@@ -1,0 +1,265 @@
+%=$[$ 
+ ' vim: ts=3:sw=3:syntax=golem
+$]module     [$ process_name asprefix=\_ 
+            $][% output.file match=".*/(d\\d+h\\d+l1).f90" format ="%s"%]
+   ! file:      [% output.file %]
+   ! generator: [% program.name %] ([% program.version %])
+   use [$ process_name asprefix=\_ $]config, only: ki
+   use [$ process_name asprefix=\_ $]util, only: cond
+   implicit none
+   private
+
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)[%
+
+@for instructions registers="t%d" %][%
+   @select $_ match="(.).*" format="%s"
+   @case E %]
+   complex(ki) :: [% $_ %][%
+   @end @select %][%
+@end @for instructions %][$
+
+@if extension samurai $]
+   public :: numerator_samurai[$
+@end @if $][$
+@if extension golem95 $]
+   public :: numerator_golem95[$
+@end @if $]
+contains[% 
+@for brackets bracket="brack_%d" %][%
+   @for brackets bracket="subbrack_%2$d_%1$d" %]
+!---#[ function [% $_ %]:
+   pure function [% $_ %](Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $]) result(brack)
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]color
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q[$
+      @select r2 default=implicit
+      @case implicit $]
+      complex(ki), intent(in) :: mu2[$
+      @end @select $]
+      [% type.repr %] :: brack[% 
+      @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+      @end @for %][% 
+      @for instructions prefix="inst." registers="t%d" %][%
+         @select inst.$_ match="(.).*" format="%s"
+         @case & %]
+      brack[%
+         @else %]
+      [% inst.$_ %][%
+         @end @select
+      %] = [% expression match="\\$(\\d+)" format="t%s" %][%
+      @end @for instructions %]
+   end  function [% $_ %]
+!---#] function [% $_ %]:[%
+   @end @for innerbracket %]
+!---#[ function [% $_ %]:
+   pure function [% $_ %](Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $]) result(brack)
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]color
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q[$
+      @select r2 default=implicit
+      @case implicit $]
+      complex(ki), intent(in) :: mu2[$
+      @end @select $]
+      [% type.repr %] :: brack[%
+   @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+   @end @for %][% 
+   @for instructions prefix="inst." registers="t%d" %][%
+      @select inst.$_ match="(.).*" format="%s"
+      @case & %]
+      brack[%
+      @else %]
+      [% inst.$_ %][%
+      @end @select
+      %] = [% expression bracket="brack_%2$d_%1$d(Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $])" %][%
+   @end @for instructions %]
+   end  function [% $_ %]
+!---#] function [% $_ %]:[%
+@end @for outerbracket %]
+!---#[ numerator interfaces:[$
+@if extension samurai $]
+   !------#[ function numerator_samurai:
+   function numerator_samurai(ncut,Q_ext, mu2_ext) result(numerator)
+      use precision, only: ki_sam => ki
+!      use [$ process_name asprefix=\_ $]groups, only: &
+!           & sign => [% output.file
+      match=".*/d(\\d+)h\\d+l1.f90" format ="diagram%s_sign"
+           %], shift => [% output.file
+      match=".*/d(\\d+)h\\d+l1.f90" format ="diagram%s_shift" %]
+      use [$ process_name asprefix=\_ $]globalsl1, only: epspow
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+
+      integer, intent(in) :: ncut
+      complex(ki_sam), dimension(4), intent(in) :: Q_ext[$
+      @if version_newer samurai.version 2.0 $]
+      complex(ki_sam), intent(in) :: mu2_ext[$
+      @else $]
+      real(ki_sam), intent(in) :: mu2_ext[$
+      @end @if $]
+      complex(ki_sam) :: numerator
+      complex(ki) :: [%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%][%
+   @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+   @end @for %]
+
+      ! The Q that goes into the diagram
+      complex(ki), dimension(4) :: Q[$
+   @select r2 default=implicit
+   @case implicit $]
+      complex(ki) :: mu2[$
+   @end @select $][%
+      
+   @with args %][$
+      @if extension qshift $]
+
+      Q(1)   = cmplx(real(Q_ext(4),   ki_sam), aimag(Q_ext(4)),   ki)
+      Q(2:4) = cmplx(real(Q_ext(1:3), ki_sam), aimag(Q_ext(1:3)), ki)[$
+      @else $][%
+         @select QSHIFT
+         @case 0 %]
+
+      Q(1)   = cmplx(real([% QSIGN %]Q_ext(4),   ki_sam), aimag([%
+            QSIGN %]Q_ext(4)),   ki)
+      Q(2:4) = cmplx(real([% QSIGN %]Q_ext(1:3), ki_sam), aimag([%
+            QSIGN %]Q_ext(1:3)), ki)[%
+         @else %]
+      real(ki), dimension(0:3) :: qshift
+
+      qshift = [% QSHIFT %]
+      Q(1)   = cmplx(real([% QSIGN %]Q_ext(4) - qshift(0),   ki_sam), aimag([%
+            QSIGN %]Q_ext(4)),   ki)
+      Q(2:4) = cmplx(real([% QSIGN %]Q_ext(1:3) - qshift(1:3), ki_sam), aimag([%
+            QSIGN %]Q_ext(1:3)), ki)[%
+         @end @select %][$
+      @end @if $][%
+   @end @with %][$
+   @select r2 default=implicit
+   @case implicit $][$
+      @if version_newer samurai.version 2.0 $]
+      mu2    = cmplx(real(mu2_ext, ki), aimag(mu2_ext), ki)[$
+      @else $]       
+      mu2    = cmplx(real(mu2_ext, ki), 0.0_ki, ki)[$
+      @end @if $][$
+   @end @select $]
+      [% output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%] = 0.0_ki[%
+   @for instructions registers="t%d" %]
+      [% $_ %] = [% expression bracket="brack_%d[$
+      @select r2 default=implicit
+      @case explicit only off $](Q)[$
+      @end @select $]" %][%
+   @end @for instructions %]
+      numerator = cmplx(real([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%], ki), aimag([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%]), ki_sam)
+   end function numerator_samurai
+   !------#] function numerator_samurai:[$
+@end @if $][$
+@if extension golem95 $]
+   !------#[ function numerator_golem95:
+   function numerator_golem95(Q_ext, mu2_ext) result(numerator)
+      use precision_golem, only: ki_gol => ki
+      use [$ process_name asprefix=\_ $]globalsl1, only: epspow
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+
+      real(ki_gol), dimension(0:3), intent(in) :: Q_ext
+      real(ki_gol), intent(in) :: mu2_ext
+      complex(ki_gol) :: numerator
+      complex(ki) :: [%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%][%
+   @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+   @end @for %]
+
+      ! The Q that goes into the diagram
+      complex(ki), dimension(4) :: Q[$
+   @select r2 default=implicit
+   @case implicit $]
+      complex(ki) :: mu2[$
+   @end @select $][%
+   @with args %][$
+      @if extension qshift $]
+
+      Q(:) = cmplx(real(Q_ext(:), ki_gol), 0.0_ki_gol, ki)[$
+      @else $][%
+         @select QSHIFT
+         @case 0 %]
+      Q(:) = cmplx(real([% QSIGN %]Q_ext(:), ki_gol), 0.0_ki_gol, ki)[%
+         @else %]
+      real(ki), dimension(4) :: qshift
+
+      qshift = [% QSHIFT %]
+      Q(:) = cmplx(real([% QSIGN
+               %]Q_ext(:) - qshift(:), ki_gol), 0.0_ki_gol, ki)[%
+         @end @select %][$
+      @end @if $][%
+   @end @with %][$
+   @select r2 default=implicit
+   @case implicit $]
+      mu2  = cmplx(real(mu2_ext, ki), 0.0_ki, ki)[$
+   @end @select $]
+      [% output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%] = 0.0_ki[%
+   @for instructions registers="t%d" %]
+      [% $_ %] = [% expression bracket="brack_%d[$
+      @select r2 default=implicit
+      @case explicit only off $](Q)[$
+      @end @select $]" %][%
+   @end @for instructions %]
+
+      numerator = cmplx(real([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%], ki), aimag([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%]), ki_gol)
+   end function numerator_golem95
+   !------#] function numerator_golem95:[$
+@end @if $]
+!---#] numerator interfaces:
+end module [$ process_name asprefix=\_
+          $][% output.file match=".*/(d\\d+h\\d+l1).f90" format ="%s"%]

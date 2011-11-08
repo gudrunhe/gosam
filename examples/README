@@ -1,0 +1,87 @@
+OVERVIEW
+========
+
+This file contains a list of processes that has been used to validate
+gosam.
+
+gggg       g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^4
+           Purely gluonic process without quark-loops, only one helicity.
+	   Comparison with analytic formula
+           Calculation is done using 't Hooft-Veltman
+
+gggg_dred  g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^4
+           Purely gluonic process without quark-loops, only one helicity.
+	   Comparison with analytic formula.
+           Calculation is done using dim. reduction
+
+gggg_tree  g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^2
+           Tree-Level only. Includes helicities which are known to be zero.
+
+gggz       g(k1)+g(k2) -> g(k3)+Z(k4) @ alpha_s^3 alpha^1
+           This is a loop-induced process.
+
+yyyy       gamma(k1)+gamma(k2) -> gamma(k3)+gamma(k4)
+           Comparison with analytic formulae from literature
+
+WpWpjj     u(k1)+d~(k2) -> c~(k3)+s(k4)+e+(k5)+ne(k6)+mu+(k7)+nmu(k8) @ alpha_s^4 alpha^4
+           Comparison with single phase space point of arXiv:1007.5313v???
+
+uudd       u(k1)+u~(k2) -> d(k3)+d~(k4) @ alpha_s^4 alpha^0
+           Calculation is done using 't Hooft-Veltman
+
+uudd_dred  u(k1)+u~(k2) -> d(k3)+d~(k4) @ alpha_s^4 alpha^0
+           Calculation is done using dim. reduction
+
+dgdg       d(k1)+g(k2) -> d(k3)+g(k4) @ alpha_s^4 alpha^0
+           Calculation is done using 't Hooft-Veltman
+
+dgdg_dred  d(k1)+g(k2) -> d(k3)+g(k4) @ alpha_s^4 alpha^0
+           Calculation is done using dim. reduction
+
+udene      u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) @ alpha_s^2 alpha^2
+           Calculation is done using 't Hooft-Veltman
+
+udene_dred u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) @ alpha_s^2 alpha^2
+           Calculation is done using dim. reduction
+
+udeneg     u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) + g(k5) @ alpha_s^3 alpha^2
+           Calculation is done using 't Hooft-Veltman
+
+udeneg_dred u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) + g(k5) @ alpha_s^3 alpha^2
+           Calculation is done using dim. reduction
+
+setup.in.template:
+   One can specify options (on top of the usual configuration files)
+   for all examples by creating a file setup.in.
+   Care has to be taken not to put process specific options into
+   that file.
+
+   If no such file exists, only the default values and the values
+   from config files (such as ${HOME}/.golem) are used.
+
+summarize.sh:
+   By running summarize.sh the user obtains a printout of the status
+   of all processes for which 'make test' has been run earlier.
+   Note that 'make test' is not invoked by this script.
+
+runtests.sh:
+   This script runs 'make test' for all subdirectories.
+
+HOW TO RUN THE EXAMPLES
+=======================
+
+After gosam has been successfully installed via the setup script
+(python setup.py install) each example can be run by executing 'make test'
+for the respective subdirectory. The script 'runtests.sh' can be invoked to
+run all tests. The script 'summarize.sh' gives a one-line summary for each
+test that has been run so far. By setting up the file 'setup.in' (see
+setup.in.template) one can impose default options for all tests.
+
+AUTHORS
+=======
+
+In case you encounter failing tests, please, contact the authors. Bug reports,
+including the corresponding 'ntest/test.log' can be sent to
+
+Thomas Reiter <thomasr@nikhef.nl>
+

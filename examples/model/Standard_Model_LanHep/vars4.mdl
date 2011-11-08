@@ -1,0 +1,22 @@
+Stand. Model (Feyn. gauge)
+ Variables 
+ Name     | Value       |>  Comment                                   <|
+EE        |0.31333      |Electromagnetic coupling constant (<->1/128)
+GG        |1.117        |Strong coupling constant (Z point)  (PDG-94)
+SW        |0.474        |sin of the Weinberg angle (PDG-94,"on-shell")
+s12       |0.221        |Parameter of C-K-M matrix (PDG-94)
+s23       |0.04         |Parameter of C-K-M matrix (PDG-94)
+s13       |0.0035       |Parameter of C-K-M matrix (PDG-94)
+deltaaxial|0            |Do not touch. For gamma5 renormalisation!
+MZ        |91.187       |mass of Z boson
+wZ        |2.502        |width of Z boson
+wW        |2.094        |width of W boson
+Mm        |0.1057       |mass of muon
+Mt        |1.777        |mass of tau-lepton
+Mc        |1.3          |mass of c-quark
+Ms        |0.2          |mass of s-quark
+Mtop      |170          |mass of t-quark
+wtop      |1.442        |width of t-quark
+Mb        |4.3          |mass of b-quark
+MH        |200          |mass of Higgs
+wH        |1.461        |width of Higgs
