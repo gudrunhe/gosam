@@ -1,0 +1,53 @@
+######################################################################
+#    /==#==\                           GoSam                         #
+#    | . . |       An Automated One-Loop Matrix Element Generator    #
+#  >-+ ~~~ +-<                      Version 1.0                      #
+#    |     |                                                         #
+#   <__/~\__>             (c) The GoSam Collaboration 2011           #
+#                                                                    #
+#       AUTHORS:                                                     #
+#       * Gavin Cullen         <gavin.cullen@desy.de>             #
+#       * Nicolas Greiner      <greiner@mpp.mpg.de>               #
+#       * Gudrun Heinrich      <gudrun@mpp.mpg.de>                   #
+#       * Gionata Luisoni      <gionata.luisoni@durham.ac.uk>        #
+#       * Pierpaolo Mastrolia  <pierpaolo.mastrolia@cern.ch>         #
+#       * Giovanni Ossola      <giovanni.ossola@physics.nyu.edu>     #
+#       * Thomas Reiter        <reiterth@mpp.mpg.de>                 #
+#       * Francesco Tramontano <francesco.tramontano@cern.ch>        #
+######################################################################
+
+
+Synopsis
+--------
+
+GoSam is a general one-loop evaluator for matrix elements.
+The program produces Fortran 90 code from a given process
+description by evaluating Feynman diagrams and translating
+the associated one-loop diagrams into code suitable for the
+evaluation with Samurai, Golem95 and/or PJFry.
+
+Download
+--------
+
+GoSam can be downloaded from:
+http://projects.hepforge.org/gosam/
+
+Installation
+------------
+
+If the user has super-user privileges:
+
+sudo python setup.py install
+
+If the user wants (or has to) maintain an alternative installation
+path <XXXX> for the python modules:
+
+python setup.py install --prefix=<XXXX>
+
+The prefix option can also be set permanently in the user's pydistutils config file.
+
+After successful installation the user should also update the environment variables
+PATH=\$PATH:<XXXX>/bin
+PYTHONPATH=\$PYTHONPATH:<XXXX>/lib/python<version>/site-packages
+
+For more details, please refer to the manual (doc/refman.pdf)

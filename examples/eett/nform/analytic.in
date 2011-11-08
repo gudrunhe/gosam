@@ -1,0 +1,48 @@
+@language Form -> Fortran90;
+
+@type
+	R = "real(ki_gol)";
+	RR = "real(ki)";
+	C = "complex(ki_gol)";
+	I = "integer";
+	P = "integer";
+	F = "type(form_factor)";
+
+@coerce
+	@int -> R = "%s._ki_gol";
+	@int -> C = "%s._ki_gol";
+	@int -> F = "%s._ki_gol";
+	@int/@int -> R = "%s._ki_gol/%s._ki_gol";
+	@int/@int -> C = "%s._ki_gol/%s._ki_gol";
+	@int/@int -> F = "%s._ki_gol/%s._ki_gol";
+	@int -> I;
+	RR -> R = "real(%s, ki_gol)";
+	RR -> F = "real(%s, ki_gol)";
+	RR -> C = "cmplx(%s, 0.0_ki_gol, ki_gol)";
+	R -> C;
+	R -> F;
+	C -> F;
+
+@operator
+	RR * RR -> RR;
+	R * R -> R;
+	C * C -> C;
+	F * C -> F;
+
+@define
+	pinches : P;
+	a30, b32 : P -> F;
+	a31 : I, P -> F;
+	a32 : I, I, P -> F;
+
+	R, prefactor0, prefactor1, half: R;
+
+	CF, s, t, tau, rho : R;
+	PZ, PZc : C;
+	NC, sw, cw, gev, gea, gTv, gTa, mT, mZ, wZ : RR;
+
+@poly
+	CF, NC, sw, cw, PZ, PZc, s, t, tau, rho, mT, mZ, wZ, R,
+	prefactor, half;
+@poly
+	gev, gea, gTv, gTa;

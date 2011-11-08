@@ -1,0 +1,651 @@
+[% ' vim: syntax=golem:ts=3:sw=3:expandtab
+%]\documentclass[a4paper]{article}
+\usepackage{axodraw}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{makeidx}
+
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\brb}[1]{[ #1 \vert}
+\newcommand{\kea}[1]{\vert #1 \rangle}
+\newcommand{\keb}[1]{\vert #1 ]}
+\newcommand{\Spaa}[1]{\langle #1 \rangle}
+\newcommand{\Spab}[1]{\langle #1]}
+\newcommand{\Spba}[1]{[ #1 \rangle}
+\newcommand{\Spbb}[1]{[ #1 ]}
+
+\title{\texttt{[% golem.full-name %]}: $[%
+   @for particles initial %]{[%latex%]}[%
+   @end @for %]\rightarrow[%
+   @for particles final %]{[%latex%]}[%
+   @end @for %]$}
+\author{[%user_name%]}
+\date{[% time_stamp format=%F^(%H:%M:%S) space=^%]}
+
+\renewcommand{\indexname}{Index of all Loop Diagrams}
+
+\makeindex
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent This process consists of [% @select topolopy.count.tree
+ @case 0 %]no LO diagrams[%
+ @case 1 %]one LO diagram[%
+ @else %][% topolopy.count.tree %] tree-level diagrams[%
+ @end @select %] and [% @select topolopy.count.virt
+ @case 0 %]no NLO diagrams[%
+ @case 1 %]one NLO diagram[%
+ @else %][% topolopy.count.virt %] NLO diagrams[%
+ @end @select %]. Golem has identified [% @select count groups
+    @case 0%]no different groups[%
+    @case 1%]only one group[%
+    @else %][% count groups %] groups [%
+ @end @select %] of NLO diagrams by analyzing their one-loop integrals.[%
+ @if renorm
+   %] There are [% @select diagrams.2
+ @case 0 %]no counterterms[%
+ @case 1 %]one counter term[%
+ @else %][%diagrams.1%] counter terms[%
+ @end @select %] from UV-renormalisation.[%
+ @end @if %]
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Helicities}
+
+\begin{longtable}[c]{r|[%
+   @for particles %]c[%
+   @end @for particles %]}
+\bf{Index} [%
+   @for particles %]&[%index%][%
+   @end @for particles %]\\
+\hline
+\endfirsthead
+\bf{Index} [%
+   @for particles %]&[%index%][%
+   @end @for particles %]\\
+\hline
+\endhead [%
+@for helicities %]
+[%helicity%] [% @for particles %]& $[%hel%]$[%
+@end @for particles %]\\[% @end @for helicities %]
+\end{longtable}
+\section{Wave Functions}
+In this section, we use $l_i=k_i$ for massless particles;
+in spinors $\kea{i}$ (resp. $\keb{i}$) denote $\kea{l_i}$ (resp. $\keb{l_i}$).[%
+@for instructions %][%
+   @if is_first %]
+For the massive particles we have:
+\begin{align}[%
+   @else %]\\[%
+   @end @if %][%
+
+   @select opcode
+   @case 1 %]
+l_{[% index1 %]} &= k_{[% index1%]} - \frac{[% mass1 %]^2}{%
+      2 k_{[%index1%]}\cdot [%
+      @select mass2 
+      @case 0%]k_{[%index2%]}[%
+      @else %]l_{[%index2%]}[%
+      @end @select mass2 %]}[%
+
+      @select mass2 
+      @case 0%]k_{[%index2%]}[%
+      @else %]l_{[%index2%]}[%
+      @end @select mass2 %][%
+   @case 2 %]
+l_{[% index1 %]/[% index2 %]} &= k_{[% index1%]}
+   +\left[-\frac{k_{[%index1%]}\cdot k_{[%index2%]}}{m_{[%index2%]}^2}\pm%
+    \sqrt{
+\left(\frac{k_{[%index1%]}\cdot k_{[%index2%]}}{m_{[%index2%]}^2}\right)^2
+-\frac{m_{[%index1%]}^2}{m_{[%index2%]}^2}}\right]k_{[%index2%]}[%
+   @end @select opcode %][%
+   @if is_last %]
+\end{align}[%
+   @end @if %][%
+@end @for instructions%]
+
+All helicity amplitudes are defined in terms of the following wave functions:
+\begin{itemize}[%
+
+@for particles initial %]
+\item $[%latex%](k_{[%index%]})$ [%
+   @select 2spin
+   @case 0 %]
+% scalar incoming particle
+\begin{align}
+\epsilon(k_{[% index %]}) &= 1
+\end{align}[%
+   @case 1 %][%
+      @if is_massive %]
+% massive incoming quark or lepton
+\begin{align}
+u_+(k_{[%index%]}) &= \kea{[%index%]}+\frac{m_{[%index%]}}{%
+        \Spbb{[%index%]\vert [%eval .abs. reference%]}}\keb{[%
+           eval .abs. reference%]}\\
+u_-(k_{[%index%]}) &= \keb{[%index%]}+\frac{m_{[%index%]}}{%
+        \Spaa{[%index%]\vert [%eval .abs. reference%]}}\kea{[%
+           eval .abs. reference%]}
+\end{align}[%
+      @else %]
+% massless incoming quark or lepton
+\begin{align}
+u_+(k_{[%index%]}) &= \kea{[%index%]}\\
+u_-(k_{[%index%]}) &= \keb{[%index%]}
+\end{align}[%
+      @end @if %][%
+   @case -1 %][%
+      @if is_massive %]
+% massive incoming anti-quark or anti-lepton
+\begin{align}
+\bar{v}_+(k_{[%index%]}) &= \bra{[%index%]}-\frac{m_{[%index%]}}{%
+        \Spbb{[%eval .abs. reference%]\vert [%index%]}}\brb{[%
+            eval .abs. reference%]}\\
+\bar{v}_-(k_{[%index%]}) &= \brb{[%index%]}-\frac{m_{[%index%]}}{%
+        \Spaa{[%eval .abs. reference%]\vert [%index%]}}\bra{[%
+            eval .abs. reference%]}
+\end{align}[%
+      @else %]
+% massless incoming anti-quark or anti-lepton
+\begin{align}
+\bar{v}_+(k_{[%index%]}) &= \bra{[%index%]}\\
+\bar{v}_-(k_{[%index%]}) &= \brb{[%index%]}
+\end{align}[%
+      @end @if %][%
+   @case -2 2 %]
+% incoming vector particle
+\begin{align}
+\varepsilon^\mu_+(k_{[%index%]}) &=
+   \frac{\Spab{[% eval .abs. reference%]\vert\gamma^\mu\vert [%index%]}}{%
+   \sqrt{2}\Spaa{[%eval .abs. reference%]\vert [%index%]}}\\
+\varepsilon^\mu_-(k_{[%index%]}) &=
+   \frac{\Spba{[%eval .abs. reference%]\vert\gamma^\mu\vert [%index%]}}{%
+   \sqrt{2}\Spbb{[%index%]\vert [%eval .abs. reference%]}}[%
+      @if is_massive %]\\
+\varepsilon^\mu_0(k_{[%index%]}) &=
+   \frac{1}{m_{[%index%]}}\left[l_{[%index%]}^\mu-\frac{m_{[%index%]}^2}{%
+          2l_{[%index%]}\cdot l_{[%eval .abs. reference%]}}l_{[%
+              eval .abs. reference%]}^\mu\right][%
+      @end @if %]
+\end{align}[%
+   @case 3 %]
+For the definition of vector-spinor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @case -3 %]
+For the definition of vector-spinor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @case 4 %]
+For the definition of tensor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @end @select %][%
+@end @for particles %][%
+
+
+@for particles final %]
+\item $[%latex%](k_[%index%])$ [%
+   @select 2spin
+   @case 0 %]
+\begin{align}
+% outgoing scalar particle
+\epsilon(k_{[% index %]}) &= 1
+\end{align}[%
+   @case 1 %][%
+      @if is_massive %]
+% massive outgoin quark or lepton
+\begin{align}
+\bar{u}_+(k_{[%index%]}) &= \brb{[%index%]}+\frac{m_{[%index%]}}{%
+        \Spaa{[%eval .abs. reference%]\vert [%index%]}}\bra{[%
+             eval .abs. reference%]}\\
+\bar{u}_-(k_{[%index%]}) &= \bra{[%index%]}+\frac{m_{[%index%]}}{%
+        \Spbb{[%eval .abs. reference%]\vert [%index%]}}\brb{[%
+             eval .abs. reference%]}
+\end{align}[%
+      @else %]
+% massless outgoing quark or lepton
+\begin{align}
+\bar{u}_+(k_{[%index%]}) &= \brb{[%index%]}\\
+\bar{u}_-(k_{[%index%]}) &= \bra{[%index%]}
+\end{align}[%
+      @end @if %][%
+   @case -1 %][%
+      @if is_massive %]
+% massive outgoing anti-quark or anti-lepton
+\begin{align}
+v_+(k_{[%index%]}) &= \keb{[%index%]}-\frac{m_{[%index%]}}{%
+        \Spaa{[%index%]\vert [%eval .abs. reference%]}}\kea{[%
+            eval .abs. reference%]}\\
+v_-(k_{[%index%]}) &= \kea{[%index%]}-\frac{m_{[%index%]}}{%
+        \Spbb{[%index%]\vert [%eval .abs. reference%]}}\keb{[%
+               eval .abs. reference%]}
+\end{align}[%
+      @else %]
+% massless outgoing anti-quark or anti-lepton
+\begin{align}
+v_+(k_{[%index%]}) &= \keb{[%index%]}\\
+v_-(k_{[%index%]}) &= \kea{[%index%]}
+\end{align}[%
+      @end @if %][%
+   @case -2 2 %]
+% incoming vector particle
+\begin{align}
+\varepsilon^\mu_+(k_{[%index%]})^\ast &=
+   \frac{\Spba{[%eval .abs. reference%]\vert\gamma^\mu\vert [%index%]}}{%
+   \sqrt{2}\Spbb{[%eval .abs. reference%]\vert [%index%]}}\\
+\varepsilon^\mu_-(k_{[%index%]})^\ast &=
+   \frac{\Spab{[%eval .abs. reference%]\vert\gamma^\mu\vert [%index%]}}{%
+   \sqrt{2}\Spaa{[%index%]\vert [%eval .abs. reference%]}}[%
+      @if is_massive %]\\
+\varepsilon^\mu_0(k_{[%index%]})^\ast &=
+   \frac{1}{m_{[%index%]}}\left[l_{[%index%]}^\mu-\frac{m_{[%index%]}^2}{%
+          2l_{[%index%]}\cdot l_{[%eval .abs. reference%]}}l_{[%
+            eval .abs. reference%]}^\mu\right][%
+      @end @if %]
+\end{align}[%
+   @case 3 %]
+For the definition of vector-spinor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @case -3 %]
+For the definition of vector-spinor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @case 4 %]
+For the definition of tensor states, please refer to the document
+\texttt{lorentz.pdf}.[%
+   @end @select %][%
+@end @for particles %]
+\end{itemize}
+
+%------------------------------------------------------------------------
+\section{Colour Basis}
+\begin{align}[%
+@for latex_color_base %]
+\vert c_{[% $_ %]}\rangle &= [% expr %][%
+   @if is_last %][% @else %]\\[% @end @if %][%
+@end @for %]
+\end{align}
+
+[% @if generate_lo_diagrams %]
+\section{Tree Diagrams}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-0.log}
+
+[% 
+@if pyxodraw %][%
+   @with modules pyxotree.tex path=process %][% 
+      @for elements topolopy.keep.tree var=DIAG index=DIAGINDEX %][%
+         @if is_first %]\begin{longtable}{cc}
+\endfirsthead
+\endhead[%
+         @end @if %]
+%---#[ tree diagram[% DIAG %]:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[%diagram suffix=DIAG%]\\
+{\sl [%
+         @select tree_sign DIAG
+         @case -1 %]-[%
+         @end @select %]Diagram~[%DIAG%]}
+\end{center}
+\end{minipage}}
+%---#] tree diagram[% DIAG %]:[%
+         @if is_last %]
+\end{longtable}
+[%       @else %]
+[%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+         @end @if %][% 
+      @end @for %][%
+   @end @with%][% 
+@end @if pyxodraw %][%
+@end @if generate_lo_diagrams %]
+
+[% @if generate_nlo_virt %]
+\section{One-Loop Diagrams}
+\subsection*{General Information}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-1.log}
+
+Loop diagrams are grouped into sets of diagrams which share
+loop-propagators. A loop integral can be written as
+\begin{equation}
+\int\!\frac{\mathrm{d}^nk}{i\pi^{\frac{n}{2}}}%
+\frac{\mathcal{N}(q)}{\prod_{j=1}{N}\left[(k+r_j)^2-m_j^2
+   -i m_j\Gamma_j + i\delta\right]}
+\end{equation}
+For each group we list $r_j$, $m_j$ and $\Gamma_j$.
+For $m_j$ and $\Gamma_j$ only non-vanishing symbols are listed.
+Furthermore, we give the matrix $S$ which is defined as
+\begin{equation}
+S_{\alpha\beta} = (r_\alpha-r_\beta)^2
+-m_\alpha^2-im_\alpha\Gamma_\alpha
+-m_\beta^2-im_\beta\Gamma_\beta.
+\end{equation}
+For each diagram we denote how the matrix $S^\prime$ for the specific diagram
+is obtained from the original~$S$. The notation
+\begin{equation}
+S^\prime=S_{Q\to q^\prime}^{\{l_1,l_2,\ldots\}}
+\end{equation}
+means, that the rows and columns labeled by $l_1,l_2,\ldots$ should be
+removed from $S$ (likewise $r_{l_1}, r_{l_2}, \ldots$ are removed from the
+list of propagators) and $\mathcal{N}(q)$ has to be replaced by
+$\mathcal{N}(q^\prime)$.
+The maximum effective rank of a group is the rank that has to be passed
+to \textsc{Samurai} if the whole group is reduced at once; this number
+is calculated as
+\begin{equation}
+\max_{\text{diagrams}}\left\{(\text{rank of diagram})+
+(\text{number of pinches})\right\}.
+\end{equation}
+Diagrams with massless closed quark lines are multiplied by a factor
+$\mathtt{Nfrat}=\mathtt{Nf}/\mathtt{Nfgen}$. This multiplication is indicated
+by the symbol $N_f$ following the rank. By default $\mathtt{Nfrat}$ evaluates
+to one but can be changed by modifying $\mathtt{Nf}$ or $\mathtt{Nfgen}$ in the
+model~file.
+
+[%
+@for groups var=grp %]
+\subsection{Group~[% grp %] ([% loopsize group=grp %]-Point)}
+\subsubsection*{General Information}
+The maximum effective rank in this group is~[% rank %].
+
+\begin{subequations}
+\begin{align}[%
+@for propagators group=grp prefix=k_{ suffix=} %]
+r_{[% $_ %]} &= [% momentum%][%
+   @if eval mass .ne. 0 %],\quad m_{[% $_ %]} = [% latex_parameter mass %][%
+      @if eval width .ne. 0 %],\quad \Gamma_{[% $_ %]} = [%
+              latex_parameter width %][%
+      @end @if %][%
+   @end @if %][%
+   @if is_last %][%
+   @else %]\\[%
+   @end @if %][%
+@end @for %]
+\end{align}
+\end{subequations}
+
+\begin{equation}
+S=[%
+@for smat group=grp %][%
+   @if is_first %]\left(\begin{array}{[%
+      @with eval loopsize group=grp result=ls %][% 
+         @for repeat ls %]c[% @end @for %]}[%
+      @end @with %][%
+   @end @if %][%
+   @if is_zero %]
+   0[%
+   @else %]
+   S_{[%rowindex%],[%colindex%]}[%
+   @end @if %][%
+   @if eol %][%
+      @if is_last %]\end{array}\right)[%@else%]\\[%@end @if%][%
+   @else %]&[% @end @if %][%
+@end @for %]
+\end{equation}[%
+@for smat group=grp nonzero upper diagonal 
+	powfmt=%s^%d
+	prodfmt=%s*%s
+	prefix=s_{
+	suffix=}
+	%][%
+   @if is_first %]
+\begin{subequations}
+\begin{align}[%
+   @end @if %]
+   S_{[%rowindex%],[%colindex%]}&=[%
+      @for elements re delimiter=; var=term first=first_term %][%
+         @for elements term delimiter=: %][%
+            @if is_first %][%
+               @if eval $_ .ge. 0 %][%
+                  @if first_term %][%
+                  @else %]+[%
+                  @end @if %][%
+               @else %]-[%
+               @end @if %][%
+
+               @select $_
+               @case 2 -2 %][%
+               @case 4 -4%]2[%
+               @else %]\frac{[% eval .abs. $_ %]}{2}[%
+               @end @select %][%
+            @else %][% latex_parameter $_ %][%
+            @end @if %][%
+         @end @for %][%
+      @end @for %][%
+
+      @for elements im delimiter=; var=term first=first_term %][%
+         @for elements term delimiter=: %][%
+            @if is_first %][%
+               @if eval $_ .ge. 0 %]+[%
+               @else %]-[%
+               @end @if %][%
+
+               @select $_
+               @case 2 -2 %]i\cdot{}[%
+               @case 4 -4%]2i\cdot{}[%
+               @else %]\frac{[% eval .abs. $_ %]i}{2}[%
+               @end @select %][%
+            @else %][% latex_parameter $_ %][%
+            @end @if %][%
+         @end @for %][%
+      @end @for %][%
+   @if is_last %]
+\end{align}
+\end{subequations}[%
+   @else%]\\[%
+   @end @if%][%
+@end @for %]
+
+\subsubsection{Diagrams ([% count diagrams group=grp %])}[%
+@if pyxodraw %][%
+@with modules pyxovirt.tex path=process %][% 
+   @for diagrams group=grp var=DIAG index=DIAGINDEX %][%
+      @if is_first %]\begin{longtable}{cc}
+\endfirsthead
+\endhead[% 
+      @end @if %]
+%---#[ loop diagram[% DIAG %]:
+\index{Diagram[% DIAG convert=number format=%010d %]=Diagram [% DIAG %] (Group [% grp %])}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[% diagram suffix=DIAG %]\\
+{\sl [%
+@select diagram_sign @case - -1 %]-[%
+@end @select %]Diagram~[%DIAG%]}\\
+$S^\prime=S[%
+@for elements pinches %][%
+   @if is_first %]^{\{[%
+   @else %],[%
+   @end @if %][% eval $_ + 1%][%
+   @if is_last %]\}}[%
+   @end @if %][%
+@end @for %][%
+   @select sign
+   @case + %][%
+      @select shift
+      @case 0 %][%
+      @else %]_{Q\to q-([%shift%])}[%
+      @end @select %][%
+   @case - %]_{Q\to -q[%
+      @select shift
+      @case 0 %][%
+      @else %]-([%shift%])[%
+      @end @select %]}[%
+   @end @select %]$, $\mathrm{rk}=[%rank%][%
+   @if is_nf %], N_f[% 
+   @end @if %]$
+\end{center}
+\end{minipage}}
+[%   @if is_last %]
+\end{longtable}
+[%   @else %][%
+        @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+     @end @if %]
+%---#] loop diagram[% DIAG %]:
+[% @end @for %][%
+@end @with%][%
+@end @if pyxodraw %][%
+@end @for groups %][%
+ @end @if generate_nlo_virt %]
+
+[% @if generate_uv_counterterms %]
+\section{Counter-Term Diagrams}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}
+
+[% @with modules pyxoct.tex path=process %][% 
+   @for repeat diagrams.2 shift=1 var=DIAG %][%
+     @if is_first %]
+\begin{longtable}{cc}
+\endfirsthead
+\endhead
+[% @end @if %]
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[%diagram suffix=DIAG%]\\
+{\sl [%
+   @select diagram_sign @case - -1 %]-[%
+   @else %]([%diagram_sign%])[%
+   @end @select %]Diagram~[%DIAG%]}
+\end{center}
+\end{minipage}}
+[%   @if is_last %]
+\end{longtable}
+[%   @else %]
+[%   @if eval DIAG .mod. 2 .eq. 0 %]\\[% @else %]&[%@end @if%]
+[%   @end @if %]
+[% @end @for %][%
+   @end @with%][%
+@end @if generate_uv_counterterms %]
+
+\printindex
+
+\section{Related Work}
+If you publish results obtained by using this matrix element code
+please cite the appropriate papers in the bibliography of this document.
+
+For graph generation we use QGraf~\cite{Nogueira:1991ex}.
+The Feynman diagrams are further processed with the symbolic manipulation
+program FORM~\cite{Vermaseren:2000nd} using the FORM library
+SPINNEY~\cite{Cullen:2010jv}.
+The Fortran~90 code is generated using HAGGIES~\cite{Reiter:2009ts}.
+[% @if extension samurai %]For the reduction of the tensor integrals
+the code uses the implementation of the OPP
+method~\cite{Ossola:2006us,Ossola:2007bb}
+and extensions thereof from the package
+SAMURAI~\cite{Mastrolia:2010nb}.[%
+@end @if %][% @if extension golem95 %]For
+the reduction of the tensor integrals, the code uses the 
+package GOLEM95~\cite{Binoth:2008uq,Cullen:2011kv}.
+The tensor coefficients are
+obtained using tensorial reconstruction at the integrand
+level~\cite{Heinrich:2010ax}.[%
+@end @if %]
+
+Please, make sure, you also give credit to the authors of the scalar
+loop libraries, if you configured the amplitude code such that it calls
+other libraries than the ones mentioned so far. Depending on your
+configuration you might use one or more of the following programs for
+the evaluation of the scalar integrals:
+\begin{itemize}
+\item OneLOop~\cite{vanHameren:2010cp},
+\item QCDLoop~\cite{Ellis:2007qk}, which uses FF~\cite{vanOldenborgh:1990yc},
+\item LoopTools~\cite{Hahn:1998yk}, which uses FF~\cite{vanOldenborgh:1990yc}.
+\item GOLEM95~\cite{Binoth:2008uq} which uses OneLOop~\cite{vanHameren:2010cp}
+   and may be configured such that it uses
+   LoopTools~\cite{Hahn:1998yk,vanOldenborgh:1990yc}.
+\end{itemize}
+
+\begin{thebibliography}{ABC}
+%\cite{Nogueira:1991ex}
+\bibitem{Nogueira:1991ex}
+  P.~Nogueira,
+  ``Automatic Feynman graph generation,''
+  J.\ Comput.\ Phys.\  {\bf 105} (1993) 279.
+  %%CITATION = JCTPA,105,279;%%
+%\cite{Vermaseren:2000nd}
+\bibitem{Vermaseren:2000nd}
+  J.~A.~M.~Vermaseren,
+  ``New features of FORM,''
+  arXiv:math-ph/0010025.
+  %%CITATION = MATH-PH/0010025;%% 
+%\cite{Cullen:2010jv}
+\bibitem{Cullen:2010jv}
+  G.~Cullen, M.~Koch-Janusz and T.~Reiter,
+  ``spinney: A Form Library for Helicity Spinors,''
+  arXiv:1008.0803 [hep-ph].
+  %%CITATION = ARXIV:1008.0803;%%
+%\cite{Reiter:2009ts}
+\bibitem{Reiter:2009ts}
+  T.~Reiter,
+  ``Optimising Code Generation with haggies,''
+  Comput.\ Phys.\ Commun.\  {\bf 181} (2010) 1301
+  [arXiv:0907.3714 [hep-ph]].
+  %%CITATION = CPHCB,181,1301;%%[%
+@if extension samurai %]
+%\cite{Ossola:2006us}
+\bibitem{Ossola:2006us}
+  G.~Ossola, C.~G.~Papadopoulos, R.~Pittau,
+  ``Reducing full one-loop amplitudes to scalar integrals at the
+    integrand level,''
+  Nucl.\ Phys.\  {\bf B763 } (2007)  147-169.
+  [hep-ph/0609007].
+%\cite{Ossola:2007bb}
+\bibitem{Ossola:2007bb}
+  G.~Ossola, C.~G.~Papadopoulos, R.~Pittau,
+  ``Numerical evaluation of six-photon amplitudes,''
+  JHEP {\bf 0707 } (2007)  085.
+  [arXiv:0704.1271 [hep-ph]].
+%\cite{Mastrolia:2010nb}
+\bibitem{Mastrolia:2010nb}
+  P.~Mastrolia, G.~Ossola, T.~Reiter and F.~Tramontano,
+  ``Scattering AMplitudes from Unitarity-based Reduction Algorithm at the
+    Integrand-level,''
+  arXiv:1006.0710 [Unknown].
+  %%CITATION = ARXIV:1006.0710;%%[%
+@end @if %]
+%\cite{Binoth:2008uq}
+\bibitem{Binoth:2008uq}
+  T.~Binoth, J.~P.~Guillet, G.~Heinrich, E.~Pilon and T.~Reiter,
+  %``Golem95: a numerical program to calculate one-loop tensor integrals with up
+  %to six external legs,''
+  Comput.\ Phys.\ Commun.\  {\bf 180} (2009) 2317
+  [arXiv:0810.0992 [hep-ph]].
+  %%CITATION = CPHCB,180,2317;%%
+%\cite{Cullen:2011kv}
+\bibitem{Cullen:2011kv}
+  G.~Cullen, J.~P.~.Guillet, G.~Heinrich, T.~Kleinschmidt, E.~Pilon, T.~Reiter, M.~Rodgers,
+  %``Golem95C: A library for one-loop integrals with complex masses,''
+  Comput.\ Phys.\ Commun.\  {\bf 182 } (2011)  2276-2284.
+  [arXiv:1101.5595 [hep-ph]].
+%\cite{vanHameren:2010cp}
+\bibitem{vanHameren:2010cp}
+  A.~van Hameren,
+  ``OneLOop: For the evaluation of one-loop scalar functions,''
+  [arXiv:1007.4716 [hep-ph]].
+%\cite{Ellis:2007qk}
+\bibitem{Ellis:2007qk}
+  R.~K.~Ellis, G.~Zanderighi,
+  ``Scalar one-loop integrals for QCD,''
+  JHEP {\bf 0802 } (2008)  002.
+  [arXiv:0712.1851 [hep-ph]].
+%\cite{vanOldenborgh:1990yc}
+\bibitem{vanOldenborgh:1990yc}
+  G.~J.~van Oldenborgh,
+  ``FF: A Package to evaluate one loop Feynman diagrams,''
+  Comput.\ Phys.\ Commun.\  {\bf 66 } (1991)  1-15.
+%\cite{Hahn:1998yk}
+\bibitem{Hahn:1998yk}
+  T.~Hahn, M.~Perez-Victoria,
+  ``Automatized one loop calculations in four-dimensions and D-dimensions,''
+  Comput.\ Phys.\ Commun.\  {\bf 118 } (1999)  153-165.
+  [hep-ph/9807565].
+%\cite{Heinrich:2010ax}
+\bibitem{Heinrich:2010ax}
+  G.~Heinrich, G.~Ossola, T.~Reiter, F.~Tramontano,
+  ``Tensorial Reconstruction at the Integrand Level,''
+  JHEP {\bf 1010 } (2010)  105.
+  [arXiv:1008.2441 [hep-ph]].
+\end{thebibliography}
+\end{document}

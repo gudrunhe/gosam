@@ -1,0 +1,29 @@
+@language form -> fortran90;
+@type
+	integer = "integer";
+	real    = "real(ki)";
+	complex = "complex(ki)";
+
+@coerce
+	@int -> integer;
+	integer -> real = "real(%s, ki)";
+	integer -> complex = "complex(%s, ki)";
+	@int -> real = "%s.0_ki";
+	@int -> complex = "%s.0_ki";
+	@int/@int -> real = "%s.0_ki/%s.0_ki";
+	@int/@int -> complex = "%s.0_ki/%s.0_ki";
+	real -> complex;
+
+@operator
+	real * real -> real;
+	complex * complex -> complex;
+
+@define
+	TR, NC, NA : real;
+	i_ : complex;
+	T... : complex;
+	CC_... : complex;
+	incolors : real;
+	numcs : integer;
+
+@polynomial TR, NC;

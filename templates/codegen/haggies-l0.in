@@ -1,0 +1,40 @@
+@language form -> fortran90;
+
+@type
+	integer = "integer";
+	real    = "real(ki)";
+	complex = "complex(ki)";
+	color   = "complex(ki), dimension(numcs)";
+	vector  = "real(ki), dimension(4)";
+
+@coerce
+	@int -> integer;
+	@int -> real = "(%s.0_ki)";
+	@int -> complex = "(%s.0_ki)";
+	@int -> color = "(%s.0_ki)";
+	@int/@int -> real = "(%s.0_ki/%s.0_ki)";
+	@int/@int -> complex = "(%s.0_ki/%s.0_ki)";
+	real -> complex;
+
+@operator
+	real * real -> real;
+	real ^ real -> real;
+	complex * complex -> complex;
+	complex * color -> color;
+	vector . vector -> real = "dotproduct(%s, %s)";
+	
+@define[%
+	include codegen/model-define.inc class=Model %][% 
+	include codegen/haggies-common.inc class=Verbatim %][% 
+	include codegen/kinematics-define.inc class=Kinematics
+	%]
+	SpSqrt : real -> complex = "sqrt(cmplx(%2$s, 0.0_ki, ki))";
+	
+	# Return type of the diagrams:
+	d... : color;
+	abb... : complex;
+	EXSYM... : complex;
+
+@polynomial TR, i_;
+[% include codegen/model-poly.inc class=Model %]
+[% include codegen/kinematics-poly.inc class=Kinematics %]

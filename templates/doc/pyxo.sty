@@ -1,0 +1,39 @@
+<prologue>
+# vim: syntax=python:ts=3:sw=3
+
+from golem.pyxo.objects import diagram, leg, vertex, propagator, field
+
+__model_name__    = "[model]"
+__qgraf_version__ = "<program>"
+__qgraf_dat__     = """\
+<command_loop><command_line_loop>
+<back><command_data><end><end><back>"""
+
+def get_diagrams(diagrams):
+<diagram>
+   diagrams[[<diagram_index>]] = diagram({ <in_loop>
+         <in_index>: leg(
+<back>field("<field>", "[MASS]", [CONJ]1, [TWOSPIN], [COLOR]), 
+<back> "<momentum>", <vertex_index>),<end><back>
+      }, { <out_loop>
+         <out_index>: leg(
+<back>field("<field>", "[MASS]", [CONJ]1, [TWOSPIN], [COLOR]), 
+<back> "<momentum>", <vertex_index>),<end><back>
+      }, { <vertex_loop>
+         <vertex_index>: vertex(<vertex_degree>,
+<ray_loop>               field(
+<back>"<field>", "[MASS]", [CONJ]1, [TWOSPIN], [COLOR]), 
+<end><back><back>),<end><back>
+      }, { <propagator_loop>
+         <propagator_index>: propagator(
+               field(
+<back>"<dual-field>", "[MASS]", [dual-CONJ]1, [TWOSPIN], [COLOR]),
+<back> <dual-vertex_index>,
+               field(
+<back>"<field>", "[MASS]", [CONJ]1, [TWOSPIN], [COLOR]),
+<back> <vertex_index>,
+         "<momentum>"),<end><back>})
+<epilogue>
+   return diagrams
+
+<exit>

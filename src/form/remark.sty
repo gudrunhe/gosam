@@ -1,0 +1,61 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{remark}[17/12/2007 v0.1 remark]
+
+\newif\ifr@emarks@draft
+\newif\ifr@emarks@final
+
+\r@emarks@drafttrue
+\r@emarks@finalfalse
+
+\def\r@emarks@x\relax
+
+\DeclareOption{draft}{\r@emarks@drafttrue\r@emarks@finalfalse}
+\DeclareOption{final}{\r@emarks@draftfalse\r@emarks@finaltrue}
+\DeclareOption{draft}{}
+
+\ProcessOptions
+
+\edef\@remark@fname{\jobname.do}%
+
+\newwrite\@remarkFile
+\newcounter{remark}\setcounter{remark}{0}
+\immediate\openout\@remarkFile=\@remark@fname%
+
+\newcommand{\remarktitle}{Remark}
+\newcommand{\remarklisttitle}{List of Remarks}
+
+\DeclareRobustCommand{\remark}[2][\remarktitle]{%
+   \ifr@emarks@final
+      \PackageError{remarks}{{#1} not allowed in final version}
+   \fi
+   \refstepcounter{remark}\label{remark:page:\theremark}
+   \immediate\write\@remarkFile{%
+      \string\item[#1\string\,%
+      (p.\string~\string\pageref{remark:page:\theremark})] #2}
+   \marginpar{\tiny{\bf #1}: #2}
+   \typeout{(remark) #1: #2^^J}
+   \def\r@emarks@x{1}
+}
+
+\newcommand{\remarks}{%
+   \immediate\closeout\@remarkFile
+   \ifr@emarks@draft
+      \typeout{reading \@remark@fname}
+      \ifx\r@emarks@x\relax
+			% nothing
+      \else
+         \newpage{\sc\bf\remarklisttitle}
+         \begin{description}
+				\input\@remark@fname
+         \end{description}
+      \fi
+      \renewcommand{\remark}[2]{%
+         \PackageWarning{remark}{Remark after list of remarks is ignored}}
+   \fi
+}
+
+\newcommand{\TODO}[1]{\remark[TODO]{#1}}
+\newcommand{\FIXME}[1]{\remark[FIXME]{#1}}
+\newcommand{\CHECK}[1]{\remark[FIXME]{#1}}
+
+\endinput

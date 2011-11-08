@@ -1,0 +1,2026 @@
+\documentclass[11pt,a4paper]{refrep}
+\usepackage{xspace}
+\usepackage[final]{remark}
+\usepackage{listings}
+\usepackage{amsmath,amssymb}
+\usepackage[pdftex]{hyperref}
+
+\input lstform
+\input lstolp
+\newcommand{\golemversion}{{1{.}0}}
+\newcommand{\golem}{{\tt GoSam}\xspace}
+%\newcommand{\golemv}[1][\golemversion]{{{\tt Golem}~\golemversion}\xspace}
+\newcommand{\golemv}[1][\golemversion]{{\tt GoSam}\xspace}
+\newcommand{\golemVC}{{\tt golem95}\xspace}
+\newcommand{\packagename}{{gosam-\golemversion}}
+\newcommand{\hepforge}{{\sc HepForge}\xspace}
+
+\newcommand{\qgraf}{{\tt QGraf}\xspace}
+\newcommand{\form}{{\tt Form}\xspace}
+\newcommand{\python}{{\tt Python}\xspace}
+\newcommand{\fortranXC}{{\tt Fortran\,95}\xspace}
+\newcommand{\fortranMMIII}{{\tt Fortran\,2003}\xspace}
+\newcommand{\pjfry}{{\tt PJFry}\xspace}
+\newcommand{\haggies}{{\tt haggies}\xspace}
+\newcommand{\samurai}{{\sc Samurai}\xspace}
+
+\newcommand{\contl}{{\ensuremath{\hookrightarrow}}}
+\newcommand{\fmslash}[1]{{#1}\!\!\!/}
+\newcommand{\pslash}[1][{}]{\ensuremath{\fmslash{p}_{#1}}}
+\newcommand{\kslash}[1][{}]{\ensuremath{\fmslash{k}_{#1}}}
+
+\title{\golemv Manual}
+\author{Thomas Reiter}
+\date{Version \today}
+
+\begin{document}
+\hypersetup{%
+	pdfborder={0 0 0},%
+	pdftitle={GoSam \golemversion{} Manual},%
+	pdfauthor={Thomas Reiter},%
+	pdfsubject={High Energy Physics/Higher Order Corrections},%
+	pdfkeywords={NLO, automatization},%
+	pdfdisplaydoctitle
+}
+
+\begin{fullpage}
+\maketitle
+\tableofcontents
+\end{fullpage}
+
+\chapter{Introduction}
+\section{Synopsis}
+\golemv is a general one-loop evaluator for matrix elements.
+The program produces \fortranXC code from a given process
+description by evaluating Feynman diagrams and translating
+the associated one-loop diagrams into a numerical representation
+of the numerator such that it can be evaluated and reduced
+numerically with either
+the \golemVC library~\cite{Golem95:2008,Cullen:2011kv}
+or \samurai~\cite{Mastrolia:2010nb}
+or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
+
+\section{Conventions}
+In this manual, shell commands are indicated
+by lines starting with a dollar sign (\texttt{\$})
+and are given for the \texttt{bash} shell only.
+Lines that are broken for type setting reasons and should
+continue the previous line(s) start with a \contl.
+
+\python program fragments are denoted by the `\texttt{>>>}' and
+`\texttt{...}' (for continuation lines) prompts.
+
+\chapter{Setup}
+\section{Prerequisites}
+The generation of matrix element code using \golemv can be understood
+as a three step process, although the three steps are not necessarily
+obvious to the user. In principle, each step could be run on a different
+machine and the programs listed below only need to be available during
+the respective step.
+\begin{enumerate}
+\item During the {\bf setup of the process directory} \python
+and \qgraf need to be installed. This phase is initiated by
+running \texttt{gosam.py}
+or any user written \python script of similar functionality.
+\item During the {\bf code generation} only \form and \haggies are run.
+This phase is initiated by running \texttt{make source}.
+\item During the {\bf compilation and running} of the matrix element
+a \fortranXC compiler and the chosen reduction libraries need to be installed.
+At the level of the matrix element, this phase is initiated
+by running \texttt{make compile}. Please note that running
+\texttt{make compile} will invoke \texttt{make source} if the latter
+has not been run successfully before that.
+\end{enumerate}
+
+Before running the \golemv package, Please ensure that
+the following programs are available on your system.
+The numbers indicate during which phase of the code generation
+the tools will be required.
+
+\marginlabel{\qgraf (1)} \qgraf~\cite{Nogueira:1991ex}
+is required in version 3{.}1 or
+higher and can be downloaded from
+\url{http://cfif.ist.utl.pt/~paulo/qgraf.html}.
+
+\marginlabel{\python (1)} This program has been tested with \python{}
+versions 2{.}6, 2{.}7 and 3{.}1.
+%It is currently not guaranteed to work with any other version. 
+%Since \python{} 3{.}x introduces many new
+%language features there might be conflicts which have to be resolved before
+%this program is ready to be run with versions of \python{} 3{.}x.
+Please see also \url{http://python.org}.
+
+\marginlabel{\form (2)} You will need \form~\cite{Vermaseren:2000nd}
+version 3{.}3 (build
+11--aug--2010 or later).
+The most recent version is available from
+\url{http://www.nikhef.nl/~form/}.
+
+\marginlabel{\haggies (2)} The code generator \haggies{}~\cite{Reiter:2009ts}
+is included in the \golemv{} distribution already.
+Alternatively, it can also be obtained separately from the URL
+\url{http://sourceforge.net/projects/haggies/}.
+\haggies requires \texttt{Java} in version~1{.}5 or higher.
+The current version of \golemv requires \haggies{} in version 1{.}1 or
+higher.
+
+\marginlabel{\golemVC/\samurai/\pjfry (3)}
+For one-loop calculations, at least one of these three libraries is
+required. If the program is used for the extraction of the $R_2$ term
+only, the libraries are not required.
+\begin{itemize}
+\item \golemVC can be downloaded from
+\url{http://projects.hepforge.org/golem/}.
+\item \samurai can be downloaded from
+\url{http://projects.hepforge.org/samurai/}.
+\item \pjfry can be obtained via \texttt{git} from
+\url{https://github.com/Vayu/PJFry/}.
+\end{itemize}
+
+\marginlabel{\texttt{refrep.cls} (3)} The documentation
+is based on the \LaTeX-class \texttt{refrep}, which appears
+not to be in the default installation of all \LaTeX{}
+distributions. It can be downloaded from \url{http://www.ctan.org/}
+as part of the \texttt{refman} package.
+This file is only needed if one intends to run \texttt{make doc},
+which generates some documentation for the matrix element.
+
+\attention Please note that these programs might have
+license policies which are different from the license
+applying to \golemv. The authors of \golem do \emph{not}
+take any responsibility for any problems related to the
+above mentioned software packages.
+
+\section{Download}
+The \golemv{} source code can be downloaded either via \texttt{subversion}
+or via HTTP download.
+
+\subsection{Subversion}
+You can check-out a working copy of the repository with the command
+\begin{example}
+\$ svn co http://svn.hepforge.org/gosam/trunk/ gosam-\golemversion{}
+\end{example}
+This will create a folder \texttt{gosam-\golemversion} in your current directory.
+Authenticated users can use the URL
+\begin{example}
+\$ svn co svn+ssh://svn.hepforge.org/hepforge/svn/\\
+   \contl{}gosam/trunk/ gosam-\golemversion{}
+\end{example}
+to gain read and write access to the project files.
+
+\subsection{HTTP Download}
+Under \url{http://www.hepforge.org/downloads/gosam/}
+you can download the sources of \golemv{} using a web browser or a
+HTTP client like \texttt{wget} or \texttt{curl}.
+If you received \golemv{} as a tar-ball you can unpack it using the command
+\begin{example}
+\$ tar xzvf \packagename{}.tar.gz
+\end{example}
+
+\section{Installation}
+\golemv{} is distributed as a \python package.
+The installation of the source package is done by running
+the setup script. One of the following scenarios will be
+encountered most probably:
+\begin{itemize}
+\item If the \python installation resides in \texttt{/usr} or
+   \texttt{/usr/local}
+   and the user has super-user privileges:
+\begin{example}
+\$ sudo python setup.py install
+\end{example}
+
+\item If the user wants (or has to) maintain an alternative installation
+   path for \python modules. $\mathtt{<XXXX>}$ here denotes the name of the
+   alternative installation tree:
+\begin{example}
+\$ python setup.py install --prefix=<XXXX>
+\end{example}
+   The \texttt{prefix} option can also be permanently set in the
+   user's \texttt{pydistutils} config file\footnote{%
+   On Unix systems and MacOS this file is called
+   \texttt{\$HOME/.pydistutils.cfg}, on Windows it is
+   \texttt{\%HOME\%\textbackslash{}pydistutils.cfg}.} by adding the
+   following lines.
+\begin{example}
+[install]\\
+prefix=<XXXX>
+\end{example}
+   After successful installation the user should also update the
+   environment variables
+\begin{example}
+PATH=\$PATH:<XXXX>/bin\\
+PYTHONPATH=\$PYTHONPATH:<XXXX>/lib/python<version>\\
+\contl/site-packages
+\end{example}
+\end{itemize}
+%  A more complete tutorial on the installation of \python packages
+%  can be found at \url{http://docs.python.org/install/}.
+
+\section{Directory Structure}
+The \golemv{} source directory has the structure as described below:
+
+\marginlabel{\texttt{doc/}} This directory contains the documentation
+and example setup files. You can run \texttt{make} in this directory
+to generate the document \texttt{refman.pdf}; this is the document you
+are currently reading.
+
+\marginlabel{\texttt{models/}} For each implemented model this directory
+contains the \qgraf model file (no extension), a \form interface
+(\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
+only the Standard Model (\texttt{sm}) is distributed with \golemv.
+A second version of the Standard Model (\texttt{smdiag}) implements
+diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$)
+The structure of the model files is discussed in more detail in
+Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
+LanHEP~\cite{Semenov:2010qt} and FeynRules/UFO~\cite{Degrande:2011ua}  
+can be found in the directory 
+\texttt{examples/model/}.
+
+\marginlabel{\texttt{templates/}} Contains templates for the creation
+of the files in the process directory. The contents are transformed
+by the class \texttt{golem.util.parser.Template} and its subclasses
+in \texttt{golem.templates.*}. The translation of the templates is
+controled by the file \texttt{templates.xml} of the same directory.
+
+\marginlabel{\texttt{src/python/}} All model independent \python modules
+can be found in this directory tree.
+
+\marginlabel{\texttt{src/form/}} Here one finds all \form files
+which are not part of the template.
+
+\marginlabel{\texttt{build}} This directory is created during
+building and installation of this package by running \texttt{setup.py}.
+The files in this directory are of temporary nature and can be safely
+removed.
+
+\marginlabel{\texttt{dist}} This directory is created by running
+\texttt{setup.py} with the \texttt{sdist} or \texttt{bdist} command
+and contains the distributable package files.
+To create a tar-ball from the working copy, Please run
+\begin{example}
+\$ python setup.py sdist --formats=gztar
+\end{example}
+For more information
+please run
+\begin{example}
+\$ python setup.py --help-commands
+\end{example}
+
+\marginlabel{\texttt{examples}} This directory contains some simple example
+processes for which \golemv{} has been compared to the literature.
+
+\marginlabel{\texttt{olp}} Files in this directory are used by
+\texttt{gosam.py --olp}, which is \golemv's implementation of the
+Les Houches interface for one-loop programs~\cite{Binoth:2010xt}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Setup of a Process}
+\section{Introduction}
+\label{chp:setup-of-a-process}
+This chapter provides a step by step guide how to
+set up a new process. 
+
+In order to generate the matrix element for a given process one has to
+create a process specific setup file, which we call {\em process card}. 
+
+The syntax of this file is
+closely related to that of Java \texttt{.properties} files.
+The detailed syntax and a 
+full list of options are given in 
+Appendix~\ref{chp:appendix-template.in}.
+%\seealso{Appendix \ref{chp:appendix-template.in}}
+Here we first give a commented example, which should be sufficient to explain the 
+most important features of a {\em process card}. 
+
+
+
+\section{Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
+at NLO in QCD}
+
+It is recommended to generate and modify a template file for the 
+process card instead of
+starting from scratch. This can be done by invoking the shell command
+\begin{example}
+\$ gosam.py --template eett.in
+\end{example}
+This would generate the file \texttt{eett.in} with some documentation
+for all accepted options. The options are filled with some default values,
+which can be set in a global configuration file.
+The script will search\footnote{in this order} in the \golemv{} directory,
+in the user's home directory and in the current working directory for a file
+named `\texttt{.golem}' or `\texttt{golem.in}'. Such a file can be generated
+with the following command:
+\begin{example}
+\$ golem-config.py > golem.in
+\end{example}
+
+In the following brief tutorial it is assumed that the process
+$e^+e^-\rightarrow t\bar{t}$ should be calculated to order
+$\mathcal{O}(\alpha)\mathcal{O}(\alpha_s)$ (virtual corrections);
+the tree-level process is of order $\mathcal{O}(\alpha)$. We neglect
+the exchange of a $Z$ or a Higgs boson and treat the electron massless.
+The output directory is assumed to be in the relative path
+\texttt{eett}.
+
+\begin{lstlisting}[gobble=3,%
+     numbers=left,caption={{\tt eett.in}},%
+     basicstyle=\ttfamily]
+ 1 process_path=eett
+ 2 process_name=eett
+ 3 in=    e+, e-
+ 4 out=   t, t~
+ 5 model= sm
+ 6 order= gs, 0, 2
+ 7 
+ 8 qgraf.options=nosnails,notadpoles,onshell
+ 9 qgraf.verbatim=\
+10    true=iprop[Z, 0, 0];\n\
+11    true=iprop[H, 0, 0];
+12 zero=me
+13 one=gs,e
+14
+15 extensions=samurai
+16 samurai.fcflags=`pkg-config --cflags samurai`
+17 samurai.ldflags=`pkg-config --libs samurai`
+\end{lstlisting}
+
+The above lines are discussed one by one. The line numbers on the left
+are only included for better readability and \emph{must not} be included
+in the setup file.
+\begin{enumerate}
+\item[1] The option \texttt{process\_path} specifies the directory
+to which all generated files and directories are written.
+The directory which is specified here must already exist.
+\\Specification of a process path is mandatory.
+\item[2] Setting a process name is optional but recommended. All module
+names will be prefixed with the  process name (e.g. \texttt{precision}
+$\to$ \texttt{eett\_precision}). This will avoid name conflicts if at
+a later stage more than one matrix elements are linked into one
+executable.
+\item[3--4] The options \texttt{in} and \texttt{out} specify the particles
+of the initial and final state. The particle names must be defined in the
+selected model file. As the model files usually define mnemonics for the
+particle names there might be several ways of specifying the same process.
+Instead of `\lstinline[basicstyle=\ttfamily]{e+}'
+one could have written `\lstinline[basicstyle=\ttfamily]{ep}'
+or `\lstinline[basicstyle=\ttfamily]{positron}'.
+\seealso{Appendix~\ref{chp:model-files}}
+For a complete list of
+alternative particle names please refer to the documentation of the
+according model file.
+\\Specifying \texttt{in} and \texttt{out} particles is mandatory.
+\item[5] The option \texttt{model} specifies which model files should
+be used in order to generate and evaluate the diagrams. 
+%It is only possible to refer to files that are located in
+%\texttt{\$GOLEMPATH/models}.
+\\This option is mandatory.
+\item[6] The option \texttt{order} is a comma separated list with
+three entries. The first entry specifies a symbol that denotes a coupling
+constant. In the Standard Model file \texttt{sm} the only two possibilities
+are `\lstinline[basicstyle=\ttfamily]{gs}' for the strong coupling constant
+$g_s$ and `\lstinline[basicstyle=\ttfamily]{e}' for the electro-weak coupling.
+The second number is the power of the chosen coupling constant for the
+tree-level diagrams and the third parameter specifies the power of that
+coupling constant for the one-loop diagrams.
+\attention Note that the numbers
+refer to the powers in the diagrams of the amplitude
+rather than the squared amplitude. In the above example the
+string `\lstinline[basicstyle=\ttfamily]{gs, 0, 2}' specifies that
+the tree-level diagrams should be of order $g_s^0$ and the one-loop
+diagrams should be of order $g_s^2$ and an unspecified
+power of $e$ in both cases. 
+If there is no tree level, i.e. the process is loop induced, 
+the keyword \texttt{NONE} should be put as second item in the list,
+instead of the tree level power of the coupling.
+
+The value of this option is
+translated into a \texttt{vsum} constraint in the file \texttt{qgraf.dat}.
+\\This option is mandatory.
+\item[8--11] The option
+\texttt{qgraf.options} creates the line
+`\lstinline[basicstyle=\ttfamily]{options=}\dots;' in the file
+\texttt{qgraf.dat}. The value of the option \texttt{qgraf.verbatim} is
+passed verbatim to the file \texttt{qgraf.dat}.
+In our example we specify that loops of size one and self-energy insertions
+at external lines should be omitted in the graph generation. Lines
+9--11 suppress the generation of diagrams containing Higgs and $Z$ bosons.
+\attention As these commands are passed verbatim to \qgraf no mnemonic names
+are allowed here, e.g. the Higgs particle has to be denoted by
+`\lstinline[basicstyle=\ttfamily]{H}' and cannot be replaced by
+`\lstinline[basicstyle=\ttfamily]{h}'.
+For a complete list of available options, Please consult the
+\qgraf manual. For a complete list of particle names see 
+Appendix \ref{sec:model-files:sm} resp. the
+documentation of the model file.
+\\These options can be omitted.
+\item[12--13] The keywords \texttt{zero} and \texttt{one} specify
+a set of symbols that should be treated as zero (resp. one). These
+simplifications are applied at the symbolical level. Only symbols
+that appear in the \form interface of the model file should be
+specified here (masses, couplings, CKM-matrix elements, etc).
+In the example we specify the electron mass
+`\lstinline[basicstyle=\ttfamily]{me}' to be zero and we do not keep
+the coupling constants in the calculation explicitly ($g_s=e=1$).
+\\These options can be omitted.
+\item[15] The option \texttt{extensions} contains a list of extensions
+to the core of the program. Currently, the extension \texttt{samurai}
+is mandatory. Other extensions, e.g. \texttt{powhegbox}, are planned
+or under development.
+\item[16--17] For each extension one can add options of the form
+\textit{extension}{.}\textit{name}. Currently the program is scanning
+for options of the form \textit{extension}{.}\texttt{ldflags} and
+\textit{extension}{.}\texttt{fcflags}. These options are copied
+to the contens of the according variables (\texttt{FCFLAGS} and
+\texttt{LDFLAGS}) in the makefiles.
+\end{enumerate}
+
+In order to populate the specified process directory with files
+one invokes
+\begin{example}
+\$ gosam.py eett.in
+\end{example}
+
+\section{Process Directory Structure}
+After running \texttt{golem} with an appropriate setup file the
+process directory contains a number of files which are described below.
+
+\marginlabel{\tt codegen/} This directory contains files which are only
+relevant for code generation. These files will therefore not be included
+in a tar-ball created with \texttt{make dist}.
+
+\marginlabel{\tt common/} Fortran files which are common to all helicity
+amplitudes and to the constructed matrix element code. This directory
+is always compiled first.
+
+\marginlabel{\tt doc/} Contains all files (apart from
+\texttt{pyxotree.tex} and \texttt{pyxovirt.tex}) which are
+necessary for creating
+\texttt{doc/process.ps}, which lists all Feynman diagrams of this process, 
+together with colour and helicity info.
+
+\marginlabel{\tt helicity*} This directory contains all files for a specific
+helicity amplitude. The labeling of the helicities can be found in
+\texttt{doc/process.ps}. Before invoking \texttt{make source}, 
+this directory only contains the makefiles.
+
+\marginlabel{\tt matrix} This folder contains the code to combine
+the helicity amplitudes into a matrix element. Here one also finds
+the test program \texttt{test.f90}. This folder is always compiled last.
+
+\marginlabel{\tt model,model.hh,model.py} The files from the \texttt{model/}
+directory of \golemv. The original files are renamed, e.g.
+\texttt{sm} $\to$ \texttt{model}, \texttt{sm.py} $\to$ \texttt{model.py}
+and \texttt{sm.hh} $\to$ \texttt{model.hh}.
+
+\marginlabel{\tt diagrams-[01].hh} The diagram files generated
+by \qgraf.
+
+\marginlabel{\tt config.sh} This script facilitates linking with external
+programs. For details, run
+\begin{example}
+\$ sh ./config.sh -help
+\end{example}
+
+\marginlabel{\tt process.hh} contains the process dependent definitions
+for \form. This file is used by \texttt{golem.frm} to generate the expressions
+for each diagram in every helicity configuration.
+
+\marginlabel{\tt process.dat} contains the on-shell conditions, the number of
+incoming particles and an expression for momentum conservation. This
+file is needed by the program \texttt{golem-analyzer.py}.
+
+\marginlabel{\tt func.txt} Defines dependencies between parameters of
+the model files.
+
+\marginlabel{\tt Makefile.conf} This files contains the settings
+which might need to be modified by the user. Please check the contents
+of this file if you have trouble running the makefiles.
+
+\marginlabel{\tt Makefile\\Makefile.source} These two files are part of
+each directory. \texttt{Makefile.source} is used when calling
+\texttt{make source}. Running \texttt{make} from the process
+directory will pass through all subdirectories. The following
+targets of \texttt{make} are recommended for direct use:
+\begin{description}
+\item[\texttt{help}] lists all major targets.
+\item[\texttt{source}] generate source files, mainly \fortranXC files.
+\item[\texttt{compile}] compile the \fortranXC sources.
+\item[\texttt{dist}] create a tar-ball of the source files.
+\item[\texttt{clean}] remove object files and intermediate files.
+\item[\texttt{very-clean}] remove files including targets of
+                                \texttt{make source}.
+\item[\texttt{doc}] create various documents related to the process.
+      To obtain a description of the \emph{topologies}, you need to run
+      \texttt{source} before \texttt{make doc}.
+\end{description}
+
+\section{Code Generation and Compilation}
+The \fortranXC code is generated by the command
+\begin{example}
+\$ make source
+\end{example}
+and can be compiled using
+\begin{example}
+\$ make compile
+\end{example}
+Please note that the \texttt{compile} target invokes
+the \texttt{source} target if necessary.
+
+A simple test program,
+which gives the value of the amplitude at a randomly generated phase space point,
+can be found in the directory \texttt{matrix/},
+in order to compile and run it, type
+\begin{example}
+\$ cd matrix
+\$ make test.exe
+\$ ./test.exe
+\end{example}
+The program will generate a file \texttt{\_debug.xml},
+which, depending on the settings contains the values of helicity amplitudes
+and diagrams for a set of phase space points.
+
+\subsection{Customization}
+\paragraph{Runtime Parameters.}
+Many settings can be changed without recompiling the code, by
+creating and modifying the file \texttt{matrix/param.dat}.
+This file has a very simple format:
+\begin{itemize}
+\item Lines starting with a comment character (`!', `\#', `;')
+      in the first column and blank lines are ignored.
+\item All other lines have the format
+\begin{example}
+\textit{name} = \textit{float}\\
+\# \textrm{or}\\
+\textit{name} = \textit{float}, \textit{float}
+\end{example}
+      where the first line defines a real number and the second
+      line defines a complex number, and \textit{name} is a 
+      parameter de.
+\item Whitespace is ignored but must not appear inside names or
+      literals. Physical lines can not be continued nor can
+      multiple entries appear on one line.
+\end{itemize}
+The list of recognized names can be found in the file
+\texttt{common/model.f90}. In addition there are some model
+independent parameters:
+\smallskip
+
+\begin{tabular}{l@{\quad}p{0.7\textwidth}}
+   \texttt{samurai\_scalar} & selects a library of scalar integrals
+   (see \samurai documentation).\\
+   \texttt{samurai\_test} & sets a method to detect unstable points
+   (see \samurai documentation). \\
+   \texttt{samurai\_verbosity} & sets the verbosity level of
+   \samurai; it should be set to zero in a production environment
+   (see \samurai documentation).\\
+   \texttt{renormalisation} & An integer number indicating if no
+   renormalisation (0) or $\beta$-function renormalisation (1,
+   QCD only) should be applied. Other values are reserved for future
+   extensions. \\
+   \texttt{gauge\textit{i}o} & for the external vector particle with
+   index~$i$ (e.g. \texttt{gauge1o}, \texttt{gauge2o}\ldots),
+   if not defined as a constant. \\
+   \texttt{gauge\textit{i}z} & as \texttt{gauge\textit{i}o}.
+   The polarisation vector is transformed into
+   \begin{displaymath}
+   \varepsilon^\mu(k_i)\to\mathtt{gauge\mathit{i}o}\cdot\varepsilon^\mu(k_i)
+      + \mathtt{gauge\mathit{i}z}\cdot k_i^\mu
+   \end{displaymath}
+   This allows for a quick check of gauge invariance.
+\end{tabular}
+Furthermore, all model constants that have not been specified as zero or one
+can be set in this way. 
+%In the builtin Standard Model file (\texttt{sm}) one
+One can can re-set, for example, the value for the Higgs mass using the entry
+\begin{example}
+mH = 124.5
+\end{example}
+Please note that upper and lower case letters have to be distinguished
+and that the names need to be spelled exactly as defined in \texttt{model.py}.
+
+\paragraph{Compile Time Parameters.}
+Other configuration options can be found in the file \texttt{common/config.f90}
+but require the recompilation of the source code
+(\texttt{make clean; make compile}).
+\smallskip
+Examples of options contained in \texttt{config.f90} are
+\begin{maxipage}
+\begin{tabular}{lp{0.6\textwidth}}
+\texttt{ki} & the floating point kind used throughout the calculation.\\
+\texttt{debug\_lo\_diagrams} & controls if information about the
+    tree level diagrams is written to the output file.\\
+\texttt{debug\_nlo\_diagrams} & controls if information about the
+    loop-diagrams is written to the output file.\\
+\texttt{include\_eps\_terms} & controls if
+    terms of order $\varepsilon$ multiplying
+    poles are taken into account.\\
+\texttt{include\_eps2\_terms} & controls if
+    terms of order $\varepsilon^2$ multiplying
+    double poles are taken into account.\\
+\texttt{include\_color\_avg\_factor} & controls if the color averaging
+    factor for inital state partons is multiplied to the final result.\\
+\texttt{include\_helicity\_avg\_factor} & controls if the helicity averaging
+    factor for inital state particles is multiplied to the final result.\\
+\texttt{include\_symmetry\_factor} & controls if the symmetry
+    factor for identical final state particles
+    is multiplied to the final result. \\
+\texttt{use\_sorted\_sum} & controls if the diagrams are summed using
+    the algorithm Malcolm~\cite{Malcolm:1970}, which reduces the error
+    accumulated in presence of large cancellations.
+\end{tabular}
+\end{maxipage}
+
+\section{Drawing the Feynman Diagrams}
+In order to print out the diagrams the makefile contains the target
+\texttt{doc} which produces the file \texttt{process.ps}.
+We use \LaTeX{} plus the package \textsf{axodraw}~\cite{Vermaseren:1994je}
+to create the graphical representation.
+
+The layout of the diagrams is determined by the algorithm used in
+\textsf{feynMF}~\cite{Ohl:1995kr}, modelling the propagators by springs.
+The implemented algorithm works in two steps: first, the topology is
+disentangled by ordering the external legs such that the diagram can
+be drawn as a planar graph. The coordinates $e_k$
+of the external legs are
+fixed along a contour around the drawing area.\footnote{Currently,
+this contour is chosen as an ellipse but in principle any convex
+shape could be used.}
+In a second step the remaining degrees of freedom, the coordinates
+of the vertices $v_i=(x_i, y_i)$, are fixed by minimizing the Lagrangian
+\begin{multline}
+L(v_1, \ldots, v_n; e_1, \ldots, e_N) =\\
+ \frac14\sum_{i,j=1}^n t_{ij}\left(v_i-v_j\right)^2
++\frac12\sum_{i=1}^n\sum_{k=1}^N\lambda_{ik}\left(v_i-e_k\right)^2
+\end{multline}
+Here, $n$ is the number of vertices and $N$ is the number of external
+legs.
+Minimization of the Lagrangian leads to a system of linear equations, which
+can easily be solved.
+\begin{align*}
+&\frac{\partial L}{\partial v_r}=0\\
+\Leftrightarrow&
+ \frac12\sum_{i,j=1}^n t_{ij}\left(v_i-v_j\right)
+     \cdot\left(\delta_{ir}-\delta_{jr}\right)
++\sum_{i=1}^n\sum_{k=1}^N\lambda_{ik}\left(v_i-e_k\right)
+     \cdot\delta_{ir}=0\\
+\Leftrightarrow&
+M_{rj}v_j\equiv
+ \sum_{j=1}^n t_{rj}\left(v_r-v_j\right)
++\left(\sum_{k=1}^N\lambda_{rk}\right)v_r
+=\sum_{k=1}^N\lambda_{rk}e_k
+\end{align*}
+In the last step we used the symmetry of $t_{ij}$.
+The matrix $M$ can be written as
+\begin{equation}
+M_{rc}=\left\{\begin{array}{ll}
+\left(\sum_{i\neq r}t_{ri}\right)+
+\left(\sum_{k=1}^N\lambda_{rk}\right),&
+r=c\\
+-t_{rc},&\text{otherwise}
+\end{array}\right.
+\end{equation}
+
+The symbol $t_{ij}$ is the sum of the spring constants of all
+propagators connecting vertices $i$ and $j$; similarly, $\lambda_{ik}$
+is the spring constant of the leg $k$ if it is connected to vertex $i$
+and zero otherwise.
+
+\section{Import of Model Files}
+
+Examples about how to import model files can be found in the subdirectory 
+ \texttt{examples}.
+
+\subsection{Import from FeynRules}
+A model description in the UFO~\cite{Degrande:2011} format consists of a \texttt{Python} package
+stored in a directory. In order to import the model into \golem{} one needs
+to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
+in front of the directory name, where we assume that
+the model description is in the directory \texttt{\$HOME/models/MSSM\_UFO}.
+\begin{example}
+model= FeynRules,\$HOME/models/MSSM\_UFO
+\end{example}
+
+\subsection{Import from LanHEP}
+In order to use model files generated by LanHEP the following steps
+have to be taken:
+\begin{enumerate}
+\item When generating the tables using LanHEP, one should include the
+   following option to ensure that the generated tables have the correct
+   headings\footnote{\golemv{} relies on the column names rather than
+   some specific order.}. The number of spaces in the column headers are
+   irrelevant as long as the columns are wide enough to contain the
+   respective values.
+\begin{example}
+   prtcformat\\
+      fullname: '  fullname  ',\\
+      name:     '  name   ',\\
+      aname:    '  aname  ',\\
+      spin2:    '  spin2  ',\\
+      mass:     '  mass  ',\\
+      width:    '  width  ',\\
+      color:    '  color  ',\\
+      aux:      '  aux  ',\\
+      texname:  '      texname      ',\\
+      atexname: '     atexname      ',\\
+      pdg:      '  pdg   '.
+\end{example}
+\item If the model file is not already equipped with pdg codes
+   the user might want to use the \verb!prtcprop! command in
+   LanHEP to add the relevant codes.
+\item In the setup file, one needs to specify the model as a pair
+   of path and integer number. If the table files are under the directory
+   \texttt{lanhep/ued/} in the tables \texttt{func7.mdl}, \texttt{lgrng7.mdl},
+   \texttt{prtcls7.mdl} and \texttt{vars7.mdl}, the correct statement in
+   the setup file would be
+\begin{example}
+   model=lanhep/ued, 7
+\end{example}
+\item The use of user defined functions (\texttt{external\_func} in LanHEP)
+   requires an adaption of the file \texttt{codegen/haggies-l0.in}. If one
+   wants to use the function \texttt{double foo(double,double)} the
+   following line sould be added.
+\begin{example}
+@define mdlfoo : real, real -> real =\\ "foo(\%2\$s, \%3\$s)";
+\end{example}
+   The function also needs to be declared in \texttt{codegen/functions.out}
+   in the subroutine \texttt{init\_functions}
+\end{enumerate}
+
+\section{Handling Big Processes}
+Although the default settings should work for most cases, very big processes
+in terms of the number of diagrams and the size of the expressions can cause
+the compiler to become very slow or even to crash. In this section we discuss
+solutions which can help to reduce the load for the compiler and to speed-up
+the code generation. It should be mentioned that some of these measures can
+have a negative impact on the runtime efficiency of the generated code.
+
+\subsection{Grouping of Tree Level Diagrams}
+By default the expressions of all tree-level diagrams are grouped into one
+file. This has the advantage that subexpressions which appear in several
+tree-level diagrams can be reused across the amplitude. In some cases
+it can happen that the sum of all terms of the tree-level diagrams is too big
+to be compiled in one subroutine. In this case it is recommended to set
+the option \texttt{group} to \texttt{false}.
+
+\subsection{Computation of Abbreviations}
+The constant, i.e. $q$- and $\mu^2$ independent parts of the numerators
+of the one-loop diagrams are factored out from the numerators and computed
+as abbreviations. In some cases the list of abbreviations is too big to
+be compiled into one subroutine. One can restrict the number of instructions
+that go into a single subroutine by setting \texttt{abbrev.limit} to a positive
+number in the setup file. 
+The variable \texttt{abbrev.level}, which by default is set to 
+\texttt{helicities}, can be set to \texttt{groups} or 
+\texttt{diagrams} if the list of abbreviations common to a helicity configuration 
+is too large.
+
+If the list of abbreviations causes \haggies{}
+to crash, one needs to increase the amount of memory reserved for Java.
+This can be done by adding the \texttt{-Xmx} option to the call of Java.
+A typical setting of the variable \texttt{haggies.bin} would be
+\begin{example}
+haggies.bin=java -Xmx3g -jar \\
+\contl\ \$\{GOLEMPATH\}/haggies/haggies.jar
+\end{example}
+which assigns 3\,GB of memory to Java.
+
+\subsection{Splitting the Process}
+If a process becomes too big in order to be linked\footnote{
+Currently, most systems support programs to a size up to 4\,GB.
+Although 64\,bit systems can handle a much bigger address space,
+the current limitation comes from some legacy code in the GNU linker.}
+there are some possibilities to split the process into independent
+programs:
+\begin{itemize}
+\item the generation of a subset of the helicity configurations, 
+e.g. one helicity configuration
+      per process directory.
+\item the generation of a subset of diagrams. If the diagrams are not
+      split according to gauge invariant subsets the user should ensure
+      that all subsets are called with the same set of phase space points.
+      An easy way of splitting the diagrams into subsets is by using
+      the option \texttt{select.nlo=\textit{$\langle$first$\rangle$}:\textit{%
+       $\langle$last$\rangle$}}, where \texttt{first} and \texttt{last} refer to the 
+       diagram numbers in {\em process.ps}.
+\end{itemize}
+
+\section{Advanced Usage}
+The call to the executable \texttt{gosam.py} can be simulated
+inside more complex \python programs.
+It is an easy exercise to
+run the file generation in user defined \python scripts as long as
+one includes the module files in the environment variable
+\texttt{PYTHON\_PATH}. The following script emulates the
+program \texttt{gosam.py}:
+\begin{lstlisting}[language=python]
+>>> from golem.util.config import Properties
+>>> from golem.util.main_misc import *
+>>> props = Properties()
+>>> props.setProperty("in", ["e+", "e-"])
+>>> props.setProperty("out", ["t", "t~"])
+>>> # ... populate props with further values ...
+>>> workflow(props)
+>>> generate_process_files(props)
+\end{lstlisting}
+
+\section{Advanced Diagram Selection}
+\golemv implements several ways of selecting subsets of diagrams:
+\begin{itemize}
+\item by restricting QGraf,
+\item by selecting specific diagrams by their number,
+\item by defining filters using \python.
+\end{itemize}
+
+\subsection{Restricting the Generation with QGraf}
+The options for restricting the set of diagrams at the level
+of the diagram generation is the most efficient way since this
+happens already at the earliest possible stage.
+However, QGraf's built-in filters are sometimes
+too limited in order to express more advanced criteria.
+
+\golemv{} allows one to pass information to QGraf through the option
+\texttt{qgraf.options} and through \texttt{qgraf.verbatim},
+\texttt{qgraf.verbatim.lo} and \texttt{qgraf.verbatim.nlo}.
+For the exact syntax the user is refered to the QGraf documentation.
+
+\subsection{Selecting Diagrams by their Number}
+An a posteriori selection 'by eye' can be achieved after all (also unwanted)
+diagrams of a process have been generated and inspected in
+\texttt{doc/process.ps}. The user can then modify the options
+\texttt{select.lo} and \texttt{select.nlo} and rerun \texttt{gosam.py}.
+
+%This option is mainly intended for debugging purposes in large processes.
+
+\subsection{Filtering Diagrams in \python{}}
+The user can write short \python{} functions in order to decide whether
+a specific diagram is to be taken or not. This function should return
+\texttt{True} for all diagrams which are kept, and \texttt{False} for
+all diagrams which should be discarded. These functions are passed by
+the options \texttt{filter.lo} and \texttt{filter.nlo}.
+
+Longer functions should be defined in an external file, which can be
+passed using \texttt{filter.module}.
+
+When writing a filter the one can use the predefined particle lists
+\texttt{QUARKS}, \texttt{LEPTONS}, \texttt{FERMIONS} and \texttt{BOSONS}.
+The underscore (\texttt{\_}) matches any field.
+
+A diagram object \texttt{d} has the following methods which are inteded
+to be used in filters.
+Alternative predefined functions and functors are also given.
+\begin{description}
+\item[\texttt{d.rank()}] returns the tensor rank of a diagram.\\
+   $\mathtt{RANK}\equiv\lambda\mathtt{d}.(\mathtt{d.rank()})$
+\item[\texttt{d.loopsize()}] returns the number of propagators
+   in the loop of a diagram.\\
+   $\mathtt{LOOPSIZE}\equiv\lambda\mathtt{d}.(\mathtt{d.loopsize()})$
+\item[\texttt{d.sign()}] computes the sign coming from closed
+   fermion loops.\\
+   $\mathtt{SIGN}\equiv\lambda\mathtt{d}.(\mathtt{d.sign()})$
+\item[\texttt{d.isNf()}] reports if a diagram contains a closed
+   quark loop of size two where all loop propagators are massless.\\
+   $\mathtt{NF}\equiv\lambda\mathtt{d}.(\mathtt{d.isNf()})$
+\item[\texttt{d.isMassiveQuarkSE()}] returns True if the diagram
+   contains a QCD self energy insertion at a massive quark line.\\
+   $\mathtt{MQSE}\equiv\lambda\mathtt{d}.(\mathtt{d.isMassiveQuarkSE()})$
+\item[\texttt{d.isScaleless()}] returns True if the loop integral associate
+   with this diagram carries no scale.\\
+   $\mathtt{SCALELESS}\equiv\lambda\mathtt{d}.(\mathtt{d.isScaleless()})$
+\item[\texttt{d.vertices(f1,f2,\ldots)}] returns the number of vertices
+   in the diagram with the specified fields. The arguments \texttt{f1},
+   \texttt{f2}, \dots are lists of field names.\\
+   $\mathtt{VERTICES(f1,f2,\ldots)}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.vertices(\mathtt{f1},\mathtt{f2},\ldots)})$
+\item[\texttt{d.loopvertices(f1,f2,\ldots)}]
+   same as \texttt{vertices}, but only counts vertices which have
+   loop propagators attached.\\
+   $\mathtt{LOOPVERTICES(f1,f2,\ldots)}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.loopvertices(%
+    \mathtt{f1},\mathtt{f2},\ldots)})$
+\item[\texttt{d.iprop(f,**opts)}] returns the number of propagators
+   of the given fields. Optional arguments are
+   \texttt{momentum} to specify the momentum of the propagator,
+   \texttt{twospin} to filter by the $2\times$ the spin,
+   \texttt{massive} to specify whether massive or massless propagators
+   should be considered and \texttt{color} to filter for certain color
+   representations.\\
+   $\mathtt{IPROP(\ldots)}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.iprop(\ldots)})$
+\item[\texttt{d.chord(f,**opts)}] same as \texttt{iprop}
+   but only counts loop propagators.\\
+   $\mathtt{CHORD(\ldots)}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.chord(\ldots)})$
+\item[\texttt{d.bridge(f,**opts)}] same as \texttt{iprop}
+   but only counts propagators which are not in a loop.\\
+   $\mathtt{BRIDGE(\ldots)}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.bridge(\ldots)})$
+\item[\texttt{d.QuarkBubbleMasses()}] returns a list of
+   all different masses in a closed quark loop of size two
+   or an empty list if the diagram is not a quark bubble.\\
+   $\mathtt{QBMASSES}\equiv%
+    \lambda\mathtt{d}.(\mathtt{d.QuarkBubbleMasses()})$
+\end{description}
+
+Furthermore, the following predefined filters exist:
+\begin{description}
+\item[\texttt{NFGEN(f1,f2,\ldots)}] for closed quark loops of size two
+   this filter returns true only if all loop propagators belong to one
+   of the fields in the argument list. For all diagrams which are not
+   quark bubbles it returns True.
+\item[\texttt{AND(filter1,filter2,\ldots)}] returns True if all filters
+   in the argument list return True.
+\item[\texttt{OR(filter1,filter2,\ldots)}] returns True if at least one filter
+   in the argument list returns True.
+\item[\texttt{NOT(filter)}] returns True if the argument evaluates to False.
+\item[\texttt{TRUE}] always returns True.
+\item[\texttt{FALSE}] always returns False.
+\end{description}
+
+\chapter{The Binoth Les Houches Accord Interface}
+
+\section{Initialisation Phase}
+The script \texttt{gosam.py --olp} which comes with \golemv{} can be used to generate
+matrix elements compatible with the specifications of the Binoth Les Houches
+Accord~\cite{Binoth:2010xt}. This script expects at least the name of an order file.
+This order file is usually but not necessarily created by a Monte Carlo program. An
+example file for the partonic $2\to3$ processes of $pp\rightarrow t\bar{t}+\text{jets}$
+is given below:
+\lstset{literate={->}{{$\rightarrow$}}1}
+\begin{lstlisting}[language=olp,numbers=left]
+MatrixElementSquareType CHsummed
+IRregularisation        tHV
+OperationMode           CouplingsStrippedOff
+SubdivideSubprocess     yes
+AlphasPower             3
+CorrectionType          QCD
+
+# Here comes the list of subprocesses
+# specified through PDG codes
+# g     g -> t t-bar g
+ 21    21 -> 6 -6   21
+# u u-bar -> t t-bar g
+  2    -2 -> 6 -6   21
+# u     g -> t t-bar u
+  2    21 -> 6 -6    2
+\end{lstlisting}
+The line numbers are not part of the file.
+The arrow `$\rightarrow$' is generated by the two characters `\verb|->|'.
+The following options are part of the Standard and accepted by
+\golemv{}:
+\lstset{language=olp}
+\begin{description}
+\item[\texttt{MatrixElementSquareType}] accepts the values
+	\lstinline!Hsummed!, \lstinline!Csummed!,
+	\lstinline!Haveraged!, \lstinline!Caveraged!,
+	\lstinline!CHsummed!, \lstinline!CHaveraged!.
+
+	The value \lstinline!NOTsummed! is not supported. 
+	Sensible combinations are also allowed, as in
+\begin{lstlisting}[language=olp]
+MatrixElementSquareType Hsummed Caveraged
+\end{lstlisting}
+
+        In \golemv{} this statement is optional.
+	Any quantity which is not explicitely averaged is assumed to be
+	summed
+\item[\texttt{CorrectionType}] accepts the values
+        \lstinline!QCD!, \lstinline!QED! and \lstinline!EW!, whereas
+	\golemv{} does not distinguish between the latter two (this behaviour
+	might change in the future when appropriate model files are available).
+
+	This statement is mandatory and must not be omitted.
+\item[\texttt{IRregularisation}] accepts the values \lstinline!tHV!
+        ('t~Hooft-Veltman scheme) and \lstinline!DRED! (dimensional reduction).
+	The value \lstinline!CDR! (conventional dimensional regularisation)
+	is not supported and therefore rejected.
+
+%	\attention The support for \lstinline!DRED! is limited.
+%        This featureis still considered experimental. 
+%       It should only be used with great care.
+
+	This statement is mandatory and must not be omitted.
+\item[\texttt{MassiveParticleScheme}] accepts the value \lstinline!OnShell!
+	only.
+	At the moment this option has no effect on the generation of the matrix
+	element. This statement is optional; if it appears in the order file
+	a warning is issued, reminding the user that no UV-counterterms for
+	massive particles are implemented yet.
+\item[\texttt{IRsubtractionMethod}] accepts the value \lstinline!None! only.
+	\golemv{} does not provide any subtracted output.
+
+	This statement is optional.
+\item[\texttt{ModelFile}] accepts the name of parameter file in the
+	Les Houches Accord format. The script reads the parameter file
+	setting all masses to zero which are not specified explicitly
+	to be non-zero.
+
+	This statement is mandatory.
+
+	It is recommended to use absolute paths here as the file will later
+	be read in the function \texttt{OLP\_Start} in the matrix element
+	code, which might be located elsewhere.
+\item[\texttt{OperationMode}] accepts the value
+	\lstinline!CouplingsStrippedOff! only.
+
+	This statement is optional. If it is given, the coupling constants
+	are stripped off from the amplitude.
+\item[\texttt{SubDivideSubProcess}] accepts logical values
+	(\lstinline!yes! or \lstinline!no!).
+
+	If the value is \lstinline!yes! a separate channel for each
+	helicity is assigned. Otherwise there will be one channel per
+	subprocess.
+
+	This statement is optional. Its default value is \lstinline!no!.
+\item[\texttt{AlphasPower}] the power of $\alpha_s$ of the Born cross-section.
+	At least one of the options \lstinline!AlphaPower! and
+	\lstinline!AlphasPower! has to be specified.
+\item[\texttt{AlphaPower}] the power of $\alpha$ of the Born cross-section.
+	At least one of the options \lstinline!AlphaPower! and
+	\lstinline!AlphasPower! has to be specified.
+\end{description}
+
+The options which have been proposed for electro-weak corrections
+are currently not supported.
+
+\subsection{Command Line Arguments of \texttt{gosam.py --olp}}
+The syntax for the invocation of \texttt{gosam.py} is as follows:
+\begin{example}
+\$ gosam.py --olp \{$\langle$\textit{option}$\rangle$\}\\
+    \contl $\langle$\textit{order file}$\rangle$
+    \{$\langle$\textit{order file}$\rangle$\} \\
+    \contl \{$\langle$\textit{key}$\rangle$=$\langle$\textit{value}$\rangle$\}
+\end{example}
+The allowed options are given below. The list of
+$\langle$\textit{key}$\rangle$\texttt{=}$\langle$\textit{value}$\rangle$-pairs
+supplements the options given in the configuration files.
+\begin{description}
+\item[\texttt{-h}, \texttt{--help}]
+      Prints a help screen with all available command line options and exits.
+\item[\texttt{-d}, \texttt{--debug}] 
+      With this options the script will print lots of extra information to
+      the screen, which is usually not useful for non-experts.
+\item[\texttt{-v}, \texttt{--verbose}] 
+      The script will print information e.g. about creating directories
+      and reading files.
+\item[\texttt{-w}, \texttt{--warn}]
+      Warnings and errors are printed. This is the default setting.
+\item[\texttt{-q}, \texttt{--quiet}]
+      Only errors are printed, no warnings are issued.
+\item[\texttt{-l}\textit{file}, \texttt{--log-file=}\textit{file}]
+      All messages are written to a log file. When one or more log files
+      are specified the information is still written to the screen with
+      the latest specified level of detail. The following example will
+      read the order file \texttt{test.olo}; messages at the debug
+      level will be written to \texttt{detailed.log}, warnings and
+      errors are written to \texttt{short.log} and only errors are printed
+      to the screen.
+      \begin{example}
+\$ gosam.py --olp -d -ldetailed.log -w \\
+	\contl{} -lshort.log -q test.olo
+      \end{example}
+\item[\texttt{-c}\textit{file}, \texttt{--config=}\textit{file}]
+      Overlay default config files by the specified file.
+      Usually, the script first searches in the default locations for
+      configuration files. Afterwards, all files specified by \texttt{-c}
+      options are read in the order in which they are encountered. Values
+      which are already set by earlier files will be overwritten.
+      See also option `\texttt{-C}'.
+\item[\texttt{-C}, \texttt{--no-defaults}]
+      The script will not search for configuration
+      files (\texttt{.golem} and \texttt{golem.in}) in the standard locations
+      (\golemv{} installation directory, user's home directory and
+      current working directory).
+\item[\texttt{-f}, \texttt{--force}] Overwrite contract files without asking.
+      The default behaviour is that contract files are not overwritten. If
+      a contract file already exists the program gives an error message.
+\item[\texttt{-e}, \texttt{--use-single-quotes}]
+      Activates syntax extensions that allow the use of single quotes in
+      order and contract files (See Section~\ref{sec:olp:extensions}).
+\item[\texttt{-E}, \texttt{--use-double-quotes}]
+      Activates syntax extensions that allow the use of double quotes in
+      order and contract files (See Section~\ref{sec:olp:extensions}).
+\item[\texttt{-b}, \texttt{--use-backslash}]
+      Activates syntax extensions that allow the use of backslash escape
+      sequences in
+      order and contract files (See Section~\ref{sec:olp:extensions}).
+\item[\texttt{-i}, \texttt{--ignore-case}] 
+      Activates syntax estensions which make the parsing of order
+      and contract files case-insensitive
+      (See Section~\ref{sec:olp:extensions}).
+\item[\texttt{-x}, \texttt{--ignore-unknown}]
+      Unknown statements or values in order and contract files will be ignored.
+      The default behaviour is that unknown statements and/or values will lead
+      to an error message.
+\item[\texttt{-o}\textit{file}, \texttt{--output-file=}\textit{file}]
+      Specifies the name of the contract file(s). The following set of
+      wildcard sequences can be used to derive the name of the contract file
+      from the name of the order file. A value of
+      `\texttt{-}' writes to the standard output.
+      \begin{description}
+      \item[\texttt{\%f}] The full file name (e.g. `\texttt{dir/process.olo}')
+      \item[\texttt{\%F}] The file name without any leading path
+         (`\texttt{process.olo}')
+      \item[\texttt{\%p}] Path name only (`\texttt{dir/}')
+      \item[\texttt{\%s}] The stem of the file name (`\texttt{process}')
+      \item[\texttt{\%e}] The extension of the file name (`\texttt{.olo}')
+      \end{description}
+      By default this option is set to `\texttt{\%p\%s.olc}'.
+\item[\texttt{-D}\textit{dir}, \texttt{--destination=}\textit{dir}]
+      Chooses the output directory, to which each process is written.
+      The same wildcards as above can be used. By default, all output is
+      written to the current working directory. It is therefore not recommended
+      to set this option using wildcards when more than one order file is
+      specified.
+\item[\texttt{-t}\textit{path}, \texttt{--templates=}\textit{path}]
+      Sets an alternative templates directory or template
+      XML-file.
+\item[\texttt{-z}, \texttt{--scratch}]
+      Overwrites all process files, including those which otherwise
+      would be preserved (\texttt{Makefile.conf}, \texttt{config.f90} etc).
+\end{description}
+
+\subsection{\golem{} Extensions to the Original Standard}
+\label{sec:olp:extensions}
+Modern file systems allow for path names which cannot be expressed in
+the original formulation of the Les Houches accord. Therefore \golemv{}
+implements syntax extensions for order and contract files for including
+special characters in statements, especially in file names (as in
+\lstinline!ModelFile!).
+
+\begin{description}
+\item[double qoutes] This syntax extension proposes that inside a pair
+   of double quotes (ASCII character~\#34) special characters lose their
+   special meaning. The backslash acts as escape character, with the following
+   set of escape sequences being allowed:
+   \begin{itemize}
+   \item[\texttt{\textbackslash t}] expands to a horizontal tabulator
+        character (ASCII character~\#9),
+   \item[\texttt{\textbackslash n}] expands to a new line character
+   	(ASCII character~\#10),
+   \item[\texttt{\textbackslash f}] expands to a form feed character
+   	(ASCII character~\#12),
+   \item[\texttt{\textbackslash r}] expands to a carriage return character
+   	(ASCII character~\#13),
+   \item[\texttt{\textbackslash x}\textit{hh}], where \textit{hh} are two
+        hexadecimal digits expands to the character of which the
+        ASCII code is the hexadecimal number represented by the
+	digits~\textit{hh}.
+   \item any other character following a backslash expands to itself,
+        in particular \texttt{\textbackslash"}
+	and~\texttt{\textbackslash\textbackslash}.
+   \end{itemize}
+\item[single quotes] This syntax extension proposes that inside a pair
+   of single quotes (ASCII character~\#39) all characters lose their
+   special meaning. There is no escape character. A literal single quote
+   is generated by a sequence of two single quotes (Pascal like).
+\item[backslash escapes] This syntax extension proposes that any character
+   following a backslash loses its special meaning.
+\end{description}
+
+Different extensions might prove useful on different operating systems.
+On a Windows system, the file name \verb!F:\Golem Files\mssm.slha! can
+only be expressed with the proposed syntax extensions and would have the
+following three equivalent representations:
+\begin{itemize}
+\item \verb!F:\\Golem\ Files\\mssm.slha!
+\item \verb!'F:\Golem Files\mssm.slha'!
+\item \verb!"F:\\Golem Files\\mssm.slha"!
+\end{itemize}
+
+The three extensions can be switched on by the command line options
+of \texttt{gosam.py --olp},
+`\texttt{-E}', `\texttt{-e}' and `\texttt{-b}' respectively.
+
+\subsection{Advanced Usage}
+The core functionality of the script \texttt{gosam.py --olp} is implemented
+by the function \texttt{golem.util.olp.process\_order\_file}, which has the
+the following signature:
+\begin{example}
+process\_order\_file(order\_file\_name, out\_file, out\_dir,\\
+   \ \ conf,
+   templates=None,
+   ignore\_case=False,\\
+   \ \ ignore\_unknown=False,
+   single\_quotes=False,\\
+   \ \ double\_quotes=False,
+   backslash\_escape=False)
+\end{example}
+\begin{description}
+\item[\texttt{order\_file\_name}] (character string) name of the order
+   file.
+\item[\texttt{out\_file}] (file object, open for writing)
+   contract file.
+\item[\texttt{out\_dir}] (character string) name of an existing directory
+   to which all matrix-element files will be written.
+\item[\texttt{conf}] (\texttt{golem.util.config.Properties})
+   configuration shared by all subprocesses.
+\item[\texttt{templates}] (character string) template directory or
+   name of an XML-file.
+\item[\dots] all other arguments activate the corresponding
+   syntax extensions.
+\end{description}
+The return value is zero in case of a success and one if an error occurred.
+
+A list of options read from default config files can be obtained by
+the function
+\texttt{golem.util.main\_misc.find\_config\_files()}. The following
+example suggests the usage of the interface from a \python{}-based
+Monte Carlo program
+\begin{lstlisting}[language=python]
+import os
+import golem
+
+# Monte Carlo program prepars the process
+# and writes order file proc.olo ...
+# (not shown in example)
+
+conf = golem.util.main_misc.find_config_files()
+f = open("proc.olc", 'w')
+os.mkdir("proc/")
+
+# Add own options
+conf[golem.properties.model] = \
+   "FeynRules, ${HOME}/models/mssm_ufo"
+conf[golem.properties.fc_bin] = "gfortran"
+err_flag = golem.util.olp.process_order_file(\
+   "proc.olo", f, "proc/", conf)
+
+if err_flag > 0:
+	print "Problems generating OLP"
+	print "Please consult the file proc.olc"
+\end{lstlisting}
+
+
+\section{Runtime Phase}
+
+After the script \texttt{gosam.py --olp} or any equivalent program has been
+run successfully, the files in the newly created process directories are
+compiled by invoking \texttt{make} in the respective top-level directory.
+This generates the object file \texttt{olp\_module.o} which contains all
+API functions. The library for a given process can be linked using the
+script \texttt{config.sh} in the same directory. The make-file of a client
+program would typically contain code similar to the following:
+\begin{lstlisting}[language=bash]
+PROCESS_PATH=path/to/your/process-files
+LDFLAGS+=$(shell sh $(PROCESS_PATH)/config.sh -libs)
+\end{lstlisting}
+
+\attention The module \texttt{olp\_module.f90} uses \fortranMMIII{}
+extensions (\texttt{ISO\_C\_BINDING}) for establishing a well defined
+interface for the linker. Older \fortranXC{} compilers might therefore
+not be able to compile this module. Please refer to the compiler documentation
+for details.
+
+\subsection{API Functions}
+\lstset{language=C}
+The file \texttt{olp.h} contains the following prototypes.
+\begin{lstlisting}[language=C]
+void OLP_Start(char*,int*);
+void OLP_EvalSubProcess(int,double*,
+   double,double*,double*);
+void OLP_Finalize();
+void OLP_Option(char*,int*);
+\end{lstlisting}
+The first two functions are defined exactly as proposed
+in~\cite{Binoth:2010xt}. The other two functions extend the original
+standard. It should, however, be noted that the generated matrix element code
+can be run without any calls to either \lstinline!OLP_Finalize!
+or \lstinline!OLP_Option!.
+
+\subsubsection*{\texttt{OLP\_Start}}
+\begin{lstlisting}[language=C]
+void OLP_Start(char* contract_file, int* success);
+\end{lstlisting}
+This function should be called before the first evaluation of the matrix
+element. It ensures that all global variables in the matrix element code
+are initialized properly. The argument \lstinline!contract_file!
+should receive the (full) name of the contract file which was generated
+together with the matrix element. The integer \lstinline!success! is
+initialized by \lstinline!OLP_Start! to either the value one, indicating
+success, or zero, indicating that an error occurred during initialization.
+
+Matrix elements generated with \golemv{} will try to read the SLHA model
+file specified by the option \lstset{language=olp}\lstinline!ModelFile!
+in the contract file. It is not required that the contract file used in
+the runtime phase points to the same model file as used during the
+initialisation phase. However, values which were set to zero during
+initialisation will remain zero during the runtime phase.
+
+\subsubsection*{\texttt{OLP\_EvalSubProcess}}
+\lstset{language=C}
+\begin{lstlisting}[language=C]
+void OLP_EvalSubProcess(int label, double* momenta,
+   double scale, double* parameter, double* amp);
+\end{lstlisting}
+This function retrieves the values for a channel of the OLP for a given
+phase space point. A channel might be a subprocess or a
+gauge invariant partial amplitude, depending on the settings in the
+contract file. The channel is labeled by the argument \lstinline!label!.
+The second argument is a one-dimensional array holding the $5\times N$
+components of the momenta for an $N$-particle process. They are in the order
+\begin{displaymath}
+(E^{(1)}, p_x^{(1)}, p_y^{(1)}, p_z^{(1)}, m^{(1)},
+ E^{(2)}, p_x^{(2)}, p_y^{(2)}, p_z^{(2)}, m^{(2)},
+ \ldots, m^{(N)})
+\end{displaymath}
+The third argument is the renormalization scale (not its square).
+A list of scale dependent parameters is passed in the fourth argument.
+Its first entry is expected to be $\alpha_s(\mu)$. Any further entries
+are user-defined; the user is expected to adapt the subroutine
+\texttt{init\_event\_parameters} in \texttt{olp\_module.f90}
+if he wishes to make use of any additional parameters.
+
+The last argument is an array of length four. Its entries are, in this order,
+\begin{enumerate}
+\item the coefficient of the $1/\varepsilon^2$ pole in the Laurent series
+   of the interference term between virtual and Born amplitude,
+\item the coefficient of the $1/\varepsilon$ pole in the Laurent series
+   of the interference term between virtual and Born amplitude,
+\item the $\mathcal{O}(1)$ term in the Laurent series
+   of the interference term between virtual and Born amplitude,
+\item the square of the Born amplitude.
+\end{enumerate}
+
+Matrix elements generated by \golemv{} use the convention that in case
+of an error during the evaluation of the matrix element, the fourth
+entry is set to $(-1)$. It is therefore recommended that client programs
+check for the positiveness of the Born matrix element.
+
+\subsubsection{\texttt{OLP\_Finalize}}
+\begin{lstlisting}[language=C]
+void OLP_Finalize();
+\end{lstlisting}
+
+This function should be called after the last evaluation of the matrix
+element. It allows the OLP to close any open file handles, to release
+allocated memory and to exit gracefully.
+Although on most modern operating systems this is done automatically,
+it is good practice and therefore recommended to always call this function
+before exiting the program.
+
+\subsubsection{\texttt{OLP\_Option}}
+\begin{lstlisting}[language=C]
+void OLP_Option(char* assignment, int* success);
+\end{lstlisting}
+
+This function can be used to update internal parameters of the OLP which
+are not part of the standard. The first argument is a character string
+containing a textual representation of the requested assignment. The
+second argument will be set by the function according to the success
+of the request.
+
+Matrix elements generated with \golemv{} accept any string which would
+also be valid as a (non-comment) line in a parameter
+file (see~\texttt{model.f90}). Typical calls would be
+\begin{lstlisting}[language=C]
+OLP_Option("samurai_test=3", &flag);
+/* The previous call requires 
+ * reinitialization of the OLP */
+OLP_Start(contract_file, &flag);
+OLP_Option("Nf=5", &flag);
+/* Setting the Higgs mass: */
+OLP_Option("mH=124.5", &flag);
+\end{lstlisting}
+
+\subsection{The OLP Socket Protocol}
+The necessity to link the client program each time another OLP is used
+might become cumbersome, especially when one likes to work with more than
+one OLP at the same time. We have therefore developed a socket protocol
+which enables any client program to access the same functionality as
+defined in the Les Houches accord~\cite{Binoth:2010xt} through a TCP/IP
+connection with a server hosting the OLP. In this way it is possible
+to access multiple OLPs simultaneously and to load OLPs at runtime.
+
+\subsubsection{The OLP Socket Server}
+OLPs generated with \golemv{} contain additional files in their
+top-level directory implementing a server for the OLP Socket protocol.
+These files are
+\begin{description}
+\item[\texttt{olp\_daemon.c}] ANSI-C file with service routines especially
+    network related routines,
+\item[\texttt{olp\_daemon.h}] ANSI-C file, header for \texttt{olp\_daemon.c},
+\item[\texttt{olp\_protocol.l}] Lex/Flex file, part of the grammar definition
+    of the protocol and
+\item[\texttt{olp\_protocol.y}] Yacc/Bison file, part of the grammar
+    definition of the protocol, contains the main program.
+\end{description}
+These files are compiled with the command
+\begin{example}
+\$ make olp\_daemon EXTRA\_LDFLAGS=\dots
+\end{example}
+It is often necessary to specify the variable \verb!EXTRA_LDFLAGS!
+to provide the necessary run-time libraries of the \fortranXC{} compiler.
+
+The compiled program can be run with the following options
+\begin{example}
+\$ olp\_daemon [-p \textit{port}] [-s|-S] [-f] \textit{file-name}
+\end{example}
+\begin{description}
+\item[\texttt{-f}\textit{file-name}] name of a contract file (required).
+\item[\texttt{-p}\textit{port}] port at which the program accepts connections,
+   default: 7711.
+\item[\texttt{-s}/\texttt{-S}] forbid resp. allow the
+   \texttt{SHUTDOWN} command, default: allow.
+\item[\texttt{-r}/\texttt{-R}] forbid resp. allow the
+   \texttt{RESTART} command, default: allow.
+\item[\texttt{-d}] detach from terminal (run as daemon).
+\end{description}
+
+\subsubsection{OLP Socket Clients}
+Sample client implementations for \texttt{C++}, \texttt{Java} and
+\python{} are provided in the directory \texttt{olp/contrib/}.
+Below, a brief example for the \texttt{C++} case is given:
+\begin{lstlisting}[language=C]
+olp::OLPClient OLP_EvalSubProcess("localhost", 7711);
+OLP_EvalSubProcess(0, num_legs, mom, scale,
+                   num_param, param, amp);
+OLP_EvalSubprocess.close();
+\end{lstlisting}
+The class \texttt{OLPClient} overwrites the operater \texttt{()}
+emulating the original protocol as closely as possible. For technical
+reasons, two additional arguments (\texttt{num\_legs} and \texttt{num\_param})
+are required, specifying the number of external legs and the length of the
+array \texttt{param} respectively.
+
+\subsubsection{Definition of the Protocol}
+The protocol consists of statements sent by the client to the server.
+Each statement is terminated by a newline character. The server responds
+with one line starting with a three digit number followed by a space
+and an optional message. The three digit number contains the response code.
+A response code of 200 signals success, all other values denote an error.
+
+% \TODO{complete description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\chapter{Conventions of the Amplitude}
+
+\section{Convention of \golemVC}
+The integral library \golemVC{} computes integrals of the form
+\begin{multline}
+\int\frac{\mu^{2\varepsilon}\mathrm{d^nk}}{i\pi^{n/2}}\frac{k^{\mu_1}\cdots k^{\mu_r}}{%
+((k+r_1)^2-m_1^2)\cdots(k+r_N)^2-m_N^2)}=\\
+r_\Gamma\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right]
+\end{multline}
+where $n=(4-2\varepsilon)$ and
+\begin{equation}
+r_\Gamma=\frac{\Gamma(1+\varepsilon)\Gamma^2(1-\varepsilon)}{%
+   \Gamma(1-2\varepsilon)}.
+\end{equation}
+The integration measure for the internal momentum $k$ is
+\begin{equation}
+\frac{\mu^{2\varepsilon}\mathrm{d}^nk}{(2\pi)^n}
+=\mu^{2\varepsilon}\frac{i}{2^n\pi^{n/2}}\cdot\frac{{\mathrm d}^nk}{i\pi^{n/2}}
+=\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}\cdot%
+ \frac{\mu^{2\varepsilon}{\mathrm d}^nk}{i\pi^{n/2}}.
+\end{equation}
+
+\section{Convention of \golemv}
+The factor from above which does not go into the integral definition of
+\golemVC{} can be written as
+\begin{equation}
+\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}=
+\frac{(4\pi)^\varepsilon}{(2\pi)(4\pi)}\frac{i}{2}
+\end{equation}
+The factor of $i/2$ is included in the amplitude definition of \golemv{}.
+The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
+$\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
+
+In the following we assume that the coupling constants\footnote{
+$e$ and $g_s$ in the standard model} have been set to one in the
+setup of \golemv{}. This ensures that the one-loop matrix
+element in QCD is calculated in the $\overline{\mathrm{MS}}$ scheme as
+\begin{equation}
+\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}=
+\frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q})
+\end{equation}
+The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
+appearing in the squared tree-level matrix element. \golemv{} will
+return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
+
+The conversion between different conventions for the $\Gamma$-functions
+is straightforward:
+\begin{equation}
+\frac{1}{\Gamma(1-\varepsilon)}=r_\Gamma+{\mathcal O}(\varepsilon^3)=
+\left(1-\frac{\pi^2}{6}\varepsilon^2\right)\Gamma(1+\varepsilon)
+   +{\mathcal O}(\varepsilon^3)
+\end{equation}
+
+The relevant terms in the expansion of $r_\Gamma$ are
+\begin{equation}
+r_\Gamma=e^{-\gamma_E\varepsilon}
+\left(1-\frac{\pi^2}{12}\varepsilon^2\right)+\mathcal{O}(\varepsilon^3)
+\end{equation}
+
+If one prefers to pull out a factor of
+$e^{-\gamma_E\varepsilon}(4\pi)^{\varepsilon}$ the appropriate
+definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
+\begin{equation}
+\frac{\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}}%
+{e^{-\gamma_E\varepsilon}(4\pi)^\epsilon}=
+\frac{\alpha_s}{2\pi}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}
++\left(c_0-\frac{\pi^2}{12}\,c_{-2}\right)
+\right](g_1^{n_1}\cdots g_q^{n_q})
+%+{\mathcal{O}}(\varepsilon)
+\end{equation}
+
+\chapter{Explicit Reduction of the $R_2$ Terms}
+The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
+containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
+algebra. For an explicit reduction of these terms, a list of all integrals
+of the form
+\begin{align}
+\int\frac{\mu^{2\varepsilon}\mathrm{d}^nk}{i\pi^{n/2}}
+\frac{N(\hat{q})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
+\end{align}
+where either $\alpha$ or $\beta$ is a positive integer number
+and the denominators are $D_i=(q+r_i)^2-m_i^2+i\delta$.
+Note that integrals where both $\alpha$ and $\beta$ are
+non-zero, will not contribute to the final result.
+We expand the above tensor integral and only consider the term
+of rank $r$, similarly to Eq.~(208) in Ref.~\cite{Reiter:2009kb}:
+\begin{multline}
+I_N^{n,\alpha,\beta;\mu_1\ldots\mu_r}=
+(-1)^{r}\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}
+\varepsilon^\beta
+\sum_{l=0}^{\lfloor r/2\rfloor}\left(-\frac12\right)^l
+\sum_{j_1,\ldots,j_{r-2l}=1}^N
+\times\\
+\left[\hat{g}^{\bullet\bullet}\ldots
+\hat{g}^{\bullet\bullet}r_{j_1}^\bullet
+\cdots r_{j_{r-2l}}^\bullet\right]^{\mu_1\ldots\mu_r}
+I_N^{n+2\alpha+2l}(j_1,\ldots,j_{r-2l}).
+\end{multline}
+Here, the integral $I_N^d(j_1,j_2,\ldots)$ denotes a Feynman parameter
+integral with the parameters $z_{j_1}, z_{j_2}, \ldots$ in the numerator,
+\begin{multline}
+I_N^d(j_1,\ldots, j_p)=\\
+(-1)^N\Gamma\left(N-\frac{d}2\right)%
+\int\!\!\mathrm{d}^N_\Box\!z\,\delta_z
+\frac{\prod_{\nu=1}^p z_{j_\nu}}{%
+\left[-\frac12 z^{\mathsf{T}}Sz-i\delta\right]^{N-d/2}},
+\end{multline}
+where $\mathrm{d}^N_\Box\!z=
+\prod_{j=1}^N\mathrm{d}z_j\Theta(z_j)\Theta(1-z_j)$
+and $\delta_z=\delta(1-\sum_i z_i)$.
+The square brackets $[\ldots]^{\mu_1\ldots\mu_p}$ expand to the sum of
+all possible assignments of indices to the $\hat{g}^{\bullet\bullet}$-tensors
+where a (one) arbitrary assignment of indices to the momenta $r_j^\bullet$
+is chosen.
+
+We only need to consider integrals containing an UV pole, which leads to
+a rational term when multiplied with $\varepsilon$ stemming either from
+$\varepsilon^\beta$ or from
+\begin{equation}
+\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}=
+(\alpha-1)!\left[-\varepsilon +{\mathcal O}(\varepsilon^2)\right],
+\quad\text{for}\,\alpha>0.
+\end{equation}
+The UV divergence comes from the Gamma function
+\begin{equation}
+\Gamma\left(N-\frac{n+2\alpha+2l}2\right)=
+\Gamma(\varepsilon-(2+\alpha+l-N))\equiv\Gamma(\varepsilon-\eta)
+\end{equation}
+in the Feynman parameter integral~$I_N^{n+2\alpha+2l}$.
+Hence, we examine further the expression
+\begin{multline}
+\varepsilon\cdot I_N^{n+2l+2\alpha}(l_1,\ldots, l_{r-2l})=\\
+\left\{\begin{array}{lr}
+{\mathcal O}(\varepsilon),&\eta<0\\
+(-1)^N\frac1{2^\eta\eta!}\int\mathrm{d}^N_\Box\!z\delta_z
+\left[z^{\mathsf{T}}Sz\right]^\eta
+\prod_{i=1}^{r-2l}z_{l_i},&\eta\geq0
+\end{array}\right.
+\end{multline}
+
+The remaining integration can be understood as a special case of the
+Feynman parameter identity
+\begin{equation}
+\frac{1}{\prod_{j=1}^N A_j^{\alpha_j}}=\frac{\Gamma(\alpha)}{
+\prod_{j=1}^N \Gamma(\alpha_j)}\int\!\mathrm{d}^N_\Box\!z\,\delta_z
+\frac{\prod_{j=1}^N z_j^{\alpha_j-1}}{\left(
+\sum_{j=1}^N z_j A_j\right)^\alpha}
+\end{equation}
+for $A_j=1$, in which case one finds
+\begin{equation}
+\int\!\mathrm{d}^N_\Box\!z\,\delta_z
+\prod_{j=1}^N z_j^{\alpha_j-1}=\frac{\prod_{j=1}^N \Gamma(\alpha_j)}%
+{\Gamma(\alpha)}
+\end{equation}
+
+All phenomenologically relevant, non-zero cases for renormalizable
+gauge theories (working in Feynman gauge) are listed below:
+\begin{align}
+I_1^{n,0,1}&=-\frac12 S_{11}\\
+I_1^{n,0,1;\mu_1}&=\frac12 S_{11} \cdot r_1^{\mu_1}\\
+I_2^{n,1,0}&=-\frac16\left(S_{11}+S_{12}+S_{22}\right)\\
+I_2^{n,0,1}&=1\\
+I_2^{n,0,1;\mu_1}&=-\frac12\left(r_1^{\mu_1}+r_2^{\mu_1}\right)\\
+I_2^{n,0,1;\mu_1\mu_2}&=
+\frac16\left(%
+2r_1^{\mu_1}r_1^{\mu_2}
++r_1^{\mu_1}r_2^{\mu_2}
++r_2^{\mu_1}r_1^{\mu_2}
++2r_2^{\mu_1}r_2^{\mu_2}\right)\nonumber\\
+&-\frac1{12}\hat{g}^{\mu_1\mu_2}\left(S_{11}+S_{12}+S_{22}\right)\\
+I_3^{n,1,0}&=\frac12\\
+I_3^{n,1,0;\mu_1}&=-\frac16\left(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}\right)\\
+I_3^{n,0,1;\mu_1\mu_2}&=\frac14\hat{g}^{\mu_1\mu_2}\\
+I_3^{n,0,1;\mu_1\mu_2\mu_3}&=-\frac{1}{12}
+\sum_{l=1}^3\left[\hat{g}^{\bullet\bullet}r^{\bullet}\right]^{\mu_1\mu_2\mu_3}%
+\\
+I_4^{n,1,0;\mu_1\mu_2}&=\frac{1}{12}\hat{g}^{\mu_1\mu_2}\\
+I_4^{n,2,0}&=-\frac16\\
+I_4^{n,0,1;\mu_1\mu_2\mu_3\mu_4}&=\frac1{4!}\left[\hat{g}^{\bullet\bullet}%
+\hat{g}^{\bullet\bullet}\right]^{\mu_1\mu_2\mu_3\mu_4}
+\end{align}
+All other integrals of that type are identically zero.
+
+
+
+\chapter{The included Model Files}
+\label{chp:model-files}
+
+\section{Format of the Model Files}\label{sec:modelfiles}
+\golemv{} expects three files for a proper model definition:
+\begin{description}
+\item[$\langle model\rangle$\texttt{.hh}] \form{} file containing the Feynman rules
+\item[$\langle model\rangle$\texttt{.py}] \python{} file
+\item[$\langle model\rangle$] (no extension) \qgraf{} model file
+\end{description}
+
+\subsection{The \python{} File}
+Thy \python{} file contains the following definitions
+\begin{description}
+\item[\texttt{model\_name}] a variable of string type containing a human-readable
+     name for this model, such as ``Standard Model (Feyn. Gauge) w/o Higgs'' etc.
+\item[\texttt{particles}] a \python{} \texttt{dict} that contains all particles
+     \emph{and} anti-particles of the model. The keys are the \qgraf{} names of the
+     fields; the values are objects of the class \texttt{Particle}.
+     The constructor has the arguments
+     \begin{verbatim}
+Particle(name, two_spin, mass, color_rep, partner, width='0')
+     \end{verbatim}
+\item[\texttt{mnemonics}] a \python{} \texttt{dict} of
+     human-readable particle names. The values are objects of the class
+     \texttt{Particle}. It is save to refer to the dictionary \texttt{particles}.
+\item[\texttt{parameters}] a \python{} \texttt{dict} of
+     model parameters with their default values. Both key and value are strings.
+\item[\texttt{functions}] a \python{} \texttt{dict} of
+     variable names and initialization expressions. Both key and value are strings.
+\item[\texttt{types}] the types of all parameters and functions indicated by
+     \texttt{'R'} for real numbers and \texttt{'C'} for complex numbers.
+\item[\texttt{latex\_names}] a \python{} \texttt{dict} assigning \LaTeX{}
+     code to the field names. Math mode is assumed.
+\item[\texttt{line\_styles}] a \python{} \texttt{dict} assigning line styles
+     to field names. The line style used when drawing Feynman diagrams.
+     Allowed values are \texttt{photon}, \texttt{ghost}, \texttt{scalar},
+     \texttt{gluon}, \texttt{fermion}.
+\end{description}
+
+\subsection{The \qgraf{} File}
+The propagators in the \qgraf{} file must contain the following functions:
+\begin{description}
+\item[\texttt{TWOSPIN}] twice the spin of the particle.
+\item[\texttt{COLOR}]   the color representation of the particle $\in\{1,3,8\}$.
+\item[\texttt{MASS}]    the mass of the particle.
+\item[\texttt{WIDTH}]   the width of the particle (currently not used).
+\item[\texttt{AUX}]     must be zero for most fields. Tensor Ghosts, as introduced
+                        by CalcHep have the value $1$ here.
+\item[\texttt{CONJ}]    for self-conjugate particles the value is \texttt{('+')},
+                        otherwise it is \texttt{('+','-')}.
+\end{description}
+
+The vertices must provide all fields that should be accessible in \texttt{VSUM} statements
+and therefore also the ones that \golemv{} uses in the \texttt{order} option.
+
+\subsection{The \form{} File}
+There are two possible ways of specifying the Feynman rules in the \form{} file.
+If a model contains only Standard Model like interactions one can make use of
+the file \texttt{src/form/vertices.hh} in the \golemv{} directory and just define
+the coefficients \texttt{CL} and \texttt{CR} in front of the vertices. This
+strategy is implemented by the modelfiles \texttt{models/sm}. The file
+\form{} contains a procedure \texttt{VertexConstants} which
+replaces the the vertex constants by their symbols. A QED example would be
+\begin{lstlisting}[language=form]
+#Procedure VertexConstants
+   Id CL([field.em], [field.ep], [field.ph]) = e;
+   Id CR([field.em], [field.ep], [field.ph]) = e;
+#EndProcedure
+\end{lstlisting}
+In the header of the \form{} file all model specific
+symbols and functions need to be defined. For this simple
+model we have the fields and the coupling constant as only
+new symbols.
+\begin{lstlisting}[language=form]
+Symbols [field.em], [field.ep], [field.ph], e;
+\end{lstlisting}
+
+Instead of using the file \texttt{vertices.hh} one can also use
+his own vertex definitions. In this case the \form{} file must contain
+the definition
+\begin{lstlisting}[language=form]
+#Define USEVERTEXPROC "1"
+\end{lstlisting}
+and it must define the procedure \texttt{ReplaceVertices}. An example
+for QED is given below.
+\begin{maxipage}
+\begin{lstlisting}[language=form]
+#Procedure ReplaceVertices
+Identify Once vertex(iv?,
+      [field.ep], idx1?, -1, k1?, idx1L1?, -1, idx1C1?,
+      [field.em], idx2?,  1, k2?, idx2L1?,  1, idx2C1?,
+      [field.ph], idx3?,  2, k3?, idx3L2?,  1, idx3C1?) =
+   PREFACTOR(i_ * e) *
+   NCContainer(Sm(idx3L2), idx1L1, idx2L1) *
+   node(idx1, idx2, idx3);
+#EndProcedure
+\end{lstlisting}
+\end{maxipage}
+It should be noted that \golemv{} expects the procedure \texttt{VertexConstants}
+to exist in both cases. If all the constants are already substituted inside
+\texttt{ReplaceVertices} the file must still provide a possibly empty empty
+implementation of \texttt{VertexConstants}. \golemv{} ensures that
+\texttt{VertexConstants} is always called after \texttt{ReplaceVertices}.
+
+It is recommended to wrap any factors that are global prefactors to the diagram
+into the argument of the function \texttt{PREFACTOR} as \golemv{} scans for these
+functions and brackets them out. Each vertex definition must contain a factor
+\texttt{node} which contains the indices\footnote{In \qgraf's terminology
+these indices are a combination of vertex and ray index of the field.}
+of the fields at this vertex.
+
+The \qgraf{} style file generates vertex functions as follows:
+\begin{multline*}
+\mathtt{vertex}(\mathrm{vertex\,index},\\
+   \mathrm{field}_1, \mathrm{index}_1, \pm2\mathrm{spin}_1, \mathrm{momentum}_1, \mu_1, \pm\mathrm{color\,rep}_1, %
+   \mathrm{color\,index}_1,\\
+   \mathrm{field}_2, \mathrm{index}_2, \pm2\mathrm{spin}_2, \mathrm{momentum}_2, \mu_2, \pm\mathrm{color\,rep}_2, %
+   \mathrm{color\,index}_2,\\
+   \vdots\\
+   \mathrm{field}_n, \mathrm{index}_n, \pm2\mathrm{spin}_n, \mathrm{momentum}_n, \mu_n, \pm\mathrm{color\,rep}_n, %
+   \mathrm{color\,index}_n)
+\end{multline*}
+
+The entries are:
+\begin{description}
+\item[vertex index] The unique index of this vertex. (\texttt{iv1}, \texttt{iv2}, \dots)
+\item[$\mathrm{field}_i$] The field name of the $i$-th particle. These names are constructed
+from the \qgraf{} field name as \texttt{[field.$\langle name\rangle$]}.
+\item[$\mathrm{index}_i$] A unique name for this ``ray'' (at index $1$ they are \texttt{idx1r1},
+   \texttt{idx1r2}, \ldots)
+\item[$\pm2\mathrm{spin}_i$] twice the spin of the $i$-th particle.
+   The sign distinguishes particles~($+$) from antiparticles~($-$).
+\item[$\mathrm{momentum}_i$] the incoming momentum of the $i$-th particle.
+\item[$\mu_i$] the Lorentz index of the $i$-th particle. Depending on the spin of the particle
+   this is a spinor index (spin $1/2$), a Lorentz index (spin $1$) or a dummy index (spin $0$).
+   For higher spins this index must be split into its components using the function
+   \texttt{SplitLorentzIndex}. For its proper definition the reader is referred to
+   the document \texttt{src/form/lorentz.pdf}.
+\item[$\pm\mathrm{color\,rep}_i$] the color representation of the $i$-th particle. Allowed
+   values currently are $\pm1,\pm3,\pm8$, although the sign only really makes sense for the
+   fundamental representation $3$ and its conjugate $\bar{3}\equiv-3$.
+\item[$\mathrm{color\,index}_i$] The color index of the $i$-th particle. Depending on the color
+   representation this is an index in the fundamental, the adjoint or the trivial representation.
+\end{description}
+
+All symbols defined in \texttt{src/form/symbols.hh} are also accessible in this \form{} file.
+\attention Note: until recently the definition of \texttt{Sqrt2} and \texttt{sqrt2} were part
+of the model file. Now these symbols are part of \texttt{src/form/symbols.hh} and must not be
+redefined.
+
+\attention All Dirac matrices and metric tensors must use the notation introduced by \texttt{spinney}.
+The metric tensor is $g^{\mu\nu}=\mathtt{d}(\mu, \nu)$ and $\gamma^\mu=\mathtt{Sm}(\mu)$,
+$\gamma_5=\mathtt{Gamma5}$, $\Pi_+=\mathtt{ProjPlus}$, $\Pi_-=\mathtt{ProjMinus}$. All non-commuting
+objects must reside inside the function \texttt{NCContainter} (see~example).
+
+The color structure must use the objects $t_{ij}^A=\mathtt{T}(A, i, j)$ (where the color flow is such
+that$j$ is the index of an anti-quark), $f^{ABC}=\mathtt{f}(A, B, C)$ and
+$f^{ABE}f^{CDE}=\mathtt{f4}(A,B,C,D)$. At vertices coupling colored with colorless particles
+it might be necessary to use the \texttt{d\_} tensor to file the color flow through the vertex.
+
+\attention Note that all propagators and wave functions are defined in a model independent
+way in the files \texttt{src/form/propagators.hh} and \texttt{src/form/legs.hh}. Please,
+refrain from modifying these files directly but make all changes to \texttt{src/form/lorentz.nw}.
+
+In theories with Maiorana fermions the model file should include the following
+line:
+\begin{lstlisting}[language=form]
+#Define DISPOSEQGRAFSIGN "1"
+\end{lstlisting}
+
+\section{Standard Model (\texttt{sm})}
+\label{sec:model-files:sm}
+\subsection{Synopsis}
+The model `\texttt{sm}' contains the Feynman rules for the
+Standard Model in Feynman gauge as described
+in~\cite[Appendix~A]{Boehm:2001}.
+
+\subsection{Particle Content}
+\marginlabel{Leptons}
+\begin{tabular}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\tt ep & \tt positron e+ & \tt me& $e^+$\\
+\tt em & \tt electron e- & \tt me& $e^-$\\
+\tt ne & & $0$ & $\nu_e$\\
+\tt nebar & \tt ne\~& $0$ & $\bar{\nu}_e$\\
+\hline
+\tt mup & \tt mu+ & \tt mmu& $\mu^+$\\
+\tt mum & \tt mu- & \tt mmu& $\mu^-$\\
+\tt nmu & & $0$ & $\nu_\mu$\\
+\tt nmubar & \tt nmu\~ & $0$ & $\bar{\nu}_\mu$\\
+\hline
+\tt taup & \tt tau+ & \tt mtau& $e^+$\\
+\tt taum & \tt tau- & \tt mtau& $e^-$\\
+\tt ntau & & $0$ & $\nu_\tau$\\
+\tt ntaubar & \tt ntau\~ & $0$ & $\bar{\nu}_\tau$\\
+\hline
+\end{tabular}
+
+\marginlabel{Quarks}
+\begin{tabular}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\tt U & \tt u & \tt mU& $u$\\
+\tt Ubar & \tt u\~ & \tt mU& $\bar{u}$\\
+\tt D & d & \tt mD & $d$\\
+\tt Dbar & \tt d\~& mD & $\bar{d}$\\
+\hline
+\tt S & \tt s & \tt mS& $u$\\
+\tt Sbar & \tt s\~ & \tt mS& $\bar{u}$\\
+\tt C & c & \tt mC & $d$\\
+\tt Cbar & \tt c\~& mC & $\bar{d}$\\
+\hline
+\tt T & \tt t & \tt mT& $t$\\
+\tt Tbar & \tt t\~ & \tt mT& $\bar{t}$\\
+\tt B & b & \tt mB & $b$\\
+\tt Bbar & \tt b\~& mB & $\bar{b}$\\
+\hline
+\end{tabular}
+
+\marginlabel{Gauge Bosons}
+\begin{tabular}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\tt g & \tt gluon & $0$ & $g$ \\
+\tt A & \tt photon gamma & $0$ & $\gamma$ \\
+\tt Z & & \tt mZ & $Z$ \\
+\tt Wp & \tt W+& \tt mW & $W^+$ \\
+\tt Wm & \tt W-& \tt mW & $W^-$ \\
+\hline
+\end{tabular}
+
+\marginlabel{Scalar Bosons}
+\begin{tabular}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\tt H & \tt h higgs & \tt mH & $H$ \\
+\tt phim & \tt phi- & \tt mW & $\phi^-$ \\
+\tt phip & \tt phi+ & \tt mW & $\phi^+$ \\
+\tt chi &  & \tt mZ & $\chi$ \\
+\hline
+\end{tabular}
+
+\marginlabel{Ghost Fields}
+\begin{tabular}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\tt gh &  & $0$ & $u^g$\\
+\tt ghbar &  & $0$ & $\bar{u}^g$ \\
+\tt ghA &  & $0$ & $u^A$ \\
+\tt ghAbar &  & $0$ & $\bar{u}^A$ \\
+\tt ghZ &  & \tt mZ & $u^Z$ \\
+\tt ghZbar &  & \tt mZ & $\bar{u}^Z$ \\
+\tt ghWp &  & \tt mW & $u^+$ \\
+\tt ghWpbar &  & \tt mW & $\bar{u}^+$ \\
+\tt ghWm &  & \tt mW & $u^-$ \\
+\tt ghWmbar &  & \tt mW & $\bar{u}^-$ \\
+\hline
+\end{tabular}
+
+\subsection{Parameters}
+This section lists all model parameters which are not already
+listed as particle masses.
+
+\medskip
+\begin{tabular}{|l|l|l|}
+\hline
+Name & Symbol & Description\\
+\hline
+\tt NC & $N_C$ & Number of colors in QCD\\
+\tt e & $e$ & electro-weak coupling constant: $\alpha=e^2/(4\pi)$\\
+\tt gs & $g_s$ & strong coupling constant: $\alpha_s=g_s^2/(4\pi)$\\
+\tt sw & $s_w=\sin\theta_w$ & sine of weak mixing angle\\
+\tt cw & $c_w=\cos\theta_w$ & cosine of weak mixing angle\\
+\tt VUD & $V_{ud}$ & CKM mixing matrix element\\
+\tt CVDU & $V_{du}^{\dagger}$ & --- '' ---\\
+\tt VUS & $V_{us}$ & --- '' ---\\
+\tt CVSU & $V_{su}^{\dagger}$ & --- '' ---\\
+\tt VUB & $V_{ub}$ & --- '' ---\\
+\tt CVBU & $V_{bu}^{\dagger}$ & --- '' ---\\
+\tt VCD & $V_{cd}$ & --- '' ---\\
+\tt CVDC & $V_{dc}^{\dagger}$ & --- '' ---\\
+\tt VCS & $V_{cs}$ & --- '' ---\\
+\tt CVSC & $V_{sc}^{\dagger}$ & --- '' ---\\
+\tt VCB & $V_{cb}$ & --- '' ---\\
+\tt CVBC & $V_{bc}^{\dagger}$ & --- '' ---\\
+\tt VTD & $V_{td}$ & --- '' ---\\
+\tt CVTD & $V_{dt}^{\dagger}$ & --- '' ---\\
+\tt VTS & $V_{ts}$ & --- '' ---\\
+\tt CVST & $V_{st}^{\dagger}$ & --- '' ---\\
+\tt VTB & $V_{tb}$ & --- '' ---\\
+\tt CVTB & $V_{bt}^{\dagger}$ & --- '' ---\\
+\hline
+\end{tabular}
+
+\chapter{Template for a Process Setup File}
+\label{chp:appendix-template.in}
+\seealso{Chapter \ref{chp:setup-of-a-process}}
+In order to create a new process setup file one can invoke
+\begin{example}
+\$ gosam.py --template your\_new\_file.in
+\end{example}
+This is the recommended way of obtaining the most recent
+documentation of the available options.
+
+The syntax of a general process setup file should obey the following rules:
+\begin{itemize}
+\item A setup file ({\em process card}) consists of a sequence of lines representing
+key-value pairs. A key-value pair can span across several lines
+if each of the lines except the last line is terminated by a backslash.
+\item A setup file is allowed to contain any number of blank lines or
+comment lines, 
+indicated by a `\lstinline[basicstyle=\ttfamily]{!}' or a
+`\lstinline[basicstyle=\ttfamily]{#}' as its first non-blank character.
+\item The key and the value are separated by a blank, a colon
+`\lstinline[basicstyle=\ttfamily]{:}' or
+an equals sign `\lstinline[basicstyle=\ttfamily]{=}'. Notice that the line
+`\lstinline[showspaces=true,basicstyle=\ttfamily]{key = value}'
+will be interpreted as the key `\lstinline[basicstyle=\ttfamily]{key}'
+followed by the value
+`\lstinline[showspaces=true,basicstyle=\ttfamily]{= value}'
+as the terminator of the key is the blank and not the equals sign.
+In order to produce one of the terminators literally as a part of the
+key one has to escape it with a backslash, e.g.
+`\lstinline[showspaces=true,basicstyle=\ttfamily]{very\ long\ name:value}'
+would translate to the key
+`\lstinline[showspaces=true,basicstyle=\ttfamily]{very long name}' and the
+value `\lstinline[basicstyle=\ttfamily]{value}'.
+\item The escape characters
+`\lstinline[basicstyle=\ttfamily]{\\}',
+`\lstinline[basicstyle=\ttfamily]{\n}',
+`\lstinline[basicstyle=\ttfamily]{\r}',
+`\lstinline[basicstyle=\ttfamily]{\f}' and
+`\lstinline[basicstyle=\ttfamily]{\t}' work as usual. Backslashes in front
+of any other character are just dropped.
+\item Leading and trailing blanks are removed from the key and the value
+by default and must be escaped to preserve them. Whitespace is also
+removed in front and after commas if the value is interpreted as a
+comma separated list.
+\item If an option expects a logical value, the literals
+`\lstinline[basicstyle=\ttfamily]{1}',
+`\lstinline[basicstyle=\ttfamily]{true}',
+`\lstinline[basicstyle=\ttfamily]{.true.}',
+`\lstinline[basicstyle=\ttfamily]{t}',
+`\lstinline[basicstyle=\ttfamily]{.t.}',
+`\lstinline[basicstyle=\ttfamily]{yes}' and
+`\lstinline[basicstyle=\ttfamily]{.y.}'
+are recognized as the value \emph{true}. These values are interpreted
+case-insensitively. If a value is not recognized as \emph{true} it
+corresponds to \emph{false}. 
+\end{itemize}
+\attention Note, that deviating from the Java standard, unicode
+escapes, such as `\lstinline[basicstyle=\ttfamily]{\u10EF}', have not
+been implemented; neither are octal and hexadecimal escape sequences
+recognized.
+
+\begin{fullpage}
+\input template.tex
+%\lstinputlisting[basicstyle=\ttfamily\small,frame=tblr,%
+%	caption={\texttt{template.in}}]{template.in}
+\end{fullpage}
+
+\bibliographystyle{amsalpha}
+\begin{fullpage}
+\bibliography{refman}
+\end{fullpage}
+
+\clearpage
+\remarks
+
+\end{document}

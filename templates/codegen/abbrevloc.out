@@ -1,0 +1,72 @@
+%=$[% ' vim: syntax=golem
+%]module     [$ process_name asprefix=\_
+	$][% output.file match=".*/([^/.]*)\\.f90" format="%s" %]
+   use [$ process_name asprefix=\_ $]config, only: ki
+   use [$ process_name asprefix=\_ $]globals[% 
+           output.file match=".*/[^/.h]*(h[0-9]*)\\.f90" format="%s" %]
+   implicit none
+   private[%
+   @for instructions registers="XXX" %][%
+      @select $_
+      @case XXX %][%
+      @else %]
+   complex(ki), public :: [% $_ %][%
+      @end @select %][%
+   @end @for %][$
+   @if eval abbrev.limit > 0 $][%
+      @for symbols registers="t%s" %]
+   [%type.repr%] :: [% $_ %][%
+      @end @for%][$
+   @end @if $]
+   public :: init_abbrev
+
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+
+contains
+   subroutine     init_abbrev()[$
+   @if use_flags_1 $]
+      use [$ process_name asprefix=\_ $]groups, only: evaluate_virt_diagram[$
+   @end @if $]
+      use [$ process_name asprefix=\_ $]config, only: deltaOS
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]color, only: TR
+      use [$ process_name asprefix=\_ $]globalsl1, only: epspow
+      implicit none[$
+   @if eval abbrev.limit > 0 $][$
+   @else $][%
+      @for symbols registers="t%s" %]
+      [%type.repr%] :: [% $_ %][%
+      @end @for%][$
+   @end @if $][%
+   @for instructions registers="t%s" %]
+      [% $_ %] = [% expression %][%
+      @select $_ match="(.).*" format="%s"
+      @case r %]
+      [$
+         @if use_flags_1 $]if(evaluate_virt_diagram([%
+             $_ match="rat2d(.*)" format="%s" %]))[$
+         @end @if $]rat2 = rat2 + [% $_ %][%
+      @end @select %][$
+      @if eval abbrev.limit > 0 $][%
+         @if eval expression="index%[$abbrev.limit$]==[$abbrev.limit$]-1" %][%
+            @with eval bp="index//[$abbrev.limit$]"%][%
+               @if is_last %][%
+               @else %]
+      call init_abbrev_cont[% bp %]()
+   end subroutine
+
+   subroutine     init_abbrev_cont[% bp %]()
+      use [$ process_name asprefix=\_ $]config, only: deltaOS
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]color, only: TR
+      implicit none[%
+               @end @if %][%
+            @end @with %][%
+         @end @if %][$
+      @end @if $][%
+   @end @for %]
+   end subroutine
+end module [$ process_name asprefix=\_
+	$][% output.file match=".*/([^/.]*)\\.f90" format="%s" %]
