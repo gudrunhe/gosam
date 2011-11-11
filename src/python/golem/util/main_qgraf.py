@@ -165,9 +165,10 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 	f = open(os.path.join(path, log_name), 'w')
 	try:
 		subprocess.call([qgraf_bin], cwd=path, stdout=f)
-	except OSError:
+	except OSError as ex:
 		raise GolemConfigError(
 				("QGraf (%r) has failed while processing 'qgraf.dat' in %r.\n" +
+					("Error message: %s\n" % ex) +
 					"Detailed output has been written to %r.")
 				% (qgraf_bin, path, log_name))
 	finally:
