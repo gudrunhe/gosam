@@ -664,7 +664,7 @@ Set SpObject : UbarSpa, UbarSpb, USpa, USpb, Sm, Sm4, SmEps,
                NCContainer(fDUMMY2?{UbarSpa,UbarSpb,USpa,USpb}(?all2), iDUMMY1?) =
                 NCContainer(fDUMMY1(?all1) * fDUMMY2(?all2));
         #IfNDef `NOSPFLIP'
-                FactArg NCContainer;
+                FactArg (-1), NCContainer;
                 Repeat Id NCContainer(?head, sDUMMY1?number_) =
                         sDUMMY1 * NCContainer(?head);
                 Id NCContainer(?head, fDUMMY2?{UbarSpa,UbarSpb}(?all2)) =
@@ -674,7 +674,7 @@ Set SpObject : UbarSpa, UbarSpb, USpa, USpb, Sm, Sm4, SmEps,
                 Repeat Id NCContainer(sDUMMY1?, sDUMMY2?, ?tail) = 
                         NCContainer(sDUMMY1 * sDUMMY2, ?tail);
                 Id NCContainer(sDUMMY1?) = sDUMMY1;
-                FactArg SpFlip;
+                FactArg (-1), SpFlip;
                 Id SpFlip(?all) = nDUMMY1(reverse_(?all));
                 ChainOut nDUMMY1;
                 Id nDUMMY1(sDUMMY1?) = SpFlip(sDUMMY1);

@@ -152,14 +152,14 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
       + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
         inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
 	   + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	  ) * NCContainer(1, iDUMMY1, iDUMMY2) * d(iDUMMY3, iDUMMY4);
+	  ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
   Id fDUMMY1(ZERO, p1, vDUMMY2?, p1, sDUMMY1?, sDUMMY2?,
         iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = - deltaOS * sDUMMY1 / 4 *
   	  (
       + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
         inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
 	   - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	  ) * NCContainer(1, iDUMMY1, iDUMMY2) * d(iDUMMY3, iDUMMY4);
+	  ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
 
 	#IfDef `DRED'
 		Id deltaHV = 0;
@@ -236,12 +236,6 @@ Argument;
 EndArgument;
 
 .sort:subst. vertices and fermion legs;
-#If (`VERSION_' >= 4) && (`SUBVERSION_' >= 0)
-* Note: This is not strictly required but can make things
-*       a bit faster.
-*       The FactArg command is used inside RemoveNCContainer.
-   On OldFactArg;
-#EndIf
 
 repeat id d(iv1L?, iv2L?) * d(iv2L?, iv3L?) = d(iv1L, iv3L);
 
