@@ -157,7 +157,7 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), dimension([%num_legs%], 4), intent(out) :: new_vecs[%
 @for crossing %]
-      new_vecs([% index %],:) = [%sign%] vecs([% $_ %],:)[%
+      new_vecs([% $_ %],:) = [%sign%] vecs([% index %],:)[%
 @end @for %]
    end  subroutine twist_momenta
 

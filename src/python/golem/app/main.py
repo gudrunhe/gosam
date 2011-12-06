@@ -110,6 +110,8 @@ def main(argv=sys.argv):
 
    message(GOLEM_FULL)
 
+   golem.util.tools.check_script_name(argv[0])
+
    debug("      path: %r" % golem_path())
 
    if generate_templates:

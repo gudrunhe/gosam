@@ -1,5 +1,5 @@
 program test
-   use yyyy_config, only: ki, samurai_scalar, samurai_test, samurai_verbosity
+   use yyyy_config, only: ki
    use yyyy_kinematics, only: dotproduct
    use yyyy_matrix, only: samplitude, initgolem, exitgolem
    use yyyy_rambo, only: ramb
@@ -37,11 +37,6 @@ program test
    channels(2) = 6
 
    me = 0.0_ki
-
-   ! we use OneLOop both in golem and in the reference program
-   samurai_scalar = 1
-   samurai_test   = 1
-   samurai_verbosity = 3
 
    call initgolem()
 

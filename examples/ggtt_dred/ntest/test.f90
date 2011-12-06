@@ -118,7 +118,7 @@ subroutine     setup_parameters()
    renorm_logs = .true.
    convert_to_cdr = .false.
 
-   reduction_interoperation = 0
+   reduction_interoperation = 1
    ! samurai_group_numerators = .false.
 
    mT    = 171.2_ki

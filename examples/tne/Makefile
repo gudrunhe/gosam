@@ -1,7 +1,7 @@
 
 PROCESS=tne
 
-GOLEM=golem-main.py
+GOLEM=gosam.py
 GOLEM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 

@@ -15,9 +15,22 @@
    public :: inspect_lo_diagram
    public :: cond[%
 @if extension samurai %]
-   public :: cmplx_sam, cmplx_ki[%
+   public :: cmplx_sam, cmplx_ki, metric_tensor[%
 @end @if %]
 contains
+   pure function metric_tensor(mu,nu) result(d)
+      implicit none
+      integer, intent(in) :: mu, nu
+      real(ki) :: d
+      if (mu.ne.nu) then
+         d = 0.0_ki
+      elseif (mu.eq.1) then
+         d = 1.0_ki
+      else
+         d = -1.0_ki
+      end if
+   end  function metric_tensor
+
    pure function cond(cnd, brack, Q, mu2)
       implicit none
       logical, intent(in) :: cnd

@@ -51,6 +51,9 @@ OBJECTS= \
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.o[%
+		   @if internal GENERATE_DERIVATIVES %] \
+	d[%$_%]h[%helicity%]l1d.o[%
+			@end @if %][%
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %]
@@ -91,6 +94,9 @@ GENERATED_SRC=[%
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
+		   @if internal GENERATE_DERIVATIVES %] \
+	d[%$_%]h[%helicity%]l1d.f90[%
+			@end @if %][%
    	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %]
@@ -131,6 +137,8 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-name 'd*l[01].f90' \
 		-or -name 'd*l[01]fr5.f90' \
 		-or -name 'd*l[01].txt' \
+		-or -name 'd*l1d.txt' \
+		-or -name 'd*l1d.f90' \
 		-or -name 'd*l[01]-fr.txt' \
 		-or -name 'd*l[01].dat' \
 		-or -name 'd*l[01].abb' \

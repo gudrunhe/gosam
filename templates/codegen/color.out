@@ -100,22 +100,22 @@ contains
       write (unit,'(A13)') "golem_color=["
       do i=1,numcs
          do j=1,numcs
-	    if (j==1) then
-	       ch1 = "["
-	    else
-	       ch1 = " "
-	    endif
+            if (j==1) then
+               ch1 = "["
+            else
+               ch1 = " "
+            endif
 
-	    if (j == numcs) then
-	       ch2 = "]"
+            if (j == numcs) then
+               ch2 = "]"
                if (i == numcs) then
                   ch3 = "]"
                end if
-	    else
-	       ch2 = ","
-	    end if
+            else
+               ch2 = ","
+            end if
 
-	    if (j == numcs) then
+            if (j == numcs) then
                write (unit,'(3x,A1,A8,G23.16,A1,G23.16,A1,A1,A1)') &
                & ch1, "complex(", real(CC(i,j)), ",", aimag(CC(i,j)), ")", &
                & ch2, ch3

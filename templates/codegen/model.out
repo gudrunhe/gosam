@@ -164,7 +164,7 @@ contains
       character(len=line_length) :: rvalue, ivalue, value
       character(len=name_length) :: name
       real(ki) :: re, im
-      integer :: idx, lnr, nidx, ierr
+      integer :: idx, lnr, nidx, ierr, pdg
 
       if(present(line_number)) then
          lnr = line_number
@@ -278,7 +278,103 @@ contains
          @else $]re[$
          @end @select $][$
          @end @for $]
-         end select
+         end select[$
+@if has_slha_locations dimension=1 $][$
+   @for slha_blocks lower $]
+      elseif (name(1:[$ eval 1 + .len. $_ $]).eq."[$ $_ $](") then
+         idx = scan(name, ')', .false.)
+         if (idx.eq.0) then
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         endif
+         read(name([$ eval 2 + .len. $_ $]:idx-1),*, iostat=ierr) pdg
+         if (ierr.ne.0) then
+            write(*,*) "Not an integer:", name([$
+                    eval 2 + .len. $_ $]:idx-1)
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         end if
+         select case(pdg)[$
+      @for slha_entries $]
+            case([$index$])
+               [$ $_ $] = parsereal(value, ierr, lnr)[$
+      @end @for $]
+            case default
+               write(*,'(A20,1x,I10)') "Cannot set [$ $_ $] for code:", pdg
+               stat = 1
+               return
+         end select[$
+   @end @for $][$
+@end @if $]
+      elseif (name(1:2).eq."m(" .or. name(1:2).eq."w(") then
+         idx = scan(name, ')', .false.)
+         if (idx.eq.0) then
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         endif
+         read(name(3:idx-1),*, iostat=ierr) pdg
+         if (ierr.ne.0) then
+            write(*,*) "pdg is not an integer:", name(3:idx-1)
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         end if
+         if (name(1:1).eq."m") then
+            ! set mass according to PDG code
+            select case(pdg)[$
+@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case masses $][$
+         @for slha_entries $]
+            case([$index$])
+               [$ $_ $] = parsereal(value, ierr, lnr)[$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+            case default
+               write(*,'(A20,1x,I10)') "Cannot set mass for PDG code:", pdg
+               stat = 1
+               return
+            end select
+         else
+            ! set width according to PDG code
+            select case(pdg)[$
+@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case decay $][$
+         @for slha_entries $]
+            case([$index$])
+               [$ $_ $] = parsereal(value, ierr, lnr)[$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+            case default
+               write(*,'(A20,1x,I10)') "Cannot set width for PDG code:", pdg
+               stat = 1
+               return
+            end select
+         endif
       else
          write(*,'(A20,1x,A20)') 'Unrecognized option:', name
          stat = 1
@@ -303,7 +399,7 @@ contains
 
          call parseline(line,ios,lnr)
          if(ios .ne. 0) then
-            write(*,'(A44,I2,A1)'), &
+            write(*,'(A44,I2,A1)') &
             & 'Error while reading parameter file in parse(', aunit, ')'
          end if
       end do loop1

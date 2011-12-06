@@ -17,6 +17,7 @@ CFunctions C(symmetric), CL(symmetric), CR(symmetric);
 
 CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
 CFunction QGRAFSIGN;
+CTensor SUBSCRIPT;
 NFunction NCOrder;
 
 * formfactor(A, B) = A + B/eps

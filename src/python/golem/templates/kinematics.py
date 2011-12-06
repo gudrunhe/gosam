@@ -7,9 +7,6 @@ import golem.util.tools
 from golem.util.config import Properties
 import golem.util.parser
 
-from functools import reduce
-
-
 class KinematicsTemplate(golem.util.parser.Template):
    """
    Implements a template that has knowledge about the
@@ -95,16 +92,16 @@ class KinematicsTemplate(golem.util.parser.Template):
             identical_particles[str(fin)] = 1
       symmetry_factor = 1
       for multi in identical_particles.values():
-         fact = reduce(lambda x, y: x * y, range(1, multi + 1), 1)
+         fact = golem.util.tools.factorial(multi)
          symmetry_factor *= fact
 
       props.setProperty("num_in", num_in)
       props.setProperty("num_out", num_out)
       props.setProperty("num_legs", num_legs)
       props.setProperty("num_helicities",
-            reduce(lambda x, y: x*y, map(len,self._helicities), 1))
+            golem.util.tools.product(map(len,self._helicities)))
       props.setProperty("in_helicities",
-            reduce(lambda x, y: x*y, map(len,self._helicities[:num_in]), 1))
+            golem.util.tools.product(map(len,self._helicities[:num_in])))
       props.setProperty("symmetry_factor", symmetry_factor)
 
       # predict the number of colors:
@@ -239,7 +236,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       symmetry_factor = 1
       for multi in particles.values():
-         fact = reduce(lambda x, y: x * y, range(1, multi + 1), 1)
+         fact = golem.util.tools.factorial(multi)
          symmetry_factor *= fact
 
       return str(symmetry_factor)
