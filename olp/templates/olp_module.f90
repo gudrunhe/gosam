@@ -153,8 +153,9 @@ contains
       end if[%
       @end @for %]
       stat = 1
-   end subroutine OLP_Option
-
+   end subroutine OLP_Option[%
+      @select olp.parameters default=NONE
+      @case NONE %]
    !---#[ init_event_parameters :
    subroutine     init_event_parameters(sp, parameters)
       use, intrinsic :: iso_c_binding
@@ -168,7 +169,8 @@ contains
       ! sp specifies the subprocess
       !
    end subroutine init_event_parameters
-   !---#] init_event_parameters :
+   !---#] init_event_parameters :[%
+      @end @select %]
 [%
 @for subprocesses prefix=sp. %][%
    @for crossings include-self prefix=cr. %]
@@ -180,6 +182,7 @@ contains
       @end @select %]momenta, mu, parameters, res)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
+      use [% sp.$_ %]_model, only: parseline
       use [% cr.$_ %]_matrix, only: samplitude
       implicit none[%
       @select count cr.channels
@@ -195,9 +198,26 @@ contains
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension(4) :: amp
-      logical :: ok
+      logical :: ok[%
+      @select olp.parameters default=NONE
+      @case NONE %]
 
-      call init_event_parameters([% cr.id %], parameters)
+      call init_event_parameters([% cr.id %], parameters)[%
+      @else %]
+      character(len=255) :: buffer
+      integer :: ierr
+
+      !---#[ receive parameters from argument list:[%
+         @for elements olp.parameters shift=1 %]
+      write(buffer, '(A128,E64.32)') "[% $_ %]=", parameters([% index %])
+      call parseline(buffer, ierr)
+      if(ierr.ne.0) then
+         amp(1) = -1.0_c_double
+         return
+      end if[%
+         @end @for %]
+      !---#] receive parameters from argument list:[%
+      @end @select %]
 
       vecs(:,1) = real(momenta(1::5),ki)
       vecs(:,2) = real(momenta(2::5),ki)

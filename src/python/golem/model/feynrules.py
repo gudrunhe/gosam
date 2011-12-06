@@ -640,8 +640,6 @@ class Model:
 					color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
 					color = color.replaceNegativeIndices(0, "MDLIndex%d",
 							dummy_found)
-					if not scolor.startswith("Id"):
-						print(fold_name)
 					color = transform_color(color, colors, xidx)
 					if lorentz == ex.IntegerExpression(1):
 						expr = color
@@ -931,7 +929,6 @@ def transform_color(expr, colors, xidx):
 				elif order == [8, 0, 3]:
 					order[1] = -3
 
-				print(order, xi, map(str,indices))
 				if order == [8, -3, 3]:
 					return head(indices[0], indices[1], indices[2])
 				elif order == [8, 3, -3]:

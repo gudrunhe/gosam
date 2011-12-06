@@ -7,7 +7,9 @@
 # in the future.
 
 import os.path
+import golem.properties
 from golem.util.olp_objects import OLPError
+from golem.util.tools import warning
 
 __all_olp_options__ = {}
 __olp_lower_case__ = {}
@@ -182,6 +184,30 @@ def AlphaPower(values, conf, ignore_case):
 		return __value_OK__ + " # WARNING: should not be blank."
 
 
+@optional_olp_option
+def UFOModel(values, conf, ignore_case):
+	"""
+	NOT YET PART OF THE STANDARD
+	"""
+	file_name = os.path.abspath(" ".join(values).strip())
+	conf["olp.ufomodel"] = file_name
+	if os.path.exists(file_name) and os.path.isdir(file_name) \
+			and os.path.exists(os.path.join(file_name, "__init__.py")):
+
+		conf[golem.properties.model] = ["FeynRules", file_name]
+		return __value_OK__
+	else:
+		warning("UFOModel which expands to '%s' does not exist." % file_name)
+		return __value_ERR__ + "UFO model does not exist or is not a valid model."
+
+@optional_olp_option
+def Parameters(values, conf, ignore_case):
+	"""
+	NOT YET PART OF THE STANDARD
+	"""
+	conf["olp.parameters"] = values
+	return __value_OK__
+	
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
 	err_flag = False
 

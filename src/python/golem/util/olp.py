@@ -130,7 +130,7 @@ def derive_coupling_names(model_path, conf):
    in model files, otherwise this routine has difficulties detecting them
    as couplings. These name can also be prefixed by the string 'mdl'
    """
-   strong_coupling_names = ["QCD", "GS", "GG"]
+   strong_coupling_names = ["QCD", "GS", "GG", "G"]
    weak_coupling_names   = ["QED", "GW", "E", "EE", "EW"]
 
    #---#[ Load model file as module:
@@ -139,6 +139,7 @@ def derive_coupling_names(model_path, conf):
 
    strong_couplings_found = {}
    weak_couplings_found   = {}
+   candidates = []
 
    for param in mod.types.iterkeys():
       if param.startswith('mdl'):
@@ -149,10 +150,13 @@ def derive_coupling_names(model_path, conf):
          strong_couplings_found[canonical_name] = param
       elif canonical_name in weak_coupling_names:
          weak_couplings_found[canonical_name] = param
+      else:
+         candidates.append(canonical_name)
 
    if len(strong_couplings_found) == 0:
       golem.util.tools.error(
-         "Invalid model file: cannot determine name of strong coupling.")
+         "Invalid model file: cannot determine name of strong coupling.",
+         "Candidates are:" + ",".join(candidates))
    else:
       for name in strong_coupling_names:
          if name in strong_couplings_found:
@@ -161,7 +165,8 @@ def derive_coupling_names(model_path, conf):
 
    if len(weak_couplings_found) == 0:
       golem.util.tools.error(
-         "Invalid model file: cannot determine name of weak coupling.")
+         "Invalid model file: cannot determine name of weak coupling.",
+         "Candidates are:" + ",".join(candidates))
    else:
       for name in weak_coupling_names:
          if name in weak_couplings_found:
@@ -397,6 +402,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if "olp.massiveparticlescheme" in conf:
       golem.util.tools.warning("UV-counterterms for massive particles are not "
             + "implemented yet.")
+
    #---#[ Iterate over subprocesses:
    subdivide = conf.getProperty("olp.subdivide", "no").lower() in ["yes", "true", "1"]
    channels  = {}
