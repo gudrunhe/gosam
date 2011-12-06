@@ -53,12 +53,16 @@
    ! Options to control the interoperation between different
    ! reduction methods
    integer :: reduction_interoperation = [%
-   @if extension samurai %][%
-      @if extension golem95 %]2[%
-      @else %]0[%
+   @select reduction_interoperation default="-1"
+   @case -1 %][%
+      @if extension samurai %][%
+         @if extension golem95 %]2[%
+        @else %]0[%
+         @end @if %][%
+      @else %]1[%
       @end @if %][%
-   @else %]1[%
-   @end @if %]
+   @else %][% reduction_interoperation %][%
+   @end @select %]
    ! 0: use samurai only
    ! 1: golem95 only
    ! 2: try samurai first, use golem95 if samurai fails

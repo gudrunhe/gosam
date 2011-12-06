@@ -41,7 +41,7 @@ cmd_ignore_unknown = False
 cmd_force = False
 cmd_from_scratch = False
 cmd_name = ""
-cmd_use_crossings = False
+cmd_use_crossings = True
 
 cmd_mc = "any"
 

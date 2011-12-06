@@ -273,6 +273,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       ignore_unknown = False,
       from_scratch = False,
       mc_name = "any",
+      use_crossings = True,
       **opts
       ):
 
@@ -281,11 +282,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       "double_quotes",
       "backslash_escape"
    ]
-
-   if "use_crossings" in opts:
-      use_crossings = opts["use_crossings"]
-   else:
-      use_crossings = True
 
    extensions = {}
    for ex in syntax_extensions:
