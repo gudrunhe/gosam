@@ -638,8 +638,7 @@ crossings = Property("crossings",
 
    crossings=dxd_uux: -1 1 > 2 -2, ud_ud: 2 1 > 2 1
    """,
-   list,
-   experimental=True)
+   list)
 
 symmetries = Property("symmetries",
    """\
@@ -729,7 +728,7 @@ config_renorm_mqwf = Property("renorm_mqwf",
 
 config_renorm_gamma5 = Property("renorm_gamma5",
    """\
-   Set the name of the same variable in config.f90
+   Set the same variable in config.f90
 
    Activates finite renormalisation for axial couplings in the
    't Hooft-Veltman scheme
@@ -737,6 +736,14 @@ config_renorm_gamma5 = Property("renorm_gamma5",
    QCD only, works only with built-in model files.
    """,
    bool, True)
+
+config_reduction_interoperation = Property("reduction_interoperation",
+   """
+   Set the same variable in config.f90
+
+   See common/config.f90 for details.
+   """,
+   int)
 
 
 properties = [
@@ -783,6 +790,7 @@ properties = [
    config_renorm_mqse,
    config_renorm_logs,
    config_renorm_gamma5,
+   config_reduction_interoperation,
 
    reference_vectors,
    abbrev_limit,

@@ -14,7 +14,8 @@ class TemplateFactory:
    def __init__(self):
       pass
 
-   def process(self, in_file, out_file, class_name, props, conf, opts):
+   def process(self, in_file, out_file, class_name, props, conf, opts,
+         filter=None):
       debug("Transforming file %r by template class %sTemplate" % 
             (in_file, class_name))
 
@@ -126,6 +127,8 @@ class TemplateFactory:
                return result
             else:
                f_out = open(out_file, 'w')
+               if filter is not None:
+                  f_out = filter.reset(f_out)
                for chunk in template(*props):
                   f_out.write(chunk)
                f_out.close()

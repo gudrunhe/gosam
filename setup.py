@@ -14,12 +14,12 @@ INFO = {
 		'name': 'gosam',
 		'version': VERSION,
 		'author': 'The GoSam (Golem and Samurai) Collaboration',
-		'author_email': 'golem@hepforge.org',
+		'author_email': 'gosam@hepforge.org',
 		'maintainer': 'Thomas Reiter',
 		'maintainer_email': 'reiterth@mpp.mpg.de',
-		'url': 'http://projects.hepforge.org/golem/',
+		'url': 'http://projects.hepforge.org/gosam/',
 		'download_url': 
-		'http://projects.hepforge.org/golem/downloads/gosam-%s.tar.gz' %
+		'http://projects.hepforge.org/gosam/downloads/gosam-%s.tar.gz' %
 			VERSION,
 		'description': 'GoSam, An Automated One-Loop Matrix Element Generator',
 		'long_description': """\

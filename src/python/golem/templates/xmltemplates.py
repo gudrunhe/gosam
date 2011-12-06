@@ -7,6 +7,7 @@ import tempfile
 import golem.util.main_misc
 import golem.util.config
 
+import golem.templates.filter
 import golem.templates.factory
 
 from golem.util.tools import debug, message, warning, error, \
@@ -94,7 +95,7 @@ class _TemplateState:
          message("Creating directory %r ..." % dest)
          os.mkdir(dest)
 
-   def transform_template_file(self, in_file, out_file, class_name):
+   def transform_template_file(self, in_file, out_file, class_name, filter):
       if out_file in self.produced_files:
          warning("File %r has been overwritten while processing %r" % \
                (out_file, in_file))
@@ -102,7 +103,7 @@ class _TemplateState:
          self.produced_files.append(out_file)
 
       self.factory.process(in_file, out_file, class_name,
-            self.props, self.opts, self.opts)
+            self.props, self.opts, self.opts, filter=filter)
 
    def start_template(self, attrs):
       for name in ["description", "version",
@@ -215,6 +216,7 @@ class _TemplateState:
          in_file = os.path.join(tpl_dir, env["template file name"])
          out_file = os.path.join(out_dir, env["output file name"])
          class_name = env["class name"]
+         filter = env.get("filter", None)
       
          extra_props = golem.util.config.Properties()
          for name in env:
@@ -223,7 +225,7 @@ class _TemplateState:
          self.props.append(extra_props)
 
          message("Generating file %s" % env["output file name"])
-         self.transform_template_file(in_file, out_file, class_name)
+         self.transform_template_file(in_file, out_file, class_name, filter)
          self.props.pop()
 
    def expand_directory(self, env, attrs):
@@ -440,6 +442,30 @@ class _TemplateState:
    def end_only(self):
       pass
 
+   def start_filter(self, attrs):
+      envs = self.stack.pop()
+      for env in envs:
+         if "filter" in env:
+            old_filter = env["filter"]
+         else:
+            old_filter = None
+
+         if "name" in attrs:
+            opts = attrs.copy()
+            del opts["name"]
+
+            new_filter = golem.templates.filter.FilterFactory(
+                  attrs["name"], old_filter, **opts)
+
+            env["filter"] = new_filter
+         else:
+            env["filter"] = old_filter
+
+      self.stack.append(envs)
+
+   def end_filter(self):
+      pass
+
    def start_foreach(self, attrs):
       if "iterator" in attrs:
          if "list" in attrs:
@@ -521,6 +547,8 @@ def create_parser(template_dir, output_dir, *props, **opts):
          xmld.start_except(attrs)
       elif name == "only":
          xmld.start_only(attrs)
+      elif name == "filter":
+         xmld.start_filter(attrs)
       elif name == "foreach":
          xmld.start_foreach(attrs)
       else:
@@ -538,6 +566,8 @@ def create_parser(template_dir, output_dir, *props, **opts):
          xmld.end_except()
       elif name == "only":
          xmld.end_only()
+      elif name == "filter":
+         xmld.end_filter()
       elif name == "foreach":
          xmld.end_foreach()
       else:
