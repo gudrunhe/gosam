@@ -640,7 +640,9 @@ class Model:
 					color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
 					color = color.replaceNegativeIndices(0, "MDLIndex%d",
 							dummy_found)
-					color = transform_color(color, colors)
+					if not scolor.startswith("Id"):
+						print(fold_name)
+					color = transform_color(color, colors, xidx)
 					if lorentz == ex.IntegerExpression(1):
 						expr = color
 					else:
@@ -886,10 +888,10 @@ col_f = ex.SymbolExpression("f")
 col_Identity = ex.SymbolExpression("Identity")
 col_d_ = ex.SymbolExpression("d_")
 
-def transform_color(expr, colors):
+def transform_color(expr, colors, xidx):
 	if isinstance(expr, ex.SumExpression):
 		n = len(expr)
-		return ex.SumExpression([transform_color(expr[i], colors) 
+		return ex.SumExpression([transform_color(expr[i], colors, xidx)
 			for i in range(n)])
 	elif isinstance(expr, ex.ProductExpression):
 		n = len(expr)
@@ -897,30 +899,45 @@ def transform_color(expr, colors):
 
 		for i in range(n):
 			sign, factor = expr[i]
-			new_factors.append( (sign, transform_color(factor, colors)) )
+			new_factors.append( (sign, transform_color(factor, colors, xidx)) )
 		return ex.ProductExpression(new_factors)
 
 	elif isinstance(expr, ex.UnaryMinusExpression):
 		return ex.UnaryMinusExpression(
-				transform_color(expr.getTerm(), colors)
+				transform_color(expr.getTerm(), colors, xidx)
 			)
 	elif isinstance(expr, ex.FunctionExpression):
 		head = expr.getHead()
 		args = expr.getArguments()
 		if head == col_T or head == col_f:
 			indices = []
+			order = []
+			xi = []
 			for j in range(3):
 				if isinstance(args[j], ex.IntegerExpression):
 					i = int(args[j])
-					c = abs(colors[i-1])
-					indices.append(ex.SymbolExpression("idx%dC%d" % (i, c)))
+					x = xidx[i-1]
+					c = abs(colors[x])
+					order.append(colors[x])
+					xi.append(x)
+					indices.append(ex.SymbolExpression("idx%dC%d" % (x+1, c)))
 				else:
 					indices.append(args[j])
+					order.append(0)
+					xi.append(-1)
 			if head == col_T:
-				if colors[1] > 0:
+				if order == [8, -3, 0]:
+					order[2] = 3
+				elif order == [8, 0, 3]:
+					order[1] = -3
+
+				print(order, xi, map(str,indices))
+				if order == [8, -3, 3]:
+					return head(indices[0], indices[1], indices[2])
+				elif order == [8, 3, -3]:
 					return head(indices[0], indices[2], indices[1])
 				else:
-					return head(indices[0], indices[1], indices[2])
+					error("Cannot recognize color assignment at vertex: %s" % order)
 			else:
 				return head(indices[0], indices[1], indices[2])
 		if head == col_Identity:

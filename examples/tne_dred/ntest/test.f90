@@ -122,7 +122,7 @@ subroutine     setup_parameters()
    renorm_mqse = .true.
    renorm_logs = .true.
 
-   reduction_interoperation=0
+   ! reduction_interoperation=0
 
    ! settings for samurai:
    ! verbosity: we keep it zero here unless you want some extra files.

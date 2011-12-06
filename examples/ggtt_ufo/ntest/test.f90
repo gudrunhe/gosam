@@ -118,7 +118,7 @@ subroutine     setup_parameters()
    renorm_logs = .true.
    convert_to_cdr = .false.
 
-   reduction_interoperation = 0
+   ! reduction_interoperation = 0
 
    mT    = 171.2_ki
    Nf    = 5.0_ki

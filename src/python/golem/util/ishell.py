@@ -2,7 +2,11 @@
 
 import os
 import re
-import readline
+try:
+   import readline
+except ImportError:
+   readline = None
+
 import atexit
 import glob
 
@@ -13,7 +17,8 @@ class InteractiveShell:
          completer_delims=None,
          follow_set={}):
 
-      readline.parse_and_bind("tab: complete")
+      if readline is not None:
+         readline.parse_and_bind("tab: complete")
 
       if history_file is not None:
          self.init_history(os.path.expanduser(
@@ -26,8 +31,9 @@ class InteractiveShell:
 
       if completer_delims is not None:
          self._delims = completer_delims
-         readline.set_completer_delims(completer_delims)
-         readline.set_completer(self.completer_function)
+         if readline is not None:
+            readline.set_completer_delims(completer_delims)
+            readline.set_completer(self.completer_function)
          pat = ""
          for delim in self._delims:
             if delim in ["[", "\\", "]", "^", "-"]:
@@ -81,14 +87,15 @@ class InteractiveShell:
 
    def init_history(self, file_name):
       self._histfile = file_name
-      try:
-         readline.read_history_file(self._histfile)
-      except IOError:
-         pass
+      if readline is not None:
+         try:
+            readline.read_history_file(self._histfile)
+         except IOError:
+            pass
       atexit.register(self.save_history)
 
    def save_history(self):
-      if self._histfile is not None:
+      if self._histfile is not None and readline is not None:
          readline.write_history_file(self._histfile)
 
    def run(self):
@@ -121,6 +128,9 @@ class InteractiveShell:
       return True
 
    def get_history(self, stub=""):
+      if readline is None:
+         return []
+
       l = readline.get_current_history_length()
       result = []
       for i in range(l):

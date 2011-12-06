@@ -10,10 +10,10 @@ LDFLAGS=../ngolem/matrix/matrix.a \
 compile: test_program
 
 test.o: test.f90
-	$(FC) $(CFLAGS) -o$@ -c $<
+	$(FC) $(CFLAGS) -o $@ -c $<
 
 test_program: test.o
-	$(FC) -o$@ $+ $(LDFLAGS)
+	$(FC) -o $@ $+ $(LDFLAGS)
 
 test: test.log
 

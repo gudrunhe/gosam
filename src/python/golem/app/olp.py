@@ -146,6 +146,7 @@ def main(argv=sys.argv):
 
 	golem.util.tools.message("GoSam %s (OLP)" % ".".join(map(str,
 		golem.util.main_misc.GOLEM_VERSION)))
+	golem.util.tools.check_script_name(argv[0])
 	golem.util.tools.debug("      path: %r" % golem.util.path.golem_path())
 	
 	defaults = []

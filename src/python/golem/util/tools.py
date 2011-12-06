@@ -67,7 +67,7 @@ def warning(*messages):
 
 def error(*messages):
    do_message(ERROR, "==>", "\n".join(messages))
-   sys.exit("GOLEM terminated due to an error")
+   sys.exit("GoSam terminated due to an error")
 
 def do_message(level, prefix, message):
    for logger in __logger__:
@@ -357,7 +357,7 @@ def expand_parameter_list(prop, conf):
       else:
          warning("Property '%s' contains an unknown parameter name (%s)."
                % (prop, value),
-               "This will most likely lead to an error when running 'make'.")
+               "The errorneous symbol has been removed from the list.")
    conf.setProperty(prop, list(new_values))
 
 def generate_parameter_list(conf):
@@ -366,7 +366,7 @@ def generate_parameter_list(conf):
    model = getModel(conf)
    result = list(model.types.keys())
 
-   if generate_gauge_var:
+   if generate_gauge_var and conf["__GAUGE_CHECK__"]:
       in_p, out_p = generate_particle_lists(conf)
 
       idx = 0
@@ -577,6 +577,26 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
 
    return args
 
+def check_script_name(name):
+   pname, sname = os.path.split(name)
+   sbase, sext  = os.path.splitext(sname)
+   flag = False
+   if sbase.lower() == "golem-main":
+      flag = True
+      chunk1 = ""
+      chunk2 = "It"
+   elif sbase.lower() == "golem-init":
+      flag = True
+      chunk1 = "with the option --olp "
+      chunk2 = "Apart from that, it"
+     
+   if flag:
+      warning(
+           "The use of the script %s is obsolete." % sname,
+           "This script might be removed from any future version of GoSam.",
+           "Please, use the script gosam.py %sinstead." % chunk1,
+           "%s uses the same command line syntax as the old script." % chunk2)
+
 def process_path(conf):
    setup_file = conf.getProperty("setup-file")
    setup_dir = os.path.dirname(setup_file)
@@ -680,4 +700,11 @@ def getZeroes(conf):
             zeroes.append(name)
    return zeroes
 
+def product(lst):
+   r = 1
+   for i in lst:
+      r *= i
+   return r
 
+def factorial(n):
+   return product(range(2, n+1))

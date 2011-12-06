@@ -8,6 +8,7 @@
 	vector  = "real(ki), dimension(4)";
 	cvector = "complex(ki), dimension(4)";
 	aux     = "integer";
+	aux0    = "complex(ki)";
 
 @coerce
 	@int -> integer;
@@ -21,6 +22,7 @@
 @operator
 	aux * complex -> complex =
 		"cond(epspow.eq.%s,%s,Q,mu2)";
+	aux * aux0 -> complex = "0.0_ki";
 	real * real -> real;
 	complex * complex -> complex;
 	complex * color -> color;
@@ -48,13 +50,20 @@
 	Spab3, Spba3 : vector, cvector, vector -> complex;
 	spva... : cvector;
 	deltaOS : real;
+	d : integer, integer -> real;
 
 	# Return type of the diagrams:
 	d... : complex;
 	p... : complex;
 	cf... : color;
 	vf... : complex;
-	EXSYM... : complex;
+	PREFACTOR : complex -> complex = "(%2$s)";
+	NULL : aux0 = "(0.0_ki,0.0_ki)";
+	EXSYM... : complex;[%
+@if internal GENERATE_DERIVATIVES %]
+	iv... : integer;
+	SUBSCRIPT : cvector, integer -> complex = "%2$s(%3$s)";[%
+@end @if %]
 
 
 @polynomial TR, Qt2, i_, deltaOS;

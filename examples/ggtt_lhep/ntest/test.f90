@@ -110,8 +110,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ggtt_config, only: renormalisation, renorm_logs, &
-             & convert_to_cdr, reduction_interoperation
+   use ggtt_config
    use ggtt_model, only: Nf, Nfgen, mT => mdlMtop, gauge1z
    implicit none
 
@@ -119,7 +118,7 @@ subroutine     setup_parameters()
    renorm_logs = .true.
    convert_to_cdr = .false.
 
-   reduction_interoperation = 0
+   ! reduction_interoperation = 0
    !samurai_group_numerators = .false.
 
    mT    = 171.2_ki

@@ -85,6 +85,9 @@ DIAGRAMS_VIRT=[%
 @case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
+	   @if internal GENERATE_DERIVATIVES %] \
+	d[%$_%]h[%helicity%]l1d.f90[%
+      @end @if %][%
    @end @for %][%
 @end @select %]
 
@@ -122,7 +125,7 @@ abbrevh[%helicity%].f90: $(TXT_VIRT)
 		-t ../codegen/abbrev.out \
 		-c ../codegen/abbrev.in \
 		-D helicity=[%helicity%] \
-		-o $@ $(subst .txt,.abb,$(TXT_VIRT))[%
+		-o $@ $(subst .txt,.abb,$(filter %l1.txt,$(TXT_VIRT)))[%
 @end @select %][%
 @for elements topolopy.keep.tree %]
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
@@ -184,8 +187,9 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 @if generate_nlo_virt %][%
    @for groups var=grp %][%
 	   @for diagrams group=grp %]
-d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity
-   %]l1.abb: ../diagrams-1.hh
+d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
+@if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity %]l1d.txt[%
+@end @if %]: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT)[%
 	      @if is_mqse %] \
@@ -196,7 +200,13 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
-		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1[%
+			@if internal GENERATE_DERIVATIVES %] \
+		-D GENERATEDERIVATIVES=1[%
+			@end @if %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %] \
 		../codegen/golem.frm
 d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt
 	@echo Haggies is processing loop diagram [%$_%] @ Helicity [%helicity%]
@@ -209,6 +219,20 @@ d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt
 			d[%$_%]h[%helicity%]l1.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ $<[%
+		@if internal GENERATE_DERIVATIVES %]
+d[%$_%]h[%helicity%]l1d.f90: d[%$_%]h[%helicity%]l1d.txt
+	@echo Haggies is processing derivatives [%$_%] @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
+		-D RANK=[%rank%] \
+		-c ../codegen/haggies-l1.in \
+		-t ../codegen/haggies-l1d.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]h[%helicity%]l1.dat \
+			| sed 's/extrasymbols=//')) \
+		-o $@ -F $(wildcard $<)[%
+		@end @if %][%
 	   @select abbrev.level @case diagram %]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.abb
 	@echo Haggies is processing abbreviations for loop diagram [%$_

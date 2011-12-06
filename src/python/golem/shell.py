@@ -66,6 +66,13 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                "implicit", "explicit", "only", "off"],
             str(golem.properties.symmetries): [
                "flavour", "family", "lepton", "generation", "parity"],
+            str(golem.properties.config_renorm_gamma5): ["true", "false"],
+            str(golem.properties.config_renorm_mqwf): ["true", "false"],
+            str(golem.properties.config_renorm_decoupling): ["true", "false"],
+            str(golem.properties.config_renorm_mqse): ["true", "false"],
+            str(golem.properties.config_renorm_logs): ["true", "false"],
+            str(golem.properties.config_renorm_beta): ["true", "false"],
+            str(golem.properties.pyxodraw): ["true", "false"],
             "!": [" file"]
          }
       self.golem_delims = " :=,"
@@ -79,7 +86,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
 
       golem.util.ishell.InteractiveShell.__init__(self,
          prompt = prompt,
-         history_file = ".golem_history",
+         history_file = ".gosam_history",
          completer_delims = self.golem_delims,
          follow_set = self.golem_follow_set)
 

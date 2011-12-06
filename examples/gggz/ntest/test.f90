@@ -121,14 +121,12 @@ use gggz_kinematics, only: adjust_kinematics, dotproduct
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use gggz_config, only: renormalisation, &
-             & reduction_interoperation, &
-             & convert_to_cdr
+   use gggz_config
    use gggz_model, only: Nf, Nfgen, mZ, mW, mU
    implicit none
 
    renormalisation = 0
-   reduction_interoperation = 0
+   ! reduction_interoperation = 0
 
    mZ = 91.1876_ki
    mW = mZ * sqrt(1.0_ki - 0.4808222_ki**2)

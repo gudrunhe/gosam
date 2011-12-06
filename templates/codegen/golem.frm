@@ -1,4 +1,4 @@
-* vim: syntax=form:ts=3:sw=3
+* vim: syntax=form:ts=3:sw=3:expandtab
 *
 * This version of golem.frm generates expressions for the numerator
 * only.
@@ -12,18 +12,18 @@ off statistics;
 * 'reference-vectors' in the configuration file.
 * Changing them here might lead to inconsistent results.[%
 @for particles %][%
-	@if is_massive
-		%]
+   @if is_massive
+      %]
 #define REFk[%index%] "[%
       @if eval reference > 0 %]k[%reference %][%
       @else %]l[% eval - reference %][%
       @end @if %]"[%
-	@else %][%
+   @else %][%
       @select 2spin @case 2 3 4 %]
 #define REFk[%index%] "[%
          @if eval reference > 0 %]k[%reference %][%
          @else %]l[% eval - reference %][%
-			@end @if %]"[%
+         @end @if %]"[%
       @end @select %][%
    @end @if %][% 
 @end @for %][%
@@ -46,8 +46,8 @@ off statistics;
 @end @if %]
 
 #If `LOOPS' == 1
-	#Include- abbreviate.hh
-	#Create <`OUTFILE'.abb>
+   #Include- abbreviate.hh
+   #Create <`OUTFILE'.abb>
 #EndIf
 
 #include- spinney.hh
@@ -57,7 +57,7 @@ off statistics;
 * #include- fermion_flow.hh
 
 #ifndef `USEVERTEXPROC'
-	#include- vertices.hh
+   #include- vertices.hh
 #endif
 
 CFunctions Spab3, Spba3;
@@ -103,11 +103,11 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 * in the (Form-)model file and, in the same file,
 * define the procedure ReplaceVertices
 #ifndef `USEVERTEXPROC'
-	#Call ExpandVertices
+   #Call ExpandVertices
 #else
-	Repeat;
-		#call ReplaceVertices
-	EndRepeat;
+   Repeat;
+      #call ReplaceVertices
+   EndRepeat;
 #endif
 
 #call VertexConstants
@@ -118,9 +118,9 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
    Id deltaaxial = 0;
 #else
    #ifdef `FR5'
-	   Id deltaaxial^2 = 0;
+      Id deltaaxial^2 = 0;
    #else
-	   Id deltaaxial = 0;
+      Id deltaaxial = 0;
    #endif
 #endif
 
@@ -148,35 +148,35 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
 
   Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, sDUMMY2?,
         iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * sDUMMY1 / 4 *
-  	  (
+       (
       + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
         inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	   + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	  ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
+      + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
+     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
   Id fDUMMY1(ZERO, p1, vDUMMY2?, p1, sDUMMY1?, sDUMMY2?,
         iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = - deltaOS * sDUMMY1 / 4 *
-  	  (
+       (
       + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
         inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	   - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-	  ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
+      - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
+     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
 
-	#IfDef `DRED'
-		Id deltaHV = 0;
-	#Else
-		Id deltaHV = -1/2;
-	#EndIf
+   #IfDef `DRED'
+      Id deltaHV = 0;
+   #Else
+      Id deltaHV = -1/2;
+   #EndIf
    .sort:MQSE 1.1;
 #EndIf
 
 #include- propagators.hh
 
 #if `LOOPS' == 1
- 	SplitArg (p1), inv, 1;
-	Id inv(k1?, p1, ?tail) = 1;
-	Id inv(k1?, -p1, ?tail) = 1;
-	Id inv(-p1, ?tail) = 1;
-	Id inv(p1, ?tail) = 1;
+    SplitArg (p1), inv, 1;
+   Id inv(k1?, p1, ?tail) = 1;
+   Id inv(k1?, -p1, ?tail) = 1;
+   Id inv(-p1, ?tail) = 1;
+   Id inv(p1, ?tail) = 1;
 #endif
 Id inv(k1?, m?, sDUMMY1?) = inv(k1.k1 - m^2 + i_ * m * sDUMMY1);
 Id inv(k1?, m?) = inv(k1.k1 - m^2);
@@ -185,7 +185,7 @@ Id inv(0, m?, sDUMMY1?) = + inv(-m^2 + i_ * m * sDUMMY1);
 
 Argument inv;
    Id ZERO = 0;
-	#call kinematics
+   #call kinematics
 EndArgument;
 Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
 
@@ -195,8 +195,8 @@ Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
 
 Repeat Id SplitLorentzIndex(iDUMMY1?, iDUMMY2?, ?tail1) *
           SplitLorentzIndex(iDUMMY3?, iDUMMY4?, ?tail2) =
-	SplitLorentzIndex(iDUMMY1, ?tail1) *
-	SplitLorentzIndex(iDUMMY3, ?tail2) * d_(iDUMMY2, iDUMMY4);
+   SplitLorentzIndex(iDUMMY1, ?tail1) *
+   SplitLorentzIndex(iDUMMY3, ?tail2) * d_(iDUMMY2, iDUMMY4);
 Id SplitLorentzIndex(iDUMMY1?) * SplitLorentzIndex(iDUMMY1?) = 1;
 
 *---#] Process Propagators:
@@ -205,29 +205,29 @@ Id SplitLorentzIndex(iDUMMY1?) * SplitLorentzIndex(iDUMMY1?) = 1;
 
 *---#[ Process Legs:
 *#if `LOOPS' == 1
-*	#call loopflow(`DIAG')
+*   #call loopflow(`DIAG')
 *#else
-*	#call treeflow(`DIAG')
+*   #call treeflow(`DIAG')
 *#endif
 
 #call rewritelegs
 
 Id fDUMMY1?{inplorentz,outlorentz}(sDUMMY1?!{-1,1}, ?tail) =
-	SCREEN(fDUMMY1(sDUMMY1, ?tail));
+   SCREEN(fDUMMY1(sDUMMY1, ?tail));
 #include- legs.hh
 
 #IfNDef `USEVERTEXPROC'
    Repeat;
-  		#Call ExpandLorentzStructures
+        #Call ExpandLorentzStructures
       Id ZERO = 0;
-		Id d(ZERO, iDUMMY1?) = 0;
-		Id d(vDUMMY1?{`EXTERNAL'}, iDUMMY1?) = vDUMMY1(iDUMMY1);
-		Repeat Id vDUMMY1?{`EXTERNAL'}(iDUMMY1?) * d(iDUMMY1?, iDUMMY2?) =
-			vDUMMY1(iDUMMY2);
-		#Call kinematics
+      Id d(ZERO, iDUMMY1?) = 0;
+      Id d(vDUMMY1?{`EXTERNAL'}, iDUMMY1?) = vDUMMY1(iDUMMY1);
+      Repeat Id vDUMMY1?{`EXTERNAL'}(iDUMMY1?) * d(iDUMMY1?, iDUMMY2?) =
+         vDUMMY1(iDUMMY2);
+      #Call kinematics
    EndRepeat;
 #Else
-	#Call kinematics
+   #Call kinematics
    Id ZERO = 0;
 #EndIf
 
@@ -257,8 +257,8 @@ Id SCREEN(sDUMMY1?) = sDUMMY1;
 * The rules of legs.hh do not restore all inp() and out()
 * functions after we introduce the gauge check.
 #if `GAUGEVAR'
-	Id fDUMMY1?{inp,out}(sDUMMY1?, iDUMMY1?, vDUMMY1?, ?tail) =
-		fDUMMY1(sDUMMY1, iDUMMY1, vDUMMY1);
+   Id fDUMMY1?{inp,out}(sDUMMY1?, iDUMMY1?, vDUMMY1?, ?tail) =
+      fDUMMY1(sDUMMY1, iDUMMY1, vDUMMY1);
 #endif
 
 Id inp(?all) = 1;
@@ -282,14 +282,17 @@ Id sqrt2^-2 = 1/2;
    Multiply PREFACTOR(i_/2);
 #endif
 
+Repeat Id PREFACTOR(sDUMMY1?) * PREFACTOR(sDUMMY2?) =
+   PREFACTOR(sDUMMY1 * sDUMMY2);
+
 Id PREFACTOR(sDUMMY1?) = sDUMMY1;
 
 Argument SpDenominator;
-	#Call spsymbols
+   #Call spsymbols
 EndArgument;
 
 Argument inv;
-	#Call kinematics
+   #Call kinematics
 EndArgument;
 
 #IfDef `FR5'
@@ -303,7 +306,7 @@ EndArgument;
 
 #Call lightconedecomp
 Argument SpDenominator;
-	#Call spsymbols
+   #Call spsymbols
 EndArgument;
 
 * tHooftAlgebra will split all Dirac matrices Sm
@@ -312,21 +315,21 @@ EndArgument;
 * later on. To avoid this as far as possible we
 * replace here all matrices contracted to external momenta.
 #If `LOOPS' == 1
-	#IfDef `DRED'
-		Id d(iDUMMY1?, iDUMMY2?) = d4(iDUMMY1, iDUMMY2);
-		Id Sm(iDUMMY1?) = Sm4(iDUMMY1);
-	#Else
-		Id Sm(vDUMMY1?{`EXTERNAL'}) = Sm4(vDUMMY1);
-		Id d(vDUMMY1?{`EXTERNAL'}, iDUMMY1?) = d4(vDUMMY1, iDUMMY1);
+   #IfDef `DRED'
+      Id d(iDUMMY1?, iDUMMY2?) = d4(iDUMMY1, iDUMMY2);
+      Id Sm(iDUMMY1?) = Sm4(iDUMMY1);
+   #Else
+      Id Sm(vDUMMY1?{`EXTERNAL'}) = Sm4(vDUMMY1);
+      Id d(vDUMMY1?{`EXTERNAL'}, iDUMMY1?) = d4(vDUMMY1, iDUMMY1);
 * If there are any p1's in the first place we better protect them
 * in order not to lose dimensionality information:
-   	Id p1.p1 = d(p1, p1);
-	   Id p1.vDUMMY1?{`EXTERNAL'} = d4(p1, vDUMMY1);
-   	Id p1(iDUMMY1?) = d(p1, iDUMMY1);
-	#EndIf
+      Id p1.p1 = d(p1, p1);
+      Id p1.vDUMMY1?{`EXTERNAL'} = d4(p1, vDUMMY1);
+      Id p1(iDUMMY1?) = d(p1, iDUMMY1);
+   #EndIf
 #Else
-	Id Sm(iDUMMY1?) = Sm4(iDUMMY1);
-	Id d(iDUMMY1?, iDUMMY2?) = d4(iDUMMY1, iDUMMY2);
+   Id Sm(iDUMMY1?) = Sm4(iDUMMY1);
+   Id d(iDUMMY1?, iDUMMY2?) = d4(iDUMMY1, iDUMMY2);
 #EndIf
 
 .sort:part 3.5;
@@ -334,38 +337,38 @@ EndArgument;
 #Call tHooftAlgebra
 
 #If `LOOPS' == 1
-	
-	#IfDef `DRED'
-		Repeat;
-			Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
-			Id Sm4(p1) * Sm4(iDUMMY1?) =
-				- Sm4(iDUMMY1) * Sm4(p1) + 2 * d4(p1, iDUMMY1);
-		EndRepeat;
-		Id d4(p1, p1) = p1.p1;
-		Id p1.p1 = p1.p1 - Qt2;
-	#Else
-	   Id dEps(iDUMMY1?, iDUMMY1?) = -2*eps;
-   	Id dEps(p1, p1) = -Qt2;
-		Id dEps(vDUMMY1?{`EXTERNAL'}, iDUMMY2?) = 0;
-	#EndIf
+   
+   #IfDef `DRED'
+      Repeat;
+         Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
+         Id Sm4(p1) * Sm4(iDUMMY1?) =
+            - Sm4(iDUMMY1) * Sm4(p1) + 2 * d4(p1, iDUMMY1);
+      EndRepeat;
+      Id d4(p1, p1) = p1.p1;
+      Id p1.p1 = p1.p1 - Qt2;
+   #Else
+      Id dEps(iDUMMY1?, iDUMMY1?) = -2*eps;
+      Id dEps(p1, p1) = -Qt2;
+      Id dEps(vDUMMY1?{`EXTERNAL'}, iDUMMY2?) = 0;
+   #EndIf
 
 * Qt2 terms only contribute to finite part
 * Therefore Qt2 * eps cannot contribute to the result
-	Id Qt2 * eps = 0;
+   Id Qt2 * eps = 0;
    Id eps^sDUMMY1?{>2} = 0;
 
    #If `LOOPSIZE' > 4
-	   Id Qt2 = 0;
-	#ElseIf `LOOPSIZE' == 4
-		ToTensor, Functions, p1, ptens;
-		If(count(ptens,1)==0) Multiply ptens;
+      Id Qt2 = 0;
+   #ElseIf `LOOPSIZE' == 4
+      ToTensor, Functions, p1, ptens;
+      If(count(ptens,1)==0) Multiply ptens;
 * For boxes we need to consider integrals of type mu2*ptens(mu,nu) and
 * mu2^2.
-		Id Only ptens * Qt2 = 0;
-		Id ptens(iDUMMY1?) * Qt2 = 0;
+      Id Only ptens * Qt2 = 0;
+      Id ptens(iDUMMY1?) * Qt2 = 0;
 
-		ToVector, ptens, p1;
-	#EndIf
+      ToVector, ptens, p1;
+   #EndIf
 #Else
    Id dEps(iDUMMY1?, iDUMMY1?) = 0;
 #EndIf
@@ -404,9 +407,9 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
    Brackets eps, Qt2;
 .sort 5.3;
    Local d`DIAG'R2 = 
-		+ diagram`DIAG'[eps] * fDUMMY1(eps)
-		+ diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
-		+ diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
+      + diagram`DIAG'[eps] * fDUMMY1(eps)
+      + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
+      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
    Id eps = 0;
    Id Qt2 = 0;
    Id fDUMMY1(eps?) = eps;
@@ -431,9 +434,9 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
    Brackets eps, Qt2;
 .sort 5.3;
    Local d`DIAG'R2 = 
-		+ diagram`DIAG'[eps] * fDUMMY1(eps)
-		+ diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
-		+ diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
+      + diagram`DIAG'[eps] * fDUMMY1(eps)
+      + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
+      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
    Id eps = 0;
    Id Qt2 = 0;
    Id fDUMMY1(eps?) = eps;
@@ -455,24 +458,24 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 @if extension qshift %]
    #Call shiftmomenta(`DIAG')
    Argument Spab, Spaa, Spbb, Spba;
-   	#Call shiftmomenta(`DIAG')
+      #Call shiftmomenta(`DIAG')
    EndArgument;[%
 @else %]
    Id p1 = Q;
    Argument Spab, Spaa, Spbb, Spba;
-      Id p1 = Q;	
+      Id p1 = Q;   
    EndArgument;[%
 @end @if %]
-	Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
-		fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);
-	#call SpOpen(`LIGHTLIKE')
+   Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
+      fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);
+   #call SpOpen(`LIGHTLIKE')
 #endif
 
 Id d4(vDUMMY1?, iDUMMY1?) = vDUMMY1(iDUMMY1);
 
 #If `LOOPS' == 1
-	Id Spab(vDUMMY1?, Q?, vDUMMY2?) = Spab3(vDUMMY1, Q, vDUMMY2);
-	Id Spba(vDUMMY1?, Q?, vDUMMY2?) = Spba3(vDUMMY1, Q, vDUMMY2);
+   Id Spab(vDUMMY1?, Q?, vDUMMY2?) = Spab3(vDUMMY1, Q, vDUMMY2);
+   Id Spba(vDUMMY1?, Q?, vDUMMY2?) = Spba3(vDUMMY1, Q, vDUMMY2);
 * slight optimisation:
    Id Spba3(vDUMMY1?, iDUMMY1?, vDUMMY2?) = Spab3(vDUMMY2, iDUMMY1, vDUMMY1);
    Id Spab3(vDUMMY1?, iDUMMY1?, vDUMMY1?) = 2*vDUMMY1(iDUMMY1);
@@ -482,12 +485,12 @@ Id d4(vDUMMY1?, iDUMMY1?) = vDUMMY1(iDUMMY1);
 #EndIf
 
 Id Spa2(vDUMMY1?{`EXTERNAL'}, vDUMMY2?{`EXTERNAL'}) *
-	Spb2(vDUMMY2?, vDUMMY1?) = 2 * fDUMMY1(vDUMMY1.vDUMMY2);
+   Spb2(vDUMMY2?, vDUMMY1?) = 2 * fDUMMY1(vDUMMY1.vDUMMY2);
 
 Id vDUMMY1?{`EXTERNAL'}.vDUMMY2?{`EXTERNAL'} = fDUMMY1(vDUMMY1.vDUMMY2);
 
 Id SpDenominator(Spa2(vDUMMY1?{k1,...,k`LEGS'}, vDUMMY2?{k1,...,k`LEGS'})) *
-	SpDenominator(Spb2(vDUMMY1?, vDUMMY2?)) = -1/2 * inv(vDUMMY1.vDUMMY2);
+   SpDenominator(Spb2(vDUMMY1?, vDUMMY2?)) = -1/2 * inv(vDUMMY1.vDUMMY2);
 
 Argument inv, fDUMMY1;
 #call kinematics
@@ -495,22 +498,22 @@ EndArgument;
 
 Id fDUMMY1(sDUMMY1?) * inv(sDUMMY1?) = 1;
 Id fDUMMY1(sDUMMY1?) = sDUMMY1;
-Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
+Id inv(sDUMMY1?symbol_) = (1/sDUMMY1);
 
 #call kinematics
 Id vDUMMY1?{`LIGHTLIKE'}.vDUMMY2?{`LIGHTLIKE'} =
-	1/2 * Spa2(vDUMMY1, vDUMMY2) * Spb2(vDUMMY2, vDUMMY1);
+   1/2 * Spa2(vDUMMY1, vDUMMY2) * Spb2(vDUMMY2, vDUMMY1);
 
 #call spsymbols
 
-Id SpDenominator(sDUMMY1?) = 1/sDUMMY1;
-Id inv(sDUMMY1?) = 1/sDUMMY1;
+Id SpDenominator(sDUMMY1?) = (1/sDUMMY1);
+Id inv(sDUMMY1?) = (1/sDUMMY1);
 
 .sort:5.2;
 
 #If `LOOPS' == 1
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
-	      Q[%
+         Q[%
 @select r2 default=implicit @case implicit %],Qt2,eps[%
 @end @select %])
 #EndIf
@@ -535,7 +538,7 @@ Id inv(sDUMMY1?) = 1/sDUMMY1;
       #Write <`OUTFILE'.abb> "rat2d`DIAG' = %e", d`DIAG'R2
    #EndIf[%
 @end @select %]
-	#Close <`OUTFILE'.abb>
+   #Close <`OUTFILE'.abb>
 #EndIf
 
 #If (`GROUP' == 0) && (`USETOPOLYNOMIAL')
@@ -573,12 +576,12 @@ Id inv(sDUMMY1?) = 1/sDUMMY1;
    #Create <`OUTFILE'.txt>
    #If `GROUP' == 0
       #If `TERMS' != 0
-	      #If `USETOPOLYNOMIAL' == "1"
+         #If `USETOPOLYNOMIAL' == "1"
             #Do x=1,`EXTRASYMBOLS_'
                 #Write <`OUTFILE'.txt> "`EXTRAPAT'`x'_ = %`x'x;"
             #EndDo
-	   	#EndIf
-   	#EndIf
+         #EndIf
+      #EndIf
    #EndIf
 
    #If `TERMS' > 0
@@ -593,9 +596,44 @@ Id inv(sDUMMY1?) = 1/sDUMMY1;
 #IfDef `FR5'
    #If `LOOPS' == 0
       #Create <`OUTFILE'-fr.txt>
-	   #Write <`OUTFILE'-fr.txt> "d`DIAG' = %e", diagram`DIAG'fr
+      #Write <`OUTFILE'-fr.txt> "d`DIAG' = %e", diagram`DIAG'fr
       #Close <`OUTFILE'-fr.txt>
    #EndIf
 #EndIf
-.end:output;
 
+#IfNDef `GENERATEDERIVATIVES'
+.end:output;
+#Else
+.sort:output;
+#EndIf
+Global diagram = diagram`DIAG';
+.store:start derivatives;
+
+   Local d0diagram = diagram;
+#Do p=1,`LOOPSIZE'
+   Local d`p'diagram = <d(iv1)> *...* <d(iv`p')> * diagram;
+#EndDo
+ToTensor, Functions, Q, ptens;
+Repeat;
+   Id Once d(iDUMMY1?) * ptens(?indices) =
+      fDUMMY1(iDUMMY1) * distrib_(1,1, fDUMMY2, ptens, ?indices);
+   Id fDUMMY1(iDUMMY1?) * fDUMMY2(iDUMMY2?) = d_(iDUMMY1, iDUMMY2);
+EndRepeat;
+ToVector ptens, Q;
+Id d(iDUMMY1?) = 0;
+#IfDef `DERIVATIVESATZERO'
+   Id Q = 0;
+#EndIf
+Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);
+
+Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
+.sort
+#Do p=0,`LOOPSIZE'
+   #$d`p'terms = termsin_(d`p'diagram);
+   #If `$d`p'terms' > 0
+      #Write <`OUTFILE'd.txt> "d`p'diagram = %e", d`p'diagram
+   #Else
+      #Write <`OUTFILE'd.txt> "d`p'diagram = NULL*epspow(0);"
+   #EndIf
+#EndDo
+.end:output derivatives;

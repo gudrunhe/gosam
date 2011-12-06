@@ -2,11 +2,26 @@
 
 PWD=`dirname $0`
 
-FC=`sed -n 'H;${g;s/\\\\[ \\t]*\\n[ \\t]*//g;p}' $PWD/Makefile.conf|\
+FC=`sed -n 'H
+   ${
+   g
+   s/\\\\[ \\t]*\\n[ \\t]*//g
+   p
+   }' $PWD/Makefile.conf|\
    grep '^[ \\t]*FC[ \\t]*='|sed 's/^[ \\t]*FC[ \\t]*=//'`
-LDFLAGS=`sed -n 'H;${g;s/\\\\[ \\t]*\\n[ \\t]*//g;p}' $PWD/Makefile.conf|\
+LDFLAGS=`sed -n 'H
+   ${
+   g
+   s/\\\\[ \\t]*\\n[ \\t]*//g
+   p
+   }' $PWD/Makefile.conf|\
    grep '^[ \\t]*LDFLAGS[ \\t]*='|sed 's/^[ \\t]*LDFLAGS[ \\t]*=//'`
-CFLAGS=`sed -n 'H;${g;s/\\\\[ \\t]*\\n[ \\t]*//g;p}' $PWD/Makefile.conf|\
+CFLAGS=`sed -n 'H
+   ${
+   g
+   s/\\\\[ \\t]*\\n[ \\t]*//g
+   p
+   }' $PWD/Makefile.conf|\
    grep '^[ \\t]*FCFLAGS[ \\t]*='|sed 's/^[ \\t]*FCFLAGS[ \\t]*=//'`
 
 PROCESS_LDFLAGS=" $PWD/matrix/matrix.a[%

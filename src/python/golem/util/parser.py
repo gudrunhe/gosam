@@ -1786,6 +1786,17 @@ class Template:
          factor = 1
       return nl * factor
 
+   def internal(self, *args, **opts):
+      if len(args) == 0:
+         raise TemplateError("[% internal %] requires an argument")
+      
+      iname = "__%s__" % (args[0].upper())
+      if iname in self.__INTERNALS__().split(","):
+         value = getattr(self, iname)
+         return value(self, *(args[1:]), **opts)
+      else:
+         raise TemplateError("Undefined [%% internal %s %%]" % args[0])
+
 def unescape_value(v):
    backslash = False
    result = ''

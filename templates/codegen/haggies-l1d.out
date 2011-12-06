@@ -1,0 +1,219 @@
+%=$[$ 
+ ' vim: ts=3:sw=3:syntax=golem
+$]module     [$ process_name asprefix=\_ 
+            $][% output.file match=".*/(d\\d+h\\d+l1d).f90" format ="%s"%]
+   ! file:      [% output.file %]
+   ! generator: [% program.name %] ([% program.version %])
+   use [$ process_name asprefix=\_ $]config, only: ki
+   use [$ process_name asprefix=\_ $]util, only: cond, d => metric_tensor
+   implicit none
+   private
+
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)[%
+
+@for instructions registers="t%d" %][%
+   @select $_ match="(.).*" format="%s"
+   @case E %]
+   complex(ki), private :: [% $_ %][%
+   @case d %]
+   integer, private :: [%
+         $_ match="d(\\d+)diagram" format="iv%s" %][%
+   @end @select %][%
+@end @for instructions %]
+
+   public :: derivative 
+contains[% 
+@for brackets bracket="brack_%d" %][%
+   @for brackets bracket="subbrack_%2$d_%1$d" %]
+!---#[ function [% $_ %]:
+   pure function [% $_ %](Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $]) result(brack)
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]color
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q[$
+      @select r2 default=implicit
+      @case implicit $]
+      complex(ki), intent(in) :: mu2[$
+      @end @select $]
+      [% type.repr %] :: brack[% 
+      @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+      @end @for %][% 
+      @for instructions prefix="inst." registers="t%d" %][%
+         @select inst.$_ match="(.).*" format="%s"
+         @case & %]
+      brack[%
+         @else %]
+      [% inst.$_ %][%
+         @end @select
+      %] = [% expression match="\\$(\\d+)" format="t%s" %][%
+      @end @for instructions %]
+   end  function [% $_ %]
+!---#] function [% $_ %]:[%
+   @end @for innerbracket %]
+!---#[ function [% $_ %]:
+   pure function [% $_ %](Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $]) result(brack)
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]color
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q[$
+      @select r2 default=implicit
+      @case implicit $]
+      complex(ki), intent(in) :: mu2[$
+      @end @select $]
+      [% type.repr %] :: brack[%
+   @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+   @end @for %][% 
+   @for instructions prefix="inst." registers="t%d" %][%
+      @select inst.$_ match="(.).*" format="%s"
+      @case & %]
+      brack[%
+      @else %]
+      [% inst.$_ %][%
+      @end @select
+      %] = [% expression bracket="brack_%2$d_%1$d(Q[$
+      @select r2 default=implicit
+      @case implicit $], mu2[$
+      @end @select $])" %][%
+   @end @for instructions %]
+   end  function [% $_ %]
+!---#] function [% $_ %]:[%
+@end @for outerbracket %]
+   
+!---#[ function derivative:
+   function derivative([$
+   @if internal DERIVATIVES_AT_ZERO $][$
+   @else $]Q_ext, [$
+   @end @if $]mu2[%
+   @for instructions %][%
+      @select $_ match="(.).*" format="%s"
+      @case d %][%
+         @select $_ match="d(\\d+)diagram" format="%s"
+         @case 0 %][%
+         @else %], [% $_ match="d(\\d+)diagram" format="i%s" %][%
+         @end @select %][%
+      @end @select %][%
+   @end @for %]) result(numerator)
+      use precision, only: ki_sam => ki
+      use [$ process_name asprefix=\_ $]globalsl1, only: epspow
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none[$
+      @if internal DERIVATIVES_AT_ZERO $][$
+      @else $]
+      complex(ki), dimension(4), intent(in) :: Q_ext[$
+      @end @if $]
+      complex(ki), intent(in) :: mu2[%
+      @for instructions %][%
+         @select $_ match="(.).*" format="%s"
+         @case d %][%
+            @select $_ match="d(\\d+)diagram" format="%s"
+            @case 0 %][%
+            @else %]
+      integer, intent(in), optional :: [%
+         $_ match="d(\\d+)diagram" format="i%s" %][%
+            @end @select %][%
+         @end @select %][%
+      @end @for %]
+      complex(ki) :: numerator
+      complex(ki) :: loc[%
+      @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+      @end @for %]
+      integer :: deg[$
+      @if internal DERIVATIVES_AT_ZERO $]
+      complex(ki), dimension(4), parameter :: Q = (/&
+        &(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)[$
+      @else $]
+      ! The Q that goes into the diagram
+      complex(ki), dimension(4) :: Q[%
+   @with args %][$
+      @if extension qshift $]
+
+		Q(:) = Q_ext(:)[$
+      @else $][%
+         @select QSHIFT
+         @case 0 %]
+
+      Q(:) = [% QSIGN %]Q_ext(:)[%
+         @else %]
+      real(ki), dimension(0:3) :: qshift
+
+      qshift = [% QSHIFT %]
+      Q(:)   = [% QSIGN %]Q_ext(:) - qshift(:)[%
+         @end @select %][$
+      @end @if $][%
+   @end @with %][$
+      @end @if DERIVATIVES_AT_ZERO $]
+      numerator = 0.0_ki
+      deg = 0[%
+      @for instructions %][%
+         @select $_ match="(.).*" format="%s"
+         @case d %][%
+            @select $_ match="d(\\d+)diagram" format="%s"
+            @case 0 %][%
+            @else %]
+      if(present([% $_ match="d(\\d+)diagram" format="i%s" %])) then
+         [% $_ match="d(\\d+)diagram" format="iv%s" %] = [%
+            $_ match="d(\\d+)diagram" format="i%s" %]
+         deg = [% $_ match="d(\\d+)diagram" format="%s" %]
+      else
+         [% $_ match="d(\\d+)diagram" format="iv%s" %] = 1
+      end if[%
+            @end @select %][%
+         @end @select %][%
+      @end @for %][%
+   @for instructions registers="t%d" %][%
+      @select $_ match="(.).*" format="%s"
+      @case d %]
+      if(deg.eq.[% $_ match="d(\\d+)diagram" format="%s" %]) then
+         loc = [% expression bracket="brack_%d[$
+         @select r2 default=implicit
+         @case explicit only off $](Q)[$
+         @end @select $]" %]
+         numerator = cmplx(real(loc, ki), aimag(loc), ki_sam)
+         return
+      end if[%
+      @else %]
+      [% $_ %] = [% expression bracket="brack_%d[$
+         @select r2 default=implicit
+         @case explicit only off $](Q)[$
+         @end @select $]" %][%
+      @end @select %][%
+   @end @for instructions %]
+   end function derivative
+!---#] function derivative:
+end module [$ process_name asprefix=\_
+          $][% output.file match=".*/(d\\d+h\\d+l1d).f90" format ="%s"%]

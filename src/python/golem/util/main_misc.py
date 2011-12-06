@@ -62,6 +62,7 @@ def generate_process_files(conf, from_scratch=False):
 	This routine is a wrapper around anything that needs to be done
 	for creating a new process.
 	"""
+	golem.properties.setInternals(conf)
 
 	path = golem.util.tools.process_path(conf)
 

@@ -569,7 +569,18 @@ slha_locations = {
    'mtau': ('MASSES', [15]),
    'mZ': ('MASSES', [23]),
    'mW': ('MASSES', [24]),
-   'mH': ('MASSES', [25])
+   'mH': ('MASSES', [25]),
+   'wB': ('DECAY', [5]),
+   'wT': ('DECAY', [6]),
+   'wtau': ('DECAY', [15]),
+   'wZ': ('DECAY', [23]),
+   'wW': ('DECAY', [24]),
+   'wH': ('DECAY', [25]),
+   'wchi': ('DECAY', [250]),
+   'wphi': ('DECAY', [251]),
+   'wghZ': ('DECAY', [9000003]),
+   'wghWp': ('DECAY', [9000004]),
+   'wghWm': ('DECAY', [9000005]),
 }
 #---#] slha_locations:
 

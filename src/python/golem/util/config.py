@@ -6,7 +6,10 @@ import os
 import os.path
 import subprocess
 import re
-import ast
+try:
+   import ast
+except ImportError:
+   ast = None
 
 import golem.util.path as gpath
 
@@ -214,7 +217,10 @@ class Properties:
             # won't work in python3:
             # return result.decode("string_escape")
             # This is not 100% correct but should work reasonably well:
-            return ast.literal_eval("'"+result+"'")
+            if ast is not None:
+               return ast.literal_eval("'"+result+"'")
+            else:
+               return result.decode("string_escape")
          else:
             return result
             
@@ -914,4 +920,3 @@ def levenshtein(str1, str2, case_sensitive=False):
 		previous_row = current_row
 
 	return previous_row[-1]
-

@@ -412,8 +412,14 @@ def resolve_dependencies(functions):
 	can be computed
 	"""
 	all_names = functions.keys()
+	nfunctions = len(all_names)
 	graph = {}
+	golem.util.tools.message("      * Building call graph")
+	i = 0
 	for name, expr in functions.items():
+		i += 1
+		if i % 100 == 0:
+			golem.util.tools.message("         (%5d/%5d)" % (i, nfunctions))
 		edges = []
 		for other in all_names:
 			if name == other:
@@ -422,6 +428,10 @@ def resolve_dependencies(functions):
 			if expr.dependsOn(other):
 				edges.append(other)
 		graph[name] = edges
+
+	golem.util.tools.message("      * Traversing call graph")
+	nedges = len(graph)
+	golem.util.tools.message("         %5d edges left" % nedges)
 
 	program = []
 	while len(graph) > 0:
@@ -459,6 +469,9 @@ def resolve_dependencies(functions):
 
 		program.append(name)
 		del graph[name]
+		nedges -= 1
+		if nedges % 100 == 0:
+			golem.util.tools.message("         %5d edges left" % nedges)
 
 		for edges in graph.values():
 			if name in edges:
@@ -476,11 +489,17 @@ def generate_func_txt(conf):
 	path = golem.util.tools.process_path(conf)
 	model_mod = golem.util.tools.getModel(conf)
 
+	nfunctions = len(model_mod.functions)
+
 	golem.util.tools.message("Generating func.txt ...")
 	golem.util.tools.message("   - Compiling functions ...")
 	parser = golem.model.expressions.ExpressionParser()
 	functions = {}
+	i = 0
 	for name, value in model_mod.functions.items():
+		i += 1
+		if i % 100 == 0:
+			golem.util.tools.message("     (%5d/%5d)" % (i, nfunctions))
 		expr = parser.compile(value)
 		functions[name] = expr
 	
@@ -488,9 +507,15 @@ def generate_func_txt(conf):
 	program = resolve_dependencies(functions)
 	golem.util.tools.message("   - Writing func.txt ...")
 
+	nlines = len(program)
 	fname = os.path.join(path, "func.txt")
 	f = open(fname, "w")
+	i = 0
 	for name in program:
+		i += 1
+		if i % 100 == 0:
+			golem.util.tools.message("      (%5d/%5d) lines" % (i, nlines))
+
 		ast = functions[name]
 		f.write(name)
 		f.write("=");
@@ -498,4 +523,4 @@ def generate_func_txt(conf):
 		f.write(";\n")
 	f.close()
 
-	golem.util.tools.message("   - Done")
+	golem.util.tools.message("   - Done with func.txt")

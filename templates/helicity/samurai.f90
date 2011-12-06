@@ -338,16 +338,20 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    @end @if %]
          if(debug_nlo_diagrams) then
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-finite' re='", real(acc(0), ki), &
+               & "<result kind='nlo-finite' re='", [%
+                  diagram_sign %]real(acc(0), ki), &
                & "' im='", aimag(acc(0)), "'/>"
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-single' re='", real(acc(-1), ki), &
+               & "<result kind='nlo-single' re='", [%
+                  diagram_sign %]real(acc(-1), ki), &
                & "' im='", aimag(acc(-1)), "'/>"
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-double' re='", real(acc(-2), ki), &
+               & "<result kind='nlo-double' re='", [%
+                  diagram_sign %]real(acc(-2), ki), &
                & "' im='", aimag(acc(-2)), "'/>"
             write(logfile,'(A32,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-rational' re='", real(accr, ki), &
+               & "<result kind='nlo-rational' re='", [%
+                  diagram_sign %]real(accr, ki), &
                & "' im='", aimag(accr), "'/>"
             if(ok) then
                write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
