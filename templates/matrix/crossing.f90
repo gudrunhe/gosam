@@ -15,14 +15,15 @@ contains
       use [% process_name asprefix=\_ %]config, only: &
       & include_color_avg_factor, include_helicity_avg_factor, &
       & include_symmetry_factor
-      use [% process_name asprefix=\_ %]model, only: NC, NA
+      use [% process_name asprefix=\_ %]model, only: NC
       use [% process_name asprefix=\_ %]kinematics, only: &
       & in_helicities, symmetry_factor
       use [% process_name asprefix=\_ %]color, only: incolors
       implicit none
-      real(ki) :: prefactor
+      real(ki) :: prefactor, NA
 
       prefactor = 1.0_ki
+      NA = (NC + 1.0_ki) * (NC - 1.0_ki)
 
       if (include_color_avg_factor) then
          prefactor = prefactor * real(incolors, ki)[%
