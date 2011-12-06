@@ -739,11 +739,12 @@ config_renorm_gamma5 = Property("renorm_gamma5",
 
 config_reduction_interoperation = Property("reduction_interoperation",
    """
-   Set the same variable in config.f90
+   Set the same variable in config.f90. A value of '-1' lets gosam
+   decide depending on the specified extensions.
 
    See common/config.f90 for details.
    """,
-   int)
+   int, -1)
 
 
 properties = [
