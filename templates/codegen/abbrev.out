@@ -30,7 +30,8 @@ contains
    @if use_flags_1 $]
       use [$ process_name asprefix=\_ $]groups, only: evaluate_virt_diagram[$
    @end @if $]
-      use [$ process_name asprefix=\_ $]config, only: deltaOS
+      use [$ process_name asprefix=\_ $]config, only: deltaOS, &
+     &    logfile, debug_nlo_diagrams
       use [$ process_name asprefix=\_ $]kinematics
       use [$ process_name asprefix=\_ $]model
       use [$ process_name asprefix=\_ $]color, only: TR
@@ -50,7 +51,15 @@ contains
       [$
          @if use_flags_1 $]if(evaluate_virt_diagram([% 
                  $_ match="rat2d(.*)" format="%s" %]))[$
-         @end @if $]rat2 = rat2 + [% $_ %][%
+         @end @if $]rat2 = rat2 + [% $_ %]
+      if (debug_nlo_diagrams) then
+         [$
+         @if use_flags_1 $]if(evaluate_virt_diagram([% 
+                 $_ match="rat2d(.*)" format="%s" %]))[$
+         @end @if $] write (logfile,*) "<result name='r2' index='[% 
+                 $_ match="rat2d(.*)" format="%s" %]' value='", &
+          & [% $_ %], "'/>"
+      end if[%
       @end @select %][$
       @if eval abbrev.limit > 0 $][%
          @if eval expression="index%[$abbrev.limit$]==[$abbrev.limit$]-1" %][%

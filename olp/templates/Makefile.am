@@ -5,7 +5,10 @@ SUBDIRS=[%
 	[% path %][%
 @end @for subprocesses %]
 
-bin_PROGRAMS=olp_daemon
+bin_PROGRAMS=[%
+@if internal GENERATE_OLP_DAEMON %]olp_daemon[%
+@end @if %]
+
 lib_LTLIBRARIES=lib@GENERIC_LIBRARY_NAME@.la
 
 olp_daemon_SOURCES=olp_daemon.c olp_lexer.l olp_parser.y
@@ -13,7 +16,9 @@ lib@GENERIC_LIBRARY_NAME@_la_SOURCES=olp_module.f90
 
 nodist_pkginclude_HEADERS=olp_module.mod
 pkginclude_HEADERS=olp.h
-noinst_HEADERS=olp_daemon.h olp_parser.h
+noinst_HEADERS=[%
+@if internal GENERATE_OLP_DAEMON %]olp_daemon.h olp_parser.h[%
+@end @if %]
 
 olp_daemon_LDADD=lib@GENERIC_LIBRARY_NAME@.la
 lib@GENERIC_LIBRARY_NAME@_la_LIBADD=[%

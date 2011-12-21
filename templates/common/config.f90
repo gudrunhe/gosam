@@ -133,7 +133,18 @@
    ! deltaOS = 0.0_ki --> off
    ! Do not modify directly, use renormalisation=0,1,2 instead.
    real(ki) :: deltaOS = 1.0_ki
-   !---#] Renormalisation:
+   !---#] Renormalisation:[%
+@if internal GENERATE_DERIVATIVES %]
 
+   ! This generated code provides the derivatives of the numerator.
+   ! Therefore we have the choice between using Golem95's tens_rec
+   ! modules for determining the tensor coefficients from N(q) and
+   ! using the derivatives to directly accessing the terms of the
+   ! Taylor series.
+   !
+   ! This option affects the calculation only if reduction_interoperation
+   ! is chosen such that the tensorial reconstruction method is used.
+   logical :: tens_rec_by_derivatives = .true.[%
+@end @if %]
 end module [% process_name asprefix=\_ %]config
 

@@ -43,6 +43,8 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
    @case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
+         @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.f90[%
+         @end @if %][%
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %]
@@ -138,6 +140,8 @@ GENERATED_SRC=[%
    @end @select %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
+      @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.f90[%
+      @end @if %][%
    @end @for %][%
 @end @if generate_nlo_virt %]
 

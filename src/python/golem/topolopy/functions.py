@@ -141,22 +141,26 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             lose.append(idx)
             continue
       if analyze_diagram(diagram, zero, fltr):
-         keep.append(idx)
-         loopcache.add(diagram, idx)
-
-         if filter_flags is not None:
-            for flag in diagram.filter_flags:
-               if flag not in filter_flags:
-                  filter_flags[flag] = [idx]
-               else:
-                  filter_flags[flag].append(idx)
-
-
+         # check for massive quarks first. Even though the
+         # diagram might fail the next test it contributes
+         # to the renormalization of the gluon wave function.
          if quark_masses is not None:
             for qm in diagram.QuarkBubbleMasses():
                if qm not in quark_masses:
                   quark_masses.append(qm)
 
+         if diagram.onshell() > 0:
+            lose.append(idx)
+         else:
+            keep.append(idx)
+            loopcache.add(diagram, idx)
+
+            if filter_flags is not None:
+               for flag in diagram.filter_flags:
+                  if flag not in filter_flags:
+                     filter_flags[flag] = [idx]
+                  else:
+                     filter_flags[flag].append(idx)
       else:
          lose.append(idx)
 

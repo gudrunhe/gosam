@@ -266,6 +266,14 @@ class Diagram:
       return sum([self._propagators[p].match(args, **opts)
          for p in set(self._propagators.keys())-set(map(abs,self._loop))])
 
+   def onshell(self, *args, **opts):
+      opts["zero"] = self._zerosum
+      return sum([
+         self._propagators[abs(p)].match(args, **opts)
+            and self._propagators[abs(p)].momentum.onshell()
+         for p in set(self._propagators.keys())-set(map(abs,self._loop))
+      ])
+
    def substituteZero(self, symbols):
       for p in self._propagators.values():
          p.substituteZero(symbols)
@@ -1606,6 +1614,12 @@ class Momentum:
                   del self._dict[k]
                else:
                   self._dict[k] = new_val
+
+   def onshell(self):
+      ld = len(self._dict)
+      lz = len(self._zdict)
+
+      return ld == 0 or ld == lz or ld == 1 or ld == lz - 1
 
    def copy(self):
       return Momentum(self._dict, self._zdict)

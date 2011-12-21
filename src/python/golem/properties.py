@@ -435,7 +435,7 @@ extensions = Property("extensions",
    list,
    options=["samurai", "golem95", "pjfry", "dred", "fr5",
       "powhegbox", "autotools", "qshift", "topolynomial",
-      "qcdloop", "avh_olo", "looptools", "gaugecheck"])
+      "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive"])
 
 select_lo_diagrams = Property("select.lo",
    """\

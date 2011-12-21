@@ -31,31 +31,23 @@ contains
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0, only: amplitudel0 => amplitude[%
-   @select r2 default=implicit
-   @case implicit explicit off %][%
-      @if extension fr5 %]
+   @if extension fr5 %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0fr5, only: amplitudel0fr5 => amplitude[%
-      @end @if extension fr5 %][%
-   @end @select r2 %][%
+   @end @if extension fr5 %][%
 @end @if generate_lo_diagrams %]
       implicit none
       real(ki), intent(in) :: scale2
       real(ki) :: amp[%
 @if generate_lo_diagrams %][%
-   @select r2 default=implicit
-   @case implicit explicit off %][%
-      @if extension fr5 %]
+   @if extension fr5 %]
       complex(ki),  dimension(numcs) :: amp0, amp5
       real(ki) :: deltaZ5[%
-      @end @if extension fr5 %][%
-   @end @select r2 %][%
+   @end @if extension fr5 %][%
 @end @if generate_lo_diagrams %]
       amp = 0.0_ki[%
 @if generate_lo_diagrams %][%
-   @select r2 default=implicit
-   @case implicit explicit off %][%
-      @if extension fr5 %]
+   @if extension fr5 %]
       amp0 = amplitudel0()
       !---#[ finite renormalisation of gamma5:
       ! We need to replace gamma5 by
@@ -64,18 +56,17 @@ contains
       !    S. Weinzierl, ``Equivariant dimensional regularization,''
       !    arXiv:hep-ph/9903380
       ![%
-         @if extension dred %]
+      @if extension dred %]
       deltaZ5 = 0.0_ki * CF[%
-         @else %]
+      @else %]
       ! There's a factor of 2 in the square routine already.
       deltaZ5 = -1.0_ki * CF[%
-         @end @if %]
+      @end @if %]
 
       amp5 = amplitudel0fr5()
       amp = amp + deltaZ5 * square(amp0, amp5)
       !---#] finite renormalisation of gamma5:[%
-      @end @if extension fr5 %][%
-   @end @select r2 %][%
+   @end @if extension fr5 %][%
 @end @if generate_lo_diagrams %]
    end function finite_renormalisation
    !---#] function finite_renormalisation:
@@ -86,7 +77,8 @@ contains
 @else %]the_col0,[%
 @end @if%]opt_perm)
       use [% process_name asprefix=\_
-         %]config, only: include_eps_terms, include_eps2_terms
+         %]config, only: include_eps_terms, include_eps2_terms, &
+      & logfile, debug_nlo_diagrams
       use [% process_name asprefix=\_
          %]globalsl1, only:[%
 @if generate_lo_diagrams %] amp0,[%
@@ -116,8 +108,11 @@ contains
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0, only: amplitudel0 => amplitude[%
-@end @if %]
-      use [% process_name asprefix=\_ %]groups
+@end @if %][%
+@select r2 @case only %][%
+@else %]
+      use [% process_name asprefix=\_ %]groups[%
+@end @select %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok[%
@@ -215,6 +210,11 @@ contains
       @end @for %][%
    @case only %]
       samplitude(-2:-1) = 0.0_ki
+      if(debug_nlo_diagrams) then
+         write(logfile,'(A22,G24.16,A6,G24.16,A4)') &
+         & "<result name='r2' re='", real(rat2, ki), &
+         &                 "' im='", aimag(rat2), "' />"
+      end if
       samplitude(0) = [%
       @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
       @else %]rat2[%
@@ -223,6 +223,11 @@ contains
       epspow=0
       samplitude(-2) = 0.0_ki
       samplitude(-1) = 0.0_ki
+      if(debug_nlo_diagrams) then
+         write(logfile,'(A22,G24.16,A6,G24.16,A4)') &
+         & "<result name='r2' re='", real(rat2, ki), &
+         &                 "' im='", aimag(rat2), "' />"
+      end if
       samplitude(0) = [%
       @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
       @else %]rat2[%
