@@ -413,9 +413,9 @@ def workflow(conf):
 	conf["generate_uv_counterterms"] = False
 
 
-	if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
-		qgraf_options.append("onshell")
-		conf[golem.properties.qgraf_options] = ",".join(qgraf_options)
+	#if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
+	#	qgraf_options.append("onshell")
+	#	conf[golem.properties.qgraf_options] = ",".join(qgraf_options)
 
 
 	if generate_nlo_virt and not r2only:

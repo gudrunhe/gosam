@@ -16,7 +16,7 @@
    real(ki), dimension([%num_legs%], 4) :: vecs
    double precision :: scale2
    double precision, dimension(0:3) :: amp
-   double precision, dimension(2:3) :: irp
+   real(ki), dimension(2:3) :: irp
    real :: t1, t2
 
    open(unit=logfile,status='unknown',action='write',file='debug.xml')

@@ -24,8 +24,16 @@
 		<only if-extension="autotools"/>
 	</file>
 
-	<file src="olp_daemon.h" class="Verbatim" usedby="olp"/>
-	<file src="olp_daemon.c" class="Verbatim" usedby="olp"/>
-	<file src="olp_lexer.l" class="Verbatim" usedby="olp"/>
-	<file src="olp_parser.y" class="Verbatim" usedby="olp"/>
+	<file src="olp_daemon.h" class="Verbatim" usedby="olp">
+		<only if-internal="generate_olp_daemon" />
+	</file>
+	<file src="olp_daemon.c" class="Verbatim" usedby="olp">
+		<only if-internal="generate_olp_daemon" />
+	</file>
+	<file src="olp_lexer.l" class="Verbatim" usedby="olp">
+		<only if-internal="generate_olp_daemon" />
+	</file>
+	<file src="olp_parser.y" class="Verbatim" usedby="olp">
+		<only if-internal="generate_olp_daemon" />
+	</file>
 </template>

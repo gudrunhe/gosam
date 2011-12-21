@@ -1797,6 +1797,65 @@ class Template:
       else:
          raise TemplateError("Undefined [%% internal %s %%]" % args[0])
 
+
+   def tens_rec_info(self, *args, **opts):
+      if len(args) == 0:
+         raise TemplateError("[%% tens_rec_info %%] requires argument (rank)")
+
+      R = self._eval_int(args[0])
+
+      if "dim" in opts:
+         d = int(opts["dim"])
+      else:
+         d = 4
+
+      if "shift_args" in opts:
+         shift_args = int(opts["shift_args"])
+      else:
+         shift_args = 0
+
+
+      coeff_name = self._setup_name("coeff", "coeff", opts)
+      args_name = self._setup_name("args", "args", opts)
+      symmetry_name = self._setup_name("symmetry", "symmetry", opts)
+      sign_name = self._setup_name("sign", "sign", opts)
+      k_name = self._setup_name("k", "k", opts)
+      i_name = self._setup_name("i", "i", opts)
+
+      props = Properties()
+
+      props[coeff_name] = 0
+      props[args_name] = []
+      props[symmetry_name] = 1
+      props[k_name] = 0
+      props[i_name] = 0
+      props[sign_name] = 1
+      yield props
+
+      for k in range(1,min(R,d)+1):
+         lst, dic = generate_mapping(R, k)
+         dim = len(lst)
+         lab = 0
+         for indices in select(range(d), k):
+            lab += 1
+            for i in range(dim):
+               sign = 1
+               args = []
+               symm = 1
+               for idx, mult in zip(indices, lst[i]):
+                  args.extend([idx+shift_args]*mult)
+                  symm *= fact(mult)
+                  if idx > 0 and (mult % 2 == 1):
+                     sign = -sign
+
+               props[coeff_name] = k
+               props[args_name] = args
+               props[symmetry_name] = symm
+               props[k_name] = lab
+               props[i_name] = i+1
+               props[sign_name] = sign
+               yield props
+
 def unescape_value(v):
    backslash = False
    result = ''
@@ -1814,3 +1873,96 @@ def unescape_value(v):
       else:
          result += ch
    return result
+
+
+def fact(N):
+   """
+   Compute the factorial of a non-negative integer number.
+   """
+   if N == 0:
+      return 1
+   elif N > 0:
+      return N * fact(N-1)
+
+def combinat(n, k):
+   """
+      Calculates the binomial coefficient (n atop k).
+   """
+   if k < 0 or k > n:
+      return 0
+   else:
+      num = 1
+      den = 1
+      for i in range(1, k+1):
+         num *= n-i+1
+         den *= i
+      return num/den
+
+def select(items, k):
+   """
+   Iterator over all selections of k elements from a given list.
+
+   PARAMETER
+
+   items  --  list of elements to choose from (no repetitions)
+   k      --  number of elements to select.
+   """
+   n = len(items)
+   # We use the fact that
+   # (n choose k) = (1 choose 1)(n-1 choose k-1)+(1 choose 0)(n-1 choose k)
+   if k == n:
+      yield items[:]
+   elif k == 0:
+      yield []
+   elif 0 < k and k < n:
+      head = items[0:1]
+      tail = items[1:]
+      for result in select(tail, k-1):
+         yield head + result
+
+      for result in select(tail, k):
+         yield result
+
+def generate_mapping(R, k):
+   """
+      Generates a mapping from tensor components \hat{C}(a_1, ..., a_k)
+      into a one dimensional array.
+
+      PARAMETER
+
+      R  -- rank
+      k  -- number of non-zero components of q
+
+      RETURN
+
+      (lst, dic)
+
+      lst -- list of (a_1, ..., a_k)
+      dic -- mapping from (a_1, ..., a_k) -> int
+
+      lst[dic[X]] = X if X in dic
+   """
+
+   def rec_generator(k, R):
+      if k == 0:
+         yield []
+      elif k <= R:
+         for a_1 in range(1, R - (k - 1) + 1):
+            if k > 1:
+               for tail in rec_generator(k - 1, R - a_1):
+                  yield [a_1] + tail
+            else:
+               yield [a_1]
+   
+   lst = []
+   dic = {}
+   i = 0
+   for indices in rec_generator(k, R):
+      t = tuple(indices)
+      lst.append(t)
+      dic[t] = i
+      i += 1
+
+   assert i == combinat(R, k), \
+         "len(%s) != %d, R=%d,k=%d" % (lst,combinat(R, k),R,k)
+   return lst, dic

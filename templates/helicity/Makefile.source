@@ -94,6 +94,10 @@ DIAGRAMS_VIRT=[%
 TXT_VIRT=[%
 @select r2 default=implicit
 @case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
+@case only %][%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.abb[%
+   @end @for %][%
 @end @select %]
 ABB_VIRT=[%
    @select abbrev.level
@@ -125,7 +129,9 @@ abbrevh[%helicity%].f90: $(TXT_VIRT)
 		-t ../codegen/abbrev.out \
 		-c ../codegen/abbrev.in \
 		-D helicity=[%helicity%] \
-		-o $@ $(subst .txt,.abb,$(filter %l1.txt,$(TXT_VIRT)))[%
+		-o $@ \
+		$(subst .txt,.abb,$(filter %l1.txt,$(TXT_VIRT))) \
+		$(filter %l1.abb,$(TXT_VIRT))[%
 @end @select %][%
 @for elements topolopy.keep.tree %]
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
@@ -231,7 +237,7 @@ d[%$_%]h[%helicity%]l1d.f90: d[%$_%]h[%helicity%]l1d.txt
 		$(addprefix -p,$(shell grep extrasymbols \
 			d[%$_%]h[%helicity%]l1.dat \
 			| sed 's/extrasymbols=//')) \
-		-o $@ -F $(wildcard $<)[%
+		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
 		@end @if %][%
 	   @select abbrev.level @case diagram %]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.abb
@@ -240,7 +246,8 @@ abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.abb
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
 		-t ../codegen/abbrevloc.out \
 		-c ../codegen/abbrev.in \
-		-D helicity=[%helicity%] \
+		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D RANK=[%rank%] \
 		-o $@ $<[%
 	   @end @select %][%
 	@end @for diagrams %][%

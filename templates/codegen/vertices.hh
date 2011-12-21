@@ -170,12 +170,10 @@ id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C?,
 	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C?) = i_ * (
-		+ CL(field1, field2, field3) *
-		  NCContainer(Sm(iv3L) * ProjMinus, iv1L, iv2L)
-		+ CR(field1, field2, field3) * 
-		  NCContainer(Sm(iv3L) * ProjPlus, iv1L, iv2L)
+		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
+		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * deltaaxial * (
+		  1/4 * (1 + deltaaxial) * (
 		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
 		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
 		  )
@@ -184,12 +182,10 @@ id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
 	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C1?) = i_ * (
-		+ CL(field1, field2, field3) *
-		  NCContainer(Sm(iv3L) * ProjMinus, iv1L, iv2L)
-		+ CR(field1, field2, field3) * 
-		  NCContainer(Sm(iv3L) * ProjPlus, iv1L, iv2L)
+		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
+		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * deltaaxial * (
+		  1/4 * (1 + deltaaxial) * (
 		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
 		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
 		  )
@@ -205,6 +201,8 @@ id vertex(iv?,
 		T(iv3C8, iv1C3, iv2C3);
 *---#] VFF vertex (QCD) (2.4.32) :
 *---#[ SFF vertex (A.2.24) :
+* TODO: Have a look at hep-ph/9302240 --> peudoscalar coupling might not be correct yet.
+*       Can this be fixed by changing deltaaxial --> 2*deltaaxial here?
 id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C1?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,

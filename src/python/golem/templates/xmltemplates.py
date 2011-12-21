@@ -307,6 +307,7 @@ class _TemplateState:
          <... if-option="name" value="value"/>
          <... if-option="name" list="value,value,value..."/>
          <... in-mode="scratch"/>
+         <... if-internal="name" />
       """
 
       l = len(attrs)
@@ -403,6 +404,18 @@ class _TemplateState:
                      or option_value in values
             else:
                return option_value in values
+
+      if "if-internal" in attrs:
+         option_name = "__%s__" % (attrs["if-internal"].upper())
+         internals = self._getproperty("__INTERNALS__")
+         if option_name in internals:
+            return self._getproperty(option_name)
+         else:
+            return False
+
+      if len(attrs) != 1:
+         raise TemplateXMLError(
+            "Unknown attributes encountered near 'if-internal'")
 
    def start_except(self, attrs):
       envs = self.stack.pop()

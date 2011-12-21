@@ -110,7 +110,10 @@ class Property:
                   values = sval.split(default)
    
                for value in values:
-                  if value.lower().strip() not in self._options:
+                  vls = value.lower().strip()
+                  if vls == "":
+                     continue
+                  if vls not in self._options:
                      odds.append(value)
    
             if len(odds) > 0:

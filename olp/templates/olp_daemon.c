@@ -98,7 +98,7 @@ void daemon_signal_handler(int sig)
 
 void daemonize(void)
 {
-   int i,lfp;
+   int i,lfp, fd_stdout, fd_stderr;
    char str[128];
 
 	if(getppid() == 1)
@@ -113,10 +113,10 @@ void daemonize(void)
       close(i); /* close all descriptors */
 
 	i = open("/dev/null",O_RDWR);
-   dup(i);
-   dup(i);
+   fd_stdout = dup(i);
+   fd_stderr = dup(i);
 	umask(027); /* set newly created file permissions */
-	chdir(DAEMON_RUNDIR); /* change running directory */
+	i = chdir(DAEMON_RUNDIR); /* change running directory */
    sprintf(str, "%s.%d.log", PROGNAME, port);
    log_file_name = strdup(str);
 
@@ -136,7 +136,7 @@ void daemonize(void)
 
 	/* first instance continues */
 	sprintf(str, "%d\n", getpid());
-	write(lfp, str, strlen(str)); /* record pid to lockfile */
+	i = write(lfp, str, strlen(str)); /* record pid to lockfile */
 
 	signal(SIGCHLD,SIG_IGN); /* ignore child */
 	signal(SIGTSTP,SIG_IGN); /* ignore tty signals */

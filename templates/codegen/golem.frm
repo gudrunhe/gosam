@@ -605,8 +605,19 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 .end:output;
 #Else
 .sort:output;
+#Append <`OUTFILE'.abb>
 #EndIf
-Global diagram = diagram`DIAG';
+Global diagram = diagram`DIAG';[%
+@if extension qshift %][%
+@else %]
+   Id Q = p1;
+   #Call shiftmomenta(`DIAG')
+   Id p1 = Q;
+   #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
+         Q[%
+     @select r2 default=implicit @case implicit %],Qt2,eps,epspow[%
+     @end @select %])[%
+@end @if %]
 .store:start derivatives;
 
    Local d0diagram = diagram;
@@ -636,4 +647,5 @@ Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
       #Write <`OUTFILE'd.txt> "d`p'diagram = NULL*epspow(0);"
    #EndIf
 #EndDo
+#Close <`OUTFILE'.abb>
 .end:output derivatives;
