@@ -6,6 +6,7 @@ import imp
 import traceback
 import getopt
 import re
+import itertools
 
 import golem.model
 import golem.properties
@@ -178,12 +179,128 @@ def combinations(map):
    for c in rec_combinations(list(map.keys()), map):
       yield c
 
+
+def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
+      symmetries = conf.getProperty(golem.properties.symmetries)
+      lsymmetries = [s.lower().strip() for s in symmetries]
+      family = "family" in lsymmetries
+      flavour = "flavour" in lsymmetries
+      lepton = "lepton" in lsymmetries
+      generation = "generation" in lsymmetries
+      # parity = "parity" in lsymmetries
+
+      quarks = {}
+      anti_quarks = {}
+      leptons = {}
+      anti_leptons = {}
+
+      fixed = {}
+      for s in symmetries:
+         if "=" in s:
+            idx, hel = s.split("=", 1)
+            fixed[int(idx)] = \
+                  golem.algorithms.helicity.parse_helicity(hel.strip())
+
+      for idx, p in enumerate(in_particles):
+         sp = p.getSpin()
+         if abs(sp) % 2 != 1:
+            continue
+
+         m = p.isMassive(zeroes)
+         pdg = p.getPDGCode()
+         apdg = abs(pdg)
+
+         if pdg in range(1,9):
+            quarks[idx] = (pdg, m, ((apdg-1)//2) + 1)
+         elif -pdg in range(1,9):
+            anti_quarks[idx] = (pdg, m, ((apdg-1)//2) + 1)
+         elif pdg in range(11,19):
+            leptons[idx] = (pdg, m, ((apdg-11)//2) + 1)
+         elif -pdg in range(11,19):
+            anti_leptons[idx] = (pdg, m, ((apdg-11)//2) + 1)
+
+      li = len(in_particles)
+      for idx, p in enumerate(out_particles):
+         sp = -p.getSpin()
+         if abs(sp) % 2 != 1:
+            continue
+
+         m = p.isMassive(zeroes)
+         pdg = -p.getPDGCode()
+         apdg = abs(pdg)
+
+         if pdg in range(1,9):
+            quarks[li+idx] = (pdg, m, ((apdg-1)//2) + 1)
+         elif -pdg in range(1,9):
+            anti_quarks[li+idx] = (pdg, m, ((apdg-1)//2) + 1)
+         elif pdg in range(11,19):
+            leptons[li+idx] = (pdg, m, ((apdg-11)//2) + 1)
+         elif -pdg in range(11,19):
+            anti_leptons[li+idx] = (pdg, m, ((apdg-11)//2) + 1)
+
+      quark_filters = []
+      lepton_filters = []
+      valid_assignments = 0
+      assignments = 0
+      if flavour or family:
+         if len(quarks) != len(anti_quarks):
+            error("Cannot apply 'flavour' or 'family' " +
+               "symmetry to this external state.")
+
+         qi = list(quarks.keys())
+         ai = list(anti_quarks.keys())
+         for p in itertools.permutations(ai):
+            assignments += 1
+            valid = True
+            lines = []
+            for q, a in zip(qi, ai):
+               qpdg, qm, qg = quarks[q]
+               apdg, am, ag = anti_quarks[a]
+               if (flavour and qpdg != apdg) or (family and qg != ag):
+                  valid = False
+                  break
+               if not (am or qm):
+                  lines.append( (q, a) )
+            if valid:
+               valid_assignments += 1
+               quark_filters.append(lines)
+
+      if lepton or generation:
+         if len(leptons) != len(anti_leptons):
+            error("Cannot apply 'lepton' or 'generation' " +
+               "symmetry to this external state.")
+
+         qi = list(leptons.keys())
+         ai = list(anti_leptons.keys())
+         for p in itertools.permutations(ai):
+            assignments += 1
+            valid = True
+            lines = []
+            for q, a in zip(qi, ai):
+               qpdg, qm, qg = leptons[q]
+               apdg, am, ag = anti_leptons[a]
+               if (flavour and qpdg != apdg) or (family and qg != ag):
+                  valid = False
+                  break
+               if not (am or qm):
+                  lines.append( (q, a) )
+            if valid:
+               valid_assignments += 1
+               lepton_filters.append(lines)
+
+      def filter_function(heli):
+         return True
+         
+
 def enumerate_helicities(conf):
       """
       """
       zeroes = getZeroes(conf)
       in_particles, out_particles = generate_particle_lists(conf)
       in_particles.extend(out_particles)
+
+      interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles)
+
       helic = {}
       for i in range(len(in_particles)):
          helic[i] = in_particles[i].getHelicityStates(zeroes)
