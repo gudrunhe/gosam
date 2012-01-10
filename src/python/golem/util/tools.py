@@ -180,7 +180,7 @@ def combinations(map):
       yield c
 
 
-def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
+def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
       symmetries = conf.getProperty(golem.properties.symmetries)
       lsymmetries = [s.lower().strip() for s in symmetries]
       family = "family" in lsymmetries
@@ -195,11 +195,44 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
       anti_leptons = {}
 
       fixed = {}
+      pdg_fixed = {}
       for s in symmetries:
          if "=" in s:
             idx, hel = s.split("=", 1)
-            fixed[int(idx)] = \
-                  golem.algorithms.helicity.parse_helicity(hel.strip())
+            if idx.strip().startswith("%"):
+               #selection by pdg code
+               pos = idx.index("%")
+               pidx = idx[pos+1:]
+               if pidx.startswith("+"):
+                  signs = [1]
+                  pidx = pidx[1:]
+               elif pidx.startswith("-"):
+                  signs = [-1]
+                  pidx = pidx[1:]
+               else:
+                  signs = [1,-1]
+
+               try:
+                  pdg = int(pidx)
+                  for sign in signs:
+                     pdg_fixed[sign*pdg] = \
+                           set(golem.algorithms.helicity.parse_helicity(
+                                 hel.strip()).values())
+               except ValueError:
+                  error("In symmetries=%s ... : '%s' is not a PDG code."
+                        % (s, pidx))
+            else:
+               try:
+                  idx = int(idx) - 1
+               except ValueError:
+                  error("In symmetries=%s ... : '%s' is not a particle number."
+                        % (s, idx))
+               if idx < 0 or idx >= len(in_particles) + len(out_particles):
+                  error("In symmetries=%s ... : '%d' is not in a good range."
+                        % (s, idx+1))
+
+               fixed[idx] = set(golem.algorithms.helicity.parse_helicity(
+                  hel.strip()).values())
 
       for idx, p in enumerate(in_particles):
          sp = p.getSpin()
@@ -240,8 +273,10 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
 
       quark_filters = []
       lepton_filters = []
-      valid_assignments = 0
-      assignments = 0
+
+      quark_assignments = 0
+      lepton_assignments = 0
+
       if flavour or family:
          if len(quarks) != len(anti_quarks):
             error("Cannot apply 'flavour' or 'family' " +
@@ -250,7 +285,7 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
          qi = list(quarks.keys())
          ai = list(anti_quarks.keys())
          for p in itertools.permutations(ai):
-            assignments += 1
+            quark_assignments += 1
             valid = True
             lines = []
             for q, a in zip(qi, ai):
@@ -262,7 +297,6 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
                if not (am or qm):
                   lines.append( (q, a) )
             if valid:
-               valid_assignments += 1
                quark_filters.append(lines)
 
       if lepton or generation:
@@ -273,7 +307,7 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
          qi = list(leptons.keys())
          ai = list(anti_leptons.keys())
          for p in itertools.permutations(ai):
-            assignments += 1
+            lepton_assignments += 1
             valid = True
             lines = []
             for q, a in zip(qi, ai):
@@ -285,11 +319,59 @@ def interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles):
                if not (am or qm):
                   lines.append( (q, a) )
             if valid:
-               valid_assignments += 1
                lepton_filters.append(lines)
 
+      fermion_filters = []
+      if lepton_assignments > 0:
+         fermion_filters.append(lepton_filters)
+
+      if quark_assignments > 0:
+         fermion_filters.append(quark_filters)
+
+      inp = in_particles[:]
+      outp = out_particles[:]
+      linp = len(inp)
+
       def filter_function(heli):
+         for i, p in enumerate(inp):
+            pdg = p.getPDGCode()
+            if pdg in pdg_fixed:
+               if heli[i] not in pdg_fixed[pdg]:
+                  return False
+         for i, p in enumerate(outp):
+            pdg = p.getPDGCode()
+            if pdg in pdg_fixed:
+               if heli[linp+i] not in pdg_fixed[pdg]:
+                  return False
+
+         for k, h_set in fixed.items():
+            if heli[k] not in h_set:
+               return False
+
+         for branches in fermion_filters:
+            this_filter = False
+            for lines in branches:
+               branch = True
+               for fermion, anti_fermion in lines:
+                  hf = heli[fermion]
+                  ha = heli[anti_fermion]
+
+                  if (li - anti_fermion) * (li - fermion) > 0:
+                     fulfilled = (hf == - ha)
+                  else:
+                     fulfilled = (hf == ha)
+
+                  if not fulfilled:
+                     branch = False
+                     break
+               if branch:
+                  this_filter = True
+                  break
+            if not this_filter:
+               return False
          return True
+
+      return filter_function
          
 
 def enumerate_helicities(conf):
@@ -297,9 +379,10 @@ def enumerate_helicities(conf):
       """
       zeroes = getZeroes(conf)
       in_particles, out_particles = generate_particle_lists(conf)
-      in_particles.extend(out_particles)
+      fermion_filter = generate_symmetry_filter(
+            conf, zeroes, in_particles, out_particles)
 
-      interpret_fermion_symmetries(conf, zeroes, in_particles, out_particles)
+      in_particles.extend(out_particles)
 
       helic = {}
       for i in range(len(in_particles)):
@@ -321,7 +404,8 @@ def enumerate_helicities(conf):
          helicity_comb = new_helicity_comb
 
       for h in helicity_comb:
-         yield h
+         if fermion_filter(h):
+            yield h
 
 def expand_helicities(patterns):
    anti = {"+": "-", "0": "0", "-": "+", "m": "k", "k": "m"}
