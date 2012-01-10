@@ -1,9 +1,0 @@
-[  limit used in the tests   ]
-
-1.0e-3		[  pwlimit   ]
-1.0e-3    	[  nnlimit   ]
-1.0e-2    	[  lnnlimit4 ]
-1.0e-2    	[  lnnlimit3 ]
-1.0e-2    	[  lnnlimit2 ]
-10.0e+0   	[  lnnlimit1 ]
-
