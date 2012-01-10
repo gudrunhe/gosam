@@ -382,7 +382,6 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
                for fermion, anti_fermion in lines:
                   hf = heli[fermion]
                   ha = heli[anti_fermion]
-                        (fermion, anti_fermion, hf, ha))
 
                   if (float(linp - anti_fermion) - 0.5) * \
                         (float(linp - fermion) - 0.5) > 0:
