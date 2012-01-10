@@ -1,0 +1,28 @@
+%=$module     [$ process_name asprefix=\_ $]functions
+   use [$ process_name asprefix=\_ $]config, only: ki
+   use [$ process_name asprefix=\_ $]util, only: sort4, ifpos
+   implicit none
+
+   private :: ki
+   private :: sort4, ifpos
+contains
+   subroutine     init_functions()
+      use [$ process_name asprefix=\_ $]model
+      implicit none
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+      real(ki), parameter :: pi = 3.14159265358979323846264&
+     &3383279502884197169399375105820974944592307816406286209_ki[%
+@for symbols match="\\$(.*)" format="reg%s" %]
+      [% type.repr %] :: [% $_ %][%
+@end @for symbols %][%
+@for instructions %][%
+   @select $_ match="(.).*" format="%s"
+   @case $ %]
+      [% $_ match="\\$(.*)" format="reg%s" %][%
+   @else %]
+      [% $_ %][%
+   @end @select %] = [%
+          expression match="\\$(.*)" format="reg%s" %][%
+@end @for @instructions %]
+   end subroutine init_functions
+end module [$ process_name asprefix=\_ $]functions

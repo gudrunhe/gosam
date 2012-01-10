@@ -1,0 +1,64 @@
+<prologue>
+* vim: syntax=form
+*-----------------------------------------------------
+*
+* This file has been generated automatically 
+* by "<program>" using the Feynman rules of the
+* model "[model]".
+* The file results from the following "qgraf.dat":
+*
+*---------- <<qgraf.dat>> ------------------------------
+<command_loop><command_line_loop>* <command_data>
+<back><end><end>*
+*---------- END OF <<qgraf.dat>> -----------------------
+*--#[[diagrams:
+
+<diagram>
+*--#[[ diagram<diagram_index>:
+*
+Local diagram<diagram_index> =
+  QGRAFSIGN(<sign>1) * PREFACTOR(<symmetry_factor>)
+<in_loop><back> *
+   inp([[field.<field>]], <momentum>) *
+   inplorentz([CONJ][TWOSPIN], iv<vertex_index>r<ray_index>L[TWOSPIN],
+<back> <momentum>, [MASS]) *
+   inpcolor(<in_index>, iv<vertex_index>r<ray_index>C[COLOR])
+<end><back>
+<out_loop><back> *
+   out([[field.<field>]], <momentum>) *
+   outlorentz([CONJ][TWOSPIN], iv<vertex_index>r<ray_index>L[TWOSPIN],
+<back> <momentum>, [MASS]) *
+   outcolor(<out_index>, iv<vertex_index>r<ray_index>C[COLOR])
+<end><back>
+<vertex_loop><back> *
+   vertex(iv<vertex_index>,
+<ray_loop>      [[field.<field>]], idx<vertex_index>r<ray_index>,
+<back> [CONJ][TWOSPIN], <momentum>+ZERO,
+<back> iv<vertex_index>r<ray_index>L[TWOSPIN],
+<back> [CONJ][COLOR], iv<vertex_index>r<ray_index>C[COLOR],
+<end><back><back>)
+<end><back>
+<propagator_loop><back> *
+   propcolor([CONJ][COLOR],
+<back> iv<dual-vertex_index>r<dual-ray_index>C[COLOR],
+<back> iv<vertex_index>r<ray_index>C[COLOR]) *
+   proplorentz([CONJ][TWOSPIN],
+<back> <momentum>+ZERO, [MASS], [WIDTH], [AUX],
+<back> iv<dual-vertex_index>r<dual-ray_index>L[TWOSPIN],
+<back> iv<vertex_index>r<ray_index>L[TWOSPIN])
+<end><back>
+;
+*--#]] diagram<diagram_index>:
+<epilogue>
+*
+* END OF DIAGRAMS
+*
+*--#]]diagrams:
+*--#[[global:
+
+#define DIAGRAMCOUNT "<diagram_index>"
+
+*--#]]global:
+
+
+<exit>

@@ -1,0 +1,261 @@
+%
+% Standard Model - unitary and t'Hooft-Feynman gauges.
+%
+
+keys gauge_fixing=Feynman.
+
+do_if gauge_fixing==Feynman.
+    model 'Stand. Model (Feyn. gauge)'/4.
+do_else_if gauge_fixing==unitary.
+    model 'Stand. Model (un. gauge)'/3.
+do_else.
+    write('Error: the key "gauge" should be either "Feynman" or "unitary".').
+    quit.
+end_if.
+
+option ReduceGamma5=0.
+let g5=gamma5.
+use sm_tex.
+
+parameter  EE  = 0.31333 : 'Electromagnetic coupling constant (<->1/128)',
+	   GG  = 1.117   : 'Strong coupling constant (Z point)  (PDG-94)',
+	   SW  = 0.4740  : 'sin of the Weinberg angle (PDG-94,"on-shell")',
+           s12 = 0.221   : 'Parameter of C-K-M matrix (PDG-94)',
+	   s23 = 0.040   : 'Parameter of C-K-M matrix (PDG-94)',
+           s13 = 0.0035  : 'Parameter of C-K-M matrix (PDG-94)'.
+
+parameter  CW  = sqrt(1-SW**2) : 'cos of the Weinberg angle'.
+
+parameter  c12  = sqrt(1-s12**2) : 	'parameter  of C-K-M matrix',
+           c23  = sqrt(1-s23**2) : 	'parameter  of C-K-M matrix',
+           c13  = sqrt(1-s13**2) : 	'parameter  of C-K-M matrix'.
+
+parameter  Vud = c12*c13 		: 'C-K-M matrix element',
+	   Vus = s12*c13 		: 'C-K-M matrix element',
+	   Vub = s13     		: 'C-K-M matrix element',
+           Vcd = (-s12*c23-c12*s23*s13) : 'C-K-M matrix element',
+           Vcs = (c12*c23-s12*s23*s13)  : 'C-K-M matrix element',
+	   Vcb = s23*c13 		: 'C-K-M matrix element',
+	   Vtd = (s12*s23-c12*c23*s13) 	: 'C-K-M matrix element',
+	   Vts = (-c12*s23-s12*c23*s13)	: 'C-K-M matrix element',
+	   Vtb = c23*c13  		: 'C-K-M matrix element'.
+
+parameter  deltaaxial = 0 : 'Do not touch. For gamma5 renormalisation!'.
+
+OrthMatrix( { {Vud,Vus,Vub}, {Vcd,Vcs,Vcb}, {Vtd,Vts,Vtb}} ).
+
+do_if gauge_fixing==Feynman.
+
+vector  
+	A/A: (photon, gauge),
+	Z/Z:('Z boson', mass MZ = 91.187, width wZ = 2.502, gauge),
+	G/G: (gluon, color c8, gauge),
+	'W+'/'W-': ('W boson', mass MW = MZ*CW, width wW = 2.094, gauge).
+
+do_else.
+
+vector  
+	A/A: (photon, gauge),
+	Z/Z:('Z boson', mass MZ = 91.187, width wZ = 2.502),
+	G/G: (gluon, color c8, gauge),
+	'W+'/'W-': ('W boson', mass MW = MZ*CW, width wW = 2.094).
+
+end_if.
+
+spinor 		n1:(neutrino,left), 	   e1:(electron),
+		n2:('mu-neutrino',left),   e2:(muon, mass Mm  = 0.1057),
+		n3:('tau-neutrino',left),  e3:('tau-lepton', mass Mt  = 1.777).
+
+spinor		u:('u-quark',color c3),
+		d:('d-quark',color c3),
+		c:('c-quark',color c3, mass Mc  = 1.300),
+		s:('s-quark',color c3, mass Ms = 0.200),
+		t:('t-quark',color c3, mass Mtop = 170, width wtop = 1.442),
+		b:('b-quark',color c3, mass Mb =  4.300 ).
+
+scalar H/H:(Higgs, mass MH = 200, width wH = 1.461).
+			
+let l1={n1,e1}, L1={N1,E1}.
+let l2={n2,e2}, L2={N2,E2}.
+let l3={n3,e3}, L3={N3,E3}.
+
+let q1={u,d}, Q1={U,D}, q1a={u,Vud*d+Vus*s+Vub*b}, Q1a={U,Vud*D+Vus*S+Vub*B}.
+let q2={c,s}, Q2={C,S}, q2a={c,Vcd*d+Vcs*s+Vcb*b}, Q2a={C,Vcd*D+Vcs*S+Vcb*B}. 
+let q3={t,b}, Q3={T,B}, q3a={t,Vtd*d+Vts*s+Vtb*b}, Q3a={T,Vtd*D+Vts*S+Vtb*B}.
+
+let B1= -SW*Z+CW*A, W3=CW*Z+SW*A, W1=('W+'+'W-')/Sqrt2,
+	 W2 = i*('W+'-'W-')/Sqrt2.
+
+do_if gauge_fixing==Feynman.
+
+let gh1 = ('W+.c'+'W-.c')/Sqrt2, gh2= i*('W+.c'-'W-.c')/Sqrt2,
+		gh3= CW*'Z.c'+SW*'A.c', gh={gh1,gh2,gh3}.
+
+let Gh1 = ('W+.C'+'W-.C')/Sqrt2, Gh2=i*('W+.C'-'W-.C')/Sqrt2, 
+		Gh3= CW*'Z.C'+SW*'A.C', Gh={Gh1,Gh2,Gh3}. 
+
+end_if.
+
+let WW1 = {W1,  W2 , W3}, WW = {'W+',W3,'W-'}.
+
+let g=EE/SW, g1=EE/CW.
+
+
+
+
+% Self-interaction of gauge bosons
+
+
+
+lterm -F**2/4   where 
+	F=deriv^mu*B1^nu-deriv^nu*B1^mu.
+
+lterm -F**2/4  where
+	F=deriv^mu*G^nu^a-deriv^nu*G^mu^a+i*GG*f_SU3^a^b^c*G^mu^b*G^nu^c.
+
+lterm -F**2/4  where
+F=deriv^mu*WW1^nu^a-deriv^nu*WW1^mu^a -g*eps^a^b^c*WW1^mu^b*WW1^nu^c.
+
+
+
+
+% left fermion interaction with gauge fields
+
+
+lterm  	anti(psi)*gamma*(1-g5)/2*(i*deriv-g*taupm*WW/2-Y*g1*B1)*psi
+		where 
+			psi=l1,  Y=-1/2;
+			psi=l2,  Y=-1/2;
+			psi=l3,  Y=-1/2;
+			psi=q1a, Y= 1/6;
+			psi=q2a, Y= 1/6;
+			psi=q3a, Y= 1/6.
+
+lterm  	anti(psi)*gamma*g5/2*(-deltaaxial)*(i*deriv-g*taupm*WW/2-Y*g1*B1)*psi
+		where 
+			psi=l1,  Y=-1/2;
+			psi=l2,  Y=-1/2;
+			psi=l3,  Y=-1/2;
+			psi=q1a, Y= 1/6;
+			psi=q2a, Y= 1/6;
+			psi=q3a, Y= 1/6.
+
+% right fermion interaction with gauge fields
+
+lterm  	anti(psi)*gamma*(1+g5)/2*(i*deriv - Y*g1*B1)*psi
+		where 
+			psi=e1,Y= -1;
+			psi=e2,Y= -1;
+			psi=e3,Y= -1;
+			psi=u, Y=  2/3;
+			psi=c, Y=  2/3;
+			psi=t, Y=  2/3;
+			psi=d, Y= -1/3;
+			psi=s, Y= -1/3;
+			psi=b, Y= -1/3.
+
+lterm  	anti(psi)*gamma*g5/2*deltaaxial*(i*deriv - Y*g1*B1)*psi
+		where 
+			psi=e1,Y= -1;
+			psi=e2,Y= -1;
+			psi=e3,Y= -1;
+			psi=u, Y=  2/3;
+			psi=c, Y=  2/3;
+			psi=t, Y=  2/3;
+			psi=d, Y= -1/3;
+			psi=s, Y= -1/3;
+			psi=b, Y= -1/3.
+
+% quark-gluon interaction
+
+lterm  GG*anti(psi)*lambda*gamma*G*psi where
+	psi=q1; psi=q2; psi=q3.
+
+do_if gauge_fixing==Feynman.
+
+let pp = { -i*'W+.f',  (vev(2*MW/EE*SW)+H+i*'Z.f')/Sqrt2 }, 
+    PP = {  i*'W-.f',  (vev(2*MW/EE*SW)+H-i*'Z.f')/Sqrt2 }.
+
+do_else.
+
+let pp = { 0,  (vev(2*MW/EE*SW)+H)/Sqrt2 }, 
+    PP = { 0,  (vev(2*MW/EE*SW)+H)/Sqrt2 }.
+    
+end_if.
+
+
+lterm  -M/MW/Sqrt2*g*(anti(pl)*(1+g5)/2*pr*pp + anti(pr)*(1-g5)/2*pl*PP )
+    where
+	M=Vud*0,  pl=q1a, pr=d;          % 0 stands for Md 
+	M=Vus*Ms, pl=q1a, pr=s;
+	M=Vub*Mb, pl=q1a, pr=b;
+	M=Vcd*0,  pl=q2a, pr=d;
+	M=Vcs*Ms, pl=q2a, pr=s;
+	M=Vcb*Mb, pl=q2a, pr=b;
+	M=Vtd*0,  pl=q3a, pr=d;
+	M=Vts*Ms, pl=q3a, pr=s;
+	M=Vtb*Mb, pl=q3a, pr=b.
+
+
+lterm  -M/MW/Sqrt2*g*(anti(pl)*(1+g5)/2*i*tau2*pr*PP 
+		+ anti(pr)*(1-g5)/2*i*pl*tau2*pp ) 
+ where
+	M=0 ,  pl=q1a, pr=u;
+	M=Mc,  pl=q2a, pr=c;
+	M=Mtop,pl=q3a, pr=t.
+
+lterm  -M/MW/Sqrt2*g*(anti(pl)*(1+g5)/2*pr*pp + anti(pr)*(1-g5)/2*pl*PP )
+    where
+	M=Mm,  pl=l2,  pr=e2;
+	M=Mt,  pl=l3,  pr=e3.
+	
+
+
+lterm -2*lambda*(pp*PP-v**2/2)**2  where 
+	lambda=(g*MH/MW)**2/16, v=2*MW*SW/EE.
+
+
+
+let Dpp^mu^a = (deriv^mu+i*g1/2*B1^mu)*pp^a +
+	 i*g/2*taupm^a^b^c*WW^mu^c*pp^b.
+
+let DPP^mu^a = (deriv^mu-i*g1/2*B1^mu)*PP^a 
+	-i*g/2*taupm^a^b^c*{'W-'^mu,W3^mu,'W+'^mu}^c*PP^b.
+
+	
+
+lterm DPP*Dpp.
+
+
+lterm -i*GG*f_SU3*ccghost(G)*G^mu*deriv^mu*ghost(G).
+lterm  -1/2*(deriv*G)**2.
+
+do_if gauge_fixing==Feynman.
+
+%lterm -g*eps*gh*WW1*deriv*Gh.
+
+lterm g*eps*deriv*Gh*gh*WW1.
+
+
+lterm  -1/2*(deriv*A)**2.
+
+
+lterm  -1/2*(2*(deriv*'W+'+MW*'W+.f')*(deriv*'W-'+MW*'W-.f') +
+	(deriv*Z+MW/CW*'Z.f')**2).
+
+
+lterm -MW*EE/2/SW*((H+i*'Z.f')*('W-.C'*'W+.c' + 'W+.C'*'W-.c')
+    		+H*'Z.C'*'Z.c'/CW**2-2*i*'Z.f'*'W+.C'*'W-.c').
+
+lterm i*EE*MW/2/CW/SW*(
+	'W+.f'*('W-.C'*'Z.c'*(1-2*SW**2)+'W-.c'*'Z.C'
+			+2*CW*SW*'W-.C'*'A.c') -
+	'W-.f'*('W+.C'*'Z.c'*(1-2*SW**2)+'W+.c'*'Z.C'
+			+2*CW*SW*'W+.C'*'A.c')).
+end_if.
+
+SetAngle(1-SW**2=CW**2).
+SetEM(A,EE).
+CheckHerm.
+
+read golem_fmt.

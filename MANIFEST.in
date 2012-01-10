@@ -1,0 +1,44 @@
+recursive-include templates/     *
+recursive-include models/        *
+recursive-include olp/           *
+recursive-include olp/contrib    *.py *.java *.c *.cpp *.h *.hpp
+include doc/Makefile
+include doc/refman.bib
+include doc/refman.tex
+include doc/remark.sty
+include doc/lstform.tex
+include doc/lstolp.tex
+include README
+include COPYING
+include MANIFEST.in
+include haggies/haggies.jar
+recursive-include examples      README Makefile *.rc ntest/test.f90
+recursive-include examples      ntest/analytic.f90
+include examples/README
+include examples/setup.in.template
+include examples/summarize.sh
+include examples/runtests.sh
+include examples/gggg/nform/color.frm
+include examples/gggg/nform/square.frm
+include examples/gggg/nform/square.out
+include examples/gggg/nfort/four_gluon.f90
+include examples/gggg_dred/nfort/four_gluon.f90
+include examples/gggg_lhep/nfort/four_gluon.f90
+include examples/WpWpjj/nform/refres.frm
+include examples/eett/nform/square.frm
+include examples/eett/nform/analytic.in
+include examples/eett/nform/analytic.out
+include examples/eett/nform/analytic.f90
+include examples/eett_lhep/nform/square.frm
+include examples/eett_lhep/nform/analytic.in
+include examples/eett_lhep/nform/analytic.out
+include examples/eett_lhep/nform/analytic.f90
+recursive-include examples/model/MSSM_UFO *.py *.log
+recursive-include examples/model/Standard_Model_UFO *.py *.log
+recursive-include examples/model/Standard_Model_LanHep Makefile *.mdl
+recursive-include src/form  *.hh *.frm *.sty *.nw
+recursive-exclude src       *.pyc *.pyo *~ *.swp .svn
+recursive-exclude olp       *.pyc *.pyo *~ *.swp .svn
+recursive-exclude templates *.pyc *.pyo *~ *.swp .svn
+recursive-exclude models/   *~ *.swp .svn
+recursive-exclude examples/*/ngolem/ *
