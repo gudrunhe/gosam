@@ -58,7 +58,7 @@ class Fortran90(_OutputFilter):
          result = ""
          for line in xchunk.splitlines(True):
             if line.endswith("\n") or line.endswith("\r"):
-               buf = line[:-1]
+               buf = line[:-1].rstrip()
                endl = line[-1:]
             else:
                buf = line
@@ -77,9 +77,11 @@ class Fortran90(_OutputFilter):
                buf = buf[last:]
                ll = len(buf)
 
-               result += "&\n" + self.indent  + "&"
-               self.column = len(self.indent) + 1
+               if len(buf) > 0:
+                  result += "&\n" + self.indent  + "&"
+                  self.column = len(self.indent) + 1
             result += buf
+
             if endl == "":
                self.column += len(buf)
             else:

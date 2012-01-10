@@ -244,13 +244,13 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
          apdg = abs(pdg)
 
          if pdg in range(1,9):
-            quarks[idx] = (pdg, m, ((apdg-1)//2) + 1)
+            quarks[idx] = (apdg, m, ((apdg-1)//2) + 1)
          elif -pdg in range(1,9):
-            anti_quarks[idx] = (pdg, m, ((apdg-1)//2) + 1)
+            anti_quarks[idx] = (apdg, m, ((apdg-1)//2) + 1)
          elif pdg in range(11,19):
-            leptons[idx] = (pdg, m, ((apdg-11)//2) + 1)
+            leptons[idx] = (apdg, m, ((apdg-11)//2) + 1)
          elif -pdg in range(11,19):
-            anti_leptons[idx] = (pdg, m, ((apdg-11)//2) + 1)
+            anti_leptons[idx] = (apdg, m, ((apdg-11)//2) + 1)
 
       li = len(in_particles)
       for idx, p in enumerate(out_particles):
@@ -263,13 +263,13 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
          apdg = abs(pdg)
 
          if pdg in range(1,9):
-            quarks[li+idx] = (pdg, m, ((apdg-1)//2) + 1)
+            quarks[li+idx] = (apdg, m, ((apdg-1)//2) + 1)
          elif -pdg in range(1,9):
-            anti_quarks[li+idx] = (pdg, m, ((apdg-1)//2) + 1)
+            anti_quarks[li+idx] = (apdg, m, ((apdg-1)//2) + 1)
          elif pdg in range(11,19):
-            leptons[li+idx] = (pdg, m, ((apdg-11)//2) + 1)
+            leptons[li+idx] = (apdg, m, ((apdg-11)//2) + 1)
          elif -pdg in range(11,19):
-            anti_leptons[li+idx] = (pdg, m, ((apdg-11)//2) + 1)
+            anti_leptons[li+idx] = (apdg, m, ((apdg-11)//2) + 1)
 
       quark_filters = []
       lepton_filters = []
@@ -288,7 +288,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
             quark_assignments += 1
             valid = True
             lines = []
-            for q, a in zip(qi, ai):
+            for q, a in zip(qi, p):
                qpdg, qm, qg = quarks[q]
                apdg, am, ag = anti_quarks[a]
                if (flavour and qpdg != apdg) or (family and qg != ag):
@@ -310,7 +310,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
             lepton_assignments += 1
             valid = True
             lines = []
-            for q, a in zip(qi, ai):
+            for q, a in zip(qi, p):
                qpdg, qm, qg = leptons[q]
                apdg, am, ag = anti_leptons[a]
                if (flavour and qpdg != apdg) or (family and qg != ag):
@@ -343,7 +343,6 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
             if pdg in pdg_fixed:
                if heli[linp+i] not in pdg_fixed[pdg]:
                   return False
-
          for k, h_set in fixed.items():
             if heli[k] not in h_set:
                return False

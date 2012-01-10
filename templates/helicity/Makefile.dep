@@ -60,8 +60,7 @@ samuraih[%helicity%].[%O%]: [%
 golem95h[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.[%O%][%
-					@if internal GENERATE_DERIVATIVES
-						%] d[%$_%]h[%helicity%]l1d.[%O%][%
+					@if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.[%O%][%
 					@end @if %][%
          	@end @for %][%
 	      @end @if extension golem95 %][%
