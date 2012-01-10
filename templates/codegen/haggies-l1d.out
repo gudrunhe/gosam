@@ -1,7 +1,7 @@
 %=$[$ 
  ' vim: ts=3:sw=3:syntax=golem
-$]module     [$ process_name asprefix=\_ 
-            $][% output.file match=".*/(d\\d+h\\d+l1d).f90" format ="%s"%]
+$][% @with args %]module     [$ process_name asprefix=\_ 
+            $]d[% DIAGRAM %]h[% HELICITY %]l1d
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
    use [$ process_name asprefix=\_ $]config, only: ki
@@ -21,7 +21,7 @@ $]module     [$ process_name asprefix=\_
    @end @select %][%
 @end @for instructions %]
 
-   public :: derivative 
+   public :: derivative, reconstruct_d[% DIAGRAM %]
 contains[% 
 @for brackets bracket="brack_%d" %][%
    @for brackets bracket="subbrack_%2$d_%1$d" %]
@@ -119,7 +119,6 @@ contains[%
          @end @select %][%
       @end @select %][%
    @end @for %]) result(numerator)
-      use precision, only: ki_sam => ki
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       use [$ process_name asprefix=\_ $]kinematics
       use [$ process_name asprefix=\_ $]abbrev[%
@@ -162,7 +161,7 @@ contains[%
    @with args %][$
       @if extension qshift $]
 
-		Q(:) = Q_ext(:)[$
+      Q(:) = Q_ext(:)[$
       @else $][%
          @select QSHIFT
          @case 0 %]
@@ -199,11 +198,10 @@ contains[%
       @select $_ match="(.).*" format="%s"
       @case d %]
       if(deg.eq.[% $_ match="d(\\d+)diagram" format="%s" %]) then
-         loc = [% expression bracket="brack_%d[$
+         numerator = [% expression bracket="brack_%d[$
          @select r2 default=implicit
          @case explicit only off $](Q)[$
          @end @select $]" %]
-         numerator = cmplx(real(loc, ki), aimag(loc), ki_sam)
          return
       end if[%
       @else %]
@@ -214,6 +212,141 @@ contains[%
       @end @select %][%
    @end @for instructions %]
    end function derivative
-!---#] function derivative:
+!---#] function derivative:[$
+@if extension golem95 $]
+!---#[ subroutine reconstruct_d[% DIAGRAM %]:
+   subroutine     reconstruct_d[% DIAGRAM %](coeffs)
+      use [$ process_name asprefix=\_ $]groups, only: tensrec_info_group[% 
+             GROUP %]
+      implicit none
+      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
+      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
+
+      type(tensrec_info_group[% GROUP %]), intent(out) :: coeffs[$
+   @select r2 default=implicit @case implicit $][%
+      @select RANK @case 0 1 2 3 %][%
+      @else %]
+      complex(ki) :: x1, x2[%
+      @end @select %][$
+   @end @select $][$
+   @if internal DERIVATIVES_AT_ZERO $][$
+   @else $]
+      complex(ki), dimension(4), parameter :: Q = (/czip,czip,czip,czip/)[$
+   @end @if $][[$ ' $]%
+
+   @select RANK[$
+   @for repeat 7 var=rk $]
+   @case [$ rk $] %[$ ' $]]
+      ! rank [$ rk $] case:
+      !---[# reconstruct coeffs%coeffs_[% DIAGRAM %]:[$
+      @for tens_rec_info rk shift_args=1 $]
+      coeffs%coeffs_[% DIAGRAM %][$
+         @if eval rk .gt. 0 $]%c[$ coeff $][$
+            @select coeff @case 0 $][$
+            @else $]([$k$],[$i$])[$
+            @end @select $][$
+         @end @if $] = [$
+         @select sign @case -1 $]-[$
+         @end @select $]derivative([$
+
+         @if internal DERIVATIVES_AT_ZERO $][$
+         @else $]Q,[$
+         @end @if $]czip[$
+         @for elements args delim=, $],[$ $_ $][$
+         @end @for $])[$
+         @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+         @end @if $][$
+      @end @for tens_rec_info rk $]
+      !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]:[$
+
+
+
+      @select r2 default=implicit @case implicit $][$
+         @select rk @case 0 1 $][$
+         @case 2 3 $]
+      !---#[ reconstruct coeffs%coeffs_[% DIAGRAM %]s1:[$
+            @with eval rk - 2 result=rkk $][$
+               @for tens_rec_info rkk shift_args=1 $]
+      coeffs%coeffs_[% DIAGRAM %]s1[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $]cone[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$k$],[$i$])[$
+                  @end @select $][$
+               @end @for tens_rec_info rkk $][$
+            @end @with eval rkk $]
+      !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]s1:[$
+         @else $]
+      !---#[ reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2:[$
+            @with eval rk - 2 result=rkk $][$
+               @for tens_rec_info rkk shift_args=1 $]
+      x1 = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $] cone[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$k$],[$i$])[$
+                  @end @select $]
+      x2 = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $]-cone[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$k$],[$i$])[$
+                  @end @select $]
+      coeffs%coeffs_[% DIAGRAM %]s1[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = 0.5_ki * (x1 - x2)
+      coeffs%coeffs_[% DIAGRAM %]s2[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = 0.5_ki * (x1 + x2)[$
+               @end @for tens_rec_info $][$
+            @end @with eval rkk $]
+      !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2:[$
+         @end @select rk $][$
+      @end @select r2 $][[$ ' $]%[$
+   @end @for repeat max_rank $]
+   @end @select %[$ ' $]]
+   end subroutine reconstruct_d[% DIAGRAM %]
+!---#] subroutine reconstruct_d[% DIAGRAM %]:[$
+@end @if $]
 end module [$ process_name asprefix=\_
-          $][% output.file match=".*/(d\\d+h\\d+l1d).f90" format ="%s"%]
+          $]d[%DIAGRAM%]h[%HELICITY%]l1d[%
+@end @with %]
