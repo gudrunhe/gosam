@@ -660,9 +660,16 @@ symmetries = Property("symmetries",
    * lepton     -- means for leptons what 'flavour' means for quarks
    * generation -- means for leptons what 'family' means for quarks
    * parity     -- the amplitude is invariant under parity tranformation.
+                   === Parity is not implemented yet.
    * <n>=<h>    -- restriction of particle helicities,
             e.g. 1=-, 2=+ specifies helicities of particles 1 and 2
-       to be fixed.
+   * %<n>=<h>   -- restriction by PDG code,
+            e.g. %23=+- specifies the helicity of all Z-bosons to be
+            '+' and '-' only (no '0' polarisation).
+
+            %<n> refers to both +n and -n
+            %+<n> refers to +n only
+            %-<n> refers to -n only
    """,
    list, experimental=True)
 
