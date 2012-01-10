@@ -1,0 +1,37 @@
+
+SetTexName([u=u,U='\\bar{u}','u.c'='\\bar{u^c}','U.c'='u^c']).
+SetTexName([d=d,D='\\bar{d}','d.c'='\\bar{d^c}','D.c'='d^c']).
+SetTexName([s=s,S='\\bar{s}','s.c'='\\bar{s^c}','S.c'='s^c']).
+SetTexName([b=b,B='\\bar{b}','b.c'='\\bar{b^c}','B.c'='b^c']).
+SetTexName([c=c,C='\\bar{c}','c.c'='\\bar{c^c}','C.c'='c^c']).
+SetTexName([t=t,T='\\bar{t}','t.c'='\\bar{t^c}','T.c'='t^c']).
+SetTexName([e1=e,E1='\\bar{e}', n1='\\nu^e', N1='\\bar{\\nu}^e']).
+SetTexName([e=e,E='\\bar{e}', ne='\\nu^e', Ne='\\bar{\\nu}^e']).
+SetTexName(['e1.c'='e^c','E1.c'='\\bar{e}^c', 
+	    'n1.c'='\\nu^{ec}', 'N1.c'='\\bar{\\nu}^{ec}']).
+SetTexName(['e.c'='e^c','E.c'='\\bar{e}^c', 
+	    'ne.c'='\\nu^{ec}', 'Ne.c'='\\bar{\\nu}^{ec}']).
+SetTexName([e2='\\mu',E2='\\bar{\\mu}', n2='\\nu^\\mu', N2='\\bar{\\nu}^\\mu']).
+SetTexName([e3='\\tau',E3='\\bar{\\tau}', n3='\\nu^\\tau',
+			N3='\\bar{\\nu}^\\tau']).
+SetTexName([m='\\mu',M='\\bar{\\mu}', nm='\\nu^\\mu', Nm='\\bar{\\nu}^\\mu']).
+SetTexName([l='\\tau',L='\\bar{\\tau}', nl='\\nu^\\tau',
+			Nl='\\bar{\\nu}^\\tau']).
+
+SetTexName(['W+'='W^+', 'W+.c'='C^{W+}', 'W+.C'='\\bar{C}^{W+}',
+	'W+.f'='W^+_F']).
+SetTexName(['W-'='W^-', 'W-.c'='C^{W-}', 'W-.C'='\\bar{C}^{W-}',
+	'W-.f'='W^-_F']).
+
+SetTexName([ 'Z.c'='C^{Z}', 'Z.C'='\\bar{C}^{Z}',
+	'Z.f'='Z_F', 'A.c'='C^{Z}', 'A.C'='\\bar{C}^A',
+	'G.c'='C^G','G.C'='\\bar{C}^G']).
+
+
+
+SetTexName([EE=e, GG='g_s', SW='s_w', CW='c_w', MZ='M_Z']).
+
+SetTexName([Me='M_e', Mm='M_\\mu', Mt='M_\\tau', Ms='M_s',
+		Mc='M_c', Mb=M_b, Mtop=M_t, wtop='\\Gamma_t',
+		wW='\\Gamma_W', wZ='\\Gamma_Z', MW=M_W, MZ=M_Z]).
+

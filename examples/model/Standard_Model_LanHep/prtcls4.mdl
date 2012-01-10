@@ -1,0 +1,20 @@
+Stand. Model (Feyn. gauge)
+ Particles 
+fullname|name|aname|spin2|mass|width|color|aux|texname|atexname|pdg|
+photon  |A   |A    |2    |0   |0    |1    |G  |A      |A       |22 |
+Z boson |Z   |Z    |2    |MZ  |wZ   |1    |G  |Z      |Z       |23 |
+gluon   |G   |G    |2    |0   |0    |8    |G  |G      |G       |21 |
+W boson |W+  |W-   |2    |MW  |wW   |1    |G  |W^+    |W^-     |24 |
+neutrino|n1  |N1   |1    |0   |0    |1    |L  |\nu^e  |\bar{\nu}^e|12 |
+electron|e1  |E1   |1    |0   |0    |1    |   |e      |\bar{e} |11 |
+mu-neutrino|n2  |N2   |1    |0   |0    |1    |L  |\nu^\mu|\bar{\nu}^\mu|14 |
+muon    |e2  |E2   |1    |Mm  |0    |1    |   |\mu    |\bar{\mu}|13 |
+tau-neutrino|n3  |N3   |1    |0   |0    |1    |L  |\nu^\tau|\bar{\nu}^\tau|16 |
+tau-lepton|e3  |E3   |1    |Mt  |0    |1    |   |\tau   |\bar{\tau}|15 |
+u-quark |u   |U    |1    |0   |0    |3    |   |u      |\bar{u} |2  |
+d-quark |d   |D    |1    |0   |0    |3    |   |d      |\bar{d} |1  |
+c-quark |c   |C    |1    |Mc  |0    |3    |   |c      |\bar{c} |4  |
+s-quark |s   |S    |1    |Ms  |0    |3    |   |s      |\bar{s} |3  |
+t-quark |t   |T    |1    |Mtop|wtop |3    |   |t      |\bar{t} |6  |
+b-quark |b   |B    |1    |Mb  |0    |3    |   |b      |\bar{b} |5  |
+Higgs   |H   |H    |0    |MH  |wH   |1    |   |H      |H       |25 |

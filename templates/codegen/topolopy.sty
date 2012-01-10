@@ -1,0 +1,37 @@
+<prologue>
+# vim: ts=3:sw=3:expandtab:syntax=python
+#
+# This file has been generated automatically.
+
+from golem.topolopy.objects import Diagram, Leg, Propagator, Vertex
+
+generation_info = {
+    'program': "<program>",
+    'model': "[model]",
+    'qgraf.dat': [[<command_loop>
+       """<command_line_loop><command_data><back><end>""",<end><back>]]
+}
+
+diagrams = {}
+
+<diagram>
+#---#[[ diagrams[[<diagram_index>]]:
+diagrams[[<diagram_index>]] = Diagram(
+<in_loop>   Leg(<in_index>, True, "<field>", <vertex_index>, <ray_index>,
+<back> "<momentum>", "[MASS]", [CONJ][TWOSPIN], [COLOR],
+<back> "<field>" == "<dual-field>"),
+<end><out_loop>   Leg(<out_index>, False, "<field>", <vertex_index>,
+<back> <ray_index>, "<momentum>", "[MASS]", [CONJ][TWOSPIN], [COLOR],
+<back> "<field>" == "<dual-field>"),
+<end><back><back><propagator_loop>,
+   Propagator(<propagator_index>, "<field>",
+<back> <dual-vertex_index>, <dual-ray_index>,
+<back> <vertex_index>, <ray_index>, "<momentum>", "[MASS]", "[WIDTH]", [AUX],
+<back> [TWOSPIN], [COLOR],
+      "<field>" == "<dual-field>", sign="<field_sign>")
+<back><end><vertex_loop>,
+   Vertex(<vertex_index>, [RK], <ray_loop>"<field>", <end><back><back>)<end>)
+#---#]] diagrams[[<diagram_index>]]:
+<epilogue>
+#-------------------------------------------------------------------
+<exit>

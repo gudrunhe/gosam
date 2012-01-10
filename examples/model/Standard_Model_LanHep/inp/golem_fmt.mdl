@@ -1,0 +1,21 @@
+prtcformat
+   fullname:   'fullname',
+   name:       'name',
+   aname:      'aname',
+   spin2:      'spin2',
+   mass:       'mass',
+   width:      'width',
+   color:      'color',
+   aux:        'aux',
+   texname:    'texname',
+   atexname:   'atexname',
+   pdg:        'pdg'.
+
+prtcprop pdg: (
+   d=1,u=2,s=3,c=4,b=5,t=6,
+   e1=11,n1=12,
+   e2=13,n2=14,
+   e3=15,n3=16,
+   G=21,A=22,Z=23,'W+'=24,
+   H=25
+   ).
