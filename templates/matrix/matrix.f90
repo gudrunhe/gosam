@@ -499,7 +499,7 @@ contains
                 & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
             write(logfile,'(A33,E24.16,A3)') &
                 & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-            if (corrections_are_qcd .and. renorm_gamma_5) then
+            if (corrections_are_qcd .and. renorm_gamma5) then
                write(logfile,'(A30,E24.16,A3)') &
                    & "<result kind='fin-ren' value='", fr, "'/>"
             end if
