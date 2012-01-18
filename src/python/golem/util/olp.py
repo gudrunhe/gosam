@@ -486,6 +486,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if templates == "":
       templates = golem.util.tools.golem_path("olp", "templates")
 
+   golem.properties.setInternals(conf)
+
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(True),
          conf=conf,
          subprocesses=list(subprocesses.values()),
