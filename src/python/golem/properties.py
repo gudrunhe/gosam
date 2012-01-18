@@ -674,7 +674,7 @@ symmetries = Property("symmetries",
             %+<n> refers to +n only
             %-<n> refers to -n only
    """,
-   list, experimental=True)
+   list)
 
 pyxodraw = Property("pyxodraw",
    """\
