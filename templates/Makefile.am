@@ -1,7 +1,7 @@
 [% ' vim: syntax=golem:ts=3:sw=3
  %]# vim: ts=3:sw=3
 SUBDIRS=doc common[%
-@for helicities %] \
+@for helicities generated %] \
 	helicity[% helicity %][%
 @end @for helicities %] \
 	matrix
@@ -15,7 +15,7 @@ libgolem_process[% process_name assuffix=\_ %]_la_SOURCES=
 libgolem_process[% process_name assuffix=\_ %]_la_LIBADD= \
 		$(builddir)/common/libgolem_process[%
 				process_name assuffix=\_ %]_common.la[%
-@for helicities %] \
+@for helicities generated %] \
 		$(builddir)/helicity[% helicity
 			%]/libgolem_process[%
 				process_name assuffix=\_ %]_helicity[% helicity %].la[%

@@ -431,11 +431,14 @@ extensions = Property("extensions",
    topolynomial --- (with FORM >= 4.0) use the ToPolynomial command
    gaugecheck   --- modify gauge boson wave functions to allow for
                     a limited gauge check (introduces gauge*z variables)
+   olp_daemon   --- (OLP interface only): generates a C-program providing
+                    network access to the amplitude
    """,
    list,
    options=["samurai", "golem95", "pjfry", "dred", "fr5",
       "powhegbox", "autotools", "qshift", "topolynomial",
-      "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive"])
+      "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
+      "generate-all-helicities", "olp_daemon"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -844,7 +847,10 @@ def setInternals(conf):
          "__DERIVATIVES_AT_ZERO__",
          "__REGULARIZATION_DRED__",
          "__REGULARIZATION_HV__",
-         "__GAUGE_CHECK__"]
+         "__GAUGE_CHECK__",
+         "__NUMPOLVEC__",
+         "__REDUCE_HELICITIES__",
+         "__OLP_DAEMON__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
@@ -853,3 +859,6 @@ def setInternals(conf):
    conf["__REGULARIZATION_HV__"] = not conf["__REGULARIZATION_DRED__"]
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
+   conf["__NUMPOLVEC__"] = "numpolvec" in extensions
+   conf["__REDUCE_HELICITIES__"] = "generate-all-helicities" not in extensions
+   conf["__OLP_DAEMON__"] = "olp_daemon" in extensions

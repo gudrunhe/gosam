@@ -60,8 +60,8 @@ class Property:
                min_opt = option
                min_lev = dist
          if min_opt is not None and min_lev <= 5:
-            result.append("Did you mean '%s' where you typed '%s'?"
-                     % (min_opt, word))
+            result.append(("If you meant '%s' instead of '%s', " +
+               "please correct and rerun!") % (min_opt, word))
       return result
 
    def check(self, conf):

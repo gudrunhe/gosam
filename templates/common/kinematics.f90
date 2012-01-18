@@ -144,10 +144,15 @@ contains
    end subroutine inspect_kinematics
 !---#] subroutine inspect_kinematics:
 !---#[ subroutine init_event:
-   subroutine     init_event(vecs)
+   subroutine     init_event(vecs[%
+@for particles lightlike vector %], hel[%index%][%
+@end @for %])
       use [% process_name asprefix=\_ %]model
       implicit none
-      real(ki), dimension(num_legs,4), intent(in) :: vecs
+      real(ki), dimension(num_legs,4), intent(in) :: vecs[%
+@for particles lightlike vector %]
+      integer, intent(in), optional :: hel[%index%][%
+@end @for %]
       
       call invalidate_cache()[%
 @for particles %]
@@ -227,8 +232,13 @@ contains
     @if is_lightlike2%]k[%index2%][%
     @else %]l[%index2%][%
     @end @if %])[%
-    @end @for %]
-
+    @end @for %][%
+    @if internal NUMPOLVEC %][%
+       @for particles lightlike vector %]
+       if(present(hel[%index%]) then
+       end if[%
+       @end @for %][%
+    @end @if%]
    end subroutine init_event
 !---#] subroutine init_event:
 !---#[ subroutine light_cone_decomposition:

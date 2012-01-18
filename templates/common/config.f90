@@ -56,7 +56,9 @@
    @select reduction_interoperation default="-1"
    @case -1 %][%
       @if extension samurai %][%
-         @if extension golem95 %]2[%
+         ' This should be put back to '2' after the rescue system
+           has been completely fixed %][%
+         @if extension golem95 %]0[%
         @else %]0[%
          @end @if %][%
       @else %]1[%

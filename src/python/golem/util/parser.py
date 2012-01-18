@@ -577,11 +577,12 @@ class Template:
 
    def _format_value(self, value, *args, **opts):
       if "substr" in opts:
-         line=map(int, opts["substr"].split(":"))
+         coords = opts["substr"]
+         line=coords.split(":")
          if len(line) == 1:
-            value = value[line[0]:]
+            value = value[self._eval_int(line[0]):]
          elif len(line) == 2:
-            value = value[line[0]:line[1]]
+            value = value[self._eval_int(line[0]):self._eval_int(line[1])]
 
       if "convert" in opts:
          if opts["convert"] == "lower":

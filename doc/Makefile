@@ -9,11 +9,11 @@ GOLEM=gosam.py
 
 .PHONY: all
 
-all: refman.pdf
+all: refman.pdf devel.pdf
 
-%.pdf: %.tex %.bib template.tex
+%.pdf: %.tex
 	$(PDFLATEX) $(PDFLATEX_OPT) $*
-	$(BIBTEX) $(BIBTEX_OPT) $*
+	-$(BIBTEX) $(BIBTEX_OPT) $*
 	@while ( grep "Rerun to get cross-references" \
 		$*.log > /dev/null ); do	\
 		echo '** Re-running LaTeX **'; \
@@ -22,3 +22,5 @@ all: refman.pdf
 
 template.tex:
 	${GOLEM} --no-defaults --format=LaTeX --template $@
+
+refman.pdf: template.tex refman.bib

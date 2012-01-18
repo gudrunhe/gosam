@@ -1,5 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 import golem.properties
+import golem.algorithms.color
 import itertools
 
 symbol_to_heli = {'0': 0, '+': +1, '-': -1,
@@ -208,14 +209,13 @@ def parse_helicity(string, symbols=symbol_to_heli):
             "Illegal helicity: %r" % string)
    return result
 
-def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
+def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
       symmetries = conf.getProperty(golem.properties.symmetries)
       lsymmetries = [s.lower().strip() for s in symmetries]
       family = "family" in lsymmetries
       flavour = "flavour" in lsymmetries
       lepton = "lepton" in lsymmetries
       generation = "generation" in lsymmetries
-      # parity = "parity" in lsymmetries
 
       quarks = {}
       anti_quarks = {}
@@ -400,8 +400,125 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
          return True
 
       return filter_function
-       
-def find_symmetry_group(helicity_list, conf):
+
+def parse_cycles(s, error):
+   cycles = []
+   current_cycle = None
+   level = 0
+   tokens = s.replace("(", " ( ").replace(")", " ) ").split()
+   for token in tokens:
+      if token == "(":
+         if level == 0:
+            level = 1
+            current_cycle = []
+         else:
+            error("Bad place for %r in permutation %r" % (token, s))
+      elif token == ")":
+         if level == 1:
+            level = 0
+            if len(current_cycle) > 1:
+               cycles.append(current_cycle)
+         else:
+            error("Bad place for %r in permutation %r" % (token, s))
+      else:
+         if level == 1:
+            try:
+               idx = int(token) - 1
+               current_cycle.append(idx)
+            except ValueError:
+               error("Unrecognized token %r in permutation %r." % (token, s))
+         else:
+            error("Bad place for %r in permutation %r" % (token, s))
+
+   return cycles
+
+class Permutation:
+   def __init__(self, a_map={}):
+      self._map = {}
+      for k, v in a_map.items():
+         if k == v:
+            continue
+         else:
+            self._map[k] = v
+
+   def __call__(self, arg):
+      if isinstance(arg, Permutation):
+         result = {}
+         keys = set(self._map.keys()).union(arg._map.keys())
+         for k in keys:
+            kk = arg(k)
+            v = self(kk)
+            if k == v:
+               continue
+            result[k] = v
+         return Permutation(result)
+
+      elif isinstance(arg, int):
+         if arg in self._map:
+            return self._map[arg]
+         else:
+            return arg
+      else:
+         return map(self, arg)
+
+   def inverse(self):
+      result = {}
+      for k, v in self._map.items():
+         result[v] = k
+
+      return Permutation(result)
+
+   def __str__(self):
+      args = []
+      for k in sorted(self._map.keys()):
+         v = self._map[k]
+         if k == v:
+            continue
+         args.append("%d -> %d" % (k, v))
+      return "Permutation(%s)" % ", ".join(args)
+
+   def __hash__(self):
+      return hash(tuple(self._map.items()))
+
+   def __eq__(self, other):
+      if isinstance(other, Permutation):
+         return len(self(other.inverse())._map) == 0
+      else:
+         return False
+
+
+def permutation_from_cycles(cycles):
+   result = Permutation()
+   for cycle in cycles:
+      l = len(cycle)
+      for p in range(l-1):
+         c0 = cycle[p]
+         c1 = cycle[p+1]
+         result = result(Permutation({c0: c1, c1: c0}))
+   return result
+
+def color_sort(tpl):
+   lines, traces = tpl
+   ntraces = []
+   for trace in traces:
+      l = len(trace)
+      m = min(trace)
+      r = list(reversed(trace))
+      im = trace.index(m)
+      ir = r.index(m)
+
+      t = trace[im:] + trace[:im]
+      tr = r[ir:] + r[:ir]
+      if tr[1] < t[1]:
+         ntraces.append(tr)
+      else:
+         ntraces.append(t)
+
+   return (sorted(lines, key=lambda lst: lst[0]),
+         sorted(ntraces, key=lambda lst: lst[0]))
+
+def find_symmetry_group(helicity_list, conf,
+      in_particles, out_particles, error):
    """
    Find a set of symmetry transformations which maps helicities of the
    given list onto each other.
@@ -417,13 +534,46 @@ def find_symmetry_group(helicity_list, conf):
    then lst should be None.
 
    """
-   in_particles, out_particles = generate_particle_lists(conf)
+   symmetries = conf.getProperty(golem.properties.symmetries)
+   zeroes = golem.util.tools.getZeroes(conf)
+   lsymmetries = [s.lower().strip() for s in symmetries]
+   parity = "parity" in lsymmetries
+   numpolvec = conf["__NUMPOLVEC__"].lower() == "true"
+   noreduce = conf["__REDUCE_HELICITIES__"].lower() == "false"
+
+   color_basis = map(color_sort, golem.algorithms.color.get_color_basis(
+         in_particles, out_particles))
+
+   if noreduce:
+      result = []
+      for ih, helicity in enumerate(helicity_list):
+         result.append( (ih, None) )
+      return result
+
+
+   user_permutations = [Permutation()]
+   for p in lsymmetries:
+      if not p.startswith("("):
+         continue
+      # explicit permutation symmetry
+      cycles = parse_cycles(p, error)
+      user_permutations.append(permutation_from_cycles(cycles))
 
    groups = {}
+
+   relevant_indices = []
 
    # find groups of identical particles
    for i, p in enumerate(in_particles):
       name = str(p)
+      if numpolvec:
+         if abs(p.getSpin()) != 2 or p.isMassive(zeroes):
+            relevant_indices.append(i)
+         else:
+            continue
+      else:
+         relevant_indices.append(i)
+
       if name not in groups:
          groups[name] = []
 
@@ -433,8 +583,103 @@ def find_symmetry_group(helicity_list, conf):
 
    for i, p in enumerate(out_particles):
       name = p.getPartner()
+
+      if numpolvec:
+         if abs(p.getSpin()) != 2 or p.isMassive(zeroes):
+            relevant_indices.append(i+ofs)
+         else:
+            continue
+      else:
+         relevant_indices.append(i+ofs)
       if name not in groups:
          groups[name] = []
 
       groups[name].append(i+ofs)
 
+   permutation_group_factors = [ set(user_permutations) ]
+   identical_particles = []
+   for lst in groups.values():
+      if len(lst) > 1:
+         identical_particles.append(lst)
+         permutation_group_factors.append(set(
+               [ Permutation(dict(zip(lst, p)))
+                  for p in itertools.permutations(lst)]))
+
+   while len(permutation_group_factors) > 1:
+      f1 = permutation_group_factors.pop()
+      f2 = permutation_group_factors.pop()
+      f = set()
+      for p1 in f1:
+         for p2 in f2:
+            f.add(p1(p2))
+      permutation_group_factors.append(f)
+
+   permutation_group = permutation_group_factors.pop()
+
+   # compute permuted color basis:
+   permuted_color_basis = {}
+   for pi in permutation_group:
+         pcb = [color_sort(([pi(line) for line in lines],
+                  [pi(trace) for trace in traces]))
+                     for lines, traces in color_basis]
+         icb = [color_basis.index(c) for c in pcb]
+         permuted_color_basis[pi] = icb
+
+
+   li = len(in_particles)
+   lo = len(out_particles)
+   in_indices = range(li)
+   out_indices = range(li,li+lo)
+
+   generated_helicities = []
+   result = []
+
+   for ih, helicity in enumerate(helicity_list):
+      mapping = None
+      for pi in permutation_group:
+         p_in_indices = pi(in_indices)
+         p_out_indices = pi(out_indices)
+         p_helicity = {}
+         signs = []
+         for i, j in zip(in_indices, p_in_indices):
+            h = helicity[j]
+            if j not in in_indices:
+               p_helicity[i] = -h
+               signs.append(-1)
+            else:
+               p_helicity[i] = h
+               signs.append(+1)
+         for i, j in zip(out_indices, p_out_indices):
+            h = helicity[j]
+            if j not in out_indices:
+               p_helicity[i] = -h
+               signs.append(-1)
+            else:
+               p_helicity[i] = h
+               signs.append(+1)
+
+         rp_helicity = [p_helicity[i] for i in relevant_indices]
+         mrp_helicity = [-h for h in rp_helicity]
+
+         for gi in generated_helicities:
+            gh = helicity_list[gi]
+            r_gh = [gh[i] for i in relevant_indices]
+
+            if rp_helicity == r_gh:
+               lst = [(pi(i), signs[i], False) for i in range(li+lo)]
+               mapping = (gi, lst, permuted_color_basis[pi])
+               break
+            elif parity and mrp_helicity == r_gh:
+               lst = [(pi(i), signs[i], True) for i in range(li+lo)]
+               mapping = (gi, lst, permuted_color_basis[pi])
+               break
+
+         if mapping is not None:
+            break
+
+      if mapping is None:
+         generated_helicities.append(ih)
+         result.append( (ih, None, range(len(color_basis))) )
+      else:
+         result.append( mapping )
+   return result

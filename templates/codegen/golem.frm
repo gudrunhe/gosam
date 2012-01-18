@@ -604,6 +604,9 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #IfNDef `GENERATEDERIVATIVES'
 .end:output;
 #Else
+   #If (`GROUP' == 0) && (`USETOPOLYNOMIAL')
+      FromPolynomial;
+   #EndIf
 .sort:output;
 #Append <`OUTFILE'.abb>
 #EndIf

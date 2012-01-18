@@ -45,6 +45,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._helicities = []
       self._latex = []
       self._helicity_stack = []
+      self._mapping_stack = []
+      self._color_stack = []
       self._field_info = []
       self._tree_signs = tree_signs
       # self._tree_flows = tree_flows
@@ -139,6 +141,9 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       self._helicity_comb = [h for h in
             golem.util.tools.enumerate_helicities(conf)]
+
+      self._helicity_map = [h for h in 
+            golem.util.tools.enumerate_and_reduce_helicities(conf)]
 
    def crossed_color(self, *args, **opts):
       cri = [prop.getIntegerProperty("$_") for prop in self.crossing()]
@@ -1021,6 +1026,89 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          yield props
 
+   def color_mapping(self, *args, **opts):
+      if len(self._color_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               " [% @for color_mapping %] " +
+               "must be inside [% @for helicities %].")
+
+      prefix = self._setup_name("prefix", "", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+      var_name = self._setup_name("var", prefix + "$_", opts)
+      
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+
+      lst = self._color_stack[-1]
+
+      if lst is None:
+         lst = [(i, 1, False) for i in range(self._num_legs)]
+
+      L = self._num_legs
+
+      props = Properties()
+      for i, ci in enumerate(lst):
+         is_first = i == 0
+         is_last = i == L - 1
+
+         props.setProperty(first_name, is_first)
+         props.setProperty(last_name, is_last)
+         props.setProperty(index_name, shift + i)
+         props.setProperty(var_name, shift + ci)
+
+         yield props
+
+   def helicity_mapping(self, *args, **opts):
+      """
+      Iterates over the currently set helicity mapping
+      """
+
+      if len(self._mapping_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               " [% @for helicity_mapping %] " +
+               "must be inside [% @for helicities %].")
+
+      prefix = self._setup_name("prefix", "", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+      var_name = self._setup_name("var", prefix + "$_", opts)
+      sign_name = self._setup_name("sign", prefix + "sign", opts)
+      parity_name = self._setup_name("parity", prefix + "parity", opts)
+      
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+
+      lst = self._mapping_stack[-1]
+
+      if lst is None:
+         lst = [(i, 1, False) for i in range(self._num_legs)]
+
+      L = self._num_legs
+
+      props = Properties()
+      for i, mapping in enumerate(lst):
+         k, m, p = mapping
+         is_first = i == 0
+         is_last = i == L - 1
+
+         props.setProperty(first_name, is_first)
+         props.setProperty(last_name, is_last)
+         props.setProperty(index_name, shift + i)
+         props.setProperty(var_name, shift + k)
+         props.setProperty(sign_name, m)
+         props.setProperty(parity_name, p)
+
+         yield props
+
    def helicities(self, *args, **opts):
       """
       Enumerates all helicities possible with this
@@ -1068,6 +1156,13 @@ class KinematicsTemplate(golem.util.parser.Template):
       var_name = self._setup_name("var", prefix + "helicity", opts)
       first_name = self._setup_name("first", prefix + "is_first", opts)
       last_name = self._setup_name("last", prefix + "is_last", opts)
+      generated_name = self._setup_name("is_generated",
+            prefix + "generated", opts)
+      map_index = self._setup_name("map.index", prefix + "map.index", opts)
+
+      largs = [a.lower() for a in args]
+
+      generated_only = "generated" in args
 
       symbols = {
                -2: symbol_minus2,
@@ -1113,7 +1208,15 @@ class KinematicsTemplate(golem.util.parser.Template):
       props = Properties()
       i = base
       l = len(self._helicity_comb)
-      for h in self._helicity_comb:
+      for h, mapping in zip(self._helicity_comb, self._helicity_map):
+         gi, lst, color_basis = mapping
+
+         is_generated = (i - base == gi)
+
+         if generated_only and not is_generated:
+            i += 1
+            continue
+
          h = golem.util.tools.encode_helicity(h, symbols)
          skip = False
          for idx, sym in h.items():
@@ -1126,8 +1229,14 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty(first_name, i == base)
             props.setProperty(last_name, i-base >= l-1)
             props.setProperty(var_name, i)
+            props.setProperty(generated_name, is_generated)
+            props.setProperty(map_index, gi+base)
             self._helicity_stack.append(h)
+            self._mapping_stack.append(lst)
+            self._color_stack.append(color_basis)
             yield props
+            self._color_stack.pop()
+            self._mapping_stack.pop()
             self._helicity_stack.pop()
          i += 1
          

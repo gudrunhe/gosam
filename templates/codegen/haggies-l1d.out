@@ -21,7 +21,9 @@ $][% @with args %]module     [$ process_name asprefix=\_
    @end @select %][%
 @end @for instructions %]
 
-   public :: derivative, reconstruct_d[% DIAGRAM %]
+   public :: derivative[$
+   @if extension golem95 $], reconstruct_d[% DIAGRAM %][$
+   @end @if $]
 contains[% 
 @for brackets bracket="brack_%d" %][%
    @for brackets bracket="subbrack_%2$d_%1$d" %]

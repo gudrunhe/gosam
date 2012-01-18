@@ -1,4 +1,4 @@
-
+# vim: syntax=golem
 SUBDIRS=[% @for subprocesses %] \
 	[% path %][% @end @for %]
 
@@ -27,12 +27,16 @@ YACC=yacc
 YACC_OPTS=
 
 F_OBJECTS=olp_module.o
-C_OBJECTS=olp_parser.o olp_lexer.o olp_daemon.o
+C_OBJECTS=[%
+@if internal OLP_DAEMON %]olp_parser.o olp_lexer.o olp_daemon.o[%
+@end @if %]
 
 DISTFILES= \
-	Makefile olp.h config.sh olp_module.f90 \
+	Makefile olp.h config.sh olp_module.f90[%
+@if internal OLP_DAEMON %] \
 	olp_daemon.c olp_daemon.h olp_lexer.l olp_parser.y \
-	olp_lexer.c olp_parser.c olp_parser.h
+	olp_lexer.c olp_parser.c olp_parser.h[%
+@end @if %]
 
 .PHONY: compile_subprocesses compile source doc clean very-clean
 
@@ -83,7 +87,9 @@ filelist-source: source
 dist: golem_olp.tar.gz
 
 golem_olp.tar.gz: source filelist-source
-	$(TAR) $(TAR_OPT) c -z -f $@ -T filelist-source
+	$(TAR) $(TAR_OPT) c -z -f $@ -T filelist-source[%
+
+@if internal OLP_DAEMON %]
 
 olp_lexer.c: olp_lexer.l olp_parser.h
 	$(LEX) $(LEX_OPTS) -o $@ $<
@@ -94,7 +100,8 @@ olp_parser.c: olp_parser.y
 	$(YACC) $(YACC_OPTS) -d -o $@ $<
 
 olp_daemon: $(C_OBJECTS) $(F_OBJECTS)
-	$(CC) $(CC_OPT) -o $@ $(C_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS)
+	$(CC) $(CC_OPT) -o $@ $(C_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS)[%
+@end @if %]
 
 $(C_OBJECTS): %.o: %.c
 	$(CC) $(CC_OPT) -c $< -o $@

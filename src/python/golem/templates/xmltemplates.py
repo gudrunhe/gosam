@@ -11,7 +11,8 @@ import golem.templates.filter
 import golem.templates.factory
 
 from golem.util.tools import debug, message, warning, error, \
-      enumerate_helicities, encode_helicity
+      enumerate_helicities, encode_helicity, \
+      enumerate_and_reduce_helicities
 
 def compare_version(version1, version2):
    """
@@ -488,11 +489,16 @@ class _TemplateState:
          itername = attrs["iterator"]
          if itername == "helicity":
             values = []
+            mappings = [m for m in 
+                  enumerate_and_reduce_helicities(self.opts["conf"])]
+
             if "conf" in self.opts:
                for i, heli in enumerate(
                      enumerate_helicities(self.opts["conf"])):
-                  values.append({"helicity": i,
-                     "helicitysymbol": encode_helicity(heli)})
+                  gi, mapping, color_basis = mappings[i]
+                  if i == gi:
+                     values.append({"helicity": i,
+                        "helicitysymbol": encode_helicity(heli)})
 
             self.shuffle_push(values)
          elif itername == "crossings":
