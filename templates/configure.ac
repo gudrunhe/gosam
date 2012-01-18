@@ -69,7 +69,7 @@ AC_CONFIG_FILES([
    config.sh
    doc/Makefile
    common/Makefile[%
-@for helicities %]
+@for helicities generated %]
    helicity[% helicity %]/Makefile[%
 @end @for %]
    matrix/Makefile

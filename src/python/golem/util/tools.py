@@ -185,7 +185,7 @@ def enumerate_helicities(conf):
       zeroes = getZeroes(conf)
       in_particles, out_particles = generate_particle_lists(conf)
       fermion_filter = golem.algorithms.helicity.generate_symmetry_filter(
-            conf, zeroes, in_particles, out_particles)
+            conf, zeroes, in_particles, out_particles, error)
 
       in_particles.extend(out_particles)
 
@@ -211,6 +211,15 @@ def enumerate_helicities(conf):
       for h in helicity_comb:
          if fermion_filter(h):
             yield h
+
+def enumerate_and_reduce_helicities(conf):
+   in_particles, out_particles = generate_particle_lists(conf)
+   helicities = [h for h in enumerate_helicities(conf)]
+   group = golem.algorithms.helicity.find_symmetry_group(helicities,
+         conf, in_particles, out_particles, error)
+   for g in group:
+      yield g
+
 
 def expand_helicities(patterns):
    anti = {"+": "-", "0": "0", "-": "+", "m": "k", "k": "m"}

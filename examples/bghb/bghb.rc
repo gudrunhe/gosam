@@ -14,3 +14,4 @@ model=sm
 model.options= masses: mH mT, widths: none
 
 helicities=[bB=+-][+-]0B
++symmetries=parity

@@ -3,17 +3,19 @@
 SUBDIRS=[%
 @for subprocesses %] \
 	[% path %][%
-@end @for subprocesses %]
-
-bin_PROGRAMS=olp_daemon
-lib_LTLIBRARIES=lib@GENERIC_LIBRARY_NAME@.la
-
+@end @for subprocesses %][%
+@if internal OLP_DAEMON %]
+bin_PROGRAMS=olp_daemon[%
+@end @if %]
+lib_LTLIBRARIES=lib@GENERIC_LIBRARY_NAME@.la[%
+@if internal OLP_DAEMON %]
 olp_daemon_SOURCES=olp_daemon.c olp_lexer.l olp_parser.y
+noinst_HEADERS=olp_daemon.h olp_parser.h[%
+@end @if %]
 lib@GENERIC_LIBRARY_NAME@_la_SOURCES=olp_module.f90
 
 nodist_pkginclude_HEADERS=olp_module.mod
 pkginclude_HEADERS=olp.h
-noinst_HEADERS=olp_daemon.h olp_parser.h
 
 olp_daemon_LDADD=lib@GENERIC_LIBRARY_NAME@.la
 lib@GENERIC_LIBRARY_NAME@_la_LIBADD=[%
@@ -40,6 +42,8 @@ AM_YFLAGS= -d
 
 EXTRA_DIST=m4 \
 			  autogen.sh
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I m4[%
+@if internal OLP_DAEMON %]
 
-olp_lexer.c: olp_parser.h
+olp_lexer.c: olp_parser.h[%
+@end @if %]

@@ -25,13 +25,13 @@ CFLAGS=`sed -n 'H
    grep '^[ \\t]*FCFLAGS[ \\t]*='|sed 's/^[ \\t]*FCFLAGS[ \\t]*=//'`
 
 PROCESS_LDFLAGS=" $PWD/matrix/matrix.a[%
-	@for helicities %] \
+	@for helicities generated %] \
 $PWD/helicity[%helicity%]/amplitude[%helicity%].a[%
 	@end @for helicities %] \
 $PWD/common/common.a"
 
 PROCESS_CFLAGS=" -I$PWD/matrix[%
-	@for helicities %] \
+	@for helicities generated %] \
 -I$PWD/helicity[%helicity%][%
 	@end @for helicities %] \
 -I$PWD/common"

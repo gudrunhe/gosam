@@ -4,8 +4,8 @@
 	in the main directory.
 ' %]# vim: ts=3:sw=3
 
-SUBDIRS=doc common [%
-@for helicities %] helicity[% helicity %][%
+SUBDIRS=doc common[%
+@for helicities generated %] helicity[% helicity %][%
 @end @for helicities %] matrix
 
 include Makefile.conf

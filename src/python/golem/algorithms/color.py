@@ -50,6 +50,39 @@ def colorbasis(quarks, aquarks, gluons):
             continue
       yield lines, traces
 
+def get_color_basis(in_particles, out_particles):
+   """
+   Find all colored particles and build a color basis
+   """
+   quarks = []
+   aquarks = []
+   gluons = []
+   li = len(in_particles)
+   for i in range(li):
+      p = in_particles[i]
+      color_index = i
+
+      if p.getColor() == 3:
+         quarks.append(color_index)
+      elif p.getColor() == -3:
+         aquarks.append(color_index)
+      elif p.getColor() == 8:
+         gluons.append(color_index)
+
+   for i in range(len(out_particles)):
+      p = out_particles[i]
+      color_index = li+i
+      if p.getColor() == 3:
+         aquarks.append(color_index)
+      elif p.getColor() == -3:
+         quarks.append(color_index)
+      elif p.getColor() == 8:
+         gluons.append(color_index)
+
+   return [(lines, traces)
+      for lines, traces in golem.algorithms.color.colorbasis(
+         quarks, aquarks, gluons)]
+
 def permutations(lst):
    """
    Generates all permutations of a list.

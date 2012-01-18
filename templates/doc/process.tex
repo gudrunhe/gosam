@@ -15,6 +15,8 @@
 \newcommand{\Spba}[1]{[ #1 \rangle}
 \newcommand{\Spbb}[1]{[ #1 ]}
 
+\allowdisplaybreaks[1]
+
 \title{\texttt{[% golem.full-name %]}: $[%
    @for particles initial %]{[%latex%]}[%
    @end @for %]\rightarrow[%
@@ -70,7 +72,10 @@
 \hline
 \endhead [%
 @for helicities %]
-[%helicity%] [% @for particles %]& $[%hel%]$[%
+$[%helicity%][%
+   @if generated %][%
+   @else %]\rightarrow [% map.index %][%
+   @end @if %]$[% @for particles %]& $[%hel%]$[%
 @end @for particles %]\\[% @end @for helicities %]
 \end{longtable}
 \section{Wave Functions}
