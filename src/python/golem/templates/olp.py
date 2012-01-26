@@ -48,6 +48,41 @@ class OLPTemplate(golem.util.parser.Template):
 			yield props
 			self._pstack.pop()
 
+	def generated_helicities(self, *args, **opts):
+		if len(self._pstack) == 0:
+			raise TemplateError(
+					"[% @for crossings %] outside [% @for subprocesses %]")
+
+		subprocess = self._pstack[-1]
+		helis = subprocess.generated_helicities
+
+		last = len(helis) - 1
+
+		if "prefix" in opts:
+			prefix = opts["prefix"]
+		else:
+			prefix = ""
+
+		first_name = self._setup_name("first", prefix + "is_first", opts)
+		last_name = self._setup_name("last", prefix + "is_last", opts)
+		index_name = self._setup_name("index", prefix + "index",	opts)
+		var_name = self._setup_name("var", prefix + "$_", opts)
+
+		if "shift" in opts:
+			shift = int(opts[shift])
+		else:
+			shift = 0
+
+		props = Properties()
+		for index, gh in enumerate(helis):
+			props[first_name] = (index == 0)
+			props[last_name] = (index == last)
+			props[index_name] = index 
+			props[var_name] = gh + shift
+
+			yield props
+
+
 	def crossings(self, *args, **opts):
 		if "prefix" in opts:
 			prefix = opts["prefix"]

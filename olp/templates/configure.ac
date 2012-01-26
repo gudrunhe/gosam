@@ -76,7 +76,7 @@ AC_CONFIG_FILES([
    [% path %]/config.sh
    [% path %]/doc/Makefile
    [% path %]/common/Makefile[%
-   @for repeat num_helicities var=helicity %]
+   @for generated_helicities var=helicity %]
    [% path %]/helicity[% helicity %]/Makefile[%
    @end @for %]
    [% path %]/matrix/Makefile[%

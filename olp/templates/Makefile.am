@@ -10,6 +10,7 @@ bin_PROGRAMS=olp_daemon[%
 lib_LTLIBRARIES=lib@GENERIC_LIBRARY_NAME@.la[%
 @if internal OLP_DAEMON %]
 olp_daemon_SOURCES=olp_daemon.c olp_lexer.l olp_parser.y
+olp_daemon_LDADD=lib@GENERIC_LIBRARY_NAME@.la
 noinst_HEADERS=olp_daemon.h olp_parser.h[%
 @end @if %]
 lib@GENERIC_LIBRARY_NAME@_la_SOURCES=olp_module.f90
@@ -17,7 +18,6 @@ lib@GENERIC_LIBRARY_NAME@_la_SOURCES=olp_module.f90
 nodist_pkginclude_HEADERS=olp_module.mod
 pkginclude_HEADERS=olp.h
 
-olp_daemon_LDADD=lib@GENERIC_LIBRARY_NAME@.la
 lib@GENERIC_LIBRARY_NAME@_la_LIBADD=[%
 @for subprocesses %] \
 		$(builddir)/[% path %]/libgolem_process_[% $_ %].la[%

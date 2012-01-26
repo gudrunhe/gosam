@@ -1162,7 +1162,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       largs = [a.lower() for a in args]
 
-      generated_only = "generated" in args
+      generated_only = "generated" in largs
 
       symbols = {
                -2: symbol_minus2,

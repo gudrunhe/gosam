@@ -410,7 +410,7 @@ class _TemplateState:
          option_name = "__%s__" % (attrs["if-internal"].upper())
          internals = self._getproperty("__INTERNALS__")
          if option_name in internals:
-            return self._getproperty(option_name)
+            return str(self._getproperty(option_name)).lower() == 'true'
          else:
             return False
 
@@ -467,6 +467,8 @@ class _TemplateState:
          if "name" in attrs:
             opts = attrs.copy()
             del opts["name"]
+
+            opts = dict([(str(k), v) for k, v in opts.iteritems()])
 
             new_filter = golem.templates.filter.FilterFactory(
                   attrs["name"], old_filter, **opts)
