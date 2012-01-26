@@ -178,6 +178,7 @@ def main(argv=sys.argv):
          c["golem.full-name"] = GOLEM_FULL
 
          message("Processing %r" % arg)
+         golem.util.tools.POSTMORTEM_CFG = c
          try:
             path = golem.util.tools.process_path(c)
             c.setProperty(golem.properties.process_path, path)
