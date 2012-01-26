@@ -6,6 +6,7 @@ import os.path
 import re
 
 import golem
+import golem.util.tools
 
 CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
 		('c', "config=", "Overlay default config files by the specified file"),

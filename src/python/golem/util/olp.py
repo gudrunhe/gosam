@@ -436,9 +436,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             golem.installation.GOLEM_VERSION))
          subprocess_conf["golem.full-name"] = GOLEM_FULL
 
-         #print(">"*80)
-         #subprocess_conf.list()
-         #print("<"*80)
+         golem.util.tools.POSTMORTEM_CFG = subprocess_conf
 
          try:
             golem.util.main_misc.workflow(subprocess_conf)

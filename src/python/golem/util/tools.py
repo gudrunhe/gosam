@@ -32,6 +32,9 @@ DEFAULT_CMD_LINE_ARGS = [
          "writes a log file with the current level of verbosity"),
    ]
 
+POSTMORTEM_LOG = []
+POSTMORTEM_CFG = None
+
 def add_logger(file_name=None):
    if file_name is None:
       logger = Logger()
@@ -60,12 +63,15 @@ def debug(*messages):
    do_message(DEBUG, "DEB", "\n".join(messages))
 
 def message(*messages):
+   POSTMORTEM_LOG.extend(messages)
    do_message(MESSAGE, "~~~", "\n".join(messages))
 
 def warning(*messages):
+   POSTMORTEM_LOG.extend(messages)
    do_message(WARNING, "-->", "\n".join(messages))
 
 def error(*messages):
+   POSTMORTEM_LOG.extend(messages)
    do_message(ERROR, "==>", "\n".join(messages))
    sys.exit("GoSam terminated due to an error")
 

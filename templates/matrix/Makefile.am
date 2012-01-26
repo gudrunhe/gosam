@@ -18,7 +18,7 @@ test_SOURCES=test.f90
 test_LDADD=\
    $(builddir)/../matrix/libgolem_process[%
       process_name assuffix=\_ %]_matrix.la[%
-@for helicities %] \
+@for helicities generated %] \
    $(builddir)/../helicity[% helicity %]/libgolem_process[%
       process_name assuffix=\_ %]_helicity[% helicity %].la[%
 @end @for helicities %] \
@@ -30,7 +30,7 @@ CLEANFILES=$(nodist_pkginclude_HEADERS)
 ACLOCAL_AMFLAGS=-I m4
 
 AM_FCFLAGS=$(GOLEM_CONFIG_FCFLAGS) -I../common[%
-   @for helicities %] \
+   @for helicities generated %] \
 	   -I../helicity[%helicity%][%
    @end @for %]
 
