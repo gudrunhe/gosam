@@ -860,10 +860,11 @@ class Template:
             else:
                path = None
 
-            path = os.path.expandvars(path)
-
-         fname = args[0]
-         fname = os.path.expandvars(fname)
+            fname = os.path.join(path, args[0])
+            fname = os.path.expandvars(fname)
+         else:
+            fname = args[0]
+            fname = os.path.expandvars(fname)
 
          if "replace" in opts:
             rep = opts["replace"]
@@ -1740,6 +1741,10 @@ class Template:
       return len(lst) == 0
 
    def golem_path(self, *args, **opts):
+      """
+      Returns the installation path. If args is not empty
+      each element in args is appended to the path as a subdirectory.
+      """
       return golem.util.path.golem_path(*args)
 
    def time_stamp(self, *args, **opts):

@@ -22,6 +22,7 @@ class OLPSubprocess:
 
       self.num_legs = len(p_ini) + len(p_fin)
       self.num_helicities = -1
+      self.generated_helicities = []
 
    def addCrossing(self, id, process_name, p_ini, p_fin):
       self.crossings[process_name] = "%s > %s" \
@@ -31,8 +32,9 @@ class OLPSubprocess:
    def assignChannels(self, id, channels):
       self.channels[id] = channels
 
-   def assignNumberHelicities(self, nh):
+   def assignNumberHelicities(self, nh, gh):
       self.num_helicities = nh
+      self.generated_helicities = gh
 
    def getIDs(self):
       return list(self.ids.keys())
@@ -444,7 +446,11 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                   from_scratch)
 
             helicities = list(
-                  golem.util.tools.enumerate_helicities(subprocess_conf))
+                  golem.util.tools.enumerate_and_reduce_helicities(
+                     subprocess_conf))
+
+            generated_helicities = map(lambda t: t[0],
+                  filter(lambda t: t[1] is None, helicities))
 
             for id in subprocess.getIDs():
                chelis[id] = len(helicities)
@@ -461,7 +467,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
                contract_file.setProcessResponse(id, channels[id])
                subprocess.assignChannels(id, channels[id])
-               subprocess.assignNumberHelicities(len(helicities))
+               subprocess.assignNumberHelicities(len(helicities),
+                     generated_helicities)
 
          except golem.util.config.GolemConfigError as err:
             result = 1

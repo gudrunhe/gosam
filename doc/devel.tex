@@ -4,10 +4,14 @@
 \usepackage{listings}
 \usepackage{amsmath,amssymb}
 \usepackage{syntax}
+\usepackage{color}
 \usepackage[pdftex]{hyperref}
+\usepackage{longtable}
+\usepackage{multirow}
 
 \input lstform
 \input lstolp
+\input lstgosam
 \newcommand{\golemversion}{{1{.}0}}
 \newcommand{\golem}{{\tt GoSam}\xspace}
 %\newcommand{\golemv}[1][\golemversion]{{{\tt Golem}~\golemversion}\xspace}
@@ -33,6 +37,8 @@
 \title{\golemv Developer's Manual}
 \author{Thomas Reiter}
 \date{Version \today}
+
+\lstset{basicstyle=\tt}
 
 \begin{document}
 \hypersetup{%
@@ -97,6 +103,7 @@ Unfortunately, there is no light without shadows:
    to express things in a complicated way.
 \end{itemize}
 
+\section{The File \texttt{template.xml}}
 The template processor is written in \python{} and is controlled
 by a XML file, by default this is the file \texttt{templates/template.xml}
 in the \golem{} installation directory.
@@ -108,7 +115,134 @@ file is used instead of \golem{}'s \texttt{templates/template.xml}.
 This feature could be used to provide template directories for specific
 purposes.
 
+\subsection{The \texttt{<template>} Tag}
+The \texttt{<template>} tag is the root element of the template file.
+All other tags must be nested elements of this tag.
+
+\paragraph{Attributes}
+\begin{description}
+\item[\texttt{name}] (mandatory) a human-readable name for this template
+\item[\texttt{version}] (mandatory) a version number
+\item[\texttt{author}] (mandatory) one or multiple author names
+\item[\texttt{author-email}] (mandatory) the email address of one of the
+    authors
+\item[\texttt{description}] (mandatory) a longer informal description of
+    this template, e.g. in how far it differs from the defaul templates
+    etc.
+\end{description}
+
+\paragraph{Nested Tags}
+\begin{itemize}
+\item \texttt{<file>} tags, describing how a template file is translated
+   to a destination file,
+\item \texttt{<directory>} tags, indicating that a file is read from or
+   written to a subdirectory. This tag can have nested
+   \texttt{<directory>}, \texttt{<file>} or \texttt{<foreach>} tags.
+\item \texttt{<foreach iterator="name">} tags, where \texttt{name} is
+   either \texttt{helicity} or \texttt{crossing}. This tag can have nested
+   \texttt{<directory>}, \texttt{<file>} or \texttt{<foreach>} tags.
+   The current value of the iterator inside the \texttt{<foreach>} block
+   can be accessed through the \texttt{arguments} attribute.
+\end{itemize}
+
+\subsection{The \texttt{<file>} Tag}
+Reads a source file at the current directory (relative to the
+location of \texttt{template.xml}), and transforms it to a destination
+file, where the definitions of a certain Python template class are used.
+\paragraph{Attributes}
+\begin{description}
+\item[\texttt{src}] (mandatory) the name of the source file relative
+   to the directory in which \texttt{template.xml} is located or
+   relative to the directory currently set by an enclosing
+   \texttt{<directory>} tag.
+\item[\texttt{dest}] (optional) the name of the destination file
+   relative to the current destination directory. If not specified
+   the name of the source file is used.
+\item[\texttt{class}]
+   \seealso{Appendix~\ref{appendix:template-classes}}
+   (mandatory) the name of the Python class
+   used to translate the file (s. Appendix~\ref{appendix:template-classes}).
+\item[\texttt{arguments}] (optional) in combination with wildcard symbols
+   in the \texttt{dest} argument, this attribute contains a comma seperated
+   list of names defined by an enclosing iterator.
+\item[\texttt{usedby}] (optional) indicates which component of \golem{}
+   is responsible for the translation. Currently the values \texttt{qgraf}
+   and \texttt{olp} are in use.
+\end{description}
+
+\paragraph{Nested Tags}
+\begin{itemize}
+\item \texttt{<only>} generates the file only if a condition is true,
+\item \texttt{<except>} generates the file except if a condition is true.
+\item \texttt{<filter>} applies a filter to the output file before it is
+   written to disk. Currently, there is only one filter defined:
+   the tag \texttt{<filter name="Fortran90" width="80"/>} formats the
+   output such that lines longer than 80 characters are wrapped using
+   the Fortran90 line break syntax ('\texttt{\&}').
+\end{itemize}
+
+\subsection{The \texttt{<directory>} Tag}
+\paragraph{Attributes}
+The possible attributes are \texttt{src}, \texttt{dest} and
+\texttt{arguments} with the same meaning as in the \texttt{<file>} tag.
+
+\paragraph{Nested Tags}
+The possible nested tags are \texttt{<only>} and \texttt{<except>}
+with the same meaning as for the \texttt{<file>} tag.
+
+\paragraph{Note:} both \texttt{src} and \texttt{dest} can have the
+value \texttt{"."}, which refers to the current directory.
+
+\subsection{The \texttt{<foreach>} Tag}
+\paragraph{Attributes}
+\begin{description}
+\item[\texttt{iterator}] The name of an iterator used in this loop.
+Currently, only \texttt{helicities} and \texttt{crossings} are defined.
+\end{description}
+
+\paragraph{Nested Tags}
+\begin{itemize}
+\item \texttt{<file>}
+\item \texttt{<directory>}
+\item \texttt{<foreach>}
+\end{itemize}
+
+\subsection{The \texttt{<except>} and \texttt{<only>} Tags}
+\paragraph{Attributes}
+Only one of the \texttt{if-...} attributes should be specified:
+\begin{description}
+\item[\texttt{if-file}] possible values are \texttt{exists} and
+\texttt{generated}. If the value is \texttt{exists} \golem{} checks
+whether or not the file is present in the current output directory.
+If the value is \texttt{generated} \golem{} checks whether it has
+generated this file already by an earlier statement during this run.
+\item[\texttt{if-extension}] the value is a comma separated list of
+extensions. The program checks if these extensions are activated.
+The behaviour how to combine the elements of the list
+can be modified by the optional attribute
+\texttt{required}, which can take the values \texttt{all}, \texttt{some}
+and \texttt{none}. If \texttt{required} is not given \texttt{all} is assumed,
+which means that all extensions have to be present. \texttt{some} requires
+that at least one of the extensions is activated. The value \texttt{none}
+requires that none of the listed extensions is activated.
+\item[\texttt{if-option}] the value should be the name of an option.
+As a second attribute the user has to specify either \texttt{value}
+or \texttt{list}. If \texttt{value} is given the value of the option
+is compared to the value given by \texttt{value}. If \texttt{list} is
+given, the argument of \texttt{list} consists a comma seperated list
+of values. In this case it is checked if the value of the option is
+a member of the list.
+\item[\texttt{if-internal}] Checks an internal symbol whether its value
+is true or false.
+\item[\texttt{in-mode}] if given, the condition is only applied if the
+\emph{mode} is equal to the argument. The default is that the mode is
+\texttt{normal}. If everything is built from scratch  the mode is
+different from \texttt{normal}.
+
+\end{description}
+
 \section{Template Markup Syntax}
+\lstset{language=[fortran]gosamt}
 \subsection{Simple Tags}
 Template files are a mixture of text which is copied to the output file in
 verbatim and tags enclosed in \lit{[\%} and \lit{\%]}. In the simplest
@@ -118,9 +252,251 @@ case, a tag contains only a variable name, e.g.
 \end{lstlisting}
 In the output, the sequence \lit{[\%num\_legs\%]} is replaced by the
 actual number of external particles in the process.
+Any tag can have arguments. \golem{} distinguished positional arguments,
+i.e. arguments bound by the order in which they appear, and named
+arguments. As an example, consider the tag
+\begin{lstlisting}
+[% eval ( a + 10 ) * b format=%05d %]
+\end{lstlisting}
+While \lit{eval} is the name of the tag, the tokens
+\lit{(}, \lit{a}, \lit{+}, \lit{10}, \lit{)}, \lit{*} and \lit{b}
+are positional arguments. This example contains one named argument,
+\lit{format}, which has the value \lit{\%05d}.
+
+\attention{} Since the parser is
+kept as simple as possible it is important to put white space in
+the correct places: e.g. one has to write \lit{( a + 10 )} instead of
+\lit{(a+10)}, as the latter one would be a single token. Moreover,
+it is not allowed to put a space before or after the \lit{=} sign
+in a named argument.
+
+\begin{quotation}
+\small\sf
+Before a template is processed, the Python program creates an
+object of the template class indicated in the XML file.
+A tag is evaluated by the Python code by invoking the method
+of the same name as the tag name with the arguments given to the tag.
+The return value of the method can be
+\begin{itemize}
+\item a character string (use as a normal function or symbol),
+\item an iterator of property sets (use in a for-loop),
+\item a property set (use as an environment in a with-statement).
+\end{itemize}
+The previous example would lead to the call
+\begin{lstlisting}[language=Python]
+template.eval("(", "a", "+", "10", ")", "*", "b", \
+     format="%05d")
+\end{lstlisting}
+\end{quotation}
+
+\subsection{Modifying the Parser}
+The delimiters \lit{[\%} amd \lit{\%]} can be changed to some other
+sequence at the beginning of the file. If one puts the sequence
+\lit{\%=\$} as the first three characters of the template file
+the delimiters of the tags are \lit{[\$]} and \lit{\$]}.
+In principle, any other character would also work instead of the dollar
+sign but for clarity only \lit{\%} and \lit{\$} should be used.
+
+\subsection{Commentary}
+One can leave commentary in a template file which is not written to the
+output file. A commentary tag is indicated by an apostrophy instead of
+a tag name:
+\begin{lstlisting}[language=gosamt]
+Hello Wo[% ' some commentary %]rld!
+\end{lstlisting}
+This sequence would simply produce \lit{Hello World!}.
+
+\subsection{Control Structures}
+The \golem{} template language knows XX different control structure:
+\begin{description}
+\item[\texttt{@if}] conditional evaluation based on a logical expression
+\item[\texttt{@select}] conditional evaluation based on the comparison
+    of values
+\item[\texttt{@for}] repetition
+\item[\texttt{@with}] local environments
+\item[\texttt{@macro}] parametrized reusable code block
+\end{description}
+
+\paragraph{Conditional Evaluation I}
+The syntax of an if-statement is as follows
+\begin{lstlisting}[language=gosamt]
+[% @if tagname arguments ... %]
+   Block used if expression evaluates to true
+[% @elif tagname arguments ... %]
+   Any number (including zero) elif-blocks
+   are allowed. An elif-block is used if all
+   earlier expressions evaluate to false but
+   this expression evaluates to true.
+[% @else %]
+   The else block can be omitted. It is used
+   if all conditions evaluated to false.
+[% @end @if %]
+\end{lstlisting}
+
+Example:
+\begin{lstlisting}
+use config, only: ki[%
+@if extension samurai %]
+use msamurai[%
+@end @if %]
+\end{lstlisting}
+
+Sometimes one needs to negate a condition. The simplest construction
+to do so is to put nothing in the first branch but only output text
+in the else-branch:
+\begin{lstlisting}
+[% @if generate_lo_diagrams
+      %][%
+   @else %]
+complex(ki), dimension(numcs, -2:0) :: colorvec
+integer :: c[%
+   @end @if %]
+\end{lstlisting}
+
+\paragraph{Conditional Evaluatation II}
+The syntax of the select-statement is as follows
+\begin{lstlisting}[language=gosamt]
+[% @select tagname arguments ...
+   @case value1 value2 ... %]
+   Block used if expression evaluates to one of
+   the values following @case
+[% @case value3 value4 ... %]
+   Any number (including zero) of case-blocks
+   are allowed. A case-block is used if all
+   earlier case blocks were not used.
+[% @else %]
+   The else block can be omitted. It is used
+   if all previous blocks were skipped.
+[% @end @select %]
+\end{lstlisting}
+
+A select statement can be a simpler replacement for an if-statement.
+Consider the following example:
+\begin{lstlisting}
+[% @if eval num_legs .eq. 1 %]stop[% @end @if %]
+\end{lstlisting}
+The equivalent select statement would be
+\begin{lstlisting}
+[% @select num_legs @case 1 %]stop[% @end @select %]
+\end{lstlisting}
+There is no need to invoke the \texttt{eval} method here.
+Sometimes the use of arguments makes it even impossible to
+find an equivalent if-statement for a select-statement:
+\begin{lstlisting}
+[% @select count particles lightlike vector colored
+   @case 0 %][%
+   @else %]
+print, "Process has gluons."[%
+   @end @select %]
+\end{lstlisting}
+
+\attention{} Note that the select statement only uses at most one
+block. Therefore it uses a Fortran-like semantics (rather than
+a C-like semantics where all subsequent blocks are used unless
+a break-statement is met).
+
+\paragraph{Repetition}
+There is only definite repetition in the template language\footnote{
+There is no indefinite while-statement, which would only make sense
+in an imperative language where the loop-body can produce side effects.}.
+The syntax of the loop is as follows
+\begin{lstlisting}[language=gosamt]
+[% @for tagname arguments ... %]
+Block is evaluated for each element in the
+iterator defined by the tag name.
+[% @end @for %]
+\end{lstlisting}
+
+The following example computes the color average factor for a given
+process:
+\begin{lstlisting}
+color_avg = 1.0_ki[%
+@for particles initial %][%
+   @select color
+   @case -3 3 %]/NC[%
+   @case  8 %]/(NC*NC-1.0_ki)[%
+   @end @select %][%
+@end @for %]
+\end{lstlisting}
+\attention{}The main iteration variable is usually called \lit{\$\_}.
+Most iterators define the symbols \texttt{is\_first}
+and \texttt{is\_last}. One application are comma seperated lists
+\begin{lstlisting}
+[%
+@for particles colored %][%
+   @if is_first %]
+partons = (/[%
+   @else %], [%
+   @end @if %][% $_ %][%
+   @if is_last %]/)[%
+   @end @if %][%
+@end @for %]
+\end{lstlisting}
+This block produces nothing if the process does not have external
+colored particles. Otherwise it produces an assignment which
+sets \texttt{partons} to a list of particle indices which are partons.
+
+\paragraph{Environments}
+The syntax of a with statement is as follows.
+\begin{lstlisting}[language=gosamt]
+[% @with tagname arguments ... %]
+Block is evaluated as usual but might
+have additional symbols defined.
+[% @end @with %]
+\end{lstlisting}
+
+One use of with statements is to store more complex expressions
+in a single symbol which can be used inside the \texttt{eval}
+tag:
+\begin{lstlisting}
+[% @with eval x + y result=z %]
+Five times x plus y is [% eval 5 * z %][%
+   @end @with %]
+\end{lstlisting}
+
+One could also use a with-block in order to access currently set
+shell variables:
+\begin{lstlisting}
+[% @with os prefix=shell. %]
+character(len=255), parameter :: host_name = [%
+  ' ignore line break %] "[% shell.HOST %]"
+[% @end @with %]
+\end{lstlisting}
+In the above example a commentary tag has been used to hide a
+line break from the output.
+
+\paragraph{Macros}
+The syntax of a macro definition is the following:
+\begin{lstlisting}[language=gosamt]
+[% @macro name arg1 arg2 ... opt_arg1=value1 ...
+%]Macro body which may depend on [% arg1 %] ...
+and the optional arguments such as [% opt_arg1 %][%
+   @end @macro %]
+\end{lstlisting}
+
+\attention{} The \texttt{@macro} block itself does not generate
+any output. Only when the macro is called its body is evaluated.
+
+Example:
+\begin{lstlisting}
+module my_kinematics[%
+@macro def_particle index mass=0 %]
+real(ki), dimension(4) :: k[% index %][%
+   @select mass @case 0 %][%
+   @else %]
+real(ki) :: m[% index %] = [% mass %][%
+   @end @select %][%
+@end @macro %]
+[% def_particle 1 %]
+[% def_particle 2 %]
+[% def_particle 3 mT %]
+[% def_particle 4 mT %]
+\end{lstlisting}
 
 \appendix
 \chapter{Available Template Classes}
+\label{appendix:template-classes}
+
 \section{Predefined Symbols}
 All symbols which are defined in the list of properties
 in \texttt{golem.properties} are read from the process card and
@@ -144,13 +520,950 @@ diagrams (depends on the value of \texttt{order}).
 \item[\texttt{generate\_uv\_counterterms}] reserved for future use,
 currently always set to \texttt{false}.
 \end{description}
+\bigskip
 
+Any symbol can be formatted with the following arguments:
+\begin{description}
+\item[\texttt{substr=}{\synt{start}[\texttt{:}\synt{end}]}]
+   Only extract a substring of the value indicated by the (zero-based)
+   indices \synt{start} (including) and \synt{end} (excluding).
+\item[\texttt{convert=}{\lit{lower}\texttt{|}%
+   \lit{upper}\texttt{|}%
+   \lit{bool}\texttt{|}%
+   \lit{number}\texttt{|}\lit{float}}]
+   The result is converted to the given type. If also \texttt{format}
+   is provided, this conversion is done before formatting.
+\item[\texttt{true=}\synt{true} \texttt{false=}\synt{false}]
+   If \texttt{convert=bool} is supplied the symbols \synt{true}
+   and \synt{false} specify the return value depending on the
+   logical value of the result.
+\item[\texttt{radix=}\synt{base}] If \texttt{convert=number} this
+   option defines the basis in which the result is given. By default
+   this is 10. If the result starts with \lit{0x} or \lit{\$} the
+   base is set to 16.
+\item[\texttt{match=}\synt{pattern} {[\texttt{flags=}\synt{flags}]}]
+   The result is matched by a regular expression given in
+   \synt{pattern}. Flags can be a string formed by any subset of the characters
+   \lit{I} (ignore case), \lit{L} (locale), \lit{M} (multiline),
+   \lit{S} (\lit{.} matches also new line), \lit{U} (unicode),
+   \lit{X} (extended syntax).
+\item[\texttt{format=}\synt{fmt}]
+   The result is formatted using a Python format string.
+\item[\texttt{digits=}\synt{lst}] The result is interpreted as an integer
+   number being formatted with the digits given in \synt{lst}. Binary format,
+   for example, can be achieved by setting \texttt{digits=01}.
+\item[\texttt{asprefix=}\synt{prefix}] Adds a prefix to the result if
+   the result is non-empty.
+\item[\texttt{assuffix=}\synt{suffix}] Adds a suffix to the result if the
+   result is non-empty.
+\end{description}
+\bigskip
+
+Additional options influencing the way symbols are looked up are the following:
+\begin{description}
+\item[\texttt{default=}\synt{value}] The value \synt{value} is returned if
+   the symbol was not defined.
+\item[\texttt{suffix=}\synt{var}] Suffixes the name by the value of \synt{var}
+   before it is being looked up.
+   Example:
+\begin{lstlisting}
+[% @for repeat 5 %]
+[% diagram suffix=$_ %][%
+[% @end @for %]
+\end{lstlisting}
+   This example generates and evaluates the tags \lstinline|[% diagram0 %]|
+   \ldots \lstinline|[% diagram4 %]|.
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Base Class}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%---------------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{anymember}
+   \synt{element$_1$} {[\synt{element$_2$}\dots
+   \synt{element$_n$}]} \synt{var} {[\texttt{ignore\_case=}\synt{logical}]} 
+   $\to$ \synt{logical}]
+   Checks whether any of the arguments \synt{element$_1$} \ldots
+   \synt{element$_n$} (not interpreted as variable names) is an element of
+   the comma seperated list denoted by the symbol \synt{var}.
+\item[\texttt{count} \ldots $\to$ \synt{integer}] The arguments of
+   \texttt{count} are interpreted as an iterator. The result is the
+   number of times the iterator yields an element.
+\item[\texttt{empty} \synt{var} $\to$ \synt{logical}]
+   Checks whether the symbol \synt{var} denotes an empty list.
+\item[\texttt{error} \synt{error message}] This tag does not produce any code.
+   The error message is printed and the program is stopped when this
+   symbol is processed.
+\item[\texttt{eval} \ldots $\to$ \synt{string}]
+   This function interprets its arguments as tokens of an expression and
+   evaluates it. The expression is evaluated from left to right obeying
+   the following operator precedence. Parentheses can be used for changing
+   the evaluation order.
+   \begin{center}
+   \begin{longtable}{|c|p{12em}|r|}
+   \hline
+   {\bf Operation}&
+   {\bf Description}&
+   {\bf Prec.}\\
+   \hline
+\endhead
+   \hline
+\endlastfoot
+   $x\,\mathtt{|}\,y$ & logical \emph{or} & 100\\
+   $x\,\mathtt{||}\,y$ & logical \emph{or} & 100\\
+   $x\,\mathtt{.or.}\,y$ & logical \emph{or} & 100\\
+   $x\,\mathtt{\&}\,y$ & logical \emph{and} & 150\\
+   $x\,\mathtt{\&\&}\,y$ & logical \emph{and} & 150\\
+   $x\,\mathtt{.and.}\,y$ & logical \emph{and} & 150\\
+   $\mathtt{!}\,x$ & logical \emph{not} & 200\\
+   $\mathtt{.not.}\,x$ & logical \emph{not} & 200\\
+   $x\,\mathtt{.eq.}\,y$ & comparison $x=y$ & 255\\
+   $x\,\mathtt{<}\,y$ & comparison $x<y$ & 255\\
+   $x\,\mathtt{.lt.}\,y$ & comparison $x<y$ & 255\\
+   $x\,\mathtt{>}\,y$ & comparison $x>y$ & 255\\
+   $x\,\mathtt{.gt.}\,y$ & comparison $x>y$ & 255\\
+   $x\,\mathtt{.ge.}\,y$ & comparison $x\geq y$ & 255\\
+   $x\,\mathtt{.geq.}\,y$ & comparison $x\geq y$ & 255\\
+   $x\,\mathtt{.le.}\,y$ & comparison $x\leq y$ & 255\\
+   $x\,\mathtt{.leq.}\,y$ & comparison $x\leq y$ & 255\\
+   $x\,\mathtt{<>}\,y$ & comparison $x\neq y$ & 255\\
+   $x\,\mathtt{.ne.}\,y$ & comparison $x\neq y$ & 255\\
+   $x\,\mathtt{.neq.}\,y$ & comparison $x\neq y$ & 255\\
+   $x\,\mathtt{\sim<}\,y$ & $x$ starts with $y$ (str) & 255\\
+   $x\,\mathtt{\sim>}\,y$ & $x$ ends with $y$ (str) & 255\\
+   $x\,\mathtt{\sim}\,y$ & $x$ contains $y$ (str) & 255\\
+   $x\,\mathtt{+}\,y$ & sum, $x+y$ & 300\\
+   $x\,\mathtt{-}\,y$ & difference, $x-y$ & 300\\
+   $x\,\mathtt{.}\,y$ & string concatenation, $xy$ & 300\\
+   $x\,\mathtt{.max.}\,y$ & maximum, $\max(x,y)$ & 300\\
+   $x\,\mathtt{.min.}\,y$ & minimum, $\min(x,y)$ & 300\\
+   $x\,\mathtt{::}\,y$ & euclidean dist., $\sqrt{x^2+y^2}$ & 300\\
+   $x\,\mathtt{*}\,y$ & product, $x\cdot y$ & 350\\
+   $x\,\mathtt{/}\,y$ & quotient (float), $x/y$ & 350\\
+   $x\,\mathtt{//}\,y$ & integer division & 350\\
+   $x\,\mathtt{\%}\,y$ & remainder of division & 350\\
+   $x\,\mathtt{.mod.}\,y$ & remainder of division & 350\\
+   $\mathtt{-}\,x$ & negation, unary minus & 400\\
+   $\mathtt{+}\,x$ & unary plus & 400\\
+   $x\,\mathtt{**}\,y$ & power, $x^y$ & 450\\
+   $x\,\text{\tt\textasciicircum}\,y$ & power, $x^y$ & 450\\
+   $\mathtt{+:}\,x$ & double, $2x$ & 500\\
+   $\mathtt{-:}\,x$ & half, $x/2$ & 500\\
+   $\mathtt{*:}\,x$ & square, $x^2$ & 1000\\
+   $\mathtt{/:}\,x$ & inverse, $1/x$ & 1000\\
+   $\mathtt{.abs.}\,x$ & modulus, $\vert x\vert$ & 1000\\
+   $\mathtt{.acos.}\,x$ & trigonometric func., $\cos^{-1} x$ & 1000\\
+   $\mathtt{.asin.}\,x$ & trigonometric func., $\sin^{-1} x$ & 1000\\
+   $\mathtt{.atan.}\,x$ & trigonometric func., $\tan^{-1} x$ & 1000\\
+   $\mathtt{.cos.}\,x$ & trigonometric func., $\cos x$ & 1000\\
+   $\mathtt{.cosh.}\,x$ & hyperbolic func., $\cosh x$ & 1000\\
+   $\mathtt{.even.}\,x$ & checks whether $x$ is even & 1000\\
+   $\mathtt{.exp.}\,x$ & exponential, $e^x$ & 1000\\
+   $\mathtt{.floor.}\,x$ & round $x$ towards $-\infty$ & 1000\\
+   $\mathtt{.ceil.}\,x$ & round $x$ towards $+\infty$ & 1000\\
+   $x\,\mathtt{.lcm.}\,y$ & least common multiple & 1000\\
+   $\mathtt{.len.}\,x$ & length of $x$ (str) & 1000\\
+   $\mathtt{.log.}\,x$ & natural logarithm, $\log x$ & 1000\\
+   $x\,\mathtt{.log.}\,y$ & logarithm, $\log_x y$ & 1000\\
+   $\mathtt{.odd.}\,x$ & checks whether $x$ is odd & 1000\\
+   $\mathtt{.sign.}\,x$ & sign of $x$ & 1000\\
+   $\mathtt{.sin.}\,x$ & trigonometric func., $\sin x$ & 1000\\
+   $\mathtt{.sinh.}\,x$ & hyperbolic func., $\sinh x$ & 1000\\
+   $\mathtt{.sqrt.}\,x$ & square root, $\sqrt{x}$ & 1000\\
+   $\mathtt{.str.}\,x$ & convert $x$ to string & 1000\\
+   $\mathtt{.tan.}\,x$ & trigonometric func., $\tan x$ & 1000\\
+   $\mathtt{.tanh.}\,x$ & hyperbolic func., $\tanh x$ & 1000\\
+   $\mathtt{`}\,x$ & interpret as symbol name & 1000\\
+   \end{longtable}
+   \end{center}
+\item[\texttt{extension} {[\texttt{!}]}\synt{name$_1$} 
+   {[\texttt{!}]}\synt{name$_2$} \dots
+   {[\texttt{!}]}\synt{name$_n$} {[\texttt{require=}\lit{all}\texttt{|}%
+\lit{any}\texttt{|}\lit{no}]} $\to$ \synt{logical}]
+   This function checks whether a set of extensions is activated.
+   An exclamation mark in front of an extension name checks for absence
+   rather than presence. The optional argument \texttt{require}
+   defines how the checks for the single extensions should be combined
+   to an end result.
+\item[\texttt{golem\_path} {[\synt{arg$_1$} \ldots \synt{arg$_n$}]} $\to$
+   \synt{string}]
+   Returns the \golem{} installation path. The arguments are appended to
+   the path using the current path seperator (Linux: \lit{/}).
+\item[\texttt{include} \synt{file-name}] Includes another template file
+   at this position. The \synt{file-name} is interpreted relative to the
+   current template file. The class used in the included file is the same
+   as in the current file. Any symbols defined at the current position
+   are made visible in the included file.
+\item[\texttt{indexof} \synt{needle} \synt{haystack}
+   {[\texttt{delimiter=}\synt{delimiter}]}
+   {[\texttt{shift=}\synt{shift}]} $\to$ \synt{integer}]
+   Returns the index at which \synt{needle} appears in \synt{haystack},
+   where the latter is interpreted as a list seperated by \synt{delimiter}.
+   If \synt{delimiter} is not given, the comma (\lit{,}) is used as a
+   delimiter. Indices start from zero or \synt{shift}, if \synt{shift} is
+   present. If \synt{needle} is not found in \synt{haystack}, $-1$ is
+   returned.
+\item[\texttt{internal} \synt{name} $\to$ \synt{string}]
+   Returns the value of an internal symbol called \synt{name}.
+   The name is case insensitive. Currently, the list of internal symbols
+   is
+\begin{verbatim}
+GENERATE_DERIVATIVES   DERIVATIVES_AT_ZERO
+REGULARIZATION_DRED    REGULARIZATION_HV
+GAUGE_CHECK            NUMPOLVEC
+REDUCE_HELICITIES      OLP_DAEMON
+\end{verbatim}
+   Typically, these symbols have the value \lit{True} or \lit{False}.
+\item[\texttt{max} \synt{var} \ldots $\to$ \synt{string}] The arguments
+   after \synt{var} are interpreted as an iterator. The result is the
+   maximum element
+   of the values of \synt{var} for each iteration of the iterator.
+\item[\texttt{member} \synt{needle} \synt{haystack} {[\texttt{ignore\_case}]}
+{[\texttt{numeric}]} $\to$ \synt{logical}]
+   This function tests for membership of the value of \synt{needle}
+   in \synt{haystack}. The latter one can be a symbol denoting a list,
+   a range (specified as \synt{from}\texttt{:}\synt{to}[\texttt{:}\synt{step}])
+   or a list of values. If \lit{ignore\_case} is present the comparison
+   is not case sensitive. If \lit{numeric} is present \synt{needle}
+   is converted to a number before comparing to \synt{haystack}.
+\item[\texttt{min} \synt{var} \ldots $\to$ \synt{string}] The arguments
+   after \synt{var} are interpreted as an iterator. The result is the
+   minimum element
+   of the values of \synt{var} for each iteration of the iterator.
+\item[\texttt{nl} {[\texttt{dos}]} {[\texttt{rep=}\synt{factor}]}
+   $\to$ \synt{string}]
+   Returns a new-line character sequence. By default, the result
+   is \lit{\\n}. If \lit{dos} is given as an argument the result is
+   \lit{\\r\\n} instead. The integer argument \synt{factor} specifies
+   how many times the result should be repeated.
+\item[\texttt{sum} \synt{var} \ldots $\to$ \synt{integer}] The arguments
+   after \synt{var} are interpreted as an iterator. The result is the
+   sum of the values of \synt{var} for each iteration of the iterator.
+\item[\texttt{subscript} \synt{list} \synt{index}
+   {[\texttt{delimiter=}\synt{delimiter}]}
+   {[\texttt{shift=}\synt{shift}]} $\to$ \synt{string}]
+   Selects the element at index \synt{index} in the list
+   represented by \synt{list}. If \synt{delimiter} is not present
+   the list is assumed to be comma-seperated. Indices are zero-based
+   unless \synt{shift} is specified, in which case \synt{shift}
+   denotes the index of the first element.
+\item[\texttt{tab} {[\texttt{rep=}\synt{rep}]} $\to$ \synt{string}]
+   Generates the given
+   number (\synt{rep}) of horizontal tabulator (\lit{\\t}) characters.
+\item[\texttt{time\_stamp} {[\texttt{space=}\synt{char}]}
+   {[\texttt{format=}\synt{format}]} $\to$ \synt{string}]
+   Returns a time stamp of the current system time. If \synt{format} is
+   not given, the return format is \lit{YYYY-MM-DD}. Otherwise the given
+   format is used for conversion. If \synt{space} is given the
+   character \synt{space} is replaced by a \lit{ } in \synt{format} before
+   the format is used. Example:
+\begin{lstlisting}
+File generated [% time_stamp 
+           format=DD*MM*YYYY space=* %]
+\end{lstlisting}
+   This would produce the following output:
+\begin{lstlisting}
+File generated 23 01 2012
+\end{lstlisting}
+\item[\texttt{user\_name} $\to$ \synt{string}]
+   Returns the login name of the user running \golem{}.
+\item[\texttt{version\_newer} \synt{version$_1$} \synt{version$_2$}
+   $\to$ \synt{logical}]
+   Returns whether \synt{version$_1$} denotes a newer version than
+   \synt{version$_2$}. For example $3.0>2.1.1>2.1>2.0.4$, whereas
+   $2.0.0=2.0$.
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Iterators}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{banner}
+   {[\texttt{width=}\synt{width}]}
+   {[\texttt{prefix=}\synt{prefix}]}
+   {[\texttt{suffix=}\synt{suffix}]}]
+   This iterator yields the lines of the banner. Each line is surrounded
+   by the characters in \synt{prefix} and \synt{suffix}, where the
+   \synt{suffix} character string is aligned such that the banner
+   appears aligned to the left and with a width of \synt{width} characters.
+\item[\texttt{cuts} \synt{legs}
+   {[\texttt{cut=}\texttt{cut}]}
+   {[\texttt{uncut=}\texttt{uncut}]}
+   {[\texttt{maxcut=}\texttt{maxcut}]}
+   {[\texttt{shift=}\texttt{shift}]}
+   {[\texttt{delim=}\texttt{delim}]}]
+   This iterator lists all possible cuts (in the sense of a unitarity
+   method) of the legs $0\dots\synt{legs}$. The number \synt{maxcut}
+   (default: 4) defines the highest number of simultaneous cuts to put.
+   The lists of cut and uncut propagators are returned in the symbols
+   \texttt{cut} and \texttt{uncut} respectively. The symbol \synt{delim}
+   (empty string by default) seperates the propagator labels. The lists
+   are sorted from highest to lowest such that a zero is never a leading
+   zero.
+   The symbols \texttt{is\_first} and \texttt{is\_last} have their
+   usual meaning.
+\item[\texttt{debug\_options}] This iterator loops over all
+   currently set options. The name is stored in the symbol \lit{name},
+   the value in \lit{\$\_}.
+\item[\texttt{each} \synt{arg$_1$}\dots \synt{arg$_n$}
+  {[\texttt{var=}\synt{var}]}
+   {[\texttt{first=}\synt{first}]}
+   {[\texttt{last=}\synt{last}]}]
+   This iterator loops over its arguments which are stored in
+   the symbol \lit{\$\_} or whatever the argument \synt{var} points to.
+   The arguments \synt{first} and \synt{last} define the names of the flags
+   which are true if the current iteration is the first (resp. last) one.
+   Their default values are \lit{is\_first} and \lit{is\_last} respectively.
+\item[\texttt{elements} \synt{list}
+   {[\texttt{delimiter=}\synt{delimiter}]}
+   {[\texttt{shift=}\synt{shift}]}]
+   Further arguments are  {[\texttt{var=}\synt{var}]}
+   {[\texttt{index=}\synt{index}]}
+   {[\texttt{first=}\synt{first}]}
+   {[\texttt{last=}\synt{last}]}.
+
+   This iterator loops over the elements of a list denoted by \synt{list}.
+   If \synt{delimiter} is specified the elements of the list are assumed to
+   be delimited by that symbol, otherwise \lit{,} is used as a delimiter.
+   The elements are stored in the symbol defined by \synt{var}
+   (default: \lit{\$\_}). The corresponding list index (starting from zero
+   or \synt{shift}) is stored in the symbol defined by \synt{index}.
+   The arguments \synt{first} and \synt{last} define the names of the flags
+   which are true if the current iteration is the first (resp. last) one.
+   Their default values are \lit{is\_first} and \lit{is\_last} respectively.
+\item[\texttt{options} \synt{pattern} {[\texttt{ignorecase}]}]
+   This iterator lists all defined symbols
+   which are consistend with the pattern \synt{pattern}. A pattern has the
+   form
+\begin{grammar}
+<pattern> ::= <name part>
+   \alt <name part> '.' <pattern>
+
+<name part> ::= <word without '.'> \alt '*'
+\end{grammar}
+   Additional optional arguments:
+   \begin{description}
+   \item[\texttt{first}] (default: \lit{is\_first}) sets the name of the
+      flag indicating that this iteration is the first one.
+   \item[\texttt{last}] (default: \lit{is\_last}) sets the name of the
+      flag indicating that this iteration is the last one.
+   \item[\texttt{var}] (default: \lit{\$\_}) sets the symbol
+      denoting the value of the variable of the matched name.
+   \item[\texttt{name}] (default: \lit{name}) sets the symbol
+      denoting the matched name.
+   \end{description}
+
+   The following example is taken from a Makefile:
+\begin{lstlisting}
+LDFLAGS=[%
+   @for options *.ldflags ignorecase %] \
+      [% $_ %][%
+   @end @for %]
+\end{lstlisting}
+\item[\texttt{repeat} {[\synt{from}]} \synt{to} {[\synt{step}]}
+   {[\texttt{inclusive}]} {[\texttt{shift=}\synt{shift}]}
+   {[\texttt{var=}\synt{var}]}]
+   This iterator repeats a loop the given number of times.
+   The loop counter \synt{var} (default: \lit{\$\_}) is initialized
+   to \synt{from} (default: 0). After each iteration the loop counter
+   is increased by \synt{step} (default: 1). The loop is repeated
+   as long as the counter is less than \synt{to}. If \texttt{inclusive}
+   is pressend the loop is repeated as long as the counter is less or equal
+   than \synt{to}. The symbols \lit{is\_first} and \lit{is\_last} are
+   defined with their usual meaning.
+\item[\texttt{tens\_rec\_info} \synt{rank} {[\texttt{dim=}\synt{dim}]}
+   {[\texttt{shift\_args=}\synt{shift}]}]
+   Further optional arguments are \texttt{coeff=}\synt{coeff},
+   \texttt{args=}\synt{args},
+   \texttt{symmetry=}\synt{symmetry},
+   \texttt{sign=}\synt{sign},
+   \texttt{k=}\synt{k},
+   \texttt{i=}\synt{i}; they all have their name as default value.
+
+   This iterator loops over all coefficients needed for tensorial
+   reconstruction of rank \synt{rank}.
+
+   Example:
+\begin{lstlisting}
+[%
+@for tens_rec_info rk shift_args=1 %]
+coeffs%c[% coeff %][%
+   @select coeff @case 0 %][%
+   @else %]([%k%],[%i%])[%
+   @end @select %] = ([%sign%]) * derivative([%
+      args %]) / [% symmetry %].d0[%
+@end @for %]
+\end{lstlisting}
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Environments}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{env}
+   \synt{key$_1$}\texttt{=}\synt{value$_1$}\dots
+   \synt{key$_n$}\texttt{=}\synt{value$_n$}]
+   Defines an environment in which the assignments of the arguments
+   are defined as symbols.
+\item[\texttt{eval} \synt{expression} \ldots \texttt{result=}\synt{name}]
+   Defines an environment by assigning the result of the evaluation of
+   \synt{expression} to \synt{name}. The details about the expression
+   syntax can be found in the description of the \emph{function} \texttt{eval}.
+\item[\texttt{modules} \synt{file-name}
+   {[\texttt{path=}\synt{path}]}
+   {[\texttt{replace=}\synt{pattern} \texttt{by=}\synt{replacement}]}]
+   Defines symbols by reading in a file of `chunks'. The file needs to
+   have an unindented line of the form:
+\begin{verbatim}
+boundary=...
+\end{verbatim}
+   Whatever comes after the \lit{=} sign defines the boundary between
+   different chunks. The following example defines an error message
+   in different languages:
+\begin{verbatim}
+You can put anything you like before the boundary line.
+
+boundary=XXXXX
+
+Now follows the first chunk
+
+--XXXXX name=error.en
+This is the error message.
+--XXXXX name=error.de
+Das ist eine Fehlermeldung.
+--XXXXX--
+\end{verbatim}
+   Assuming the file is called \lit{error.txt},
+   in the template file one could use:
+\begin{lstlisting}
+print*, [%
+@with modules error.txt %][%
+   @select language
+   @case de %]"[%error.de%]"[%
+   @else %]"[%error.en%]"[%
+   @end @select %][%
+@end @with %]
+\end{lstlisting}
+   The argument \synt{path} may be \lit{process} (denoting the process path),
+   \lit{templates} (denoting the template path),
+   \lit{golem} (denoting the \golem{} installation path) or
+   a relative or absolute path name. The arguments \synt{pattern} and
+   \synt{replacement} can be used to replace part of the file name
+   depending on the value of a currently defined symbol, e.g.
+\begin{lstlisting}
+[% modules errorXYZ.txt
+      replace=XYZ by=helicity %]
+\end{lstlisting}
+\item[\texttt{os} {[\texttt{prefix=}\synt{prefix}]}]
+   Provides an environment containing all environment variables
+   as symbols. If \synt{prefix} is supplied as an argument all
+   variable names are prefixed with \synt{prefix}.
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Kinematics}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The class \texttt{Kinematics} is derived from the base class.
+
+%---------------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{crossed\_symmetry\_factor} $\to$ \synt{integer}]
+   Returns the symmetry factor arising from identical final state
+   particles computed for the current crossing.
+
+\attention This function must be nested inside a loop over all
+   \texttt{crossings}.
+\item[\texttt{in\_helicities} $\to$ \synt{integer}]
+   This is the reciprocal of the helicity average factor.
+\item[\texttt{isqcd} {[\synt{name$_1$}]} \dots
+ {[\synt{name$_n$}]} $\to$ \synt{logical}] This function determines
+   if the correction type is QCD. The arguments are the same as in
+   \texttt{loqcd}.
+\item[\texttt{loqcd} {[\synt{name$_1$}]} \dots
+ {[\synt{name$_n$}]} $\to$ \synt{integer}] This function returns the
+   power of the strong coupling $g_s$ in the leading order amplitude.
+   The arguments \synt{name$_1$}, \dots, \synt{name$_n$} are a list of
+   names for the leading order coupling which is used instead of the
+   standard choice \texttt{qcd}, \texttt{gg}, \texttt{gs}.
+\item[\texttt{num\_in} $\to$ \synt{integer}]
+   The number of initial state particles.
+\item[\texttt{num\_out} $\to$ \synt{integer}]
+   The number of final state particles.
+\item[\texttt{num\_legs} $\to$ \synt{integer}]
+   The number of external particles.
+\item[\texttt{num\_helicities} $\to$ \synt{integer}]
+   The number of helicity amplitudes.
+\item[\texttt{symmetry\_factor} $\to$ \synt{integer}]
+   The symmetry factor arising from
+   identical particles in the final state.
+\item[\texttt{tree\_sign} \synt{diagram} $\to$ \synt{integer}]
+   Returns the sign of the
+   tree diagram with the number \synt{diagram} computed from the
+   Majorana fermion permutation.
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Iterators}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{crossings}
+    {[\texttt{index=}\synt{index}]} {[\texttt{var=}\synt{var}]}]
+   This iterator loops over all crossings requested
+   by the user. \texttt{is\_first} and \texttt{is\_last} have their usual
+   meaning. The symbol \synt{index} runs a zero based counter along with
+   the names of the crossings which are stored in \synt{var}
+   (default: \lit{\$\_}).
+\item[\texttt{crossed\_color}
+    {[\texttt{initial}]} {[\texttt{final}]}
+    {[\texttt{index=}\synt{index}]} {[\texttt{var=}\synt{var}]}]
+   Only available in files which are
+   generated inside an XML-loop over crossing.
+   Iterates over the color mapping for this crossing defined by
+   \synt{index} $\to$ \synt{var} (default: \lit{\$\_}).
+\item[\texttt{crossed\_helicities}
+    {[\texttt{initial}]} {[\texttt{final}]}
+    {[\texttt{index=}\synt{index}]} {[\texttt{var=}\synt{var}]}]
+    Same as \texttt{crossed\_color}
+    but for helicities instead of color.
+\item[\texttt{crossing}
+    {[\texttt{sign=}\synt{sign}]}
+    {[\texttt{index=}\synt{index}]} {[\texttt{var=}\synt{var}]}]
+    This iterator defines the permutation of the legs needed to obtain
+    the crossing from the original amplitude. The symbol \synt{sign}
+    denotes a number $\pm1$. A value of $-1$ indicates that the corresponding
+    vector has to be negated because a final state momentum is crossed into
+    initial state or vice versa.
+\item[\texttt{pairs}
+   {[\texttt{ordered}]} {[\texttt{distinct}]} \ldots] Iterator over
+   pairs of external particles. This iterator has the same filters and
+   names as \texttt{particles} but with either a \lit{1} or \lit{2} attached
+   to the name as a suffix. Furthermore, the argument \texttt{ordered}
+   indicates that only ordered pairs are included in the iteration
+   (including the case of the first and the second particle having the same
+   index). The presence of the argument \texttt{distinct} excludes the
+   cases where the first and second particle are the same.
+\item[\texttt{particles}
+   {[\synt{filter$_1$}]}\dots {[\synt{filter$_n$}]}
+   {[\synt{name$_1$}\texttt{=}\synt{new-name$_1$}]}\dots]
+   This iterator loops over the external particles in this process.
+   The user can apply the following filters to restrict the particles
+   by spin, color, mass and direction:
+   \begin{description}\footnotesize
+   \item[\textsc{Selection by Direction}]
+   \item[\texttt{initial}] initial state particles
+   \item[\texttt{final}] final state particles
+   \item[\textsc{Selection by Mass}]
+   \item[\texttt{massive}] massive particles
+   \item[\texttt{lightlike}] massless (light-like) particles
+   \item[\textsc{Selection by Color}]
+   \item[\texttt{white}] uncolored particles
+   \item[\texttt{colored}] colored particles
+   \item[\texttt{fundamental}] particles in the fundamental or
+          anti-fundamental representation
+   \item[\texttt{quarks}] particles in the fundamental representation
+   \item[\texttt{anti-quarks}] particles in the
+          anti-fundamental representation
+   \item[\texttt{adjoint|gluons}] particles in the adjoint representation
+   \item[\textsc{Selection by Spin}]
+   \item[\texttt{scalar}] spin-$0$ particles
+   \item[\texttt{spinor}] spin-$1/2$ particles
+   \item[\texttt{vector}] spin-$1$ particles
+   \item[\texttt{vectorspinor}] spin-$3/2$ particles
+   \item[\texttt{tensor}] spin-$2$ particles
+   \item[\texttt{boson}] spin $0$, $1$ or $2$ particles
+   \item[\texttt{fermion}] spin $1/2$ or $3/2$ particles
+   \end{description}
+The iterator defines the following names:
+   \begin{description}\footnotesize
+   \item[\texttt{index}] The index of this particle.
+       This index runs from 1 to the number of external particles.
+   \item[\texttt{out\_index}] This index is only defined for final state
+       particles and runs from 1 to the number of final state particles.
+   \item[\texttt{hel}] The helicity of this particle.
+   \item[\texttt{mass}] The (symbolic) mass of this particle or zero
+       if the particle is massless.
+   \item[\texttt{spin}] The spin of this particle as a fraction, e.g.
+      \lit{0}, \lit{1/2}, \lit{1}, \dots
+   \item[\texttt{2spin}] Twice the spin of this particles as an integer
+      number. This value is negative for anti-particles.
+   \item[\texttt{is\_lightlike}] Flag indicating if this particle is massless.
+   \item[\texttt{is\_massive}] Flag indicating if this particle is massive.
+   \item[\texttt{is\_initial}] Flag indicating if this particle is an
+      initial state particle.
+   \item[\texttt{is\_final}] Flag indicating if this particle is an
+      final state particle.
+   \item[\texttt{color}] The color representation of this particle
+      as an integer number such as $1$, $\pm3$, $8$.
+   \item[\texttt{latex}] The \LaTeX{} name of the current particle.
+   \item[\texttt{is\_first}] Flag indicating if this is the first
+      iteration (not necessarily the first particle in the process).
+   \item[\texttt{is\_last}] Flag indicating if this is the last
+      iteration (not necessarily the last particle in the process).
+   \end{description}
+
+   Please, note that all names can be prefixed by setting the argument
+   \texttt{prefix}.
+\item[\texttt{quark\_loop\_masses}] This iteratr enumerates all
+   quark masses present in closed quark loops. The arguments
+   \texttt{prefix}, \texttt{var}, \texttt{first} and \texttt{last}
+   are used with their usual meaning.
+\item[\texttt{mandelstam}
+   {[\texttt{zero|non-zero}]}]
+   This iterator runs over all independent Mandelstam variables defined
+   for this process.
+
+   This iterator takes the following additional optional options:
+   \smallskip
+
+\begin{tabular}{l|l|p{12em}}
+\textbf{Name} & \textbf{Default} & \textbf{Description} \\
+\hline
+   \texttt{first} & \lit{is\_first} & name of a symbol
+      indicating if this is the first iteration.\\
+   \texttt{last} & \lit{is\_last} & name of a symbol
+      indicating if this is the last iteration.\\
+   \texttt{zero} & \lit{is\_zero} & name of a symbol 
+      indicating if this Mandelstam variable is zero.\\
+   \texttt{non-zero} & \lit{is\_non-zero} & name of a symbol 
+      indicating if this Mandelstam variable is non-zero.\\
+   \texttt{symbol} & \lit{symbol} & name of a symbol
+      holding the name of the Mandelstam variable derived
+      from the indices of the vectors and the format
+      defined by \texttt{sym\_prefix}, \texttt{sym\_suffix} and
+      \texttt{sym\_infix}.\\
+   \texttt{index} & \lit{index} & counter of all Mandelstam variables
+      selected in this loop.\\
+   \texttt{global\_index} & \lit{global\_index} &
+      counter of all Mandelstam variables.\\
+   \hline
+   \texttt{sym\_prefix} & \lit{es} & \multirow{3}{*}{
+\begin{minipage}{\linewidth}
+  The elements to build up the name of the Mandelstam variable. See below.
+\end{minipage}}\\
+   \texttt{sym\_suffix} & \lit{} \\
+   \texttt{sym\_infix} & \lit{}
+\end{tabular}
+\smallskip
+
+The variable $s_{123}$ by default is translated to \texttt{es123}. With
+\texttt{sym\_prefix=}\lit{s(}, \texttt{sym\_suffix}=\lit{)} and
+\texttt{sym\_infix=}\lit{,} this would read \texttt{s(1,2,3)}.
+\item[\texttt{mandelstam\_expression}]
+   This iterator is quite complex. In this exceptional case the reader
+   is referred to the source code.
+\item[\texttt{latex\_color\_base}
+   {[\texttt{var=}\synt{var}]}
+   {[\texttt{expr=}\synt{expression}]}]
+   This iterator runs over all color basis elements and returns their
+   definition in \LaTeX{} format. \synt{var} (default: \lit{\$\_}
+   defines the symbol holding
+   the color index, \synt{expression} the name of the symbol holding
+   the \LaTeX expression.
+\item[\texttt{color\_mapping}
+   {[\texttt{index=}\synt{index}]}
+   {[\texttt{var=}\synt{var}]}] Iterator over all color basis elements
+   and the permutation induced by the mapping between two helicities.
+   The additional parameters \lit{first}, \lit{last} and \lit{prefix}
+   have their usual meaning. The permutation between the color basis
+   elements is defined by \synt{index} $\to$ \synt{var}, where \synt{var}
+   has \lit{\$\_} as default value.
+\item[\texttt{helicity\_mapping}
+  {[\texttt{index=}\synt{index}]}
+  {[\texttt{var=}\synt{var}]}
+  {[\texttt{sign=}\synt{sign}]}
+  {[\texttt{parity=}\synt{parity}]}
+  {[\texttt{shift=}\synt{shift}]}]
+   For the current helicity, this iterator
+   runs over the indices of all external particles returning the required
+   permutation, the sign and a flag indicating if parity needs to be applied
+   to this vector. The arguments \lit{first}, \lit{last} and \lit{prefix}
+   have their usual meaning. The arguments \synt{sign}, \synt{parity},
+   and \synt{index} have their names as default values and
+   define the variable names filled by the iterator. The default of \synt{var}
+   is \lit{\$\_}.
+   The symbol \synt{index} contains the index of the particle at
+   which the momentum of particle \synt{var} should appear in the
+   argument list of the actually called amplitude (which has the helicity
+   label \lit{map.index}). \synt{sign} is $-1$ if a final state particle is
+   assigned at an initial state position or vice versa; \synt{parity} being
+   true indicates that a parity transformation should be applied to this
+   vector.
+\item[\texttt{helicities} {[\texttt{generated}]}]
+   If \lit{generated} is given in the arguments, only helicities
+   are included for which code has been generated.
+
+   This iterator takes the following additional optional options:
+   \smallskip
+
+\begin{tabular}{l|l|p{16em}}
+\textbf{Name} & \textbf{Default} & \textbf{Description} \\
+\hline
+\texttt{symbol\_plus} &  \lit{+} & defines which
+      symbol is used in the output to indicate `+' helicity.\\
+\texttt{symbol\_plus2} &  \lit{p} & defines which
+      symbol is used in the output to indicate `++' helicity.\\
+\texttt{symbol\_minus} &  \lit{-} & defines which
+      symbol is used in the output to indicate `-' helicity.\\
+\texttt{symbol\_minus2} &  \lit{m} & defines which
+      symbol is used in the output to indicate `-{}-' helicity.\\
+\texttt{symbol\_zero} &  \lit{0} & defines which
+      symbol is used in the output to indicate zero helicity.\\
+\texttt{base} &  \lit{0} & the number starting
+      from which helicities are labeled.\\
+\texttt{prefix} & \lit{} & common prefix to put in front of all symbols.\\
+\texttt{var} & \lit{helicity} & symbol representing the helicity label.\\
+\texttt{first} & \lit{is\_first} & symbol flagging if this is the first
+      iteration.\\
+\texttt{first} & \lit{is\_first} & symbol flagging if this is the last
+      iteration.\\
+\texttt{is\_generated} & \lit{generated} & symbol flagging if code for this
+      helicity needs to be generated.\\
+\texttt{map.index} & \lit{map.index} & symbol representing the helicity label
+      this helicity is mapped to.\\
+\texttt{where} & --- & filter restricting the helicities.
+
+      Currently, this is only used in the calculation of spin correlated
+      tree-level matrix elements in combination with
+      \texttt{modified\_helicity}.
+\end{tabular}
+
+\item[\texttt{modified\_helicity} \texttt{modify=}\synt{index}
+       \texttt{to=}\synt{new}] Returns the helicity index of the helicity
+   where the helicity of particle \synt{index} is modified to
+   \synt{new}. If no such helicity is defined the iterator has no
+   iterations. Further optional arguments are \lit{symbol\_plus},
+   \lit{symbol\_minus}, \lit{symbol\_plus2}, \lit{symbol\_minus2},
+   \lit{symbol\_zero}, \lit{base}, \lit{prefix} and \lit{var} with the
+   same meaning as in the iterator \texttt{helicities}.
+
+   Currently, this is only used in the calculation of spin correlated
+   tree-level matrix elements.
+\item[\texttt{instructions}
+   {[\texttt{opcode=}\synt{opcode}]}
+   {[\texttt{index1=}\synt{index$_1$}]}
+   {[\texttt{mass1=}\synt{mass$_1$}]}
+   {[\texttt{index2=}\synt{index$_2$}]}
+   {[\texttt{mass2=}\synt{mass$_2$}]}]
+   This iterator generates a list of
+   instructions to initialize the splitting of massive external momenta.
+   The symbol \synt{opcode} (default: \lit{opcode}) can be either one or two:
+   \begin{enumerate}
+   \item Particle \synt{index$_1$} is massive, particle \synt{index$_2$}
+       is lightlike.
+   \item Both particles \synt{index$_1$} and \synt{index$_2$} are massive.
+   \end{enumerate}
+   The arguments \synt{opcode}, \synt{index$_i$} and \synt{mass$_i$}
+   have their names as default values.
+
+   The symbols \texttt{is\_first} and \texttt{is\_last} have their
+   usual meaning.
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Integrals}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The class \lit{Integrals} is derived from \lit{Kinematics}. It provides
+additional information about each loop diagram.
+
+%---------------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{latex\_parameter} \synt{expr} $\to$ \synt{string}]
+   Converts the product expression \synt{expr} into \LaTeX{}
+   format.
+\item[\texttt{complex\_mass\_needed} \texttt{group=}\synt{index}
+   $\to$ \synt{logical}]
+    This function indicates whether the integrals of a certain group
+    require complex masses.
+\item[\texttt{lo\_flags} {[\texttt{diagram=}\synt{diagram}]} $\to$
+   \synt{list}]
+    Returns a set of group names defined by the Python filters in the
+    input file.
+    If \synt{diagram} is specified the list contains all group names
+    to which this diagram belongs. If \synt{diagram} is not specified
+    this function returns a list of \emph{all} filter groups.
+\item[\texttt{loopsize}
+   \texttt{group|diagram=}\synt{index} $\to$ \synt{integer}]
+    The loop size of either the diagram with the index \synt{index} or
+    the maximum loop size appearing in the group with the index \synt{index}.
+\item[\texttt{maxloopsize} $\to$ \synt{integer}]
+    The maximum loop size appearing in the one-loop diagrams of this
+    process.
+\item[\texttt{nlo\_flags} {[\texttt{diagram|group=}\synt{index}]} $\to$
+   \synt{list}]
+    Returns a set of group names defined by the Python filters in the
+    input file.
+    If \synt{index} is specified the list contains all group names
+    to which this diagram or group (w.r.t. the integral) belongs.
+    If \synt{index} is not specified
+    this function returns a list of \emph{all} filter groups.
+\item[\texttt{use\_flags\_0}] flag indicating whether filter groups
+    are used at tree level.
+\item[\texttt{use\_flags\_1}] flag indicating whether filter groups
+    are used at one-loop level.
+\item[\texttt{min\_diagram\_0}] the minimum diagram index at tree level.
+    Also: \texttt{max\_diagram\_0}.
+\item[\texttt{min\_diagram\_1}] the minimum diagram index at one-loop level.
+    Also: \texttt{max\_diagram\_1}.
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Iterators}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{diagrams}
+      {[\texttt{group=}\synt{group}]}
+      {[\texttt{loopsize=}\synt{loopsize}]}
+      {[\texttt{idxshift=}\synt{index-shift}]}
+      {[\texttt{unpinched=}\synt{set}]}
+  ] % TODO
+      Further arguments are:
+   \begin{description}\footnotesize
+   \item[\texttt{invert}] (default: False) If \synt{set} is
+      provided by default this loop returns all diagrams which for the
+      given cut are non-zero. If \texttt{invert} is true only
+      diagrams which are zero are returned.
+   \end{description}
+      The following symbols are defined inside the loop:
+   \begin{description}\footnotesize
+      \item[\texttt{\$\_}] the diagram index assigned by QGraf.
+      \item[\texttt{is\_first}] indicates if this is the first
+         iteration of this loop.
+      \item[\texttt{is\_last}] indicates if this is the last
+         iteration of this loop.
+      \item[\texttt{index}] a continuous index over all diagrams in
+         this loop.
+      \item[\texttt{pinches}] the pinched propagators with respect
+         to the propagators of this group.
+      \item[\texttt{shift}] the shift vector used in this loop diagram
+      \item[\texttt{sign}] the sign introduced if the order of the loop
+         propagators is reversed ($Q\to-Q$).
+      \item[\texttt{rank}] the rank of this diagram.
+      \item[\texttt{is\_nf}] flag indicating whether this is an $N_f$
+         type diagram.
+      \item[\texttt{is\_mqse}] flag indicating whether this diagram
+         has a massive quark self energy insertion.
+      \item[\texttt{diagram\_sign}] possibly additional sign not part
+         of the expression.
+      \item[\texttt{global\_index}] a continuous index of all diagrams
+         in that group.
+   \end{description}
+\item[\texttt{groups}
+   {[\texttt{loopsize=}\synt{size}]}
+   {[\texttt{rank=}\synt{rank}]}
+   {[\texttt{index=}\synt{index}]}
+   {[\texttt{var=}\synt{var}]}]
+   This iterator loops over all groups of one-loop diagrams. If
+   \synt{size} is set the iterator only loops over the groups of
+   a particular size. The symbol \synt{rank} contains the effective
+   rank of the group, \synt{index} is an index running from zero to
+   the number of groups which are in the loop, \synt{var}
+   (default: \lit{\$\_}) holds the group number.
+\item[\texttt{propagators} \texttt{group=}\synt{group}
+   {[\texttt{index=}\synt{index}]}
+   {[\texttt{shift=}\synt{shift}]}
+   {[\texttt{prefix=}\synt{prefix}]}
+   {[\texttt{suffix=}\synt{suffix}]}]
+   Runs over the list of propagators of the one-loop integral of a
+   given group. The arguments \synt{prefix} (default: \lit{k})
+   and \synt{suffix} (default: \lit{}) are used to form the
+   names of the momenta. The momentum is returned in the
+   variable \texttt{momentum}. If the momentum of the propagator
+   is $Q+k_1-k_3$, and further \synt{prefix}=\lit{vecs(} and
+   \synt{suffix}=\lit{,:)}, the resulting value of \texttt{momentum}
+   would be \lit{vecs(1,:)-vecs(3,:)}. The symbol \texttt{mass} (resp.
+   \texttt{width})
+   contains the mass (resp. width) of the current propagator. The symbol
+   \synt{index} (default: \lit{\$\_}) contains the index of the current
+   propagator (starting from \synt{shift}, default: 0).
+\item[\texttt{smat} \texttt{group=}\synt{group}
+   {[\texttt{upper}]} {[\texttt{lower}]} {[\texttt{diagonal}]}
+   {[\texttt{nonzero}]} {[\texttt{zero}]} {[\texttt{real}]}
+   {[\texttt{complex}]}]
+   Iterates over the entries of the kinematical $S$-matrix.
+   The key words \texttt{upper}, \texttt{lower} and \texttt{diagonal}
+   denote the parts of the matrix which should be included in the loop.
+   The key words \texttt{zero} and \texttt{nonzero} only include
+   zero and non-zero entries of the matrix.
+   Specifying \texttt{real} or \texttt{complex} filters only
+   real or complex matrix entries.
+
+   The following arguments control the output format:
+   \begin{description}\footnotesize
+   \item[\texttt{prefix}] (default: \lit{s})
+      defines the format of a Mandelstam variable.
+   \item[\texttt{suffix}] (default: \lit{})
+      defines the format of a Mandelstam variable.
+   \item[\texttt{infix}] (default: \lit{})
+      defines the format of a Mandelstam variable.
+   \item[\texttt{powfmt}] (default: \lit{\%s**\%d})
+      defines how an integer power is translated.
+   \item[\texttt{prodfmt}] (default: \lit{\%s*\%s})
+      defines how a product is translated.
+   \end{description}
+
+   Inside the loop the following symbols are defined:
+   \begin{description}\footnotesize
+   \item[\texttt{is\_first}] flag indicating if this iteration
+       is the first one.
+   \item[\texttt{is\_last}] flag indicating if this iteration
+       is the last one.
+   \item[\texttt{rowindex}] current row index (based on \texttt{shift}).
+   \item[\texttt{colindex}] current column index (based on \texttt{shift}).
+   \item[\texttt{eol}] set to true if the end of a row is reached.
+   \item[\texttt{bol}] set to true if the beginning of a row is reached.
+   \item[\texttt{re.is\_zero}] indicates if the real part of the entry
+       is zero.
+   \item[\texttt{im.is\_zero}] indicates if the imaginary part of the entry
+       is zero.
+   \item[\texttt{is\_zero}] indicates if the entry is zero.
+   \item[\texttt{re}] real part of the entry, represented as
+       a list of terms (seperated by \lit{;}), each term being written
+       as a numerical coefficient and a product of symbols. The coefficient
+       and the remainder are seperated by a colon (\lit{:}).
+   \item[\texttt{im}] imaginary part of the entry; the data format is
+       the same as for the real part.
+\item[\texttt{loop\_flow} \synt{diagram}] defines the fermion flow
+       of a loop diagram. This is needed for Majorana fermions.
+   \end{description}
+\end{description}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Model}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% TODO
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Multi}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This template class is derived from the base class. It only
+has one function.
+\begin{description}
+\item[\texttt{include} \synt{file-name} {[\texttt{class=}\synt{class}]}]
+   Includes the given file using the class \synt{class}.
+\end{description}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{LightCone}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+references
+instructions
+
+% TODO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Verbatim}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This class is not implemented in terms of a Python class. There is
+no markup defined for this class. The input file is copied in
+verbatim to the output file. Even the character sequences
+\lit{[\%} etc. are copied as they are.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{OLP}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subprocesses
+generated\_helicities
+crossings
+%TODO
 \end{document}
