@@ -221,15 +221,15 @@ Id C([field.phim], [field.Wp], [field.Z]) = PREFACTOR(e * gPWZ);
 *---#[   chiFF :
 #do f={U,C,T,D,S,B}
 	Id CL([field.`f'bar], [field.`f'], [field.chi]) =
-		-PREFACTOR(e * gX`f');
+		+i_*PREFACTOR(e * gX`f');
 	Id CR([field.`f'bar], [field.`f'], [field.chi]) =
-		+PREFACTOR(e * gX`f');
+		-i_*PREFACTOR(e * gX`f');
 #enddo
 #do f={e,mu,tau}
 	Id CL([field.`f'p], [field.`f'm], [field.chi]) =
-		-PREFACTOR(e * gX`f');
+		+i_*PREFACTOR(e * gX`f');
 	Id CR([field.`f'p], [field.`f'm], [field.chi]) =
-		+PREFACTOR(e * gX`f');
+		-i_*PREFACTOR(e * gX`f');
 #enddo
 #Do f={ne,nmu,ntau}
 	Id CL([field.`f'bar], [field.`f'], [field.chi]) = 0;

@@ -164,7 +164,7 @@ contains
       character(len=line_length) :: rvalue, ivalue, value
       character(len=name_length) :: name
       real(ki) :: re, im
-      integer :: idx, lnr, nidx, ierr, pdg
+      integer :: idx, icomma, idx1, idx2, lnr, nidx, ierr, pdg
 
       if(present(line_number)) then
          lnr = line_number
@@ -314,6 +314,69 @@ contains
                stat = 1
                return
          end select[$
+   @end @for $][$
+   @for slha_blocks lower dimension=2 $]
+      elseif (name(1:[$ eval 1 + .len. $_ $]).eq."[$ $_ $](") then
+         idx = scan(name, ')', .false.)
+         if (idx.eq.0) then
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         endif
+         icomma = scan(name(1:idx), ',', .false.)
+         if (icomma.eq.0) then
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         endif
+         read(name([$ eval 2 + .len. $_ $]:icomma-1),*, iostat=ierr) idx1
+         if (ierr.ne.0) then
+            write(*,*) "Not an integer:", name([$
+                    eval 2 + .len. $_ $]:icomma-1)
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         end if
+         read(name(icomma+1:idx-1),*, iostat=ierr) idx2
+         if (ierr.ne.0) then
+            write(*,*) "Not an integer:", name(icomma+1:idx-1)
+            if(present(line_number)) then
+               write(*,'(A13,1x,I5)') 'error at line', line_number
+            else
+               write(*,'(A18)') 'error in parseline'
+            end if
+            stat = 1
+            return
+         end if[$
+      @for slha_entries index=index1 $]
+         [$
+         @if is_first $][$ @else $]else[$
+         @end @if$]if(idx1.eq.[$index1$]) then[$
+         @for slha_entries index=index2 $]
+            [$
+            @if is_first $][$ @else $]else[$
+            @end @if $]if(idx2.eq.[$index2$]) then
+               [$ $_ $] = parsereal(value, ierr, lnr)[$
+            @if is_last $]
+            end if[$
+            @end @if $][$
+         @end @for $][$
+         @if is_last $]
+         end if[$
+         @end @if $][$
+      @end @for $][$
    @end @for $][$
 @end @if $]
       elseif (name(1:2).eq."m(" .or. name(1:2).eq."w(") then

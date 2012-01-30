@@ -5,6 +5,7 @@ import sys
 import golem.app.main as main
 import golem.app.olp as olp
 import traceback
+import golem.util.tools
 
 def report_crash(exc, stack, fname="gosam.crashed"):
    import os
@@ -12,7 +13,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
    import xml.parsers.expat as expat
 
    from math import log
-   from golem.util.tools import POSTMORTEM_LOG, POSTMORTEM_CFG
+   from golem.util.tools import POSTMORTEM_LOG, POSTMORTEM_CFG, POSTMORTEM_DO
 
    def emit(*args, **opts):
       topic = " ".join(args)
@@ -35,13 +36,15 @@ def report_crash(exc, stack, fname="gosam.crashed"):
    for msg in POSTMORTEM_LOG:
       f.write(msg + "\n")
    f.write("---#] MESSAGES:\n")
-   f.write("---#[ LAST WORDS:\n")
-   f.write(str(exc) + "\n")
-   f.write("---#] LAST WORDS:\n")
-   f.write("---#[ STACK:\n")
-   for idx, line in enumerate(traceback.format_tb(sys.exc_traceback)):
-      f.write("[%3d] %s" % (idx, line))
-   f.write("---#] STACK:\n")
+   if exc is not None:
+      f.write("---#[ LAST WORDS:\n")
+      f.write(str(exc) + "\n")
+      f.write("---#] LAST WORDS:\n")
+   if stack is not None:
+      f.write("---#[ STACK:\n")
+      for idx, line in enumerate(traceback.format_tb(sys.exc_traceback)):
+         f.write("[%3d] %s" % (idx, line))
+      f.write("---#] STACK:\n")
    if POSTMORTEM_CFG is not None:
       f.write("---#[ CONFIG:\n")
       POSTMORTEM_CFG.list(f)
@@ -101,6 +104,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
 
    print("A detailed crash report has been written to '%s'." % fname)
    print("Please, attach this file when you contact the authors.")
+   POSTMORTEM_DO = False
 
 if __name__ == "__main__":
    argv = sys.argv[:]
@@ -117,3 +121,6 @@ if __name__ == "__main__":
       print("===> Unexpected error: %s" % ex)
       print(traceback.format_tb(sys.exc_traceback)[-1])
       report_crash(ex, sys.exc_traceback)
+
+   if golem.util.tools.POSTMORTEM_DO:
+      report_crash(None, None)

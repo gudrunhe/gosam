@@ -30,10 +30,12 @@ DEFAULT_CMD_LINE_ARGS = [
       ('q', "quiet", "suppresses warnings and messages"),
       ('l', "log-file=",
          "writes a log file with the current level of verbosity"),
+      ('r', "report", "generate post-mortem debug file"),
    ]
 
 POSTMORTEM_LOG = []
 POSTMORTEM_CFG = None
+POSTMORTEM_DO = False
 
 def add_logger(file_name=None):
    if file_name is None:
@@ -521,6 +523,7 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
    handler -- a function (name, value=None) -> True/False
             should return true if an argument is known, false otherwise
    """
+   global POSTMORTEM_DO
    short_args = ""
    long_args = []
    long_width = 0
@@ -575,6 +578,8 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          for msg in help_msgs:
             print(msg)
          sys.exit()
+      elif o in ("-r", "--report"):
+         POSTMORTEM_DO = True
       else:
          if handler is None:
             error("Unhandled command line option: %s" % o)
