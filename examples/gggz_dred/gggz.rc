@@ -21,4 +21,5 @@ zero=w*, mD
 
 helicities=+-++,+-+-,+-+0
 
-process.extensions=fr5
+# dred: switch on dimensional reduction
+process.extensions=dred

@@ -93,9 +93,24 @@ class Fortran90(_OutputFilter):
       else:
          return xchunk
 
+class ExpandTab(_OutputFilter):
+   def setup(self):
+      if "ts" in self.options:
+         self.tabsize = int(self.options["ts"])
+      else:
+         self.tabsize = 3
+
+   def filter(self, chunk):
+      if self.tabsize >= 0:
+         return chunk.expandtabs(self.tabsize)
+      else:
+         return chunk
+
 def FilterFactory(name, output, **opts):
    if name == "Fortran90":
       return Fortran90(output, **opts)
+   if name == "ExpandTab":
+      return ExpandTab(output, **opts)
    else:
       return None
 

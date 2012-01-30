@@ -238,6 +238,9 @@ class Template:
          keyword = cmd[1:].lower()
          if keyword == "end":
             is_end = True
+            if len(args) == 0:
+               raise TemplateError(
+                  "#%d: keyword expected after @end" % self._line_number)
             cmd = args[0]
             args = args[1:]
             if cmd.startswith("@"):

@@ -173,7 +173,7 @@ id vertex(iv?,
 		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
 		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * (1 + deltaaxial) * (
+		  1/4 * (1 + 0*deltaaxial) * (
 		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
 		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
 		  )
@@ -185,7 +185,7 @@ id vertex(iv?,
 		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
 		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * (1 + deltaaxial) * (
+		  1/4 * (1 + 2*deltaaxial) * (
 		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
 		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
 		  )

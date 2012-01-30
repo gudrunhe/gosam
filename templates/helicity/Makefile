@@ -134,14 +134,17 @@ very-clean: clean
 	rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(FIND) $(FIND_OPT) . \( \
-		-name 'd*l[01].f90' \
-		-or -name 'd*l[01]fr5.f90' \
-		-or -name 'd*l[01].txt' \
-		-or -name 'd*l1d.txt' \
-		-or -name 'd*l1d.f90' \
-		-or -name 'd*l[01]-fr.txt' \
-		-or -name 'd*l[01].dat' \
-		-or -name 'd*l[01].abb' \
+		-name 'd*h[%helicity%]l[01].f90' \
+		-or -name 'd*h[%helicity%]l[01]fr5.f90' \
+		-or -name 'd*h[%helicity%]l[01].txt' \
+		-or -name 'd*h[%helicity%]l1d.txt' \
+		-or -name 'd*h[%helicity%]l1d.f90' \
+		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
+		-or -name 'd*h[%helicity%]l[01].dat' \
+		-or -name 'd*h[%helicity%]l[01].abb'[%
+@if group %] \
+		-or -name 'diagramsl0.f90'[%
+@end @if %] \
 		-or -name 'lightconedecomp.prc' \
 		\) -exec rm \{} \;
 endif
