@@ -493,6 +493,30 @@ real(ki) :: m[% index %] = [% mass %][%
 [% def_particle 4 mT %]
 \end{lstlisting}
 
+\chapter{Some Coding Examples}
+
+\section{A New Variable in \texttt{config.f90}}
+In the first public version of \golem{}, the results of the generated code
+ were explained only for the case where the coupling constants
+$g_s$ and $e$ are set to one.
+The effects of setting these constants to any other value
+have been somewhat difficult to understand.
+
+We try to improve the code by introducing an integer variable
+\texttt{nlo\_prefactors} in \texttt{common/config.f90} which
+offers the following options:
+\begin{description}
+\item[\texttt{0}:] A factor of $\alpha_s/(2\pi)$ (resp. $\alpha/(2\pi)$
+for QED/EW corrections) is not included in the result, regardless of the
+settings of $e$ and $g_s$.
+\item[\texttt{1}:] A factor of $1/(8\pi^2)$ is not included in the result.
+\item[\texttt{2}:] The full result including $\alpha_{(s)}/(2\pi)$ is
+returned.
+\end{description}
+In any case, the factor $1/\Gamma(1-\varepsilon)$ is not included.
+
+\section{Numerical Polarization Vectors}
+
 \appendix
 \chapter{Available Template Classes}
 \label{appendix:template-classes}
@@ -1318,7 +1342,7 @@ additional information about each loop diagram.
       {[\texttt{loopsize=}\synt{loopsize}]}
       {[\texttt{idxshift=}\synt{index-shift}]}
       {[\texttt{unpinched=}\synt{set}]}
-  ] % TODO
+  ] 
       Further arguments are:
    \begin{description}\footnotesize
    \item[\texttt{invert}] (default: False) If \synt{set} is
@@ -1433,15 +1457,160 @@ additional information about each loop diagram.
 \section{\texttt{Model}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-has\_slha\_locations
-slha\_blocks
-slha\_entries
-count
-parameters
-functions
-comment\_chars
+%---------------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{count}
+   {[\texttt{R}]}
+   {[\texttt{RP}]}
+   {[\texttt{C}]}
+   {[\texttt{CP}]}
+] Counts how many parameters are of the given type:
+   \begin{description}\small
+   \item[\texttt{R}] real variable
+   \item[\texttt{RP}] real constant (parameter)
+   \item[\texttt{C}] complex variable
+   \item[\texttt{CP}] complex constant (parameter)
+   \end{description}
+\item[\texttt{has\_slha\_locations}] Returns whether this model file
+   defines an interface to the SLHA standard.
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Iterators}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{comment\_chars} {[\texttt{base=}\synt{base}]}
+]
+   This iterator loops over all characters which initiate a
+   comment in a parameter file (like \texttt{param.dat} in the default
+   test program). Currently, these are \lit{!}, \lit{;} and \lit{\#}.
 
-% TODO
+   The variable \texttt{index} runs starting from \synt{base} (default: 1)
+   providing a unique sequential index with each character.
+   Furthermore, inside the
+   loop the user has access to the following symbols:
+   \begin{description}\small
+   \item[\texttt{\$\_}] the actual character
+   \item[\texttt{hex}] hexadecimal ASCII value of the character
+   \item[\texttt{ord}] decimal ASCII value of the character
+   \item[\texttt{unihex}] four digit hexadecimal unicode value
+   \end{description}
+   The symbols \texttt{is\_first} and \texttt{is\_last} are defined with
+   their usual meaning.
+\item[\texttt{functions}
+   {[\texttt{base=}\synt{base}]}
+   {[\texttt{R}]}
+   {[\texttt{C}]}
+] This iterator provides a list of all derived
+   symbols of the model files, i.e. all model parameters which are not
+   input parameters but computed depending on other model parameters.
+   If \lit{R} or \lit{C} are given as parameter, the iterator loops only
+   over real (resp. complex) functions.
+
+   The variable \texttt{index} runs starting from \synt{base} (default: 1)
+   providing a unique sequential index with each function.
+   Furthermore, inside the
+   loop the user has access to the following symbols:
+   \begin{description}\small
+   \item[\texttt{\$\_}] the function name
+   \item[\texttt{type}] the type of the function
+      being either \lit{R} or \lit{C} for real (resp. complex)
+      functions.
+   \end{description}
+   The symbols \texttt{is\_first} and \texttt{is\_last} are defined with
+   their usual meaning.
+\item[\texttt{parameters}
+   {[\texttt{base=}\synt{base}]}
+   {[\texttt{R}]}
+   {[\texttt{RP}]}
+   {[\texttt{C}]}
+   {[\texttt{CP}]}
+] This iterator provides a list of all input (i.e. non-derived)
+   parameters of the model files.
+   If one or more of the following are given as parameter,
+   the iterator loops only over a subset of paramters:
+   \begin{description}\small
+   \item[\texttt{R}] real variables
+   \item[\texttt{RP}] real constants
+   \item[\texttt{C}] complex variables
+   \item[\texttt{CP}] complex constants
+   \end{description}
+   The variable \texttt{index} runs starting from \synt{base} (default: 1)
+   providing a unique sequential index with each function.
+   Furthermore, inside the
+   loop the user has access to the following symbols:
+   \begin{description}\small
+   \item[\texttt{\$\_}] the parameter name
+   \item[\texttt{type}] the type of the parameter
+      being either \lit{R}, \lit{RP}, \lit{C} or \lit{CP}
+   \item[\texttt{real}] the real part of the initialization value
+   \item[\texttt{imag}] the imaginary part of the initialization value
+   \item[\texttt{alignment}] a character string consisting of blank characters
+      only. The length is such that \lstinline{[% alignment %][% $_ %]}
+      produces all parameters nicely aligned. Therefore the length of
+      this string is the length of the longest parameter name minus
+      the length of this parameter name.
+   \end{description}
+   The symbols \texttt{is\_first} and \texttt{is\_last} are defined with
+   their usual meaning.
+\item[\texttt{slha\_blocks}
+   {[\texttt{shift=}\synt{shift}]}
+   {[\texttt{dimension=}\synt{dim: 1,2}]}
+   {[\texttt{reversed}]}
+   {[\texttt{upper|lower}]}
+] This iterator loops over all SLHA blocks defined in the model file.
+  If \synt{dim: 1,2} is present only blocks of the given dimension
+  are taken into account. A variable \texttt{index} starting from
+  \synt{shift} (default: 0) runs along with the blocks.
+  If \texttt{reversed} is in the list of arguments, the list is traversed
+  in reverse order. If \texttt{upper} (resp. \texttt{lower}) is in the
+  list of arguments the name is converted accordingly. The block name
+  is returned in the variable \lit{\$\_}, and \texttt{is\_first}
+  and \texttt{is\_last} have their usual meaning.
+\item[\texttt{slha\_entries}
+   {[\texttt{upper|lower}]}
+] There are two cases to distinguish: if the SLHA block is of dimension 1
+  this iterator loops over all SLHA locations in this block.
+  The variable \texttt{index} refers to the index within the block
+  and \lit{\$\_} contains the parameter name as defined by the model file.
+
+  In the case of a two-dimensional SLHA block this loop needs to be
+  nested. The index of the outer loop refers to the first index,
+  the index of the inner loop refers to the second index.
+  \attention{} The symbol \lit{\$\_} has no meaning in the outer loop.
+  Only in the inner loop it points to the parameter name.
+
+  Example:
+\begin{lstlisting}
+[%
+@for slha_blocks dimension=1 %]
+Block [% $_ %][%
+   @for slha_locations %]
+  [% index %]  ... # variable [% $_ %][%
+   @end @for %][%
+@end @for %][%  
+@for slha_blocks dimension=2 %]
+Block [% $_ %][%
+   @for slha_locations index=i1 %]
+      @for slha_locations index=i2 %]
+  [%i1%] [%i2%]  ... # variable: [%$_%][%
+      @end @for %][%
+   @end @for %][%
+@end @for %]
+\end{lstlisting}
+
+  This would produce something like
+\begin{lstlisting}
+Block MASS
+  1 ... # variable mdlMD
+  2 ... # variable mdlMU
+Block NMIX
+  1 1 ... # variable mdlR11
+  1 3 ... # variable mdlR13
+  3 3 ... # variable mdlR33
+\end{lstlisting}
+\end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Multi}}
@@ -1455,10 +1624,8 @@ has one function.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{LightCone}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-references
-instructions
+This class is deprecated and should not be used anymore.
 
-% TODO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{Verbatim}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1470,8 +1637,83 @@ verbatim to the output file. Even the character sequences
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\texttt{OLP}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-subprocesses
-generated\_helicities
-crossings
-%TODO
+%---------------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{olp.irregularisation}] Copies the value of
+   \texttt{IRregularisation} from the contract file.
+\item[\texttt{olp.irsubtractionmethod}] Copies the value of
+   \texttt{IRsubtractionMethod} from the contract file.
+\item[\texttt{olp.include\_color\_average}] Depending on the value of
+   \texttt{MatrixElementSquareType} in the order file this symbol
+   is set to true if the color average factor is to be included.
+\item[\texttt{olp.include\_helicity\_average}] Depending on the value of
+   \texttt{MatrixElementSquareType} in the order file this symbol
+   is set to true if the spin average factor is to be included.
+\item[\texttt{olp.no\_tree\_level}] Depending on the value of
+   \texttt{MatrixElementSquareType} in the order file this symbol
+   is set to true if no tree level amplitude should be generated and
+   therefore the NLO is the square of the virtual (rather than the interference
+   between tree level and virtual part).
+\item[\texttt{olp.massiveparticlescheme}] Copies the value of
+   \texttt{MassiveParticleScheme} from the contract file.
+\item[\texttt{olp.operationmode}] Copies the value of
+   \texttt{OperationMode} from the contract file.
+\item[\texttt{olp.subdivide}] Copies the value of
+   \texttt{SubdivideSubprocess} from the contract file.
+\item[\texttt{olp.alphaspower}] Copies the value of
+   \texttt{AlphasPower} from the contract file.
+\item[\texttt{olp.alphapower}] Copies the value of
+   \texttt{AlphaPower} from the contract file.
+\item[\texttt{olp.ufomodel}] Copies the value of
+   \texttt{UFOModel} from the contract file.
+\item[\texttt{olp.parameters}] Copies the value of
+   \texttt{Parameters} from the contract file.
+\end{description}
+%---------------------------------------------------------------------
+\subsection{Iterators}
+%---------------------------------------------------------------------
+\begin{description}
+\item[\texttt{subprocesses}] This iterator loops over all subprocesses
+   generated for this process. The variables defined inside the loop
+   are as follows:
+   \begin{description}\small
+   \item[\texttt{is\_first}] is set to true during the first iteration
+      of the loop
+   \item[\texttt{is\_last}] is set to true during the last iteration
+      of the loop
+   \item[\texttt{id}] the global indes assigned to this subprocess
+   \item[\texttt{index}] an index counting the subprocesses
+   \item[\texttt{path}] the path pointing to the generated code
+   \item[\texttt{\$\_}] the generated prefix for this subprocess
+   \item[\texttt{num\_legs}] number of external particles for this subprocess
+   \item[\texttt{num\_helicities}] number of helicities in this subprocess
+   \end{description}
+\item[\texttt{generated\_helicities}] loops over all \emph{generated}
+   helicity amplitudes of a subprocess. The symbol \lit{\$\_} contains
+   the (global) helicity label, \texttt{index} contains a continuous index.
+   The symbols \texttt{is\_first} and \texttt{is\_last} are defined with their
+   usual meanings.
+\item[\texttt{crossings}
+   {[\texttt{include-self}]} ]
+   This iterator must be enclosed in a loop over all subprocesses.
+   This iterator runs over all crossings of the current subprocess.
+   The uncrossed subprocess is only included if \texttt{include-self}
+   is part of the arguments. Inside the loop the following
+   variables are define:
+   \begin{description}\small
+   \item[\texttt{is\_first}] is set to true during the first iteration
+      of the loop
+   \item[\texttt{is\_last}] is set to true during the last iteration
+      of the loop
+   \item[\texttt{index}] an index counting the crossings
+   \item[\texttt{id}] the global indes assigned to this crossing
+   \item[\texttt{\$\_}] the generated prefix for this crossing
+   \item[\texttt{channels}] the list of labels defined in the
+      contract file. If \lit{SubdivideSubprocess} was set to true in
+      the order file there is a list of labels, one per helicity amplitude.
+      Otherwise there is exactly one label per subprocess or crossing.
+   \end{description}
+\end{description}
 \end{document}

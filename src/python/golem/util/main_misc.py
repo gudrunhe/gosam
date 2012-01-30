@@ -125,6 +125,9 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 
+	for key, value in golem.util.tools.derive_coupling_names(conf).items():
+		props.setProperty("%s_COUPLING_NAME" % key, value)
+
 	# Create and populate subdirectories
 	golem.templates.xmltemplates.transform_templates(templates, path, props,
 			conf = conf,
