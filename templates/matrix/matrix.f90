@@ -190,6 +190,30 @@ contains
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, h)
       else
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok)
+      end if
+
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 %]
+         ! The name of the QCD coupling is either unknown or
+         ! the coupling has been set to zero.[%
+      @case 1 %]
+         ! Nothing to be done: the QCD coupling has been set
+         ! to one algebraically[%
+      @else %]
+         amp(2:4) = amp(2:4)/[% QCD_COUPLING_NAME %]/[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 %]
+         ! The name of the QED coupling is either unknown or
+         ! the coupling has been set to zero.[%
+      @case 1 %]
+         ! Nothing to be done: the QED coupling has been set
+         ! to one algebraically[%
+      @else %]
+         amp(2:4) = amp(2:4)/[% QED_COUPLING_NAME %]/[% QED_COUPLING_NAME %][%
+      @end @select %]
       end if[%
       
          @select r2 default=implicit

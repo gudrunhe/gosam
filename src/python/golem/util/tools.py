@@ -726,6 +726,21 @@ def getZeroes(conf):
             zeroes.append(name)
    return zeroes
 
+def getOnes(conf):
+   model_mod = getModel(conf)
+   ones = list(filter(None, conf.getListProperty(golem.properties.one)))
+   for name, value in model_mod.parameters.items():
+      if name in ones:
+         continue
+      t = model_mod.types[name]
+      if t == 'RP':
+         if float(value) == 1.0:
+            ones.append(name)
+      elif t == 'CP':
+         if float(value[0]) == 1.0 and float(value[1]) == 0.0:
+            ones.append(name)
+   return ones
+
 def product(lst):
    r = 1
    for i in lst:
@@ -734,3 +749,37 @@ def product(lst):
 
 def factorial(n):
    return product(range(2, n+1))
+
+def derive_coupling_names(conf):
+   """
+   For a given configuration try to find out how the QCD and the QED
+   couplings are called and if they are set to one.
+   """
+
+   result = {}
+
+   candidates = {
+         'QCD': ['gs', 'mdlG', 'mdlGG'],
+         'QED': ['e', 'mdlee', 'mdlEE']
+   }
+
+   model = getModel(conf)
+   symbols = list(model.types.keys())
+   ones = getOnes(conf)
+   zeroes = getZeroes(conf)
+
+   for t, lst in candidates.items():
+      flag = False
+      for c in lst:
+         if c in symbols:
+            if c in ones:
+               result[t] = '1'
+            elif c in zeroes:
+               result[t] = '0'
+            else:
+               result[t] = c
+            flag = True
+            break
+      if not flag:
+         result[t] = '0'
+   return result
