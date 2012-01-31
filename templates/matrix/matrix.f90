@@ -129,16 +129,18 @@ contains
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse
+         & renorm_logs, renorm_mqse, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
       use [% process_name asprefix=\_ %]model
+      use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       double precision, intent(in) :: scale2
       double precision, dimension(4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
+      real(ki) :: nlo_coupling
 
       ! Number of heavy quark flavours in loops.
       real(ki), parameter :: NFh = [% count quark_loop_masses %].0_ki
@@ -147,6 +149,22 @@ contains
 
       ! used for m=0 QCD renormalisation
       real(ki) :: beta0
+
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
 
       call init_event(vecs)
 
@@ -187,9 +205,9 @@ contains
       end select
 
       if (present(h)) then
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, h)
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, h)/nlo_coupling
       else
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok)
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok)/nlo_coupling
       end if
 
       if(corrections_are_qcd) then[%
@@ -215,7 +233,7 @@ contains
          amp(2:4) = amp(2:4)/[% QED_COUPLING_NAME %]/[% QED_COUPLING_NAME %][%
       @end @select %]
       end if[%
-      
+
          @select r2 default=implicit
          @case implicit explicit off %]
       select case (renormalisation)
@@ -324,6 +342,14 @@ contains
          end if
          write(logfile,'(A8)') "</event>"
       end if
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         amp(2:4) = amp(2:4) * nlo_coupling
+      case(2)
+         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi
+      end select
    end subroutine samplitude
    !---#] subroutine samplitude :
    !---#[ function samplitudel0 :
@@ -550,8 +576,12 @@ contains
    !---#] function samplitudel1 :
    !---#[ subroutine ir_subtraction :
    subroutine     ir_subtraction(vecs,scale2,amp)
+      use [% process_name asprefix=\_ %]config, only: &
+         & nlo_prefactors
+      use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]kinematics, only: &
-         & init_event
+         & init_event, corrections_are_qcd
+      use [% process_name asprefix=\_ %]model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       double precision, intent(in) :: scale2
@@ -560,8 +590,25 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper
       complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      real(ki) :: nlo_coupling
 
       call init_event(vecs)
+
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
 
       oper = insertion_operator(real(scale2,ki), vecs)
       amp(:) = 0.0_ki[%
@@ -607,6 +654,14 @@ contains
          amp = amp / real(symmetry_factor, ki)
       end if[%
    @end @if %]
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         amp(:) = amp(:) * nlo_coupling
+      case(2)
+         amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi
+      end select
    end subroutine ir_subtraction
    !---#] subroutine ir_subtraction :
    !---#[ color correlated ME :

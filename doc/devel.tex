@@ -515,9 +515,285 @@ returned.
 \end{description}
 In any case, the factor $1/\Gamma(1-\varepsilon)$ is not included.
 
+We already included a division of the virtual part by the respective coupling
+in order to provide a result with $\alpha_{(s)}/(2\pi)$ factored out in all
+cases, also if $g_s$ or $e$ was not equal to one. In order to do so
+the symbols \lstinline{[% QCD_COUPLING_NAME %]}
+and \lstinline{[% QED_COUPLING_NAME %]}
+have been introduced. Furthermore, we will make use of the
+variable \texttt{corrections\_are\_qcd} defined in
+\texttt{common/kinematics.f90} to distinguish between QCD and QED
+corrections.
+
+\subsection{The Minimalist Approach}
+As we would like to have \texttt{nlo\_prefactors=0} as the default,
+in a first step we add the following lines to the file
+\texttt{templates/\hspace{0pt}common/\hspace{0pt}config.f90}.
+\begin{lstlisting}
+! Determines the way GoSam treats the overall
+! factor of alpha_(s)/2/pi in the NLO result.
+! 0: A factor of alpha_(s)/2/pi is not included
+! 1: A factor of 1/8/pi^2 is not included
+! 2: The NLO includes all prefactors
+integer :: nlo_prefactors = 0
+\end{lstlisting}
+\attention Please not that in order to put this change into effect in an
+already existing process directory you need to remove \texttt{config.f90}
+there manually or force gosam to overwrite it with the \texttt{--scratch}
+option\footnote{This option will also affect the files \texttt{Makefile.conf}
+and \texttt{matrix/test.f90}.}
+
+The second step is a modification of the file
+\texttt{templates/\hspace{0pt}matrix/\hspace{0pt}matrix.f90}:
+here we need to adapt the results
+of the two routines \texttt{samplitude} and
+\texttt{ir\_subtraction}. First, we define the square of the coupling
+constant which is relevant in our process, i.e. either $g_s^2$ or $e^2$.
+In both the routines we add the local variable
+\begin{lstlisting}
+real(ki) :: nlo_coupling
+\end{lstlisting}
+and later in the routines we initialize it by the following lines
+\begin{lstlisting}
+if(corrections_are_qcd) then[%
+@select QCD_COUPLING_NAME
+@case 0 1 %]
+   nlo_coupling = 1.0_ki[%
+@else %]
+   nlo_coupling = [%QCD_COUPLING_NAME%]*[%
+        QCD_COUPLING_NAME%][%
+@end @select %]
+else[%
+@select QED_COUPLING_NAME
+@case 0 1 %]
+   nlo_coupling = 1.0_ki[%
+@else %]
+   nlo_coupling = [%QED_COUPLING_NAME%]*[%
+        QED_COUPLING_NAME%][%
+@end @select %]
+end if
+\end{lstlisting}
+Of course, we could have opted for a more complicated template
+expression avoiding the if-statement all together in the case
+when both, QED and QCD coupling are fixed.
+
+In the routine \texttt{ir\_subtractions}, we need to import the
+symbols \texttt{corrections\_are\_qcd} and the names of the
+couplings. Therefore we extend the \texttt{use} statements.\footnote{
+In the routine \texttt{samplitude} these symbols are already imported.}
+On top of that also the symbol \texttt{nlo\_prefactors} is needed.
+\begin{lstlisting}
+use [%process_name asprefix=\_%]config, &
+   & only: nlo_prefactors
+use [%process_name asprefix=\_%]kinematics
+use [%process_name asprefix=\_%]model
+\end{lstlisting}
+
+At the end of the two routines we need to add the statements
+multiplying in the relevant factor depending on the value
+of  \texttt{nlo\_prefactors}. 
+Note that the indices of \texttt{amp} are different for the two routines.
+\begin{lstlisting}
+select case(nlo_prefactors)
+case(0)
+   ! The result is already ok
+case(1)
+   amp(2:4)=amp(2:4)*nlo_coupling
+case(2)
+   amp(2:4)=amp(2:4)*nlo_coupling/8._ki/pi/pi
+end select
+\end{lstlisting}
+
+\subsection{Adding the Option to \texttt{parseline}}
+Although what we programmed so far is a fully working implementation
+we would like to add a bit of luxury for the user: we would like
+the function \texttt{parseline} in \texttt{common/\hspace{0pt}model.f90}
+to recognize settings of our newly defined variable \texttt{nlo\_prefactors}
+read from text files or, in the context of the BLHA interface,
+through the routine \texttt{OLP\_Option}.
+
+The additional complication with respect to the previously modified
+files is the fact that \texttt{model.f90} is not generated directly
+by \golem{} but from the make files using \haggies{}. Therefore we
+need to modify the file
+\texttt{templates/\hspace{0pt}codegen\hspace{0pt}/model.out}.
+
+When looking at the file in the editor we recognize that the file
+starts with
+\lstset{language=[haggies]{gosamt}}
+\begin{lstlisting}
+%=$[$ ' vim:syntax=golem
+$]module     [$ process_name asprefix=\_ $]model
+\end{lstlisting}
+The first three digits \lit{\%=\$} change the markup format from
+\lit{[\% ... \%]} to \lit{[\$ ... \$]}. This is necessary because
+the former coincides to be the markup syntax of \haggies{}, too.
+By changing the markup syntax, the format with the percent signs
+is treated as plain text by \golem{}, only the format with the
+dollar signs is recognized as markup.
+
+In the subroutine \texttt{parseline} we localize the block staring
+with the line
+\begin{lstlisting}
+if (name .eq. "renormalization") then
+\end{lstlisting}
+and we add the block
+\begin{lstlisting}
+elif (name .eq. "nlo_prefactors") then
+   re = parsereal(value, ierr, lnr)
+   if (ierr .ne. 0) then
+      stat = 1
+      return
+   end if
+   nlo_prefactors = int(re)
+\end{lstlisting}
+
+Furthermore, we add the variable import of \texttt{nlo\_prefactors}
+to the \texttt{use} statement at the beginning of the module
+\begin{lstlisting}
+use [$ process_name asprefix=\_ $]config, ...&
+    & ... &
+    & nlo_prefactors
+implicit none
+private :: nlo_prefactors
+\end{lstlisting}
+
+\subsection{Adding an Option to the Input File}
+After having the option \texttt{nlo\_prefactors} added to the
+\texttt{parseline} routine,
+it would be even more of a luxury for the user if he had the possibility
+to define already in the input file (i.e. before running \golem{}) what
+setting for \texttt{nlo\_prefactors} he would like to see in the file
+\texttt{config.f90}, without having to modify that file and without the
+need of setting the value at runtime. This can be achieved by adding
+the default value in \texttt{config.f90} as a template variable.
+
+We open the file \textt{templates/\hspace{0pt}common\hspace{0pt}/config.f90}
+and replace the declaration of \texttt{nlo\_prefactors} by
+\lstset{language=[fortran]{gosamt}}
+\begin{lstlisting}
+integer :: nlo_prefactors = [% nlo_prefactors
+     convert=number
+     default=0 %]
+\end{lstlisting}
+The argument \lit{convert=number} is not necessary but reduces the risk
+of typos propagating through and being detected only when the file is
+compiled. The argument \lit{default=0}, however, is necessary, as long
+as we have not defined a default-value elsewhere. Leaving out the
+\texttt{default} argument would cause an error if the input file does
+not define \texttt{nlo\_prefactors}.
+
+At this level, \golem{} does not know anything about the existence of
+the template variable \texttt{nlo\_prefactors}; it is now a
+user-defined preprocessor variable which could be added to the input
+file by the user and would be passed through behind the scenes to any
+template file.
+Although this, in principle, is a sufficient solution for our purpose,
+it should be noted that user-defined variables come with a couple of
+drawbacks:
+\begin{itemize}
+\item There is no proper error checking possible on the values of
+      the variable.
+\item In generated template files there is no section for the
+      user-defined variable and therefore it might be difficult
+      to find out about its existence.
+\item In the interactive mode this variable would not be visible
+      either.
+\item The variable is not automatically added to the appendix of
+      the user manual.
+\end{itemize}
+
+In order to promote our user-defined variable to a built-in variable
+touching some lines of \python{} code is unavoidable. However, the
+required modifications are very small. The central location to define
+new built-in template variables (or \emph{properties}) is the file
+\texttt{src/\hspace{0pt}python/\hspace{0pt}golem/\hspace{0pt}%
+properties.py}, where we have to proceed in two steps,
+\begin{enumerate}
+\item defining the new property and
+\item adding it to the global variable \texttt{properties}.
+\end{enumerate}
+
+The first step is done by adding the following lines:
+\begin{lstlisting}[language=Python]
+config_nlo_properties = Property("nlo_prefactors",
+   """
+   Set the same variable in config.f90.
+   The values have the following meaning:
+   ...
+   """,
+   int, 0, options=[0,1,2])
+\end{lstlisting}
+The first argument of the constructor \texttt{Property}
+is the name of the variable in the input file\footnote{%
+The name \texttt{config\_nlo\_properties} has only local meaning.}.
+The second argument provides some documentation about the new
+property, followed by its type and default value as third and fourth
+argument. The optional argument \texttt{options} defines a list of
+valid values for this variable.
+
+A further optional argument would be \texttt{experimental}.
+If it is set to \texttt{True} the property is marked as experimental,
+which means that
+\begin{itemize}
+\item setting it in the input file produces a warning and
+\item it is not added to new template files or to the documentation.
+\end{itemize}
+
+After having added the property to the list \texttt{properties},
+\begin{lstlisting}[language=Python]
+properties = [
+   process_name,
+   ...
+   config_nlo_properties,
+   ...
+]
+\end{lstlisting}
+all benefits of a built-in variable are in place. Therefore,
+setting \texttt{nlo\_properties=5} would result in the warning:
+\begin{verbatim}
+-->  The value (5) of option 'nlo_prefactors'
+     is not in the valid range.
+\end{verbatim}
+
+As a last step we better remove the \texttt{default} argument in
+\texttt{config.f90} to avoid overwriting the default value from
+\texttt{properties.py}. Since now the data type of the variable
+is declared correctly we can also skip the argument \texttt{convert}:
+\begin{lstlisting}
+integer :: nlo_prefactors = [% nlo_prefactors %]
+\end{lstlisting}
+
+\subsection{Adding a Parameter to the Interactive Interface}
+Despite of its shadowy existence, the interactive mode of \golem{}
+can be an interesting playground for trying out new features.
+The more it is important to add some extra level of luxury for our
+new option also there.
+
+After having added the variable to \texttt{properties.py} it is already
+automatically added to the list of tab-completions in \golem{}'s interactive
+mode, which is started by running \texttt{gosam -i}.
+Typing \lit{nlo} at the prompt followed by hitting the \lit{Tab} key is
+enough to trigger the auto-completion, and the input line now reads
+\lit{nlo\_prefactors} followed by a white space. Hitting the \lit{Tab} key
+again, however, does not help us in remembering the set of allowed variables.
+What we would like to have is the auto-completion printing the list of
+valid options to the screen. In order to enable this feature, we simply
+edit the \python{} file
+\texttt{src/\hspace{0pt}python/\hspace{0pt}golem/\hspace{0pt}%
+shell.py}. In the \texttt{\_\_init\_\_} function of the class
+\texttt{GolemShell} we find an assignment to
+\texttt{self.golem\_follow\_set}, where we add the entry:
+\begin{lstlisting}[language=Python]
+str(golem.properties.config_nlo_prefactors):
+   ["0", "1", "2"],
+\end{lstlisting}
+That's all, we are done!
+
 \section{Numerical Polarization Vectors}
 
 \appendix
+\lstset{language=[fortran]{gosamt}}
 \chapter{Available Template Classes}
 \label{appendix:template-classes}
 
@@ -527,6 +803,14 @@ in \texttt{golem.properties} are read from the process card and
 made available in any template. Furthermore, the following symbols
 are set up while the input file is processed.
 \begin{description}
+\item[\texttt{QCD\_COUPLING\_NAME}] the name of the QCD coupling in the
+current model. This equals to 1 if the coupling has been set to one,
+it equals to 0 if the coupling is set to zero or if the name could not
+ee determined.
+\item[\texttt{QED\_COUPLING\_NAME}] the name of the QED coupling in the
+current model. This equals to 1 if the coupling has been set to one,
+it equals to 0 if the coupling is set to zero or if the name could not
+be determined.
 \item[\texttt{topolopy.keep.tree}] comma seperated list of diagram labels
 (tree diagrams) which passed the filters.
 \item[\texttt{topolopy.keep.virt}] comma seperated list of diagram labels

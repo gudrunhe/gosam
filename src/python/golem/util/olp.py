@@ -318,7 +318,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       conf["olp.mc.version"] = mc_name_parts[1].lower()
 
    #---#[ Read order file:
-   order_file = golem.util.olp_objects.OLPOrderFile(order_file_name, extensions)
+   try:
+      order_file = golem.util.olp_objects.OLPOrderFile(
+            order_file_name, extensions)
+   except IOError as err:
+      raise golem.util.olp_objects.OLPError("while reading order file: %s"
+            % err)
+
    contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
    conf.setProperty("setup-file", order_file_name)
@@ -481,7 +487,11 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    f_contract.write("#@IgnoreCase %s\n" % ignore_case)
    f_contract.write("#@SyntaxExtensions %s\n" % " ".join(
       filter(lambda i: extensions[i], extensions.keys())))
-   contract_file.store(f_contract)
+   try:
+      contract_file.store(f_contract)
+   except IOError as err:
+      raise golem.util.olp_objects.OLPError(
+            "while writing contract file: %s" % err)
    #---#] Write output file:
    #---#[ Process global templates:
 

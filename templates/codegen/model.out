@@ -6,7 +6,8 @@ $]module     [$ process_name asprefix=\_ $]model
    & samurai_scalar, samurai_verbosity, samurai_test, &
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
-   & renormalisation, reduction_interoperation, deltaOS
+   & renormalisation, reduction_interoperation, deltaOS, &
+   & nlo_prefactors
    implicit none
 
    private :: ki[$
@@ -15,6 +16,7 @@ $]module     [$ process_name asprefix=\_ $]model
    private :: samurai_group_numerators, samurai_istop[$
 @end @if $]
    private :: renormalisation, reduction_interoperation, deltaOS
+   private :: nlo_prefactors
 
    real(ki), parameter :: sqrt2 = &
       &1.414213562373095048801688724209698078&
@@ -193,6 +195,13 @@ contains
             return
          end if
          renormalisation = int(re)
+      elseif (name .eq. "nlo_prefactors") then
+         re = parsereal(value, ierr, lnr)
+         if (ierr .ne. 0) then
+            stat = 1
+            return
+         end if
+         nlo_prefactors = int(re)
       elseif (name .eq. "deltaOS") then
          re = parsereal(value, ierr, lnr)
          if (ierr .ne. 0) then
