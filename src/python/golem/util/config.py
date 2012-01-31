@@ -76,13 +76,13 @@ class Property:
                   ivalue = int(value)
                   if value not in self._options:
                      result.append(
-                        "The value (%d) of option '%s'" +
-                        " is not in the valid range."
+                        ("The value (%d) of option '%s'" +
+                        " is not in the valid range.")
                         % (ivalue, self))
                except ValueError:
                   result.append(
-                        "The value (%r) of option '%s'" +
-                        " is not an integer number."
+                        ("The value (%r) of option '%s'" +
+                        " is not an integer number.")
                         % (value, self))
    
       elif self._type == bool:
@@ -240,7 +240,7 @@ class Properties:
       true_values = ["1", "true", ".true.", "t", ".t.", "yes", "y"]
       name = str(key)
       if name in self:
-         value = self[name].strip().lower()
+         value = self.getProperty(name, default=default).strip().lower()
          return value in true_values
       else:
          return default
@@ -248,8 +248,13 @@ class Properties:
    def getIntegerProperty(self, key, default=None):
       name = str(key)
       if name in self:
-         value = self[name].strip()
-         return int(value)
+         value = self.getProperty(name, default=default).strip()
+         try:
+            return int(value)
+         except ValueError as ex:
+            raise GolemConfigError(
+               "Property '%s' does not contain an integer value ('%s')." %
+               (key, value))
       else:
          return default
 

@@ -756,6 +756,18 @@ config_reduction_interoperation = Property("reduction_interoperation",
    """,
    int, -1)
 
+config_nlo_prefactors = Property("nlo_prefactors",
+   """
+   Set the same variable in config.f90. The values have the following
+   meaning:
+
+   0: A factor of alpha_(s)/2/pi is not included in the NLO result
+   1: A factor of 1/8/pi^2 is not included in the NLO result
+   2: The NLO includes all prefactors
+
+   Note, however, that a factor of 1/Gamma(1-eps) is neglected in all cases.
+   """,
+   int, 0, options=[0,1,2])
 
 properties = [
    process_name,
@@ -802,6 +814,7 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_reduction_interoperation,
+   config_nlo_prefactors,
 
    reference_vectors,
    abbrev_limit,

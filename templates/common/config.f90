@@ -148,5 +148,15 @@
    ! is chosen such that the tensorial reconstruction method is used.
    logical :: tens_rec_by_derivatives = .true.[%
 @end @if %]
+
+   ! Determines the way GoSam treats the overall factor of alpha_(s)/2/pi
+   ! in the result of an NLO amplitude.
+   !
+   ! 0: A factor of alpha_(s)/2/pi is not included in the NLO result
+   ! 1: A factor of 1/8/pi^2 is not included in the NLO result
+   ! 2: The NLO includes all prefactors
+   !
+   ! Note, however, that a factor of 1/Gamma(1-eps) is neglected in all cases.
+   integer :: nlo_prefactors = [% nlo_prefactors %]
 end module [% process_name asprefix=\_ %]config
 
