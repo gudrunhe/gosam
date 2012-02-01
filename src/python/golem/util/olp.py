@@ -317,6 +317,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if len(mc_name_parts) > 1:
       conf["olp.mc.version"] = mc_name_parts[1].lower()
 
+
    #---#[ Read order file:
    try:
       order_file = golem.util.olp_objects.OLPOrderFile(
@@ -324,6 +325,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    except IOError as err:
       raise golem.util.olp_objects.OLPError("while reading order file: %s"
             % err)
+
+   mc_specials(conf, order_file)
 
    contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
@@ -510,3 +513,31 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          user="olp")
    #---#] Process global templates:
    return result
+
+def mc_specials(conf, order_file):
+   mc_name = conf.getProperty("olp.mc.name")
+   mc_version = conf.getProperty("olp.mc.version", None)
+
+   for pi in order_file.processing_instructions():
+      pi_parts = pi.strip().split(" ", 1)
+      if len(pi_parts) == 2:
+         conf.setProperty(pi_parts[0], pi_parts[1])
+      else:
+         conf.setProperty(pi_parts[0], True)
+
+   required_extensions = []
+
+      
+   if mc_name.startswith("powheg"):
+      required_extensions.extend(["autotools", "f77", "fr5"])
+   elif mc_name.startswith("sherpa"):
+      pass
+
+   extensions = golem.properties.getExtensions(conf)
+   add_extensions = []
+   for ext in required_extensions:
+      if ext not in extensions:
+         add_extensions.append(ext)
+   if len(add_extensions) > 0:
+      conf.setProperty("%s-auto.extensions" % mc_name,
+            ",".join(add_extensions))

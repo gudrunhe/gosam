@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2011.4.14)  29 SEP 2011 10:01
+This is pdfTeX, Version 3.1415926-1.40.11 (TeX Live 2010) (format=pdflatex 2011.4.14)  31 JAN 2012 13:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -807,18 +807,8 @@ Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1538.
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 1538.
  (./lorentz.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1538.
-
-
-Package rerunfilecheck Warning: File `lorentz.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `lorentz.out':
-(rerunfilecheck)             Before: 0A52E8D8F299E61F86DE64C2C57C33F7;1105
-(rerunfilecheck)             After:  EE474547942C1EFEA5ADC7C8CE2FA482;1105.
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
+Package rerunfilecheck Info: File `lorentz.out' has not changed.
+(rerunfilecheck)             Checksum: EE474547942C1EFEA5ADC7C8CE2FA482;1105.
  ) 
 Here is how much of TeX's memory you used:
  5913 strings out of 493747
@@ -846,7 +836,7 @@ blic/amsfonts/cm/cmsy8.pfb></usr/share/texmf/fonts/type1/public/amsfonts/cm/cmt
 i10.pfb></usr/share/texmf/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share
 /texmf/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/
 public/amsfonts/cm/cmtt12.pfb>
-Output written on lorentz.pdf (21 pages, 309329 bytes).
+Output written on lorentz.pdf (21 pages, 309316 bytes).
 PDF statistics:
  634 PDF objects out of 1000 (max. 8388607)
  582 compressed objects within 6 object streams

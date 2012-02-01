@@ -6,7 +6,14 @@ module     olp_module
 contains
 
    subroutine     OLP_Start(contract_file_name,ierr) &
-   & bind(C,name="[% olp.process_name asprefix=\_ %]OLP_Start")
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_start[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_Start[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
       use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem[%
@@ -71,11 +78,22 @@ contains
    end subroutine OLP_Start
 
    subroutine     OLP_EvalSubProcess(label, momenta, mu, parameters, res) &
-   & bind(C,name="[% olp.process_name asprefix=\_ %]OLP_EvalSubProcess")
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_evalsubprocess[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_EvalSubProcess[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
       use, intrinsic :: iso_c_binding
       implicit none
-      integer(kind=c_int), value, intent(in) :: label
-      real(kind=c_double), value, intent(in) :: mu
+      integer(kind=c_int)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: label
+      real(kind=c_double)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: mu
       real(kind=c_double), dimension(50), intent(in) :: momenta
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(4), intent(out) :: res
@@ -111,7 +129,14 @@ contains
    end subroutine OLP_EvalSubProcess
 
    subroutine     OLP_Finalize() &
-   & bind(C,name="[% olp.process_name asprefix=\_ %]OLP_Finalize")
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_finalize[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_Finalize[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
       use [%$_%]_matrix, only: [%$_%]_exitgolem => exitgolem[%
@@ -125,7 +150,14 @@ contains
    end subroutine OLP_Finalize
 
    subroutine     OLP_Option(line,stat) &
-   & bind(C,name="[% olp.process_name asprefix=\_ %]OLP_Option")
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_option[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_Option[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
       use [%$_%]_model, only: [%$_%]_parseline => parseline[%
@@ -192,7 +224,9 @@ contains
       @end @select %]
       real(kind=c_double), dimension([%
          eval 5 * sp.num_legs %]), intent(in) :: momenta
-      real(kind=c_double), value, intent(in) :: mu
+      real(kind=c_double)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: mu
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(4), intent(out) :: res
 
