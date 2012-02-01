@@ -496,6 +496,20 @@ real(ki) :: m[% index %] = [% mass %][%
 \chapter{Some Coding Examples}
 
 \section{A New Variable in \texttt{config.f90}}
+The following section provides a small example which at the same time
+consists one of the most common tasks: an additional configuration option
+is introduced in the Fortran code and used in some other part of the code.
+
+Section~\ref{ssec:nlo-prefactors:01} describes what needs to be done in
+any case. The steps described here should be familiar to anybody seriously
+developing or extending \golem{}. The later subsections 
+\ref{ssec:nlo-prefactors:02} to \ref{ssec:nlo-prefactors:04} are intended
+for the more experienced and interested audience: they involve several
+levels of the templates and of the code but conversely are of lower
+importance in daily business. Skipping them should not influence the
+understanding of the rest of the manual significantly.
+
+\subsection{Background}
 In the first public version of \golem{}, the results of the generated code
  were explained only for the case where the coupling constants
 $g_s$ and $e$ are set to one.
@@ -526,6 +540,7 @@ variable \texttt{corrections\_are\_qcd} defined in
 corrections.
 
 \subsection{The Minimalist Approach}
+\label{ssec:nlo-prefactors:01}
 As we would like to have \texttt{nlo\_prefactors=0} as the default,
 in a first step we add the following lines to the file
 \texttt{templates/\hspace{0pt}common/\hspace{0pt}config.f90}.
@@ -605,6 +620,7 @@ end select
 \end{lstlisting}
 
 \subsection{Adding the Option to \texttt{parseline}}
+\label{ssec:nlo-prefactors:02}
 Although what we programmed so far is a fully working implementation
 we would like to add a bit of luxury for the user: we would like
 the function \texttt{parseline} in \texttt{common/\hspace{0pt}model.f90}
@@ -659,6 +675,7 @@ private :: nlo_prefactors
 \end{lstlisting}
 
 \subsection{Adding an Option to the Input File}
+\label{ssec:nlo-prefactors:03}
 After having the option \texttt{nlo\_prefactors} added to the
 \texttt{parseline} routine,
 it would be even more of a luxury for the user if he had the possibility
@@ -668,7 +685,7 @@ setting for \texttt{nlo\_prefactors} he would like to see in the file
 need of setting the value at runtime. This can be achieved by adding
 the default value in \texttt{config.f90} as a template variable.
 
-We open the file \textt{templates/\hspace{0pt}common\hspace{0pt}/config.f90}
+We open the file \texttt{templates/\hspace{0pt}common\hspace{0pt}/config.f90}
 and replace the declaration of \texttt{nlo\_prefactors} by
 \lstset{language=[fortran]{gosamt}}
 \begin{lstlisting}
@@ -765,6 +782,7 @@ integer :: nlo_prefactors = [% nlo_prefactors %]
 \end{lstlisting}
 
 \subsection{Adding a Parameter to the Interactive Interface}
+\label{ssec:nlo-prefactors:04}
 Despite of its shadowy existence, the interactive mode of \golem{}
 can be an interesting playground for trying out new features.
 The more it is important to add some extra level of luxury for our
@@ -791,6 +809,142 @@ str(golem.properties.config_nlo_prefactors):
 That's all, we are done!
 
 \section{Numerical Polarization Vectors}
+This section describes a \emph{project} rather than an example:
+we are not only going to modify the generated code but also the
+structure of the numerators. This is a good example for everybody who
+wants to dig deeper in the code structure of \golem{}.
+The reader will have to learn about \form{} and \haggies{} as we are going
+to extend the list of symbols that can appear in an expression.
+Less emphasis is on the Fortran part of the code: here we will only add
+the code to initialize the numerical representation of the polarisation
+vectors.
+
+\subsection{Background}
+When \golem{} generates an expression for each diagram the wave functions
+(spinors, polarisation vectors, \dots) are replaced at the algebraic
+level by a helicity projection. Besides all advantages of such an approach
+there is one big draw-back: for amplitudes with many external gauge bosons
+the number of helicity amplitudes explodes exponentially. In the worst case
+one needs to generate a seperate directory for each helicity amplitude.
+By mapping helicity-amplitudes which are related by permutation symmetry
+this problem can be softened but not completely removed.
+
+Since the polarisation vectors of massless gauge bosons are (complex)
+light-like vectors the algebra can be carried out without any modifications
+even if the polarisation vectors are left in the expressions as extra symbols:
+instead of substituting, for example,
+\begin{equation}
+\epsilon^\mu_+(k_1)\to\frac{\langle p\vert\gamma^\mu\vert k_1]}%
+{\sqrt{2}\langle pk\rangle}
+\end{equation}
+we just introduce a new symbol
+$\mathtt{eps1}\equiv\epsilon_1=\epsilon^\mu_\pm(k_1)$
+together with all relevant spinor products $\langle r\epsilon_1\rangle$
+and $[r\epsilon_1]$.
+
+Whether this procedure leads to a more efficient implementation is difficult
+to decide in general. Therefore we leave this new feature as an extension
+which the user can switch on and of per process.
+
+\section{Adding an Extension}
+When a new feature is added to the code it is always a good idea to add it
+as an \emph{extension}. Extensions are key words which can be added by
+the user to the option \texttt{extensions} or to any option of the
+form \texttt{*.extensions}, such as \texttt{my.extensions},
+\texttt{extra.extensions}, \texttt{system.extensions} and so on.
+This mechanism of allowing for
+several variables for extensions prevents overwriting already set extensions
+for example when information from different setup files is merged into one.
+
+The code should always\footnote{There are well-motivated exceptions from
+this rule} be written in a way that \emph{doing nothing changes nothing},
+i.e. if the user does not put this exception explicitly the behaviour of
+the program does not change. On the other hand, after a couple of versions
+it might become obvious that 90\% of the users always work \emph{with}
+this new extension, so it is cumbersome to always add it. It might become
+more natural to introduce an extension \texttt{no-supercalifragilistic}
+which only 10\% of the users have to add
+rather than \texttt{supercalifragilistic} which is found in the configuration
+files of 90\% of the users. For this reason the concept
+of \emph{internals} has been introduced: it creates an intermediate level
+between the user view (extension) and the templates. The example will
+make this clearer.
+
+In our specific case, the extension is called \texttt{numpolvec},
+which seems to be a good compromise between the very self-documenting
+but keyboard-intense \texttt{numerical-polarisation-vectors} and the
+cryptic opposite \texttt{npv}.
+
+In principle adding a new extension is at no cost: similar to the
+user-defined variables which can be accessed at any time in the templates
+without having to modify a piece of Python code
+(see Section~\ref{ssec:nlo-prefactors:03}), one could also access
+an extension without having to declare it anywhere. The template
+code is straight-forward, e.g.
+\begin{lstlisting}
+[% @if extension numpolvec %]
+... work with numerical polarisation vectors ...
+[% @else %]
+... work without ...
+[% @end @if %]
+\end{lstlisting}
+That's it. Very simple but difficult to maintain as you might end up
+with dozens of such if-statements spread around all your template files.
+
+The recommendation therefore is to introduce an internal variable
+with each new extension. This is not much more difficult than the
+if statement before. In the file
+\texttt{src/\hspace{0pt}python/\hspace{0pt}golem/\hspace{0pt}properties.py},
+we need to add two lines to the function \texttt{setInternals}.
+First of all, we add \texttt{"\_\_NUMPOLVEC\_\_"} to the list of internals
+\begin{lstlisting}[language=Python]
+conf["__INTERNALS__"] = [
+   ...
+   "__NUMPOLVEC__"
+]
+\end{lstlisting}
+The second modification of this function is the assignment
+\begin{lstlisting}[language=Python]
+conf["__NUMPOLVEC__"] = "numpolvec" in extensions
+\end{lstlisting}
+
+Accessing an internal symbol is as easy as accessing an extension:
+\begin{lstlisting}
+[% @if internal NUMPOLVEC %]
+... work with numerical polarisation vectors ...
+[% @else %]
+... work without ...
+[% @end @if %]
+\end{lstlisting}
+However, the advantage of using internals becomes apparent very
+quickly: if at some point we would like to make the use of numerical
+polarisation vectors the default we remove the extension \texttt{numpolvec}
+and replace it by the extension \texttt{no-numpolvec} or \texttt{algpolvec}
+or anything similar. The only modification in the code would be the
+assignment to \texttt{conf["\_\_NUMPOLVEC\_\_"]},
+\begin{lstlisting}[language=Python]
+conf["__NUMPOLVEC__"] = "no-numpolvec" \
+     not in extensions
+\end{lstlisting}
+We do not need to touch any of our template files.
+
+Being user friendly, we add our changes also to the variable
+\texttt{extensions} in the same file \texttt{properties.py}:
+the documentation gets the additional line
+\begin{verbatim}
+numpolvec    --- evaluate polarisation vectors numerically
+\end{verbatim}
+and the optional argument \texttt{options} in the constructor
+\texttt{Property} is extended by the additional entry
+\texttt{"numpolvec"} -- otherwise \golem{} would spit out a warning
+every time it encounters the `unknown' extension \texttt{numpolvec}.
+
+The first obstacle is take now: the user can add the extension
+\texttt{numpolvec} to his input files, we can access the internal
+\texttt{NUMPOLVEC} in our template files --- but so far, nothing changed.
+
+\subsection{Initializing the New Symbols Numerically}
+
 
 \appendix
 \lstset{language=[fortran]{gosamt}}

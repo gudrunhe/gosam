@@ -24,7 +24,7 @@ class OLPOrderFile:
 
 	T. Binoth et al., ``A proposal for a standard
 	interface between Monte-Carlo tools and one-loop programs,''
-	[aXiv:?????].
+	[aXiv:1001.1307].
 
 	The document is, however, not clear about some details of the
 	language. Therefore we add a description here of how we interpret
@@ -155,6 +155,7 @@ class OLPOrderFile:
 		self._opt_res = {}
 		self._processes = []
 		self._proc_res = []
+		self._processing_instructions = []
 
 		if isinstance(source, str):
 			f = open(source)
@@ -330,6 +331,9 @@ class OLPOrderFile:
 				elif ch == "-":
 					state = 4
 				elif ch == "#":
+					commentary = line[col:]
+					if commentary.startswith("@"):
+						self._processing_instructions.append(commentary[1:])
 					break
 				else:
 					token += ch
@@ -415,6 +419,9 @@ class OLPOrderFile:
 			inp, out = process
 			yield (i, inp, out)
 			i += 1
+
+	def processing_instructions(self):
+		return self._processing_instructions[:]
 
 class OLPContractFile(OLPOrderFile):
 

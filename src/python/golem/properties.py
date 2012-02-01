@@ -433,12 +433,16 @@ extensions = Property("extensions",
                     a limited gauge check (introduces gauge*z variables)
    olp_daemon   --- (OLP interface only): generates a C-program providing
                     network access to the amplitude
+   numpolvec    --- evaluate polarisation vectors numerically
+   f77          --- in combination with the BLHA interface it generates
+                    an olp_module.f90 linkable with Fortran77
    """,
    list,
    options=["samurai", "golem95", "pjfry", "dred", "fr5",
       "powhegbox", "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon"])
+      "generate-all-helicities", "olp_daemon", "numpolvec",
+      "f77"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -765,7 +769,8 @@ config_nlo_prefactors = Property("nlo_prefactors",
    1: A factor of 1/8/pi^2 is not included in the NLO result
    2: The NLO includes all prefactors
 
-   Note, however, that a factor of 1/Gamma(1-eps) is neglected in all cases.
+   Note, however, that the factor of 1/Gamma(1-eps) is not included
+   in any of the cases.
    """,
    int, 0, options=[0,1,2])
 
@@ -863,7 +868,10 @@ def setInternals(conf):
          "__GAUGE_CHECK__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
-         "__OLP_DAEMON__"]
+         "__OLP_DAEMON__",
+         "__OLP_TRAILING_UNDERSCORE__",
+         "__OLP_CALL_BY_VALUE__",
+         "__OLP_TO_LOWER__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
@@ -875,3 +883,6 @@ def setInternals(conf):
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
    conf["__REDUCE_HELICITIES__"] = "generate-all-helicities" not in extensions
    conf["__OLP_DAEMON__"] = "olp_daemon" in extensions
+   conf["__OLP_TRAILING_UNDERSCORE__"] = "f77" in extensions
+   conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
+   conf["__OLP_TO_LOWER__"] = "f77" in extensions

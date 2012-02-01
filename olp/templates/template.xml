@@ -11,9 +11,7 @@
 	<file src="Makefile" class="OLP" usedby="olp">
 		<except if-extension="autotools"/>
 	</file>
-	<file src="config.sh" class="OLP" usedby="olp">
-		<except if-extension="autotools"/>
-	</file>
+	<file src="config.sh" class="OLP" usedby="olp" />
 	<file src="Makefile.am" class="OLP" usedby="olp">
 		<only if-extension="autotools"/>
 	</file>

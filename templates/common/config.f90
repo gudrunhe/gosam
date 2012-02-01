@@ -156,7 +156,8 @@
    ! 1: A factor of 1/8/pi^2 is not included in the NLO result
    ! 2: The NLO includes all prefactors
    !
-   ! Note, however, that a factor of 1/Gamma(1-eps) is neglected in all cases.
+   ! Note, however, that the factor of 1/Gamma(1-eps) is not included
+   ! in any of the cases.
    integer :: nlo_prefactors = [% nlo_prefactors %]
 end module [% process_name asprefix=\_ %]config
 
