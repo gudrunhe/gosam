@@ -8,6 +8,10 @@ include doc/refman.tex
 include doc/remark.sty
 include doc/lstform.tex
 include doc/lstolp.tex
+include doc/devel.tex
+include doc/lstgosam.tex
+include doc/lsttemplates.tex
+include doc/template.tex
 include README
 include COPYING
 include MANIFEST.in

@@ -1,7 +1,7 @@
 noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%].la
 libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= \
 	globals.f90 amplitudeh[%helicity%].f90[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @if extension golem95 %] golem95h[%helicity%].f90[%
    @end @if %][%
@@ -16,7 +16,7 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
-   @if extension fr5 %] \
+   @if internal REQUIRE_FR5 %] \
 	diagramsl0fr5.f90[%
       @if group %][%
       @else %][%
@@ -39,7 +39,7 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
 	abbrevd[%$_%]h[%helicity%].f90[%
       @end @for %][%
    @end @select %][%
-   @select r2 default=implicit
+   @select r2
    @case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
@@ -52,7 +52,7 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
 nodist_pkginclude_HEADERS=[%
 	process_name asprefix=\_ %]globalsh[% helicity %].mod [%
 	process_name asprefix=\_ %]amplitudeh[%helicity%].mod[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @if extension golem95 %] \
         [% process_name asprefix=\_ %]golem95h[%helicity%].mod[%
@@ -69,7 +69,7 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod[%
       @end @for %][%
    @end @if %][%
-   @if extension fr5 %] \
+   @if internal REQUIRE_FR5 %] \
 	[% process_name asprefix=\_ %]diagramsh[%helicity%]l0fr5.mod[%
       @if group %][%
       @else %][%
@@ -92,7 +92,7 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod[%
       @end @for %][%
    @end @select %][%
-   @select r2 default=implicit
+   @select r2
    @case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod[%
@@ -115,7 +115,7 @@ GENERATED_SRC=[%
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
-   @if extension fr5 %][%
+   @if internal REQUIRE_FR5 %][%
       @if group %] \
 	diagramsl0fr5.f90[%
       @else %][% 

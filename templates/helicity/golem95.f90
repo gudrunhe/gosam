@@ -54,7 +54,7 @@ subroutine     reconstruct_group[% grp %](coeffs)
       @else %]
          call reconstruct[% 
          rank %](numerator_d[% DIAG %], coeffs%coeffs_[% DIAG %][%
-         @select r2 default=implicit @case implicit %][%
+         @select r2 @case implicit %][%
             @with eval loopsize diagram=DIAG result=DIAGLS %][%
                @if eval DIAGLS .lt. 5 %][%
                   @if eval rank .gt. 1 %], &

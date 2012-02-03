@@ -62,6 +62,7 @@
 	EXSYM... : complex;[%
 @if internal GENERATE_DERIVATIVES %]
 	iv... : integer;
+	qshift : vector;
 	SUBSCRIPT : cvector, integer -> complex = "%2$s(%3$s)";[%
 @end @if %]
 
@@ -70,7 +71,7 @@
 [% include codegen/model-poly.inc class=Model %]
 [% include codegen/kinematics-poly.inc class=Kinematics %][%
 
-@select r2 default=implicit
+@select r2
 @case implicit %]
 @brackets epspow;
 @nobrackets p..., cf..., EXSYM... ;[%

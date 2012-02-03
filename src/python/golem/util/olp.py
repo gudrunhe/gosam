@@ -515,9 +515,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    return result
 
 def mc_specials(conf, order_file):
-   mc_name = conf.getProperty("olp.mc.name")
-   mc_version = conf.getProperty("olp.mc.version", None)
-
    for pi in order_file.processing_instructions():
       pi_parts = pi.strip().split(" ", 1)
       if len(pi_parts) == 2:
@@ -525,13 +522,23 @@ def mc_specials(conf, order_file):
       else:
          conf.setProperty(pi_parts[0], True)
 
-   required_extensions = []
+   mc_name = conf.getProperty("olp.mc.name").lower().strip()
+   mc_version = []
+   try:
+      s = conf.getProperty("olp.mc.version", default="").strip()
+      if len(s) > 0:
+         mc_version = map(int, s.split("."))
+   except ValueError as ex:
+      pass
 
+   required_extensions = []
       
    if mc_name.startswith("powheg"):
-      required_extensions.extend(["autotools", "f77", "fr5"])
+      required_extensions.extend(["autotools", "f77"])
    elif mc_name.startswith("sherpa"):
-      pass
+      required_extensions.extend(["autotools"])
+   elif mc_name.startswith("whizard"):
+      required_extensions.extend(["autotools"])
 
    extensions = golem.properties.getExtensions(conf)
    add_extensions = []

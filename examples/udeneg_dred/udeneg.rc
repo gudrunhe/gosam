@@ -23,4 +23,4 @@ zero=mU,mD,me
 # There are only two non-zero helicities
 helicities=-+-++, -+-+-
 
-process.extensions=fr5, dred
+process.extensions=dred

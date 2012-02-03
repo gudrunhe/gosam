@@ -132,6 +132,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
    keep = []
    lose = []
+   max_rank = 0
 
    loopcache = LoopCache()
 
@@ -161,11 +162,16 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
                      filter_flags[flag] = [idx]
                   else:
                      filter_flags[flag].append(idx)
+            rk = diagram.rank()
+            if rk > max_rank:
+               max_rank = rk
       else:
          lose.append(idx)
 
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
             (len(keep), len(lose)))
+
+   conf["__max_rank__"] = max_rank
 
    return keep, loopcache
 

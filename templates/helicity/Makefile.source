@@ -42,7 +42,7 @@ DIAGRAMS_TREE=[%
 	@end @for %][%
 @end @if %]
 
-DIAGRAMS_TREE_FR5=[% @if extension fr5 %][%
+DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
 @else %][% 
 	@for elements topolopy.keep.tree %] \
@@ -60,7 +60,7 @@ TXT_TREE=[%
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %]
 
-TXT_TREE_FR5=[% @if extension fr5 %][%
+TXT_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
    @for elements topolopy.keep.tree %] \
 		d[%$_%]h[%helicity%]l0-fr.txt[%
@@ -73,7 +73,7 @@ TXT_TREE_FR5=[% @if extension fr5 %][%
 [% @if generate_lo_diagrams %]
 SOURCE_TREE= \
 	diagramsl0.f90 $(DIAGRAMS_TREE)[%
-   @if extension fr5 %] \
+   @if internal REQUIRE_FR5 %] \
 	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
    @end @if %]
 [% @else %]
@@ -81,7 +81,7 @@ SOURCE_TREE=
 [% @end @if %]
 [% @if generate_nlo_virt %]
 DIAGRAMS_VIRT=[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
@@ -92,7 +92,7 @@ DIAGRAMS_VIRT=[%
 @end @select %]
 
 TXT_VIRT=[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
 @case only %][%
    @for elements topolopy.keep.virt %] \
@@ -142,7 +142,7 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D DIAG=[%$_%] \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm[%
-   @if extension fr5 %]
+   @if internal REQUIRE_FR5 %]
 d[%$_%]h[%helicity%]l0-fr.txt: d[%$_%]h[%helicity%]l0.txt[%
 	@end @if %][%
 	@if group %][%
@@ -156,7 +156,7 @@ d[%$_%]h[%helicity%]l0.f90: d[%$_%]h[%helicity%]l0.txt
 			d[%$_%]h[%helicity%]l0.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ $<[%
-      @if extension fr5 %]
+      @if internal REQUIRE_FR5 %]
 d[%$_%]h[%helicity%]l0fr5.f90: d[%$_%]h[%helicity%]l0-fr.txt
 	@echo Haggies is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) \
@@ -166,7 +166,7 @@ d[%$_%]h[%helicity%]l0fr5.f90: d[%$_%]h[%helicity%]l0-fr.txt
 			d[%$_%]h[%helicity%]l0.dat \
 			| sed 's/extraysymbols=//')) \
 		-o $@ $<[%
-      @end @if extension fr5 %][%
+      @end @if internal REQUIRE_FR5 %][%
    @end @if %][%
 @end @for %][%
 	
@@ -178,7 +178,7 @@ diagramsl0.f90: $(TXT_TREE)
 		-t ../codegen/haggies-l0.out \
 		-D helicity=[%helicity%] -D "modsuffix=" \
 		-o $@ $+[%
-   @if extension fr5 %]
+   @if internal REQUIRE_FR5 %]
 diagramsl0fr5.f90: $(TXT_TREE_FR5)
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
@@ -231,7 +231,7 @@ d[%$_%]h[%helicity%]l1d.f90: d[%$_%]h[%helicity%]l1d.txt
 	@$(HAGGIES) $(HAGGIES_OPT) \
 		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
 		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] \
+		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-c ../codegen/haggies-l1.in \
 		-t ../codegen/haggies-l1d.out \
 		$(addprefix -p,$(shell grep extrasymbols \

@@ -12,9 +12,9 @@
 #define R2PREFACTOR "1"
 
 #procedure ReduceDiagramR2(DIAG)
-   #call shiftmomenta(`DIAG')
+   #call shiftmomenta(`DIAG',0)
    Argument Spab, Spaa, Spbb, Spba;
-      #Call shiftmomenta(`DIAG')
+      #Call shiftmomenta(`DIAG',0)
    EndArgument;
    Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
       fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);

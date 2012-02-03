@@ -34,6 +34,8 @@ Vector ZERO, vDUMMYA;
 	CFunction j;
 	CTensor ptens;
 	Vector Q;
+	Vector qshift;
+	CFunction fshift;
 #EndIf
 
 AutoDeclare Indices idx, iv;

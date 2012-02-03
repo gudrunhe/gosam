@@ -29,7 +29,7 @@ contains[%
    @for brackets bracket="subbrack_%2$d_%1$d" %]
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
@@ -45,7 +45,7 @@ contains[%
       @end @with %]
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
@@ -67,7 +67,7 @@ contains[%
    @end @for innerbracket %]
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
@@ -83,7 +83,7 @@ contains[%
       @end @with %]
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
@@ -99,7 +99,7 @@ contains[%
       [% inst.$_ %][%
       @end @select
       %] = [% expression bracket="brack_%2$d_%1$d(Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $])" %][%
    @end @for instructions %]
@@ -144,7 +144,7 @@ contains[%
 
       ! The Q that goes into the diagram
       complex(ki), dimension(4) :: Q[$
-   @select r2 default=implicit
+   @select r2
    @case implicit $]
       complex(ki) :: mu2[$
    @end @select $][%
@@ -173,7 +173,7 @@ contains[%
          @end @select %][$
       @end @if $][%
    @end @with %][$
-   @select r2 default=implicit
+   @select r2
    @case implicit $][$
       @if version_newer samurai.version 2.0 $]
       mu2    = cmplx(real(mu2_ext, ki), aimag(mu2_ext), ki)[$
@@ -184,7 +184,7 @@ contains[%
       [% output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%] = 0.0_ki[%
    @for instructions registers="t%d" %]
       [% $_ %] = [% expression bracket="brack_%d[$
-      @select r2 default=implicit
+      @select r2
       @case explicit only off $](Q)[$
       @end @select $]" %][%
    @end @for instructions %]
@@ -221,7 +221,7 @@ contains[%
 
       ! The Q that goes into the diagram
       complex(ki), dimension(4) :: Q[$
-   @select r2 default=implicit
+   @select r2
    @case implicit $]
       complex(ki) :: mu2[$
    @end @select $][%
@@ -242,14 +242,14 @@ contains[%
          @end @select %][$
       @end @if $][%
    @end @with %][$
-   @select r2 default=implicit
+   @select r2
    @case implicit $]
       mu2  = cmplx(real(mu2_ext, ki), 0.0_ki, ki)[$
    @end @select $]
       [% output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%] = 0.0_ki[%
    @for instructions registers="t%d" %]
       [% $_ %] = [% expression bracket="brack_%d[$
-      @select r2 default=implicit
+      @select r2
       @case explicit only off $](Q)[$
       @end @select $]" %][%
    @end @for instructions %]

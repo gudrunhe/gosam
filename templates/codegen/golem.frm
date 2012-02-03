@@ -30,7 +30,7 @@ off statistics;
 @if extension dred %]
 #Define DRED "defined"[%
 @end @if %][%
-@if extension fr5 %]
+@if internal REQUIRE_FR5 %]
 #Define FR5 "defined"[%
 @end @if %]
 
@@ -81,7 +81,7 @@ Symbol Qt2;
 #include- model.hh
 #include- process.hh
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
-@select r2 default=implicit
+@select r2
 @case explicit only %]
 #If `LOOPS' == 1
    #include- r2.hh
@@ -394,7 +394,7 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 #call SpOpen(`LIGHTLIKE')
 
 #If `LOOPS' == 1[%
-@select r2 default=implicit
+@select r2
 @case implicit %]
 * Implicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
@@ -456,9 +456,9 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 
 #if `LOOPS' == 1[%
 @if extension qshift %]
-   #Call shiftmomenta(`DIAG')
+   #Call shiftmomenta(`DIAG',0)
    Argument Spab, Spaa, Spbb, Spba;
-      #Call shiftmomenta(`DIAG')
+      #Call shiftmomenta(`DIAG',0)
    EndArgument;[%
 @else %]
    Id p1 = Q;
@@ -514,7 +514,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #If `LOOPS' == 1
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
          Q[%
-@select r2 default=implicit @case implicit %],Qt2,eps[%
+@select r2 @case implicit %],Qt2,eps[%
 @end @select %])
 #EndIf
 
@@ -522,7 +522,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 
 #If `LOOPS' == 1
    #$terms=termsin_(diagram`DIAG')[%
-@select r2 default=implicit @case explicit only %]+ termsin_(d`DIAG'R2)[%
+@select r2 @case explicit only %]+ termsin_(d`DIAG'R2)[%
 @end @select%];
 #Else
    #$terms=termsin_(diagram`DIAG');
@@ -531,7 +531,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 .sort:part 7;
 
 #If `LOOPS' == 1[%
-@select r2 default=implicit @case explicit only %]
+@select r2 @case explicit only %]
    #If "`R2PREFACTOR'" != "1"
       #Write <`OUTFILE'.abb> "rat2d`DIAG' = `R2PREFACTOR' *(%E);", d`DIAG'R2
    #Else
@@ -561,7 +561,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Write <`OUTFILE'.dat> "time=`time_'"
 #Close <`OUTFILE'.dat>[%
 
-@select r2 default=implicit @case implicit %]
+@select r2 @case implicit %]
 #If `LOOPS' > 0
    Multiply epspow(0);
    Id epspow(0) * eps^sDUMMY2? = epspow(sDUMMY2);
@@ -569,7 +569,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @select %]
 .sort:part 9.1;[%
 
-@select r2 default=implicit
+@select r2
 @case only %]
 #If `LOOPS' == 0[%
 @end @select %]
@@ -588,7 +588,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
       #Write <`OUTFILE'.txt> "d`DIAG' = %e", diagram`DIAG'
    #EndIf
    #Close <`OUTFILE'.txt>[%
-@select r2 default=implicit
+@select r2
 @case only %]
 #EndIf[%
 @end @select %]
@@ -614,17 +614,19 @@ Global diagram = diagram`DIAG';[%
 @if extension qshift %][%
 @else %]
    Id Q = p1;
-   #Call shiftmomenta(`DIAG')
+   #Call shiftmomenta(`DIAG',1)
+   Id fshift(0) = 0;
+   Id fshift(?all) = 1;
    Id p1 = Q;
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
-         Q[%
-     @select r2 default=implicit @case implicit %],Qt2,eps,epspow[%
+         Q,qshift,[%
+     @select r2 @case implicit %],Qt2,eps,epspow[%
      @end @select %])[%
 @end @if %]
 .store:start derivatives;
 
    Local d0diagram = diagram;
-#Do p=1,`LOOPSIZE'
+#Do p=1,`RANK'
    Local d`p'diagram = <d(iv1)> *...* <d(iv`p')> * diagram;
 #EndDo
 ToTensor, Functions, Q, ptens;
@@ -642,7 +644,7 @@ Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);
 
 Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
 .sort
-#Do p=0,`LOOPSIZE'
+#Do p=0,`RANK'
    #$d`p'terms = termsin_(d`p'diagram);
    #If `$d`p'terms' > 0
       #Write <`OUTFILE'd.txt> "d`p'diagram = %e", d`p'diagram

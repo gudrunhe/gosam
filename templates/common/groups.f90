@@ -29,7 +29,7 @@
          @else %]
       type(coeff_type_[% diag_rank %])[%
          @end @if %] :: coeffs_[% DIAG %][%
-         @select r2 default=implicit @case implicit %][%
+         @select r2 @case implicit %][%
             @with eval loopsize diagram=DIAG result=DIAGLS %][%
                @if eval DIAGLS .lt. 5 %][%
                   @if eval diag_rank .gt. 1 %][%
@@ -39,12 +39,8 @@
       type(coeff_type_[% eval diag_rank - 2 %])[%
                      @end @if %] :: coeffs_[% DIAG %]s1[%
                   @end @if %][%
-                  @if eval diag_rank .gt. 3 %][%
-                     @if eval diag_rank .eq. 2 %]
-      complex(ki_gol)[%
-                     @else %]
-      type(coeff_type_[% eval diag_rank - 2 %])[%
-                     @end @if %] :: coeffs_[% DIAG %]s2[%
+                  @if eval diag_rank .gt. 3 %]
+      type(coeff_type_[% eval diag_rank - 2 %]) :: coeffs_[% DIAG %]s2[%
                   @end @if %][%
                @end @if %][%
             @end @with %][%
@@ -361,7 +357,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
             @else %]contract[% loopsize diagram=DIAG %]_[% rank 
       %](coeffs%coeffs_[% DIAG %], rmomenta, b_set)[%
             @end @if %][%
-            @select r2 default=implicit @case implicit %][%
+            @select r2 @case implicit %][%
                @select loopsize diagram=DIAG
                @case 2 3 4 %][%
                   @if eval rank .gt. 1 %]&
@@ -520,7 +516,7 @@ function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(
             @else %]contract[% loopsize diagram=DIAG %]_[% rank 
       %](coeffs%coeffs_[% DIAG %], rmomenta, b_set, ep)[%
             @end @if %][%
-            @select r2 default=implicit @case implicit %][%
+            @select r2 @case implicit %][%
                @select loopsize diagram=DIAG
                @case 2 3 4 %][%
                   @if eval rank .gt. 1 %]&
@@ -687,7 +683,7 @@ function     numetens_group[% grp %](icut, Q, mu2) result(num)
             @else %]ctenseval[% rank 
       %](Qg, coeffs_group[% grp %]%coeffs_[% DIAG %])[%
             @end @if %][%
-            @select r2 default=implicit @case implicit %][%
+            @select r2 @case implicit %][%
                @select loopsize diagram=DIAG
                @case 2 3 4 %][%
                   @if eval rank .gt. 1 %][%

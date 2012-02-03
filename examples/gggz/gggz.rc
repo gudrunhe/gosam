@@ -21,4 +21,4 @@ zero=w*, mD
 
 helicities=+-++,+-+-,+-+0
 
-process.extensions=fr5
+#process.extensions=fr5

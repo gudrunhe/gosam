@@ -9,7 +9,7 @@ HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
 OBJECTS= \
 	globals.o amplitudeh[%helicity%].o[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @if extension golem95 %] golem95h[%helicity%].o[%
    @end @if %][%
@@ -24,7 +24,7 @@ OBJECTS= \
 	d[%$_%]h[%helicity%]l0.o[%
       @end @for %][%
    @end @if %][%
-   @if extension fr5 %] \
+   @if internal REQUIRE_FR5 %] \
 	   diagramsl0fr5.o[%
       @if group %][%
 		@else %][%
@@ -47,7 +47,7 @@ OBJECTS= \
 	abbrevd[%$_%]h[%helicity%].o[%
       @end @for %][%
    @end @select %][%
-	@select r2 default=implicit
+	@select r2
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.o[%
@@ -67,7 +67,7 @@ GENERATED_SRC=[%
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
-   @if extension fr5 %][%
+   @if internal REQUIRE_FR5 %][%
       @if group %] \
 	   diagramsl0fr5.f90[%
       @else %][% 
@@ -90,7 +90,7 @@ GENERATED_SRC=[%
 	abbrevd[%$_%]h[%helicity%].f90[%
       @end @for %][%
    @end @select %][%
-	@select r2 default=implicit
+	@select r2
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%

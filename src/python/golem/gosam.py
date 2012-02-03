@@ -116,7 +116,8 @@ if __name__ == "__main__":
       else:
          main.main(argv)
    except SystemExit as ex:
-      report_crash(ex, sys.exc_traceback)
+      if len(ex.args) > 0:
+         report_crash(ex, sys.exc_traceback)
    except BaseException as ex:
       print("===> Unexpected error: %s" % ex)
       print(traceback.format_tb(sys.exc_traceback)[-1])

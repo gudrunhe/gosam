@@ -1,12 +1,16 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
-   '%]#Procedure    shiftmomenta(DIAG)
+   '%]#Procedure    shiftmomenta(DIAG,WRAP)
 * vim: ts=3:sw=3:expandtab:syntax=form
    #Switch `DIAG'[%
 @for groups var=grp %]
 *---#[ Diagram Group [%grp%]:[%
   @for diagrams group=grp %]
   #Case [% $_ %]
-     Id p1 = [% sign %] Q - ([% shift %]);
+     #If `WRAP'
+        Id p1 = [% sign %] Q - qshift * fshift([% shift %]);
+     #Else
+        Id p1 = [% sign %] Q - ([% shift %]);
+     #EndIf
      #Break[%
   @end @for diagrams %]
 *---#] Diagram Group [%grp%]:[%

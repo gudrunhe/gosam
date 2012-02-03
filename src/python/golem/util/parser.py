@@ -380,6 +380,11 @@ class Template:
       op2 = list(map(int, s2.split(".")))
       return version_compare(op1, op2) > 0
 
+   def iterator_empty(self, *args, **opts):
+      for props in self._evaluate_command(args[0], args[1:], opts):
+         return False
+      return True
+
    def count(self, *args, **opts):
       c = 0
       for props in self._evaluate_command(args[0], args[1:], opts):
@@ -1804,7 +1809,8 @@ class Template:
          value = getattr(self, iname)
          return value(self, *(args[1:]), **opts)
       else:
-         raise TemplateError("Undefined [%% internal %s %%]" % args[0])
+         raise TemplateError(
+               "In [%% internal %s %%]: unknown internal variable" % args[0])
 
 
    def tens_rec_info(self, *args, **opts):
