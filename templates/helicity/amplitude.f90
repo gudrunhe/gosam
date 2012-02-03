@@ -4,7 +4,7 @@
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color, only: numcs[%
 @if generate_nlo_virt %][%
-   @select r2 default=implicit
+   @select r2
    @case implicit explicit off %]
    use [% process_name asprefix=\_ %]groups[%
       @if extension samurai %]
@@ -31,23 +31,23 @@ contains
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0, only: amplitudel0 => amplitude[%
-   @if extension fr5 %]
+   @if internal REQUIRE_FR5 %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0fr5, only: amplitudel0fr5 => amplitude[%
-   @end @if extension fr5 %][%
+   @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
       implicit none
       real(ki), intent(in) :: scale2
       real(ki) :: amp[%
 @if generate_lo_diagrams %][%
-   @if extension fr5 %]
+   @if internal REQUIRE_FR5 %]
       complex(ki),  dimension(numcs) :: amp0, amp5
       real(ki) :: deltaZ5[%
-   @end @if extension fr5 %][%
+   @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
       amp = 0.0_ki[%
 @if generate_lo_diagrams %][%
-   @if extension fr5 %]
+   @if internal REQUIRE_FR5 %]
       amp0 = amplitudel0()
       !---#[ finite renormalisation of gamma5:
       ! We need to replace gamma5 by
@@ -66,7 +66,7 @@ contains
       amp5 = amplitudel0fr5()
       amp = amp + deltaZ5 * square(amp0, amp5)
       !---#] finite renormalisation of gamma5:[%
-   @end @if extension fr5 %][%
+   @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
    end function finite_renormalisation
    !---#] function finite_renormalisation:
@@ -169,7 +169,7 @@ contains
    @end @select %][%
 
 
-   @select r2 default=implicit
+   @select r2
    @case implicit %]
       samp_part(:,:) = 0.0_ki
       do epspow=0,2
@@ -251,7 +251,7 @@ contains
 @end @if generate_nlo_virt %]
    end function samplitude
    !---#] function samplitude:[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @for groups var=grp %]
 !---#[ subroutine evaluate_group[% grp %]:

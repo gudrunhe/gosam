@@ -169,7 +169,7 @@
 				<only if-option="group" value="false"/>
 			</file>
 			<file src="diagramsl0fr5.f90" class="Multi">
-				<only if-extension="fr5"/>
+				<only if-internal="REQUIRE_FR5"/>
 				<only if-option="group" value="false"/>
 			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"

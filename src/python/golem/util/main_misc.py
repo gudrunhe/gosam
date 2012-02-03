@@ -121,6 +121,7 @@ def generate_process_files(conf, from_scratch=False):
 	props.setProperty("topolopy.count.virt", len(keep_virt))
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
+	props.setProperty("max_rank", conf["__max_rank__"])
 
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)

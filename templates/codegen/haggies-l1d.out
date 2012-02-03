@@ -19,7 +19,12 @@ $][% @with args %]module     [$ process_name asprefix=\_
    integer, private :: [%
          $_ match="d(\\d+)diagram" format="iv%s" %][%
    @end @select %][%
-@end @for instructions %]
+@end @for instructions %][$
+@if extension qshift $][$
+@else $]
+   real(ki), dimension(4), private :: qshift[$
+@end @if $]
+
 
    public :: derivative[$
    @if extension golem95 $], reconstruct_d[% DIAGRAM %][$
@@ -29,7 +34,7 @@ contains[%
    @for brackets bracket="subbrack_%2$d_%1$d" %]
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
@@ -45,7 +50,7 @@ contains[%
       @end @with %]
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
@@ -67,7 +72,7 @@ contains[%
    @end @for innerbracket %]
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
@@ -83,7 +88,7 @@ contains[%
       @end @with %]
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
@@ -99,7 +104,7 @@ contains[%
       [% inst.$_ %][%
       @end @select
       %] = [% expression bracket="brack_%2$d_%1$d(Q[$
-      @select r2 default=implicit
+      @select r2
       @case implicit $], mu2[$
       @end @select $])" %][%
    @end @for instructions %]
@@ -159,7 +164,21 @@ contains[%
         &(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)[$
       @else $]
       ! The Q that goes into the diagram
-      complex(ki), dimension(4) :: Q[%
+      complex(ki), dimension(4) :: Q[$
+      @end @if $][%
+   @with args %][$
+      @if extension qshift $][$
+      @else $][%
+         @select QSHIFT
+         @case 0 %]
+      qshift(:) = 0.0_ki[%
+         @else %]
+      qshift = [% QSHIFT %][%
+         @end @select %][$
+      @end @if $][%
+   @end @with %][$
+      @if internal DERIVATIVES_AT_ZERO $][$
+      @else $][%
    @with args %][$
       @if extension qshift $]
 
@@ -167,12 +186,8 @@ contains[%
       @else $][%
          @select QSHIFT
          @case 0 %]
-
       Q(:) = [% QSIGN %]Q_ext(:)[%
          @else %]
-      real(ki), dimension(0:3) :: qshift
-
-      qshift = [% QSHIFT %]
       Q(:)   = [% QSIGN %]Q_ext(:) - qshift(:)[%
          @end @select %][$
       @end @if $][%
@@ -201,14 +216,14 @@ contains[%
       @case d %]
       if(deg.eq.[% $_ match="d(\\d+)diagram" format="%s" %]) then
          numerator = [% expression bracket="brack_%d[$
-         @select r2 default=implicit
+         @select r2
          @case explicit only off $](Q)[$
          @end @select $]" %]
          return
       end if[%
       @else %]
       [% $_ %] = [% expression bracket="brack_%d[$
-         @select r2 default=implicit
+         @select r2
          @case explicit only off $](Q)[$
          @end @select $]" %][%
       @end @select %][%
@@ -225,11 +240,13 @@ contains[%
       complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
 
       type(tensrec_info_group[% GROUP %]), intent(out) :: coeffs[$
-   @select r2 default=implicit @case implicit $][%
+   @select r2 @case implicit $][%
+     @select LOOPSIZE @case 0 1 2 3 4 %][%
       @select RANK @case 0 1 2 3 %][%
       @else %]
       complex(ki) :: x1, x2[%
-      @end @select %][$
+      @end @select %][%
+     @end @select %][$
    @end @select $][$
    @if internal DERIVATIVES_AT_ZERO $][$
    @else $]
@@ -237,7 +254,7 @@ contains[%
    @end @if $][[$ ' $]%
 
    @select RANK[$
-   @for repeat 7 var=rk $]
+   @for repeat max_rank inclusive=true var=rk $]
    @case [$ rk $] %[$ ' $]]
       ! rank [$ rk $] case:
       !---[# reconstruct coeffs%coeffs_[% DIAGRAM %]:[$
@@ -263,7 +280,8 @@ contains[%
 
 
 
-      @select r2 default=implicit @case implicit $][$
+      @select r2 @case implicit $][%
+        @select LOOPSIZE @case 0 1 2 3 4 %][$
          @select rk @case 0 1 $][$
          @case 2 3 $]
       !---#[ reconstruct coeffs%coeffs_[% DIAGRAM %]s1:[$
@@ -342,7 +360,8 @@ contains[%
                @end @for tens_rec_info $][$
             @end @with eval rkk $]
       !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2:[$
-         @end @select rk $][$
+         @end @select rk $][%
+        @end @select %][$
       @end @select r2 $][[$ ' $]%[$
    @end @for repeat max_rank $]
    @end @select %[$ ' $]]

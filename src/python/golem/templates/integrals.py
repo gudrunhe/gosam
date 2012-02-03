@@ -105,7 +105,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 	def propagators(self, *args, **opts):
 		nopts = opts.copy()
 		for kw in ["group", "first", "last", "index", "shift",
-				"prefix", "suffix", "momentum", "mass", "width"]:
+				"prefix", "suffix", "momentum", "mass", "width", "select"]:
 			if kw in nopts:
 				del nopts[kw]
 
@@ -120,6 +120,12 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 				raise TemplateError("Unknown group in [% propagators %]")
 		else:
 			raise TemplateError("[% propagators %] must be called per group")
+
+		if "select" in opts:
+			lst = self._eval_string(opts["select"])
+			selection = map(int, lst.split(","))
+		else:
+			selection = range(1, size+1)
 
 		if "shift" in opts:
 			shift = int(opts["shift"])
@@ -136,6 +142,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		else:
 			s_suffix = ""
 
+
+
 		first_name = self._setup_name("first", "is_first", opts)
 		last_name = self._setup_name("last", "is_last", opts)
 		index_name = self._setup_name("index", "$_", opts)
@@ -143,8 +151,19 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		mass_name = self._setup_name("mass", "mass", opts)
 		width_name = self._setup_name("width", "width", opts)
 
+		mass_filter = self._setup_filter(["massive", "massless"], args)
+		include_massive = "massive" in mass_filter
+		include_massless = "massless" in mass_filter
+
 		props = Properties()
-		for i in range(1, size+1):
+		for i in selection:
+			if str(root.mass(i)) == "0":
+				if not include_massless:
+					continue
+			else:
+				if not include_massive:
+					continue
+
 			props.setProperty(index_name, i + shift)
 			props.setProperty(first_name, i == 1)
 			props.setProperty(last_name, i == size)

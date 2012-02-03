@@ -5,7 +5,7 @@ libgolem_process[% process_name assuffix=\_ %]_common_la_SOURCES=[%
 @end @if %] \
 	config.f90 accu.f90 model.f90 color.f90 rambo.f90 globalsl1.f90 \
 	util.f90 scalar_cache.f90 kinematics.f90 dipoles.f90[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %] groups.f90[%
 @end @select %]
 nodist_pkginclude_HEADERS=[%
@@ -24,7 +24,7 @@ nodist_pkginclude_HEADERS=[%
 	   process_name asprefix=\_ %]scalar_cache.mod [%
 	   process_name asprefix=\_ %]kinematics.mod [%
 	   process_name asprefix=\_ %]dipoles.mod[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %] [%
 	   process_name asprefix=\_ %]groups.mod[%
 @end @select %]

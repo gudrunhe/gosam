@@ -180,14 +180,29 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 					"Detailed output has been written to %r.")
 				% (output_name, log_name))
 
+def format_qgraf_verbatim(conf, prop):
+	result = []
+	verbatim = conf.getProperty(prop)
+	lines = verbatim.splitlines()
+	for line in lines:
+		lhs, sep, rhs = line.partition(";")
+		while rhs != "":
+			result.append(lhs+sep)
+			lhs, sep, rhs = rhs.partition(";")
+		result.append(lhs+sep)
+	return "\n".join(result)
+
 def run_qgraf(conf, in_particles, out_particles):
 	path = golem.util.tools.process_path(conf)
 
 	powers = conf.getProperty(golem.properties.qgraf_power)
 	options = conf.getProperty(golem.properties.qgraf_options)
-	verbatim = conf.getProperty(golem.properties.qgraf_verbatim)
-	verbatim_lo = conf.getProperty(golem.properties.qgraf_verbatim_lo)
-	verbatim_nlo = conf.getProperty(golem.properties.qgraf_verbatim_nlo)
+	verbatim =     format_qgraf_verbatim(conf,
+			golem.properties.qgraf_verbatim)
+	verbatim_lo =  format_qgraf_verbatim(conf,
+			golem.properties.qgraf_verbatim_lo)
+	verbatim_nlo = format_qgraf_verbatim(conf,
+			golem.properties.qgraf_verbatim_nlo)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 

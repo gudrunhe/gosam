@@ -202,7 +202,6 @@ id vertex(iv?,
 *---#] VFF vertex (QCD) (2.4.32) :
 *---#[ SFF vertex (A.2.24) :
 * TODO: Have a look at hep-ph/9302240 --> peudoscalar coupling might not be correct yet.
-*       Can this be fixed by changing deltaaxial --> 2*deltaaxial here?
 id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C1?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,
@@ -212,10 +211,7 @@ id vertex(iv?,
 		+ CR(field1, field2, field3) *
 		  NCContainer(ProjPlus, iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * deltaaxial * (
-		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
-		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
-		  )
+		  1/2 * 0*deltaaxial * NCContainer(Gamma5, iv1L, iv2L)
 		);
 id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
@@ -226,10 +222,7 @@ id vertex(iv?,
 		+ CR(field1, field2, field3) *
 		  NCContainer(ProjPlus, iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
-		  1/4 * deltaaxial * (
-		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
-		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
-		  )
+		  1/2 * deltaaxial * NCContainer(Gamma5, iv1L, iv2L)
 		) * dcolor(iv1C3, iv2C3);
 *---#] SFF vertex (A.2.24) :
 *---#[ VGG vertex (A.2.26) :
@@ -259,7 +252,7 @@ id vertex(iv?,
 	field1?, idx1?, 2, vDUMMY1?, iv1L?, 8, iv1C?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
 	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign1?{-1,1}, iv3C?) =
-		i_ * C(field1, field2, field3) * d_(iv1C, iv2C) *
+		i_ * C(field1, field2, field3) * dcolor8(iv1C, iv2C) *
       ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
 		- d(vDUMMY1, iv1L) * d(vDUMMY2, iv2L));
 id vertex(iv?,

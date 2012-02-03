@@ -160,7 +160,8 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    use madds, only: s_mat[%
    @end @if %]
    use [% process_name asprefix=\_ %]config, only: samurai_group_numerators, &
-      samurai_verbosity, samurai_istop, debug_nlo_diagrams, logfile
+      & samurai_verbosity, samurai_istop, samurai_test, &
+      & debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics
    use [% process_name asprefix=\_ %]model[%
 
@@ -183,6 +184,8 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    complex(ki_sam) :: accr
    logical :: acc_ok
 
+   integer :: istopm, istop0
+
    integer, parameter :: effective_group_rank = [% rank %][%
    @if version_newer samurai.version 2.1 %]
    !-----------#[ invariants for samurai:
@@ -194,7 +197,15 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    @if complex_mass_needed group=grp %]complex(ki_sam)[%
    @else %]real(ki_sam)[%
    @end @if %], dimension([% loopsize group=grp %]) :: msq
-   real(ki_sam), dimension([% loopsize group=grp %],4) :: Vi[%
+   real(ki_sam), dimension([% loopsize group=grp %],4) :: Vi
+   
+   if(samurai_test.eq.1 .or. samurai_test.eq.3) then
+      istopm = 1
+      istop0 = 1
+   else
+      istopm = samurai_istop
+      istop0 = max(2,samurai_istop)
+   end if[%
 
    @for propagators group=grp suffix=((/2,3,4,1/))%]
    msq([% $_ %]) = [% 
@@ -286,7 +297,10 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
       @end @if %][%
    @end @if %](numeval_group[% grp %], tot, totr, Vi, msq, [%
          loopsize group=grp %], &
-         & effective_group_rank, samurai_istop, scale2, ok[%
+         & effective_group_rank, [%
+   @if iterator_empty propagators group=grp massive %]istop0[%
+   @else %]istopm[%
+   @end @if %], scale2, ok[%
    @if version_newer samurai.version 2.0 %], &
          & samurai_cache_flag_g[%grp%], samurai_cache_g[%grp%][%
    @end @if %])[%
@@ -324,7 +338,11 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    @end @if %](numerator_diagram[% DIAG %], acc, accr, &
             & Vi((/[% indices %]/),:), msq((/[% indices %]/)), [%
          loopsize diagram=DIAG %], &
-            & [% rank %], samurai_istop, scale2, [%
+            & [% rank %], [%
+   @if iterator_empty propagators group=grp
+          select=indices massive %]istop0[%
+   @else %]istopm[%
+   @end @if %], scale2, [%
       @if is_first %]ok[%
       @else %]acc_ok[%
       @end @if %][%

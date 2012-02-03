@@ -75,7 +75,7 @@ contains
          init_third_party = .true.
       end if[%
 
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %]
       if (init_third_party) then[%
    @if extension samurai %]
@@ -93,7 +93,7 @@ contains
    !---#] subroutine initgolem :
    !---#[ subroutine exitgolem :
    subroutine     exitgolem(is_last)[%
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %][%
    @if extension golem95 %]
       use [% process_name asprefix=\_ %]groups, only: tear_down_golem95[%
@@ -110,7 +110,7 @@ contains
          exit_third_party = .true.
       end if[%
 
-@select r2 default=implicit
+@select r2
 @case implicit explicit off %]
       if (exit_third_party) then[%
    @if extension samurai %]
@@ -210,7 +210,7 @@ contains
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok)/nlo_coupling
       end if[%
 
-         @select r2 default=implicit
+         @select r2
          @case implicit explicit off %]
       select case (renormalisation)
       case (0)
@@ -283,7 +283,7 @@ contains
       amp(2:4) = 0.0_ki[%
       @end @if%][%
 
-      @select r2 default=implicit
+      @select r2
       @case implicit explicit off %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure

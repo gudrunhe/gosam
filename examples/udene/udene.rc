@@ -25,4 +25,4 @@ one=gs,e
 # There's only one non-zero helicity
 helicities=+--+
 
-process.extensions=fr5
+#process.extensions=fr5
