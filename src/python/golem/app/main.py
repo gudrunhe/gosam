@@ -11,6 +11,7 @@ import golem.util.config
 import golem.util.tools
 from golem.util.config import GolemConfigError
 import golem.installation
+import golem.util.constants
 
 # The following files contain routines which originally were
 # part of golem-main itself:
@@ -158,7 +159,7 @@ def main(argv=sys.argv):
                   in_file = dir_info["setup-file"]
                else:
                   warning("The directory %r contains no file %r." % (
-                     arg, GOLEM_DIR_FILE_NAME),
+                     arg, golem.util.constants.GOLEM_DIR_FILE_NAME),
                         "This directory has been skipped.")
                   continue
             else:

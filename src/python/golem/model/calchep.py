@@ -840,7 +840,7 @@ mnemonics = {
 		fsubs = {}
 		fprefix = prefix + "float"
 		f.write("functions = {\n")
-		f.write("\t'Nfrat': 'Nf/Nfgen'")
+		f.write("\t'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'")
 		for row in self.func_list(funcs, prefix):
 			name = row[0]
 			expr = row[1].replaceFloats(fprefix, fsubs, counter)
@@ -858,7 +858,7 @@ mnemonics = {
 		f.write("\t\t'NC': '3.0',\n")
 		f.write("\t\t# Number of light flavours\n")
 		f.write("\t\t'Nf': '5.0',")
-		f.write("\t\t'Nfgen': '5.0'")
+		f.write("\t\t'Nfgen': '-1.0'")
 
 		for name, value in fsubs.items():
 			f.write(",\n")

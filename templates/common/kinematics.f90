@@ -35,28 +35,66 @@
    [% @end @for mandelstam %]
    [% @for mandelstam non-zero sym_prefix=es
    %]real(ki), public :: [%symbol%]
-   [% @end @for mandelstam %]
-   [% @for pairs ordered distinct
-      %]complex(ki), public :: spa[%
+   [% @end @for mandelstam %][%
+@for pairs ordered distinct %]
+   complex(ki), public :: spa[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %], spb[% 
                  @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %]
-   [% @end @for %]
-   [% @for pairs distinct %]
+            %][%
+@end @for %][% 
+@for pairs distinct %]
    complex(ki), dimension(4), public :: spva[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %][% 
-      @end @for %]
-   [% @for particles %]
+@end @for %][%
+@for particles %]
    real(ki), dimension(4), public :: k[%index%][%
-   @end @for particles %]
-   [% @for particles massive %]
+@end @for particles %][%
+@for particles massive %]
    real(ki), dimension(4), public :: l[%index%][%
-   @end @for particles %]
+@end @for particles %][%
+@if internal NUMPOLVEC %]
+
+   ! Polarisation vectors and related symbols[%
+   @for particles lightlike vector %]
+   complex(ki), dimension(4), public :: e[%index%][%
+   @end @for %][%
+   @for pairs ordered distinct %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   complex(ki), public :: spa[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2
+            %], spbe[% index2
+            %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   complex(ki), public :: spae[% index1
+            %]e[% index2 %], spbe[% index2 %]e[% index1 %][%
+      @end @if %][%
+   @end @for %][%
+   @for pairs %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   complex(ki), dimension(4), public :: spva[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2 %], spvae[% index2 %][% 
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   complex(ki), dimension(4), public :: spvae[% index1
+            %]e[% index2 %], spvae[% index2 %]e[% index1 %][%
+      @end @if %][%
+   @end @for %][%
+@end @if%]
 
    interface epsi
       module procedure epsi0
@@ -78,7 +116,9 @@
    interface Spab3
       module procedure Spab3_complex
       module procedure Spab3_mcfm
+      module procedure Spab3_mcfmc
       module procedure Spab3_vec
+      module procedure Spab3_vecc
    end interface
 
    interface Spba3
@@ -232,13 +272,93 @@ contains
     @if is_lightlike2%]k[%index2%][%
     @else %]l[%index2%][%
     @end @if %])[%
-    @end @for %][%
-    @if internal NUMPOLVEC %][%
-       @for particles lightlike vector %]
-       if(present(hel[%index%]) then
-       end if[%
-       @end @for %][%
-    @end @if%]
+@end @for %][%
+@if internal NUMPOLVEC %]
+      if(.true.[%
+   @for particles lightlike vector %] .and. present(hel[%index%])[%
+   @end @for %]) then[%   
+   @for particles lightlike vector initial %][%
+      @with eval 'k .rep. ( reference > 0 ) . 'l .rep. ( reference < 0 )
+          . reference result=refvec %]
+         select case(hel[%index%])
+         case(1)
+            e[% index %] = spva[%refvec%]k[%
+               index%]/sqrt2/Spaa([%refvec%],k[%index%])
+         case(-1)
+            e[% index %] = spvak[%index%][%
+               refvec%]/sqrt2/Spbb(k[%index%],[%refvec%])
+         case default
+            print*, "Illegal helicity for particle [%
+               index %]:", hel[% index %]
+            stop
+         end select[%
+      @end @with %][%
+   @end @for %][%
+   @for particles lightlike vector final %][%
+      @with eval 'k .rep. ( reference > 0 ) . 'l .rep. ( reference < 0 )
+          . reference result=refvec %]
+         select case(hel[%index%])
+         case(1)
+            e[% index %] = spvak[%index%][%
+               refvec%]/sqrt2/Spbb(k[%index%],[%refvec%])
+         case(-1)
+            e[% index %] = spva[%refvec%]k[%
+               index%]/sqrt2/Spaa([%refvec%],k[%index%])
+         case default
+            print*, "Illegal helicity for particle [%
+               index %]:", hel[% index %]
+            stop
+         end select[%
+      @end @with %][%
+   @end @for %][%
+   @for pairs ordered distinct %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+         spa[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2 %] = Spaacc(cmplx([%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %], 0.0_ki, ki), e[% index2 %])
+         spbe[% index2
+            %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 
+            %] = Spbbcc(e[% index2 %], cmplx([%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 
+            %], 0.0_ki, ki))[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+         spae[% index1
+            %]e[% index2 %] = Spaacc(e[% index1 %], e[% index2 %])
+         spbe[% index2 %]e[% index1
+            %] = Spbbcc(e[% index2 %], e[% index1 %])[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+         spva[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2 %] = Spab3_vecc(cmplx([%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %], 0.0_ki, ki), e[% index2 %])
+         spvae[% index2 %][% 
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %] = Spab3_vecc(e[% index2 %], cmplx([% 
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %], 0.0_ki, ki))[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+         spvae[% index1
+            %]e[% index2 %] = Spab3_vecc(e[%index1%], e[%index2%])
+         spvae[% index2 %]e[% index1 %] = Spab3_vecc(e[%
+             index2%], e[%index1%])[%
+      @end @if %][%
+   @end @for %]
+      end if[%
+@end @if%]
    end subroutine init_event
 !---#] subroutine init_event:
 !---#[ subroutine light_cone_decomposition:
@@ -332,6 +452,20 @@ contains
       Spbb = sign(1.0_ki, dotproduct(p, q)) * conjg(Spaa(q, p))
    end  function Spbb
 !---#] function Spbb:
+!---#[ function Spbbcc:
+   pure function Spbbcc(p, q)
+      implicit none
+      complex(ki), dimension(4), intent(in) :: p, q
+      complex(ki) :: spaa
+      complex(ki) :: Spbbcc
+      spaa = Spaacc(p, q)
+      if (abs(spaa) .gt. 1.0E+03 * epsilon(1.0_ki)) then 
+         Spbbcc = dotproduct(p, q) / spaa
+      else
+         Spbbcc = 0.0_ki
+      end if
+   end  function Spbbcc
+!---#] function Spbbcc:
 !---#[ function Spab3_complex:
    pure function Spab3_complex(k1, Q, k2)
       implicit none
@@ -368,6 +502,27 @@ contains
          & (/0.0_ki, 0.0_ki, 0.0_ki, 1.0_ki/), k2)
    end  function Spab3_vec
 !---#] function Spab3_vec:
+!---#[ function Spab3_vecc:
+   pure function Spab3_vecc(k1, k2)
+      implicit none
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+
+      complex(ki), dimension(4), intent(in) :: k1, k2
+      complex(ki), dimension(0:3) :: Spab3_vecc
+
+      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
+      complex(ki), parameter :: zip = (0.0_ki, 1.0_ki)
+
+      Spab3_vecc(0) =   Spab3_mcfmc(k1, &
+         & (/cone, zip, zip, zip/), k2)
+      Spab3_vecc(1) = - Spab3_mcfmc(k1, &
+         & (/zip, cone, zip, zip/), k2)
+      Spab3_vecc(2) = - Spab3_mcfmc(k1, &
+         & (/zip, zip, cone, zip/), k2)
+      Spab3_vecc(3) = - Spab3_mcfmc(k1, &
+         & (/zip, zip, zip, cone/), k2)
+   end  function Spab3_vecc
+!---#] function Spab3_vecc:
 !---#[ function Spaa:
    pure function Spaa(k1, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -404,6 +559,23 @@ contains
          Spaa = -f2*f1*(c232*rt1/rt2-c231*rt2/rt1)
    end  function Spaa
 !---#] function Spaa:
+!---#[ function Spaacc:
+   pure function Spaacc(k1, k2)
+      ! This routine has been copied from mcfm and adapted to our setup
+      implicit none
+      complex(ki), dimension(0:3), intent(in) :: k1, k2
+      complex(ki) :: Spaacc
+
+      complex(ki) :: rt1, rt2
+      complex(ki) :: c231, c232, f1, f2
+!---if one of the vectors happens to be zero this routine fails.
+         rt1=sqrt(k1(0)+k1(1))
+         c231=k1(3)-k1(2)*(0.0_ki, 1.0_ki)
+         rt2=sqrt(k2(0)+k2(1))
+         c232=k2(3)-k2(2)*(0.0_ki,1.0_ki)
+         Spaacc = -(c232*rt1/rt2-c231*rt2/rt1)
+   end  function Spaacc
+!---#] function Spaacc:
 !---#[ function Spab3_mcfm:
    pure function Spab3_mcfm(k1, Q, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -458,6 +630,44 @@ contains
      &    +rt1*(rt2*km-kr*pl2/rt2))
    end  function Spab3_mcfm
 !---#] function Spab3_mcfm:
+!---#[ function Spab3_mcfmc:
+   pure function Spab3_mcfmc(k1, Q, k2)
+      ! This routine has been copied from mcfm and adapted to our setup
+      implicit none
+      complex(ki), dimension(0:3), intent(in) :: k1, k2
+      complex(ki), dimension(0:3), intent(in) :: Q
+      complex(ki) :: Spab3_mcfmc
+
+      complex(ki) :: kp, km
+      complex(ki) :: kr, kl
+      complex(ki) :: pr1, pr2, pl1, pl2
+      complex(ki) :: rt1, rt2
+
+      !--setup components for vector which is contracted in
+      kp=+Q(0)+Q(1)
+      km=+Q(0)-Q(1)
+      kr=+Q(3)-Q(2)*(0.0_ki, 1.0_ki)
+      kl=+Q(3)+Q(2)*(0.0_ki, 1.0_ki)
+
+      !---if one of the vectors happens to be zero this routine fails.
+      if(all(abs(Q) < 1.0E+2_ki * epsilon(1.0_ki))) then
+         Spab3_mcfmc = 0.0_ki
+         return
+      end if
+            
+      rt1=sqrt((k1(0)+k1(1)))
+      pr1=k1(3)-k1(2) * (0.0_ki, 1.0_ki)
+      pl1=conjg(pr1)
+
+      rt2=sqrt((k2(0)+k2(1)))
+      pr2=k2(3)-k2(2) * (0.0_ki, 1.0_ki)
+      pl2=conjg(pr2)
+
+      Spab3_mcfmc=(&
+     &     pr1/rt1*(pl2*kp/rt2-kl*rt2)&
+     &    +rt1*(rt2*km-kr*pl2/rt2))
+   end  function Spab3_mcfmc
+!---#] function Spab3_mcfmc:
 !---#[ function Spba3_complex:
    pure function Spba3_complex(k1, Q, k2)
       implicit none

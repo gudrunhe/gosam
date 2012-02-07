@@ -38,7 +38,7 @@
 \author{Thomas Reiter}
 \date{Version \today}
 
-\lstset{basicstyle=\tt}
+\lstset{basicstyle=\tt,keywordstyle=\tt\color{blue}}
 
 \begin{document}
 \hypersetup{%
@@ -944,7 +944,104 @@ The first obstacle is take now: the user can add the extension
 \texttt{NUMPOLVEC} in our template files --- but so far, nothing changed.
 
 \subsection{Initializing the New Symbols Numerically}
+We would like to initialize the polarisation vectors and the
+symbols derived from them in the module
+\texttt{common/\hspace{0pt}kinematics.f90} in the subroutine
+\texttt{init\_event}. In order to pass the relevant helicity information
+we have already added dummy parameters, one per gauge boson.
+In the template file
+\texttt{templates/\hspace{0pt}common/\hspace{0pt}kinematics.f90}
+this is realized by a loop over all lightlike spin 1 (key word
+\lit{vector}) particles:
+\begin{lstlisting}
+   subroutine init_event(vecs[%
+@for particles lightlike vector %], hel[%index%][%
+@end @for %])
+      use [% process_name asprefix=\_ %]model
+      implicit none
+      real(ki), dimension(num_legs,4), &
+     &         intent(in) :: vecs[%
+@for particles lightlike vector %]
+      integer, optional, &
+     &         intent(in) :: hel[%index%][%
+@end @for %]
+\end{lstlisting}
 
+Before we can initialize anything we need to declare the relevant
+symbols at the module level. These global declarations are generated
+by a couple of \texttt{particles} and \texttt{pairs} loops.
+For the declaration of the polarisation vectors we can use exactly
+the same construction that we already had for the arguments.
+\begin{lstlisting}
+[% @if internal NUMPOLVEC %][%
+   @for particles lightlike vector %]
+complex(ki), dimension(4), public :: e[%
+      index %][%
+   @end @for %]
+\end{lstlisting}
+
+For pairs of particles the keywords \texttt{lightlike} and
+\texttt{vector} are not implemented. Therefore we need to use
+a construction like the following:
+\begin{lstlisting}
+[%
+@for pairs ordered distinct %][%
+   @if eval is_lightlike2
+      .and. ( 2spin2 .eq. 2 ) %]
+complex(ki), public :: spa[%
+      @if is_lightlike1 %]k[%
+      @else %]l[%
+      @endif %][% index1 %]e[% index2 %][%
+   @end @if %][%
+@end @for %]
+\end{lstlisting}
+In a similar way we also declare symbols for $\langle e_i\vert e_j\rangle$
+and $\langle e_i\vert\gamma^\mu\vert k_j]$ etc.
+
+Now we can turn our attention back to the routine
+\texttt{init\hspace{0pt}\_event}, where the actual initialization of
+these symbols is still missing. The initialization of the vectors
+\texttt{e\it i} is greatly simplified by using a with statement defining
+the reference vector.
+\begin{lstlisting}
+[%
+@if internal NUMPOLVEC %]
+if(.true.[%
+   @for particles lightlike vector
+      %] .and. present(hel[%index%])[%
+   @end @for %]) then[%
+   @for particles lightlike vector initial %][%
+      @with eval 'k .rep. ( reference > 0 )
+               . 'l .rep. ( reference < 0 )
+               . reference result=refvec %]
+   select case(hel[%index%])
+   case(1)
+      e[% index %] = sva[%refvec%]k[%index
+          %]/sqrt2/Spaa([%refvec%],k[%index%])
+   case(-1)
+      ...
+   end select[%
+      @end @with %][%
+   @end @for %]
+end if
+\end{lstlisting}
+
+First we need to understand the expression in the with-statement:
+\texttt{'k} and \texttt{'l} denote the respective letters litterally.
+The operator \texttt{.rep.} produces the given number of repetitions
+(including zero) of the string in front of it. The comparisons produce
+either the value 0 or 1, therefore one of the two letters is repeated
+once the other one zero times. The concatenation operator puts the three
+parts together, producing a symbol like \lit{k4} or \lit{l4}. The
+result is stored in the symbol \texttt{refvec}. The body of the with-statement
+is relatively easy to understand as it only uses already known concepts.
+
+The routine is also augmented by the loops initializing the newly defined
+symbols for spinor products. It should be noted that new routines for spinor
+products with complex arguments have been defined, which is not covered
+in this manual.
+
+\subsection{Adding symbol definitions in \form}
 
 \appendix
 \lstset{language=[fortran]{gosamt}}
@@ -1112,6 +1209,7 @@ Additional options influencing the way symbols are looked up are the following:
    $\mathtt{+}\,x$ & unary plus & 400\\
    $x\,\mathtt{**}\,y$ & power, $x^y$ & 450\\
    $x\,\text{\tt\textasciicircum}\,y$ & power, $x^y$ & 450\\
+   $x\,\mathtt{.rep.}\,y$ & repeat string ($x$) $y$ times & 450\\
    $\mathtt{+:}\,x$ & double, $2x$ & 500\\
    $\mathtt{-:}\,x$ & half, $x/2$ & 500\\
    $\mathtt{*:}\,x$ & square, $x^2$ & 1000\\
@@ -1139,6 +1237,7 @@ Additional options influencing the way symbols are looked up are the following:
    $\mathtt{.tan.}\,x$ & trigonometric func., $\tan x$ & 1000\\
    $\mathtt{.tanh.}\,x$ & hyperbolic func., $\tanh x$ & 1000\\
    $\mathtt{`}\,x$ & interpret as symbol name & 1000\\
+   $\mathtt{'}x$ & quote (no space inbetween) & 1000\\
    \end{longtable}
    \end{center}
 \item[\texttt{extension} {[\texttt{!}]}\synt{name$_1$} 
@@ -1563,6 +1662,10 @@ The iterator defines the following names:
       iteration (not necessarily the first particle in the process).
    \item[\texttt{is\_last}] Flag indicating if this is the last
       iteration (not necessarily the last particle in the process).
+   \item[\texttt{reference}] (where applicable) the index of the reference
+      vector for this particle. This number is positive for light-like
+      reference vectors and is minus the index of the reference vector
+      if the latter is massive.
    \end{description}
 
    Please, note that all names can be prefixed by setting the argument
