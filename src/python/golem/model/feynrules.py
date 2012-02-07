@@ -52,6 +52,7 @@ sym_Nf    = ex.SpecialExpression("Nf")
 sym_Nfgen = ex.SpecialExpression("Nfgen")
 sym_Nfrat = ex.SpecialExpression("Nfrat")
 sym_NC    = ex.SpecialExpression("NC")
+sym_if    = ex.SpecialExpression("if")
 
 i_ = ex.SpecialExpression("i_")
 
@@ -63,7 +64,7 @@ cmath_functions = [
 
 shortcut_functions = [
 		sym_re, sym_im, sym_sec, sym_csc, sym_asec, sym_acsc,
-		sym_conjg, sym_cmplx
+		sym_conjg, sym_cmplx, sym_if
 	]
 
 unprefixed_symbols = [
@@ -228,10 +229,10 @@ class Model:
 		types['NC'] = 'R'
 		parameters['Nf'] = '5.0'
 		types['Nf'] = 'R'
-		parameters['Nfgen'] = '5.0'
+		parameters['Nfgen'] = '-1.0'
 		types['Nfgen'] = 'R'
 
-		functions['Nfrat'] = 'Nf/Nfgen'
+		functions['Nfrat'] = 'if(Nfgen,Nf/Nfgen,1)'
 		types['Nfrat'] = 'R'
 
 		specials = {}

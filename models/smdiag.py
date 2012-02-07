@@ -133,7 +133,7 @@ parameters = {
    # Number of flavours, not really a model parameter
    # but needed:
    'Nf': '5.0',
-   'Nfgen': '5.0'
+   'Nfgen': '-1.0'
 }
 #---#] parameters:
 #---#[ latex_parameters:
@@ -363,7 +363,7 @@ functions = {
 
    'cw': '(mW/mZ)',
 
-   'Nfrat': 'Nf/Nfgen'
+   'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'
 }
 #---#] functions:
 #---#[ types:

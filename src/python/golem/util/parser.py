@@ -1363,7 +1363,7 @@ class Template:
 
       def push(arg):
          value = arg
-         if value.startswith("'"):
+         if value.startswith("'") or value.startswith("\""):
             value = value[1:]
          elif value not in ["+", "-", ".",
                "0", "1", "2", "3", "4",
@@ -1482,6 +1482,7 @@ class Template:
 
             " ^ ":      [450, lambda x, y: x ** y],
             " ** ":     [450, lambda x, y: x ** y],
+            " .rep. ":  [450, lambda x, y: str(x) * int(y)],
 
             " +:":      [500, lambda x: x + x],
             " -:":      [500, lambda x: x / 2],
