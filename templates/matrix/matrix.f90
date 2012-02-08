@@ -136,8 +136,8 @@ contains
       use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      double precision, intent(in) :: scale2
-      double precision, dimension(4), intent(out) :: amp
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       real(ki) :: nlo_coupling
@@ -406,7 +406,7 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
-      double precision, intent(in) :: scale2
+      real(ki), intent(in) :: scale2
       integer, optional, intent(in) :: h
       real(ki), dimension([%num_legs%], 4) :: pvecs
       real(ki), dimension(-2:0) :: amp, heli_amp[%
@@ -560,7 +560,7 @@ contains
       use [% process_name asprefix=\_ %]model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      double precision, intent(in) :: scale2
+      real(ki), intent(in) :: scale2
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs

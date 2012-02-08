@@ -1,8 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 import golem.installation
 
-generate_gauge_var = True
-
 PATTERN_DIAGRAMS_LO = "diagrams-0"
 PATTERN_DIAGRAMS_CT = "diagrams-ct"
 PATTERN_DIAGRAMS_NLO_VIRT = "diagrams-1"

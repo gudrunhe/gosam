@@ -14,8 +14,8 @@
 
    integer :: ievt, ierr
    real(ki), dimension([%num_legs%], 4) :: vecs
-   double precision :: scale2
-   double precision, dimension(0:3) :: amp
+   real(ki) :: scale2
+   real(ki), dimension(0:3) :: amp
    real(ki), dimension(2:3) :: irp
    real :: t1, t2
 

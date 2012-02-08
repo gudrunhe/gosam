@@ -384,12 +384,10 @@ def expand_parameter_list(prop, conf):
    conf.setProperty(prop, list(new_values))
 
 def generate_parameter_list(conf):
-   from golem.util.constants import generate_gauge_var
-
    model = getModel(conf)
    result = list(model.types.keys())
 
-   if generate_gauge_var and conf["__GAUGE_CHECK__"]:
+   if conf["__GAUGE_CHECK__"]:
       in_p, out_p = generate_particle_lists(conf)
 
       idx = 0

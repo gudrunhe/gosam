@@ -76,7 +76,6 @@ class Template:
       PARAMETER
 
          source -- either a string, a file or an iterator of strings
-         conf   -- a golem.util.Properties object
 
       """
       self._line_number = 0
@@ -1812,7 +1811,6 @@ class Template:
       else:
          raise TemplateError(
                "In [%% internal %s %%]: unknown internal variable" % args[0])
-
 
    def tens_rec_info(self, *args, **opts):
       if len(args) == 0:

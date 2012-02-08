@@ -12,8 +12,6 @@ CFunctions c;
 
 #Include- color.hh
 
-#Include- `PROCESSPATH'/process.hh
-
 .global
 *InParallel;
 
