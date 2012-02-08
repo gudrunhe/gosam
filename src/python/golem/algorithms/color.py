@@ -25,22 +25,26 @@ def colorbasis(quarks, aquarks, gluons):
    for l in permutations(lhs):
       lines = []
       traces = []
-      glue = set(gluons)
+      iglue = set(range(nglue))
       for a in aquarks:
          line = [a]
          r = rhs[l.index(a)]
-         while r in glue:
+         while r in [gluons[i] for i in iglue]:
+            ir = gluons.index(r)
             line.append(r)
-            glue.remove(r)
+            iglue.remove(ir)
             r = rhs[l.index(r)]
          line.append(r)
          lines.append(line)
-      while len(glue) > 0:
+      while len(iglue) > 0:
          line = []
-         r = rhs[l.index(glue.pop())]
-         while r in glue:
+         ig = iglue.pop()
+         g = gluons[ig]
+         r = rhs[l.index(g)]
+         while r in [gluons[i] for i in iglue]:
+            ir = gluons.index(r)
             line.append(r)
-            glue.remove(r)
+            iglue.remove(ir)
             r = rhs[l.index(r)]
          line.append(r)
          traces.append(line)

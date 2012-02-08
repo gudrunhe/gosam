@@ -54,7 +54,6 @@ off statistics;
 #redefine SPCANCEL "0"
 
 #include- symbols.hh
-* #include- fermion_flow.hh
 
 #ifndef `USEVERTEXPROC'
    #include- vertices.hh
@@ -79,7 +78,6 @@ Symbol Qt2;
 
 #include- diagrams-`LOOPS'.hh #global
 #include- model.hh
-#include- process.hh
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
 @select r2
 @case explicit only %]

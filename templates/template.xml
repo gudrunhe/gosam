@@ -56,7 +56,7 @@
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Verbatim"/>
 		<file src="abbreviate.hh" class="Verbatim"/>
-		<file src="symbols.hh" class="Verbatim"/>
+		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>
 		<file src="vertices.hh" class="Verbatim"/>
@@ -140,12 +140,6 @@
 		</file>
 		<file src="ltest.dat" class="Verbatim">
 			<except if-file="exists" in-mode="normal" />
-		</file>
-		<file src="powhegbox.f90" class="Kinematics">
-			<only if-extension="powhegbox"/>
-		</file>
-		<file src="ph_test.f" class="Kinematics">
-			<only if-extension="powhegbox"/>
 		</file>
 		<foreach iterator="crossings">
 			<file src="crossing.f90"

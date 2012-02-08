@@ -1,15 +1,10 @@
 noinst_PROGRAMS=test
 noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_matrix.la
-libgolem_process[% process_name assuffix=\_ %]_matrix_la_SOURCES=[%
-@if extension powhegbox %] \
-	powhegbox.f90[%
-@end @if %] matrix.f90[%
+libgolem_process[% process_name assuffix=\_ %]_matrix_la_SOURCES= matrix.f90[%
 @for crossings %] \
 	[% $_ asprefix=\_ %]matrix.f90[%
 @end @for crossings %]
-nodist_pkginclude_HEADERS=[%
-@if extension powhegbox %] [% process_name asprefix=\_ %]powheg.mod[%
-@end @if %] [% process_name asprefix=\_ %]matrix.mod[%
+nodist_pkginclude_HEADERS= [% process_name asprefix=\_ %]matrix.mod[%
 @for crossings %] \
 	[% $_ asprefix=\_ %]matrix.mod[%
 @end @for crossings %]

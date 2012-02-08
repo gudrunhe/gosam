@@ -7,19 +7,19 @@ import os.path
 
 import golem.algorithms.color
 
-def write_color_basis(f, in_particles, out_particles):
+def OBSOLETE_write_color_basis(f, in_particles, out_particles):
 	"""
 	Find all colored particles and build a color basis
 	"""
-	ini_fundamental = []
-	fin_fundamental = []
+	#ini_fundamental = []
+	#fin_fundamental = []
 
 	quarks = []
 	aquarks = []
 	gluons = []
 	particles = []
 	wf = []
-	in_colors = []
+	#in_colors = []
 	for i in range(len(in_particles)):
 		p = in_particles[i]
 		color_index = "idxi%dC%d?" % (i+1, abs(p.getColor()))
@@ -27,14 +27,14 @@ def write_color_basis(f, in_particles, out_particles):
 		wf.append("inpcolor(%d, %s)" % (i+1, color_index))
 		if p.getColor() == 3:
 			quarks.append(color_index)
-			in_colors.append("NC")
+			#in_colors.append("NC")
 		elif p.getColor() == -3:
 			aquarks.append(color_index)
-			in_colors.append("NC")
-			ini_fundamental.append(i+1)
+			#in_colors.append("NC")
+			#ini_fundamental.append(i+1)
 		elif p.getColor() == 8:
 			gluons.append(color_index)
-			in_colors.append("NA")
+			#in_colors.append("NA")
 
 	for i in range(len(out_particles)):
 		p = out_particles[i]
@@ -42,14 +42,14 @@ def write_color_basis(f, in_particles, out_particles):
 		wf.append("outcolor(%d, %s)" % (i+1, color_index))
 		if p.getColor() == 3:
 			aquarks.append(color_index)
-			fin_fundamental.append(i+1)
+			#fin_fundamental.append(i+1)
 		elif p.getColor() == -3:
 			quarks.append(color_index)
 		elif p.getColor() == 8:
 			gluons.append(color_index)
 
-	f.write("*---#[ procedure colorbasis :\n")
-	f.write("#procedure colorbasis\n")
+	f.write("*---#[ procedure OBSOLETEcolorbasis :\n")
+	f.write("#procedure OBSOLETEcolorbasis\n")
 	num_color = 0
 	for lines, traces in golem.algorithms.color.colorbasis(
 			quarks, aquarks, gluons):
@@ -89,21 +89,21 @@ def write_color_basis(f, in_particles, out_particles):
 				idx1 = idx2
 			string.append("T(%s, %s, %s)" % (tr[0], idx1, idx0))
 			s_lines.extend(string)
-		pattern = "*\n\t\t".join(s_lines)
+		pattern = " *\n\t\t".join(s_lines)
 
 		f.write("\tId %s = c%d;\n" % (pattern, num_color))
 
 	f.write("#endprocedure\n\n")
-	f.write("*---#] procedure colorbasis :\n")
+	f.write("*---#] procedure OBSOLETEcolorbasis :\n")
 
-	if num_color > 0:
-		f.write("Symbols c1, ..., c%d;\n" % num_color)
-	f.write("#define NUMCS \"%d\"\n" % num_color)
-	f.write("#define INCOLORS \"%s\"\n" % ",".join(in_colors))
-	f.write("#define INIFUNDAMENTAL \"%s\"\n"
-			% ",".join(map(str,ini_fundamental)))
-	f.write("#define FINFUNDAMENTAL \"%s\"\n"
-			% ",".join(map(str,fin_fundamental)))
+	#if num_color > 0:
+	#	f.write("Symbols c1, ..., c%d;\n" % num_color)
+	#f.write("#define NUMCS \"%d\"\n" % num_color)
+	#f.write("#define INCOLORS \"%s\"\n" % ",".join(in_colors))
+	#f.write("#define INIFUNDAMENTAL \"%s\"\n"
+	#		% ",".join(map(str,ini_fundamental)))
+	#f.write("#define FINFUNDAMENTAL \"%s\"\n"
+	#		% ",".join(map(str,fin_fundamental)))
 
 	return num_color
 
@@ -152,10 +152,10 @@ def write_invcolor_basis(f, in_particles, out_particles):
 			gluons.append(color_index)
 			colored.append(i+len(in_particles)+1)
 
-	f.write("#define COLORED \"%s\"\n" % ",".join(map(str, colored)))
+	#f.write("#define COLORED \"%s\"\n" % ",".join(map(str, colored)))
 
 	f.write("*---#[ procedure invcolorbasis :\n")
-	f.write("#procedure invcolorbasis(suffix,num)\n")
+	f.write("#procedure OBSOLETEinvcolorbasis(suffix,num)\n")
 	num_color = 0
 	for lines, traces in golem.algorithms.color.colorbasis(
 			quarks, aquarks, gluons):
@@ -279,7 +279,7 @@ def write_invcolor_basis(f, in_particles, out_particles):
 
 	return num_color
 
-def create_color_tex(conf, in_particles, out_particles):
+def OBSOLETE_create_color_tex(conf, in_particles, out_particles):
 	"""
 	Creates the file color.tex which is included by
 	process.tex

@@ -4,7 +4,6 @@ from golem.util.config import Properties
 from golem.util.parser import Template
 
 import golem.util.tools
-from golem.util.constants import generate_gauge_var
 
 class ModelTemplate(Template):
 	"""
@@ -88,9 +87,6 @@ class ModelTemplate(Template):
 		self._slha_entry_stack = []
 
 	def add_kinematics_parameters(self, in_particles, out_particles):
-
-		if not generate_gauge_var:
-			return
 
 		def add_param(name, value):
 			if name in self._zeroes:

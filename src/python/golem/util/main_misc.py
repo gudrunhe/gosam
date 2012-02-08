@@ -144,11 +144,29 @@ def generate_process_files(conf, from_scratch=False):
 			lo_flags = flags[0],
 			nlo_flags = flags[1])
 
-	create_process_hh(conf, in_particles, out_particles)
+	# create_process_hh(conf, in_particles, out_particles)
 	generate_func_txt(conf)
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
+
+	cleanup(path)
+
+def cleanup(path):
+	cleanup_files = []
+
+	for ext in [".tex", ".log", ".py", ".pyc", ".pyo"]:
+		for stub in ["pyxotree", "pyxovirt", "topotree", "topovirt"]:
+			cleanup_files.append(stub + ext)
+
+	if True:
+		for ext in ["", ".py", ".pyc", ".pyo"]:
+			cleanup_files.append("model" + ext)
+
+	for filename in cleanup_files:
+		full_name = os.path.join(path, filename)
+		if os.path.exists(full_name):
+			os.remove(full_name)
 
 def find_config_files():
 	"""

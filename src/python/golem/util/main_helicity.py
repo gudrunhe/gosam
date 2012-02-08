@@ -5,8 +5,6 @@ This module contains all functions of the main program that are
 concerned with the helicity projections of the process
 """
 
-from golem.util.constants import generate_gauge_var
-
 import golem.algorithms.helicity
 
 def helicitylabel(h):
@@ -30,11 +28,11 @@ def enumerate_helicities(keys, map):
 				result[key] = heli
 				yield result 
 
-def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
+def OBSOLETE_rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 	#lc_args = []
 	l_vectors = []
-	ext_vectors = []
-	light_vectors = []
+	#ext_vectors = []
+	#light_vectors = []
 	f.write("*---#[ procedure rewritelegs :\n")
 	f.write("#procedure rewritelegs\n")
 	k = 0
@@ -45,15 +43,15 @@ def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 		mass = inp.getMass()
 		if (mass == "0") or (mass in zeroes):
 			massive = False
-			ext_vectors.append("k%d" % k)
-			light_vectors.append("k%d" % k)
+			#ext_vectors.append("k%d" % k)
+			#light_vectors.append("k%d" % k)
 			mass = "0"
 		else:
 			massive = True
-			ext_vectors.append("k%d" % k)
-			ext_vectors.append("l%d" % k)
-			light_vectors.append("l%d" % k)
-			l_vectors.append("l%d" % k)
+			#ext_vectors.append("k%d" % k)
+			#ext_vectors.append("l%d" % k)
+			#light_vectors.append("l%d" % k)
+			#l_vectors.append("l%d" % k)
 			#lc_args.append("k%d, l%d, `REFk%d', %s" % (k, k, k, inp.getMass()))
 		twospin = inp.getSpin()
 		if (twospin == 1) or (twospin == -1):
@@ -68,7 +66,7 @@ def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 				f.write("\tId inp(field1?, k%d) = " % k)
 				f.write("inp(field1, k%d, `HELi%d', `REFk%d');\n" % (k, i, k))
 
-			if generate_gauge_var:
+			if True:
 				f.write("\t#If `GAUGEVAR'\n") 
 				f.write("\t\tId inplorentz(%d, idx%dL2?, k%d, %s) =\n"
 						% (twospin, k, k, mass))
@@ -84,14 +82,14 @@ def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 		mass = out.getMass()
 		if (mass == "0") or (mass in zeroes):
 			massive = False
-			ext_vectors.append("k%d" % k)
-			light_vectors.append("k%d" % k)
+			#ext_vectors.append("k%d" % k)
+			#light_vectors.append("k%d" % k)
 		else:
 			massive = True
-			ext_vectors.append("k%d" % k)
-			ext_vectors.append("l%d" % k)
-			light_vectors.append("l%d" % k)
-			l_vectors.append("l%d" % k)
+			#ext_vectors.append("k%d" % k)
+			#ext_vectors.append("l%d" % k)
+			#light_vectors.append("l%d" % k)
+			#l_vectors.append("l%d" % k)
 			#lc_args.append("k%d, l%d, `REFk%d', %s" % (k, k, k, out.getMass()))
 		twospin = out.getSpin()
 		if (twospin == 1) or (twospin == -1):
@@ -105,7 +103,7 @@ def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 			else:
 				f.write("\tId out(field1?, k%d) = " % k)
 				f.write("out(field1, k%d, `HELo%d', `REFk%d');\n" % (k, o, k))
-			if generate_gauge_var:
+			if True:
 				f.write("\t#If `GAUGEVAR'\n") 
 				f.write("\t\tId outlorentz(%d, idx%dL2?, k%d, %s) =\n"
 						% (twospin, k, k, mass))
@@ -117,8 +115,8 @@ def rewrite_helicity_legs(f, in_particles, out_particles, zeroes):
 	f.write("#endprocedure\n")
 	f.write("*---#] procedure rewritelegs :\n")
 
-	if len(l_vectors) > 0:
-		f.write("Vectors %s;\n" % ", ".join(l_vectors))
-	f.write("#define LIGHTLIKE \"%s\"\n" % ",".join(light_vectors))
-	f.write("#define EXTERNAL \"%s\"\n" % ",".join(ext_vectors))
+	#if len(l_vectors) > 0:
+	#	f.write("Vectors %s;\n" % ", ".join(l_vectors))
+	#f.write("#define LIGHTLIKE \"%s\"\n" % ",".join(light_vectors))
+	#f.write("#define EXTERNAL \"%s\"\n" % ",".join(ext_vectors))
 

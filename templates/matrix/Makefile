@@ -14,10 +14,7 @@ PROCESS_LDFLAGS=$(shell ${SHELL} ../config.sh -plibs)
 OBJECTS=matrix.o[%
    @for crossings %] \
 	[% $_ asprefix=\_ %]matrix.o[%
-   @end @for %][%
-   @if extension powhegbox %] \
-	powhegbox.o[%
-   @end @if %]
+   @end @for %]
 
 .PHONY: source compile clean very-clean doc
 .SUFFIXES:

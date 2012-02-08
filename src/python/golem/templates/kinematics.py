@@ -19,6 +19,9 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._mandel_stack = []
       zeroes = golem.util.tools.getZeroes(conf)
       self._zeroes = zeroes
+      ones = golem.util.tools.getOnes(conf)
+      self._ones = ones
+
       self._model = golem.util.tools.getModel(conf)
 
       props = Properties()
@@ -42,15 +45,21 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._twospin = []
       self._spin = []
       self._color = []
+      self._acolor = []
       self._helicities = []
       self._latex = []
       self._helicity_stack = []
       self._mapping_stack = []
       self._color_stack = []
+      self._cs_stack = []
+      self._cs_line_stack = []
+      self._cs_trace_stack = []
       self._field_info = []
       self._tree_signs = tree_signs
       # self._tree_flows = tree_flows
       self._crossings = []
+
+      self._msubs_stack = []
 
       for i, crossing in enumerate(
             conf.getProperty(golem.properties.crossings)):
@@ -62,6 +71,7 @@ class KinematicsTemplate(golem.util.parser.Template):
          mass    = p.getMass(zeroes)
          twospin = p.getSpin()
          color   = sign * p.getColor()
+         acolor  = p.getColor()
          latex   = p.getLaTeXName()
 
          self._masses.append(mass)
@@ -76,6 +86,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             self._spin.append("%d/2" % twospin)
 
          self._color.append(color)
+         self._acolor.append(acolor)
          self._helicities.append(p.getHelicityStates(zeroes))
          field_info = (str(p), p.getPartner(), sign)
          self._field_info.append(field_info)
@@ -481,7 +492,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       lightlike_name = self._setup_name("lightlike", prefix + "is_lightlike", 
             opts)
       massive_name = self._setup_name("massive", prefix + "is_massive", opts)
-      ini_name = self._setup_name("initial", prefix + "is_inital", opts)
+      ini_name = self._setup_name("initial", prefix + "is_initial", opts)
       fin_name = self._setup_name("final", prefix + "is_final", opts)
       color_name = self._setup_name("color", prefix + "color", opts)
       latex_name = self._setup_name("latex", prefix + "latex", opts)
@@ -811,6 +822,54 @@ class KinematicsTemplate(golem.util.parser.Template):
             is_first = False
             yield props
 
+   def zeroes(self, *args, **opts):
+      if "shift" in opts:
+         shift = self._eval_int(opts["shift"])
+      else:
+         shift = 0
+      
+      prefix = self._setup_name("prefix", "", opts)
+      var_name = self._setup_name("var", prefix + "$_", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+
+      zeroes = self._zeroes
+
+      props = Properties()
+      lasti = len(zeroes) - 1
+      for i, z in enumerate(zeroes):
+         props.setProperty(var_name, z)
+         props.setProperty(index_name, i + shift)
+         props.setProperty(first_name, i == 0)
+         props.setProperty(last_name, i == lasti)
+
+         yield props
+
+   def ones(self, *args, **opts):
+      if "shift" in opts:
+         shift = self._eval_int(opts["shift"])
+      else:
+         shift = 0
+      
+      prefix = self._setup_name("prefix", "", opts)
+      var_name = self._setup_name("var", prefix + "$_", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+
+      ones = self._ones
+
+      props = Properties()
+      lasti = len(ones) - 1
+      for i, z in enumerate(ones):
+         props.setProperty(var_name, z)
+         props.setProperty(index_name, i + shift)
+         props.setProperty(first_name, i == 0)
+         props.setProperty(last_name, i == lasti)
+
+         yield props
+
    def mandelstam(self, *args, **opts):
       zero_filter = self._setup_filter(["zero", "non-zero"], args)
       zero_name = self._setup_name("zero", "is_zero", opts)
@@ -946,6 +1005,125 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty("is_last_term", count_terms == 0)
             yield props
             is_first_term = False
+
+   def mandelstam_subs(self, *args, **opts):
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 1
+
+      index_filter = self._setup_filter(["upper", "lower", "diagonal"], args)
+      include_upper = "upper" in index_filter
+      include_lower = "lower" in index_filter
+      include_diagonal = "diagonal" in index_filter
+      
+      index1_name = self._setup_name("index1", prefix + "index1", opts)
+      index2_name = self._setup_name("index2", prefix + "index2", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      
+      fmt_prefix = self._setup_name("fmt_prefix", "es", opts)
+      fmt_suffix = self._setup_name("fmt_suffix", "", opts)
+      fmt_infix = self._setup_name("fmt_infix", "", opts)
+
+      m_vars, m_subs = \
+         golem.algorithms.mandelstam.generate_mandelstam_set(
+               self._num_in, self._num_out,
+               prefix=fmt_prefix,
+               infix=fmt_infix,
+               suffix=fmt_suffix)
+
+      num_legs = self._num_legs
+      props = Properties()
+
+      indices = []
+      for i in range(num_legs):
+         for j in range(num_legs):
+            if i == j:
+               if not include_diagonal:
+                  continue
+            elif i > j:
+               if not include_lower:
+                  continue
+            else:
+               if not include_upper:
+                  continue
+            indices.append( (i, j) )
+
+      last_idx = len(indices) - 1
+      for idx, pair in enumerate(indices):
+         i, j = pair
+         subs = m_subs[i][j]
+
+         props.setProperty(index1_name, i + shift)
+         props.setProperty(index2_name, j + shift)
+         props.setProperty(index_name, idx)
+
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+         self._msubs_stack.append( (fmt_prefix, fmt_suffix, subs) )
+         yield props
+         self._msubs_stack.pop()
+
+   def mandelstam_subs_rhs(self, *args, **opts):
+
+      if len(self._msubs_stack) == 0:
+         raise golem.util.parser.TemplateError(
+            "[% mandelstam_subs_rhs %] must be inside [% mandelstam_subs %]")
+
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      var_name = self._setup_name("var", prefix + "$_", opts)
+      coeff_name = self._setup_name("coeff", prefix + "coeff", opts)
+      exponent_name = self._setup_name("exponent", prefix + "exponent", opts)
+      index_name = self._setup_name("index", prefix + "index", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      prefix, suffix, subs = self._msubs_stack[-1]
+      mandel1 = dict(zip([ prefix + str(i) + suffix
+            for i in range(1, self._num_legs + 1) ], self._masses))
+
+      terms = []
+      for v, c in subs.items():
+         if v in mandel1:
+            mv = str(mandel1[v]).strip()
+            if mv == "0":
+               continue
+            terms.append( (c, mv, 2) )
+         else:
+            if v == "0":
+               continue
+            terms.append( (c, v, 1) )
+
+      props = Properties()
+      last_idx = len(terms) - 1
+      for idx, term in enumerate(terms):
+         c, v, e = term
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+         props.setProperty(index_name, idx == idx + shift)
+         props.setProperty(var_name, v)
+         props.setProperty(coeff_name, c)
+         props.setProperty(exponent_name, e)
+
+         yield props
+
+
 
    def latex_color_base(self, *args, **opts):
       """
@@ -1400,3 +1578,317 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          index += 1
          yield props
+
+
+   def color_basis(self, *args, **opts):
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      if "index_shift" in opts:
+         index_shift = int(opts["index_shift"])
+      else:
+         index_shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      quarks = []
+      aquarks = []
+      gluons = []
+      particles = []
+      wf = []
+      for i in range(self._num_in):
+         color = self._acolor[i]
+         this_wf = "i:%d:%d:%d" % (i+shift, i+shift, abs(color))
+
+         wf.append(this_wf)
+         if color == 3:
+            quarks.append(this_wf)
+         elif color == -3:
+            aquarks.append(this_wf)
+         elif color == 8:
+            gluons.append(this_wf)
+
+      for i in range(self._num_out):
+         color = self._acolor[self._num_in + i]
+         this_wf = "o:%d:%d:%d" % (i+shift, i+self._num_in+shift, abs(color))
+
+         wf.append(this_wf)
+         if color == 3:
+            aquarks.append(this_wf)
+         elif color == -3:
+            quarks.append(this_wf)
+         elif abs(color) == 8:
+            gluons.append(this_wf)
+
+
+      cs = []
+      for lines, traces in golem.algorithms.color.colorbasis(
+            quarks, aquarks, gluons):
+
+         wf_copy = wf[:]
+         lines_copy = []
+
+         for line in lines:
+            N = len(line)
+            if N == 2:
+               for i in range(len(wf_copy)):
+                  if wf_copy[i] == line[0]:
+                     wf_copy[i] = line[1]
+            else:
+               lines_copy.append(line)
+
+         cs.append( (wf_copy, lines_copy, traces[:]) )
+
+      props = Properties()
+      last_idx = len(cs) - 1
+      for idx, c in enumerate(cs):
+         wf, lines, traces = c
+
+         props.setProperty(index_name, idx + index_shift)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+
+         self._cs_stack.append((wf, lines, traces))
+         yield props
+         self._cs_stack.pop()
+
+   def color_wf(self, *args, **opts):
+      if len(self._cs_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% color_wf %] must be inside [% color_basis %]")
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      gindex_name = self._setup_name("gindex", prefix + "gindex", opts)
+      lindex_name = self._setup_name("lindex", prefix + "lindex", opts)
+      io_name = self._setup_name("io", prefix + "io", opts)
+      rep_name = self._setup_name("rep", prefix + "rep", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+
+      wf, lines, traces = self._cs_stack[-1]
+
+      props = Properties()
+      last_idx = len(wf) - 1
+
+      for idx, the_wf in enumerate(wf):
+         io, io_idx, g_idx, r = the_wf.split(":")
+         props.setProperty(index_name, idx + shift)
+         props.setProperty(io_name, io)
+         props.setProperty(rep_name, r)
+         props.setProperty(lindex_name, io_idx)
+         props.setProperty(gindex_name, g_idx)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+         yield props
+
+   def color_lines(self, *args, **opts):
+      if len(self._cs_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% color_lines %] must be inside [% color_basis %]")
+
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      first_io = self._setup_name("first_io", prefix + "first_io", opts)
+      first_rep = self._setup_name("first_rep", prefix + "first_rep", opts)
+      first_gidx = self._setup_name("first_gidx", prefix + "first_gidx", opts)
+      first_lidx = self._setup_name("first_lidx", prefix + "first_lidx", opts)
+
+      last_io = self._setup_name("last_io", prefix + "last_io", opts)
+      last_rep = self._setup_name("last_rep", prefix + "last_rep", opts)
+      last_gidx = self._setup_name("last_gidx", prefix + "last_gidx", opts)
+      last_lidx = self._setup_name("last_lidx", prefix + "last_lidx", opts)
+
+      wf, lines, traces = self._cs_stack[-1]
+
+      props = Properties()
+      last_idx = len(lines) - 1
+
+      for idx, the_line in enumerate(lines):
+
+         first_idx = the_line[0]
+         last_idx = the_line[-1]
+         fio, flidx, fgidx, fr = first_idx.split(":")
+         lio, llidx, lgidx, lr = last_idx.split(":")
+
+         props.setProperty(index_name, idx + shift)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+
+         props.setProperty(first_io, fio)
+         props.setProperty(first_gidx, fgidx)
+         props.setProperty(first_lidx, flidx)
+         props.setProperty(first_rep, fr)
+         props.setProperty(last_io, lio)
+         props.setProperty(last_gidx, lgidx)
+         props.setProperty(last_lidx, llidx)
+         props.setProperty(last_rep, lr)
+
+         self._cs_line_stack.append(the_line[1:-1])
+         yield props
+         self._cs_line_stack.pop()
+
+   def color_traces(self, *args, **opts):
+      if len(self._cs_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% color_traces %] must be inside [% color_basis %]")
+
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      wf, lines, traces = self._cs_stack[-1]
+
+      props = Properties()
+      last_idx = len(traces) - 1
+
+      first_trace_index = 0
+
+      for idx, the_trace in enumerate(traces):
+         props.setProperty(index_name, idx + shift)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+
+         self._cs_trace_stack.append((first_trace_index, the_trace))
+         yield props
+         self._cs_trace_stack.pop()
+         first_trace_index += len(the_trace)
+
+   def color_line_elements(self, *args, **opts):
+      if len(self._cs_line_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% color_line_elements %] must be inside [% color_lines %]")
+
+      do_reversed = "reversed" in args
+
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      prev_name = self._setup_name("prev", prefix + "prev", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      gindex_name = self._setup_name("gindex", prefix + "gindex", opts)
+      lindex_name = self._setup_name("lindex", prefix + "lindex", opts)
+      io_name = self._setup_name("io", prefix + "io", opts)
+      rep_name = self._setup_name("rep", prefix + "rep", opts)
+
+      line = self._cs_line_stack[-1]
+      last_idx = len(line) - 1
+
+      props = Properties()
+      if do_reversed:
+         line = reversed(line)
+      prev = -1
+      for idx, element in enumerate(line):
+         props.setProperty(index_name, idx + shift)
+         props.setProperty(prev_name, prev + shift)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+
+         io, io_idx, g_idx, r = element.split(":")
+         props.setProperty(io_name, io)
+         props.setProperty(rep_name, r)
+         props.setProperty(lindex_name, io_idx)
+         props.setProperty(gindex_name, g_idx)
+
+         yield props
+         prev = idx
+
+   def color_trace_elements(self, *args, **opts):
+      if len(self._cs_trace_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% color_trace_elements %] must be inside [% color_traces %]")
+
+      do_reversed = "reversed" in args
+
+      if "prefix" in opts:
+         prefix = opts["prefix"]
+      else:
+         prefix = ""
+
+      if "shift" in opts:
+         shift = int(opts["shift"])
+      else:
+         shift = 0
+
+      index_name = self._setup_name("index", prefix + "index", opts)
+      prev_name = self._setup_name("prev", prefix + "prev", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+
+      gindex_name = self._setup_name("gindex", prefix + "gindex", opts)
+      lindex_name = self._setup_name("lindex", prefix + "lindex", opts)
+      io_name = self._setup_name("io", prefix + "io", opts)
+      rep_name = self._setup_name("rep", prefix + "rep", opts)
+
+      first_trace_index, trace = self._cs_trace_stack[-1]
+
+      props = Properties()
+      last_idx = len(trace) - 1
+
+      if do_reversed:
+         trace = reversed(trace)
+      prev = last_idx
+      for idx, element in enumerate(trace):
+         props.setProperty(index_name, idx + shift + first_trace_index)
+         props.setProperty(prev_name, prev + shift + first_trace_index)
+         props.setProperty(first_name, idx == 0)
+         props.setProperty(last_name, idx == last_idx)
+
+         io, io_idx, g_idx, r = element.split(":")
+         props.setProperty(io_name, io)
+         props.setProperty(rep_name, r)
+         props.setProperty(lindex_name, io_idx)
+         props.setProperty(gindex_name, g_idx)
+
+         yield props
+         prev = idx

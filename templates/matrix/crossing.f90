@@ -77,8 +77,8 @@ contains
       use [% process_name asprefix=\_ %]matrix, only: orig_sub => samplitude
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      double precision, intent(in) :: scale2
-      double precision, dimension(4), intent(out) :: amp
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
 
@@ -122,7 +122,7 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
-      double precision, intent(in) :: scale2
+      real(ki), intent(in) :: scale2
       integer, optional, intent(in) :: h
       real(ki), dimension(-2:0) :: amp
       real(ki), dimension([%num_legs%], 4) :: new_vecs
@@ -142,7 +142,7 @@ contains
       & only: orig_sub => ir_subtraction
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      double precision, intent(in) :: scale2
+      real(ki), intent(in) :: scale2
       real(ki), dimension(2), intent(out) :: amp
 
       real(ki), dimension([%num_legs%], 4) :: new_vecs
