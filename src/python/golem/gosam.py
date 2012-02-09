@@ -6,6 +6,7 @@ import golem.app.main as main
 import golem.app.olp as olp
 import traceback
 import golem.util.tools
+import golem.installation
 
 def report_crash(exc, stack, fname="gosam.crashed"):
    import os
@@ -99,6 +100,17 @@ def report_crash(exc, stack, fname="gosam.crashed"):
          encoding = expat.native_encoding,
          returns_unicode = xmlp.returns_unicode
       )
+
+   emit("GoSam",
+         version = ".".join(map(str, golem.installation.GOLEM_VERSION)),
+         revision = str(golem.installation.GOLEM_REVISION),
+         maintainer = "%s <%s>" % 
+            (golem.installation.INFO["maintainer"],
+               golem.installation.INFO["maintainer_email"]),
+         author = "%s <%s>" %
+            (golem.installation.INFO["author"],
+               golem.installation.INFO["author_email"]),
+         url = golem.installation.INFO["url"])
 
    f.close()
 

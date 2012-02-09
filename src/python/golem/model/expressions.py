@@ -1,6 +1,7 @@
 # vim: ts=3:sw=3
 
 import golem.model.scanner
+import golem.util.tools
 from golem.util.tools import error
 
 class ExpressionParser:
@@ -1245,3 +1246,75 @@ def mulSymbolPowers(p1, factor):
 		result[name] = factor * p
 	return result
 
+def resolve_dependencies(functions):
+	"""
+	Bring a list of expressions into an order in which they
+	can be computed
+	"""
+	all_names = functions.keys()
+	nfunctions = len(all_names)
+	graph = {}
+	golem.util.tools.message("      * Building call graph")
+	i = 0
+	for name, expr in functions.items():
+		i += 1
+		if i % 100 == 0:
+			golem.util.tools.message("         (%5d/%5d)" % (i, nfunctions))
+		edges = []
+		for other in all_names:
+			if name == other:
+				continue
+
+			if expr.dependsOn(other):
+				edges.append(other)
+		graph[name] = edges
+
+	golem.util.tools.message("      * Traversing call graph")
+	nedges = len(graph)
+	golem.util.tools.message("         %5d edges left" % nedges)
+
+	program = []
+	while len(graph) > 0:
+		found = None
+		for name, edges in graph.items():
+			if len(edges) == 0:
+				found = name
+				break
+		if found is None:
+			# Before we generate an error message we minimize the set of problematic
+			# functions. In order to do so we drop all functions on which no other
+			# function depends.
+			flag = True
+			while flag:
+				flag = False
+				bottom_expression = None
+				for name in graph.keys():
+					bottom = True
+					for edges in graph.values():
+						if name in edges:
+							bottom = False
+							break
+					if bottom:
+						bottom_expression = name
+						break
+				if bottom_expression is not None:
+					flag = True
+					del graph[bottom_expression]
+
+			problem_set = ", ".join(graph.keys())
+
+			golem.util.tools.error(
+					"Cannot resolve dependencies between functions: %s." %
+					problem_set)
+
+		program.append(name)
+		del graph[name]
+		nedges -= 1
+		if nedges % 100 == 0:
+			golem.util.tools.message("         %5d edges left" % nedges)
+
+		for edges in graph.values():
+			if name in edges:
+				edges.remove(name)
+
+	return program

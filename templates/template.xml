@@ -53,6 +53,7 @@
 		<file src="haggies-l1.out" class="Kinematics"/>
 		<file src="haggies-l1d.out" class="Kinematics"/>
 
+		<file src="info.frm" class="Kinematics" />
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Verbatim"/>
 		<file src="abbreviate.hh" class="Verbatim"/>
@@ -68,6 +69,7 @@
 		<file src="r2integrals.hh" class="Verbatim" />
 		<file src="lightconedecomp.prc" class="Kinematics"/>
 		<file src="spva.prc" class="Kinematics"/>
+		<file src="func.txt" class="Model" />
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">

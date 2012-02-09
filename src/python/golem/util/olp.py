@@ -444,6 +444,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          subprocess_conf["golem.version"] = ".".join(map(str,
             golem.installation.GOLEM_VERSION))
          subprocess_conf["golem.full-name"] = GOLEM_FULL
+         subprocess_conf["golem.revision"] = \
+            golem.installation.GOLEM_REVISION
 
          golem.util.tools.POSTMORTEM_CFG = subprocess_conf
 

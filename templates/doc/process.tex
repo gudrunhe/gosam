@@ -265,8 +265,29 @@ For the definition of tensor states, please refer to the document
 %------------------------------------------------------------------------
 \section{Colour Basis}
 \begin{align}[%
-@for latex_color_base %]
-\vert c_{[% $_ %]}\rangle &= [% expr %][%
+@for color_basis index_shift=1 shift=1%]
+\vert c_{[% index %]}\rangle &=[%
+   @for color_wf shift=1 %][%
+      @select color
+      @case 3 %]q_{i_{[%gindex%]}}^{([%gindex%])}[%
+      @case -3 %]\bar{q}_{i_{[%gindex%]}}^{([%gindex%])}[%
+      @case -8 8 %]g^{A_{[%gindex%]}}_{([%gindex%])}[%
+      @end @select %][%
+   @end @for %][%
+   @for color_lines %]\left([%
+      @for color_line_elements %]T^{A_{[%gindex%]}}[%
+      @end @for %]\right)_{[%
+      @select first_rep
+      @case -3 3 %]i_{[%first_gidx%]}[%
+      @end @select %][%
+      @select last_rep
+      @case -3 3 %]i_{[%last_gidx%]}[%
+      @end @select %]}[%
+   @end @for %][%
+   @for color_traces %]\textrm{tr}\left\{[%
+      @for color_trace_elements %]T^{A_{[%gindex%]}}[%
+      @end @for %]\right\}[%
+   @end @for %][%
    @if is_last %][% @else %]\\[% @end @if %][%
 @end @for %]
 \end{align}

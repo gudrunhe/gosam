@@ -5,7 +5,7 @@ include ../Makefile.conf
 
 
 OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
-		  color.o accu.o[%
+		  color.o accu.o version.o[%
 @select r2
 @case implicit explicit off %] groups.o[%
 @end @select %] globalsl1.o scalar_cache.o[%

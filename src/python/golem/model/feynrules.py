@@ -823,7 +823,8 @@ def transform_lorentz(expr, spins):
 				index2 = args[1]
 
 			if my_spins == [1, 1]:
-				return lor_d1(index1, index2)
+				#return lor_d1(index1, index2)
+				return lor_NCContainer(ex.IntegerExpression(1), index1, index2)
 			else:
 				return lor_d(index1, index2)
 		elif head == lor_Gamma:
