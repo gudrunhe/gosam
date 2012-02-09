@@ -1,5 +1,7 @@
 # vim: ts=3:sw=3
 
+import StringIO
+
 from golem.util.config import Properties
 from golem.util.parser import Template
 
@@ -121,6 +123,52 @@ class ModelTemplate(Template):
 	def __call__(self, *conf):
 		for chunk in Template.__call__(self, self._globals, *conf):
 			yield chunk
+
+	def functions_resolved(self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expression_name  = self._setup_name("expression", "expression", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		
+		model_mod = self._mod
+	
+		nfunctions = len(model_mod.functions)
+
+		golem.util.tools.message("Compiling functions ...")
+		parser = golem.model.expressions.ExpressionParser()
+		functions = {}
+		i = 0
+		for name, value in model_mod.functions.items():
+			i += 1
+			if i % 100 == 0:
+				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+			expr = parser.compile(value)
+			functions[name] = expr
+	
+		golem.util.tools.message("Resolving dependencies between functions ...")
+		program = golem.model.expressions.resolve_dependencies(functions)
+
+		nlines = len(program)
+
+		props = Properties()
+		for i, name in enumerate(program):
+			if i % 100 == 0:
+				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+
+			ast = functions[name]
+			buf = StringIO.StringIO()
+			try:
+				ast.write(buf)
+
+				props.setProperty(name_name, name)
+				props.setProperty(expression_name, buf.getvalue())
+				props.setProperty(index_name, i)
+				props.setProperty(first_name, i == 0)
+				props.setProperty(last_name, i == nlines - 1)
+			finally:
+				buf.close()
+			yield props
 
 	def has_slha_locations(self, *args, **opts):
 		return len(self._slha_blocks) > 0

@@ -547,7 +547,7 @@ def find_symmetry_group(helicity_list, conf,
    if noreduce:
       result = []
       for ih, helicity in enumerate(helicity_list):
-         result.append( (ih, None) )
+         result.append( (ih, None, range(len(color_basis))) )
       return result
 
 

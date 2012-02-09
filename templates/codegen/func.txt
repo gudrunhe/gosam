@@ -1,0 +1,6 @@
+[%
+@for functions_resolved %][%
+   @if is_first %][%
+   @else %]
+[% @end @if %][% $_ %] = [% expression %];[%
+@end @for %]

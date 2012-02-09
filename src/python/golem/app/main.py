@@ -177,6 +177,8 @@ def main(argv=sys.argv):
          c["golem.version"] = ".".join(map(str, 
             golem.installation.GOLEM_VERSION))
          c["golem.full-name"] = GOLEM_FULL
+         c["golem.revision"] = \
+            golem.installation.GOLEM_REVISION
 
          message("Processing %r" % arg)
          golem.util.tools.POSTMORTEM_CFG = c

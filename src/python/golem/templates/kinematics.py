@@ -1125,7 +1125,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
 
 
-   def latex_color_base(self, *args, **opts):
+   def _OBSOLETE_latex_color_base(self, *args, **opts):
       """
       Enumerates all color structures for this process in
       LaTeX format.
@@ -1137,7 +1137,6 @@ class KinematicsTemplate(golem.util.parser.Template):
       first_name = self._setup_name("first", "is_first", opts)
       last_name = self._setup_name("last", "is_last", opts)
 
-      # This is basically what has been golem.main_color.latex_color before.
       result = ""
       quarks = []
       aquarks = []
@@ -1604,6 +1603,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       aquarks = []
       gluons = []
       particles = []
+      sort = []
       wf = []
       for i in range(self._num_in):
          color = self._acolor[i]
@@ -1683,6 +1683,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       first_name = self._setup_name("first", prefix + "is_first", opts)
       last_name = self._setup_name("last", prefix + "is_last", opts)
 
+      color_name = self._setup_name("color", prefix + "color", opts)
+      acolor_name = self._setup_name("acolor", prefix + "acolor", opts)
 
       wf, lines, traces = self._cs_stack[-1]
 
@@ -1698,6 +1700,8 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(gindex_name, g_idx)
          props.setProperty(first_name, idx == 0)
          props.setProperty(last_name, idx == last_idx)
+         props.setProperty(color_name, self._color[idx])
+         props.setProperty(acolor_name, self._acolor[idx])
          yield props
 
    def color_lines(self, *args, **opts):

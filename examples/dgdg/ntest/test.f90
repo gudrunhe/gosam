@@ -113,8 +113,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use dgdg_config, only: renormalisation !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar
+   use dgdg_config
    use dgdg_model, only: Nf, Nfgen
    implicit none
 
@@ -127,6 +126,7 @@ subroutine     setup_parameters()
    ! samurai_scalar = 2
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 2
+   samurai_group_numerators = .false.
 
    Nf    = 2.0_ki
    Nfgen = 2.0_ki

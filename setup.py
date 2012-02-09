@@ -10,6 +10,8 @@ import os
 import fnmatch
 
 VERSION = "1.0"
+SVN_REVISION = "$Rev$"
+
 INFO = {
 		'name': 'gosam',
 		'version': VERSION,
@@ -108,7 +110,8 @@ class build_py(_build_py):
 		f.write("\n}\n\n")
 		f.write("GOLEM_VERSION = [%s]\n" %
 				",".join(map(lambda s: s.strip(), INFO["version"].split("."))))
-
+		f.write("GOLEM_REVISION = %d\n" %
+				int(SVN_REVISION.replace("$Rev:", "").replace("$", "")))
 		f.close()
 
 	def run(self):

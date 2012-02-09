@@ -29,7 +29,6 @@ from golem.util.config import GolemConfigError
 # The following files contain routines which originally were
 # part of golem-main itself:
 from golem.util.main_qgraf import *
-from golem.util.main_process import *
 from golem.installation import GOLEM_VERSION
 
 def create_ff_files(conf, in_particles, out_particles):
@@ -143,9 +142,6 @@ def generate_process_files(conf, from_scratch=False):
 				conf.getListProperty("__heavy_quarks__")),
 			lo_flags = flags[0],
 			nlo_flags = flags[1])
-
-	# create_process_hh(conf, in_particles, out_particles)
-	generate_func_txt(conf)
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
