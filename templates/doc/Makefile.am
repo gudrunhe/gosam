@@ -1,5 +1,5 @@
 
-EXTRA_DIST=process.tex gind.ist axodraw.sty
+EXTRA_DIST=process.tex gind.ist axodraw.sty redo.log
 
 .PHONY: dvi html ps pdf clean-html clean-local
 

@@ -299,12 +299,64 @@ class Properties:
       for key in self:
          stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
 
-   def store(self, stream, comments=None):
+   def store(self, stream, comments=None, properties=None,
+         info=[]):
+
+      def format_comment(prop):
+         if prop.getType() == str:
+            stype = "text"
+         elif prop.getType() == int:
+            stype = "integer number"
+         elif prop.getType() == bool:
+            stype = "true/false"
+         elif prop.getType() == list:
+            stype = "comma separated list"
+         else:
+            stype = str(prop.getType())
+
+         stream.write("### %s (%s)\n" % (prop, stype))
+         for line in prop.getDescription().splitlines(False):
+            text = "# %s" % (line.expandtabs(3))
+            stream.write("%s\n" % text)
+
+         if prop.isExperimental():
+            stream.write("### This property is marked as EXPERIMENTAL !!!\n")
+
+
       if comments is not None:
          for cline in comments.splitlines():
             stream.write("# %s\n" % cline)
       stream.write("# %s\n" % datetime.datetime.now())
-      for key in self:
+
+      keys = [key for key in self]
+
+      for key in info:
+         if key in keys:
+            stream.write("# %s=%s\n" % (key, self[key]))
+            keys.remove(key)
+      stream.write("\n")
+
+      if properties is not None:
+         for propty in properties:
+            format_comment(propty)
+
+            key = str(propty)
+            if key in keys:
+               stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
+               keys.remove(key)
+            else:
+               dflt = propty.getDefault()
+               if dflt is None:
+                  dflt = ""
+               else:
+                  dflt = str(dflt)
+               stream.write("### Default:\n")
+               stream.write("# %s=%s\n" % (escape(key, True), escape(dflt)))
+            stream.write("\n")
+
+      stream.write("### Further settings:\n")
+      keys.sort()
+      for key in keys:
          stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
 
    def load(self, stream):

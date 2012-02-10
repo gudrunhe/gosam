@@ -119,6 +119,7 @@
 			<only if-extension="autotools" />
 		</file>
 		<file src="process.tex" class="Integrals"/>
+		<file src="redo.log" class="Kinematics"/>
 	</directory>
 
 	<directory src="doc" dest="." usedby="qgraf">

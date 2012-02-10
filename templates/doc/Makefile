@@ -48,3 +48,4 @@ filelist-source:
 	echo Makefile > $@
 	echo process.tex >> $@
 	echo axodraw.sty >> $@
+	echo redo.log >> $@
