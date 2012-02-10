@@ -3,6 +3,7 @@ import sys
 import os
 import os.path
 import imp
+import StringIO
 
 from time import gmtime, strftime
 
@@ -409,6 +410,16 @@ def workflow(conf):
 	qgraf_options = conf.getProperty(golem.properties.qgraf_options)
 
 	r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
+
+	# Prepare a copy of the setup file in the property [% user.setup %]
+	buf = StringIO.StringIO()
+	conf.store(buf, properties=golem.properties.properties,
+			info= [
+            "golem.full-name", "golem.name", "golem.version",
+            "golem.revision", "setup-file"])
+	conf.setProperty("user.setup", buf.getvalue())
+	buf.close()
+
 
 	# Check if path exists. If it doesn't, raise an exception
 	if not os.path.exists(path):

@@ -1,0 +1,11 @@
+[% ' vim: syntax=golem
+%]# This is the complete setup description which was active when the
+# matrix element code was generated. If you want to rerun the setup
+# don't forget to adapt the directory and system settings according
+# to your environment.
+#
+# For a list of software versions (Form, Haggies, ...) used  for code
+# generation, please consult the file common/version.f90.
+#
+#
+[% user.setup %]
