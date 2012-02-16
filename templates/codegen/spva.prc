@@ -9,5 +9,27 @@
             @end @if %]) = spva[%
               @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
          %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %].Q;[%
-   @end @for %]
+   @end @for %][%
+@if internal NUMPOLVEC %][%
+   @for pairs %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   Id Spab3([%
+        @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %], Q?, e[%
+         index2 %]) = spva[%
+        @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2 %].Q;
+   Id Spab3(e[% index2 %], Q?, [% 
+        @if is_lightlike1 %]k[% @else %]l[% @end @if %][%
+          index1 %]) = spvae[% index2 %][% 
+        @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %].Q;[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   Id Spab3(e[%index1%], Q?, e[%index2%]) = spvae[%index1%]e[%index2%].Q;
+   Id Spab3(e[%index2%], Q?, e[%index1%]) = spvae[%index2%]e[%index1%].Q;[%
+      @end @if %][%
+   @end @for %][%
+@end @if %]
 #EndProcedure

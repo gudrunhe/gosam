@@ -833,12 +833,12 @@ Since the polarisation vectors of massless gauge bosons are (complex)
 light-like vectors the algebra can be carried out without any modifications
 even if the polarisation vectors are left in the expressions as extra symbols:
 instead of substituting, for example,
-\begin{equation}
-\epsilon^\mu_+(k_1)\to\frac{\langle p\vert\gamma^\mu\vert k_1]}%
-{\sqrt{2}\langle pk\rangle}
+\begin{equation}\label{eq:def-epsplus}
+\epsilon^\mu_+(k_i, r_i)\to\frac{\langle r_i\vert\gamma^\mu\vert k_i]}%
+{\sqrt{2}\langle r_ik_i\rangle}
 \end{equation}
 we just introduce a new symbol
-$\mathtt{eps1}\equiv\epsilon_1=\epsilon^\mu_\pm(k_1)$
+$\mathtt{eps1}\equiv\epsilon_1=\epsilon^\mu_\pm(k_1, r_1)$
 together with all relevant spinor products $\langle r\epsilon_1\rangle$
 and $[r\epsilon_1]$.
 
@@ -846,7 +846,58 @@ Whether this procedure leads to a more efficient implementation is difficult
 to decide in general. Therefore we leave this new feature as an extension
 which the user can switch on and of per process.
 
-\section{Adding an Extension}
+\subsection{Spinor Products of Polarization Vectors}
+In order to construct the spinor products $\langle v\epsilon_i\rangle$
+and $[v\epsilon_i]$ we first write down $\fmslash{\epsilon}_i$, as it is
+\begin{align}
+\fmslash{\epsilon}_+(k_i, r_i) &=\frac{\sqrt{2}}{\langle r_ik_i\rangle}
+\left(\vert k_i]\langle r_i\vert + \vert r_i\rangle[k_i\vert\right),\\
+\fmslash{\epsilon}_-(k_i, r_i) &=\frac{\sqrt{2}}{[k_ir_i]}
+\left(\vert k_i\rangle[r_i\vert + \vert r_i]\langle k_i\vert\right).
+\end{align}
+From the contractions $[v\vert\fmslash{\epsilon}_+\vert k_i\rangle$
+and $\langle v\vert\fmslash{\epsilon}_+\vert r_i]$ we can read off
+the relations
+\begin{align}
+[v\epsilon_+] &= \sqrt{2}\frac{[vk_i]}{\langle\epsilon_+k_i\rangle},\\
+\langle v\epsilon_+\rangle &=\sqrt{2}\frac%
+{\langle vr_i\rangle[k_ir_i]}{[\epsilon_+r_i]\langle r_ik_i\rangle}
+\end{align}
+Furthermore, it is trivial to see that $\langle\epsilon_+r_i\rangle$
+and $[\epsilon_+k_i]$ both are zero.
+This does not solve the problem completely but reduces it to the need to know
+$\langle\epsilon_+k_i\rangle$ and $[\epsilon_+r_i]$. Replacing
+$v=k_i$ or $v=r_i$ in the above equation (which is equivalent to
+using the normalization condition $\epsilon_+\cdot\epsilon_-=-1$)
+yields
+\begin{equation}
+[r_i\epsilon_+]\langle\epsilon_+k_i\rangle = \sqrt{2}[r_ik_i]
+\end{equation}
+
+With the Gordon identity we can write
+\begin{equation}
+2\epsilon_+^\mu=\langle\epsilon_+\vert\gamma^\mu\vert\epsilon_+]
+=\frac{\sqrt{2}}{\langle r_ik_i\rangle}\langle r_i\vert\gamma^\mu\vert k_i]
+\end{equation}
+We can now attempt the identification
+\begin{align}
+\vert\epsilon_+\rangle &\equiv\sqrt{\frac{\sqrt{2}}{\langle r_ik_i\rangle}}
+   \vert r_i\rangle
+\quad\text{and}\\
+\vert\epsilon_+] &\equiv\sqrt{\frac{\sqrt{2}}{\langle r_ik_i\rangle}}
+   \vert k_i]
+\end{align}
+This choice reproduces all relevant relations. For the negative polarisation
+case we choose
+\begin{align}
+\vert\epsilon_-\rangle &\equiv\sqrt{\frac{\sqrt{2}}{[k_ir_i]}}
+   \vert k_i\rangle
+\quad\text{and}\\
+\vert\epsilon_-] &\equiv\sqrt{\frac{\sqrt{2}}{[k_ir_i]}}
+   \vert r_i]
+\end{align}
+
+\subsection{Adding an Extension}
 When a new feature is added to the code it is always a good idea to add it
 as an \emph{extension}. Extensions are key words which can be added by
 the user to the option \texttt{extensions} or to any option of the
@@ -1042,6 +1093,46 @@ products with complex arguments have been defined, which is not covered
 in this manual.
 
 \subsection{Adding symbol definitions in \form}
+The same symbols which have just been added to the Fortran files
+need to be defined also at the level of the \form{} files.
+All process dependent symbol definitions are found in the file
+\texttt{templates/\hspace{0pt}codegen/\hspace{0pt}symbols.hh}.
+We can proceed there exactly the same way as we did in the Fortran file
+by adding loops over \texttt{particles} and \texttt{pairs}, all protected
+by an if-tag.
+\lstset{language=[form]{gosamt}}
+\begin{lstlisting}
+[%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %]
+Vector e[%index%];[%
+   @end @for %][%
+   @for pairs ordered distinct %][%
+      @if eval is_lightlike2 .and.
+            ( 2spin2 .eq. 2 ) %]
+Symbols spa[%
+         @if is_lightlike1 %]k[%
+         @else %]l[%
+         @end @if %][% index1 %]e[% index2
+      %], spbe[% index2 %][%
+         @if is_lightlike1 %]k[%
+         @else %]l[%
+         @end @if %][% index1 %];[%
+      @end @if %][%
+   @end @for %][%
+@end @if %]
+\end{lstlisting}
+As the pedagogical value of a complete repetition of all definitions would
+be very limited we skip the rest of this file. We must however not forget
+to add the newly defined vectors to the definitions of \texttt{LIGHTLIKE}
+and \texttt{EXTERNAL} and also in the relevant routines like
+\texttt{spsymbols} and \texttt{kinematics}.
+
+\paragraph{TODO}
+\begin{itemize}
+\item describe \texttt{kinematics-define.inc}
+\item describe \texttt{spva.prc}
+\end{itemize}
 
 \appendix
 \lstset{language=[fortran]{gosamt}}

@@ -63,13 +63,20 @@
    @for particles lightlike vector %]
    complex(ki), dimension(4), public :: e[%index%][%
    @end @for %][%
-   @for pairs ordered distinct %][%
+   @for pairs ordered %][%
       @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
    complex(ki), public :: spa[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %]e[% index2
             %], spbe[% index2
             %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
+      @end @if %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) %]
+   complex(ki), public :: spae[% index1 %][%
+                 @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
+            %], spb[%
+                 @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]e[%
+                    index1 %][%
       @end @if %][%
    @end @for %][%
    @for pairs distinct ordered %][%
@@ -118,7 +125,6 @@
       module procedure Spab3_mcfm
       module procedure Spab3_mcfmc
       module procedure Spab3_vec
-      module procedure Spab3_vecc
    end interface
 
    interface Spba3
@@ -186,12 +192,20 @@ contains
 !---#[ subroutine init_event:
    subroutine     init_event(vecs[%
 @for particles lightlike vector %], hel[%index%][%
-@end @for %])
+@end @for %])[%
+@if internal NUMPOLVEC %]
+      use [% process_name asprefix=\_ %]config, only: debug_numpolvec, [% '
+      %]logfile[%
+@end @if %]
       use [% process_name asprefix=\_ %]model
       implicit none
       real(ki), dimension(num_legs,4), intent(in) :: vecs[%
 @for particles lightlike vector %]
       integer, intent(in), optional :: hel[%index%][%
+@end @for %][%
+@for particles lightlike vector %]
+      complex(ki) :: N[%index%]
+      logical :: flag[%index%][%
 @end @for %]
       
       call invalidate_cache()[%
@@ -282,16 +296,19 @@ contains
           . reference result=refvec %]
          select case(hel[%index%])
          case(1)
-            e[% index %] = spva[%refvec%]k[%
-               index%]/sqrt2/Spaa([%refvec%],k[%index%])
+            flag[%index%] = .false.
+            N[%index%] = sqrt2*Spaa([%refvec%],k[%index%])
+            e[% index %] = spva[%refvec%]k[%index%]/N[%index%]
          case(-1)
-            e[% index %] = spvak[%index%][%
-               refvec%]/sqrt2/Spbb(k[%index%],[%refvec%])
+            flag[%index%] = .true.
+            N[%index%] = sqrt2*Spbb(k[%index%],[%refvec%])
+            e[% index %] = spvak[%index%][%refvec%]/N[%index%]
          case default
             print*, "Illegal helicity for particle [%
                index %]:", hel[% index %]
             stop
-         end select[%
+         end select
+         N[%index%] = sqrt(2.0_ki/N[%index%])[%
       @end @with %][%
    @end @for %][%
    @for particles lightlike vector final %][%
@@ -299,64 +316,315 @@ contains
           . reference result=refvec %]
          select case(hel[%index%])
          case(1)
+            flag[%index%] = .true.
+            N[%index%] = sqrt2*Spbb(k[%index%],[%refvec%])
             e[% index %] = spvak[%index%][%
-               refvec%]/sqrt2/Spbb(k[%index%],[%refvec%])
+               refvec%]/N[%index%]
          case(-1)
+            flag[%index%] = .false.
+            N[%index%] = sqrt2*Spaa([%refvec%],k[%index%])
             e[% index %] = spva[%refvec%]k[%
-               index%]/sqrt2/Spaa([%refvec%],k[%index%])
+               index%]/N[%index%]
          case default
             print*, "Illegal helicity for particle [%
                index %]:", hel[% index %]
             stop
-         end select[%
+         end select
+         N[%index%] = sqrt(2.0_ki/N[%index%])[%
       @end @with %][%
    @end @for %][%
-   @for pairs ordered distinct %][%
-      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
-         spa[%
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %]e[% index2 %] = Spaacc(cmplx([%
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %], 0.0_ki, ki), e[% index2 %])
-         spbe[% index2
-            %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 
-            %] = Spbbcc(e[% index2 %], cmplx([%
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 
-            %], 0.0_ki, ki))[%
+   @for pairs ordered %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
+         @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
+          . reference2 result=refvec2 %][%
+            @with eval 'k .rep. ( is_lightlike1 ~> 'rue )
+             . 'l .rep. ( is_lightlike1 ~> 'lse )
+             . index1 result=vec1 %]
+         if(flag[%index2%]) then
+            spa[% vec1 %]e[%index2%] = [%
+                    @if eval ( 'k . index2 ) .eq. vec1 %]0.0_ki[%
+                    @else %]N[%index2%] * Spaa([%vec1%], k[%index2%])[%
+                    @end @if %]
+            spbe[%index2%][%vec1%] = [%
+                    @if eval refvec2 .eq. vec1 %]0.0_ki[%
+                    @else %]N[%index2%] * Spbb([%refvec2%], [%vec1%])[%
+                    @end @if %]
+         else
+            spa[% vec1 %]e[%index2%] = [%
+                    @if eval refvec2 .eq. vec1 %]0.0_ki[%
+                    @else %]N[%index2%] * Spaa([%vec1%], [%refvec2%])[%
+                    @end @if %]
+            spbe[%index2%][%vec1%] = [%
+                    @if eval ( 'k . index2 ) .eq. vec1 %]0.0_ki[%
+                    @else %]N[%index2%] * Spbb(k[%index2%], [%vec1%])[%
+                    @end @if %]
+         end if[%
+            @end @with %][%
+         @end @with %][%
+      @end @if %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) %][%
+         @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
+          . reference1 result=refvec1 %][%
+            @with eval 'k .rep. ( is_lightlike2 ~> 'rue )
+             . 'l .rep. ( is_lightlike2 ~> 'lse )
+             . index2 result=vec2 %]
+         if(flag[%index1%]) then
+            spae[%index1%][% vec2 %] = [%
+                    @if eval ( 'k . index1 ) .eq. vec2 %]0.0_ki[%
+                    @else %]N[%index1%] * Spaa(k[%index1%], [%vec2%])[%
+                    @end @if %]
+            spb[%vec2%]e[%index1%] = [%
+                    @if eval refvec1 .eq. vec2 %]0.0_ki[%
+                    @else %]N[%index1%] * Spbb([%vec2%], [%refvec1%])[%
+                    @end @if %]
+         else
+            spae[% index1 %][%vec2%] = [%
+                    @if eval refvec1 .eq. vec2 %]0.0_ki[%
+                    @else %]N[%index1%] * Spaa([%refvec1%], [%vec2%])[%
+                    @end @if %]
+            spb[%vec2%]e[%index1%] = [%
+                    @if eval ( 'k . index1 ) .eq. vec2 %]0.0_ki[%
+                    @else %]N[%index1%] * Spbb([%vec2%], k[%index1%])[%
+                    @end @if %]
+         end if[%
+            @end @with %][%
+         @end @with %][%
       @end @if %][%
    @end @for %][%
    @for pairs distinct ordered %][%
       @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
-               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
-         spae[% index1
-            %]e[% index2 %] = Spaacc(e[% index1 %], e[% index2 %])
-         spbe[% index2 %]e[% index1
-            %] = Spbbcc(e[% index2 %], e[% index1 %])[%
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
+         @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
+          . reference1 result=refvec1 %][%
+            @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
+          . reference2 result=refvec2 %]
+         if (flag[%index1%]) then
+            if (flag[%index2%]) then
+               spae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2
+                  %] * Spaa(k[%index1%], k[%index2%])
+               spbe[% index2 %]e[% index1 %] = [%
+            @if eval refvec1 .eq. refvec2 %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spbb([%refvec2%], [%refvec1%])[%
+            @end @if %]
+            else
+               spae[% index1 %]e[% index2 %] = [%
+            @if eval refvec2 .eq. ( 'k . index1 ) %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spaa(k[%index1%], [%refvec2%])[%
+            @end @if %]
+               spbe[% index2 %]e[% index1 %] = [%
+            @if eval refvec1 .eq. ( 'k . index2 ) %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spbb(k[%index2%], [%refvec1%])[%
+            @end @if %]
+            endif
+         else
+            if (flag[%index2%]) then
+               spae[% index1 %]e[% index2 %] = [%
+            @if eval ( 'k . index2 ) .eq. refvec1 %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spaa([%refvec1%], k[%index2%])[%
+            @end @if %]
+               spbe[% index2 %]e[% index1 %] = [%
+            @if eval refvec2 .eq. ( 'k . index1 ) %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spbb([%refvec2%], k[%index1%])[%
+            @end @if %]
+            else
+               spae[% index1 %]e[% index2 %] = [%
+            @if eval refvec2 .eq. refvec1 %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spaa([%refvec1%], [%refvec2%])[%
+            @end @if %]
+               spbe[% index2 %]e[% index1 %] = [%
+            @if eval index1 .eq. index2 %]0.0_ki[%
+            @else %]N[%index1%] * N[%index2%] * Spbb(k[%index2%], k[%index1%])[%
+            @end @if %]
+            endif
+         end if[%
+            @end @with %][%
+         @end @with %][%
       @end @if %][%
    @end @for %][%
    @for pairs %][%
-      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
-         spva[%
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %]e[% index2 %] = Spab3_vecc(cmplx([%
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %], 0.0_ki, ki), e[% index2 %])
-         spvae[% index2 %][% 
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %] = Spab3_vecc(e[% index2 %], cmplx([% 
-                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %], 0.0_ki, ki))[%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
+         @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
+          . reference2 result=refvec2 %][%
+            @with eval 'k .rep. ( is_lightlike1 ~> 'rue )
+             . 'l .rep. ( is_lightlike1 ~> 'lse )
+             . index1 result=vec1 %]
+         if (flag[%index2%]) then
+            spva[% vec1 %]e[% index2 %] = N[%index2%] * [%
+               @if eval vec1 .eq. refvec2 %]2.0_ki * [% vec1 %][%
+               @else %]Spab3_vec([%vec1%], [%refvec2%])[%
+               @end @if %]
+            spvae[% index2 %][% vec1 %] = N[%index2%] * [%
+               @if eval vec1 .eq. ( 'k . index2 ) %]2.0_ki * [% vec1 %][%
+               @else %]Spab3_vec(k[%index2%], [%vec1%])[%
+               @end @if %]
+         else
+            spva[% vec1 %]e[% index2 %] = N[%index2%] * [%
+               @if eval vec1 .eq. ( 'k . index2 ) %]2.0_ki * [% vec1 %][%
+               @else %]Spab3_vec([%vec1%], k[%index2%])[%
+               @end @if %]
+            spvae[% index2 %][% vec1 %] = N[%index2%] * [%
+               @if eval vec1 .eq. refvec2 %]2.0_ki * [% vec1 %][%
+               @else %]Spab3_vec([%refvec2%], [%vec1%])[%
+               @end @if %]
+         end if[%
+            @end @with %][%
+         @end @with %][%
       @end @if %][%
    @end @for %][%
    @for pairs distinct ordered %][%
       @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
-               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
-         spvae[% index1
-            %]e[% index2 %] = Spab3_vecc(e[%index1%], e[%index2%])
-         spvae[% index2 %]e[% index1 %] = Spab3_vecc(e[%
-             index2%], e[%index1%])[%
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
+         @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
+          . reference1 result=refvec1 %][%
+            @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
+          . reference2 result=refvec2 %]
+         if (flag[%index1%]) then
+            if (flag[%index2%]) then[% '
+               ! T T => <k1 r2] %]
+               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [%
+               @if eval refvec2 .eq. ( 'k . index1 ) %]2.0_ki * [%refvec2%][%
+               @else %]Spab3_vec(k[%index1%], [%refvec1%])[%
+               @end @if %][% '
+               ! T T => <k2 r1] %]
+               spvae[% index2 %]e[% index1 %] = N[%index1%] * N[%index2%] * [%
+               @if eval ( 'k . index2 ) .eq. refvec1 %]2.0_ki * [%refvec1%][%
+               @else %]Spab3_vec(k[%index2%], [%refvec1%])[%
+               @end @if %]
+            else[% '
+               ! T F => <k1 k2] %]
+               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [% 
+               @if eval index1 .eq. index2 %]2.0_ki * k[%index1%][%
+               @else %]Spab3_vec(k[%index1%], k[%index2%])[%
+               @end @if %][% '
+               ! T F => <r2 r1] %]
+               spvae[% index2 %]e[% index1 %] = N[%index1%] * N[%index2%] * [%
+               @if eval refvec1 .eq. refvec2 %]2.0_ki * [%refvec1%][%
+               @else %]Spab3_vec([%refvec2%], [%refvec1%])[%
+               @end @if %]
+            end if
+         else
+            if (flag[%index2%]) then[% '
+               ! F T => <r1 r2] %]
+               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [%
+               @if eval refvec1 .eq. refvec2 %]2.0_ki * [%refvec1%][%
+               @else %]Spab3_vec([%refvec1%], [%refvec2%])[%
+               @end @if %][% '
+               ! F T => <k2 k1] %]
+               spvae[% index2 %]e[% index1 %] = N[%index1%] * N[%index2%] * [% '
+                %]Spab3_vec(k[%index2%], k[%index1%])
+            else[% '
+               ! F F => <r1 k2] %]
+               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2 %] * [%
+               @if eval ( 'k . index2 ) .eq. refvec1 %]2.0_ki * [%refvec1%][%
+               @else %]Spab3_vec([%refvec1%], k[%index2%])[%
+               @end @if %][% '
+               ! F F => <r2 k1] %]
+               spvae[% index2 %]e[% index1 %] = N[%index1%] * N[%index2%] * [%
+               @if eval ( 'k . index1 ) .eq. refvec2 %]2.0_ki * [%refvec2%][%
+               @else %]Spab3_vec([%refvec2%], k[%index1%])[%
+               @end @if %]
+            end if
+         end if[%
+            @end @with %][%
+         @end @with %][%
       @end @if %][%
    @end @for %]
+         if (debug_numpolvec) then
+            write(logfile, "(A17)") "<!-- NUMPOLVEC --"[%
+   @for particles lightlike vector %]
+            write(logfile, "(A9,I2,A4,I2,A9,L1)") &
+            & "Helicity(", [%index%], ") = ", hel[%
+            index%], "; flag = ", flag[%index%][%
+   @end @for %][%
+   @for particles lightlike vector %]
+            write(logfile, *) "k[%index%].e[%index%]", dotproduct(k[%
+              index%], e[%index%])
+            write(logfile, *) "r[%index%].e[%index%]", dotproduct([%
+      @if eval reference .lt. 0 %]l[%
+      @else %]k[%
+      @end @if %][% eval .abs. reference %], e[%index%])[%
+   @end @for %][%
+   @for pairs distinct %][%
+      @for particles lightlike vector %]
+            write(logfile, *) "<[%index1%]|e[%index%]|[%index2%]]", &
+              & dotproduct(spva[%
+         @if is_lightlike1 %]k[%
+         @else %]l[%
+         @end @if %][%index1%][%
+         @if is_lightlike2 %]k[%
+         @else %]l[%
+         @end @if %][%index2%], e[%index%]), spa[%
+         @if eval index .gt. index1 %][%
+            @if is_lightlike1 %]k[%
+            @else %]l[%
+            @end @if %][%index1%]e[%index%][%
+         @else %]e[%index%][%
+            @if is_lightlike1 %]k[%
+            @else %]l[%
+            @end @if %][%index1%]*(-1.0_ki)[%
+         @end @if %]*spb[%
+         @if eval index .lt. index2 %][%
+            @if is_lightlike2 %]k[%
+            @else %]l[%
+            @end @if %][%index2%]e[%index%]*(-1.0_ki)[%
+         @else %]e[%index%][%
+            @if is_lightlike2 %]k[%
+            @else %]l[%
+            @end @if %][%index2%][%
+         @end @if %][%
+      @end @for %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+            write(logfile, *) "e[%index1%].e[%index2%]", &
+            & dotproduct(e[%index1%], e[%index2%]), &
+            & 0.5_ki * spae[%index1%]e[%index2%] * spbe[%index2%]e[%index1%][%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct lightlike1 lightlike2 %][%
+      @for particles lightlike vector %]
+            write(logfile, *) "<k[%index1%]|mu|e[%index%]]<e[%
+                 index%]|mu|k[%index2%]]", &
+            & dotproduct(spvak[%index1%]e[%index%], spvae[%index
+                      %]k[%index2%]), &
+            & -2.0_ki * dotproduct(spvak[%index1%]k[%index2%], e[%index%])[%
+      @end @for %][%
+   @end @for %][%
+   @for pairs distinct index1=ie1 index2=ie2 %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
+         @for pairs index1=ik1 index2=ik2 %][%
+            @with eval 'k .rep. ( is_lightlike1 ~> 'rue )
+             . 'l .rep. ( is_lightlike1 ~> 'lse )
+             . ik1 result=k1 %][%
+            @with eval 'k .rep. ( is_lightlike2 ~> 'rue )
+             . 'l .rep. ( is_lightlike2 ~> 'lse )
+             . ik2 result=k2 %][%
+            @for particles lightlike %]
+            write(logfile, *) "[[%ik1%]|e[%ie1%]]<e[%ie1%]|[%
+                  index%]|e[%ie2%]]<e[%ie2%]|[%ik2%]>", &
+            & [%
+               @if eval ik1 .gt. ie1 %]spb[%k1%]e[%ie1%][%
+               @else               %](-spbe[%ie1%][%k1%])[%
+               @end @if %]*dotproduct(spvae[%ie1%]e[%ie2%], k[%index%])*[%
+               @if eval ie2 .lt. ik2 %]spae[%ie2%][%k2%][%
+               @else               %](-spa[%k2%]e[%ie2%])[%
+               @end @if %], [%
+               @if eval index .eq. ik1 %]2.0_ki*dotproduct(k[%index%][%
+               @else %]dotproduct(spvak[%index%][%k1%][%
+               @end @if %], e[%ie1%])*[%
+               @if eval index .eq. ik2 %]2.0_ki*dotproduct(k[%index%][%
+               @else %]dotproduct(spva[%k2%]k[%index%][%
+               @end @if %], e[%ie2%])[%
+            @end @for %][%
+            @end @with %][%
+            @end @with %][%
+         @end @for %][%
+      @end @if %][%
+   @end @for %]
+            write(logfile, "(A18)") "  -- NUMPOLVEC -->"
+         end if
       end if[%
 @end @if%]
    end subroutine init_event
@@ -452,20 +720,6 @@ contains
       Spbb = sign(1.0_ki, dotproduct(p, q)) * conjg(Spaa(q, p))
    end  function Spbb
 !---#] function Spbb:
-!---#[ function Spbbcc:
-   pure function Spbbcc(p, q)
-      implicit none
-      complex(ki), dimension(4), intent(in) :: p, q
-      complex(ki) :: spaa
-      complex(ki) :: Spbbcc
-      spaa = Spaacc(p, q)
-      if (abs(spaa) .gt. 1.0E+03 * epsilon(1.0_ki)) then 
-         Spbbcc = dotproduct(p, q) / spaa
-      else
-         Spbbcc = 0.0_ki
-      end if
-   end  function Spbbcc
-!---#] function Spbbcc:
 !---#[ function Spab3_complex:
    pure function Spab3_complex(k1, Q, k2)
       implicit none
@@ -502,27 +756,6 @@ contains
          & (/0.0_ki, 0.0_ki, 0.0_ki, 1.0_ki/), k2)
    end  function Spab3_vec
 !---#] function Spab3_vec:
-!---#[ function Spab3_vecc:
-   pure function Spab3_vecc(k1, k2)
-      implicit none
-      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-
-      complex(ki), dimension(4), intent(in) :: k1, k2
-      complex(ki), dimension(0:3) :: Spab3_vecc
-
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: zip = (0.0_ki, 1.0_ki)
-
-      Spab3_vecc(0) =   Spab3_mcfmc(k1, &
-         & (/cone, zip, zip, zip/), k2)
-      Spab3_vecc(1) = - Spab3_mcfmc(k1, &
-         & (/zip, cone, zip, zip/), k2)
-      Spab3_vecc(2) = - Spab3_mcfmc(k1, &
-         & (/zip, zip, cone, zip/), k2)
-      Spab3_vecc(3) = - Spab3_mcfmc(k1, &
-         & (/zip, zip, zip, cone/), k2)
-   end  function Spab3_vecc
-!---#] function Spab3_vecc:
 !---#[ function Spaa:
    pure function Spaa(k1, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -559,23 +792,6 @@ contains
          Spaa = -f2*f1*(c232*rt1/rt2-c231*rt2/rt1)
    end  function Spaa
 !---#] function Spaa:
-!---#[ function Spaacc:
-   pure function Spaacc(k1, k2)
-      ! This routine has been copied from mcfm and adapted to our setup
-      implicit none
-      complex(ki), dimension(0:3), intent(in) :: k1, k2
-      complex(ki) :: Spaacc
-
-      complex(ki) :: rt1, rt2
-      complex(ki) :: c231, c232, f1, f2
-!---if one of the vectors happens to be zero this routine fails.
-         rt1=sqrt(k1(0)+k1(1))
-         c231=k1(3)-k1(2)*(0.0_ki, 1.0_ki)
-         rt2=sqrt(k2(0)+k2(1))
-         c232=k2(3)-k2(2)*(0.0_ki,1.0_ki)
-         Spaacc = -(c232*rt1/rt2-c231*rt2/rt1)
-   end  function Spaacc
-!---#] function Spaacc:
 !---#[ function Spab3_mcfm:
    pure function Spab3_mcfm(k1, Q, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -794,24 +1010,32 @@ contains
          E0 = 0.5_ki*SE*(a + y) + z0*x
       else
          ! quadratic equation
-         d = sqrt(b*b-4.0_ki*a*c)
+         d = b*b-4.0_ki*a*c
          c = 0.5_ki*SE*(a+y)
 
-         z0a = 0.5_ki*(- b + d)/a
-         z0b = 0.5_ki*(- b - d)/a
-         E0a = c + z0a*x
-         E0b = c + z0b*x
+         if (d .lt. 0.0_ki) then
+            ! assume d == 0 because d < 0 must be numerical inaccuracy
+            z0 = 0.5_ki * (-b)/a
+            E0 = c + z0*x
+         else
+            d = sqrt(d)
+         
+            z0a = 0.5_ki*(- b + d)/a
+            z0b = 0.5_ki*(- b - d)/a
+            E0a = c + z0a*x
+            E0b = c + z0b*x
 
-         if (abs(E0a - vecs([%eval num_legs - 1
+            if (abs(E0a - vecs([%eval num_legs - 1
             %],1)) + abs(z0a - vecs([%eval num_legs - 1
             %],4)) .lt. abs(E0b - vecs([%eval num_legs - 1
             %],1)) + abs(z0b - vecs([%eval num_legs - 1
             %],4))) then
-              E0 = E0a
-              z0 = z0a
-         else
-              E0 = E0b
-              z0 = z0b
+                 E0 = E0a
+                 z0 = z0a
+            else
+                 E0 = E0b
+                 z0 = z0b
+            end if
          end if
       end if
 

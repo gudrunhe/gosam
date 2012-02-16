@@ -106,9 +106,8 @@ contains
       select case(label)[%
       @for subprocesses prefix=sp. %][%
          @for crossings include-self prefix=cr. %][%
-            @select count cr.channels
+            @select count elements cr.channels
             @case 1 %]
-                ! Only one channel
       case([% cr.channels %])
               call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
                %]), mu, parameters, res)[%
@@ -208,7 +207,7 @@ contains
    @for crossings include-self prefix=cr. %]
    !---#[ subroutine eval[% cr.id %] :
    subroutine     eval[% cr.id %]([%
-      @select count cr.channels
+      @select count elements cr.channels
       @case 1 %][%
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res)
@@ -217,7 +216,7 @@ contains
       use [% sp.$_ %]_model, only: parseline
       use [% cr.$_ %]_matrix, only: samplitude
       implicit none[%
-      @select count cr.channels
+      @select count elements cr.channels
       @case 1 %][%
       @else %]
       integer, intent(in) :: h[%
@@ -259,7 +258,7 @@ contains
       vecs(:,4) = real(momenta(4::5),ki)
 
       call samplitude(vecs, mu*mu, amp, ok[%
-      @select count cr.channels
+      @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
       @end @select %])

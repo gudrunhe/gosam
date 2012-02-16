@@ -55,7 +55,11 @@ Vector ZERO, vDUMMYA;
 
    @if is_massive %],l[%index%][%
    @end @if %][%
-@end @for %]"
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %],e[%index%][%
+   @end @for %][%
+@end @if %]"
 #Define LIGHTLIKE "[%
 @for particles %][%
    @if is_first %][%
@@ -65,7 +69,11 @@ Vector ZERO, vDUMMYA;
    @if is_massive %]l[%index%][%
    @else %]k[%index%][%
    @end @if %][%
-@end @for %]"
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %],e[%index%][%
+   @end @for %][%
+@end @if %]"
 #Define FERMIONS "[%
 @for particles fermion %][%
    @if is_first %][%
@@ -159,7 +167,50 @@ Vectors [%
    Symbol gauge[% index %]z;[%
    @end @select %][%
 @end @for particles %]
-#EndIf
+#EndIf[%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %]
+Vector e[% index %];[%
+   @end @for %][%
+   @for pairs ordered %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+Symbols spa[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2
+            %], spbe[% index2
+            %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
+      @end @if %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) %]
+Symbols spae[%index1%][%
+                 @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
+            %], spb[%
+                 @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]e[%
+            index1 %];[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+Symbols spae[% index1
+            %]e[% index2 %], spbe[% index2 %]e[% index1 %];[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+Vectors spva[%
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
+            %]e[% index2 %], spvae[% index2 %][% 
+                 @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
+      @end @if %][%
+   @end @for %][%
+   @for pairs distinct ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+Vectors spvae[% index1
+            %]e[% index2 %], spvae[% index2 %]e[% index1 %];[%
+      @end @if %][%
+   @end @for %][%
+@end @if %]
 *---#] Process dependent symbol definitions:
 
 AutoDeclare Indices idx, iv;
@@ -194,7 +245,42 @@ AutoDeclare CFunctions Lor;
    @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %]) = spb[% 
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %][%
    @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
-@end @for pairs ordered distinct %]
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for pairs ordered %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) %]
+   Id Spa2(e[%index1%], [%
+         @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]) = spae[%
+      index1 %][%
+         @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %];
+
+   Id Spb2([%
+         @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %], e[%
+               index1 %]) = spb[%
+         @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]e[%
+               index1%];[%
+      @end @if %][%
+      @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   Id Spa2([%
+         @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %], e[%
+           index2%]) = spa[%
+         @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %]e[%
+                index2%];
+
+   Id Spb2(e[%index2%], [%
+         @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %]) = spbe[%
+             index2 %][%
+         @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
+      @end @if %][%
+   @end @for pairs ordered %][%
+   @for pairs ordered distinct %][%
+      @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
+               is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
+   Id Spa2(e[% index1 %], e[% index2 %]) = spae[% index1 %]e[% index2 %];
+   Id Spb2(e[% index2 %], e[% index1 %]) = spbe[% index2 %]e[% index1 %];[%
+      @end @if %][%
+   @end @for pairs ordered distinct %][%
+@end @if %]
 #EndProcedure
 *------#] procedure spsymbols:
 *------#[ procedure conservation:

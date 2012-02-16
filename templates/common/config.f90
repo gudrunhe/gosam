@@ -14,9 +14,16 @@
       @if anymember lo all debug ignore_case=true %].true.[%
       @else %].false.[%
       @end @if %]
-   logical, parameter :: debug_nlo_diagrams  = [%
+   logical, parameter :: debug_nlo_diagrams = [%
       @if anymember nlo all debug ignore_case=true %].true.[%
       @else %].false.[%
+      @end @if %][%
+
+      @if internal NUMPOLVEC %]
+   logical, parameter :: debug_numpolvec    = [%
+         @if anymember numpolvec all debug ignore_case=true %].true.[%
+         @else %].false.[%
+         @end @if %][%
       @end @if %]
 
    ! If true, the calculation includes terms proportional to eps^2
@@ -40,7 +47,7 @@
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai
    ! they can also be set using the subroutine parse in model.f90
-   integer :: samurai_scalar = 1
+   integer :: samurai_scalar = 2
    integer :: samurai_verbosity = 0
    integer :: samurai_test = 0
    ! The following parameter sets the 'istop' argument in all samurai

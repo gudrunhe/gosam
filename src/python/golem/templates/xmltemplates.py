@@ -2,6 +2,7 @@
 
 import xml.parsers.expat
 import os.path
+import sys
 import tempfile
 
 import golem.util.main_misc
@@ -214,8 +215,8 @@ class _TemplateState:
          else:
             tpl_dir = self.template_dir
 
-         in_file = os.path.join(tpl_dir, env["template file name"])
-         out_file = os.path.join(out_dir, env["output file name"])
+         in_file = os.path.join(tpl_dir, env["template file name"].encode(sys.getfilesystemencoding()))
+         out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
          class_name = env["class name"]
          filter = env.get("filter", None)
       
@@ -281,8 +282,8 @@ class _TemplateState:
       else:
          tpl_dir = self.template_dir
 
-      result["current output directory"] = os.path.join(out_dir, dest)
-      result["current template directory"] = os.path.join(tpl_dir, src)
+      result["current output directory"] = os.path.join(out_dir, dest.encode(sys.getfilesystemencoding()))
+      result["current template directory"] = os.path.join(tpl_dir, src.encode(sys.getfilesystemencoding()))
 
       return result
 
@@ -324,7 +325,7 @@ class _TemplateState:
          else:
             out_dir = self.output_dir
 
-         out_file = os.path.join(out_dir, env["output file name"])
+         out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
 
          if value == "exists":
             return os.path.exists(out_file)

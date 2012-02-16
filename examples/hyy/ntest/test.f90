@@ -30,7 +30,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="golem.log", unit=golemlogf)
+   open(file="gosam.log", unit=golemlogf)
 end if
 
 call setup_parameters(flags)

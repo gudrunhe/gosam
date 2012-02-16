@@ -249,7 +249,17 @@ repeat id d(iv1L?, iv2L?) * d(iv2L?, iv3L?) = d(iv1L, iv3L);
 #EndDo
 .sort:process fermions;
 
-Id SCREEN(sDUMMY1?) = sDUMMY1;
+Id SCREEN(sDUMMY1?) = sDUMMY1;[%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector initial %]
+Id inplorentz(2, ivL2?, k[% index %], 0) *
+   inp(field1?, k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
+   @end @for %][%
+   @for particles lightlike vector final %]
+Id outlorentz(2, ivL2?, k[% index %], 0) *
+   out(field1?, k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
+   @end @for %][%
+@end @if %]
 #include- legs.hh
 
 * The rules of legs.hh do not restore all inp() and out()
