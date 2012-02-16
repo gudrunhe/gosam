@@ -1,0 +1,36 @@
+\lstdefinelanguage{haggies}{%
+	sensitive=false,
+	morecomment=[l][commentstyle]\#,
+	morestring=[b]",
+	moredelim=*[directive]@,
+	moredirectives={language,type,operation,coerce,define,operator},
+	moredirectives={polynomial,nullary,poly,int,brackets},
+	morekeywords={@int},
+	literate={->}{$\rightarrow$}1
+}[directives,strings,comments]
+
+\lstdefinelanguage{haggiest}{%
+	sensitive=false,
+	morecomment=[s][\rm]{[\%}{\%]},
+	morestring=[b]"
+}
+\lstdefinelanguage[c]{haggiest}[]{c}{%
+	sensitive=false,
+	morecomment=[s][\color{red}]{[\%}{\%]},
+	morestring=[b]"
+}
+\lstdefinelanguage[fortran]{haggiest}[95]{fortran}{%
+	sensitive=false,
+	morecomment=[s][\color{red}]{[\%}{\%]},
+	morestring=[b]"
+}
+\lstdefinelanguage[python]{haggiest}[]{python}{%
+	sensitive=false,
+	morecomment=[s][\color{red}]{[\%}{\%]},
+	morestring=[b]"
+}
+\lstdefinelanguage[java]{haggiest}[]{java}{%
+	sensitive=false,
+	morecomment=[s][\color{red}]{[\%}{\%]},
+	morestring=[b]"
+}

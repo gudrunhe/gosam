@@ -1092,7 +1092,7 @@ class Template:
       true_values = ["1", "true", ".true.", "t", ".t.", "yes", "y"]
       false_values = ["0", "false", ".false.", "f", ".f.", "no", "n"]
 
-      s = self._eval_string(string).lower().strip()
+      s = self._eval_string(str(string)).lower().strip()
       if s in true_values:
          return True
       elif s in false_values:
@@ -1438,14 +1438,16 @@ class Template:
       operators = {
             " | ":      [100, lambda x, y: x or y],
             " || ":     [100, lambda x, y: x or y],
-            " .or. ":   [100, lambda x, y: x or y],
+            " .or. ":   [100, lambda x, y: 
+               self._eval_bool(x) or self._eval_bool(y)],
 
             " & ":      [150, lambda x, y: x and y],
             " && ":     [150, lambda x, y: x and y],
-            " .and. ":  [150, lambda x, y: x and y],
+            " .and. ":  [150, lambda x, y:
+               self._eval_bool(x) and self._eval_bool(y)],
 
             " !":       [200, lambda x: not x],
-            " .not.":   [200, lambda x: not x],
+            " .not.":   [200, lambda x: not self._eval_bool(x)],
 
             " .eq. ":   [255, lambda x, y: [x == y, y]],
             " < ":      [255, lambda x, y: [x < y, y]],

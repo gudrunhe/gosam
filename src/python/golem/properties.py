@@ -282,7 +282,7 @@ version_samurai = Property("samurai.version",
 
    """,
    str,
-   "2.0")
+   "2.1.1")
 
 zero = Property("zero",
    """\
@@ -563,7 +563,7 @@ debug_flags = Property("debug",
    Currently, the words 'lo', 'nlo' and 'all' are supported.
    """,
    list,
-   options=["nlo", "lo", "all"])
+   options=["nlo", "lo", "numpolvec", "all"])
 
 reference_vectors = Property("reference-vectors",
    """\
