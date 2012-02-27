@@ -459,29 +459,29 @@ contains
          !---#] reinitialize kinematics:
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok)[%
       @else %]
-         do c=1,numcs
-            !---#[ reinitialize kinematics:[%
+         !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
                @select sign @case 1 %]
-            pvecs([%index%],1) = vecs([%$_%],1)
-            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
                @else %]
-            pvecs([%index%],1) = -vecs([%$_%],1)
-            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
                @end @select %][%
             @else %][%
                @select sign @case 1 %]
-            pvecs([%index%],:) = vecs([%$_%],:)[%
+         pvecs([%index%],:) = vecs([%$_%],:)[%
                @else %]
-            pvecs([%index%],:) = -vecs([%$_%],:)[%
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
                @end @select %][%
             @end @if %][%
          @end @for %]
-            call init_event(pvecs[%
+         call init_event(pvecs[%
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
             !---#] reinitialize kinematics:
+         do c=1,numcs
             colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,c)
          end do
          heli_amp( 0) = square(colorvec(:, 0))

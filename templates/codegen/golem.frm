@@ -192,11 +192,10 @@ Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
 *Keep Brackets;
 
 Repeat Id SplitLorentzIndex(iDUMMY1?, iDUMMY2?, ?tail1) *
-          SplitLorentzIndex(iDUMMY3?, iDUMMY4?, ?tail2) =
+          SplitLorentzIndex(iDUMMY1?, iDUMMY4?, ?tail2) =
    SplitLorentzIndex(iDUMMY1, ?tail1) *
-   SplitLorentzIndex(iDUMMY3, ?tail2) * d_(iDUMMY2, iDUMMY4);
+   SplitLorentzIndex(iDUMMY1, ?tail2) * d_(iDUMMY2, iDUMMY4);
 Id SplitLorentzIndex(iDUMMY1?) * SplitLorentzIndex(iDUMMY1?) = 1;
-
 *---#] Process Propagators:
 
 #call coloralgebra(0)
@@ -277,6 +276,11 @@ Id ZERO = 0;
 #call zeroes
 *---#] Process Legs:
 
+Repeat Id SplitLorentzIndex(iDUMMY1?, iDUMMY2?, ?tail1) *
+          SplitLorentzIndex(iDUMMY1?, iDUMMY4?, ?tail2) =
+   SplitLorentzIndex(iDUMMY1, ?tail1) *
+   SplitLorentzIndex(iDUMMY1, ?tail2) * d_(iDUMMY2, iDUMMY4);
+Id SplitLorentzIndex(iDUMMY1?) * SplitLorentzIndex(iDUMMY1?) = 1;
 .sort:part 1;
 
 Multiply replace_(Sqrt2, sqrt2);
@@ -609,16 +613,18 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
    #EndIf
 #EndIf
 
-#IfNDef `GENERATEDERIVATIVES'
-.end:output;
-#Else
-   #If (`GROUP' == 0) && (`USETOPOLYNOMIAL')
-      FromPolynomial;
-   #EndIf
-.sort:output;
-#Append <`OUTFILE'.abb>
+#If (`GROUP' == 0) && (`USETOPOLYNOMIAL')
+   FromPolynomial;
 #EndIf
-Global diagram = diagram`DIAG';[%
+.sort:output;
+Global diagram`DIAG'x = diagram`DIAG';
+.store
+
+*---#[ GENERATEDERIVATIVES:
+#IfDef `GENERATEDERIVATIVES'
+#Append <`OUTFILE'.abb>
+
+Global diagram = diagram`DIAG'x;[%
 @if extension qshift %][%
 @else %]
    Id Q = p1;
@@ -661,4 +667,133 @@ Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
    #EndIf
 #EndDo
 #Close <`OUTFILE'.abb>
-.end:output derivatives;
+.store:end-of-derive;
+#EndIf
+*---#] GENERATEDERIVATIVES:
+*---#[ GENERATENINJATRIPLE:
+#IfDef `GENERATENINJATRIPLE'
+Vectors vecA, vecB, vecC;
+Symbol LaurentT, LaurentTi;
+
+#Append <`OUTFILE'.abb>
+Global nd3 = diagram`DIAG'x;[%
+@if extension qshift %][%
+@else %]
+Id Q = p1;
+#Call shiftmomenta(`DIAG',1)
+Id fshift(0) = 0;
+Id fshift(?all) = 1;
+Id p1 = Q;[%
+@end @if %]
+Id Q = vecA + vecB * LaurentTi + vecC * LaurentT;
+
+Id LaurentT * LaurentTi = 1;
+Id vecB.vecB = 0;
+Id vecC.vecC = 0;
+
+#Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
+#If `RANK' > `LOOPSIZE'
+   #Define MAXLaurentT "`RANK'"
+#Else
+   #Define  MAXLaurentT "`LOOPSIZE'"
+#EndIf
+  
+#Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
+      vecA,vecB,vecC,LaurentT,LaurentTi,qshift,[%
+  @select r2 @case implicit %],Qt2,eps,epspow[%
+     @end @select %])
+.sort
+Multiply fDUMMY1(0);
+Id fDUMMY1(sDUMMY1?) * LaurentT^sDUMMY2? = fDUMMY1(sDUMMY1+sDUMMY2);
+Id fDUMMY1(sDUMMY1?) * LaurentTi^sDUMMY2? = fDUMMY1(sDUMMY1-sDUMMY2);
+Brackets fDUMMY1;
+.sort
+Keep Brackets;
+#Do pow=`MINLaurentT',`MAXLaurentT'
+   #If `pow' < 0
+      Local nd3M{-`pow'} = nd3[fDUMMY1(`pow')];
+   #Else
+      Local nd3P`pow' = nd3[fDUMMY1(`pow')];
+   #EndIf
+#EndDo
+.sort
+#Create <`OUTFILE'3.txt>
+#Do pow=`MAXLaurentT',`MINLaurentT',-1
+   #If `pow' < 0
+      #$nd3M{-`pow'}terms = termsin_(nd3M{-`pow'});
+      #If `$nd3M{-`pow'}terms' > 0
+         #Write <`OUTFILE'3.txt> \
+              "numerator_{`MAXLaurentT'-`pow'}=%e",nd3M{-`pow'}
+      #Else
+         #Write <`OUTFILE'3.txt> \
+              "numerator_{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
+      #EndIf
+   #Else
+      #$nd3P{`pow'}terms = termsin_(nd3P{`pow'});
+      #If `$nd3P`pow'terms' > 0
+         #Write <`OUTFILE'3.txt> \
+              "numerator_{`MAXLaurentT'-`pow'}=%e",nd3P{`pow'}
+      #Else
+         #Write <`OUTFILE'3.txt> \
+              "numerator_{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
+      #EndIf
+   #EndIf
+#EndDo
+#Close <`OUTFILE'3.txt>
+.store
+#EndIf
+*---#] GENERATENINJATRIPLE:
+*---#[ GENERATENINJADOUBLE:
+#IfDef `GENERATENINJADOUBLE'
+Vector vecA;
+Symbols LaurentT, beta;
+
+#Append <`OUTFILE'.abb>
+Global nd2 = diagram`DIAG'x;[%
+@if extension qshift %][%
+@else %]
+Id Q = p1;
+#Call shiftmomenta(`DIAG',1)
+Id fshift(0) = 0;
+Id fshift(?all) = 1;
+Id p1 = Q;[%
+@end @if %]
+Id Q = vecA * LaurentT;[%
+@select r2 @case implicit %]
+Id Qt2 = beta * LaurentT^2;[%
+@end @select %]
+
+#Define MINLaurentT "`LOOPSIZE'"
+#If `RANK' > `LOOPSIZE'
+   #Define MAXLaurentT "`RANK'"
+#Else
+   #Define  MAXLaurentT "`LOOPSIZE'"
+#EndIf
+  
+#Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
+      vecA,beta,LaurentT,qshift,[%
+  @select r2 @case implicit %],Qt2,eps,epspow[%
+     @end @select %])
+.sort
+Multiply fDUMMY1(0);
+Id fDUMMY1(sDUMMY1?) * LaurentT^sDUMMY2? = fDUMMY1(sDUMMY1+sDUMMY2);
+Brackets fDUMMY1;
+.sort
+Keep Brackets;
+#Do pow=`MINLaurentT',`MAXLaurentT'
+   Local nd2P`pow' = nd2[fDUMMY1(`pow')];
+#EndDo
+.sort
+#Create <`OUTFILE'2.txt>
+#Do pow=`MAXLaurentT',`MINLaurentT',-1
+   #$nd2P`pow'terms = termsin_(nd2P`pow');
+   #If `$nd2P`pow'terms' > 0
+      #Write <`OUTFILE'2.txt> "numerator_{`MAXLaurentT'-`pow'}=%e", nd2P`pow'
+   #Else
+      #Write <`OUTFILE'2.txt> "numerator_{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
+   #EndIf
+#EndDo
+#Close <`OUTFILE'2.txt>
+#EndIf
+*---#] GENERATENINJADOUBLE:
+.end

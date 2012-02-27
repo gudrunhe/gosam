@@ -483,7 +483,7 @@ contains
                ! T T => <k1 r2] %]
                spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [%
                @if eval refvec2 .eq. ( 'k . index1 ) %]2.0_ki * [%refvec2%][%
-               @else %]Spab3_vec(k[%index1%], [%refvec1%])[%
+               @else %]Spab3_vec(k[%index1%], [%refvec2%])[%
                @end @if %][% '
                ! T T => <k2 r1] %]
                spvae[% index2 %]e[% index1 %] = N[%index1%] * N[%index2%] * [%

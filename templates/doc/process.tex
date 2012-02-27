@@ -267,6 +267,10 @@ For the definition of tensor states, please refer to the document
 \begin{align}[%
 @for color_basis index_shift=1 shift=1%]
 \vert c_{[% index %]}\rangle &=[%
+   @select count color_lines @case 0 %][%
+      @select count color_traces @case 0 %]1[%
+      @end @select %][%
+   @end @select %][%
    @for color_wf shift=1 %][%
       @select color
       @case 3 %]q_{i_{[%gindex%]}}^{([%gindex%])}[%

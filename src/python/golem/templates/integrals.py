@@ -10,7 +10,7 @@ import golem.util.tools
 class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks)
 		self._loopcache = loopcache
@@ -19,6 +19,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		self._latex_names = golem.util.tools.getModel(conf).latex_parameters
 		self._diagram_flags_0 = lo_flags
 		self._diagram_flags_1 = nlo_flags
+		self._massive_bubbles = massive_bubbles
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -371,6 +372,31 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(index_name, str(l))
 			props.setProperty(var_name, str(value))
 			yield props
+
+	def is_massive_bubble(self, *args, **opts):
+		if "diagram" not in opts:
+			raise TemplateError("Option 'diagram' required in "
+			 + "[% is_massive_bubble %]")
+
+		nopts = opts.copy()
+		del nopts["diagram"]
+		d = self._eval_int(opts["diagram"], **nopts)
+
+		return d in self._massive_bubbles
+
+	def massive_bubble_args(self, *args, **opts):
+		if "diagram" not in opts:
+			raise TemplateError("Option 'diagram' required in "
+			 + "[% massive_bubble_args %]")
+
+		nopts = opts.copy()
+		del nopts["diagram"]
+		d = self._eval_int(opts["diagram"], **nopts)
+
+		if d in self._massive_bubbles:
+			return ",".join(map(str, self._massive_bubbles[d]))
+		else:
+			return ""
 
 	def lo_flags(self, *args, **opts):
 		if "diagram" in opts:
