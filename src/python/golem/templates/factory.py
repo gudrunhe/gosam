@@ -56,7 +56,8 @@ class TemplateFactory:
                      or "tree_signs" not in opts \
                      or "lo_flags" not in opts \
                      or "nlo_flags" not in opts \
-                     or "heavy_quarks" not in opts:
+                     or "heavy_quarks" not in opts \
+                     or "massive_bubbles" not in opts:
                   raise golem.util.parser.TemplateError(
                         "Cannot use template 'Integrals' here.")
                loopcache = opts["loopcache"]
@@ -68,11 +69,13 @@ class TemplateFactory:
                heavy_quarks = opts["heavy_quarks"]
                lo_flags = opts["lo_flags"]
                nlo_flags = opts["nlo_flags"]
+               massive_bubbles = opts["massive_bubbles"]
 
                template = golem.templates.integrals.IntegralsTemplate(
                      f_template)
                template.setup(loopcache, in_particles, out_particles,
-                     tree_signs, conf, heavy_quarks, lo_flags, nlo_flags)
+                     tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
+                     massive_bubbles)
             elif class_name == "Kinematics":
                if "in_particles" not in opts or \
                      "out_particles" not in opts or \

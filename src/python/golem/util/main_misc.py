@@ -111,8 +111,7 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	# keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags = \
-	keep_tree, keep_virt, loopcache, tree_signs, flags = \
+	keep_tree, keep_virt, loopcache, tree_signs, flags, massive_bubbles = \
 			run_analyzer(path, conf, in_particles, out_particles)
 
 	props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
@@ -142,7 +141,8 @@ def generate_process_files(conf, from_scratch=False):
 			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
 				conf.getListProperty("__heavy_quarks__")),
 			lo_flags = flags[0],
-			nlo_flags = flags[1])
+			nlo_flags = flags[1],
+			massive_bubbles = massive_bubbles)
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
@@ -541,9 +541,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = imp.load_source(modname, fname)
 
+		massive_bubbles = {}
 		keep_virt, loopcache = golem.topolopy.functions.analyze_loop_diagrams(
 				mod_diag_virt.diagrams, model, conf, onshell, quark_masses,
-				filter_flags = virt_flags)
+				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
 	else:
 		keep_virt = []
 		loopcache = golem.topolopy.objects.LoopCache()
@@ -558,4 +559,4 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, loopcache, tree_signs, flags
+	return keep_tree, keep_virt, loopcache, tree_signs, flags, massive_bubbles

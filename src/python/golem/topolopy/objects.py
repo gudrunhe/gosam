@@ -196,6 +196,28 @@ class Diagram:
    def loopsize(self):
       return len(self._loop)
 
+   def isMassiveBubble(self, idx=0, dct={}):
+      """
+      Returns if this diagram is a bubble with at least one
+      massive propagator. As a side effect, the argument
+      'dct' is modified if the result is True, such that
+      it contains an entry:
+         idx: (2spin1, color1, mass1, 2spin2, color2, mass2)
+
+      """
+      if self.loopsize() != 2:
+         return False
+
+      loop_props = [self._propagators[abs(p)] for p in self._loop]
+      if any([p.mass != "0" for p in loop_props]):
+         dct[idx] = (
+               loop_props[0].twospin, loop_props[0].color, loop_props[0].mass,
+               loop_props[1].twospin, loop_props[1].color, loop_props[1].mass)
+
+         return True
+      else:
+         return False
+
    def isMassiveQuarkSE(self):
       if self.loopsize() != 2:
          return False
@@ -630,91 +652,6 @@ class Diagram:
          s *= -1
       #---#] new ordering:
 
-      #---#[ old ordering:
-      # xlines = lines
-      # lines = []
-      # xloops = loops
-      # loops = 0
-
-
-      # vertices = list(adjacency.keys())
-      #loops = 0
-      #lines = []
-
-      # while len(vertices) > 0:
-      #    v = vertices.pop()
-      #    av = set([v])
-      #    al = []
-
-      #    while len(av) > 0:
-      #       v = av.pop()
-      #       a = adjacency[v]
-      #       del adjacency[v]
-      #       if v in vertices:
-      #          vertices.remove(v)
-
-      #       for e in a:
-      #          if e < 0:
-      #             al.append(e)
-      #          else:
-      #             if e in vertices:
-      #                av.add(e)
-      #    if len(al) == 2:
-      #       signs = []
-      #       major = []
-      #       for l in al:
-      #          s, c = legs[l]
-      #          signs.append(s)
-      #          major.append(c)
-      #       cal = [al[1], al[0]]
-      #       if major == [False, False]:
-      #          if signs == [-1, 1]:
-      #             lines.append(tuple(al))
-      #          else:
-      #             lines.append(tuple(cal))
-      #       elif major == [False, True]:
-      #          if signs[0] == -1:
-      #             lines.append(tuple(al))
-      #          else:
-      #             lines.append(tuple(cal))
-      #       elif major == [True, False]:
-      #          if signs[1] == 1:
-      #             lines.append(tuple(al))
-      #          else:
-      #             lines.append(tuple(cal))
-      #       elif major == [True, True]:
-      #          if signs == [-1, 1]:
-      #             lines.append(tuple(al))
-      #          elif signs == [1, -1]:
-      #             lines.append(tuple(cal))
-      #          elif abs(l1) < abs(l2):
-      #             lines.append(tuple(al))
-      #          else:
-      #             lines.append(tuple(cal))
-      #    elif len(al) == 0:
-      #       loops += 1
-      #    else:
-      #       error("Cannot form fermion line: %s" % al)
-
-      # if loops != xloops:
-      #    print("LOOPS: %d %d" % (loops, xloops))
-
-      #lst = []
-      #flow = {}
-      #for l1, l2 in lines:
-      #   s1, c1 = legs[l1]
-      #   s2, c2 = legs[l2]
-      #   lst.extend([l1,l2])
-      #   if c1:
-      #      flow[abs(l1)] = -1
-      #   if c2:
-      #      flow[abs(l2)] =  1
-      #
-      #s = permutation_sign([order[l] for l in lst])
-      #if loops % 2 == 1:
-      #   s = -s
-      #
-      #---#] old ordering:
 
       self._sign = s
       self._fermion_flow = flow

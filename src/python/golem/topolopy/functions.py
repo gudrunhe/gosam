@@ -126,7 +126,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    return keep, signs #, flows
 
 def analyze_loop_diagrams(diagrams, model, conf, onshell,
-      quark_masses = None, filter_flags = None):
+      quark_masses = None, filter_flags = None, massive_bubbles = {}):
    zero = golem.util.tools.getZeroes(conf)
    lst = setup_list(golem.properties.select_nlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
@@ -155,6 +155,8 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          else:
             keep.append(idx)
             loopcache.add(diagram, idx)
+            
+            diagram.isMassiveBubble(idx, massive_bubbles)
 
             if filter_flags is not None:
                for flag in diagram.filter_flags:
