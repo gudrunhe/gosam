@@ -11,10 +11,14 @@ import fnmatch
 
 VERSION = "1.0"
 SVN_REVISION = "$Rev$"
+TAR_VERSION = "%s-%d" % (
+		VERSION,
+		int(SVN_REVISION.replace("$Rev:", "").replace("$", "")))
+
 
 INFO = {
 		'name': 'gosam',
-		'version': VERSION,
+		'version': TAR_VERSION,
 		'author': 'The GoSam (Golem and Samurai) Collaboration',
 		'author_email': 'gosam@hepforge.org',
 		'maintainer': 'Thomas Reiter',
@@ -22,7 +26,7 @@ INFO = {
 		'url': 'http://projects.hepforge.org/gosam/',
 		'download_url': 
 		'http://projects.hepforge.org/gosam/downloads/gosam-%s.tar.gz' %
-			VERSION,
+			TAR_VERSION,
 		'description': 'GoSam, An Automated One-Loop Matrix Element Generator',
 		'long_description': """\
 				GoSam is a matrix element generator for one-loop
@@ -109,7 +113,7 @@ class build_py(_build_py):
 			f.write("%r: %r" % (name, value))
 		f.write("\n}\n\n")
 		f.write("GOLEM_VERSION = [%s]\n" %
-				",".join(map(lambda s: s.strip(), INFO["version"].split("."))))
+				",".join(map(lambda s: s.strip(), VERSION.split("."))))
 		f.write("GOLEM_REVISION = %d\n" %
 				int(SVN_REVISION.replace("$Rev:", "").replace("$", "")))
 		f.close()
