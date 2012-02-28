@@ -204,15 +204,21 @@ class Diagram:
       it contains an entry:
          idx: (2spin1, color1, mass1, 2spin2, color2, mass2)
 
+      In the case of a massive Tadpole the entry is of the format:
+
+         idx: (2spin, color, mass)
+
       """
-      if self.loopsize() != 2:
+      if self.loopsize() > 2:
          return False
 
       loop_props = [self._propagators[abs(p)] for p in self._loop]
       if any([p.mass != "0" for p in loop_props]):
-         dct[idx] = (
-               loop_props[0].twospin, loop_props[0].color, loop_props[0].mass,
-               loop_props[1].twospin, loop_props[1].color, loop_props[1].mass)
+         entry = []
+         for prop in loop_props:
+            entry.extend([prop.twospin, prop.color, prop.mass])
+
+         dct[idx] = tuple(entry)
 
          return True
       else:

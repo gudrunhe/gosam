@@ -524,6 +524,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		# tree_flows = {}
 
 	quark_masses = []
+	massive_bubbles = {}
 	if generate_virt:
 		zero = golem.util.tools.getZeroes(conf)
 		onshell = {}
@@ -541,7 +542,6 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = imp.load_source(modname, fname)
 
-		massive_bubbles = {}
 		keep_virt, loopcache = golem.topolopy.functions.analyze_loop_diagrams(
 				mod_diag_virt.diagrams, model, conf, onshell, quark_masses,
 				filter_flags = virt_flags, massive_bubbles = massive_bubbles)

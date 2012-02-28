@@ -120,6 +120,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
 
 if __name__ == "__main__":
    argv = sys.argv[:]
+   EXIT_CODE = 0
 
    try:
       if "--olp" in argv[1:]:
@@ -130,10 +131,14 @@ if __name__ == "__main__":
    except SystemExit as ex:
       if len(ex.args) > 0:
          report_crash(ex, sys.exc_traceback)
+         EXIT_CODE = 1
    except BaseException as ex:
       print("===> Unexpected error: %s" % ex)
       print(traceback.format_tb(sys.exc_traceback)[-1])
       report_crash(ex, sys.exc_traceback)
+      EXIT_CODE = 1
 
    if golem.util.tools.POSTMORTEM_DO:
       report_crash(None, None)
+
+   sys.exit(EXIT_CODE)

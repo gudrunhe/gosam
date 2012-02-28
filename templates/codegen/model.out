@@ -184,8 +184,8 @@ contains
          stat = 1
          return
       end if
-      name = line(1:idx-1)
-      value = line(idx+1:len(line))
+      name = adjustl(line(1:idx-1))
+      value = adjustl(line(idx+1:len(line)))
       idx = scan(value, ',', .false.)
       
       if (name .eq. "renormalisation") then
