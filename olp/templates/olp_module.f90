@@ -214,7 +214,10 @@ contains
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
       use [% sp.$_ %]_model, only: parseline
-      use [% cr.$_ %]_matrix, only: samplitude
+      use [% cr.$_ %]_matrix, only: samplitude[%
+      @if extension golem95 %]
+      use [% sp.$_%]_groups, only: tear_down_golem95[%
+      @end @if %]
       implicit none[%
       @select count elements cr.channels
       @case 1 %][%
@@ -242,7 +245,7 @@ contains
 
       !---#[ receive parameters from argument list:[%
          @for elements olp.parameters shift=1 %]
-      write(buffer, '(A128,E64.32)') "[% $_ %]=", parameters([% index %])
+      write(buffer, '(A[% count $_ %],A1,E48.32)') "[% $_ %]", "=", parameters([% index %])
       call parseline(buffer, ierr)
       if(ierr.ne.0) then
          amp(1) = -1.0_c_double
@@ -261,7 +264,10 @@ contains
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
-      @end @select %])
+      @end @select %])[%
+      @if extension golem95 %]
+      call tear_down_golem95()[%
+      @end @if %]
 
       if (ok) then
          !
