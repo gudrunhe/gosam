@@ -441,7 +441,7 @@ extensions = Property("extensions",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon", "numpolvec",
-      "f77", "no-fr5"])
+      "f77", "no-fr5","ninja"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -871,10 +871,15 @@ def setInternals(conf):
          "__OLP_DAEMON__",
          "__OLP_TRAILING_UNDERSCORE__",
          "__OLP_CALL_BY_VALUE__",
-         "__OLP_TO_LOWER__"]
+         "__OLP_TO_LOWER__",
+         "__GENERATE_NINJA_TRIPLE__",
+         "__GENERATE_NINJA_DOUBLE__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
+
+   conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
+   conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not conf["__REGULARIZATION_DRED__"]

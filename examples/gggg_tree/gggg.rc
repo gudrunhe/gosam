@@ -5,7 +5,7 @@ process_path=ngolem
 in=21,21
 out=21,21
 
-order=QCD, 2
+order=gs, 2, 2
 
 one=gs,e
 
