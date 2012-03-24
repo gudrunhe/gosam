@@ -212,10 +212,12 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki
+      use [% sp.$_ %]_config, only: ki[%
+      @if extension golem95 %], reduction_interoperation[%
+      @end @if %]
       use [% sp.$_ %]_model, only: parseline
       use [% cr.$_ %]_matrix, only: samplitude[%
-      @if extension golem95 %]
+      @if extension golem95 %], ir_subtraction
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %]
       implicit none[%
@@ -230,8 +232,10 @@ contains
       @if internal OLP_CALL_BY_VALUE %], value[%
       @end @if %], intent(in) :: mu
       real(kind=c_double), dimension(10), intent(in) :: parameters
-      real(kind=c_double), dimension(4), intent(out) :: res
-
+      real(kind=c_double), dimension(4), intent(out) :: res[%
+      @if extension golem95 %]
+      real(kind=c_double), dimension(2:3) :: irp[%
+      @end @if %]
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension(4) :: amp
       logical :: ok[%
@@ -266,6 +270,21 @@ contains
       @else %], h[%
       @end @select %])[%
       @if extension golem95 %]
+      call ir_subtraction(vecs, mu*mu, irp)
+
+      if(abs((amp(3)-irp(2))/amp(1)) .gt. 1.0E-6_ki) then
+         reduction_interoperation = 1
+         call samplitude(vecs, mu*mu, amp, ok[%
+         @select count elements cr.channels
+         @case 1 %][%
+         @else %], h[%
+         @end @select %])
+         if(abs((amp(3)-irp(2))/amp(1)) .gt. 1.0E-4_ki) then
+            write(*,*) "RESCUE FAILED (eval[% cr.id %])!!"
+         end if
+         reduction_interoperation = 0
+      end if
+
       call tear_down_golem95()[%
       @end @if %]
 
