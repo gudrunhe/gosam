@@ -30,14 +30,14 @@
 \newcommand{\kslash}[1][{}]{\ensuremath{\fmslash{k}_{#1}}}
 
 \title{\golemv Manual}
-\author{Thomas Reiter}
+\author{The GoSam Collaboration}
 \date{Version \today}
 
 \begin{document}
 \hypersetup{%
 	pdfborder={0 0 0},%
 	pdftitle={GoSam \golemversion{} Manual},%
-	pdfauthor={Thomas Reiter},%
+	pdfauthor={Thomas Reiter, The GoSam Collaboration},%
 	pdfsubject={High Energy Physics/Higher Order Corrections},%
 	pdfkeywords={NLO, automatization},%
 	pdfdisplaydoctitle
@@ -207,12 +207,27 @@ encountered most probably:
 prefix=<XXXX>
 \end{example}
    After successful installation the user should also update the
-   environment variables
+   environment variable:
 \begin{example}
 PATH=\$PATH:<XXXX>/bin\\
-PYTHONPATH=\$PYTHONPATH:<XXXX>/lib/python<version>\\
-\contl/site-packages
 \end{example}
+
+   For Bourne shell compatible shells (bash, zsh, \dots), the \verb!PATH! environment
+   variable can be permanently changed by adding the following lines to \verb!~/.profile!:
+\begin{example}
+   PATH="\$PATH:<XXXX>/bin"\\
+   export PATH
+\end{example}
+
+   For csh compatible shells (tcsh, \dots), the following line need to be added to \verb!~/.cshrc!:
+\begin{example}
+   setenv PATH "\$PATH:<XXXX>/bin"\\
+\end{example}
+
+
+To enable this environment variables change, you need to run \verb!source ~/.profile! or
+\verb!source ~/.cshrc! and \verb!rehash!, or re-login.
+
 \end{itemize}
 %  A more complete tutorial on the installation of \python packages
 %  can be found at \url{http://docs.python.org/install/}.
@@ -2015,7 +2030,7 @@ recognized.
 
 \chapter*{Conditions of Use}
     GoSam -- An automated One-Loop matrix element generator.\\
-    Copyright (C) 2011  The GoSam Collaboration\\
+    Copyright (C) 2011, 2012  The GoSam Collaboration\\
     \begin{itemize}               
                 \item Gavin Cullen
                 \item Nicolas Greiner

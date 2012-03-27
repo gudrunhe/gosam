@@ -722,6 +722,7 @@ class Samurai(Library):
       Library.examine(self, hints)
       if len(self.locations) > 0:
          self.incdirs = self.findIncludeDir("samurai", "msamurai", hints,
+               ".mod") or self.findIncludeDir("gosam-contrib", "msamurai", hints,
                ".mod")
          if len(self.incdirs) == 0:
             self.locations = []
@@ -768,6 +769,7 @@ class Golem95(Library):
       Library.examine(self, hints)
       if len(self.locations) > 0:
          self.incdirs = self.findIncludeDir("golem95", "parametre", hints,
+               ".mod") or self.findIncludeDir("gosam-contrib", "parametre", hints,
                ".mod")
          if len(self.incdirs) == 0:
             self.locations = []
