@@ -148,7 +148,10 @@ def main(argv=sys.argv):
          if "setup-file" in dir_info:
             args.append(dir_info["setup-file"])
       for arg in args:
-         c = golem.util.config.Properties()
+         if use_default_files:
+            c = find_config_files()
+         else:
+            c = golem.util.config.Properties()
 
          if os.path.exists(arg):
             if not os.path.isfile(arg):

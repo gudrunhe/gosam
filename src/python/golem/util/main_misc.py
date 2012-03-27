@@ -20,7 +20,7 @@ import golem.util.constants as consts
 
 import golem.templates.xmltemplates
 
-from golem.util.path import golem_path
+from golem.util.path import golem_path, gosam_contrib_path
 from golem.util.tools import copy_file, \
 		debug, message, warning, \
 		generate_particle_lists
@@ -173,6 +173,7 @@ def find_config_files():
 
 	The procedure looks in the following locations:
 		<golem path>
+		<guessed share/gosam-contrib path>
 		<user's home>
 		<working directory>
 	
@@ -185,7 +186,8 @@ def find_config_files():
 		golem.conf
 	"""
 	props = golem.util.config.Properties()
-	directories = [golem_path(), golem.util.path.get_homedir(), os.getcwd()]
+	directories = [golem_path(), gosam_contrib_path(),
+			golem.util.path.get_homedir(), os.getcwd()]
 	files = [".gosam", ".golem",
 			"gosam.in", "golem.in",
 			"gosam.conf", "golem.conf"]
