@@ -151,10 +151,10 @@ class install(_install):
 			"## end of 'added by setup.py'",""])
 		logs=[]
 		for line in fileinput.input(installed_scripts,inplace=1):
-			if line.startswidth("### [line replaced by setup.py"):
+			if line.startswith("### [line replaced by setup.py"):
 				logs.append("Patching " + fileinput.filename())
 				line=replace_text
-				print line, # redirected to fileinput
+			print line, # redirected to fileinput
 		for message in logs:
 			log.info(message)
 	def change_roots (self, *names):
