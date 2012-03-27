@@ -2,6 +2,8 @@
 # vim:ts=3:sw=3:expandtab
 import sys
 
+### [line replaced by setup.py - do not delete]
+
 from golem.util.config import Configurator, OPTIONAL, REQUIRED
 
 if __name__ == "__main__":

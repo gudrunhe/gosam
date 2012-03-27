@@ -4,10 +4,14 @@
 from distutils.core import setup
 from distutils.sysconfig import get_config_vars
 from distutils.command.build_py import build_py as _build_py
+from distutils.command.install_scripts import install_scripts as _install_scripts
+from distutils.command.install import install as _install
+from distutils import log
 
 import os.path
 import os
 import fnmatch
+import fileinput
 
 VERSION = "1.0"
 SVN_REVISION = "$Rev$"
@@ -122,6 +126,42 @@ class build_py(_build_py):
 		self.create_installation_py()
 		_build_py.run(self)
 
+installed_scripts=[]
+
+class install_scripts(_install_scripts):
+	def run(self):
+		global installed_scripts
+		_install_scripts.run(self)
+		installed_scripts=self.get_outputs()
+
+orig_install_lib=None
+
+class install(_install):
+	def run(self):
+		_install.run(self)
+		global orig_install_lib
+		if orig_install_lib:
+			py_path=orig_install_lib
+		else:
+			py_path=self.install_lib
+		replace_text="\n".join([
+			"## added by setup.py:",
+			"import site",
+			"site.addsitedir("+repr(py_path)+")",
+			"## end of 'added by setup.py'",""])
+		logs=[]
+		for line in fileinput.input(installed_scripts,inplace=1):
+			if line.startswidth("### [line replaced by setup.py"):
+				logs.append("Patching " + fileinput.filename())
+				line=replace_text
+				print line, # redirected to fileinput
+		for message in logs:
+			log.info(message)
+	def change_roots (self, *names):
+		global orig_install_lib
+		orig_install_lib=self.install_lib
+		install.change_roots(self,*names)
+
 if __name__ == "__main__":
 	my_data_files=[]
 	for dir in DATA_DIRS:
@@ -148,7 +188,9 @@ if __name__ == "__main__":
 			'src/python/golem/golem-main.py',
 			'src/python/golem/gosam.py'
 		],
-		cmdclass={'build_py': build_py},
+		cmdclass={'build_py': build_py,
+			'install_scripts':install_scripts,
+			'install':install},
 		data_files=my_data_files,
 		**INFO
 	)

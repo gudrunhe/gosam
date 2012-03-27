@@ -207,38 +207,26 @@ encountered most probably:
 prefix=<XXXX>
 \end{example}
    After successful installation the user should also update the
-   environment variables:
+   environment variable:
 \begin{example}
 PATH=\$PATH:<XXXX>/bin\\
-PYTHONPATH=\$PYTHONPATH:<XXXX>/lib/python<version>\\
-\contl/site-packages
 \end{example}
 
-   The used version of python can be retrieved by running
-\begin{example}
-python --version
-\end{example}
-   Only major and minor version number are needed (e.g. \verb!2.7.2! $\Rightarrow$ \verb!python2.7/!).
-
-   For Bourne shell compatible shells (bash, zsh, \dots), the environment
-   variables can be permanently changed by adding the following lines to \verb!~/.profile!:
+   For Bourne shell compatible shells (bash, zsh, \dots), the \verb!PATH! environment
+   variable can be permanently changed by adding the following lines to \verb!~/.profile!:
 \begin{example}
    PATH="\$PATH:<XXXX>/bin"\\
-   PYTHONPATH="\$PYTHONPATH:<XXXX>/lib\\
-   \hfil\contl/python<version>/site-packages"\\
-   export PATH PYTHONPATH
+   export PATH
 \end{example}
 
-   For csh compatible shells (tcsh, \dots), the following lines need to be added to \verb!~/.cshrc!:
+   For csh compatible shells (tcsh, \dots), the following line need to be added to \verb!~/.cshrc!:
 \begin{example}
    setenv PATH "\$PATH:<XXXX>/bin"\\
-   setenv PYTHONPATH "\$PYTHONPATH:<XXXX>/lib\\
-   \hfil\contl/python<version>/site-packages"
 \end{example}
 
 
-To enable this environment variables changes, you need to run "source ~/.profile" or
-"source ~/.cshrc", or re-login.
+To enable this environment variables change, you need to run \verb!source ~/.profile! or
+\verb!source ~/.cshrc! and \verb!rehash!, or re-login.
 
 \end{itemize}
 %  A more complete tutorial on the installation of \python packages
