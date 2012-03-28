@@ -46,8 +46,20 @@ python setup.py install --prefix=<XXXX>
 
 The prefix option can also be set permanently in the user's pydistutils config file.
 
-After successful installation the user should also update the environment variables
-PATH=\$PATH:<XXXX>/bin
-PYTHONPATH=\$PYTHONPATH:<XXXX>/lib/python<version>/site-packages
+After successful installation the user should also update the environment variable
+PATH=$PATH:<XXXX>/bin
 
-For more details, please refer to the manual (doc/refman.pdf)
+For bourne shell compatible shells (bash, zsh, ...), this can be done by adding the
+following lines to ~/.profile:
+
+   PATH="$PATH:<XXXX>/bin"
+   export PATH
+
+For csh compatible shells (tcsh, ...), the following line need to be added to ~/.cshrc:
+
+   setenv PATH "$PATH:<XXXX>/bin"
+
+To enable this change, you need to run "source ~/.profile" or
+"source ~/.cshrc" and "rehash", or re-login.
+
+For more details, please refer to the manual (doc/refman.pdf).
