@@ -9,7 +9,7 @@ import cProfile
 import golem.shell
 import golem.util.config
 import golem.util.tools
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, Form
 import golem.installation
 import golem.util.constants
 
@@ -173,6 +173,19 @@ def main(argv=sys.argv):
             continue
 
          f = open(in_file, 'r')
+
+         #detect if the input file was not made via template
+         if not f.readline().startswith("#!") and use_default_files:
+              # use even non-easily overwritable default options
+              c = c.copy(strip_plusses=True)
+              if not "form.bin" in c and not "form.extensions" in c :
+                 # gosam-config.py not used
+                 # find form and check if it supports topolynomial option
+                 form_config=Form()
+                 form_config.examine([])
+                 form_config.store(c)
+         f.seek(0)
+
          c.load(f)
          f.close()
          c["setup-file"] = os.path.abspath(in_file)
