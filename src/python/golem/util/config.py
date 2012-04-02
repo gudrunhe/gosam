@@ -549,6 +549,15 @@ class Component:
                if path not in result:
                   result.append(path)
 
+      if suffix.startswith("include"):
+         # guess include path from LD_LIBRARY_PATH
+         ldp = os.getenv("LD_LIBRARY_PATH")
+         if ldp:
+            for path in ldp.split(os.path.pathsep):
+               guess_path= os.path.abspath(os.path.join(path,os.path.pardir,suffix))
+               if guess_path not in result:
+                  result.append(guess_path)
+
       if suffix == "bin":
          ldp = os.getenv("PATH")
          if ldp:
