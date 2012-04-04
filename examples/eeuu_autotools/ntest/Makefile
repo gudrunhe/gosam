@@ -18,7 +18,7 @@ test_program: $(OBJECTS)
 test: test.log
 
 test.log: test_program
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):../lib && ./test_program
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):../lib:../lib64 && ./test_program
 
 clean:
 	rm -rf test_program test.o

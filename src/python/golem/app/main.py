@@ -5,11 +5,12 @@ import os
 import os.path
 import getopt
 import cProfile
+import tempfile
 
 import golem.shell
 import golem.util.config
 import golem.util.tools
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, Form
 import golem.installation
 import golem.util.constants
 
@@ -147,6 +148,8 @@ def main(argv=sys.argv):
          dir_info = read_golem_dir_file(os.getcwd())
          if "setup-file" in dir_info:
             args.append(dir_info["setup-file"])
+      if merge_files:
+         golem.util.tools.warning("Merge option only with --template usable.")
       for arg in args:
          if use_default_files:
             c = find_config_files()
@@ -173,8 +176,36 @@ def main(argv=sys.argv):
             continue
 
          f = open(in_file, 'r')
-         c.load(f)
-         f.close()
+
+         temp_file_path=None
+
+         try:
+            #detect if the input file was not made via template
+            if not f.readline().startswith("#!") and use_default_files:
+                 # create and fill a temporary template file
+                 # including non-easily overwritable default options
+                 osfh, temp_file_path = tempfile.mkstemp(".gosam.in")
+                 os.close(osfh)
+                 f.seek(0)
+                 c.load(f)
+                 if not "form.bin" in c and not "form.extensions" in c:
+                    # gosam-config.py not used
+                    # find form and check if it supports topolynomial option
+                    form_config=Form()
+                    form_config.examine([])
+                    form_config.store(c)
+                 write_template_file(temp_file_path, c, template_format)
+                 f.close()
+                 # use the temporary file as new input file
+                 f = open(temp_file_path,'r')
+            f.seek(0)
+
+            c.load(f)
+            f.close()
+         finally:
+            if temp_file_path:
+               os.unlink(temp_file_path)
+
          c["setup-file"] = os.path.abspath(in_file)
          c["golem.name"] = "GoSam"
          c["golem.version"] = ".".join(map(str, 
