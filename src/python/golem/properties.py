@@ -773,6 +773,36 @@ config_nlo_prefactors = Property("nlo_prefactors",
    """,
    int, 0, options=[0,1,2])
 
+config_SP_check = Property("SP_check",
+   """\
+   Set the same variable in config.f90
+
+   Activates test on the single for the full amplitude level
+
+   QCD only, works only with built-in model files.
+   """,
+   bool, True)
+
+config_SP_rescue = Property("SP_rescue",
+   """\
+   Set the same variable in config.f90
+
+   Activates rescue based on the single check for the full amplitude level
+
+   QCD only, works only with built-in model files.
+   """,
+   bool, True)
+
+config_SP_chk_threshold = Property("SP_chk_threshold",
+   """\
+   Set the same variable in config.f90
+
+   Activates rescue based on the single pole check at the full amplitude level
+
+   after threshold, QCD only, works only with built-in model files.
+   """,
+   str, 0.001)
+
 properties = [
    process_name,
    process_path,
@@ -819,6 +849,9 @@ properties = [
    config_renorm_gamma5,
    config_reduction_interoperation,
    config_nlo_prefactors,
+   config_SP_check,
+   config_SP_rescue,
+   config_SP_chk_threshold,
 
    reference_vectors,
    abbrev_limit,

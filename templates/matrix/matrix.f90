@@ -8,6 +8,7 @@
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
+     & SP_check, SP_rescue, SP_chk_threshold, reduction_interoperation, &
      & convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
@@ -124,8 +125,48 @@ contains
 @end @select %]
    end subroutine exitgolem
    !---#] subroutine exitgolem :
+
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, ok, h)
+      use [% process_name asprefix=\_ %]config, only: &
+         & reduction_interoperation, SP_check, SP_chk_threshold
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(1:4), intent(out) :: amp
+      logical, intent(out), optional :: ok
+      integer, intent(in), optional :: h
+      real(ki), dimension(2:3) :: irp
+      integer :: tmp_red_int
+      call samplitudel01(vecs, scale2, amp, ok, h)
+      if(SP_check) then
+      tmp_red_int=reduction_interoperation
+      call ir_subtraction(vecs, scale2, irp)
+      if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold) then
+      write(*,*) "SINGLE POLE CHECK FAILED !!"[%
+   @if extension golem95 %]
+      if(SP_rescue) then
+         reduction_interoperation = 1
+         call samplitudel01(vecs, scale2, amp, ok, h)
+         if(abs((amp(3)-irp(2))/amp(1)) .gt. (100.0_ki*SP_chk_threshold)) then
+            write(*,*) "RESCUE FAILED !!"
+            write(*,*) "data:"
+            write(*,*) "Single pol rel.dif.,SP_check*100"
+            write(*,*) amp(3)/amp(1)-irp(2)/amp(1),100.0_ki*SP_chk_threshold
+         else
+            write(*,*) "POINT SAVED !!"
+         end if
+         reduction_interoperation = tmp_red_int
+      end if[%
+   @end @if %]
+      write(*,*)
+      end if
+      end if
+   end subroutine samplitude
+   !---#] subroutine samplitude :
+
+   !---#[ subroutine samplitudel01 :
+   subroutine     samplitudel01(vecs, scale2, amp, ok, h)
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
@@ -326,8 +367,8 @@ contains
       case(2)
          amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi
       end select
-   end subroutine samplitude
-   !---#] subroutine samplitude :
+   end subroutine samplitudel01
+   !---#] subroutine samplitudel01 :
    !---#[ function samplitudel0 :
    function     samplitudel0(vecs, h) result(amp)
       use [% process_name asprefix=\_ %]config, only: logfile

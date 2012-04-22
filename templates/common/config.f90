@@ -63,11 +63,9 @@
    @select reduction_interoperation default="-1"
    @case -1 %][%
       @if extension samurai %][%
-         ' This should be put back to '2' after the rescue system
-           has been completely fixed %][%
-         @if extension golem95 %]0[%
+        @if extension golem95 %]2[%
         @else %]0[%
-         @end @if %][%
+        @end @if %][%
       @else %]1[%
       @end @if %][%
    @else %][% reduction_interoperation %][%
@@ -166,5 +164,22 @@
    ! Note, however, that the factor of 1/Gamma(1-eps) is not included
    ! in any of the cases.
    integer :: nlo_prefactors = [% nlo_prefactors %]
+
+   ! Determines the maximum allowed difference among the abs of the
+   ! single pole evaluations obtained with the amplitude vs the one
+   ! obtained through the IR subroutine relative to the leading order.
+   ! 
+   ! Note: at the moment it only works for virtual corrections
+   ! to Tree level processes.
+   logical :: SP_check = [% SP_check
+             convert=bool
+             true=.true.
+             false=.false. %]
+   logical :: SP_rescue = [% SP_rescue
+             convert=bool
+             true=.true.
+             false=.false. %]
+   real(ki) :: SP_chk_threshold = [% SP_chk_threshold
+             convert=real %]_ki
 end module [% process_name asprefix=\_ %]config
 
