@@ -9,9 +9,6 @@ order=gs, 2, 2
 
 one=gs,e
 
-# Since we generate only the Born level, we are not interested
-# in poles cancellation
-#SP_check=.false.
 
 # Two of the three helicities must be zero at tree level,
 # we keep them as a check.

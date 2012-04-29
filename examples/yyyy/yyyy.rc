@@ -18,11 +18,6 @@ true=iprop[U,D,S,C,B,T,mum,taum,Wp,Wm,phim,phip,ghA,ghWp,ghWm,0,0];
 process.extensions=dred, gaugecheck
 
 
-# It makes no sense to check the single pole in this case
-# since the amplitude is finite
-SP_check=.false.
-
-
 # These parameters are not documented elsewhere because
 # usually they are set by the OLP interface
 +olp.include_color_average=false

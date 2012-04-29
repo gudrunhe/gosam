@@ -8,7 +8,7 @@
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
-     & SP_check, SP_rescue, SP_chk_threshold, reduction_interoperation, &
+     & SP_check, SP_rescue, SP_chk_threshold1, SP_chk_threshold2, reduction_interoperation, &
      & convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
@@ -129,7 +129,8 @@ contains
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, ok, h)
       use [% process_name asprefix=\_ %]config, only: &
-         & reduction_interoperation, SP_check, SP_chk_threshold
+         & reduction_interoperation, SP_check, &
+         & SP_chk_threshold1, SP_chk_threshold2
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -142,17 +143,17 @@ contains
       if(SP_check) then
       tmp_red_int=reduction_interoperation
       call ir_subtraction(vecs, scale2, irp)
-      if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold) then
+      if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold1) then
       write(*,*) "SINGLE POLE CHECK FAILED !!"[%
    @if extension golem95 %]
       if(SP_rescue) then
          reduction_interoperation = 1
          call samplitudel01(vecs, scale2, amp, ok, h)
-         if(abs((amp(3)-irp(2))/amp(1)) .gt. (100.0_ki*SP_chk_threshold)) then
+         if(abs((amp(3)-irp(2))/amp(1)) .gt. (SP_chk_threshold2)) then
             write(*,*) "RESCUE FAILED !!"
             write(*,*) "data:"
             write(*,*) "Single pol rel.dif.,SP_check*100"
-            write(*,*) amp(3)/amp(1)-irp(2)/amp(1),100.0_ki*SP_chk_threshold
+            write(*,*) amp(3)/amp(1)-irp(2)/amp(1), SP_chk_threshold2
          else
             write(*,*) "POINT SAVED !!"
          end if

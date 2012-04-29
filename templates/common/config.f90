@@ -175,11 +175,13 @@
              convert=bool
              true=.true.
              false=.false. %]
+   real(ki) :: SP_chk_threshold1 = [% SP_chk_threshold1
+             convert=real %]_ki
    logical :: SP_rescue = [% SP_rescue
              convert=bool
              true=.true.
              false=.false. %]
-   real(ki) :: SP_chk_threshold = [% SP_chk_threshold
+   real(ki) :: SP_chk_threshold2 = [% SP_chk_threshold2
              convert=real %]_ki
 end module [% process_name asprefix=\_ %]config
 
