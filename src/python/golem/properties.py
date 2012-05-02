@@ -771,7 +771,7 @@ config_nlo_prefactors = Property("nlo_prefactors",
    Note, however, that the factor of 1/Gamma(1-eps) is not 
    included in any of the cases.
    """,
-   int, 0, options=[0,1,2])
+   int, 0, options=["0","1","2"])
 
 config_SP_check = Property("SP_check",
    """\
@@ -781,6 +781,19 @@ config_SP_check = Property("SP_check",
    !!Works for only for QCD and with built-in model files!!
    """,
    bool, False)
+
+config_SP_verbosity = Property("SP_verbosity",
+   """\
+   Set the same variable in config.f90
+
+   Sets the verbosity of the SP_check.
+   verbosity = 0 : no output
+   verbosity = 1 : output only when rescue failed
+   verbosity = 2 : output whenever the rescue system is used
+                   with comment about the success of the rescue
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   int, 1, options=["0","1","2"])
 
 config_SP_chk_threshold1 = Property("SP_chk_threshold1",
    """\
@@ -863,6 +876,7 @@ properties = [
    config_reduction_interoperation,
    config_nlo_prefactors,
    config_SP_check,
+   config_SP_verbosity,
    config_SP_chk_threshold1,
    config_SP_rescue,
    config_SP_chk_threshold2,

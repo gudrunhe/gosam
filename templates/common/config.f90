@@ -175,6 +175,7 @@
              convert=bool
              true=.true.
              false=.false. %]
+   integer :: SP_verbosity = [% SP_verbosity %]
    real(ki) :: SP_chk_threshold1 = [% SP_chk_threshold1
              convert=real %]_ki
    logical :: SP_rescue = [% SP_rescue
