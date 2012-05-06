@@ -155,13 +155,14 @@ contains
             if(SP_verbosity .ge. 1) write(*,*) "data:"
             if(SP_verbosity .ge. 1) write(*,*) "Single pol rel.dif., SP_chk_threshold2"
             if(SP_verbosity .ge. 1) write(*,*) amp(3)/amp(1)-irp(2)/amp(1), SP_chk_threshold2
+            if(SP_verbosity .ge. 1) write(*,*)
          else
             if(SP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
+            if(SP_verbosity .ge. 2) write(*,*)
          end if
          reduction_interoperation = tmp_red_int
       end if[%
    @end @if %]
-      write(*,*)
       end if
       end if
    end subroutine samplitude
