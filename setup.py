@@ -25,8 +25,8 @@ INFO = {
 		'version': TAR_VERSION,
 		'author': 'The GoSam (Golem and Samurai) Collaboration',
 		'author_email': 'gosam@hepforge.org',
-		'maintainer': 'Thomas Reiter',
-		'maintainer_email': 'reiterth@mpp.mpg.de',
+		'maintainer': 'The GoSam Collaboration',
+		'maintainer_email': 'gosam@hepforge.org',
 		'url': 'http://projects.hepforge.org/gosam/',
 		'download_url': 
 		'http://projects.hepforge.org/gosam/downloads/gosam-%s.tar.gz' %
