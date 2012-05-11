@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem:ts=3:sw=3:expandtab
  %]dnl vim: ts=3:sw=3:expandtab
-AC_INIT([Golem_Process[% olp.process_name assuffix=- %]], [1.0],
+AC_INIT([GoSam_Process[% olp.process_name assuffix=- %]], [1.0],
 	[email@domain])
 AC_PREREQ([2.59])
 

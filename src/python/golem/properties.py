@@ -568,8 +568,8 @@ debug_flags = Property("debug",
 reference_vectors = Property("reference-vectors",
    """\
    A list of reference vectors for massive and higher spin particles.
-   For vectors which are not assigned here, the program picks a reference
-   vector automatically.
+   For vectors which are not assigned here, the program picks a 
+   reference vector automatically.
 
    Each entry of the list has to be of the form <index>:<index>
 
@@ -626,7 +626,7 @@ r2 = Property("r2",
                   the result
    off         -- all mu^2 terms are set to zero
    """,
-   str, "implicit",
+   str, "explicit",
    options=["implicit", "explicit", "off", "only"])
 
 crossings = Property("crossings",
@@ -761,17 +761,73 @@ config_reduction_interoperation = Property("reduction_interoperation",
 
 config_nlo_prefactors = Property("nlo_prefactors",
    """
-   Set the same variable in config.f90. The values have the following
-   meaning:
+   Set the same variable in config.f90. The values have the 
+   following meaning:
 
    0: A factor of alpha_(s)/2/pi is not included in the NLO result
    1: A factor of 1/8/pi^2 is not included in the NLO result
    2: The NLO includes all prefactors
 
-   Note, however, that the factor of 1/Gamma(1-eps) is not included
-   in any of the cases.
+   Note, however, that the factor of 1/Gamma(1-eps) is not 
+   included in any of the cases.
    """,
-   int, 0, options=[0,1,2])
+   int, 0, options=["0","1","2"])
+
+config_SP_check = Property("SP_check",
+   """\
+   Set the same variable in config.f90
+
+   Activates test on the single for the full amplitude.
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   bool, False)
+
+config_SP_verbosity = Property("SP_verbosity",
+   """\
+   Set the same variable in config.f90
+
+   Sets the verbosity of the SP_check.
+   verbosity = 0 : no output
+   verbosity = 1 : output only when rescue failed
+   verbosity = 2 : output whenever the rescue system is used
+                   with comment about the success of the rescue
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   int, 1, options=["0","1","2"])
+
+config_SP_chk_threshold1 = Property("SP_chk_threshold1",
+   """\
+   Set the same variable in config.f90
+
+   Threshold to declare the check on the single pole failed and 
+   the activation of the rescue
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   str, 0.0001)
+
+config_SP_rescue = Property("SP_rescue",
+   """\
+   Set the same variable in config.f90
+
+   Activates rescue based on the single pole check for the full 
+   amplitude.
+
+   Note: the usage of this rescue system is most stable if used 
+   with the extension 'derive' which ensures a stabler 
+   reconstruction of the tensor coefficients.
+
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   bool, True)
+
+config_SP_chk_threshold2 = Property("SP_chk_threshold2",
+   """\
+   Set the same variable in config.f90
+
+   Threshold to declare the rescue of the ps-point failed.
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   str, 0.01)
 
 properties = [
    process_name,
@@ -819,6 +875,11 @@ properties = [
    config_renorm_gamma5,
    config_reduction_interoperation,
    config_nlo_prefactors,
+   config_SP_check,
+   config_SP_verbosity,
+   config_SP_chk_threshold1,
+   config_SP_rescue,
+   config_SP_chk_threshold2,
 
    reference_vectors,
    abbrev_limit,

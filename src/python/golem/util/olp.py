@@ -401,6 +401,10 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          if "DRED" not in uext:
             ext.append("DRED")
             conf[golem.properties.extensions] = ",".join(ext)
+      if ir_scheme == "CDR":
+         if "DRED" not in uext:
+            ext.append("DRED")
+            conf[golem.properties.extensions] = ",".join(ext)
       else:
          if "DRED" in uext:
             i = uext.index("DRED")
