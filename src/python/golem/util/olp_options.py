@@ -77,14 +77,14 @@ def MatrixElementSquareType(values, conf, ignore_case):
 			err_flag = True
 		if "Csummed" in checked_values:
 			col_avg = False
-		elif "Caverage" in checked_values:
+		elif "Caveraged" in checked_values:
 			pass
 		else:
 			err_flag = True
 
 		if "Hsummed" in checked_values:
 			hel_avg = False
-		elif "Haverage" in checked_values:
+		elif "Haveraged" in checked_values:
 			pass
 		else:
 			err_flag = True
