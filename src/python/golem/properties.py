@@ -789,11 +789,12 @@ config_SP_verbosity = Property("SP_verbosity",
    Sets the verbosity of the SP_check.
    verbosity = 0 : no output
    verbosity = 1 : output only when rescue failed
-   verbosity = 2 : output whenever the rescue system is used
+   verbosity = 2 : as 1 but PS points are written in bad.pts
+   verbosity = 3 : output whenever the rescue system is used
                    with comment about the success of the rescue
    !!Works for only for QCD and with built-in model files!!
    """,
-   int, 1, options=["0","1","2"])
+   int, 2, options=["0","1","2","3"])
 
 config_SP_chk_threshold1 = Property("SP_chk_threshold1",
    """\
@@ -827,7 +828,7 @@ config_SP_chk_threshold2 = Property("SP_chk_threshold2",
    Threshold to declare the rescue of the ps-point failed.
    !!Works for only for QCD and with built-in model files!!
    """,
-   str, 0.01)
+   str, 0.001)
 
 properties = [
    process_name,
