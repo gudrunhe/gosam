@@ -79,7 +79,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                            @if eval mass .eq. 0 %][%
                            @else %] - [%mass%]*[%mass%][%
                               @if eval width .eq. 0 %][%
-                              @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                              @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                               @end @if %][%
                            @end @if %][%
                         @else %]
@@ -92,7 +92,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                            @else %]&
                  &    - [%mass%]*[%mass%][%
                               @if eval width .eq. 0 %][%
-                              @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                              @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                               @end @if %][%
                            @end @if %][%
                         @end @if %][%
@@ -108,7 +108,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                @if eval mass .eq. 0 %][%
                @else %] - [%mass%]*[%mass%][%
                   @if eval width .eq. 0 %][%
-                  @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                  @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                   @end @if %][%
                @end @if %][%
             @else %]
@@ -121,7 +121,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                @else %]&
                  &    - [%mass%]*[%mass%][%
                   @if eval width .eq. 0 %][%
-                  @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                  @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                   @end @if width .eq. 0 %][%
                @end @if mass .eq. 0 %][%
             @end @if momentum .eq. 0 %][%
