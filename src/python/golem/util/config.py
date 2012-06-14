@@ -815,6 +815,7 @@ class Form(Program):
                shell=True,
                bufsize=500, stdout=subprocess.PIPE).stdout
 
+         firstline=True
          for line in pipe.readlines():
             lline = line.lower().strip()
             if "version" in lline:
@@ -823,6 +824,17 @@ class Form(Program):
                lline = lline[i+len("version"):j]
                self.version = [int(re.sub("[^0-9]", "", s))
                      for s in lline.split(".")]
+            elif firstline and "form" in lline:
+               # form version 4.0 prints
+               # "FORM 4.0 (Jun 11 2012) 64-bits"
+               try:
+                  lline = lline.split(" ")[1]
+               except IndexError:
+                  pass
+               self.version = [int(re.sub("[^0-9]", "", s))
+                     for s in lline.split(".")]
+            firstline=False
+
       except OSError:
          raise ConfigurationException(
                "Could not run FORM (%s) properly" % executable)
