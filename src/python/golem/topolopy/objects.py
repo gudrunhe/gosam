@@ -211,12 +211,22 @@ class Diagram:
       """
       if self.loopsize() > 2:
          return False
-
       loop_props = [self._propagators[abs(p)] for p in self._loop]
+      in_out_props =[]
+      for indx,p in self._propagators.items():
+         if p not in loop_props:
+            # add to in_out_props if the vertex is connected
+            if p.v1 in self._loop_vertices or p.v2 in self._loop_vertices:
+              in_out_props.extend([p])
+      if len(in_out_props) == 2:
+         if (in_out_props[0].momentum != in_out_props[1].momentum):
+            return False
       if any([p.mass != "0" for p in loop_props]):
          entry = []
          for prop in loop_props:
-            entry.extend([prop.twospin, prop.color, prop.mass])
+            entry.extend([prop.twospin, prop.color, prop.mass, prop.width])
+         for prop in in_out_props:
+            entry.extend([prop.twospin, prop.color, prop.mass, prop.width])
 
          dct[idx] = tuple(entry)
 
