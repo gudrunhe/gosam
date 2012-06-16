@@ -30,7 +30,7 @@ Symbols gH`f', gX`f', gP`f';
 #EndDo
 
 #Do f={U,D,C,S,T,B,ne,nmu,ntau,e,mu,tau}
-Symbols g`f'v, g`f'a;
+Symbols g`f'v, g`f'a, g`f'l, g`f'r;
 #EndDo
 Symbols VUD,  VUS,  VUB,  VCD,  VCS,  VCB,  VTD,  VTS,  VTB,
 	CVDU, CVSU, CVBU, CVDC, CVSC, CVBC, CVDT, CVST, CVBT;
@@ -191,15 +191,15 @@ Id C([field.phim], [field.Wp], [field.Z]) = PREFACTOR(e * gPWZ);
 *---#[   ZFF :
 #Do f={U,D,C,S,T,B,ne,nmu,ntau}
 	Id CL([field.`f'bar], [field.`f'], [field.Z]) =
-		PREFACTOR(e) * (g`f'v + g`f'a);
+		PREFACTOR(e) * (g`f'l);
 	Id CR([field.`f'bar], [field.`f'], [field.Z]) =
-		PREFACTOR(e) * (g`f'v - g`f'a);
+		PREFACTOR(e) * (g`f'r);
 #EndDo
 #Do f={e,mu,tau}
-   Id CL([field.`f'p], [field.`f'm], [field.Z]) =
-		PREFACTOR(e) * (g`f'v + g`f'a);
-   Id CR([field.`f'p], [field.`f'm], [field.Z]) =
-		PREFACTOR(e) * (g`f'v - g`f'a);
+	Id CL([field.`f'p], [field.`f'm], [field.Z]) =
+		PREFACTOR(e) * (g`f'l);
+	Id CR([field.`f'p], [field.`f'm], [field.Z]) =
+		PREFACTOR(e) * (g`f'r);
 #EndDo
 *---#]   ZFF :
 *---#] VFF (A.2.21) :

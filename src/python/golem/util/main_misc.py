@@ -111,19 +111,22 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, loopcache, tree_signs, flags, massive_bubbles = \
+	keep_tree, keep_virt, keep_docu, eprops, loopcache, loopcache_doc, tree_signs, flags, massive_bubbles = \
 			run_analyzer(path, conf, in_particles, out_particles)
 
 	props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
 	props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
+	props.setProperty("topolopy.keep.docu", ",".join(map(str, keep_docu)))
 	props.setProperty("topolopy.count.tree", len(keep_tree))
 	props.setProperty("topolopy.count.virt", len(keep_virt))
+	props.setProperty("topolopy.count.docu", len(keep_docu))
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
 	props.setProperty("max_rank", conf["__max_rank__"])
 
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
+	conf["__info.count.docu__"] = len(keep_docu)
 
 	for key, value in golem.util.tools.derive_coupling_names(conf).items():
 		props.setProperty("%s_COUPLING_NAME" % key, value)
@@ -136,13 +139,15 @@ def generate_process_files(conf, from_scratch=False):
 			user = "main",
 			from_scratch=from_scratch,
 			loopcache=loopcache,
+			loopcache_doc=loopcache_doc,
 			tree_signs=tree_signs,
 			# tree_flows=tree_flows,
 			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
 				conf.getListProperty("__heavy_quarks__")),
 			lo_flags = flags[0],
 			nlo_flags = flags[1],
-			massive_bubbles = massive_bubbles)
+			massive_bubbles = massive_bubbles,
+			diagram_sum = eprops)
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
@@ -544,11 +549,14 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = imp.load_source(modname, fname)
 
-		keep_virt, loopcache = golem.topolopy.functions.analyze_loop_diagrams(
-				mod_diag_virt.diagrams, model, conf, onshell, quark_masses,
-				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+		keep_virt, keep_doc, eprops, loopcache, loopcache_doc = golem.topolopy.functions.analyze_loop_diagrams(
+			mod_diag_virt.diagrams, model, conf, onshell, quark_masses,
+			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+
 	else:
 		keep_virt = []
+		keep_doc  = []
+		eprops    = {}
 		loopcache = golem.topolopy.objects.LoopCache()
 
 	conf["__heavy_quarks__"] = quark_masses
@@ -561,4 +569,4 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, loopcache, tree_signs, flags, massive_bubbles
+	return keep_tree, keep_virt, keep_doc, eprops, loopcache, loopcache_doc, tree_signs, flags, massive_bubbles

@@ -10,7 +10,8 @@ import golem.util.tools
 class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles,
+		        eprops):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks)
 		self._loopcache = loopcache
@@ -20,6 +21,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		self._diagram_flags_0 = lo_flags
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
+		self._eprops = eprops
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -431,6 +433,15 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 				raise TemplateError("Unknown group in [% diagrams %]")
 		else:
 			return " ".join(map(str,self._diagram_flags_1.keys()))
+
+	def diagram_sum(self, *args, **opts):
+		if "group" in opts:
+			nopts = opts.copy()
+			del nopts["group"]
+			g = self._eval_int(opts["group"], **nopts)
+			return ",".join(map(str,self._eprops[g]))
+		else:
+			return ",".join(map(str,self._eprops))
 
 	def use_flags_0(self, *args, **opts):
 		return len(self._diagram_flags_0.keys()) > 1

@@ -385,6 +385,14 @@ group_diagrams = Property("group",
    bool,
    True)
 
+sum_diagrams = Property("diagsum",
+   """\
+   Flag whether or not 1-loop diagrams with the same propagators 
+   should be summed before the algebraic reduction.
+   """,
+   bool,
+   False)
+
 renorm = Property("renorm",
    """\
    Indicates if the UV counterterms should be generated.
@@ -852,6 +860,7 @@ properties = [
    haggies_bin,
    fc_bin,
    group_diagrams,
+   sum_diagrams,
    extensions,
    template_path,
    debug_flags,

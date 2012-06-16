@@ -131,10 +131,12 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    lst = setup_list(golem.properties.select_nlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
    keep = []
+   keep_doc = []
    lose = []
    max_rank = 0
 
-   loopcache = LoopCache()
+   loopcache     = LoopCache()
+   loopcache_doc = LoopCache()
 
    for idx, diagram in diagrams.items():
       if lst:
@@ -154,8 +156,9 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             lose.append(idx)
          else:
             keep.append(idx)
-            loopcache.add(diagram, idx)
-            
+            keep_doc.append(idx)
+            loopcache_doc.add(diagram, idx)
+
             diagram.isMassiveBubble(idx, massive_bubbles)
 
             if filter_flags is not None:
@@ -173,9 +176,35 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
             (len(keep), len(lose)))
 
+#--- new start
+
+   props=[]
+   eprops = {}
+   for idx in keep:
+	props.append([idx,str(diagrams[idx].getLoopIntegral())])
+
+   if conf.getProperty(golem.properties.sum_diagrams):   
+      for i,item in props:
+         for j,jtem in props:
+            if item == jtem and j>i:
+               if j not in lose:
+                  lose.append(j)
+                  keep.remove(j)
+                  if i not in eprops:
+                     eprops[i]=[j]
+                  else:
+                     eprops[i].append(j)
+   for idx in keep:
+      loopcache.add(diagrams[idx], idx)
+      if idx not in eprops.keys():
+         eprops[idx]=[idx]
+      else:
+         eprops[idx].append(idx)
+#--- new end
+
    conf["__max_rank__"] = max_rank
 
-   return keep, loopcache
+   return keep, keep_doc, eprops, loopcache, loopcache_doc
 
 def analyze_diagram(diagram, zero, fltr):
    if diagram.colorforbidden():
