@@ -177,16 +177,9 @@ latex_parameters = {
    'gev': 'v_e', 'gea': 'a_e',
    'gmuv': 'v_\\mu', 'gmua': 'a_\\mu', 'gtauv': 'v_\\tau',
    'gtaua': 'a_\\tau',
-   'gnel': 'g_{l,\\nu_e}', 'gner': 'g_{r,\\nu_e}',
-   'gnmul': 'g_{l,\\nu_\\mu}', 'gnmur': 'g_{r,\\nu_\\mu}',
-   'gntaul': 'g_{l,\\nu_\\tau}', 'gntaur': 'g_{r,\\nu_\\tau}',
-   'gel': 'g_{l,e}', 'ger': 'g_{r,e}',
-   'gmul': 'g_{l,\\mu}', 'gmur': 'g_{r,\\mu}'
-   'gtaul': 'g_{l,\\tau}','gtaur': 'g_{r,\\tau}',
    'gWWZZ': 'g_{W^+W^-ZZ}', 'gWWAZ': 'g_{W^+W^-\\gamma Z}',
    'gWWAA': 'g_{W^+W^-\\gamma\\gamma}', 'gWWWW': 'g_{W^+W^-W^+W^-}',
    'gWWZ': 'g_{W^+W^-Z}',
-
    'gHHHH': 'g_{HHHH}', 'gXXXX': 'g_{\\chi\\chi\\chi\\chi}',
    'gHHXX': 'g_{HH\\chi\\chi}',
    'gHHPP': 'g_{HH\\phi^+\\phi^-}',

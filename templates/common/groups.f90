@@ -347,10 +347,18 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
             @end @if %]
 
       amp = [%
-            @if is_first %][% diagram_sign %] [%
-            @else %]amp [% diagram_sign %] [%
+            @if is_first %][%
+            @if diagsum %]+ [%
+            @else %][% diagram_sign %][%
             @end @if %][%
-            @if is_nf %]real(Nfrat, ki_gol) * [%
+            @else %]amp [%
+            @if diagsum %]+ [%
+            @else %][% diagram_sign %] [%
+            @end @if %][%
+            @end @if %][%
+            @if is_nf %] [% 
+            @if diagsum %][%
+            @else %] real(Nfrat, ki_gol) * [% @end @if %][%
             @end @if %]([%
             @if eval rank .eq. 0 %]coeffs%coeffs_[% DIAG %] * a[%
                 loopsize diagram=DIAG %]0(b_set)[%
@@ -506,10 +514,18 @@ function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(
             @end @if %]
 
       amp = [%
-            @if is_first %][% diagram_sign %] [%
-            @else %]amp [% diagram_sign %] [%
+            @if is_first %][%
+            @if diagsum %]+ [%
+            @else %][% diagram_sign %][%
             @end @if %][%
-            @if is_nf %]real(Nfrat, ki_gol) * [%
+            @else %]amp [%
+            @if diagsum %]+ [%
+            @else %][% diagram_sign %] [%
+            @end @if %][%
+            @end @if %][%
+            @if is_nf %] [% 
+            @if diagsum %][%
+            @else %] real(Nfrat, ki_gol) * [% @end @if %][%
             @end @if %]([%
             @if eval rank .eq. 0 %]coeffs%coeffs_[% DIAG %] * pga[%
                 loopsize diagram=DIAG %]0(b_set, ep)[%
@@ -704,7 +720,7 @@ function     numetens_group[% grp %](icut, Q, mu2) result(num)
       diag = diag[%
                @end @if %] * denom[% $_ %][%
             @end @for %]
-      num = num [% diagram_sign %] [%
+      num = num [% @if diagsum %]+ [% @else %] [% diagram_sign %] [% @end @if %][%
             @if is_nf %]real(Nfrat, ki_sam) * [%
             @end @if %]diag
    end if

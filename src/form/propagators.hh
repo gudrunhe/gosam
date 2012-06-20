@@ -13,10 +13,10 @@ Id proplorentz(0, 0, m?, sDUMMY1?, 0,iv1?, iv2?) =
 *---#[ Fermions :
 Id proplorentz(1, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
   PREFACTOR(i_) * (NCContainer(Sm(k1), iv2, iv1)
-   + m * NCContainer(1, iv2, iv1)
+   + csqrt(m*(m-i_*sDUMMY1)) * NCContainer(1, iv2, iv1)
   ) * inv(k1, m, sDUMMY1);
 Id proplorentz(1, 0, m?, sDUMMY1?, 0, iv1?, iv2?) =
-   + PREFACTOR(i_ * m) * NCContainer(1, iv2, iv1) * inv(ZERO, m, sDUMMY1);
+   + PREFACTOR(i_ * csqrt(m*(m-i_*sDUMMY1))) * NCContainer(1, iv2, iv1) * inv(ZERO, m, sDUMMY1);
 Id proplorentz(1, k1?, 0, 0, 1, iv1?, iv2?) =
   PREFACTOR(i_) * NCContainer(Sm(k1)*ProjPlus, iv2, iv1) * inv(k1, 0);
 Id proplorentz(1, k1?, 0, 0, -1, iv1?, iv2?) =
@@ -34,6 +34,24 @@ Repeat;
       PREFACTOR(i_) *
       SplitLorentzIndex(iv1, iv1L2, iv1L1) *
       SplitLorentzIndex(iv2, iv2L2, iv2L1) * 1/3 * (
+         + 4*k1(iv1L2)*k1(iv2L2)/csqrt(m*(m-i_*sDUMMY1))
+         - 3*d(iv1L2,iv2L2)*csqrt(m*(m-i_*sDUMMY1))
+         + 2*NCContainer(Sm(k1),iv1L1,iv2L1)*k1(iv1L2)*k1(iv2L2)/csqrt(m*(m-i_*sDUMMY1))^2
+         - 3*NCContainer(Sm(k1),iv1L1,iv2L1)*d(iv1L2,iv2L2)
+         - NCContainer(Sm(k1)*Sm(iv2L2),iv1L1,iv2L1)*k1(iv1L2)/csqrt(m*(m-i_*sDUMMY1))
+         + NCContainer(Sm(iv1L2),iv1L1,iv2L1)*k1(iv2L2)
+         - NCContainer(Sm(iv1L2)*Sm(k1),iv1L1,iv2L1)*k1(iv2L2)/csqrt(m*(m-i_*sDUMMY1))
+         - NCContainer(Sm(iv1L2)*Sm(k1)*Sm(iv2L2),iv1L1,iv2L1)
+         + NCContainer(Sm(iv1L2)*Sm(iv2L2),iv1L1,iv2L1)*csqrt(m*(m-i_*sDUMMY1))
+         + NCContainer(Sm(iv2L2),iv1L1,iv2L1)*k1(iv1L2)
+      ) * inv(k1, m, sDUMMY1);
+   Sum iv1L2, iv1L1, iv2L2, iv2L1;
+EndRepeat;
+Repeat;
+   Id once proplorentz(3, k1?, m?, 0, 0, iv1?, iv2?) =
+      PREFACTOR(i_) *
+      SplitLorentzIndex(iv1, iv1L2, iv1L1) *
+      SplitLorentzIndex(iv2, iv2L2, iv2L1) * 1/3 * (
          + 4*k1(iv1L2)*k1(iv2L2)/m
          - 3*d(iv1L2,iv2L2)*m
          + 2*NCContainer(Sm(k1),iv1L1,iv2L1)*k1(iv1L2)*k1(iv2L2)/m^2
@@ -44,7 +62,7 @@ Repeat;
          - NCContainer(Sm(iv1L2)*Sm(k1)*Sm(iv2L2),iv1L1,iv2L1)
          + NCContainer(Sm(iv1L2)*Sm(iv2L2),iv1L1,iv2L1)*m
          + NCContainer(Sm(iv2L2),iv1L1,iv2L1)*k1(iv1L2)
-      ) * inv(k1, m, sDUMMY1);
+      ) * inv(k1, m, 0);
    Sum iv1L2, iv1L1, iv2L2, iv2L1;
 EndRepeat;
 *---#] Vector-Spinor propagator :

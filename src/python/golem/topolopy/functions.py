@@ -131,12 +131,12 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    lst = setup_list(golem.properties.select_nlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
    keep = []
-   keep_doc = []
+   keep_tot = []
    lose = []
    max_rank = 0
 
    loopcache     = LoopCache()
-   loopcache_doc = LoopCache()
+   loopcache_tot = LoopCache()
 
    for idx, diagram in diagrams.items():
       if lst:
@@ -156,8 +156,8 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             lose.append(idx)
          else:
             keep.append(idx)
-            keep_doc.append(idx)
-            loopcache_doc.add(diagram, idx)
+            keep_tot.append(idx)
+            loopcache_tot.add(diagram, idx)
 
             diagram.isMassiveBubble(idx, massive_bubbles)
 
@@ -174,7 +174,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          lose.append(idx)
 
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
-            (len(keep), len(lose)))
+            (len(keep_tot), len(lose)))
 
 #--- new start
 
@@ -202,9 +202,12 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          eprops[idx].append(idx)
 #--- new end
 
+   debug("After analyzing loop diagrams and diagram sum: keeping %d, purging %d" % 
+            (len(keep), len(lose)))
+
    conf["__max_rank__"] = max_rank
 
-   return keep, keep_doc, eprops, loopcache, loopcache_doc
+   return keep, keep_tot, eprops, loopcache, loopcache_tot
 
 def analyze_diagram(diagram, zero, fltr):
    if diagram.colorforbidden():

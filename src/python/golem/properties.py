@@ -391,7 +391,7 @@ sum_diagrams = Property("diagsum",
    should be summed before the algebraic reduction.
    """,
    bool,
-   False)
+   True)
 
 renorm = Property("renorm",
    """\

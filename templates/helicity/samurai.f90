@@ -79,7 +79,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                            @if eval mass .eq. 0 %][%
                            @else %] - [%mass%]*[%mass%][%
                               @if eval width .eq. 0 %][%
-                              @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                              @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                               @end @if %][%
                            @end @if %][%
                         @else %]
@@ -92,7 +92,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                            @else %]&
                  &    - [%mass%]*[%mass%][%
                               @if eval width .eq. 0 %][%
-                              @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                              @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                               @end @if %][%
                            @end @if %][%
                         @end @if %][%
@@ -108,7 +108,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                @if eval mass .eq. 0 %][%
                @else %] - [%mass%]*[%mass%][%
                   @if eval width .eq. 0 %][%
-                  @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                  @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                   @end @if %][%
                @end @if %][%
             @else %]
@@ -121,7 +121,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
                @else %]&
                  &    - [%mass%]*[%mass%][%
                   @if eval width .eq. 0 %][%
-                  @else %] - cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
+                  @else %] + cmplx(0.0_ki_sam, [%mass%]*[%width%])[%
                   @end @if width .eq. 0 %][%
                @end @if mass .eq. 0 %][%
             @end @if momentum .eq. 0 %][%
@@ -135,11 +135,15 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
    if(nonzero([% index %])[%
             @if use_flags_1 %].and.evaluate_virt_diagram([% DIAG %])[%
             @end @if %]) then
-      num = num [% diagram_sign %] [%
+      num = num [%
+      @if diagsum %]+ numerator_d[% DIAG %](icut, Q, mu2)[%
+            @for elements pinches %] * denom[% $_ %][%
+            @end @for %][%
+            @else %][% diagram_sign %] [%
             @if is_nf %]Nfrat * [%
             @end @if %]numerator_d[% DIAG %](icut, Q, mu2)[%
             @for elements pinches %] * denom[% $_ %][%
-            @end @for %]
+            @end @for %][% @end @if %]
    end if
    !-------#] Diagram [% DIAG %]:[%
          @end @for diagrams %]
@@ -380,16 +384,22 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
          end if
 
          tot = [%
-      @if is_first %][% diagram_sign %] [%
-      @else %]tot [% diagram_sign %] [%
+      @if is_first %][% @if diagsum %] + [%
+      @else %][% diagram_sign %][% @end @if %][%
+      @else %]tot [% @if diagsum %] + [% @else %] [% diagram_sign %] [%
       @end @if %][%
-      @if is_nf %]Nfrat * [%
+      @end @if %][%
+      @if is_nf %][% @if diagsum %] [% @else %] Nfrat * [%
+      @end @if %][%
       @end @if %]acc
          totr = [%
-      @if is_first %][% diagram_sign %] [%
-      @else %]totr [% diagram_sign %] [%
+      @if is_first %][% @if diagsum %] + [%
+      @else %][% diagram_sign %][% @end @if %][%
+      @else %]totr [% @if diagsum %] + [% @else %] [% diagram_sign %] [%
       @end @if %][%
-      @if is_nf %]Nfrat * [%
+      @end @if %][%
+      @if is_nf %][% @if diagsum %] [% @else %] Nfrat * [%
+      @end @if %][%
       @end @if %]accr[%
       @if is_first %][%
       @else %]
