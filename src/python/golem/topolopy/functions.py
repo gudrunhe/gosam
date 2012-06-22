@@ -181,7 +181,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    props=[]
    eprops = {}
    for idx in keep:
-	props.append([idx,str(diagrams[idx].getLoopIntegral())])
+	props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    if conf.getProperty(golem.properties.sum_diagrams):   
       for i,item in props:

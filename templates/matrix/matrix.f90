@@ -85,7 +85,9 @@ contains
          &                samurai_verbosity,samurai_test)[%
    @end @if %][%
    @if extension golem95 %]
-         open(unit=42, file='bad.pts', status='unknown', action='write', access='append')[%
+      if(SP_check) then
+         open(unit=42, file='bad.pts', status='unknown', action='write', access='append')
+      endif[%
    @end @if %]
       end if[%
 @end @select %]
