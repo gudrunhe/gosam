@@ -87,7 +87,7 @@ contains
    @if extension golem95 %]
       if(SP_check) then
          open(unit=42, file='bad.pts', status='unknown', action='write', access='append')
-      endif[%
+      end if[%
    @end @if %]
       end if[%
 @end @select %]

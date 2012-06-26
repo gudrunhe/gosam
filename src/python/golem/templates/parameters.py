@@ -30,7 +30,7 @@ class ModelTemplate(Template):
 		self._parameters = {}
 		self._functions = {}
 		name_length = 0
-
+		
 		for name, value in self._mod.parameters.items():
 			t = self._mod.types[name]
 			if len(name) > name_length:
@@ -50,7 +50,7 @@ class ModelTemplate(Template):
 				else:
 					param = (name, t, [value, "0.0"])
 			self._parameters[name] = param
-		
+
 		for name, expression in self._mod.functions.items():
 			t = self._mod.types[name]
 			#if len(name) > name_length:
@@ -71,6 +71,7 @@ class ModelTemplate(Template):
 
 		self._slha_blocks = {}
 		self._slha_locations = {}
+
 		for name, value in self._mod.slha_locations.items():
 			n, t, v = self._parameters[name]
 			if t == "RP" or t == "CP":

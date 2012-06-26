@@ -87,7 +87,7 @@
    @select olp.irregularisation default=DEFAULT
    @case DEFAULT %].false.[%
    @case tHV CDR %].true.[%
-   @else %].true.[%
+   @else %].false.[%
    @end @select %]
 
    integer :: logfile = 19

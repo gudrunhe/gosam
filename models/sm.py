@@ -206,9 +206,6 @@ latex_parameters = {
    'gUv': 'v_u', 'gUa': 'a_u', 'gDv': 'v_d', 'gDa': 'a_d',
    'gCv': 'v_c', 'gCa': 'a_c', 'gSv': 'v_s', 'gSa': 'a_s',
    'gTv': 'v_t', 'gTa': 'a_t', 'gBv': 'v_b', 'gBa': 'a_b',
-   'gUl': 'g_{l,u}', 'gUr': 'g_{r,u}', 'gDl': 'g_{r,d}', 'gDr': 'g_{r,d}',
-   'gCl': 'g_{l,c}', 'gCr': 'g_{r,c}', 'gSl': 'g_{r,s}', 'gSr': 'g_{r,s}',
-   'gTl': 'g_{l,t}', 'gTr': 'g_{r,t}', 'gBl': 'g_{r,b}', 'gBr': 'g_{r,b}',
    'gnev': 'v_{\\nu_e}', 'gnea': 'a_{\\nu_e}',
    'gnmuv': 'v_{\\nu_\\mu}', 'gnmua': 'a_{\\nu_\\mu}',
    'gntauv': 'v_{\\nu_\\tau}', 'gntaua': 'a_{\\nu_\\tau}',
@@ -609,8 +606,8 @@ slha_locations = {
    'me': ('MASSES', [11]),
    'mmu': ('MASSES', [13]),
    'mtau': ('MASSES', [15]),
-   'mZ': ('MASSES', [23]),
-   'mW': ('MASSES', [24]),
+#   'mZ': ('MASSES', [23]),
+#   'mW': ('MASSES', [24]),
    'mH': ('MASSES', [25]),
    'wB': ('DECAY', [5]),
    'wT': ('DECAY', [6]),
@@ -689,9 +686,18 @@ def init_ew(**options):
       functions["mW"] = "e/2/sw/sqrt(sqrt(2)*GF)"
       types["mW"] = "R"
       # mW, sw --> mZ
-      # mW, sw --> mZ
       functions["mZ"] = "mW / sqrt(1-sw*sw)"
       types["mZ"] = "R"
+   elif keys == set(["alpha", "GF", "mZ"]):
+      # alpha --> e
+      functions["e"] = "sqrt(4*pi*alpha))"
+      types["e"] = "R"
+      # GF, mZ, alpha --> mW
+      functions["mW"] = "sqrt(mZ*mZ/2+sqrt(mZ*mZ*mZ*mZ/4-pi*alpha*mZ*mZ/sqrt(2)/GF))"
+      types["mW"] = "R"
+      # mW, mZ --> sw
+      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
+      types["sw"] = "R"
    else:
       raise Exception("Invalid EW Scheme.")
 #---#] def init_ew:
