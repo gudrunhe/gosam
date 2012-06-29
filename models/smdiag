@@ -219,27 +219,27 @@
 [ntaubar, ntau, chi; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
 [Dbar, U, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Dbar, C, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Dbar, T, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Dbar, C, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Dbar, T, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
-[Sbar, U, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Sbar, U, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 [Sbar, C, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Sbar, T, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Sbar, T, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
-[Bbar, U, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Bbar, C, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Bbar, U, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Bbar, C, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 [Bbar, T, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
 [Ubar, D, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Ubar, S, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Ubar, B, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Ubar, S, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Ubar, B, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
-[Cbar, D, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Cbar, D, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 [Cbar, S, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Cbar, B, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Cbar, B, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
-[Tbar, D, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
-[Tbar, S, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Tbar, D, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
+%[Tbar, S, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 [Tbar, B, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
 [ep, ne, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
