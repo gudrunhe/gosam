@@ -145,7 +145,8 @@ contains
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       real(ki), dimension(2:3) :: irp[%
-   @if extension golem95 %]integer :: tmp_red_int, i [%
+   @if extension golem95 %]
+      integer :: tmp_red_int, i [%
    @end @if %]
       call samplitudel01(vecs, scale2, amp, ok, h)
       if(SP_check) then[%
