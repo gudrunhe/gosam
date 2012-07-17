@@ -144,13 +144,14 @@ contains
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      real(ki), dimension(2:3) :: irp
-      integer :: tmp_red_int, [%
-   @if extension golem95 %] i [%
+      real(ki), dimension(2:3) :: irp[%
+   @if extension golem95 %]integer :: tmp_red_int, i [%
    @end @if %]
       call samplitudel01(vecs, scale2, amp, ok, h)
-      if(SP_check) then
-      tmp_red_int=reduction_interoperation
+      if(SP_check) then[%
+   @if extension golem95 %]
+      tmp_red_int=reduction_interoperation[%
+   @end @if %]
       call ir_subtraction(vecs, scale2, irp)
       if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold1) then
       if(SP_verbosity .eq. 3) write(*,*) "SINGLE POLE CHECK FAILED !!"[%
