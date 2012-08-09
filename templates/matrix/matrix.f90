@@ -169,11 +169,13 @@ contains
                write(*,*)
                write(42,'(A7)')"<event>"
                write(42,'(A29,A30)') "Single pole check failed for:", "[% process_name %]"
-               write(42,'(3x,3A23)') "SP_chk_threshold2", "single pole", "IR single pole"
-               write(42,'(A2,3(2x,D23.16))') "[%num_legs%]", SP_chk_threshold2, amp(3)/amp(1), irp(2)/amp(1)
+               write(42,'(A4,4A23)') "legs","SP_chk_threshold2", "Born       ", "single pole   ", "IR single pole"
+               write(42,'(A2,4(2x,D23.16))') "[%num_legs%]", SP_chk_threshold2, amp(1), amp(3)/amp(1), irp(2)/amp(1)
+               write(42,'(A9)')"<momenta>"
                do i=1,[%num_legs%]
-                  write(42,'(4(2x,D23.16))') vecs(i,:)
+                  write(42,'(2x,4(2x,D23.16))') vecs(i,:)
                enddo
+               write(42,'(A10)')"</momenta>"
                write(42,'(A8)')"</event>"
             endif
          else
