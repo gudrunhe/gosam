@@ -930,7 +930,8 @@ def transform_color(expr, colors, xidx):
 					order[2] = 3
 				elif order == [8, 0, 3]:
 					order[1] = -3
-
+				elif order == [0, -3, 3]:
+					order[0] = 8
 				if order == [8, -3, 3]:
 					return head(indices[0], indices[1], indices[2])
 				elif order == [8, 3, -3]:

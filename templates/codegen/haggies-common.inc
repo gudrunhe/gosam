@@ -16,3 +16,4 @@
 	#	real, real, real, real, real, real, real -> real;
 
 	complexconjugate : complex -> complex = "conjg(%2$s)";
+	csqrt : complex -> complex = "sqrt(%2$s)";

@@ -249,7 +249,7 @@ pure function f(tau)
    ctau = cmplx(tau, 0.0d0, kind(1.0d0))
 
    if (tau .le. 1.0d0) then
-        f = (asin(sqrt(ctau)))**2
+        f = (asin(abs(sqrt(ctau))))**2
    else
         ipi = cmplx(0.0d0, 4.0d0 * atan(1.0d0), kind(1.0d0))
         sq = sqrt(1.0d0 - 1.0d0/tau)

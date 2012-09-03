@@ -127,20 +127,20 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
    proplorentz(sDUMMY1, vDUMMY1, 0, 0, ?tail);
 
-#IfDef `MASSIVEBUBBLE'
+*#IfDef `MASSIVEBUBBLE'
 *
 * NOTE: If you plan to insert your own renormalization code here
 *       check if you need to undefine MQSE:
 *
 * #Undefine MQSE
 *
-   #$MASSIVEBUBBLESIZE = nargs_(`MASSIVEBUBBLE') / 3;
-   #If `$MASSIVEBUBBLESIZE' == 1
-      #Message This is a massive tadpole: `MASSIVEBUBBLE'
-   #Else
-      #Message This is a massive two-point function: `MASSIVEBUBBLE'
-   #EndIf
-#EndIf
+*   #$MASSIVEBUBBLESIZE = nargs_(`MASSIVEBUBBLE') / 3;
+*   #If `$MASSIVEBUBBLESIZE' == 1
+*      #Message This is a massive tadpole: `MASSIVEBUBBLE'
+*   #Else
+*      #Message This is a massive two-point function: `MASSIVEBUBBLE'
+*   #EndIf
+*#EndIf
 
 #IfDef `MQSE'
   SplitArg (p1), proplorentz;
@@ -159,19 +159,34 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
   Id fDUMMY1(?head,  vDUMMY1?, -p1, ?tail) =
      fDUMMY1(?head, -vDUMMY1,   p1, ?tail);
 
-  Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, sDUMMY2?,
-        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * sDUMMY1 / 4 *
+ Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, sDUMMY2?,
+        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)) / 4 *
        (
-      + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
-        inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-      + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
+      + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))))*
+        inv(csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
+      + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
      ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
   Id fDUMMY1(ZERO, p1, vDUMMY2?, p1, sDUMMY1?, sDUMMY2?,
+        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = - deltaOS * csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)) / 4 *
+       (
+      + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))))*
+        inv(csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
+      - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
+     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
+
+ Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, ZERO,
+        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * sDUMMY1 / 4 *
+       (
+      + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-sDUMMY1*sDUMMY1))*
+        inv(sDUMMY1*sDUMMY1)
+      + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*sDUMMY1*sDUMMY1)
+     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
+  Id fDUMMY1(ZERO, p1, vDUMMY2?, p1, sDUMMY1?, ZERO,
         iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = - deltaOS * sDUMMY1 / 4 *
        (
-      + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+sDUMMY1*(sDUMMY1+i_*sDUMMY2)))*
-        inv(sDUMMY1*(sDUMMY1+i_*sDUMMY2))
-      - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*sDUMMY1*(sDUMMY1+i_*sDUMMY2))
+      + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+sDUMMY1*sDUMMY1))*
+        inv(sDUMMY1*sDUMMY1)
+      - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*sDUMMY1*sDUMMY1)
      ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
 
    #IfDef `DRED'
