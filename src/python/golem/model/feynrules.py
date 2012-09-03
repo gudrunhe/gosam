@@ -17,7 +17,9 @@ LINE_STYLES = {
 		'wavy': 'photon',
 		'curly': 'gluon',
 		'dashed': 'scalar',
-		'dotted': 'ghost'
+		'dotted': 'ghost',
+		'swavy' : 'majorana',
+		'scurly' : 'majorana'
 }
 
 sym_cmath = ex.SymbolExpression("cmath")
@@ -142,8 +144,12 @@ class Model:
 			latex_names[canonical_name] = p.texname
 
 			line_type = p.line.lower()
+			# FIX- 15.08.12 GC # until FeynRules can accomodate charged scalars
 			if line_type in LINE_STYLES:
-				line_types[canonical_name] = LINE_STYLES[line_type]
+				if (line_type == 'dashed') and (abs(p.color) == 3):
+					line_types[canonical_name] = 'chargedscalar'
+				else:
+					line_types[canonical_name] = LINE_STYLES[line_type]
 			else:
 				line_types[canonical_name] = 'scalar'
 
@@ -456,7 +462,7 @@ class Model:
 					if name in vfunctions:
 						if vfunctions[name] != power:
 							warning(("Vertex %s has ambiguous powers in %s (%d,%d). "
-								% (v.name, vfunctions[name], power))
+								% (v.name, name, vfunctions[name], power))
 									+ "I will use %d." % vfunctions[name])
 					else:
 						vfunctions[name] = power

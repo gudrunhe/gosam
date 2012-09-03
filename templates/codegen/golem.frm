@@ -304,6 +304,7 @@ Id out(?all) = 1;
 Id ZERO = 0;
 
 #call zeroes
+Id csqrt(0) = 0;
 *---#] Process Legs:
 
 Repeat Id SplitLorentzIndex(iDUMMY1?, iDUMMY2?, ?tail1) *

@@ -534,7 +534,21 @@ contains
                write(*,'(A37,I5)') "Illegal statement in SLHA file, line ", lnr
                if (present(ierr)) ierr = 1
                return
-            end if
+            end if[$
+         @for slha_blocks lower $][$ 
+            @select $_ @case decay $]
+         elseif (line(1:1) .eq. 'D') then
+            if (line(1:5) .eq. 'DECAY') then
+               line = adjustl(line(6:l))
+               call read_slha_line_decay(line, i)
+               block = 2            
+            else
+               write(*,'(A37,I5)') "Illegal statement in SLHA file, line ", lnr
+               if (present(ierr)) ierr = 1
+               return
+            end if[$
+            @end @select $][$
+         @end @for $]
          else
             ! read a parameter line
             select case(block)[$
@@ -555,8 +569,48 @@ contains
       end do loop1
       if (present(ierr)) ierr = 0
    end subroutine read_slha[$
-   @for slha_blocks lower dimension=1 $]
+   @for slha_blocks lower dimension=1 $][$ 
+      @select $_ @case decay $]
+   subroutine read_slha_block_[$ $_ $](line, ierr)
+   !  This subroutine reads the 'branching ratios' of 
+   !  the slha file: these are just thrown away
+      implicit none
+      character(len=*), intent(in) :: line
+      integer, intent(out), optional :: ierr
+      integer :: idx1,idx2,ioerr,nda
+      real(ki) :: value
+      read(line,*,iostat=ioerr) value, nda, idx1, idx2
+      if (ioerr .ne. 0) then
+         if (present(ierr)) ierr = 1
+         return
+      end if
+      if (present(ierr)) ierr = 0
+   end subroutine read_slha_block_[$ $_ $]
+   subroutine read_slha_line_[$ $_ $](line, ierr)
+      implicit none
+      character(len=*), intent(in) :: line
+      integer, intent(out), optional :: ierr[$
+      @for slha_entries index=idx1$][$
+         @if is_first $]
+      integer :: idx1,ioerr
+      real(ki) :: value
 
+      read(line,*,iostat=ioerr) idx1, value
+      if (ioerr .ne. 0) then
+         if (present(ierr)) ierr = 1
+         return
+      end if
+      select case(idx1)[$
+         @end @if is_first $]
+      case([$ idx1 $])
+         [$ $_ $] = value[$
+         @if is_last $]
+      end select[$
+         @end @if is_last $][$
+      @end @for$]
+      if (present(ierr)) ierr = 0
+   end subroutine read_slha_line_[$ $_ $][$
+   @else $]
    subroutine read_slha_block_[$ $_ $](line, ierr)
       implicit none
       character(len=*), intent(in) :: line
@@ -580,7 +634,8 @@ contains
          @end @if is_last $][$
       @end @for$]
       if (present(ierr)) ierr = 0
-   end subroutine read_slha_block_[$ $_ $][$
+   end subroutine read_slha_block_[$ $_ $][$ 
+   @end @select $][$
    @end @for $][$
    @for slha_blocks lower dimension=2 $]
    subroutine read_slha_block_[$ $_ $](line, ierr)
@@ -611,6 +666,7 @@ contains
       end select[$
          @end @if is_last $][$
       @end @for$]
+      if (present(ierr)) ierr = 0
    end subroutine read_slha_block_[$ $_ $][$
    @end @for $]
 !---#] SLHA READER:[$

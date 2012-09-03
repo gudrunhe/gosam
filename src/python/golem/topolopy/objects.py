@@ -784,7 +784,8 @@ class DiagramComponent:
          return True
       r1 = rays[0]
       rem = rays[1:]
-
+      if r1[0:4] == 'part':
+         r1='\'%s\'' % r1
       for i, q in enumerate(query):
          if q is None:
             if self.match_fields(rem, query[:i] + query[i+1:]):

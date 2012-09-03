@@ -451,7 +451,7 @@ class field:
 		"""
 		styles = {
 				'fermion': ['\\ArrowLine', '\\ArrowArc', '\\ArrowArcn'],
-				'maiorana': ['\\Line', '\\CArc', '\\CArc'],
+				'majorana': ['\\Line', '\\CArc', '\\CArc'],
 				'ghost': ['\\DashArrowLine', '\\DashArrowArc', '\\DashArrowArcn',
 					'ghdashsize'],
 				'scalar': ['\\DashLine', '\\DashCArc', '\\DashCArc',
@@ -459,7 +459,9 @@ class field:
 				'gluon': ['\\Gluon', '\\GlueArc', '\\GlueArc',
 					'gamplitude', 'windings'],
 				'photon': ['\\Photon', '\\PhotonArc', '\\PhotonArc',
-					'pamplitude', 'wiggles']
+					'pamplitude', 'wiggles'],
+				'chargedscalar' : ['\\DashArrowLine', '\\DashArrowArc', '\\DashArrowArcn',
+					'sdashsize']
 			}
 
 		if lookup is not None:
