@@ -187,21 +187,6 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
      ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
 
  Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, ZERO,
-        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)) / 4 *
-       (
-      + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))))*
-        inv(csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
-      + 3*(4-2*deltaHV)*Qt2*inv(vDUMMY1.vDUMMY1-3*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
-     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
-  Id fDUMMY1(ZERO, p1, vDUMMY2?, p1, sDUMMY1?, sDUMMY2?,
-        iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = - deltaOS * csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)) / 4 *
-       (
-      + (6*p1.vDUMMY2 + 3*(vDUMMY2.vDUMMY2+csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))))*
-        inv(csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
-      - 3*(4-2*deltaHV)*Qt2*inv(vDUMMY2.vDUMMY2-3*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2))*csqrt(sDUMMY1*(sDUMMY1-i_*sDUMMY2)))
-     ) * NCContainer(1, iDUMMY2, iDUMMY1) * d(iDUMMY3, iDUMMY4);
-
-  Id fDUMMY1(vDUMMY1?, p1, ZERO, p1, sDUMMY1?, ZERO,
         iDUMMY1?, iDUMMY2?, iDUMMY3?, iDUMMY4?) = + deltaOS * sDUMMY1 / 4 *
        (
       + (6*p1.vDUMMY1 + 3*(vDUMMY1.vDUMMY1-sDUMMY1*sDUMMY1))*
@@ -331,6 +316,7 @@ Id out(?all) = 1;
 Id ZERO = 0;
 
 #call zeroes
+Id csqrt(0) = 0;
 *---#] Process Legs:
 
 Repeat Id SplitLorentzIndex(iDUMMY1?, iDUMMY2?, ?tail1) *
