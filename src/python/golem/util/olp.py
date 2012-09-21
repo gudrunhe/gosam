@@ -10,7 +10,8 @@ class OLPSubprocess:
    def __init__(self, id,
          process_name,
          process_path,
-         p_ini, p_fin):
+         p_ini, p_fin,
+         key):
       self.id = id
       self.process_name = process_name
       self.process_path = process_path
@@ -19,6 +20,7 @@ class OLPSubprocess:
       self.crossings = {}
       self.ids = {id: process_name}
       self.channels = {}
+      self.key = key
 
       self.num_legs = len(p_ini) + len(p_fin)
       self.num_helicities = -1
@@ -35,6 +37,9 @@ class OLPSubprocess:
    def assignNumberHelicities(self, nh, gh):
       self.num_helicities = nh
       self.generated_helicities = gh
+
+   def getkey(self):
+      return list(self.key)
 
    def getIDs(self):
       return list(self.ids.keys())
@@ -68,7 +73,7 @@ class OLPSubprocess:
       return subproc_conf
 
 
-def getSubprocess(olpname, id, inp, out, subprocesses, model, use_crossings):
+def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings):
 
    def getparticle(name):
       return golem.util.tools.interpret_particle_name(name, model)
@@ -86,9 +91,11 @@ def getSubprocess(olpname, id, inp, out, subprocesses, model, use_crossings):
       process_name = "p%d_%s_%s" \
             % (id, "".join(s_ini), "".join(s_fin))
    process_name = process_name.lower()
+   originalkey = tuple(sorted(s_ini + s_fin))
 
    if use_crossings:
       key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
+
    else:
       key = tuple(s_ini + [p.getPartner() for p in p_fin])
 
@@ -96,8 +103,9 @@ def getSubprocess(olpname, id, inp, out, subprocesses, model, use_crossings):
       sp = subprocesses[key]
       sp.addCrossing(id, process_name, p_ini, p_fin)
       is_new = False
+
    else:
-      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin)
+      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey)
       subprocesses[key] = sp
       is_new = True
 
@@ -284,6 +292,14 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       **opts
       ):
 
+   def getquarktype(quark):
+      # keep only first capital letter
+      # trick to transform anti-quarks in quarks
+      if list(quark)[0].isupper():
+         return list(quark)[0]
+      else:
+         return quark   
+      
    syntax_extensions = [
       "single_quotes",
       "double_quotes",
@@ -349,6 +365,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          golem.util.tools.message("Creating directory %r" % imodel_path)
          os.mkdir(imodel_path)
       golem.util.tools.prepare_model_files(conf, imodel_path)
+      
+      conf["modeltype"] = conf["model"]
+
       conf["model"] = os.path.join(imodel_path,
             golem.util.constants.MODEL_LOCAL)
       #---#] Import model file once for all subprocesses:
@@ -424,11 +443,12 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    chelis    = {}
    max_occupied_channel = -1
    subprocesses = {}
+   subprocesses_flav = {}
 
    if file_ok:
       for id, inp, outp in contract_file.processes():
          subprocess, is_new = getSubprocess(
-               olp_process_name, id, inp, outp, subprocesses, model,
+               olp_process_name, id, inp, outp, subprocesses, subprocesses_flav, model,
                use_crossings)
          if is_new:
             subdir = str(subprocess)
@@ -441,8 +461,62 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                   error(str(err))
 
       # Now we run the loop again since all required crossings are added
+
+      # store initial symmetries infos
+      start_symmetries = conf["symmetries"]
+
       for subprocess in subprocesses.values():
          process_path = subprocess.getPath(path)
+## -- gio start
+         key = subprocess.getkey()
+         conf["symmetries"] = start_symmetries
+         print(subprocess)
+         if conf["modeltype"] == 'sm' or conf["modeltype"] == 'smdiag':
+            # check D,Dbar
+            if key.count('D')*10+key.count('Dbar') == 1 and 'mD' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-1=+"
+            elif key.count('D')*10+key.count('Dbar') == 10  and 'mD' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %1=-"
+            # check U,Ubar
+            if key.count('U')*10+key.count('Ubar') == 1  and 'mU' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-2=+"
+            elif key.count('U')*10+key.count('Ubar') == 10  and 'mU' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %2=-"
+            # check S,Sbar
+            if key.count('S')*10+key.count('Sbar') == 1 and 'mS' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-3=+"
+            elif key.count('S')*10+key.count('Sbar') == 10  and 'mS' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %3=-"
+            # check C,Cbar
+            if key.count('C')*10+key.count('Cbar') == 1  and 'mC' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-4=+"
+            elif key.count('C')*10+key.count('Cbar') == 10  and 'mC' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %4=-"
+            # check B,Bbar
+            if key.count('B')*10+key.count('Bbar') == 1 and 'mB' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-5=+"
+            elif key.count('B')*10+key.count('Bbar') == 10  and 'mB' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %5=-"
+            # check T,Tbar
+            if key.count('T')*10+key.count('Tbar') == 1  and 'mT' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %-6=+"
+            elif key.count('T')*10+key.count('Tbar') == 10  and 'mT' in conf[golem.properties.zero]:
+               conf["symmetries"] += ", %6=-"
+            # neutrinos:
+            if key.count('ne') != 0: 
+               conf["symmetries"] += ", %12=-"
+            if key.count('nmu') != 0: 
+               conf["symmetries"] += ", %14=-"
+            if key.count('ntau') != 0: 
+               conf["symmetries"] += ", %16=-"
+            if key.count('nebar') != 0: 
+               conf["symmetries"] += ", %-12=+"
+            if key.count('nmubar') != 0: 
+               conf["symmetries"] += ", %-14=+"
+            if key.count('ntaubar') != 0: 
+               conf["symmetries"] += ", %-16=+"                  
+## -- gio end
+
          subprocess_conf = subprocess.getConf(conf, path)
          subprocess_conf["golem.name"] = "GoSam"
          subprocess_conf["golem.version"] = ".".join(map(str,
