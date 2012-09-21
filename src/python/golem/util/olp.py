@@ -470,7 +470,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 ## -- gio start
          key = subprocess.getkey()
          conf["symmetries"] = start_symmetries
-         print(subprocess)
          if conf["modeltype"] == 'sm' or conf["modeltype"] == 'smdiag':
             # check D,Dbar
             if key.count('D')*10+key.count('Dbar') == 1 and 'mD' in conf[golem.properties.zero]:
