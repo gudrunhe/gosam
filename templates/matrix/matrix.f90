@@ -83,9 +83,15 @@ contains
    @if extension samurai %]
          call initsamurai('diag',samurai_scalar,&
          &                samurai_verbosity,samurai_test)[%
+   @end @if %][%
+   @if extension golem95 %]
+      if(SP_check) then
+         open(unit=42, file='bad.pts', status='unknown', action='write', access='append')
+      end if[%
    @end @if %]
       end if[%
 @end @select %]
+
       call init_functions()
       call init_color()
 
@@ -120,7 +126,7 @@ contains
    @end @if %][%
    @if extension golem95 %]
          call tear_down_golem95()
-[%
+         close(unit=42)[%
    @end @if %]
       end if[%
 @end @select %]
@@ -138,27 +144,43 @@ contains
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      real(ki), dimension(2:3) :: irp
-      integer :: tmp_red_int
+      real(ki), dimension(2:3) :: irp[%
+   @if extension golem95 %]
+      integer :: tmp_red_int, i [%
+   @end @if %]
       call samplitudel01(vecs, scale2, amp, ok, h)
-      if(SP_check) then
-      tmp_red_int=reduction_interoperation
+      if(SP_check) then[%
+   @if extension golem95 %]
+      tmp_red_int=reduction_interoperation[%
+   @end @if %]
       call ir_subtraction(vecs, scale2, irp)
       if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold1) then
-      if(SP_verbosity .eq. 2) write(*,*) "SINGLE POLE CHECK FAILED !!"[%
+      if(SP_verbosity .eq. 3) write(*,*) "SINGLE POLE CHECK FAILED !!"[%
    @if extension golem95 %]
       if(SP_rescue) then
          reduction_interoperation = 1
          call samplitudel01(vecs, scale2, amp, ok, h)
          if(abs((amp(3)-irp(2))/amp(1)) .gt. (SP_chk_threshold2)) then
-            if(SP_verbosity .ge. 1) write(*,*) "RESCUE FAILED !!"
-            if(SP_verbosity .ge. 1) write(*,*) "data:"
-            if(SP_verbosity .ge. 1) write(*,*) "Single pol rel.dif., SP_chk_threshold2"
-            if(SP_verbosity .ge. 1) write(*,*) amp(3)/amp(1)-irp(2)/amp(1), SP_chk_threshold2
-            if(SP_verbosity .ge. 1) write(*,*)
+            if(SP_verbosity .ge. 2) then
+               write(*,*) "RESCUE FAILED !!"
+               write(*,*) "data:"
+               write(*,*) "Single pol rel.dif., SP_chk_threshold2"
+               write(*,*) amp(3)/amp(1)-irp(2)/amp(1), SP_chk_threshold2
+               write(*,*)
+               write(42,'(A7)')"<event>"
+               write(42,'(A29,A30)') "Single pole check failed for:", "[% process_name %]"
+               write(42,'(A4,4A23)') "legs","SP_chk_threshold2", "Born       ", "single pole   ", "IR single pole"
+               write(42,'(A2,4(2x,D23.16))') "[%num_legs%]", SP_chk_threshold2, amp(1), amp(3)/amp(1), irp(2)/amp(1)
+               write(42,'(A9)')"<momenta>"
+               do i=1,[%num_legs%]
+                  write(42,'(2x,4(2x,D23.16))') vecs(i,:)
+               enddo
+               write(42,'(A10)')"</momenta>"
+               write(42,'(A8)')"</event>"
+            endif
          else
-            if(SP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
-            if(SP_verbosity .ge. 2) write(*,*)
+            if(SP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
+            if(SP_verbosity .ge. 3) write(*,*)
          end if
          reduction_interoperation = tmp_red_int
       end if[%

@@ -7,24 +7,19 @@ import golem.util.path
 import golem.util.config
 import golem.util.tools
 
-class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
+class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
-	def setup(self, loopcache, loopcache_tot, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles,
-		        eprops):
+	def setup(self, loopcache, in_particles, out_particles, tree_signs,
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks)
 		self._loopcache = loopcache
-		self._loopcache_tot = loopcache_tot
 		self._partitions = loopcache.partition()
-		self._partitions_tot = loopcache_tot.partition()
 		self._roots = sorted(self._partitions.keys())
-		self._roots_tot = sorted(self._partitions_tot.keys())
 		self._latex_names = golem.util.tools.getModel(conf).latex_parameters
 		self._diagram_flags_0 = lo_flags
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
-		self._eprops = eprops
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -437,36 +432,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		else:
 			return " ".join(map(str,self._diagram_flags_1.keys()))
 
-	def diagram_sum(self, *args, **opts):
-		return ",".join(map(str,self._eprops))
-
-	def subdiagram_sum(self, *args, **opts):
-		nopts = opts.copy()
-		for kw in ["group", "var","nf"]:
-			if kw in nopts:
-				del nopts[kw]
-		if "group" in opts:
-			g = self._eval_int(opts["group"], **nopts)
-			diagrams_tot = self._loopcache_tot.diagrams
-			dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
-			value_name = self._setup_name("var", "$_", opts)
-			nf_name = self._setup_name("nf", "is_nf", opts)
-			nf_lst = set([])
-			props = Properties()
-			for idx in self._eprops[g]:
-				if diagrams_tot[idx].sign() > 0:
-					ssgn = "+"
-				else:
-					ssgn = "-"
-				if diagrams_tot[idx].isNf():
-					nf_lst.add(idx)
-				props.setProperty(dsgn_name, ssgn)
-				props.setProperty(nf_name, idx in nf_lst)
-				props.setProperty(value_name, str(idx))
-				yield props
-		else:
-			raise TemplateError("[% subdiagram_sum %] must be called per group")
-
 	def use_flags_0(self, *args, **opts):
 		return len(self._diagram_flags_0.keys()) > 1
 
@@ -618,140 +583,5 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(dsgn_name, ssgn)
 			props.setProperty(flags_name,
 					" ".join(diagrams[diagram_index].filter_flags))
-			yield props
-
-	def diagrams_tot(self, *args, **opts):
-		nopts = opts.copy()
-		for kw in ["loopsize", "group", "var", "pinches", "first", "last",
-				"indices", "index", "shift", "rank", "idxshift",
-				"unpinched", "invert", "nf", "global_index",
-				"mqse"]:
-			if kw in nopts:
-				del nopts[kw]
-
-		diagrams_tot = self._loopcache_tot.diagrams
-		keep_lst = {}
-		pinch_lst = {}
-		shift_lst = {}
-		rank_lst = {}
-		nf_lst = set([])
-		top_se = set([])
-
-		if "group" in opts:
-			g = self._eval_int(opts["group"], **nopts)
-			if g >= 0 and g < len(self._roots_tot):
-				fltr = []
-				root = self._roots_tot[g]
-				for idx, keep, pinch, shift in self._partitions_tot[root]:
-					fltr.append(idx)
-					keep_lst[idx] = keep
-					pinch_lst[idx] = pinch
-					#if shift >= 1000 or shift <= -1000:
-					#	shift_lst[idx] = 0
-					#else:
-					#   shift_lst[idx] = shift
-					shift_lst[idx] = shift
-					rank_lst[idx] = diagrams_tot[idx].rank()
-					if diagrams_tot[idx].isNf():
-						nf_lst.add(idx)
-					if diagrams_tot[idx].isMassiveQuarkSE():
-						top_se.add(idx)
-			else:
-				raise TemplateError("Unknown group in [% diagrams %]")
-		else:
-			raise TemplateError("[% diagrams %] must be called per group")
-
-
-		if "loopsize" in opts:
-			ls = self._eval_int(opts["loopsize"], **nopts)
-			fltr = list(filter(lambda d: diagrams_tot[d].size() == ls, fltr))
-
-		first_name = self._setup_name("first", "is_first", opts)
-		last_name = self._setup_name("last", "is_last", opts)
-		idx_name = self._setup_name("index", "index", opts)
-		value_name = self._setup_name("var", "$_", opts)
-
-		keep_name = self._setup_name("indices", "indices", opts)
-		pinch_name = self._setup_name("pinches", "pinches", opts)
-		shift_name = self._setup_name("shift", "shift", opts)
-		sign_name = self._setup_name("sign", "sign", opts)
-		rank_name = self._setup_name("rank", "rank", opts)
-		nf_name = self._setup_name("nf", "is_nf", opts)
-		mqse_name = self._setup_name("mqse", "is_mqse", opts)
-		dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
-		globi_name = self._setup_name("global_index", "global_index", opts)
-		flags_name = self._setup_name("flags", "flags", opts)
-
-		if "idxshift" in opts:
-			idxshift = int(opts["idxshift"])
-		else:
-			idxshift = 0
-
-		if "unpinched" in opts:
-			if len(opts["unpinched"].strip()) > 0:
-				unpinched = map(int, str(self._eval_int(opts["unpinched"])))
-			else:
-				unpinched = []
-		else:
-			unpinched = []
-
-		unpinched = set(unpinched)
-
-		if "invert" in opts:
-			keep_null_diagrams = self._eval_bool(opts["invert"])
-		else:
-			keep_null_diagrams = False
-
-		old_fltr = fltr
-		fltr = []
-		orig_index = {}
-
-		for oi, diagram_index in enumerate(old_fltr):
-			pinches = set(pinch_lst[diagram_index])
-			some_pinch_is_zero = bool(pinches.intersection(unpinched))
-			if keep_null_diagrams == some_pinch_is_zero:
-				fltr.append(diagram_index)
-				orig_index[diagram_index] = oi
-
-		N = len(fltr)
-		props = Properties()
-
-		for idx, diagram_index in enumerate(fltr):
-			is_first = idx == 0
-			is_last = idx == N - 1
-
-			pinches = set(pinch_lst[diagram_index])
-
-			shift = shift_lst[diagram_index]
-			if shift.sign() >= 0:
-				qsign = "+"
-			else:
-				qsign = "-"
-
-			shift_vec = shift.shift_vector()
-			if diagrams_tot[diagram_index].sign() > 0:
-				ssgn = "+"
-			else:
-				ssgn = "-"
-
-			props.setProperty(first_name, is_first)
-			props.setProperty(last_name, is_last)
-			props.setProperty(value_name, diagram_index)
-			props.setProperty(idx_name, idx)
-			props.setProperty(keep_name,
-					",".join(map(str,map(lambda x: x+idxshift,
-						keep_lst[diagram_index]))))
-			props.setProperty(pinch_name,
-					",".join(map(str,map(lambda x: x+idxshift,
-						pinch_lst[diagram_index]))))
-			props.setProperty(shift_name, shift_vec)
-			props.setProperty(sign_name, qsign)
-			props.setProperty(rank_name, rank_lst[diagram_index])
-			props.setProperty(globi_name, orig_index[diagram_index])
-			props.setProperty(nf_name, diagram_index in nf_lst)
-			props.setProperty(mqse_name, diagram_index in top_se)
-			props.setProperty(dsgn_name, ssgn)
-			props.setProperty(flags_name,
-					" ".join(diagrams_tot[diagram_index].filter_flags))
 			yield props
 

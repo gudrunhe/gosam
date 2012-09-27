@@ -126,7 +126,7 @@ subroutine     setup_parameters()
    ! samurai_scalar = 2
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 2
-   samurai_group_numerators = .false.
+    samurai_group_numerators = .false.
 
    Nf    = 2.0_ki
    Nfgen = 2.0_ki

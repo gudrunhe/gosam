@@ -68,6 +68,9 @@ AutoDeclare Vectors spva;
 * - Qt2 = \tilde{Q}^2
 *
 Symbol Qt2;
+[% @if diagsum %]Symbol Nfrat;[%
+@end @if %]
+
 
 #If `USETOPOLYNOMIAL'
    ExtraSymbols,underscore,`EXTRAPAT';
@@ -77,8 +80,17 @@ Symbol Qt2;
 .global
 
 #include- diagrams-`LOOPS'.hh #global
-#include- model.hh
+#include- model.hh[%
+@if diagsum %]
+#If `LOOPS' == 0
+#include- diagrams-`LOOPS'.hh #diagram`DIAG'
+#Else
+F diag1,...,diag`DIAGRAMCOUNT';
+#include- diagsum.frm #diag`DIAG'
+#EndIf[%
+@else %]
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
+@end @if %][%
 @select r2
 @case explicit only %]
 #If `LOOPS' == 1
