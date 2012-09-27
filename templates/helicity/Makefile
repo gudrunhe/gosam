@@ -5,7 +5,10 @@
 
 include ../Makefile.conf
 
-HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
+HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
+@if diagsum %]
+HAVE_ORIG_DIAGRAM_FILE=$(if $(shell grep 'Local' ../diagrams-1.hh),1,0)[%
+@end @if %]
 
 OBJECTS= \
 	globals.o amplitudeh[%helicity%].o[%
@@ -97,7 +100,7 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
 			@end @if %][%
-   	@end @for %][%
+	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %]
 
@@ -106,7 +109,14 @@ GENERATED_SRC=[%
 
 compile: source amplitude[%helicity%].a
 
-source:
+source:[%
+@if diagsum %]
+ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
+	$(shell mv ../diagrams-1.hh ../diags-1.hh)
+	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
+	$(shell rm ../diags-1.hh)
+endif[%
+@end @if %]
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(MAKE) -f Makefile.source source
 endif

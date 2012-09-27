@@ -55,6 +55,8 @@
             @end @if %]`r[%$_%]'[%
          @end @for %])[%
       @end @select %][%
+      @if diagsum %][%
+      @else %][%
       @select diagram_sign
       @case + %][%
          @if is_nf %]
@@ -65,7 +67,8 @@
          @if is_nf %]Nfrat[%
          @else %]1[%
          @end @if %]"[%
-      @end @select %]
+      @end @select %][%
+      @end @if %]
       #break
 *------#] Diagram [%diag%]:[%
    @end @for diagrams %]

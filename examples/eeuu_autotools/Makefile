@@ -36,6 +36,10 @@ $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
 	$(MAKE) -C ntest clean
+	$(MAKE) -C ngolem uninstall
+	$(MAKE) -C ngolem clean
 	rm -f ngolem/.golem.dir
 	rm -f ngolem/Makefile
-	$(MAKE) -C ngolem clean
+	rm -fr include
+	rm -fr lib
+

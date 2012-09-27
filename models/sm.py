@@ -325,6 +325,39 @@ functions = {
    'gnmua':  ' gZ*(1/4)',
    'gntaua': ' gZ*(1/4)',
 
+   'gUl':    'gUv+gUa',
+   'gCl':    'gCv+gCa',
+   'gTl':    'gTv+gTa',
+
+   'gDl':    'gDv+gDa',
+   'gSl':    'gSv+gSa',
+   'gBl':    'gBv+gBa',
+
+   'gUr':    'gUv-gUa',
+   'gCr':    'gCv-gCa',
+   'gTr':    'gTv-gTa',
+
+   'gDr':    'gDv-gDa',
+   'gSr':    'gSv-gSa',
+   'gBr':    'gBv-gBa',
+
+   'gel':    'gev+gea',
+   'gmul':    'gmuv+gmua',
+   'gtaul':    'gtauv+gtaua',
+
+   'ger':    'gev-gea',
+   'gmur':    'gmuv-gmua',
+   'gtaur':    'gtauv-gtaua',
+
+   'gnel':    'gnev+gnea',
+   'gner':    'gnev-gnea',
+
+   'gnmul':    'gnmuv+gnmua',
+   'gnmur':    'gnmuv-gnmua',
+
+   'gntaul':    'gntauv+gntaua',
+   'gntaur':    'gntauv-gntaua',
+
    'gWWZZ': '-(cw^2/sw^2)',
    'gWWAZ': ' (cw/sw)',
    'gWWAA': '-1',
@@ -432,6 +465,12 @@ types = {
    'gnev': 'R', 'gnea': 'R', 'gnmuv': 'R', 'gnmua': 'R',
    'gntauv': 'R', 'gntaua': 'R', 'gev': 'R', 'gea': 'R',
    'gmuv': 'R', 'gmua': 'R', 'gtauv': 'R', 'gtaua': 'R',
+   'gUl': 'R', 'gUr': 'R', 'gDl': 'R', 'gDr': 'R',
+   'gCl': 'R', 'gCr': 'R', 'gSl': 'R', 'gSr': 'R',
+   'gTl': 'R', 'gTr': 'R', 'gBl': 'R', 'gBr': 'R',
+   'gnel': 'R', 'gner': 'R', 'gnmul': 'R', 'gnmur': 'R',
+   'gntaul': 'R', 'gntaur': 'R', 'gel': 'R', 'ger': 'R',
+   'gmul': 'R', 'gmur': 'R', 'gtaul': 'R', 'gtaur': 'R',
    'gWWZZ': 'R', 'gWWAZ': 'R', 'gWWAA': 'R', 'gWWWW': 'R',
    'gWWZ': 'R',
    'gHHHH': 'R', 'gXXXX': 'R', 'gHHXX': 'R', 'gHHPP': 'R',
@@ -567,8 +606,8 @@ slha_locations = {
    'me': ('MASSES', [11]),
    'mmu': ('MASSES', [13]),
    'mtau': ('MASSES', [15]),
-   'mZ': ('MASSES', [23]),
-   'mW': ('MASSES', [24]),
+#   'mZ': ('MASSES', [23]),
+#   'mW': ('MASSES', [24]),
    'mH': ('MASSES', [25]),
    'wB': ('DECAY', [5]),
    'wT': ('DECAY', [6]),
@@ -647,9 +686,18 @@ def init_ew(**options):
       functions["mW"] = "e/2/sw/sqrt(sqrt(2)*GF)"
       types["mW"] = "R"
       # mW, sw --> mZ
-      # mW, sw --> mZ
       functions["mZ"] = "mW / sqrt(1-sw*sw)"
       types["mZ"] = "R"
+   elif keys == set(["alpha", "GF", "mZ"]):
+      # alpha --> e
+      functions["e"] = "sqrt(4*pi*alpha))"
+      types["e"] = "R"
+      # GF, mZ, alpha --> mW
+      functions["mW"] = "sqrt(mZ*mZ/2+sqrt(mZ*mZ*mZ*mZ/4-pi*alpha*mZ*mZ/sqrt(2)/GF))"
+      types["mW"] = "R"
+      # mW, mZ --> sw
+      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
+      types["sw"] = "R"
    else:
       raise Exception("Invalid EW Scheme.")
 #---#] def init_ew:
