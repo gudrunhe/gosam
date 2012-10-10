@@ -4,6 +4,7 @@
 	TR : real;
 	pi : real;
 	sqrt2, Sqrt2 : real = "sqrt2";
+	sqrt3, Sqrt3 : real = "sqrt3";
 	i_ : complex;
 
 	log, sqrt, sin, asin, cos, acos, tan, atan, exp : real -> real;

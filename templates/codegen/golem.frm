@@ -330,6 +330,10 @@ Multiply replace_(Sqrt2, sqrt2);
 Id sqrt2^2  = 2;
 Id sqrt2^-2 = 1/2;
 
+Multiply replace_(Sqrt3, sqrt3);
+Id sqrt3^2  = 3;
+Id sqrt3^-2 = 1/3;
+
 #if `LOOPS' == 1
 * Discrepancy between loop-integral libraries' convention 1/(i\pi^(n/2))
 * and 1/(2\pi)^n leaving out the pre-factors as described
