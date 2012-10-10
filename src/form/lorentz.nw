@@ -36,14 +36,14 @@
 \newcommand{\doc}[1]{\paragraph{\hspace{-3em}\sc #1}}
 
 \date{Last updated: \today}
-\author{Thomas Reiter}
+\author{The GoSam Collaboration\\Thomas Reiter}
 \title{Representations for Particles up to Spin~$3/2$}
 \email{\href{mailto:thomasr@@nikhef.nl}{\nolinkurl{thomasr@@nikhef.nl}}}
 \urladdr{\url{http://www.nikhef.nl/~thomasr}}
 
 \makeatletter
 \hypersetup{
-	pdfauthor={Thomas Reiter},
+	pdfauthor={Thomas Reiter / The GoSam Collaboration},
 	pdftitle={\@@title},
 	pdfsubject={High Energy Physics, Computer Algebra},
 	pdfkeywords={Representation, Lorentz Group},
@@ -765,34 +765,27 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
 
 \begin{eqnarray}
 \Pi^{\mu\nu,\alpha\beta}(p)&=&
-\frac12\left(g^{\mu\alpha}g^{\nu\beta} +g^{\nu\alpha}g^{\mu\beta}
-   -g^{\mu\nu}g^{\alpha\beta}\right)\nonumber\\
-&-&\frac{1}{2m^2}\left(
-    g^{\mu\alpha}p^\nu p^\beta+g^{\nu\alpha}p^\mu p^\beta
-   +g^{\mu\beta}p^\nu p^\alpha+g^{\nu\beta}p^\mu p^\alpha\right)
-   \nonumber\\
-&+&\frac16\left(g^{\mu\nu}+2\frac{p^\mu p^\nu}{m^2}\right)
-    \left(g^{\alpha\beta}+2\frac{p^\alpha p^\beta}{m^2}\right)
+\frac12 \left(g^{\mu\alpha}- \frac{p^\mu p^\alpha}{m^2} \right) \left(g^{\nu\beta}- \frac{p^\nu p^\beta}{m^2} \right)   \nonumber  \\
+		    &+& \frac12  \left(g^{\mu\beta}- \frac{p^\mu p^\beta}{m^2} \right) \left(g^{\nu\alpha}- \frac{p^\nu p^\alpha}{m^2} \right)
+     \nonumber  \\
+      &-&\frac{1}{3} \left(g^{\mu\nu}- \frac{p^\mu p^\nu}{m^2} \right) \left(g^{\alpha\beta}- \frac{p^\alpha p^\beta}{m^2} \right)
 \end{eqnarray}
 
 @d graviton propagator
-@{@_Id@_ @_once@_ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
+@{@_Id@_ @_once@_ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1? iv2?) =
    SplitLorentzIndex(iv1, iv1a, iv1b) *
    SplitLorentzIndex(iv2, iv2a, iv2b) *
    (
-      + 1/2 * (
-         + d(iv1a, iv2a) * d(iv1b, iv2b)
-         + d(iv1b, iv2a) * d(iv1a, iv2b)
-         - d(iv1a, iv1b) * d(iv2a, iv2b)
-      )
-      - 1/2/m^2 * (
-         + d(iv1a, iv2a) * k1(iv1b) * k1(iv2b)
-         + d(iv1b, iv2a) * k1(iv1a) * k1(iv2b)
-         + d(iv1a, iv2b) * k1(iv1b) * k1(iv2a)
-         + d(iv1b, iv2b) * k1(iv1a) * k1(iv2a)
-      )
-      + 1/6 * (d(iv1a, iv1b) + 2*k1(iv1a)*k1(iv1b)/m^2) *
-              (d(iv2a, iv2b) + 2*k1(iv2a)*k1(iv2b)/m^2)
+        + 1/2 * (
+                + (d_(iv1a, iv2a) - k1(iv1a)*k1(iv2a)/m^2) *
+                  (d_(iv1b, iv2b) - k1(iv1b)*k1(iv2b)/m^2)
+                + (d_(iv1a, iv2b) - k1(iv1a)*k1(iv2b)/m^2) *
+                  (d_(iv1b, iv2a) - k1(iv1b)*k1(iv2a)/m^2)
+        )
+        - 1/3 * (
+                + (d_(iv1a, iv1b) - k1(iv1a)*k1(iv1b)/m^2) *
+                  (d_(iv2a, iv2b) - k1(iv2a)*k1(iv2b)/m^2)
+        )
    ) * inv(k1, m, sDUMMY1);
 @}
 

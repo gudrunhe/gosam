@@ -77,23 +77,20 @@ Repeat;
         SplitLorentzIndex(iv2, iv2a, iv2b) *
         d(iv1a, iv2a) * d(iv1b, iv2b);
    Sum iv1a, iv1b, iv2a, iv2b;
-   Id once proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
+   Id once proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1? iv2?) =
       SplitLorentzIndex(iv1, iv1a, iv1b) *
       SplitLorentzIndex(iv2, iv2a, iv2b) *
       (
-         + 1/2 * (
-            + d(iv1a, iv2a) * d(iv1b, iv2b)
-            + d(iv1b, iv2a) * d(iv1a, iv2b)
-            - d(iv1a, iv1b) * d(iv2a, iv2b)
-         )
-         - 1/2/m^2 * (
-            + d(iv1a, iv2a) * k1(iv1b) * k1(iv2b)
-            + d(iv1b, iv2a) * k1(iv1a) * k1(iv2b)
-            + d(iv1a, iv2b) * k1(iv1b) * k1(iv2a)
-            + d(iv1b, iv2b) * k1(iv1a) * k1(iv2a)
-         )
-         + 1/6 * (d(iv1a, iv1b) + 2*k1(iv1a)*k1(iv1b)/m^2) *
-                 (d(iv2a, iv2b) + 2*k1(iv2a)*k1(iv2b)/m^2)
+           + 1/2 * (
+                   + (d_(iv1a, iv2a) - k1(iv1a)*k1(iv2a)/m^2) *
+                     (d_(iv1b, iv2b) - k1(iv1b)*k1(iv2b)/m^2)
+                   + (d_(iv1a, iv2b) - k1(iv1a)*k1(iv2b)/m^2) *
+                     (d_(iv1b, iv2a) - k1(iv1b)*k1(iv2a)/m^2)
+           )
+           - 1/3 * (
+                   + (d_(iv1a, iv1b) - k1(iv1a)*k1(iv1b)/m^2) *
+                     (d_(iv2a, iv2b) - k1(iv2a)*k1(iv2b)/m^2)
+           )
       ) * inv(k1, m, sDUMMY1);
    
 EndRepeat;
