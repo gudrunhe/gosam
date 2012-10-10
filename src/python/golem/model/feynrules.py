@@ -935,6 +935,36 @@ def transform_lorentz(expr, spins):
 			else:
 				index1 = args[0]
 			return lor_NCContainer(lor_Sm(index1), index2, index3)
+		elif head == lor_Gamma5:
+			if isinstance(args[0], ex.IntegerExpression):
+				i = int(args[0])
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index1 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
+			else:
+				index1 = args[0]
+			if isinstance(args[1], ex.IntegerExpression):
+				i = int(args[1])
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index2 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
+			else:
+				index2 = args[2]
+			return lor_NCContainer(lor_Gamma5, index1, index2)
 		elif head == lor_ProjM:
 			if isinstance(args[0], ex.IntegerExpression):
 				i = int(args[0])
