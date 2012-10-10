@@ -170,6 +170,7 @@ library plus the scalar propagator
 @_Repeat@_;
    @<tensor ghost propagator@>
    @<graviton propagator@>
+   @<graviton effective propagator@>
 @_EndRepeat@_;
 *---#] Tensor Bosons :
 @}
@@ -772,7 +773,7 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
 \end{eqnarray}
 
 @d graviton propagator
-@{@_Id@_ @_once@_ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1? iv2?) =
+@{@_Id@_ @_once@_ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
    SplitLorentzIndex(iv1, iv1a, iv1b) *
    SplitLorentzIndex(iv2, iv2a, iv2b) *
    (
@@ -789,6 +790,8 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
    ) * inv(k1, m, sDUMMY1);
 @}
 
+
+
 \begin{eqnarray}
 \epsilon^{\mu\nu}_{\pm2}(p) &=& \epsilon_\pm^\mu(p)\epsilon_\pm^\nu(p)\\
 \epsilon^{\mu\nu}_{\pm1}(p) &=& \frac1{\sqrt2}\left(
@@ -799,6 +802,32 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
        +\epsilon_-^\mu(p)\epsilon_+^\nu(p)
        +2\epsilon_0^\mu(p)\epsilon_0^\nu(p)\right)
 \end{eqnarray}
+
+
+There is the possibility, to have custom propagators for Spin-2 particles.
+This is especially needed for the sum over KK modes in the ADD and RS model.
+For this the \texttt{customSpin2Prop} Fortran function need to be defined by hand.
+The mass terms in the Lorentz structure are neglected.
+
+@d graviton effective propagator
+@{@_Id@_ @_once@_ proplorentz(4, k1?, m?, sDUMMY1?, 2, iv1?, iv2?) =
+   SplitLorentzIndex(iv1, iv1a, iv1b) *
+   SplitLorentzIndex(iv2, iv2a, iv2b) *
+   (
+        + 1/2 * (
+                + (d_(iv1a, iv2a) ) *
+                  (d_(iv1b, iv2b) )
+                + (d_(iv1a, iv2b) ) *
+                  (d_(iv1b, iv2a) )
+        )
+        - 1/3 * (
+                + (d_(iv1a, iv1b) ) *
+                  (d_(iv2a, iv2b) )
+        )
+   ) * customSpin2Prop(k1, m, sDUMMY1);
+@}
+
+
 We have to consider 10 cases:
 \begin{itemize}
 \item in-/outgoing
@@ -851,6 +880,9 @@ in the ingoing and outgoing case.
    fDUMMY1(ivL2a, k1, -1, k2, k3, m) * fDUMMY1(ivL2b, k1, -1, k2, k3, m);
    @_Sum@_ ivL2a, ivL2b;
 @}
+
+
+
 
 @d ingoing graviton wave functions
 @{@<generic graviton wave functions@(inp@)@>

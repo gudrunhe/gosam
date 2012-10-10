@@ -117,6 +117,10 @@
 		<file src="pjfry_comb.f90" class="Model">
 			<only if-extension="pjfry"/>
 		</file>
+		<file src="custompropagator.f90" class="Model">
+			<only if-internal="CUSTOM_SPIN2_PROP"/>
+			<except if-file="exists" in-mode="normal" />
+	   </file>
 	</directory>
 
 	<directory src="doc">

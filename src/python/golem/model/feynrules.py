@@ -410,6 +410,14 @@ class Model:
 			else:
 				aux = "+0"
 
+			try:
+				if p.CustomSpin2Prop:
+					if not p.propagating:
+						error("Particle %s with CustomSpin2Prop has to propagate." % p.name)
+					aux = "+2"
+			except AttributeError:
+				pass
+
 			if p.selfconjugate:
 				conj = "('+')"
 			else:

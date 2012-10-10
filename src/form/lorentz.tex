@@ -176,7 +176,7 @@ library plus the scalar propagator
 \mbox{}\verb@*---#] wave functions for Vector-Spinors :@\\
 \mbox{}\verb@*---#[ wave functions for gravitons :@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries Repeat}\verb@;@\\
-\mbox{}\verb@   @\hbox{$\langle\,${\itshape graviton wave functions}\nobreak\ {\footnotesize \NWlink{nuweb19a}{19a}}$\,\rangle$}\verb@@\\
+\mbox{}\verb@   @\hbox{$\langle\,${\itshape graviton wave functions}\nobreak\ {\footnotesize \NWlink{nuweb19b}{19b}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries EndRepeat}\verb@;@\\
 \mbox{}\verb@*---#] wave functions for gravitons :@\\
 \mbox{}\verb@@{\NWsep}
@@ -194,7 +194,7 @@ library plus the scalar propagator
 \vspace{-1ex}
 \begin{list}{}{} \item
 \mbox{}\verb@@\hbox{$\langle\,${\itshape common header}\nobreak\ {\footnotesize \NWlink{nuweb2a}{2a}}$\,\rangle$}\verb@@\\
-\mbox{}\verb@@\hbox{$\langle\,${\itshape colour part of the propagators}\nobreak\ {\footnotesize \NWlink{nuweb20e}{20e}}$\,\rangle$}\verb@@\\
+\mbox{}\verb@@\hbox{$\langle\,${\itshape colour part of the propagators}\nobreak\ {\footnotesize \NWlink{nuweb21}{21}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@*---#[ Scalar Bosons :@\\
 \mbox{}\verb@@\hbox{$\langle\,${\itshape scalar propagator}\nobreak\ {\footnotesize \NWlink{nuweb4b}{4b}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@*---#] Scalar Bosons :@\\
@@ -212,6 +212,7 @@ library plus the scalar propagator
 \mbox{}\verb@@\hbox{\sffamily\bfseries Repeat}\verb@;@\\
 \mbox{}\verb@   @\hbox{$\langle\,${\itshape tensor ghost propagator}\nobreak\ {\footnotesize \NWlink{nuweb18a}{18a}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@   @\hbox{$\langle\,${\itshape graviton propagator}\nobreak\ {\footnotesize \NWlink{nuweb18b}{18b}}$\,\rangle$}\verb@@\\
+\mbox{}\verb@   @\hbox{$\langle\,${\itshape graviton effective propagator}\nobreak\ {\footnotesize \NWlink{nuweb19a}{19a}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries EndRepeat}\verb@;@\\
 \mbox{}\verb@*---#] Tensor Bosons :@\\
 \mbox{}\verb@@{\NWsep}
@@ -1277,7 +1278,7 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
 \NWtarget{nuweb18b}{} $\langle\,${\itshape graviton propagator}\nobreak\ {\footnotesize {18b}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
-\mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ @\hbox{\sffamily\bfseries once}\verb@ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1? iv2?) =@\\
+\mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ @\hbox{\sffamily\bfseries once}\verb@ proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =@\\
 \mbox{}\verb@   SplitLorentzIndex(iv1, iv1a, iv1b) *@\\
 \mbox{}\verb@   SplitLorentzIndex(iv2, iv2a, iv2b) *@\\
 \mbox{}\verb@   (@\\
@@ -1313,6 +1314,44 @@ Tensor ghosts are indicated by having an auxilliary field value of~1.
        +\epsilon_-^\mu(p)\epsilon_+^\nu(p)
        +2\epsilon_0^\mu(p)\epsilon_0^\nu(p)\right)
 \end{eqnarray}
+
+
+There is the possibility, to have custom propagators for Spin-2 particles.
+This is especially needed for the sum over KK modes in the ADD and RS model.
+For this the \texttt{customSpin2Prop} Fortran function need to be defined by hand.
+The mass terms in the Lorentz structure are neglected.
+
+\begin{flushleft} \small
+\begin{minipage}{\linewidth}\label{scrap39}\raggedright\small
+\NWtarget{nuweb19a}{} $\langle\,${\itshape graviton effective propagator}\nobreak\ {\footnotesize {19a}}$\,\rangle\equiv$
+\vspace{-1ex}
+\begin{list}{}{} \item
+\mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ @\hbox{\sffamily\bfseries once}\verb@ proplorentz(4, k1?, m?, sDUMMY1?, 2, iv1?, iv2?) =@\\
+\mbox{}\verb@   SplitLorentzIndex(iv1, iv1a, iv1b) *@\\
+\mbox{}\verb@   SplitLorentzIndex(iv2, iv2a, iv2b) *@\\
+\mbox{}\verb@   (@\\
+\mbox{}\verb@        + 1/2 * (@\\
+\mbox{}\verb@                + (d_(iv1a, iv2a) ) *@\\
+\mbox{}\verb@                  (d_(iv1b, iv2b) )@\\
+\mbox{}\verb@                + (d_(iv1a, iv2b) ) *@\\
+\mbox{}\verb@                  (d_(iv1b, iv2a) )@\\
+\mbox{}\verb@        )@\\
+\mbox{}\verb@        - 1/3 * (@\\
+\mbox{}\verb@                + (d_(iv1a, iv1b) ) *@\\
+\mbox{}\verb@                  (d_(iv2a, iv2b) )@\\
+\mbox{}\verb@        )@\\
+\mbox{}\verb@   ) * customSpin2Prop(k1, m, sDUMMY1);@\\
+\mbox{}\verb@@{\NWsep}
+\end{list}
+\vspace{-1.5ex}
+\footnotesize
+\begin{list}{}{\setlength{\itemsep}{-\parsep}\setlength{\itemindent}{-\leftmargin}}
+\item \NWtxtMacroRefIn\ \NWlink{nuweb3}{3}.
+
+\item{}
+\end{list}
+\end{minipage}\vspace{4ex}
+\end{flushleft}
 We have to consider 10 cases:
 \begin{itemize}
 \item in-/outgoing
@@ -1320,8 +1359,8 @@ We have to consider 10 cases:
 \end{itemize}
 
 \begin{flushleft} \small
-\begin{minipage}{\linewidth}\label{scrap39}\raggedright\small
-\NWtarget{nuweb19a}{} $\langle\,${\itshape graviton wave functions}\nobreak\ {\footnotesize {19a}}$\,\rangle\equiv$
+\begin{minipage}{\linewidth}\label{scrap40}\raggedright\small
+\NWtarget{nuweb19b}{} $\langle\,${\itshape graviton wave functions}\nobreak\ {\footnotesize {19b}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
 \mbox{}\verb@@\hbox{$\langle\,${\itshape ingoing graviton wave functions}\nobreak\ {\footnotesize \NWlink{nuweb20a}{20a}}$\,\rangle$}\verb@@\\
@@ -1341,8 +1380,8 @@ auxilliary function \texttt{fDUMMY1}
 to denote $\epsilon^\mu(k,\lambda)$ and $\epsilon^\ast_\mu(k,\lambda)$
 in the ingoing and outgoing case.
 
-\begin{flushleft} \small\label{scrap40}\raggedright\small
-\NWtarget{nuweb19b}{} $\langle\,${\itshape generic graviton wave functions}\nobreak\ {\footnotesize {19b}}$\,\rangle\equiv$
+\begin{flushleft} \small\label{scrap41}\raggedright\small
+\NWtarget{nuweb19c}{} $\langle\,${\itshape generic graviton wave functions}\nobreak\ {\footnotesize {19c}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ @\hbox{\sffamily\bfseries once}\verb@ @{\tt @}\verb@1lorentz(4, ivL4?, k1?, m?) *@\\
@@ -1392,12 +1431,12 @@ in the ingoing and outgoing case.
 \vspace{4ex}
 \end{flushleft}
 \begin{flushleft} \small
-\begin{minipage}{\linewidth}\label{scrap41}\raggedright\small
+\begin{minipage}{\linewidth}\label{scrap42}\raggedright\small
 \NWtarget{nuweb20a}{} $\langle\,${\itshape ingoing graviton wave functions}\nobreak\ {\footnotesize {20a}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
-\mbox{}\verb@@\hbox{$\langle\,${\itshape generic graviton wave functions}\nobreak\ ({\footnotesize 20b\label{scrap42}
- }\mbox{}\verb@inp@ ) {\footnotesize \NWlink{nuweb19b}{19b}}$\,\rangle$}\verb@@\\
+\mbox{}\verb@@\hbox{$\langle\,${\itshape generic graviton wave functions}\nobreak\ ({\footnotesize 20b\label{scrap43}
+ }\mbox{}\verb@inp@ ) {\footnotesize \NWlink{nuweb19c}{19c}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ fDUMMY1(ivL2?, k1?, +1, k2?, k3?, m?) =@\\
 \mbox{}\verb@   @\hbox{$\langle\,${\itshape expression for massive $\varepsilon(k, +1)$}\nobreak\ {\footnotesize \NWlink{nuweb10a}{10a}}$\,\rangle$}\verb@;@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ fDUMMY1(ivL2?, k1?, 0, k2?, k3?, m?) =@\\
@@ -1408,19 +1447,19 @@ in the ingoing and outgoing case.
 \vspace{-1.5ex}
 \footnotesize
 \begin{list}{}{\setlength{\itemsep}{-\parsep}\setlength{\itemindent}{-\leftmargin}}
-\item \NWtxtMacroRefIn\ \NWlink{nuweb19a}{19a}.
+\item \NWtxtMacroRefIn\ \NWlink{nuweb19b}{19b}.
 
 \item{}
 \end{list}
 \end{minipage}\vspace{4ex}
 \end{flushleft}
 \begin{flushleft} \small
-\begin{minipage}{\linewidth}\label{scrap43}\raggedright\small
+\begin{minipage}{\linewidth}\label{scrap44}\raggedright\small
 \NWtarget{nuweb20c}{} $\langle\,${\itshape outgoing graviton wave functions}\nobreak\ {\footnotesize {20c}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
-\mbox{}\verb@@\hbox{$\langle\,${\itshape generic graviton wave functions}\nobreak\ ({\footnotesize 20d\label{scrap44}
- }\mbox{}\verb@out@ ) {\footnotesize \NWlink{nuweb19b}{19b}}$\,\rangle$}\verb@@\\
+\mbox{}\verb@@\hbox{$\langle\,${\itshape generic graviton wave functions}\nobreak\ ({\footnotesize 20d\label{scrap45}
+ }\mbox{}\verb@out@ ) {\footnotesize \NWlink{nuweb19c}{19c}}$\,\rangle$}\verb@@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ fDUMMY1(ivL2?, k1?, +1, k2?, k3?, m?) =@\\
 \mbox{}\verb@   @\hbox{$\langle\,${\itshape expression for massive $\varepsilon^\ast(k, +1)$}\nobreak\ {\footnotesize \NWlink{nuweb11a}{11a}}$\,\rangle$}\verb@;@\\
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ fDUMMY1(ivL2?, k1?, 0, k2?, k3?, m?) =@\\
@@ -1431,7 +1470,7 @@ in the ingoing and outgoing case.
 \vspace{-1.5ex}
 \footnotesize
 \begin{list}{}{\setlength{\itemsep}{-\parsep}\setlength{\itemindent}{-\leftmargin}}
-\item \NWtxtMacroRefIn\ \NWlink{nuweb19a}{19a}.
+\item \NWtxtMacroRefIn\ \NWlink{nuweb19b}{19b}.
 
 \item{}
 \end{list}
@@ -1446,8 +1485,8 @@ file \texttt{propagators.hh}. The colour part of a propagator
 for all non-trivial representations is replaced by a Kronecker-$\delta$.
 The trivial representation is just ignored.
 \begin{flushleft} \small
-\begin{minipage}{\linewidth}\label{scrap45}\raggedright\small
-\NWtarget{nuweb20e}{} $\langle\,${\itshape colour part of the propagators}\nobreak\ {\footnotesize {20e}}$\,\rangle\equiv$
+\begin{minipage}{\linewidth}\label{scrap46}\raggedright\small
+\NWtarget{nuweb21}{} $\langle\,${\itshape colour part of the propagators}\nobreak\ {\footnotesize {21}}$\,\rangle\equiv$
 \vspace{-1ex}
 \begin{list}{}{} \item
 \mbox{}\verb@@\hbox{\sffamily\bfseries Id}\verb@ propcolor( 3, iv1?, iv2?) = @\hbox{\sffamily\bfseries d}\verb@_(iv1, iv2);@\\
@@ -1474,7 +1513,7 @@ The trivial representation is just ignored.
 \section{Index of Macros}
 
 {\small\begin{list}{}{\setlength{\itemsep}{-\parsep}\setlength{\itemindent}{-\leftmargin}}
-\item $\langle\,$colour part of the propagators\nobreak\ {\footnotesize \NWlink{nuweb20e}{20e}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
+\item $\langle\,$colour part of the propagators\nobreak\ {\footnotesize \NWlink{nuweb21}{21}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
 \item $\langle\,$common header\nobreak\ {\footnotesize \NWlink{nuweb2a}{2a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb2b}{2b}\NWlink{nuweb3}{, 3}.
 }
 \item $\langle\,$expression for $\varepsilon(k, +1)$\nobreak\ {\footnotesize \NWlink{nuweb8b}{8b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb9a}{9a}\NWlink{nuweb9b}{b}.
@@ -1499,10 +1538,11 @@ The trivial representation is just ignored.
 \item $\langle\,$gauge boson propagator\nobreak\ {\footnotesize \NWlink{nuweb8a}{8a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
 \item $\langle\,$gauge boson wave-functions, light-like\nobreak\ {\footnotesize \NWlink{nuweb9b}{9b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb2b}{2b}.}
 \item $\langle\,$gauge boson wave-functions, massive\nobreak\ {\footnotesize \NWlink{nuweb11d}{11d}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb2b}{2b}.}
-\item $\langle\,$generic graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb19b}{19b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb20a}{20a}\NWlink{nuweb20c}{c}.
+\item $\langle\,$generic graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb19c}{19c}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb20a}{20a}\NWlink{nuweb20c}{c}.
 }
+\item $\langle\,$graviton effective propagator\nobreak\ {\footnotesize \NWlink{nuweb19a}{19a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
 \item $\langle\,$graviton propagator\nobreak\ {\footnotesize \NWlink{nuweb18b}{18b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
-\item $\langle\,$graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb19a}{19a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb2b}{2b}.}
+\item $\langle\,$graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb19b}{19b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb2b}{2b}.}
 \item $\langle\,$handed fermion propagator\nobreak\ {\footnotesize \NWlink{nuweb5b}{5b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}
 \item $\langle\,$implementation of Equation~\eqref{eq:m0spinors:1}\nobreak\ {\footnotesize \NWlink{nuweb6a}{6a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb5c}{5c}.}
 \item $\langle\,$implementation of Equation~\eqref{eq:m0spinors:2}\nobreak\ {\footnotesize \NWlink{nuweb6b}{6b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb5c}{5c}.}
@@ -1512,10 +1552,10 @@ The trivial representation is just ignored.
 \item $\langle\,$implementation of Equation~\eqref{eq:Mspinors:2}\nobreak\ {\footnotesize \NWlink{nuweb7c}{7c}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb7a}{7a}.}
 \item $\langle\,$implementation of Equation~\eqref{eq:Mspinors:3}\nobreak\ {\footnotesize \NWlink{nuweb7d}{7d}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb7a}{7a}.}
 \item $\langle\,$implementation of Equation~\eqref{eq:Mspinors:4}\nobreak\ {\footnotesize \NWlink{nuweb7e}{7e}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb7a}{7a}.}
-\item $\langle\,$ingoing graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb20a}{20a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb19a}{19a}.}
+\item $\langle\,$ingoing graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb20a}{20a}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb19b}{19b}.}
 \item $\langle\,$ingoing vector-spinor anti-particle\nobreak\ {\footnotesize \NWlink{nuweb15}{15}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb13}{13}.}
 \item $\langle\,$ingoing vector-spinor particle\nobreak\ {\footnotesize \NWlink{nuweb14}{14}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb13}{13}.}
-\item $\langle\,$outgoing graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb20c}{20c}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb19a}{19a}.}
+\item $\langle\,$outgoing graviton wave functions\nobreak\ {\footnotesize \NWlink{nuweb20c}{20c}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb19b}{19b}.}
 \item $\langle\,$outgoing vector-spinor anti-particle\nobreak\ {\footnotesize \NWlink{nuweb17}{17}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb13}{13}.}
 \item $\langle\,$outgoing vector-spinor particle\nobreak\ {\footnotesize \NWlink{nuweb16}{16}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb13}{13}.}
 \item $\langle\,$scalar propagator\nobreak\ {\footnotesize \NWlink{nuweb4b}{4b}}$\,\rangle$ {\footnotesize {\NWtxtRefIn} \NWlink{nuweb3}{3}.}

@@ -229,6 +229,15 @@ Argument inv;
 EndArgument;
 Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
 
+[% @if internal CUSTOM_SPIN2_PROP %]
+Id customSpin2Prop(k1?, m?, sDUMMY1?) = customSpin2Prop(k1.k1,m^2 + i_ * m * sDUMMY1);
+
+Argument customSpin2Prop;
+    Id ZERO = 0;
+    #call kinematics
+EndArgument;[% @end @if %]
+
+
 *Brackets SplitLorentzIndex;
 .sort:part 0.9.0;
 *Keep Brackets;
@@ -353,6 +362,12 @@ EndArgument;
 Argument inv;
    #Call kinematics
 EndArgument;
+
+[% @if internal CUSTOM_SPIN2_PROP
+%]Argument customSpin2Prop;
+   #Call kinematics
+EndArgument;[% @end @if %]
+
 
 #IfDef `FR5'
    #If `LOOPS'==0
@@ -554,6 +569,12 @@ Id SpDenominator(Spa2(vDUMMY1?{k1,...,k`LEGS'}, vDUMMY2?{k1,...,k`LEGS'})) *
 Argument inv, fDUMMY1;
 #call kinematics
 EndArgument;
+
+[% @if internal CUSTOM_SPIN2_PROP
+%]Argument customSpin2Prop, fDUMMY1;
+#call kinematics
+EndArgument;[% @end @if %]
+
 
 Id fDUMMY1(sDUMMY1?) * inv(sDUMMY1?) = 1;
 Id fDUMMY1(sDUMMY1?) = sDUMMY1;

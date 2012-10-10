@@ -19,6 +19,7 @@ CTensors f(antisymmetric), f4, T;
 CFunctions C(symmetric), CL(symmetric), CR(symmetric);
 
 CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
+CFunction customSpin2Prop;
 CFunction QGRAFSIGN;
 CTensor SUBSCRIPT;
 NFunction NCOrder;

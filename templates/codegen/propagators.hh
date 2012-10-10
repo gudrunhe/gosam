@@ -77,7 +77,7 @@ Repeat;
         SplitLorentzIndex(iv2, iv2a, iv2b) *
         d(iv1a, iv2a) * d(iv1b, iv2b);
    Sum iv1a, iv1b, iv2a, iv2b;
-   Id once proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1? iv2?) =
+   Id once proplorentz(4, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
       SplitLorentzIndex(iv1, iv1a, iv1b) *
       SplitLorentzIndex(iv2, iv2a, iv2b) *
       (
@@ -92,6 +92,22 @@ Repeat;
                      (d_(iv2a, iv2b) - k1(iv2a)*k1(iv2b)/m^2)
            )
       ) * inv(k1, m, sDUMMY1);
+   
+   Id once proplorentz(4, k1?, m?, sDUMMY1?, 2, iv1?, iv2?) =
+      SplitLorentzIndex(iv1, iv1a, iv1b) *
+      SplitLorentzIndex(iv2, iv2a, iv2b) *
+      (
+           + 1/2 * (
+                   + (d_(iv1a, iv2a) ) *
+                     (d_(iv1b, iv2b) )
+                   + (d_(iv1a, iv2b) ) *
+                     (d_(iv1b, iv2a) )
+           )
+           - 1/3 * (
+                   + (d_(iv1a, iv1b) ) *
+                     (d_(iv2a, iv2b) )
+           )
+      ) * customSpin2Prop(k1, m, sDUMMY1);
    
 EndRepeat;
 *---#] Tensor Bosons :

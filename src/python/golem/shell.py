@@ -57,8 +57,9 @@ class GolemShell(golem.util.ishell.InteractiveShell):
             str(golem.properties.extensions): [
                   "samurai", "golem95", "pjfry", "fr5", "dred",
                   "autotools", "qshift", "topolynomial",
-                  "gaugecheck", "derive", "generate-all-helicities",
-                  "numpolvec"],
+                  "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
+                  "generate-all-helicities", "olp_daemon", "numpolvec",
+                  "f77", "no-fr5","ninja","customspin2prop"],
             str(golem.properties.debug_flags): ["lo", "nlo", "all"],
             str(golem.properties.filter_lo_diagrams): ["lambda d:"],
             str(golem.properties.filter_nlo_diagrams): ["lambda d:"],
