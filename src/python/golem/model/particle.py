@@ -99,8 +99,13 @@ class Particle:
 			states = golem.algorithms.helicity.massive_states
 		else:
 			states = golem.algorithms.helicity.massless_states
-		if sp > 2:
-			raise "Spin %d/2 particles currently not implemented"
+		#if sp > 2:
+		#	if sp % 2 == 0:
+		#		ssp = "%d" % (sp // 2)
+		#	else:
+		#		ssp = "%d/2" % sp
+		#	raise golem.util.config.GolemConfigError(
+		#			"Spin %s particles currently not implemented" % ssp)
 		return states[sp]
 		
 

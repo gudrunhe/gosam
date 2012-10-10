@@ -50,6 +50,8 @@ def report_crash(exc, stack, fname="gosam.crashed"):
          f.write("[%3d] %s" % (idx, line))
       f.write("---#] STACK:\n")
    if POSTMORTEM_CFG is not None:
+      if "user.setup" in POSTMORTEM_CFG:
+         POSTMORTEM_CFG._del("user.setup")
       f.write("---#[ CONFIG:\n")
       POSTMORTEM_CFG.list(f)
       f.write("---#] CONFIG:\n")

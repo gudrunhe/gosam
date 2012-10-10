@@ -437,6 +437,10 @@ class Properties:
          res += "%s=%s\n" % (escape(key, True), escape(self[key]))
       return res
 
+   def _del(self, name):
+      del self._map[name]
+
+
 def unescape(s):
    buf = [s[i] for i in range(len(s))]
    if "\\" in buf:

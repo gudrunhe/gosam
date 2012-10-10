@@ -6,7 +6,7 @@ CFunctions inp, inplorentz, inpcolor;
 CFunctions proplorentz, propcolor;
 CFunction vertex;
 CFunction abbr;
-CFunction SplitLorentzIndex;
+CTensor SplitLorentzIndex;
 CFunction SCREEN;
 Function NCSIGN(antisymmetric);
 CFunction csqrt;
@@ -336,6 +336,34 @@ AutoDeclare CFunctions Lor;
       @end @if %]lorentz([%2spin%], idx[%index%]L2, k[%index%], [%mass%])
          + gauge[%index%]z * k[%index%](idx[%index%]L2);
    #EndIf[%
+   @case -3 3 %]
+   Id [%
+      @if is_initial %]inp[%
+      @else %]out[%
+      @end @if %](field1?, k[%index%]) = [%
+      @if is_initial %]inp[%
+      @else %]out[%
+      @end @if %](field1, k[%index%], `HEL[%
+      @if is_initial %]i[%index%][%
+      @else %]o[%out_index%][%
+      @end @if %]'[%
+      @if is_massive %], l[%index%][%
+      @else %][%
+      @end @if %], `REFk[%index%]');[%
+   @case -4 4 %]
+   Id [%
+      @if is_initial %]inp[%
+      @else %]out[%
+      @end @if %](field1?, k[%index%]) = [%
+      @if is_initial %]inp[%
+      @else %]out[%
+      @end @if %](field1, k[%index%], `HEL[%
+      @if is_initial %]i[%index%][%
+      @else %]o[%out_index%][%
+      @end @if %]'[%
+      @if is_massive %], l[%index%][%
+      @else %][%
+      @end @if %], `REFk[%index%]');[%
    @end @select %][%
 @end @for %]
 #EndProcedure
