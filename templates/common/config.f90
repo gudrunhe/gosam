@@ -49,7 +49,7 @@
    ! they can also be set using the subroutine parse in model.f90
    integer :: samurai_scalar = 2
    integer :: samurai_verbosity = 0
-   integer :: samurai_test = 0
+   integer :: samurai_test = 3
    ! The following parameter sets the 'istop' argument in all samurai
    ! calls. Unless you really know what you do, you should stick to the
    ! default value.

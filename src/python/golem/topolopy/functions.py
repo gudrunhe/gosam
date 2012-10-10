@@ -131,10 +131,12 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    lst = setup_list(golem.properties.select_nlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
    keep = []
+   keep_tot = []
    lose = []
    max_rank = 0
 
-   loopcache = LoopCache()
+   loopcache     = LoopCache()
+   loopcache_tot = LoopCache()
 
    for idx, diagram in diagrams.items():
       if lst:
@@ -154,8 +156,9 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             lose.append(idx)
          else:
             keep.append(idx)
-            loopcache.add(diagram, idx)
-            
+            keep_tot.append(idx)
+            loopcache_tot.add(diagram, idx)
+
             diagram.isMassiveBubble(idx, massive_bubbles)
 
             if filter_flags is not None:
@@ -171,11 +174,40 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          lose.append(idx)
 
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
+            (len(keep_tot), len(lose)))
+
+#--- new start
+
+   props=[]
+   eprops = {}
+   for idx in keep:
+	props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+
+   if conf.getProperty(golem.properties.sum_diagrams):   
+      for i,item in props:
+         for j,jtem in props:
+            if item == jtem and j>i:
+               if j not in lose:
+                  lose.append(j)
+                  keep.remove(j)
+                  if i not in eprops:
+                     eprops[i]=[j]
+                  else:
+                     eprops[i].append(j)
+   for idx in keep:
+      loopcache.add(diagrams[idx], idx)
+      if idx not in eprops.keys():
+         eprops[idx]=[idx]
+      else:
+         eprops[idx].append(idx)
+#--- new end
+
+   debug("After analyzing loop diagrams and diagram sum: keeping %d, purging %d" % 
             (len(keep), len(lose)))
 
    conf["__max_rank__"] = max_rank
 
-   return keep, loopcache
+   return keep, keep_tot, eprops, loopcache, loopcache_tot
 
 def analyze_diagram(diagram, zero, fltr):
    if diagram.colorforbidden():

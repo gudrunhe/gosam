@@ -70,6 +70,10 @@
 		<file src="lightconedecomp.prc" class="Kinematics"/>
 		<file src="spva.prc" class="Kinematics"/>
 		<file src="func.txt" class="Model" />
+		<file src="diagsum.frm" dest="diagsum.frm"
+		                class="Integrals" >
+			<only if-option="diagsum" value="true"/>
+		</file>
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">
@@ -118,7 +122,7 @@
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
 		</file>
-		<file src="process.tex" class="Integrals"/>
+		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
 	</directory>
 

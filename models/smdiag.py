@@ -177,7 +177,6 @@ latex_parameters = {
    'gWWZZ': 'g_{W^+W^-ZZ}', 'gWWAZ': 'g_{W^+W^-\\gamma Z}',
    'gWWAA': 'g_{W^+W^-\\gamma\\gamma}', 'gWWWW': 'g_{W^+W^-W^+W^-}',
    'gWWZ': 'g_{W^+W^-Z}',
-
    'gHHHH': 'g_{HHHH}', 'gXXXX': 'g_{\\chi\\chi\\chi\\chi}',
    'gHHXX': 'g_{HH\\chi\\chi}',
    'gHHPP': 'g_{HH\\phi^+\\phi^-}',
@@ -287,6 +286,39 @@ functions = {
    'gnmua':  ' gZ*(1/4)',
    'gntaua': ' gZ*(1/4)',
 
+   'gUl':    'gUv+gUa',
+   'gCl':    'gCv+gCa',
+   'gTl':    'gTv+gTa',
+
+   'gDl':    'gDv+gDa',
+   'gSl':    'gSv+gSa',
+   'gBl':    'gBv+gBa',
+
+   'gUr':    'gUv-gUa',
+   'gCr':    'gCv-gCa',
+   'gTr':    'gTv-gTa',
+
+   'gDr':    'gDv-gDa',
+   'gSr':    'gSv-gSa',
+   'gBr':    'gBv-gBa',
+
+   'gel':    'gev+gea',
+   'gmul':    'gmuv+gmua',
+   'gtaul':    'gtauv+gtaua',
+
+   'ger':    'gev-gea',
+   'gmur':    'gmuv-gmua',
+   'gtaur':    'gtauv-gtaua',
+
+   'gnel':    'gnev+gnea',
+   'gner':    'gnev-gnea',
+
+   'gnmul':    'gnmuv+gnmua',
+   'gnmur':    'gnmuv-gnmua',
+
+   'gntaul':    'gntauv+gntaua',
+   'gntaur':    'gntauv-gntaua',
+
    'gWWZZ': '-(cw^2/sw^2)',
    'gWWAZ': ' (cw/sw)',
    'gWWAA': '-1',
@@ -387,6 +419,12 @@ types = {
    'gnev': 'R', 'gnea': 'R', 'gnmuv': 'R', 'gnmua': 'R',
    'gntauv': 'R', 'gntaua': 'R', 'gev': 'R', 'gea': 'R',
    'gmuv': 'R', 'gmua': 'R', 'gtauv': 'R', 'gtaua': 'R',
+   'gUl': 'R', 'gUr': 'R', 'gDl': 'R', 'gDr': 'R',
+   'gCl': 'R', 'gCr': 'R', 'gSl': 'R', 'gSr': 'R',
+   'gTl': 'R', 'gTr': 'R', 'gBl': 'R', 'gBr': 'R',
+   'gnel': 'R', 'gner': 'R', 'gnmul': 'R', 'gnmur': 'R',
+   'gntaul': 'R', 'gntaur': 'R', 'gel': 'R', 'ger': 'R',
+   'gmul': 'R', 'gmur': 'R', 'gtaul': 'R', 'gtaur': 'R',
    'gWWZZ': 'R', 'gWWAZ': 'R', 'gWWAA': 'R', 'gWWWW': 'R',
    'gWWZ': 'R',
    'gHHHH': 'R', 'gXXXX': 'R', 'gHHXX': 'R', 'gHHPP': 'R',
