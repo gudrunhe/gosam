@@ -29,7 +29,7 @@
    @end @for diagrams %][%
    @for propagators group=grp %]
       #define r[%$_%] "[%momentum%]"
-      #define m[%$_%]sq "([%mass%])^2+i_*([%width%])^2"[%
+      #define m[%$_%]sq "([%mass%])^2-i_*([%width%]*[%mass%])"[%
    @end @for propagators %]
       #break
 *---#] Diagram group [%grp%]:[%

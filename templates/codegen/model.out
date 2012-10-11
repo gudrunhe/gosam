@@ -21,6 +21,9 @@ $]module     [$ process_name asprefix=\_ $]model
    real(ki), parameter :: sqrt2 = &
       &1.414213562373095048801688724209698078&
       &5696718753769480731766797379_ki
+   real(ki), parameter :: sqrt3 = &
+      &1.732050807568877293527446341505872366&
+      &9428052538103806280558069795_ki
    [$
       @for parameters $]
    [$    @select type

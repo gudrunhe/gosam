@@ -11,6 +11,11 @@
       module procedure square_0l_0l_mat
    end interface square
 
+   interface     cond
+      module procedure cond_q_mu2
+      module procedure cond_mu2
+   end interface
+
    public :: square
    public :: inspect_lo_diagram
    public :: cond[%
@@ -31,7 +36,7 @@ contains
       end if
    end  function metric_tensor
 
-   pure function cond(cnd, brack, Q, mu2)
+   pure function cond_q_mu2(cnd, brack, Q, mu2) result(cond)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: Q
@@ -54,7 +59,30 @@ contains
       else
          cond = (0.0_ki, 0.0_ki)
       end if
-   end  function cond
+   end  function cond_q_mu2
+
+   pure function cond_mu2(cnd, brack, mu2) result(cond)
+      implicit none
+      logical, intent(in) :: cnd
+      complex(ki), intent(in) :: mu2
+
+      complex(ki) :: cond
+
+      interface
+         pure function brack(inner_mu2)
+            use [% process_name asprefix=\_ %]config, only: ki
+            implicit none
+            complex(ki), intent(in) :: inner_mu2
+            complex(ki) :: brack
+         end  function brack
+      end interface
+
+      if (cnd) then
+         cond = brack(mu2)
+      else
+         cond = (0.0_ki, 0.0_ki)
+      end if
+   end  function cond_mu2
 
    subroutine     inspect_lo_diagram(values, d, h, unit)
       implicit none

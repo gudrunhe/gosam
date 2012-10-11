@@ -381,12 +381,15 @@ class Model:
 				mass = self.prefix + pmass
 
 			if p.spin % 2 == 1:
-				if p.GhostNumber is not None:
-					if p.GhostNumber == 1:
-						sign = "-"
+				try:
+					if p.GhostNumber is not None:
+						if p.GhostNumber == 1:
+							sign = "-"
+						else:
+							sign = "+"
 					else:
 						sign = "+"
-				else:
+				except AttributeError:
 					sign = "+"
 
 				if mass == 0:
@@ -407,6 +410,14 @@ class Model:
 			else:
 				aux = "+0"
 
+			try:
+				if p.CustomSpin2Prop:
+					if not p.propagating:
+						error("Particle %s with CustomSpin2Prop has to propagate." % p.name)
+					aux = "+2"
+			except AttributeError:
+				pass
+
 			if p.selfconjugate:
 				conj = "('+')"
 			else:
@@ -424,6 +435,11 @@ class Model:
 
 		lwf = LimitedWidthOutputStream(f, 70)
 
+		for c in self.all_couplings:
+			keys = filter(lambda key: key[0:1].isdigit(), c.order.keys())
+			for k in keys:
+				c.order["O%s" % k] = c.order[k]
+				del c.order[k]
 		orders = set()
 		for c in self.all_couplings:
 			orders.update(c.order.keys())
@@ -584,6 +600,10 @@ class Model:
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
+		max_deg = max(map(lambda v: len(v.particles), self.all_vertices))
+		f.write("*---#[ Auxilliary Symbols:\n")
+		f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
+		f.write("*---#] Auxilliary Symbols:\n")
 		f.write("*---#] Symbol Definitions:\n")
 		if self.containsMajoranaFermions():
 			f.write("* Model contains Majorana Fermions:\n")
@@ -630,12 +650,28 @@ class Model:
 					color = - color
 				colors.append(color)
 
-				f.write(",\n   [field.%s], idx%d?,%d,k%d?,idx%dL%d?,%d,idx%dC%d?"
+				f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
 						% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
 							abs(color)))
 			f.write(") =")
 
 			dummies = []
+
+			brack_flag = False
+			for i, s in enumerate(spins):
+				if s == 3 or s == 4:
+					brack_flag = True
+					idx = "idx%dL%d" % (i+1, s)
+					idxa = "idx%dL%da" % (i+1, s)
+					idxb = "idx%dL%db" % (i+1, s)
+					f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+					dummies.append(idxa)
+					dummies.append(idxb)
+
+			if brack_flag:
+				f.write(" (")
+
+
 			for coord, coupling in v.couplings.items():
 				ic, il = coord
 				lorentz = lorex[v.lorentz[il].name]
@@ -666,6 +702,8 @@ class Model:
 						if s not in dummies:
 							dummies.append(s)
 
+			if brack_flag:
+				f.write(")")
 			f.write(";\n")
 
 			for idx in dummy_found.values():
@@ -803,27 +841,51 @@ def transform_lorentz(expr, spins):
 			# P(index, momentum)
 			if isinstance(args[0], ex.IntegerExpression):
 				i = int(args[0])
-				s = spins[i-1] - 1
-				index = ex.SymbolExpression("idx%dL%d" % (i, s))
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 			else:
 				index = args[0]
 
-			mom = ex.SymbolExpression("k%d" % int(args[1]))
+			mom = ex.SymbolExpression("vec%d" % int(args[1]))
 			# UFO files have all momenta outgoing:
 			return -mom(index)
 		elif head == lor_Metric or head == lor_Identity:
 			my_spins = []
 			if isinstance(args[0], ex.IntegerExpression):
 				i = int(args[0])
-				s = spins[i-1] - 1
-				index1 = ex.SymbolExpression("idx%dL%d" % (i, s))
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index1 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 				my_spins.append(s)
 			else:
 				index1 = args[0]
 			if isinstance(args[1], ex.IntegerExpression):
 				i = int(args[1])
-				s = spins[i-1] - 1
-				index2 = ex.SymbolExpression("idx%dL%d" % (i, s))
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index2 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 				my_spins.append(s)
 			else:
 				index2 = args[1]
@@ -836,14 +898,30 @@ def transform_lorentz(expr, spins):
 		elif head == lor_Gamma:
 			if isinstance(args[1], ex.IntegerExpression):
 				i = int(args[1])
-				s = spins[i-1] - 1
-				index2 = ex.SymbolExpression("idx%dL%d" % (i, s))
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index2 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 			else:
 				index2 = args[1]
 			if isinstance(args[2], ex.IntegerExpression):
 				i = int(args[2])
-				s = spins[i-1] - 1
-				index3 = ex.SymbolExpression("idx%dL%d" % (i, s))
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index3 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 			else:
 				index3 = args[2]
 			if isinstance(args[0], ex.IntegerExpression):
@@ -851,11 +929,50 @@ def transform_lorentz(expr, spins):
 				if i == 5:
 					return lor_NCContainer(lor_Gamma5, index2, index3)
 				else:
-					s = spins[i-1] - 1
-					index1 = ex.SymbolExpression("idx%dL%d" % (i, s))
+					i_particle = i % 1000
+					i_index = i // 1000
+					s = spins[i_particle-1] - 1
+					if i_index == 1:
+						suffix = "a"
+					elif i_index == 2:
+						suffix = "b"
+					else:
+						suffix = ""
+					index1 = ex.SymbolExpression("idx%dL%d%s" %
+							(i_particle, s, suffix))
 			else:
 				index1 = args[0]
 			return lor_NCContainer(lor_Sm(index1), index2, index3)
+		elif head == lor_Gamma5:
+			if isinstance(args[0], ex.IntegerExpression):
+				i = int(args[0])
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index1 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
+			else:
+				index1 = args[0]
+			if isinstance(args[1], ex.IntegerExpression):
+				i = int(args[1])
+				i_particle = i % 1000
+				i_index = i // 1000
+				s = spins[i_particle-1] - 1
+				if i_index == 1:
+					suffix = "a"
+				elif i_index == 2:
+					suffix = "b"
+				else:
+					suffix = ""
+				index2 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
+			else:
+				index2 = args[2]
+			return lor_NCContainer(lor_Gamma5, index1, index2)
 		elif head == lor_ProjM:
 			if isinstance(args[0], ex.IntegerExpression):
 				i = int(args[0])
@@ -893,6 +1010,8 @@ col_T = ex.SymbolExpression("T")
 col_f = ex.SymbolExpression("f")
 col_Identity = ex.SymbolExpression("Identity")
 col_d_ = ex.SymbolExpression("d_")
+col_d8 = ex.SymbolExpression("dcolor8")
+col_d3 = ex.SymbolExpression("dcolor")
 
 def transform_color(expr, colors, xidx):
 	if isinstance(expr, ex.SumExpression):
@@ -947,6 +1066,7 @@ def transform_color(expr, colors, xidx):
 			else:
 				return head(indices[0], indices[1], indices[2])
 		if head == col_Identity:
+			c = 0
 			if isinstance(args[0], ex.IntegerExpression):
 				i = int(args[0])
 				c = abs(colors[i-1])
@@ -959,7 +1079,12 @@ def transform_color(expr, colors, xidx):
 				index2 = ex.SymbolExpression("idx%dC%d" % (i, c))
 			else:
 				index2 = args[1]
-			return col_d_(index1, index2)
+			if c == 3:
+				return col_d3(index1, index2)
+			elif c == 8:
+				return col_d8(index1, index2)
+			else:
+				return col_d_(index1, index2)
 		else:
 			return expr
 	else:

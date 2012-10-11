@@ -51,8 +51,15 @@
 
 		<file src="haggies-l1.in" class="Multi"/>
 		<file src="haggies-l1.out" class="Kinematics"/>
-		<file src="haggies-l1d.out" class="Kinematics"/>
-
+		<file src="haggies-l1d.out" class="Kinematics">
+			<only if-internal="GENERATE_DERIVATIVES"/>
+		</file>
+		<file src="haggies-l13.out" class="Kinematics">
+			<only if-internal="GENERATE_NINJA_TRIPLE"/>
+		</file>
+		<file src="haggies-l12.out" class="Kinematics">
+			<only if-internal="GENERATE_NINJA_DOUBLE"/>
+		</file>
 		<file src="info.frm" class="Kinematics" />
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Verbatim"/>
@@ -110,6 +117,10 @@
 		<file src="pjfry_comb.f90" class="Model">
 			<only if-extension="pjfry"/>
 		</file>
+		<file src="custompropagator.f90" class="Model">
+			<only if-internal="CUSTOM_SPIN2_PROP"/>
+			<except if-file="exists" in-mode="normal" />
+	   </file>
 	</directory>
 
 	<directory src="doc">

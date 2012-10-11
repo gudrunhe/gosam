@@ -6,6 +6,8 @@
    ! generator: [% program.name %] ([% program.version %])
    use [$ process_name asprefix=\_ $]color, only: numcs
    use [$ process_name asprefix=\_ $]config, only: ki
+   [$ @if internal CUSTOM_SPIN2_PROP
+   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
    implicit none
 
    private

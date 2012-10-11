@@ -57,6 +57,12 @@ OBJECTS= \
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.o[%
 			@end @if %][%
+		   @if internal GENERATE_NINJA_TRIPLE %] \
+	d[%$_%]h[%helicity%]l13.o[%
+			@end @if %][%
+		   @if internal GENERATE_NINJA_DOUBLE %] \
+	d[%$_%]h[%helicity%]l12.o[%
+			@end @if %][%
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %]
@@ -100,7 +106,13 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
 			@end @if %][%
-	@end @for %][%
+		   @if internal GENERATE_NINJA_TRIPLE %] \
+	d[%$_%]h[%helicity%]l13.f90[%
+			@end @if %][%
+		   @if internal GENERATE_NINJA_DOUBLE %] \
+	d[%$_%]h[%helicity%]l12.f90[%
+			@end @if %][%
+   	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %]
 
@@ -147,8 +159,8 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-name 'd*h[%helicity%]l[01].f90' \
 		-or -name 'd*h[%helicity%]l[01]fr5.f90' \
 		-or -name 'd*h[%helicity%]l[01].txt' \
-		-or -name 'd*h[%helicity%]l1d.txt' \
-		-or -name 'd*h[%helicity%]l1d.f90' \
+		-or -name 'd*h[%helicity%]l1[23d].txt' \
+		-or -name 'd*h[%helicity%]l1[23d].f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
 		-or -name 'd*h[%helicity%]l[01].dat' \
 		-or -name 'd*h[%helicity%]l[01].abb'[%

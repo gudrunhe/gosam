@@ -4,6 +4,8 @@
    use [$ process_name asprefix=\_ $]config, only: ki
    use [$ process_name asprefix=\_ $]globals[% 
            output.file match=".*/[^/.h]*(h[0-9]*)\\.f90" format="%s" %]
+   [$ @if internal CUSTOM_SPIN2_PROP
+   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
    implicit none
    private[%
    @for instructions registers="XXX" %][%
