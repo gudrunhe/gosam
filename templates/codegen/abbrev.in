@@ -17,7 +17,7 @@
 
 @define[%
 	include codegen/model-define.inc class=Model %][% 
-	include codegen/haggies-common.inc class=Verbatim %][% 
+	include codegen/haggies-common.inc class=Kinematics %][%
 	include codegen/kinematics-define.inc class=Kinematics
 %]
    spva... : cvector;

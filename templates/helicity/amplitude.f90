@@ -17,6 +17,8 @@
       @end @if %][%
    @end @select %][%
 @end @if %]
+   [% @if internal CUSTOM_SPIN2_PROP
+   %]use [% process_name asprefix=\_ %]custompropagator[% @end @if %]
    implicit none
    private
 
