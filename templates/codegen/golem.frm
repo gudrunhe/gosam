@@ -230,7 +230,7 @@ EndArgument;
 Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
 
 [% @if internal CUSTOM_SPIN2_PROP %]
-Id customSpin2Prop(k1?, m?, sDUMMY1?) = customSpin2Prop(k1.k1,m^2 + i_ * m * sDUMMY1);
+Id customSpin2Prop(k1?, m?, sDUMMY1?) = customSpin2Prop(k1.k1,m^2 - i_ * m * sDUMMY1);
 
 Argument customSpin2Prop;
     Id ZERO = 0;
