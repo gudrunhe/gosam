@@ -72,7 +72,7 @@ contains
    !---#] function finite_renormalisation:
 
    !---#[ function samplitude:
-   function     samplitude(scale2,ok,[%
+   function     samplitude(scale2,ok,rational2,[%
 @if generate_lo_diagrams %]opt_amp0,[%
 @else %]the_col0,[%
 @end @if%]opt_perm)
@@ -115,6 +115,7 @@ contains
 @end @select %]
       implicit none
       real(ki), intent(in) :: scale2
+      real(ki), intent(out) :: rational2
       logical, intent(out) :: ok[%
 @if generate_lo_diagrams %]
       complex(ki), dimension(numcs), intent(in), optional :: opt_amp0[%
@@ -132,6 +133,7 @@ contains
       logical :: acc_ok
       
       ok = .true.
+      rational2 = 0.0_ki
       samplitude(:) = 0.0_ki[%
 @if generate_lo_diagrams %]
       if (present(opt_amp0)) then
@@ -228,10 +230,11 @@ contains
          & "<result name='r2' re='", real(rat2, ki), &
          &                 "' im='", aimag(rat2), "' />"
       end if
-      samplitude(0) = [%
+      rational2 = [%
       @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
       @else %]rat2[%
-      @end @if %][%
+      @end @if %]
+      samplitude(0) = rational2[%
       @for repeat maxloopsize shift=1 var=ls %][%
          @for groups loopsize=ls var=grp %][%
             @if use_flags_1 %]

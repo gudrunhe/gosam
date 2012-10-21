@@ -117,12 +117,13 @@ contains
       amp = amp * prefactor()
    end function samplitudel0
 
-   function     samplitudel1(vecs,scale2,ok,h) result(amp)
+   function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
       use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel1
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
       real(ki), intent(in) :: scale2
+      real(ki), intent(out) :: rat2
       integer, optional, intent(in) :: h
       real(ki), dimension(-2:0) :: amp
       real(ki), dimension([%num_legs%], 4) :: new_vecs
@@ -130,9 +131,9 @@ contains
       call twist_momenta(vecs, new_vecs)
 
       if (present(h)) then
-         amp = orig_func(new_vecs, scale2, ok, h)
+         amp = orig_func(new_vecs, scale2, ok, rat2, h)
       else
-         amp = orig_func(new_vecs, scale2, ok)
+         amp = orig_func(new_vecs, scale2, ok, rat2)
       end if
       amp = amp * prefactor()
    end function samplitudel1

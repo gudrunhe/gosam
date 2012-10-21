@@ -767,6 +767,14 @@ config_reduction_interoperation = Property("reduction_interoperation",
    """,
    int, -1)
 
+config_samurai_scalar = Property("samurai_scalar",
+   """
+   Set the same variable in config.f90.
+
+   See common/config.f90 for details.
+   """,
+   int, 2)
+
 config_nlo_prefactors = Property("nlo_prefactors",
    """
    Set the same variable in config.f90. The values have the 
@@ -781,45 +789,24 @@ config_nlo_prefactors = Property("nlo_prefactors",
    """,
    int, 0, options=["0","1","2"])
 
-config_SP_check = Property("SP_check",
+config_PSP_check = Property("PSP_check",
    """\
    Set the same variable in config.f90
 
-   Activates test on the single for the full amplitude.
+   Activates Phase-Space Point test for the full amplitude.
    !!Works for only for QCD and with built-in model files!!
    """,
    bool, False)
 
-config_SP_verbosity = Property("SP_verbosity",
+config_PSP_rescue = Property("PSP_rescue",
    """\
    Set the same variable in config.f90
 
-   Sets the verbosity of the SP_check.
-   verbosity = 0 : no output
-   verbosity = 1 : output only when rescue failed
-   verbosity = 2 : as 1 but PS points are written in bad.pts
-   verbosity = 3 : output whenever the rescue system is used
-                   with comment about the success of the rescue
-   !!Works for only for QCD and with built-in model files!!
-   """,
-   int, 2, options=["0","1","2","3"])
-
-config_SP_chk_threshold1 = Property("SP_chk_threshold1",
-   """\
-   Set the same variable in config.f90
-
-   Threshold to declare the check on the single pole failed and 
-   the activation of the rescue
-   !!Works for only for QCD and with built-in model files!!
-   """,
-   str, 0.0001)
-
-config_SP_rescue = Property("SP_rescue",
-   """\
-   Set the same variable in config.f90
-
-   Activates rescue based on the single pole check for the full 
-   amplitude.
+   Activates Phase-Space Point rescue based on the estimated
+   accuracy on the finite part.
+   The accuracy is estimated using information on the single
+   pole accuracy and the cancellation between cut-constructable
+   part and R2.
 
    Note: the usage of this rescue system is most stable if used 
    with the extension 'derive' which ensures a stabler 
@@ -829,14 +816,43 @@ config_SP_rescue = Property("SP_rescue",
    """,
    bool, True)
 
-config_SP_chk_threshold2 = Property("SP_chk_threshold2",
+config_PSP_verbosity = Property("PSP_verbosity",
    """\
    Set the same variable in config.f90
 
-   Threshold to declare the rescue of the ps-point failed.
+   Sets the verbosity of the PSP_check.
+   verbosity = 0 : no output
+   verbosity = 1 : output only when rescue fails
+   verbosity = 2 : as 1 but PSPs are written in file bad.pts
+   verbosity = 3 : output whenever the rescue system is used
+                   with comment about the success of the rescue
    !!Works for only for QCD and with built-in model files!!
    """,
-   str, 0.001)
+   int, 2, options=["0","1","2","3"])
+
+config_PSP_chk_threshold1 = Property("PSP_chk_threshold1",
+   """\
+   Set the same variable in config.f90
+
+   Threshold to activate the recalculation of the full
+   amplitude using golem95. The number has to be an integer
+   indicating the wished minimum number of digits accuracy
+   on the finite part.
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   int, 4)
+
+config_PSP_chk_threshold2 = Property("PSP_chk_threshold2",
+   """\
+   Set the same variable in config.f90
+
+   Threshold to declare a PSP as bad point. According to the
+   verbosity level set, such points are written to a file and not
+   used when the code is interfaced to an external Monte Carlo 
+   using the new BLHA standards.
+   !!Works for only for QCD and with built-in model files!!
+   """,
+   int, 3)
 
 properties = [
    process_name,
@@ -884,12 +900,13 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_reduction_interoperation,
+   config_samurai_scalar,
    config_nlo_prefactors,
-   config_SP_check,
-   config_SP_verbosity,
-   config_SP_chk_threshold1,
-   config_SP_rescue,
-   config_SP_chk_threshold2,
+   config_PSP_check,
+   config_PSP_verbosity,
+   config_PSP_chk_threshold1,
+   config_PSP_rescue,
+   config_PSP_chk_threshold2,
 
    reference_vectors,
    abbrev_limit,

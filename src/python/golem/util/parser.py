@@ -705,6 +705,9 @@ class Template:
       if "assuffix" in opts:
          if len(value.strip()) > 0:
             value = opts["assuffix"] + value.strip()
+      if "asstringlength" in opts:
+         if len(value.strip()) > 0:
+            value = opts["asstringlength"] + str(len(value.strip()))
       return value
 
    def debug_options(self, *args, **opts):
