@@ -69,7 +69,17 @@ contains
       implicit none
       logical, optional, intent(in) :: is_first
       
-      logical :: init_third_party
+      logical :: init_third_party[%
+      @if extension golem95 %]
+      logical :: file_exists
+      integer i
+      character(len=10) :: file_name
+      character(len=3)  :: file_numb
+      character(len=3)  :: file_pre = "bad"
+      character(len=3)  :: file_ext = "pts"
+      i = 1
+      file_exists =.true.[%
+      @end @if %]
 
       if(present(is_first)) then
          init_third_party = is_first
@@ -83,12 +93,25 @@ contains
    @if extension samurai %]
          call initsamurai('diag',samurai_scalar,&
          &                samurai_verbosity,samurai_test)[%
-   @end @if %][%
+   @end @if %]
+      ! call our banner
+      call banner()[%
    @if extension golem95 %]
       if(PSP_check) then
-         open(unit=42, file='bad.pts', status='unknown', action='write', access='append')
-         write(42,'(A22)') "<?xml version='1.0' ?>"
-         write(42,'(A5)')  "<run>"
+          do while(file_exists)
+               write(file_numb, '(I3.1)') i
+               file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
+               inquire(file=file_name, exist=file_exists)
+               if(file_exists) then
+                  write(*,*) "File ", file_name, " already exists!"
+                  i = i+1
+               else
+                  write(*,*) "Bad points stored in file: ", file_name
+                  open(unit=42, file=file_name, status='unknown', action='write', access='append')
+                  write(42,'(A22)') "<?xml version='1.0' ?>"
+                  write(42,'(A5)')  "<run>"
+               endif
+            enddo
       end if[%
    @end @if %]
       end if[%
@@ -97,8 +120,6 @@ contains
       call init_functions()
       call init_color()
 
-      ! call our banner last
-      call banner()
    end subroutine initgolem
    !---#] subroutine initgolem :
    !---#[ subroutine exitgolem :
