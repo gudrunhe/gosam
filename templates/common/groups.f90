@@ -12,7 +12,9 @@
    use precision_golem, only: ki_gol => ki
    use tens_rec[%
 @end @if golem95 %]
-   use [% process_name asprefix=\_%]config, only: ki
+   use [% process_name asprefix=\_%]config, only: ki [% @if extension golem95
+   %][% @if extension samurai %], reduction_interoperation, samurai_scalar [% 
+   @end @if %][% @end @if %]
    implicit none
    save
 
@@ -399,7 +401,12 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    end if[%
            @end @if %]
    !-------#] Diagram [% DIAG %]:[%
-         @end @for diagrams %]
+         @end @for diagrams %][%
+    @if extension samurai %]
+   if ((reduction_interoperation /= 1) .and. (samurai_scalar == 3) ) then
+        call tear_down_golem95();
+   end if[%
+    @end @if %]
 
    100 format (A30,E24.16,A6,E24.16,A3)
 end function contract_tensor_coefficients_group_[% grp %]
