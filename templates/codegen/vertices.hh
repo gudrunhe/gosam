@@ -260,7 +260,7 @@ id vertex(iv?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
 	field3?, idx3?, 2, vDUMMY3?, iv3L?, 8, iv3C?,
    field4?, idx4?, 0, vDUMMY4?, iv4L?, sign1?{-1,1}, iv4C?) =
-	 - C(field1, field2, field3, field4) *
+	  C(field1, field2, field3, field4) *
       LorVVV(vDUMMY1,vDUMMY2,vDUMMY3,iv1L,iv2L,iv3L) *
 		f(iv1C, iv2C, iv3C);
 id vertex(iv?,
