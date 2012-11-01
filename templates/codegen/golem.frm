@@ -420,7 +420,7 @@ EndArgument;
 * For boxes we need to consider integrals of type mu2*ptens(mu,nu) and
 * mu2^2.
       Id Only ptens * Qt2 = 0;
-      Id ptens(iDUMMY1?) * Qt2 = 0;
+      Id Only ptens(iDUMMY1?) * Qt2 = 0;
 
       ToVector, ptens, p1;
    #EndIf
