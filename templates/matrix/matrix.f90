@@ -168,7 +168,7 @@ contains
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      real(ki) :: rat2
+      real(ki) :: rat2, sam_amp2, sam_amp3
       integer spprec1, fpprec1
       real(ki), dimension(2:3) :: irp[%
    @if extension golem95 %]
@@ -187,6 +187,8 @@ contains
    @if extension golem95 %]
       if(PSP_rescue) then
          reduction_interoperation = 1
+         sam_amp2 = amp(2)
+         sam_amp3 = amp(3)
          call samplitudel01(vecs, scale2, amp, ok, rat2, h)
          spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
          fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
@@ -207,9 +209,10 @@ contains
                     &   spprec1, "' fpprec='", fpprec1, "'/>"
                write(42,'(8x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
                     &   spprec2, "' fpprec='", fpprec2, "'/>"
-               write(42,'(8x,A18,D23.16,A6,D23.16,A3)') "<singlePoles nlo='", amp(3), "' ir='", irp(2),"'/>"
-               write(42,'(8x,A17,D23.16,A8,D23.16,A10,D23.16,A3)') "<amplitude born='", amp(1), &
-                    &   "' rat2='", rat2, "' finite='", amp(2), "'/>"
+               write(42,'(8x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
+                    &   "' gol='", amp(3), "' ir='", irp(2),"'/>"
+               write(42,'(8x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
+                    &   "' rat2='", rat2, "' sam='", sam_amp2, "' gol='", amp(2), "'/>"
                write(42,'(4x,A12)') "</pspData>"
                write(42,'(4x,A9)') "<momenta>"
                do i=1,[%num_legs%]
@@ -662,7 +665,7 @@ contains
    end function samplitudel1
    !---#] function samplitudel1 :
    !---#[ subroutine ir_subtraction :
-   subroutine     ir_subtraction(vecs,scale2,amp)
+   subroutine     ir_subtraction(vecs,scale2,amp,h)
       use [% process_name asprefix=\_ %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
@@ -672,12 +675,21 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
+      integer, optional, intent(in) :: h
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper
       complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki) :: nlo_coupling
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
 
       call init_event(vecs)
 
@@ -701,35 +713,37 @@ contains
       amp(:) = 0.0_ki[%
   @if generate_lo_diagrams %][%
   @for helicities %]
-      !---#[ reinitialize kinematics:[%
+      if (eval_heli([%helicity%])) then
+         !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
            @select sign @case 1 %]
-      pvecs([%index%],1) = vecs([%$_%],1)
-      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
            @else %]
-      pvecs([%index%],1) = -vecs([%$_%],1)
-      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
            @end @select %][%
         @else %][%
            @select sign @case 1 %]
-      pvecs([%index%],:) = vecs([%$_%],:)[%
+         pvecs([%index%],:) = vecs([%$_%],:)[%
            @else %]
-      pvecs([%index%],:) = -vecs([%$_%],:)[%
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
            @end @select %][%
         @end @if %][%
      @end @for %]
-      call init_event(pvecs[%
+         call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
-      pcolor = amplitude[%map.index%]l0()[%
+         !---#] reinitialize kinematics:
+         pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
-      color_vectorl0([% index %]) = pcolor([% $_ %])[%
+         color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
-      heli_amp(1) = square(color_vectorl0, oper(:,:,1))
-      heli_amp(2) = square(color_vectorl0, oper(:,:,2))
-      amp = amp + heli_amp[%
+         heli_amp(1) = square(color_vectorl0, oper(:,:,1))
+         heli_amp(2) = square(color_vectorl0, oper(:,:,2))
+         amp = amp + heli_amp
+      endif[%
   @end @for helicities %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
