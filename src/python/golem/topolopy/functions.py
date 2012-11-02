@@ -126,7 +126,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    return keep, signs #, flows
 
 def analyze_loop_diagrams(diagrams, model, conf, onshell,
-      quark_masses = None, filter_flags = None, massive_bubbles = {}):
+      quark_masses = None, complex_masses=None, filter_flags = None, massive_bubbles = {}):
    zero = golem.util.tools.getZeroes(conf)
    lst = setup_list(golem.properties.select_nlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
@@ -151,6 +151,10 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             for qm in diagram.QuarkBubbleMasses():
                if qm not in quark_masses:
                   quark_masses.append(qm)
+         if complex_masses is not None:
+            for cqm in diagram.ComplexQuarkBubbleMasses():
+               if cqm not in complex_masses:
+                  complex_masses.append(cqm)
 
          if diagram.onshell() > 0:
             lose.append(idx)

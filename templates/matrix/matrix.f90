@@ -253,6 +253,8 @@ contains
       integer, intent(in), optional :: h
       real(ki) :: nlo_coupling
 
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+
       ! Number of heavy quark flavours in loops.
       real(ki), parameter :: NFh = [% count quark_loop_masses %].0_ki
 
@@ -336,9 +338,15 @@ contains
                @for quark_loop_masses %][%
                   @if is_first %]
                if (renorm_logs) then[%
-                  @end @if %]
+                  @end @if %][%
+                  @if is_real %]
                   amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %] [%
+                  @if is_complex %]
+                  amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
+                      &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %] [%
                   @if is_last %]
                end if[%
                   @end @if %][%
@@ -369,9 +377,15 @@ contains
                                 &  amp(1)
                     
                if (renorm_logs) then[%
-               @end @if %]
+               @end @if %][%
+               @if is_real %]
                   amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %] [%
+                  @if is_complex %]
+                  amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
+                       &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %] [%
                @if is_last %]
                end if
             end if[%
