@@ -760,19 +760,6 @@ class Diagram:
             return list(masses)
       return []
 
-   def ComplexQuarkBubbleMasses(self):
-      masslist=[]
-      if self.loopsize() == 2 and \
-            self.chord(massive=True,twospin=[1,-1],color=[3,-3]) == 2:
-         for p in self._loop:
-           if len(self._propagators[abs(p)].mass)>0 and len(self._propagators[abs(p)].width)>0:
-             masses=self._propagators[abs(p)].mass
-             masslist.append(masses)
-             masses=self._propagators[abs(p)].width
-             masslist.append(masses)
-         if len(masses) > 0:
-            return masslist
-      return []
 
 class DiagramComponent:
 
