@@ -292,6 +292,6 @@
 [ghZbar, ghWp, phim; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 [ghZbar, ghWm, phip; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
 
-%[g, g, H; gs='+2', gw='+1', QCD='+2', QED='+1', RK='+2']
-%[g, g, g, H; gs='+3', gw='+1', QCD='+3', QED='+1', RK='+1']
-%[g, g, g, g, H; gs='+4', gw='+1', QCD='+4', QED='+1', RK='0']
+[g, g, H; gs='+2', gw='+1', QCD='+2', QED='+1', RK='+2']
+[g, g, g, H; gs='+3', gw='+1', QCD='+3', QED='+1', RK='+1']
+[g, g, g, g, H; gs='+4', gw='+1', QCD='+4', QED='+1', RK='0']
