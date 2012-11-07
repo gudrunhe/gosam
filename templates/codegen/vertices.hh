@@ -275,6 +275,15 @@ id vertex(iv?,
 			+ LorVVVV2(iv1L,iv4L,iv2L,iv3L) * f4(iv1C, iv4C, iv2C, iv3C)
 		);
 *---#] effective gg(g)(g)H:
+*---#[ effective AAH:
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
+		i_ * C(field1, field2, field3) *
+      ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
+		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));
+*---#] effective AAH:      
 #EndProcedure
 
 #Procedure ExpandLorentzStructures

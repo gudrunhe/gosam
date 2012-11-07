@@ -23,7 +23,7 @@ Symbols gWAPH, gWZPH, gWZPX, gWAPX;
 Symbols gZXH, gAPP, gZPP, gWPH, gWPX;
 Symbols gHZZ, gHWW, gPWA, gPWZ;
 Symbols gGWX, gGWH, gGZH, gGWZP, gGZWP;
-Symbol gW, gH;
+Symbol gW, gH, gAH;
 
 #Do f={U,D,C,S,T,B,e,mu,tau}
 Symbols gH`f', gX`f', gP`f';
@@ -296,7 +296,7 @@ Id C([field.g], [field.g], [field.g], [field.g], [field.H]) =
 	PREFACTOR(e * gs^4 * gH);
 *---#] effective gg(g)(g)H:
 *---#[ effective AAH:
-*ID C([field.A], [field.A], [field.H]) = PREFACTOR(e^3 * gAH);
+ID C([field.A], [field.A], [field.H]) = PREFACTOR(e^3 * gAH);
 *---#] effective AAH:
 #EndProcedure
 *---#] Procedure VertexConstants :
