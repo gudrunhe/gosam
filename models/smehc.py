@@ -109,6 +109,7 @@ parameters = {
    'me': '0.000510998910',
    'mmu': '0.105658367',
    'mtau': '1.77684',
+   'mtauMS': '1.77684', # MSbar mass used in Higgs coupling
    'mU': '0.0', # <----
    'mD': '0.0', # <----
    'mS': '0.104',
@@ -165,7 +166,7 @@ latex_parameters = {
    'gs': 'g_s',
    'me': 'm_e',
    'mmu': 'm_\\mu',
-   'mtau': 'm_\\tau',
+   'mtau': 'm_\\tau', 'mtauMS': 'm_\\tau^{MS}',
    'mU': 'm_u', 'mD': 'm_d', 'mS': 'm_s', 'mC': 'm_c', 'mB': 'm_b',
    'mBMS': 'm_b^{MS}', 'mT': 'm_t',
    'mZ': 'm_Z', 'mW': 'm_W',
@@ -284,7 +285,9 @@ latex_parameters = {
 
    'gZ': 'g_Z',
    'gW': 'g_W',
-   'gH': 'g_H'
+   'gH': 'g_H',
+   'gAH': 'g_{AH}'
+
 }
 #---#] latex_parameters:
 #---#[ functions:
@@ -406,7 +409,7 @@ functions = {
    'gHT': '- mT/mW / 2/sw',
    'gHe': '- me/mW / 2/sw',
    'gHmu': '- mmu/mW / 2/sw',
-   'gHtau': '- mtau/mW / 2/sw',
+   'gHtau': '- mtauMS/mW / 2/sw',
    'gXU': '- mU/mW * (+1/2)/sw',
    'gXD': '- mD/mW * (-1/2)/sw',
    'gXC': '- mC/mW * (+1/2)/sw',
@@ -415,7 +418,7 @@ functions = {
    'gXT': '- mT/mW * (+1/2)/sw',
    'gXe': '- me/mW * (-1/2)/sw',
    'gXmu': '- mmu/mW * (-1/2)/sw',
-   'gXtau': '- mtau/mW * (-1/2)/sw',
+   'gXtau': '- mtauMS/mW * (-1/2)/sw',
    'gPU': 'mU/mW/sqrt2/sw',
    'gPD': 'mD/mW/sqrt2/sw',
    'gPC': 'mC/mW/sqrt2/sw',
@@ -424,7 +427,7 @@ functions = {
    'gPT': 'mT/mW/sqrt2/sw',
    'gPe': 'me/mW/sqrt2/sw',
    'gPmu': 'mmu/mW/sqrt2/sw',
-   'gPtau': 'mtau/mW/sqrt2/sw',
+   'gPtau': 'mtauMS/mW/sqrt2/sw',
 
    'gGWX': '- i_*mW/2/sw',
    'gGWH': '- mW/2/sw',
@@ -432,6 +435,8 @@ functions = {
    'gGWZP': '- (cw*cw-sw*sw)/(2*cw*sw)*mW',
    'gGZWP': 'mW/(2*cw*sw)',
    'gH': '1/(24*pi*pi*mW*sw)',
+   'gAH': '47/(144*pi*pi*mW*sw)*(1-2/987*(mH/mT)^4-14/705*(mH/mT)^2+213/26346320*(mH/mW)^12+5/119756*(mH/mW)^10+41/180950*(mH/mW)^8+87/65800*(mH/mW)^6+57/6580*(mH/mW)^4+33/470*(mH/mW)^2)',
+
 
    'cw': '(mW/mZ)',
 
@@ -450,7 +455,7 @@ types = {
    'wghZ': 'R', 'wghWp': 'R', 'wghWm': 'R',
    'wchi': 'R', 'wphi': 'R',
    'cw': 'R',
-   'mBMS': 'R',
+   'mBMS': 'R', 'mtauMS': 'R',
    'VUD': 'C', 'CVDU': 'C', 'VUS': 'C',
    'CVSU': 'C', 'VUB': 'C', 'CVBU': 'C',
    'VCD': 'C', 'CVDC': 'C', 'VCS': 'C',
@@ -488,7 +493,7 @@ types = {
    'gPT': 'R', 'gPe': 'R', 'gPmu': 'R', 'gPtau': 'R',
    'gGWX': 'C', 'gGWH': 'R', 'gGZH': 'R', 'gGWZP': 'R', 'gGZWP': 'R',
 
-   'gZ': 'R', 'gW': 'R', 'gH': 'R'
+   'gZ': 'R', 'gW': 'R', 'gH': 'R', 'gAH': 'R'
 }
 #---#] types:
 #---#[ latex_names:

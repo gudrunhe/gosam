@@ -12,7 +12,7 @@ Symbols [field.A], [field.Wp], [field.Wm], [field.Z],
 	[field.ghA], [field.ghAbar], [field.ghZ], [field.ghZbar],
 	[field.ghWm], [field.ghWmbar], [field.ghWp], [field.ghWpbar];
 
-Symbols mU, mD, mC, mS, mB, mBMS, mT, mW, mZ, mH, me, mmu, mtau;
+Symbols mU, mD, mC, mS, mB, mBMS, mT, mW, mZ, mH, me, mmu, mtau, mtauMS;
 Symbols wB, wT, wtau, wZ, wW, wH, wghZ, wghWp, wghWm, wchi, wphi;
 Symbols gs, e, cw, sw;
 Symbols gWWZZ, gWWAZ, gWWAA, gWWWW, gWWZ;
@@ -295,5 +295,8 @@ Id C([field.g], [field.g], [field.g], [field.H]) = PREFACTOR(e * gs^3 * gH);
 Id C([field.g], [field.g], [field.g], [field.g], [field.H]) =
 	PREFACTOR(e * gs^4 * gH);
 *---#] effective gg(g)(g)H:
+*---#[ effective AAH:
+*ID C([field.A], [field.A], [field.H]) = PREFACTOR(e^3 * gAH);
+*---#] effective AAH:
 #EndProcedure
 *---#] Procedure VertexConstants :

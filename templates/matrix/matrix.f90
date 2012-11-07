@@ -149,8 +149,10 @@ contains
    @end @if %][%
    @if extension golem95 %]
          call tear_down_golem95()
-         write(42,'(A6)')  "</run>"
-         close(unit=42)[%
+         if(PSP_check .and. PSP_rescue) then
+            write(42,'(A6)')  "</run>"
+            close(unit=42)
+         endif[%
    @end @if %]
       end if[%
 @end @select %]
