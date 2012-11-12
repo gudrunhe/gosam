@@ -170,7 +170,7 @@ contains
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      real(ki) :: rat2, sam_amp2, sam_amp3
+      real(ki) :: rat2, sam_amp2, sam_amp3, zero
       integer spprec1, fpprec1
       real(ki), dimension(2:3) :: irp[%
    @if extension golem95 %]
@@ -184,7 +184,7 @@ contains
       call ir_subtraction(vecs, scale2, irp)
       spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
       fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-      if(fpprec1 .lt. PSP_chk_threshold1 .and. fpprec1 .gt. -10000) then
+      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000) then
       if(PSP_verbosity .eq. 3) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
    @if extension golem95 %]
       if(PSP_rescue) then
@@ -194,28 +194,26 @@ contains
          call samplitudel01(vecs, scale2, amp, ok, rat2, h)
          spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
          fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-         if(fpprec2 .lt. PSP_chk_threshold2 .and. fpprec2 .gt. -10000) then
+         if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
             if(PSP_verbosity .ge. 2) then
-               write(*,*) "RESCUE FAILED !!"
-               write(*,*) "process: [% process_name %]" 
-               write(*,*) "#digits finite | PSP_chk_threshold2"
-               write(*,*)  fpprec2, PSP_chk_threshold2
-               write(*,*)
+!              write(*,*) "RESCUE FAILED !!"
+!              write(*,*) "process: [% process_name %]" 
+!              write(*,*) "#digits finite | PSP_chk_threshold2"
+!              write(*,*)  fpprec2, PSP_chk_threshold2
+!              write(*,*)
                write(42,'(2x,A7)')"<event>"
-               write(42,'(4x,A11)') "<pspData>"
-               write(42,'(8x,A15,A[% process_name asstringlength=\ %],A3)') "<process name='", &
+               write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') "<process name='", &
                     &   "[% process_name %]","'/>"
-               write(42,'(8x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
+               write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
                     &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
-               write(42,'(8x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
+               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
                     &   spprec1, "' fpprec='", fpprec1, "'/>"
-               write(42,'(8x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
+               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
                     &   spprec2, "' fpprec='", fpprec2, "'/>"
-               write(42,'(8x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
+               write(42,'(4x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
                     &   "' gol='", amp(3), "' ir='", irp(2),"'/>"
-               write(42,'(8x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
+               write(42,'(4x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
                     &   "' rat2='", rat2, "' sam='", sam_amp2, "' gol='", amp(2), "'/>"
-               write(42,'(4x,A12)') "</pspData>"
                write(42,'(4x,A9)') "<momenta>"
                do i=1,[%num_legs%]
                   write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
@@ -223,6 +221,9 @@ contains
                enddo
                write(42,'(4x,A10)')"</momenta>"
                write(42,'(2x,A8)')"</event>"
+               ! Give back a Nan so that point is discarded
+               zero = log(1.0_ki)
+               amp(2)= 1.0_ki/zero
             endif
          else
             if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
