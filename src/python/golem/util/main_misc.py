@@ -520,6 +520,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading tree diagram file %r" % fname)
 		mod_diag_lo = imp.load_source(modname, fname)
+		conf["ehc"]=False
 		# keep_tree, tree_signs, tree_flows =
 		keep_tree, tree_signs = \
 				golem.topolopy.functions.analyze_tree_diagrams(
@@ -531,6 +532,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		# tree_flows = {}
 
 	quark_masses = []
+	complex_masses = []
 	massive_bubbles = {}
 	if generate_virt:
 		zero = golem.util.tools.getZeroes(conf)
@@ -550,7 +552,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		mod_diag_virt = imp.load_source(modname, fname)
 
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
-			mod_diag_virt.diagrams, model, conf, onshell, quark_masses,
+			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
 			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
 
 	else:
@@ -561,6 +563,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		loopcache_tot = golem.topolopy.objects.LoopCache()
 
 	conf["__heavy_quarks__"] = quark_masses
+	conf["complex_masses"] = complex_masses
 
 	if not isinstance(lo_flags, dict):
 		lo_flags = dict(enumerate(lo_flags))

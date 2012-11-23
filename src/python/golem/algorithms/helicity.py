@@ -509,10 +509,11 @@ def color_sort(tpl):
 
       t = trace[im:] + trace[:im]
       tr = r[ir:] + r[:ir]
-      if tr[1] < t[1]:
-         ntraces.append(tr)
-      else:
-         ntraces.append(t)
+# gionata's modification to correct dipoles
+#      if tr[1] < t[1]:
+#         ntraces.append(tr)
+#      else:
+      ntraces.append(t)
 
    return (sorted(lines, key=lambda lst: lst[0]),
          sorted(ntraces, key=lambda lst: lst[0]))
