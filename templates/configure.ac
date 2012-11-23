@@ -35,7 +35,9 @@ GOLEM_CONFIG_FCFLAGS="[%
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config.aux])
 
-AM_INIT_AUTOMAKE([1.10 no-define no-dependencies foreign tar-pax])
+AM_INIT_AUTOMAKE([1.9.6 no-define no-dependencies foreign tar-pax])
+
+AC_LANG_PUSH([Fortran])
 
 AC_PROG_FC
 AC_FC_LIBRARY_LDFLAGS

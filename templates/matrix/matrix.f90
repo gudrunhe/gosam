@@ -8,8 +8,8 @@
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
-     & SP_check, SP_verbosity, SP_rescue, SP_chk_threshold1, &
-     & SP_chk_threshold2, reduction_interoperation, &
+     & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_threshold1, &
+     & PSP_chk_threshold2, reduction_interoperation, &
      & convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
@@ -69,7 +69,17 @@ contains
       implicit none
       logical, optional, intent(in) :: is_first
       
-      logical :: init_third_party
+      logical :: init_third_party[%
+      @if extension golem95 %]
+      logical :: file_exists
+      integer i
+      character(len=10) :: file_name
+      character(len=3)  :: file_numb
+      character(len=3)  :: file_pre = "bad"
+      character(len=3)  :: file_ext = "pts"
+      i = 1
+      file_exists =.true.[%
+      @end @if %]
 
       if(present(is_first)) then
          init_third_party = is_first
@@ -83,10 +93,25 @@ contains
    @if extension samurai %]
          call initsamurai('diag',samurai_scalar,&
          &                samurai_verbosity,samurai_test)[%
-   @end @if %][%
+   @end @if %]
+      ! call our banner
+      call banner()[%
    @if extension golem95 %]
-      if(SP_check) then
-         open(unit=42, file='bad.pts', status='unknown', action='write', access='append')
+      if(PSP_check .and. PSP_rescue) then
+          do while(file_exists)
+               write(file_numb, '(I3.1)') i
+               file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
+               inquire(file=file_name, exist=file_exists)
+               if(file_exists) then
+                  write(*,*) "File ", file_name, " already exists!"
+                  i = i+1
+               else
+                  write(*,*) "Bad points stored in file: ", file_name
+                  open(unit=42, file=file_name, status='unknown', action='write', access='append')
+                  write(42,'(A22)') "<?xml version='1.0' ?>"
+                  write(42,'(A5)')  "<run>"
+               endif
+            enddo
       end if[%
    @end @if %]
       end if[%
@@ -95,8 +120,6 @@ contains
       call init_functions()
       call init_color()
 
-      ! call our banner last
-      call banner()
    end subroutine initgolem
    !---#] subroutine initgolem :
    !---#[ subroutine exitgolem :
@@ -126,7 +149,10 @@ contains
    @end @if %][%
    @if extension golem95 %]
          call tear_down_golem95()
-         close(unit=42)[%
+         if(PSP_check .and. PSP_rescue) then
+            write(42,'(A6)')  "</run>"
+            close(unit=42)
+         endif[%
    @end @if %]
       end if[%
 @end @select %]
@@ -136,51 +162,69 @@ contains
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, ok, h)
       use [% process_name asprefix=\_ %]config, only: &
-         & reduction_interoperation, SP_check, SP_verbosity, &
-         & SP_chk_threshold1, SP_chk_threshold2
+         & reduction_interoperation, PSP_check, PSP_verbosity, &
+         & PSP_chk_threshold1, PSP_chk_threshold2
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
+      real(ki) :: rat2, sam_amp2, sam_amp3
+      integer spprec1, fpprec1
       real(ki), dimension(2:3) :: irp[%
    @if extension golem95 %]
-      integer :: tmp_red_int, i [%
+      integer :: tmp_red_int, i, spprec2, fpprec2 [%
    @end @if %]
-      call samplitudel01(vecs, scale2, amp, ok, h)
-      if(SP_check) then[%
+      call samplitudel01(vecs, scale2, amp, rat2, ok, h)
+      if(PSP_check) then[%
    @if extension golem95 %]
       tmp_red_int=reduction_interoperation[%
    @end @if %]
       call ir_subtraction(vecs, scale2, irp)
-      if(abs((amp(3)-irp(2))/amp(1)) .gt. SP_chk_threshold1) then
-      if(SP_verbosity .eq. 3) write(*,*) "SINGLE POLE CHECK FAILED !!"[%
+      spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+      fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000) then
+      if(PSP_verbosity .eq. 3) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
    @if extension golem95 %]
-      if(SP_rescue) then
+      if(PSP_rescue) then
          reduction_interoperation = 1
-         call samplitudel01(vecs, scale2, amp, ok, h)
-         if(abs((amp(3)-irp(2))/amp(1)) .gt. (SP_chk_threshold2)) then
-            if(SP_verbosity .ge. 2) then
-               write(*,*) "RESCUE FAILED !!"
-               write(*,*) "data:"
-               write(*,*) "Single pol rel.dif., SP_chk_threshold2"
-               write(*,*) amp(3)/amp(1)-irp(2)/amp(1), SP_chk_threshold2
-               write(*,*)
-               write(42,'(A7)')"<event>"
-               write(42,'(A29,A30)') "Single pole check failed for:", "[% process_name %]"
-               write(42,'(A4,4A23)') "legs","SP_chk_threshold2", "Born       ", "single pole   ", "IR single pole"
-               write(42,'(A2,4(2x,D23.16))') "[%num_legs%]", SP_chk_threshold2, amp(1), amp(3)/amp(1), irp(2)/amp(1)
-               write(42,'(A9)')"<momenta>"
+         sam_amp2 = amp(2)
+         sam_amp3 = amp(3)
+         call samplitudel01(vecs, scale2, amp, rat2, ok, h)
+         spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+         fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+         if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
+            if(PSP_verbosity .ge. 2) then
+!              write(*,*) "RESCUE FAILED !!"
+!              write(*,*) "process: [% process_name %]" 
+!              write(*,*) "#digits finite | PSP_chk_threshold2"
+!              write(*,*)  fpprec2, PSP_chk_threshold2
+!              write(*,*)
+               write(42,'(2x,A7)')"<event>"
+               write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') "<process name='", &
+                    &   "[% process_name %]","'/>"
+               write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
+                    &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
+               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
+                    &   spprec1, "' fpprec='", fpprec1, "'/>"
+               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
+                    &   spprec2, "' fpprec='", fpprec2, "'/>"
+               write(42,'(4x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
+                    &   "' gol='", amp(3), "' ir='", irp(2),"'/>"
+               write(42,'(4x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
+                    &   "' rat2='", rat2, "' sam='", sam_amp2, "' gol='", amp(2), "'/>"
+               write(42,'(4x,A9)') "<momenta>"
                do i=1,[%num_legs%]
-                  write(42,'(2x,4(2x,D23.16))') vecs(i,:)
+                  write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
+                       &     "' py='", vecs(i,3), "' pz='", vecs(i,4), "'/>"
                enddo
-               write(42,'(A10)')"</momenta>"
-               write(42,'(A8)')"</event>"
+               write(42,'(4x,A10)')"</momenta>"
+               write(42,'(2x,A8)')"</event>"
             endif
          else
-            if(SP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
-            if(SP_verbosity .ge. 3) write(*,*)
+            if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
+            if(PSP_verbosity .ge. 3) write(*,*)
          end if
          reduction_interoperation = tmp_red_int
       end if[%
@@ -191,7 +235,7 @@ contains
    !---#] subroutine samplitude :
 
    !---#[ subroutine samplitudel01 :
-   subroutine     samplitudel01(vecs, scale2, amp, ok, h)
+   subroutine     samplitudel01(vecs, scale2, amp, rat2, ok, h)
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
@@ -204,9 +248,12 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(4), intent(out) :: amp
+      real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       real(ki) :: nlo_coupling
+
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
 
       ! Number of heavy quark flavours in loops.
       real(ki), parameter :: NFh = [% count quark_loop_masses %].0_ki
@@ -271,9 +318,9 @@ contains
       end select
 
       if (present(h)) then
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, h)/nlo_coupling
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling
       else
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok)/nlo_coupling
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
       end if[%
 
          @select r2
@@ -288,12 +335,24 @@ contains
             if (renorm_beta) then
                beta0 = (11.0_ki * CA - 4.0_ki * TR * (NF + NFh)) / 6.0_ki
                amp(3) = amp(3) - lo_qcd_couplings * beta0 * amp(1)[%
+               @for effective_higgs %][%
+               @if is_ehc%]
+               ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
+               amp(2) = amp(2) + 11.0_ki * amp(1)[%
+               @end @if %][%
+               @end @for %][%
                @for quark_loop_masses %][%
                   @if is_first %]
                if (renorm_logs) then[%
-                  @end @if %]
+                  @end @if %][%
+                  @if is_real %]
                   amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %] [%
+                  @if is_complex %]
+                  amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
+                      &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %] [%
                   @if is_last %]
                end if[%
                   @end @if %][%
@@ -324,9 +383,15 @@ contains
                                 &  amp(1)
                     
                if (renorm_logs) then[%
-               @end @if %]
+               @end @if %][%
+               @if is_real %]
                   amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %] [%
+                  @if is_complex %]
+                  amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
+                       &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %] [%
                @if is_last %]
                end if
             end if[%
@@ -465,7 +530,7 @@ contains
    end function samplitudel0
    !---#] function samplitudel0 :
    !---#[ function samplitudel1 :
-   function     samplitudel1(vecs,scale2,ok,h) result(amp)
+   function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
       use [% process_name asprefix=\_ %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
@@ -473,6 +538,7 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
       real(ki), intent(in) :: scale2
+      real(ki), intent(out) :: rat2
       integer, optional, intent(in) :: h
       real(ki), dimension([%num_legs%], 4) :: pvecs
       real(ki), dimension(-2:0) :: amp, heli_amp[%
@@ -483,7 +549,7 @@ contains
       @end @if %]
       logical :: my_ok
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
-      real(ki) :: fr
+      real(ki) :: fr, rational2
 
       if (present(h)) then
          eval_heli(:) = .false.
@@ -493,6 +559,7 @@ contains
       end if
 
       amp(:) = 0.0_ki
+      rat2 = 0.0_ki
       ok = .true.[%
    @if generate_nlo_virt%][%
    @for helicities%]
@@ -523,7 +590,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok)[%
+         heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
       @else %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -548,7 +615,7 @@ contains
          @end @for %])
             !---#] reinitialize kinematics:
          do c=1,numcs
-            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,c)
+            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
          end do
          heli_amp( 0) = square(colorvec(:, 0))
          heli_amp(-1) = square(colorvec(:,-1))
@@ -583,6 +650,7 @@ contains
          end if
          ok = ok .and. my_ok
          amp = amp + heli_amp
+         rat2 = rat2 + rational2
 
          if(debug_nlo_diagrams) then
             write(logfile,'(A33,E24.16,A3)') &
@@ -617,7 +685,7 @@ contains
    end function samplitudel1
    !---#] function samplitudel1 :
    !---#[ subroutine ir_subtraction :
-   subroutine     ir_subtraction(vecs,scale2,amp)
+   subroutine     ir_subtraction(vecs,scale2,amp,h)
       use [% process_name asprefix=\_ %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
@@ -627,12 +695,21 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
+      integer, optional, intent(in) :: h
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper
       complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki) :: nlo_coupling
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
 
       call init_event(vecs)
 
@@ -656,35 +733,37 @@ contains
       amp(:) = 0.0_ki[%
   @if generate_lo_diagrams %][%
   @for helicities %]
-      !---#[ reinitialize kinematics:[%
+      if (eval_heli([%helicity%])) then
+         !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
            @select sign @case 1 %]
-      pvecs([%index%],1) = vecs([%$_%],1)
-      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
            @else %]
-      pvecs([%index%],1) = -vecs([%$_%],1)
-      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
            @end @select %][%
         @else %][%
            @select sign @case 1 %]
-      pvecs([%index%],:) = vecs([%$_%],:)[%
+         pvecs([%index%],:) = vecs([%$_%],:)[%
            @else %]
-      pvecs([%index%],:) = -vecs([%$_%],:)[%
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
            @end @select %][%
         @end @if %][%
      @end @for %]
-      call init_event(pvecs[%
+         call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
-      pcolor = amplitude[%map.index%]l0()[%
+         !---#] reinitialize kinematics:
+         pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
-      color_vectorl0([% index %]) = pcolor([% $_ %])[%
+         color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
-      heli_amp(1) = square(color_vectorl0, oper(:,:,1))
-      heli_amp(2) = square(color_vectorl0, oper(:,:,2))
-      amp = amp + heli_amp[%
+         heli_amp(1) = square(color_vectorl0, oper(:,:,1))
+         heli_amp(2) = square(color_vectorl0, oper(:,:,2))
+         amp = amp + heli_amp
+      endif[%
   @end @for helicities %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)

@@ -17,6 +17,12 @@ contains
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
       use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem[%
+      @if extension golem95 %]
+      use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
+           & [%$_%]_PSP_verbosity => PSP_verbosity, &
+           & [%$_%]_PSP_chk_threshold1 => PSP_chk_threshold1, &
+           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2[%
+      @end @if %][%
       @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
@@ -33,7 +39,11 @@ contains
 
       integer :: l, ferr
       character(len=128) :: line_buf
-      character(len=9) :: kw
+      character(len=9) :: kw[%
+      @if extension golem95 %]
+      integer :: PSP_verbosity, PSP_chk_threshold1, PSP_chk_threshold2
+      logical :: PSP_rescue[%
+      @end @if %]
 
       ierr = 1
       l = strlen(contract_file_name)
@@ -75,7 +85,21 @@ contains
          @if is_first %].true.[% @else %].false.[%
          @end @if %])[%
       @end @for %]
-      
+
+      [% @if extension golem95 %]
+      ! Uncomment to change rescue system setting on all suprocesses
+      ! PSP_rescue = .true.
+      ! PSP_verbosity = [% PSP_verbosity default=2 %]
+      ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
+      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %][%
+      @for subprocesses %]
+      ! [%$_%]_PSP_rescue = PSP_rescue
+      ! [%$_%]_PSP_verbosity =  PSP_verbosity
+      ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
+      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2[%
+      @end @for %][%
+      @end @if %]
+
    end subroutine OLP_Start
 
    subroutine     OLP_EvalSubProcess(label, momenta, mu, parameters, res) &
