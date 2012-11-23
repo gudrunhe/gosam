@@ -115,8 +115,8 @@ contains
 @end @select %]
       implicit none
       real(ki), intent(in) :: scale2
-      real(ki), intent(out) :: rational2
-      logical, intent(out) :: ok[%
+      logical, intent(out) :: ok
+      real(ki), intent(out) :: rational2[%
 @if generate_lo_diagrams %]
       complex(ki), dimension(numcs), intent(in), optional :: opt_amp0[%
 @else %]
@@ -134,6 +134,7 @@ contains
       
       ok = .true.
       rational2 = 0.0_ki
+
       samplitude(:) = 0.0_ki[%
 @if generate_lo_diagrams %]
       if (present(opt_amp0)) then
@@ -229,12 +230,14 @@ contains
          write(logfile,'(A22,G24.16,A6,G24.16,A4)') &
          & "<result name='r2' re='", real(rat2, ki), &
          &                 "' im='", aimag(rat2), "' />"
-      end if
-      rational2 = [%
+      end if[%
+      @if generate_lo_diagrams %]
+      rational2 = 2.0_ki * real(rat2, ki)[%
+      @end @if %]
+      samplitude(0) = [%
       @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
       @else %]rat2[%
-      @end @if %]
-      samplitude(0) = rational2[%
+      @end @if %][%
       @for repeat maxloopsize shift=1 var=ls %][%
          @for groups loopsize=ls var=grp %][%
             @if use_flags_1 %]

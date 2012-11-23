@@ -176,7 +176,7 @@ contains
    @if extension golem95 %]
       integer :: tmp_red_int, i, spprec2, fpprec2 [%
    @end @if %]
-      call samplitudel01(vecs, scale2, amp, ok, rat2, h)
+      call samplitudel01(vecs, scale2, amp, rat2, ok, h)
       if(PSP_check) then[%
    @if extension golem95 %]
       tmp_red_int=reduction_interoperation[%
@@ -191,7 +191,7 @@ contains
          reduction_interoperation = 1
          sam_amp2 = amp(2)
          sam_amp3 = amp(3)
-         call samplitudel01(vecs, scale2, amp, ok, rat2, h)
+         call samplitudel01(vecs, scale2, amp, rat2, ok, h)
          spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
          fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
          if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
@@ -238,7 +238,7 @@ contains
    !---#] subroutine samplitude :
 
    !---#[ subroutine samplitudel01 :
-   subroutine     samplitudel01(vecs, scale2, amp, ok, rat2, h)
+   subroutine     samplitudel01(vecs, scale2, amp, rat2, ok, h)
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
@@ -618,7 +618,7 @@ contains
          @end @for %])
             !---#] reinitialize kinematics:
          do c=1,numcs
-            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,c)
+            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
          end do
          heli_amp( 0) = square(colorvec(:, 0))
          heli_amp(-1) = square(colorvec(:,-1))
