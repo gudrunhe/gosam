@@ -69,8 +69,7 @@ contains
       implicit none
       logical, optional, intent(in) :: is_first
       
-      logical :: init_third_party[%
-      @if extension golem95 %]
+      logical :: init_third_party
       logical :: file_exists
       integer i
       character(len=10) :: file_name
@@ -78,8 +77,7 @@ contains
       character(len=3)  :: file_pre = "bad"
       character(len=3)  :: file_ext = "pts"
       i = 1
-      file_exists =.true.[%
-      @end @if %]
+      file_exists =.true.
 
       if(present(is_first)) then
          init_third_party = is_first
@@ -95,8 +93,7 @@ contains
          &                samurai_verbosity,samurai_test)[%
    @end @if %]
       ! call our banner
-      call banner()[%
-   @if extension golem95 %]
+      call banner()
       if(PSP_check .and. PSP_rescue) then
           do while(file_exists)
                write(file_numb, '(I3.1)') i
@@ -112,8 +109,7 @@ contains
                   write(42,'(A5)')  "<run>"
                endif
             enddo
-      end if[%
-   @end @if %]
+      end if
       end if[%
 @end @select %]
 
@@ -148,12 +144,12 @@ contains
          call exitsamurai()[%
    @end @if %][%
    @if extension golem95 %]
-         call tear_down_golem95()
+         call tear_down_golem95()[%
+   @end @if %]
          if(PSP_check .and. PSP_rescue) then
             write(42,'(A6)')  "</run>"
             close(unit=42)
-         endif[%
-   @end @if %]
+         endif
       end if[%
 @end @select %]
    end subroutine exitgolem
@@ -171,10 +167,10 @@ contains
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       real(ki) :: rat2, sam_amp2, sam_amp3, zero
-      integer spprec1, fpprec1
+      integer spprec1, fpprec1, i
       real(ki), dimension(2:3) :: irp[%
    @if extension golem95 %]
-      integer :: tmp_red_int, i, spprec2, fpprec2 [%
+      integer :: tmp_red_int, spprec2, fpprec2 [%
    @end @if %]
       call samplitudel01(vecs, scale2, amp, rat2, ok, h)
       if(PSP_check) then[%
@@ -231,8 +227,42 @@ contains
          end if
          reduction_interoperation = tmp_red_int
       end if[%
+      @else %]
+      if(PSP_rescue) then
+            if(PSP_verbosity .ge. 2) then
+!              write(*,*) "RESCUE FAILED !!"
+!              write(*,*) "process: [% process_name %]" 
+!              write(*,*) "#digits finite | PSP_chk_threshold2"
+!              write(*,*)  fpprec2, PSP_chk_threshold2
+!              write(*,*)
+               write(42,'(2x,A7)')"<event>"
+               write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') "<process name='", &
+                    &   "[% process_name %]","'/>"
+               write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
+                    &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
+               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
+                    &   spprec1, "' fpprec='", fpprec1, "'/>"
+               write(42,'(4x,A18,D23.16,A6,D23.16,A3)') "<singlePoles sam='", amp(3), &
+                    &   "' ir='", irp(2),"'/>"
+               write(42,'(4x,A17,D23.16,A8,D23.16,A7,D23.16,A3)') "<amplitude born='", amp(1), &
+                    &   "' rat2='", rat2, "' sam='", amp(2), "'/>"
+               write(42,'(4x,A9)') "<momenta>"
+               do i=1,[%num_legs%]
+                  write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
+                       &     "' py='", vecs(i,3), "' pz='", vecs(i,4), "'/>"
+               enddo
+               write(42,'(4x,A10)')"</momenta>"
+               write(42,'(2x,A8)')"</event>"
+               ! Give back a Nan so that point is discarded
+               zero = log(1.0_ki)
+               amp(2)= 1.0_ki/zero
+            endif
+         else
+            if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
+            if(PSP_verbosity .ge. 3) write(*,*)
+         end if
+      end if[%
    @end @if %]
-      end if
       end if
    end subroutine samplitude
    !---#] subroutine samplitude :

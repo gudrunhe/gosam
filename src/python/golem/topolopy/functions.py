@@ -158,6 +158,8 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             for cqm in diagram.ComplexQuarkBubbleMasses():
                if cqm not in complex_masses:
                   complex_masses.append(cqm)
+               if cqm=='0' and complex_masses[len(complex_masses)-1]!='0':
+		 complex_masses.append(cqm)
 
          if diagram.onshell() > 0:
             lose.append(idx)
