@@ -6,6 +6,8 @@ $]module     [$ process_name asprefix=\_
    ! generator: [% program.name %] ([% program.version %])
    use [$ process_name asprefix=\_ $]config, only: ki
    use [$ process_name asprefix=\_ $]util, only: cond
+   [$ @if internal CUSTOM_SPIN2_PROP
+   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
    implicit none
    private
 

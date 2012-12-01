@@ -7,6 +7,8 @@
       & debug_lo_diagrams, logfile
    use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram
    use [% process_name asprefix=\_ %]color, only: numcs
+   [% @if internal CUSTOM_SPIN2_PROP
+   %]use [% process_name asprefix=\_ %]custompropagator[% @end @if %]
    implicit none
 
    private

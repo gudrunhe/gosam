@@ -29,7 +29,7 @@
    @end @for diagrams %][%
    @for propagators group=grp %]
       #define r[%$_%] "[%momentum%]"
-      #define m[%$_%]sq "([%mass%])^2+i_*([%width%])^2"[%
+      #define m[%$_%]sq "([%mass%])^2-i_*([%width%]*[%mass%])"[%
    @end @for propagators %]
       #break
 *---#] Diagram group [%grp%]:[%
@@ -42,18 +42,20 @@
 *------#[ Diagram [%diag%]:
    #case [%diag%][%
       @select loopsize diagram=diag
-      @case 1 2 %]
+      @case 1 2 3 %]
       #call ReduceR2N[%loopsize diagram=diag%]([%
          @for elements indices %][%
             @if is_first %][% @else %],[%
             @end @if %]`r[%$_%]',`m[%$_%]sq'[%
          @end @for %])[%
-      @case 3 4 %]
+      @case 4 %]
       #call ReduceR2N[%loopsize diagram=diag%]([%
          @for elements indices %][%
             @if is_first %][% @else %],[%
             @end @if %]`r[%$_%]'[%
          @end @for %])[%
+      @case 5 %]
+      #call ReduceR2N[%loopsize diagram=diag%][%
       @end @select %][%
       @if diagsum %][%
       @else %][%

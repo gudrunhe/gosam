@@ -260,10 +260,10 @@ contains
          else
             if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
             if(PSP_verbosity .ge. 3) write(*,*)
-         end if
-      end if[%
+         end if[%
    @end @if %]
       end if
+   end if   
    end subroutine samplitude
    !---#] subroutine samplitude :
 

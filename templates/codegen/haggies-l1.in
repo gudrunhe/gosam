@@ -36,7 +36,7 @@
 
 @define[%
 	include codegen/model-define.inc class=Model %][% 
-	include codegen/haggies-common.inc class=Verbatim %][% 
+	include codegen/haggies-common.inc class=Kinematics %][%
 	include codegen/kinematics-define.inc class=Kinematics
 %]
 	epspow : @int -> aux = "%2$s";
@@ -59,10 +59,12 @@
 	vf... : complex;
 	PREFACTOR : complex -> complex = "(%2$s)";
 	NULL : aux0 = "(0.0_ki,0.0_ki)";
-	EXSYM... : complex;[%
+	EXSYM... : complex;
+
+	qshift : vector;[%
+
 @if internal GENERATE_DERIVATIVES %]
 	iv... : integer;
-	qshift : vector;
 	SUBSCRIPT : cvector, integer -> complex = "%2$s(%3$s)";[%
 @end @if %][%
 @if internal GENERATE_NINJA_TRIPLE %]

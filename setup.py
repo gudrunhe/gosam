@@ -6,6 +6,8 @@ from distutils.sysconfig import get_config_vars
 from distutils.command.build_py import build_py as _build_py
 from distutils.command.install_scripts import install_scripts as _install_scripts
 from distutils.command.install import install as _install
+from distutils.command.install_data import install_data as _install_data
+from distutils.util import change_root as _change_root
 from distutils import log
 
 import os.path
@@ -136,6 +138,25 @@ class install_scripts(_install_scripts):
 
 orig_install_lib=None
 
+class install_data(_install_data):
+	def run(self):
+		orig_root = self.root
+		orig_install_dir = self.install_dir
+
+		# circumvent self.root-ignored bug
+		# by overwritting self.install_dir
+		if self.root:
+			self.install_dir = _change_root(self.root,self.install_dir)
+			self.root=None
+
+		_install_data.run(self)
+
+		# restore
+		self.root=orig_root
+		self.install_dir=orig_install_dir
+
+
+
 class install(_install):
 	def run(self):
 		_install.run(self)
@@ -160,7 +181,7 @@ class install(_install):
 	def change_roots (self, *names):
 		global orig_install_lib
 		orig_install_lib=self.install_lib
-		install.change_roots(self,*names)
+		_install.change_roots(self,*names)
 
 if __name__ == "__main__":
 	my_data_files=[]
@@ -168,6 +189,7 @@ if __name__ == "__main__":
 		target_dir = os.path.join("share", "golem", dir)
 		files = getDataFiles(dir)
 		my_data_files.append( (target_dir, files) )
+
 
 	setup(
 		packages=[
@@ -190,6 +212,7 @@ if __name__ == "__main__":
 		],
 		cmdclass={'build_py': build_py,
 			'install_scripts':install_scripts,
+			'install_data':install_data,
 			'install':install},
 		data_files=my_data_files,
 		**INFO

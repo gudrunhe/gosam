@@ -4,9 +4,9 @@ import golem.algorithms.color
 import itertools
 
 symbol_to_heli = {'0': 0, '+': +1, '-': -1,
-      'p': +2, 'm': -2, 'P': +3, 'M': -3}
+      'k': +2, 'm': -2, 'K': +3, 'M': -3}
 heli_to_symbol = {0: '0', +1: '+', -1: '-',
-      +2: 'p', -2: 'm', +3: 'P', -3: 'M'}
+      +2: 'k', -2: 'm', +3: 'K', -3: 'M'}
 
 massless_states = [
       [0],          # spin 0
@@ -195,7 +195,7 @@ def parse_helicity(string, symbols=symbol_to_heli):
    symbols -- a dictionary of symbols
 
    EXAMPLE
-      >>> print parse_helicity("+-0p")
+      >>> print parse_helicity("+-0k")
       {0: 1, 1: -1, 2: 0, 3: 2}
    """
    result = {}
