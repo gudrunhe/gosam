@@ -112,7 +112,7 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_NINJA_DOUBLE %] \
 	d[%$_%]h[%helicity%]l12.f90[%
 			@end @if %][%
-	@end @for %][%
+   	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %]
 

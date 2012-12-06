@@ -15,15 +15,15 @@ contains
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
       use, intrinsic :: iso_c_binding[%
-      @if extension golem95 %][%
       @for subprocesses %]
-      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem
+      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem[%
+      @if extension golem95 %]
       use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
            & [%$_%]_PSP_verbosity => PSP_verbosity, &
            & [%$_%]_PSP_chk_threshold1 => PSP_chk_threshold1, &
            & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2[%
-      @end @for %][%
-      @end @if %]
+      @end @if %][%
+      @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
       integer(kind=c_int), intent(out) :: ierr

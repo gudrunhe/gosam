@@ -613,7 +613,7 @@ def mc_specials(conf, order_file):
    required_extensions = []
       
    if mc_name.startswith("powheg"):
-      required_extensions.extend(["autotools", "f77"])
+      required_extensions.extend(["f77"])
    elif mc_name.startswith("sherpa"):
       required_extensions.extend(["autotools"])
    elif mc_name.startswith("whizard"):
