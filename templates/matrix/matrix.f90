@@ -97,7 +97,7 @@ contains
       ! call our banner
       call banner()[%
    @if extension golem95 %]
-      if(PSP_check) then
+      if(PSP_check .and. PSP_rescue) then
           do while(file_exists)
                write(file_numb, '(I3.1)') i
                file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
