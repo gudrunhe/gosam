@@ -47,7 +47,7 @@
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai
    ! they can also be set using the subroutine parse in model.f90
-   integer :: samurai_scalar = 2
+   integer :: samurai_scalar = [% samurai_scalar %]
    integer :: samurai_verbosity = 0
    integer :: samurai_test = 3
    ! The following parameter sets the 'istop' argument in all samurai
@@ -171,18 +171,16 @@
    ! 
    ! Note: at the moment it only works for virtual corrections
    ! to Tree level processes.
-   logical :: SP_check = [% SP_check
+   logical :: PSP_check = [% PSP_check
              convert=bool
              true=.true.
              false=.false. %]
-   integer :: SP_verbosity = [% SP_verbosity %]
-   real(ki) :: SP_chk_threshold1 = [% SP_chk_threshold1
-             convert=real %]_ki
-   logical :: SP_rescue = [% SP_rescue
+   integer :: PSP_verbosity = [% PSP_verbosity %]
+   integer :: PSP_chk_threshold1 = [% PSP_chk_threshold1 %]
+   logical :: PSP_rescue = [% PSP_rescue
              convert=bool
              true=.true.
              false=.false. %]
-   real(ki) :: SP_chk_threshold2 = [% SP_chk_threshold2
-             convert=real %]_ki
+   integer :: PSP_chk_threshold2 = [% PSP_chk_threshold2 %]
 end module [% process_name asprefix=\_ %]config
 

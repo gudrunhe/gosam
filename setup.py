@@ -190,7 +190,6 @@ if __name__ == "__main__":
 		files = getDataFiles(dir)
 		my_data_files.append( (target_dir, files) )
 
-
 	setup(
 		packages=[
 			'golem',
