@@ -36,6 +36,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._num_legs = num_legs
 
       self._heavy_quarks = heavy_quarks
+      self._complex_masses = conf["complex_masses"]
+      self._ehc=conf["ehc"]
 
       self._references = golem.algorithms.helicity.reference_vectors(
             conf, in_particles, out_particles)
@@ -261,10 +263,18 @@ class KinematicsTemplate(golem.util.parser.Template):
       for chunk in golem.util.parser.Template \
             .__call__(self, self._properties, *conf):
          yield chunk
+         
+   def effective_higgs(self,*args, **opts):
+      ehc = self._setup_name("ehc", "is_ehc", opts)
+      props=Properties()
+      props[ehc]=self._ehc
+
+      yield props
 
    def quark_loop_masses(self, *args, **opts):
       quark_masses = self._heavy_quarks
-      N = len(list(quark_masses))
+      complex_masses=self._complex_masses
+
 
       if "prefix" in opts:
          prefix = opts["prefix"]
@@ -273,14 +283,36 @@ class KinematicsTemplate(golem.util.parser.Template):
       var_name = self._setup_name("var", prefix + "$_", opts)
       first_name = self._setup_name("first", prefix + "is_first", opts)
       last_name = self._setup_name("last", prefix + "is_last", opts)
+      real_mass = self._setup_name("real_mass", prefix + "is_real",opts)
+      complex_mass = self._setup_name("complex_mass", prefix + "is_complex",opts)
 
       props = Properties()
-      for i, mass in enumerate(quark_masses):
-         props[var_name] = mass
-         props[first_name] = i == 0
-         props[last_name] = i == N - 1
+      complex_mass_list=[]
 
-         yield props
+      for term in complex_masses.split(','):
+        complex_mass_list.append(term)
+      N = len(complex_mass_list)/2
+      
+      if N>0:
+        for i, mass in enumerate(complex_mass_list[::2]):
+          props[first_name] = i == 0
+          props[last_name] = i == N - 1
+          if len(complex_mass_list)>1:
+            if str(complex_mass_list[2*i+1])!= '0':
+              width= complex_mass_list[2*i+1]
+              props[var_name] = 'sqrt('+mass+'**2-i_*'+mass+'*'+width+')'
+              props[real_mass]=False
+              props[complex_mass]=True
+            else:
+              props[var_name] = mass
+              props[real_mass]=True
+              props[complex_mass]=False          
+          else:
+            props[var_name] = mass
+            props[real_mass]=True
+            props[complex_mass]=False          
+
+        yield props
 
    def tree_sign(self, *args, **opts):
       if len(args) == 0:
