@@ -18,7 +18,7 @@ contains
    function customSpin2Prop(s, m) result(ret)
       implicit none
       real(ki), intent(in) :: s
-      complex(ki), intent(in) :: m
+      real(ki), intent(in) :: m
       complex(ki) :: ret
 
       ! write here your custom code and delete the next three lines

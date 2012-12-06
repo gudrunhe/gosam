@@ -21,4 +21,7 @@ groups.[%O%]: config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
 	pjfry95pg.[%O%] pjfry_comb.[%O%] precision_pjfry.[%O%][%
 	   @end @if %][%
 	@end @select %][%
+   @if internal CUSTOM_SPIN2_PROP %]
+custompropagator.[%O%]: config.[%O%] model.[%O%][%
+   @end @if %][%
 @end @for %]
