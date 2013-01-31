@@ -103,7 +103,7 @@ contains[%
 @end @for outerbracket %]
    
 !---#[ subroutine numerator_t:
-   subroutine numerator_t(ncut, mu2, a, b, c, coeffs)
+   subroutine numerator_t(ncut, mu2, a, b, c, coeffs, deg)
       use [$ process_name asprefix=\_ $]config, only: ki_nin => ki
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       use [$ process_name asprefix=\_ $]kinematics
@@ -121,16 +121,14 @@ contains[%
       & (0.0_ki_nin, 0.0_ki_nin), (0.0_ki_nin, 0.0_ki_nin), &
       & (0.0_ki_nin, 0.0_ki_nin), (0.0_ki_nin, 0.0_ki_nin)/)
 
-      integer, intent(in) :: ncut
+      integer, intent(in) :: ncut, deg
       complex(ki_nin), intent(in) :: mu2
       complex(ki_nin), dimension(0:3), intent(in) :: a, b, c
       complex(ki_nin), dimension(0:), intent(out) :: coeffs[%
       @for symbols registers="t%d" %]
       [%    type.repr %] :: [% $_ %][%
       @end @for %]
-      integer :: deg
 
-      deg = ubound(coeffs,1) - lbound(coeffs,1)
       vecA = a
       vecB = b
       vecC = c[%

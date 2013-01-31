@@ -655,7 +655,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Write <`OUTFILE'.dat> "time=`time_'"
 #Close <`OUTFILE'.dat>[%
 
-@select r2 @case implicit %]
+@select r2 @case implicit explicit %]
 #If `LOOPS' > 0
    Multiply epspow(0);
    Id epspow(0) * eps^sDUMMY2? = epspow(sDUMMY2);
@@ -716,7 +716,7 @@ Global diagram = diagram`DIAG'x;[%
    Id p1 = Q;
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
          Q,qshift,[%
-     @select r2 @case implicit %],Qt2,eps,epspow[%
+     @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])[%
 @end @if %]
 .store:start derivatives;
@@ -774,11 +774,11 @@ Id vecB.vecB = 0;
 Id vecC.vecC = 0;
 
 #Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
-#If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
-#Else
-   #Define  MAXLaurentT "`LOOPSIZE'"
-#EndIf
+*#If `RANK' > `LOOPSIZE'
+#Define MAXLaurentT "`RANK'"
+*#Else
+*   #Define  MAXLaurentT "`LOOPSIZE'"
+*#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
       vecA,vecB,vecC,LaurentT,LaurentTi,qshift,[%
@@ -847,7 +847,7 @@ Id Qt2 = beta * LaurentT^2;[%
 
 #Define MINLaurentT "`LOOPSIZE'"
 #If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
+#Define MAXLaurentT "`RANK'"
 #Else
    #Define  MAXLaurentT "`LOOPSIZE'"
 #EndIf

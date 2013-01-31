@@ -86,7 +86,7 @@
 [% include codegen/kinematics-poly.inc class=Kinematics %][%
 
 @select r2
-@case implicit %]
+@case implicit explicit %]
 @brackets epspow;
 @nobrackets p..., cf..., EXSYM... ;[%
 @end @select %]
