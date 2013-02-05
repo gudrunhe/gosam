@@ -340,6 +340,16 @@ form_bin = Property("form.bin",
    str,
    "form")
 
+form_threads = Property("form.threads",
+   """\
+   Number of Form threads.
+
+   Example:
+   form.threads=4
+   runs tform, the parallel version of FORM, on 4 cores.
+   """,
+   int,2)
+
 haggies_bin = Property("haggies.bin",
    """\
    Points to the Haggies executable.
@@ -443,13 +453,15 @@ extensions = Property("extensions",
    numpolvec    --- evaluate polarisation vectors numerically
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
+   formopt      --- diagram optimization using FORM (works only with
+                    abbrev.level=diagram and r2=implicit/explicit).
    """,
    list,
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon", "numpolvec",
-      "f77", "no-fr5","ninja","customspin2prop"])
+      "f77", "no-fr5","ninja","formopt","customspin2prop"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -872,6 +884,7 @@ properties = [
    qgraf_verbatim_nlo,
    qgraf_bin,
    form_bin,
+   form_threads,
    form_tmp,
    haggies_bin,
    fc_bin,
@@ -960,12 +973,15 @@ def setInternals(conf):
          "__OLP_TRAILING_UNDERSCORE__",
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
+         "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
          "__CUSTOM_SPIN2_PROP__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
+
+   conf["__FORMOPT__"] = "formopt" in extensions
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
@@ -983,5 +999,5 @@ def setInternals(conf):
    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
 
-   conf["__REQUIRE_FR5__"] = conf["__REGULARIZATION_HV__"] \
+   conf["__REQUIRE_FR5__"] = not conf["__REGULARIZATION_DRED__"] \
          and "no-fr5" not in extensions

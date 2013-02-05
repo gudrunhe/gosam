@@ -396,7 +396,21 @@ AutoDeclare CFunctions Lor;
       @if eval exponent .gt. 1 %]^[%exponent%][%
       @end @if %][%
    @end @for %];[%
-@end @for %]
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %]
+   Id k[%index%].e[%index%]=;[%
+   @end @for %][%
+   @for particles lightlike vector %][%
+     @if is_massive %][%
+     @else %]
+   Id e[%index%].[%
+       @if eval reference > 0 %]k[%reference %]=;[%
+       @else %][% eval - reference %][%
+       @end @if %][%
+     @end @if %][% 
+   @end @for %][%
+@end @if %]
 #EndProcedure
 *------#] procedure kinematics:
 *------#[ procedure colorbasis:

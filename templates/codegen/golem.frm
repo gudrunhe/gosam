@@ -45,10 +45,22 @@ off statistics;
 #Define USETOPOLYNOMIAL "0"[%
 @end @if %]
 
+[%
+@if extension formopt %]
+#If `LOOPS' == 1
+   #Define abb`DIAG' "0"
+   Autodeclare Symbol Qsp;
+   #Include- abbreviate.hh
+   Symbol CC, R2;
+#Else
+   #Include- optimizeborn.hh
+#EndIf[%
+@else %]
 #If `LOOPS' == 1
    #Include- abbreviate.hh
    #Create <`OUTFILE'.abb>
-#EndIf
+#EndIf[%
+@end @if %]
 
 #include- spinney.hh
 #redefine SPCANCEL "0"
@@ -485,7 +497,8 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 * Implicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
 * are reduced with the reduction library (Samurai/Golem95/PJFry etc.)
-.sort 5.3;[%
+.sort 5.3;
+Local d`DIAG'R2 = 0;[%
 @case explicit %]
 * Explicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
@@ -604,6 +617,67 @@ Id SpDenominator(sDUMMY1?) = (1/sDUMMY1);
 Id inv(sDUMMY1?) = (1/sDUMMY1);
 
 .sort:5.2;
+
+[%
+@if extension formopt %][%
+@select r2 
+@case explicit %]
+#If `LOOPS' == 1
+   #Create <`OUTFILE'.txt>
+   #Call  OptimizeCode(`R2PREFACTOR')
+#Else
+   #If `BORNFLG' == 1
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #ElseIf `BORNFLG' == 2
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #EndIf
+#EndIf
+.end[%
+@case implicit %]
+#If `LOOPS' == 1
+   #Create <`OUTFILE'.txt>
+   #Call  OptimizeCode(0)
+#Else
+   #If `BORNFLG' == 1
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #ElseIf `BORNFLG' == 2
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #EndIf
+#EndIf
+.end[%
+@case only off %]
+# message 'FORM optimization implemented only with r2=explicit/implicit!!'
+.end[%
+@end @select %][%
+@else %]
 
 #If `LOOPS' == 1
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
@@ -774,11 +848,11 @@ Id vecB.vecB = 0;
 Id vecC.vecC = 0;
 
 #Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
-*#If `RANK' > `LOOPSIZE'
-#Define MAXLaurentT "`RANK'"
-*#Else
-*   #Define  MAXLaurentT "`LOOPSIZE'"
-*#EndIf
+#If `RANK' > `LOOPSIZE'
+   #Define MAXLaurentT "`RANK'"
+#Else
+   #Define  MAXLaurentT "`LOOPSIZE'"
+#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
       vecA,vecB,vecC,LaurentT,LaurentTi,qshift,[%
@@ -847,7 +921,7 @@ Id Qt2 = beta * LaurentT^2;[%
 
 #Define MINLaurentT "`LOOPSIZE'"
 #If `RANK' > `LOOPSIZE'
-#Define MAXLaurentT "`RANK'"
+   #Define MAXLaurentT "`RANK'"
 #Else
    #Define  MAXLaurentT "`LOOPSIZE'"
 #EndIf
@@ -878,4 +952,5 @@ Keep Brackets;
 #Close <`OUTFILE'2.txt>
 #EndIf
 *---#] GENERATENINJADOUBLE:
-.end
+.end[%
+@end @if %]

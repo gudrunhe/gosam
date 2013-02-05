@@ -127,6 +127,34 @@ SOURCE_VIRT=
 .PHONY: source
 .SUFFIXES:
 
+[% 
+@if extension formopt %]
+source: $(SOURCE_TREE) $(SOURCE_VIRT)
+born.txt: ../diagrams-0.hh[%
+@for elements topolopy.keep.tree %]
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \[% 
+@if is_first %][% @if is_last %]
+    	     	-D BORNFLG=2 \[%
+@else %] 
+    	     	-D BORNFLG=1 \[% @end @if %][% 
+@else %][% @if is_last %]
+    	     	-D BORNFLG=-1 \[% 
+@else %]
+    	     	-D BORNFLG=0 \[% 
+@end @if %][% @end @if %]
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm[%
+@end @for %]
+diagramsl0.f90: born.txt
+	@echo Python is processing tree diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortranborn.py \
+		-i $< \
+		--HELICITY=[%helicity%][% 
+@else %]
 source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @select abbrev.level @case helicity %]
 abbrevh[%helicity%].f90: $(TXT_VIRT)
@@ -193,9 +221,70 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 		-D helicity=[%helicity%] -D modsuffix=fr5 \
 		-o $@ $+[%
    @end @if %][%
+@end @if %][%
 @end @if %]
 
-[% 
+[% @if extension formopt %][% 
+@if generate_nlo_virt %][%
+   @for groups var=grp rank=grank %][%
+	   @for diagrams group=grp %]
+d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
+@if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity %]l1d.txt[%
+@end @if %][%
+@if internal GENERATE_NINJA_TRIPLE %] d[%$_%]h[%helicity %]l13.txt[%
+@end @if %][%
+@if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%
+@end @if %]: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT)[%
+	      @if is_mqse %] \
+		-D MQSE=1[%
+			@end @if %] \
+		-D LOOPS=1 \
+		-D GROUP=0 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1[%
+			@if internal GENERATE_DERIVATIVES %] \
+		-D GENERATEDERIVATIVES=1[%
+			@end @if %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %][%
+			@if is_massive_bubble diagram=$_ %] \
+		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
+			@end @if %][%
+			@if internal GENERATE_NINJA_TRIPLE %] \
+		-D GENERATENINJATRIPLE=1[%
+			@end @if %][%
+			@if internal GENERATE_NINJA_DOUBLE %] \
+		-D GENERATENINJADOUBLE=1[%
+			@end @if %] \
+		../codegen/golem.frm
+	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		../codegen/finaloptimization.frm[%
+	   @select abbrev.level @case diagram %]
+d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.txt
+	@echo Python is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran.py \
+		-i $< \
+		--DIAGRAM=[%$_%] \
+		--GROUP=[%grp%]  \
+		--HELICITY=[%helicity%] \
+		--QSIGN=[% sign %] \
+		--QSHIFT=[%shift%][%
+	   @end @select %][%
+	@end @for diagrams %][%
+@end @for groups %][%
+@end @if generate_nlo_virt %]
+
+[% @else %][% 
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
@@ -307,4 +396,6 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 		-o $@ $+[%
 	@end @select %][%
 @end @for groups %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@end @if %]
+

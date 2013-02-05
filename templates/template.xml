@@ -63,7 +63,11 @@
 		<file src="info.frm" class="Kinematics" />
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Verbatim"/>
-		<file src="abbreviate.hh" class="Verbatim"/>
+                <file src="abbreviate.hh" class="Kinematics"/>
+                <file src="optimizeborn.hh" class="Integrals"/>
+                <file src="finaloptimization.frm" class="Kinematics"/>
+                <file src="buildfortran.py" class="Kinematics"/>
+                <file src="buildfortranborn.py" class="Kinematics"/>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>
