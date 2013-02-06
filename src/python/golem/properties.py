@@ -284,6 +284,28 @@ version_samurai = Property("samurai.version",
    str,
    "2.1.1")
 
+ldflags_ninja = Property("ninja.ldflags",
+   """\
+   LDFLAGS required to link ninja.
+
+   Example:
+   ninja.ldflags=-L/usr/local/lib/ -lninja-gfortran-double
+
+   """,
+   str,
+   "")
+
+fcflags_ninja = Property("ninja.fcflags",
+   """\
+   FCFLAGS required to compile with ninja.
+
+   Example:
+   ninja.fcflags=-I/usr/local/include/ninja
+
+   """,
+   str,
+   "")
+
 zero = Property("zero",
    """\
    A list of symbols that should be treated as identically
@@ -899,6 +921,8 @@ properties = [
    fcflags_samurai,
    ldflags_samurai,
    version_samurai,
+   fcflags_ninja,
+   ldflags_ninja,
 
    select_lo_diagrams,
    select_nlo_diagrams,

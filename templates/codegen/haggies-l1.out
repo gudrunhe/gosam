@@ -25,6 +25,9 @@ $]module     [$ process_name asprefix=\_
 @end @if $][$
 @if extension golem95 $]
    public :: numerator_golem95[$
+@end @if $][$
+@if extension ninja $]
+   public :: numerator_ninja[$
 @end @if $]
 contains[% 
 @for brackets bracket="brack_%d" %][%
@@ -261,6 +264,77 @@ contains[%
         output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%]), ki_gol)
    end function numerator_golem95
    !------#] function numerator_golem95:[$
+@end @if $][$
+@if extension ninja $]
+   !------#[ subroutine numerator_ninja:
+   subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &
+   & bind(c, name="[% @with args %][$ process_name asprefix=\_ 
+            $]d[% DIAGRAM %]h[% HELICITY %][% @end @with %]_ninja")
+      use ninja_module, only: ki_nin
+      use [$ process_name asprefix=\_ $]globalsl1, only: epspow
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]abbrev[%
+      @with args %][$
+         @select abbrev.level
+         @case diagram $]d[%DIAGRAM%]h[%HELICITY%][$
+         @case group $]g[%GROUP%]h[%HELICITY%][$
+         @case helicity $]h[%HELICITY%][$
+         @end @select $][%
+      @end @with %]
+      implicit none
+
+      integer, intent(in) :: ncut
+      complex(ki_nin), dimension(0:3), intent(in) :: Q_ext
+      complex(ki_nin), intent(in) :: mu2_ext
+      complex(ki_nin), intent(out) :: numerator
+      complex(ki) :: [%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%][%
+   @for symbols registers="t%d" %]
+      [%    type.repr %] :: [% $_ %][%
+   @end @for %]
+
+      ! The Q that goes into the diagram
+      complex(ki), dimension(4) :: Q[$
+   @select r2
+   @case implicit explicit $]
+      complex(ki) :: mu2[$
+   @end @select $][%
+   @with args %][$
+      @if extension qshift $]
+
+      Q(:) = cmplx(real(Q_ext(:), ki_nin), aimag(Q_ext(:)),   ki)[$
+      @else $][%
+         @select QSHIFT
+         @case 0 %]
+
+      Q(:)   = cmplx(real([% QSIGN %]Q_ext(:),   ki_nin), aimag([%
+            QSIGN %]Q_ext(:)),   ki)[%
+         @else %]
+      real(ki), dimension(0:3) :: qshift
+
+      qshift = [% QSHIFT %]
+      Q(:)   = cmplx(real([% QSIGN %]Q_ext(:) - qshift(0),   ki_nin), aimag([%
+            QSIGN %]Q_ext(:)),   ki)[%
+         @end @select %][$
+      @end @if $][%
+   @end @with %][$
+   @select r2
+   @case implicit $]
+      mu2  = cmplx(real(mu2_ext, ki), 0.0_ki, ki)[$
+   @end @select $]
+      [% output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%] = 0.0_ki[%
+   @for instructions registers="t%d" %]
+      [% $_ %] = [% expression bracket="brack_%d[$
+      @select r2
+      @case only off $](Q)[$
+      @end @select $]" %][%
+   @end @for instructions %]
+
+      numerator = cmplx(real([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%], ki), aimag([%
+        output.file match=".*/(d\\d+)h\\d+l1.f90" format ="%s"%]), ki_nin)
+   end subroutine numerator_ninja
+   !------#] subroutine numerator_ninja:[$
 @end @if $]
 !---#] numerator interfaces:
 end module [$ process_name asprefix=\_

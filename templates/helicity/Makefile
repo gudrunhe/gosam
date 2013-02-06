@@ -18,6 +18,8 @@ OBJECTS= \
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].o[%
    @end @if %][%
+   @if extension ninja %] ninjah[%helicity%].o[%
+   @end @if %][%
 @end @select %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.o[%

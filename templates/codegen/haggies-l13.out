@@ -4,7 +4,7 @@ $][% @with args %]module     [$ process_name asprefix=\_
             $]d[% DIAGRAM %]h[% HELICITY %]l13
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use [$ process_name asprefix=\_ $]config, only: ki
+   use ninja_module, only: ki => ki_nin
    use [$ process_name asprefix=\_ $]util, only: cond, d => metric_tensor
    implicit none
    private
@@ -25,7 +25,7 @@ contains[%
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
       @select r2
-      @case implicit $], mu2[$
+      @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
       use [$ process_name asprefix=\_ $]kinematics
@@ -41,7 +41,7 @@ contains[%
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
       @select r2
-      @case implicit $]
+      @case implicit explicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
       [% type.repr %] :: brack[% 
@@ -63,7 +63,7 @@ contains[%
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
       @select r2
-      @case implicit $], mu2[$
+      @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
       use [$ process_name asprefix=\_ $]kinematics
@@ -79,7 +79,7 @@ contains[%
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
       @select r2
-      @case implicit $]
+      @case implicit explicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
       [% type.repr %] :: brack[%
@@ -103,7 +103,9 @@ contains[%
 @end @for outerbracket %]
    
 !---#[ subroutine numerator_t:
-   subroutine numerator_t(ncut, mu2, a, b, c, coeffs, deg)
+   subroutine numerator_t(ncut, mu2, a, b, c, deg, coeffs) &
+   & bind(c, name="[% @with args %][$ process_name asprefix=\_ 
+            $]d[% DIAGRAM %]h[% HELICITY %][% @end @with %]_ninja_t")
       use [$ process_name asprefix=\_ $]config, only: ki_nin => ki
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       use [$ process_name asprefix=\_ $]kinematics
@@ -124,7 +126,7 @@ contains[%
       integer, intent(in) :: ncut, deg
       complex(ki_nin), intent(in) :: mu2
       complex(ki_nin), dimension(0:3), intent(in) :: a, b, c
-      complex(ki_nin), dimension(0:), intent(out) :: coeffs[%
+      complex(ki_nin), dimension(0:*), intent(out) :: coeffs[%
       @for symbols registers="t%d" %]
       [%    type.repr %] :: [% $_ %][%
       @end @for %]
@@ -151,13 +153,13 @@ contains[%
       coeffs([% $_ match="numerator_(\\d+)" format="%s" %]) = [%
                expression bracket="brack_%d[$
          @select r2
-         @case explicit only off $](Q)[$
+         @case only off $](Q)[$
          @end @select $]" %]
       if (deg.eq.[% $_ match="numerator_(\\d+)" format="%s" %]) return[%
       @else %]
       [% $_ %] = [% expression bracket="brack_%d[$
          @select r2
-         @case explicit only off $](Q)[$
+         @case only off $](Q)[$
          @end @select $]" %][%
       @end @select %][%
    @end @for instructions %]

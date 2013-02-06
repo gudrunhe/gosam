@@ -15,6 +15,10 @@
    use precision_golem, only: ki_gol => ki
    use [% process_name asprefix=\_ %]golem95h[% helicity %][%
       @end @if %][%
+      @if extension ninja %]
+   use ninja_module, only: ki_nin
+   use [% process_name asprefix=\_ %]ninjah[% helicity %][%
+      @end @if %][%
    @end @select %][%
 @end @if %]
    [% @if internal CUSTOM_SPIN2_PROP
@@ -287,6 +291,10 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]samuraih[% helicity
       %], only: samurai_reduce => reduce_group[% grp %]
    use options, only: samurai_out => iout[%
+      @end @if %][%
+      @if extension ninja %]
+   use [% process_name asprefix=\_ %]ninjah[% helicity
+      %], only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
    real(ki), intent(in) :: scale2
@@ -355,6 +363,15 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
             @end @if %]
       ok = .true.[%
          @end @if %][%
+      @end @if %][%
+      @if extension ninja %]
+   case(21) ! use Ninja only
+      call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
+         @if generate_lo_diagrams %]
+      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
+         @else %]
+      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
+         @end @if %][% 
       @end @if %][%
       @if extension samurai %][%
          @if extension golem95 %]

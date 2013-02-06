@@ -841,22 +841,22 @@ Id fshift(0) = 0;
 Id fshift(?all) = 1;
 Id p1 = Q;[%
 @end @if %]
-Id Q = vecA + vecB * LaurentTi + vecC * LaurentT;
+Id Q = vecA + vecC * LaurentTi + vecB * LaurentT;
 
 Id LaurentT * LaurentTi = 1;
 Id vecB.vecB = 0;
 Id vecC.vecC = 0;
 
 #Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
-#If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
-#Else
-   #Define  MAXLaurentT "`LOOPSIZE'"
-#EndIf
+*#If `RANK' > `LOOPSIZE'
+#Define MAXLaurentT "`RANK'"
+*#Else
+*   #Define  MAXLaurentT "`LOOPSIZE'"
+*#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
       vecA,vecB,vecC,LaurentT,LaurentTi,qshift,[%
-  @select r2 @case implicit %],Qt2,eps,epspow[%
+  @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])
 .sort
 Multiply fDUMMY1(0);
@@ -920,15 +920,15 @@ Id Qt2 = beta * LaurentT^2;[%
 @end @select %]
 
 #Define MINLaurentT "`LOOPSIZE'"
-#If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
-#Else
-   #Define  MAXLaurentT "`LOOPSIZE'"
-#EndIf
+*#If `RANK' > `LOOPSIZE'
+*#Define MAXLaurentT "`RANK'"
+*#Else
+#Define  MAXLaurentT "`LOOPSIZE'"
+*#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
-      vecA,beta,LaurentT,qshift,[%
-  @select r2 @case implicit %],Qt2,eps,epspow[%
+      vecA,beta,LaurentT,qshift[%
+  @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])
 .sort
 Multiply fDUMMY1(0);
