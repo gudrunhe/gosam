@@ -443,7 +443,7 @@ EndArgument;
    Id Qt2 * eps = 0;
    Id eps^sDUMMY1?{>2} = 0;
 
-   #If `LOOPSIZE' > 5
+   #If `LOOPSIZE' > 6
       Id Qt2 = 0;
 
 

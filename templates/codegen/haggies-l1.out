@@ -302,19 +302,19 @@ contains[%
    @with args %][$
       @if extension qshift $]
 
-      Q(:) = cmplx(real(Q_ext(:), ki_nin), aimag(Q_ext(:)),   ki)[$
+      Q(1:4) = cmplx(real(Q_ext(0:3), ki_nin), aimag(Q_ext(0:3)),   ki)[$
       @else $][%
          @select QSHIFT
          @case 0 %]
 
-      Q(:)   = cmplx(real([% QSIGN %]Q_ext(:),   ki_nin), aimag([%
-            QSIGN %]Q_ext(:)),   ki)[%
+      Q(1:4)   = cmplx(real([% QSIGN %]Q_ext(0:3),   ki_nin), aimag([%
+            QSIGN %]Q_ext(0:3)),   ki)[%
          @else %]
       real(ki), dimension(0:3) :: qshift
 
       qshift = [% QSHIFT %]
-      Q(:)   = cmplx(real([% QSIGN %]Q_ext(:) - qshift(0),   ki_nin), aimag([%
-            QSIGN %]Q_ext(:)),   ki)[%
+      Q(1:4)   = cmplx(real([% QSIGN %]Q_ext(0:3) - qshift(0:3),   ki_nin), aimag([%
+            QSIGN %]Q_ext(0:3)),   ki)[%
          @end @select %][$
       @end @if $][%
    @end @with %][$
