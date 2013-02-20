@@ -217,15 +217,19 @@ contains
                enddo
                write(42,'(4x,A10)')"</momenta>"
                write(42,'(2x,A8)')"</event>"
-               ! Give back a Nan so that point is discarded
-               zero = log(1.0_ki)
-               amp(2)= 1.0_ki/zero
             endif
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
          else
             if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
             if(PSP_verbosity .ge. 3) write(*,*)
          end if
          reduction_interoperation = tmp_red_int
+      else
+         ! Give back a Nan so that point is discarded
+         zero = log(1.0_ki)
+         amp(2)= 1.0_ki/zero    
       end if[%
       @else %]
       if(PSP_rescue) then
