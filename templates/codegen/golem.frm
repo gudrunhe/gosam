@@ -624,7 +624,10 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @case explicit %]
 #If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
    #Call  OptimizeCode(`R2PREFACTOR')
+   #Close <`OUTFILE'.txt>
+   #Close <`OUTFILE'.dat>
 #Else
    #If `BORNFLG' == 1
 	#Create <borndiag.prc>
@@ -650,7 +653,10 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @case implicit %]
 #If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
    #Call  OptimizeCode(0)
+   #Close <`OUTFILE'.txt>
+   #Close <`OUTFILE'.dat>
 #Else
    #If `BORNFLG' == 1
 	#Create <borndiag.prc>

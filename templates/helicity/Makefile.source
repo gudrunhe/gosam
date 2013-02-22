@@ -228,9 +228,8 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
+
 d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
-@if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity %]l1d.txt[%
-@end @if %][%
 @if internal GENERATE_NINJA_TRIPLE %] d[%$_%]h[%helicity %]l13.txt[%
 @end @if %][%
 @if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%
@@ -268,6 +267,10 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
+		-D RANK=[% rank %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %] \
 		../codegen/finaloptimization.frm[%
 	   @select abbrev.level @case diagram %]
 d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.txt
@@ -279,7 +282,39 @@ d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l
 		--HELICITY=[%helicity%] \
 		--QSIGN=[% sign %] \
 		--QSHIFT=[%shift%][%
-	   @end @select %][%
+@if internal GENERATE_DERIVATIVES %] 
+d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt 
+	@echo Form is optimizing loop diagram derivatives [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D RANK=[% rank %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %] \
+		../codegen/derive.frm[%
+   @for repeat rank inclusive=true var=rk %]
+	@echo Form is optimizing loop diagram [%$_%] rank [%rk%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D RANK=[% rk %] \
+		-D GENERATEDERIVATIVES=1 \
+		../codegen/finaloptimization.frm[%
+	@end @for%]
+d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt
+	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_d.py \
+		-i $< \
+		--DIAGRAM=[%$_%] \
+		--GROUP=[%grp%]  \
+		--HELICITY=[%helicity%] \
+		--QSIGN=[%sign%] \
+		--QSHIFT=[%shift%] \
+		--RANK=[%rank%] \
+		--LOOPSIZE=[% loopsize diagram=$_ %][%
+		@end @if %][%
+		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %]

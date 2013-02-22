@@ -1,5 +1,6 @@
 #Procedure OptimizeBorn()
 #Create <born.txt>
+#Create <born.dat>
 
 Symbol [% 
 @for elements topolopy.keep.tree %][% 
@@ -20,13 +21,16 @@ Local diagrams=[%
 @end @for %];
 
 #Call borndiag
-Format O2,stats=off;
+Format O[%formopt.level%],stats=off;
 Brackets c1,...,c[% num_colors %];
 .sort
-Format doublefortran;
+*Format doublefortran;
 #optimize diagrams;
 #write <born.txt> "#####Abbreviations"
 #write <born.txt> "%O"
 #write <born.txt> "#####Diagrams"
-#write <born.txt> "diagrams = %e",diagrams;
+#write <born.txt> "amplitude = %e",diagrams;
+#write <born.dat> "abbrev_terms=`optimmaxvar_'"
+
+
 #EndProcedure

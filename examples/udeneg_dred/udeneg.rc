@@ -23,4 +23,6 @@ zero=mU,mD,me
 # There are only two non-zero helicities
 helicities=-+-++, -+-+-
 
-process.extensions=dred
+abbrev.level=diagram
+
+process.extensions=dred,formopt,derive,numpolvec

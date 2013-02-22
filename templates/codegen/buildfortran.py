@@ -3,18 +3,9 @@
 import sys
 import os
 from optparse import OptionParser
+from t2f import translatefile, getdata, postformat
+from pythonin import dotproducts
 
-def parse_string(string,line,list,left=0,right=0):
-    occ = line.count(string)
-    if occ > 0:
-        tmpl=line
-        for i in range(0,occ):
-            s=tmpl.find(string)-left
-            e=tmpl.find(string,s)+len(string)+right
-            if tmpl[s:e] not in list:
-                list.append(tmpl[s:e])
-            tmpl=tmpl[:s]+tmpl[e:]
-    return
 
 parser = OptionParser()
 
@@ -68,7 +59,7 @@ qshift=options.qshift
 txtfile = open(diag_name+'.txt','r')
 abbfile = open('abbrevd'+diag+'h'+heli+'.f90', 'w')
 f90file = open(diag_name+'.f90', 'w')
-
+datfilename = diag_name + '.dat'
 # import txt file
 txt_lines=[]
 dotprod_spva=[]
@@ -76,73 +67,17 @@ dotprod_sp=[]
 dotprod_kdotl=[]
 dotprod_kdote=[]
 dotprod_kdotspva=[]
-abb_max=0
-acc_max=0
+abb_max=getdata(datfilename)['abbrev_terms']
+acc_max=getdata(datfilename)['diagram_terms']
 
-while True:
-    line=txtfile.readline()
-    if len(line)==0:
-        break
-    txt_lines.append(line.replace('&','').replace('D0','0_ki').strip())
-    if line.startswith('#####R2'):
-        abb_up=len(txt_lines)-1
-    if line.startswith('#####Diagram'):
-        r2_up=len(txt_lines)-1
-    if line.startswith('diagram'+diag):
-        dia_up=len(txt_lines)-1
-line_num=len(txt_lines)
+# catch the case that acc_max is zero
+if acc_max == '0':
+	acc_max = 1
 
-#print "Lines in file: ", line_num
-#print "Lines for abb: ", abb_up
-
-# find maximal number of abbreviations:
-for idx,line in enumerate(txt_lines):
-    if line.startswith('#####R2'):
-        break
-    tmp_cline=line.partition('=')[0].strip()
-    tmp_rline=line.partition('=')[2].strip()
-    if tmp_cline.startswith('abb'+diag):
-        abb_max=max(abb_max,int(tmp_cline.split('(')[1].split(')')[0]))
-    parse_string('_e',txt_lines[idx],dotprod_kdote,2,1)
-    parse_string('_l',txt_lines[idx],dotprod_kdotl,2,1)
-    parse_string('_spva',txt_lines[idx],dotprod_kdotspva,2,4)
-    if txt_lines[idx].endswith('.D'):
-        txt_lines[idx]=txt_lines[idx].replace('D','0_ki')
-        txt_lines[idx+1]=txt_lines[idx+1][1:len(txt_lines[idx+1])+1]
-    if txt_lines[idx].endswith('.') and txt_lines[idx+1].startswith('0_ki'):
-        txt_lines[idx]=txt_lines[idx][0:len(txt_lines[idx])+1]+'0_ki'
-        txt_lines[idx+1]=txt_lines[idx+1][4:len(txt_lines[idx+1])+1]
-    ## replacement of SQRT. VALID ONLY FOR SM --> TO BE GENERALIZED!!!
-    txt_lines[idx]=txt_lines[idx].replace('csqrt(mT**2)','mT')
 
 #print "--------------------"
 
-for i in range(r2_up+1,line_num):
-    tmp_lline=txt_lines[i].partition('=')[0].strip()
-    tmp_cline=txt_lines[i].partition('=')[1].strip()
-    tmp_rline=txt_lines[i].partition('=')[2].strip()
-    if tmp_lline.startswith('acc'+diag):
-        acc_max=max(acc_max,int(tmp_lline.split('(')[1].split(')')[0]))
-    # detect scalar products:
-    # --> with spinors
-    parse_string('Qspva',txt_lines[i],dotprod_spva,0,4)
-    # --> with external momenta
-    parse_string('Qspk',txt_lines[i],dotprod_sp,0,1)
-    parse_string('Qspl',txt_lines[i],dotprod_sp,0,1)
-    parse_string('Qspe',txt_lines[i],dotprod_sp,0,1)
-    # --> with Q
-    parse_string('QspQ',txt_lines[i],dotprod_sp,0,0)
-
-    ##for j in range(1,acc_max+1):
-    ##    if tmp_rline.count('abb'+diag+'('+str(j)+')') > 0:
-    ##        tmp_rline=tmp_rline.replace('abb'+diag+'('+str(j)+')','acc'+diag+'('+str(j)+')')
-    txt_lines[i]=(tmp_lline+tmp_cline+tmp_rline).replace('Qt2','mu2')
-
-for i in range(dia_up,line_num):
-    txt_lines[i]=txt_lines[i].replace('diagram'+diag,'brack')
-
-#print "Scalar products:", dotprod_sp, dotprod_spva
-#print "Maximal number of abb: ", abb_max
+outdict=translatefile(diag_name+'.txt')
 
 # Write abbreviation file
 abbfile.write('module     [% process_name asprefix=\_ 
@@ -152,13 +87,7 @@ abbfile.write('   use [% process_name asprefix=\_ %]globalsh'+heli+'\n')
 abbfile.write('   implicit none\n')
 abbfile.write('   private\n')
 abbfile.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')
-for sp in dotprod_kdote:
-    abbfile.write('      complex(ki) :: '+sp+'\n')
-for sp in dotprod_kdotl:
-    abbfile.write('      complex(ki) :: '+sp+'\n')
-for sp in dotprod_kdotspva:
-    abbfile.write('      complex(ki) :: '+sp+'\n')
-abbfile.write('   complex(ki), public :: rat2d'+diag+'\n')
+abbfile.write('   complex(ki), public :: R2d'+diag+'\n')
 abbfile.write('\n')
 abbfile.write('   public :: init_abbrev\n')
 abbfile.write('\n')
@@ -173,30 +102,15 @@ abbfile.write('      use [% process_name asprefix=\_ %]model\n')
 abbfile.write('      use [% process_name asprefix=\_ %]color, only: TR\n')
 abbfile.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 abbfile.write('      implicit none\n')
-for sp in dotprod_kdote:
-    abbfile.write('      '+sp+ '=dotproduct('+sp.partition('_')[0]+','+sp.partition('_')[2]+')\n')
-for sp in dotprod_kdotl:
-    abbfile.write('      '+sp+ '=dotproduct('+sp.partition('_')[0]+','+sp.partition('_')[2]+')\n')
-for sp in dotprod_kdotspva:
-    abbfile.write('      '+sp+ '=dotproduct('+sp.partition('_')[0]+','+sp.partition('_')[2]+')\n')
 abbfile.write('\n')
-for i in range(4,abb_up-1):
-    if txt_lines[i+1].count('=') == 1 or len(txt_lines[i+1]) == 0:
-        abbfile.write('      '+txt_lines[i]+'\n')
-    else:
-        abbfile.write('      '+txt_lines[i]+'&\n')
+abbfile.write(outdict['Abbreviations'])
+abbfile.write(outdict['R2'])
 abbfile.write('\n')
-for i in range(abb_up+2,r2_up-1):
-    if txt_lines[i+1].count('=') == 1 or len(txt_lines[i+1]) == 0:
-        abbfile.write('      '+txt_lines[i].replace('R2','rat2')+'\n')
-    else:
-        abbfile.write('      '+txt_lines[i].replace('R2','rat2')+'&\n')
-abbfile.write('\n')
-abbfile.write('      rat2 = rat2 + rat2d'+diag+'\n')
+abbfile.write('      rat2 = rat2 + R2d'+diag+'\n')
 abbfile.write('\n')
 abbfile.write('      if (debug_nlo_diagrams) then\n')
 abbfile.write('          write (logfile,*) "<result name=\'r2\' index=\''+diag+'\' value=\'", &\n')
-abbfile.write('          & rat2d'+diag+', "\'/>"\n')
+abbfile.write('          & R2d'+diag+', "\'/>"\n')
 abbfile.write('      end if\n')
 abbfile.write('   end subroutine\n')
 abbfile.write('end module [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
@@ -230,27 +144,14 @@ f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
 f90file.write('      complex(ki), intent(in) :: mu2\n')
 f90file.write('      complex(ki) :: brack\n')
 f90file.write('      complex(ki) :: acc'+diag+'('+str(acc_max)+')'+'\n')
-for sp in dotprod_sp:
-    f90file.write('      complex(ki) :: '+sp+'\n')
-for sp in dotprod_spva:
-    f90file.write('      complex(ki) :: '+sp+'\n')
+
+for Qitem in outdict['dplist']:
+    f90file.write('      complex(ki) :: '+ Qitem +'\n')
+
+for Qitem in outdict['dplist']:
+    f90file.write('      %s = %s' % (Qitem, dotproducts[Qitem]) +'\n')
 f90file.write('\n')
-for sp in dotprod_sp:
-    f90file.write('      '+sp+'=dotproduct(Q,'+sp.split('sp')[1]+')\n')
-for sp in dotprod_spva:
-    f90file.write('      '+sp+'=dotproduct(Q,spva'+sp.split('spva')[1]+')\n')
-f90file.write('\n')
-for i in range(r2_up+1,dia_up-1):
-    if txt_lines[i+1].count('=') == 1 or len(txt_lines[i+1]) == 0:
-        f90file.write('      '+txt_lines[i]+'\n')
-    else:
-        f90file.write('      '+txt_lines[i]+'&\n')
-f90file.write('\n')
-for i in range(dia_up+1,line_num):
-    if txt_lines[i].count('=') == 1 or len(txt_lines[i]) == 0:
-        f90file.write('      '+txt_lines[i-1]+'\n')
-    else:
-        f90file.write('      '+txt_lines[i-1]+'&\n')
+f90file.write(outdict['Diagram'])
 f90file.write('\n')
 f90file.write('   end  function brack_1\n')
 f90file.write('\n')
@@ -342,6 +243,15 @@ f90file.write('end module [% process_name asprefix=\_ %]'+diag_name+'\n')
 txtfile.close()
 abbfile.close()
 f90file.close()
+### additional formatting for output files
+
+postformat(diag_name + '.f90')
+postformat('abbrevd'+diag+'h'+heli+'.f90')
+
+
+
+
+
 
 
 

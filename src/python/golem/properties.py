@@ -443,6 +443,27 @@ fc_bin = Property("fc.bin",
    str,
    "gfortran")
 
+python_bin = Property("python.bin",
+   """\
+   Denotes the executable file of Python 
+   """,
+   str,
+   "python")
+
+formopt_level = Property("formopt.level",
+   """\
+   There are three levels of Horner Scheme
+   offered and the number here will specify
+   which one we use. It can only be 1,2 or 3.
+   
+   Examples:
+   formopt.level=3
+
+   """,
+   str,
+   "2",
+   experimental=True)
+
 extensions = Property("extensions",
    """\
    A list of extension names which should be activated for the
@@ -912,6 +933,8 @@ properties = [
    form_tmp,
    haggies_bin,
    fc_bin,
+   python_bin,
+   formopt_level,
    group_diagrams,
    sum_diagrams,
    extensions,

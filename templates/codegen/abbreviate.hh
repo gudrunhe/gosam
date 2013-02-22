@@ -73,9 +73,10 @@ Id Q.e[%index%] = Qspe[%index%];[%
 @end @for %][%
 @end @if %]
 .sort
-
+Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
+.sort
 Hide diagram`DIAG',d`DIAG'R2;
-Format O2,stats=off;
+Format O[%formopt.level%],stats=off;
 Brackets CC,R2,Qt2,QspQ[%
 @for particles %],Qspk[%index%][%
    @if is_massive %],Qspl[%index%][%
@@ -105,7 +106,9 @@ Brackets CC,R2,Qt2,QspQ[%
 
 ExtraSymbols,vector,abb`DIAG';
 *Format fortran90,.0_ki;
-Format doublefortran;
+*Format doublefortran;
+#append <`OUTFILE'.txt>
+#append <`OUTFILE'.dat>
 #optimize tot`DIAG';
 #write <`OUTFILE'.txt> "*Abbreviations for diagram `OUTFILE'. Generated on `DATE_'"
 #write <`OUTFILE'.txt> ""
@@ -113,20 +116,20 @@ Format doublefortran;
 #write <`OUTFILE'.txt> "%O"
 #write <`OUTFILE'.txt> "#####R2"
 #write <`OUTFILE'.txt> ""
+#write <`OUTFILE'.dat> "abbrev_terms=`optimmaxvar_'"
 .sort
 L redCC`DIAG' = tot`DIAG'*replace_(CC,1,R2,0);
 L redR2`DIAG' = tot`DIAG'*replace_(CC,0,R2,1);
 .sort
 #If "`R2PREFACTOR'" != "1"
-#Write <`OUTFILE'.txt> "R2d`DIAG' = `R2PREFACTOR' *(%e)", redR2`DIAG';
+#Write <`OUTFILE'.txt> "R2d`DIAG' = `R2PREFACTOR' *(%E);", redR2`DIAG'
 #write <`OUTFILE'.txt> ""
 #Else
-#Write <`OUTFILE'.txt> "R2d`DIAG' = %e", redR2`DIAG';
+#Write <`OUTFILE'.txt> "R2d`DIAG' = %E;", redR2`DIAG'
 #write <`OUTFILE'.txt> ""
 #EndIf
+.sort
 Format Normal;
-#write <`OUTFILE'.prc> "#Procedure `OUTFILE'"
-#write <`OUTFILE'.prc> "Id    diagram`DIAG'  = %e",redCC`DIAG';
-#write <`OUTFILE'.prc> "#EndProcedure"
+#write <`OUTFILE'.prc> "L diagram`DIAG'  = %e",redCC`DIAG';
 #EndProcedure[%
 @end @if %]

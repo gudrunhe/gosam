@@ -1,8 +1,36 @@
 #-
 off statistics;
-#append <`OUTFILE'.txt>
-
-CF abb`DIAG';
+[% 
+@if internal GENERATE_DERIVATIVES %]
+Vectors Q[%
+@for particles %],k[% index %][%
+   @if is_massive %],l[% index %][%
+   @end @if %][%
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %],e[%index%][%
+   @end @for %][%
+@end @if %];
+Indices iDUMMY1, ..., iDUMMY5;
+Vectors vDUMMY1, ..., vDUMMY4;
+CFunctions fDUMMY1, ..., fDUMMY3;
+CTensors d(symmetric);
+CTensor ptens;
+CTensor SUBSCRIPT;
+AutoDeclare Vectors spva;
+AutoDeclare Indices idx, iv;
+CF dotproduct(symmetric);
+CF Wrapper;[%
+@end @if %][%
+@if extension qshift%][%
+@else %]
+  CFunction j;                                                                                                                                               
+  CTensor ptens;                                                                                                                                             
+  Vector Q, p1;                                                                                                                                              
+  Vector qshift;                                                                                                                                             
+  CFunction fshift;
+[%@end @if %]
+V abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%
@@ -29,16 +57,45 @@ Symbol Qt2,QspQ[%
    @end @for %][%
 @end @if %];
 
-Symbol diagram`DIAG';
+[%@if internal GENERATE_DERIVATIVES %]
+#IfNDef `GENERATEDERIVATIVES'
+[%@end @if %]
+
+#append <`OUTFILE'.txt>
+#append <`OUTFILE'.dat>
 ExtraSymbols,vector,acc`DIAG';
+#Include `OUTFILE'.prc
 Local diag=diagram`DIAG';
 
-#Call `OUTFILE'.prc
-Format O2,stats=off;
+Format O[%formopt.level%],stats=off;
 .sort
-Format doublefortran;
 #optimize diag;
 #write <`OUTFILE'.txt> "#####Diagram"
 #write <`OUTFILE'.txt> "%O"
-#write <`OUTFILE'.txt> "diagram`DIAG' = %e",diag(diagram`DIAG');
+#write <`OUTFILE'.txt> "brack = %e",diag(diagram`DIAG');
+#write <`OUTFILE'.dat> "diagram_terms=`optimmaxvar_'";
+
+#Close <`OUTFILE'.dat>
+#Close <`OUTFILE'.txt>
+
+.sort
+[%@if internal GENERATE_DERIVATIVES %]
+#Else
+#Append <`OUTFILE'.dat>
+#Append <`OUTFILE'd.txt>
+
+#include- `OUTFILE'd.hh #d`RANK'diagram
+.sort
+ExtraSymbols,vector,acd`DIAG';
+Format O[%formopt.level%],stats=off;
+#Optimize d`RANK'diagram;
+#write <`OUTFILE'd.txt> "#####Derive`RANK'"
+#write <`OUTFILE'd.txt> "%O";
+#write <`OUTFILE'd.txt> "brack = %e",d`RANK'diagram;
+#write <`OUTFILE'.dat> "d`RANK'diagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'd.txt>
+#Close <`OUTFILE'.dat>
+#EndIf
+[%
+@end @if %]
 .end
