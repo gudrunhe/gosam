@@ -471,6 +471,8 @@ extensions = Property("extensions",
                     a limited gauge check (introduces gauge*z variables)
    olp_daemon   --- (OLP interface only): generates a C-program providing
                     network access to the amplitude
+   olp_badpts   --- (OLP interface only): allows to stear the numbering
+                    of the files containing bad points from the MC
    no-fr5       --- do not generate finite gamma5 renormalisation
    numpolvec    --- evaluate polarisation vectors numerically
    f77          --- in combination with the BLHA interface it generates
@@ -482,7 +484,7 @@ extensions = Property("extensions",
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon", "numpolvec",
+      "generate-all-helicities", "olp_daemon","olp_badpts", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop"])
 
 select_lo_diagrams = Property("select.lo",
@@ -997,6 +999,7 @@ def setInternals(conf):
          "__OLP_TRAILING_UNDERSCORE__",
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
+         "__OLP_BADPTSFILE_NUMBERING__",
          "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
@@ -1022,6 +1025,7 @@ def setInternals(conf):
    conf["__OLP_TRAILING_UNDERSCORE__"] = "f77" in extensions
    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
+   conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
 
    conf["__REQUIRE_FR5__"] = not conf["__REGULARIZATION_DRED__"] \
          and "no-fr5" not in extensions

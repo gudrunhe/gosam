@@ -65,17 +65,20 @@ contains
    !---#] subroutine banner:
 
    !---#[ subroutine initgolem :
-   subroutine     initgolem(is_first)
+   subroutine     initgolem(is_first,stage,rndseed)
       implicit none
       logical, optional, intent(in) :: is_first
-      
+      integer, optional, intent(in) :: stage
+      integer, optional, intent(in) :: rndseed
       logical :: init_third_party
       logical :: file_exists
-      integer i
+      integer i, j
       character(len=10) :: file_name
       character(len=3)  :: file_numb
-      character(len=3)  :: file_pre = "bad"
-      character(len=3)  :: file_ext = "pts"
+      character(len=9)  :: file_pre = "gs_badpts"
+      character(len=3)  :: file_ext = "log"
+      character(len=1)  :: cstage
+      character(len=4)  :: crndseed
       i = 1
       file_exists =.true.
 
@@ -95,7 +98,18 @@ contains
       ! call our banner
       call banner()
       if(PSP_check .and. PSP_rescue) then
-          do while(file_exists)
+         if(present(stage)) then
+            write(cstage,'(i1)') stage
+            write(crndseed,'(i4)') rndseed
+            do j=1,4
+               if(crndseed(j:j).eq.' ') crndseed(j:j)='0'
+            enddo
+            file_name = file_pre//"-"//cstage//"-"//crndseed//"."//file_ext
+            open(unit=42, file=file_name, status='replace', action='write')
+            write(42,'(A22)') "<?xml version='1.0' ?>"
+            write(42,'(A5)')  "<run>"
+         else
+            do while(file_exists)
                write(file_numb, '(I3.1)') i
                file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
                inquire(file=file_name, exist=file_exists)
@@ -104,11 +118,12 @@ contains
                   i = i+1
                else
                   write(*,*) "Bad points stored in file: ", file_name
-                  open(unit=42, file=file_name, status='unknown', action='write', access='append')
+                  open(unit=42, file=file_name, status='unknown', action='write')
                   write(42,'(A22)') "<?xml version='1.0' ?>"
                   write(42,'(A5)')  "<run>"
-               endif
+               end if
             enddo
+         end if
       end if
       end if[%
 @end @select %]
