@@ -1,4 +1,4 @@
-# Last updated 12.02.2013 - To be tested
+# Last updated 26.02.2013 - To be tested
 
 from cStringIO import StringIO
 from tokenize import generate_tokens
@@ -9,6 +9,42 @@ from filter import Fortran90
 
 
 dotproduct_global=[]
+
+def bmatch(lin):
+        """
+        returns list of bracket matched indices in a list
+        """
+        lh = [idx for idx,val in enumerate(lin)  if val=='(']
+        rh = [idx for idx,val in enumerate(lin)  if val==')']
+        bmatch=[]
+        bmatchd={}
+        for li,le in enumerate(lh):
+                bmatchd[rh[li]] = 'r'
+                bmatchd[le] = 'l'
+        sort=sorted(bmatchd.iteritems())
+        idx = 0
+	embed = False
+	ib = 0
+	while sort != []:
+		item = sort[idx]
+		next = sort[idx+1]
+		if item[1] == 'l':
+			if next[1] == 'r':
+				if not embed:
+					ib = len(bmatch)
+				else:
+					ib = 0
+				bmatch.insert(ib,[ sort.pop(idx)[0], sort.pop(idx)[0]])
+				if embed:
+					idx -= 1
+			else:
+				idx += 1
+				embed = True
+	bmatchd={}
+	for l,r in bmatch:
+		bmatchd[l] = r
+	return bmatchd
+
 
 def getdata(infile_string):
 	"""
@@ -66,7 +102,8 @@ def translate(tokens):
 	newlist=[]
 	ilist=0
 	itoken=0
-	bcount=0
+	
+	bd = bmatch(tokens)
 	while itoken < len(tokens):
 		token = tokens[itoken]
 # special case for abbreviations
@@ -76,22 +113,21 @@ def translate(tokens):
 			newlist.append(newtoken)
 			itoken = itoken+4
 		elif token in lambdafunc.keys():
+			# the next token is '('
+			l,r = itoken+1, bd[itoken+1]
+			l_abs = l
+			r_abs = r
 			function=token
-        	        l_rel = tokens[bcount:].index('(')
-                	r_rel = tokens[bcount:].index(')')
-	                l_abs = bcount + l_rel
-        	        r_abs = bcount + r_rel
-                	bcount = bcount + r_rel + 1
-	               	bracklist = tokens[l_abs+1:r_abs]
+			bracklist = tokens[l_abs+1:r_abs]
 			itoken = itoken + len(bracklist)
 			tlist = translate(bracklist)
 			args = glue(tlist).split(',')
-	               	newlist.append('(')
+#			newlist.append('(')
 			itoken = itoken +1
 			newitem = replace(function,args)
 			newlist.append(newitem[0])
-			itoken = itoken + 1
-	       	        newlist.append(')')
+			itoken = itoken + newitem[1]
+#			newlist.append(')')
 			itoken = itoken + 1
 		elif token in dotproducts.keys():
 			if token not in dotproduct_global:
