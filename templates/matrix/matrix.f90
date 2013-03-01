@@ -73,7 +73,7 @@ contains
       logical :: init_third_party
       logical :: file_exists
       integer i, j
-      character(len=10) :: file_name
+      character(len=25) :: file_name
       character(len=3)  :: file_numb
       character(len=9)  :: file_pre = "gs_badpts"
       character(len=3)  :: file_ext = "log"

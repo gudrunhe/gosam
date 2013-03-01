@@ -10,17 +10,17 @@
    ! DOUBLE PRECISION (ki=8):
    integer, parameter :: ki = kind(1.0d0)
 
-   logical, parameter :: debug_lo_diagrams  = [%
+   logical :: debug_lo_diagrams  = [%
       @if anymember lo all debug ignore_case=true %].true.[%
       @else %].false.[%
       @end @if %]
-   logical, parameter :: debug_nlo_diagrams = [%
+   logical :: debug_nlo_diagrams = [%
       @if anymember nlo all debug ignore_case=true %].true.[%
       @else %].false.[%
       @end @if %][%
 
       @if internal NUMPOLVEC %]
-   logical, parameter :: debug_numpolvec    = [%
+   logical :: debug_numpolvec    = [%
          @if anymember numpolvec all debug ignore_case=true %].true.[%
          @else %].false.[%
          @end @if %][%
