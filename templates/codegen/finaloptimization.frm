@@ -30,7 +30,7 @@ CF Wrapper;[%
   Vector qshift;                                                                                                                                             
   CFunction fshift;
 [%@end @if %]
-V abb`DIAG';
+CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%
