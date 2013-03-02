@@ -229,7 +229,7 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
+d[%$_%]h[%helicity%]l1.txt[%
 @if internal GENERATE_NINJA_TRIPLE %] d[%$_%]h[%helicity %]l13.txt[%
 @end @if %][%
 @if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%

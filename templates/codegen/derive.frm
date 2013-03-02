@@ -17,6 +17,7 @@ Vectors Q[%
    @end @for %][%
 @end @if %];
 Indices iDUMMY1, ..., iDUMMY5;
+Symbols sDUMMY1;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -35,7 +36,7 @@ CF Wrapper;[%
   Vector qshift;                                                                                                                                             
   CFunction fshift;
 [%@end @if %]
-V abb`DIAG';
+CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%
@@ -145,7 +146,7 @@ Id d(iDUMMY1?) = 0;
    Id Q = 0;
 #EndIf
 Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);
-Id abb`DIAG'(iDUMMY1?) = Wrapper(abb`DIAG',iDUMMY1);
+Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
 Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
 Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
 .sort
