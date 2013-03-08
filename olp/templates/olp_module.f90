@@ -93,7 +93,7 @@ contains
          @for subprocesses %]
          call [%$_%]_initgolem([% 
          @if is_first %].true.[% @else %].false.[%
-         @end @if %],stage,rndiwhichseed)[%
+         @end @if %],stage,rndseed)[%
          @end @for %]
       end if[%
       @else %][%
