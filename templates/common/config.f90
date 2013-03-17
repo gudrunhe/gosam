@@ -182,5 +182,6 @@
              true=.true.
              false=.false. %]
    integer :: PSP_chk_threshold2 = [% PSP_chk_threshold2 %]
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
 end module [% process_name asprefix=\_ %]config
 

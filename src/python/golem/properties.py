@@ -851,7 +851,7 @@ config_PSP_check = Property("PSP_check",
    Set the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    bool, False)
 
@@ -869,7 +869,7 @@ config_PSP_rescue = Property("PSP_rescue",
    with the extension 'derive' which ensures a stabler 
    reconstruction of the tensor coefficients.
 
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    bool, True)
 
@@ -883,7 +883,7 @@ config_PSP_verbosity = Property("PSP_verbosity",
    verbosity = 2 : as 1 but PSPs are written in file bad.pts
    verbosity = 3 : output whenever the rescue system is used
                    with comment about the success of the rescue
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 2, options=["0","1","2","3"])
 
@@ -895,7 +895,7 @@ config_PSP_chk_threshold1 = Property("PSP_chk_threshold1",
    amplitude using golem95. The number has to be an integer
    indicating the wished minimum number of digits accuracy
    on the finite part.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 4)
 
@@ -907,9 +907,21 @@ config_PSP_chk_threshold2 = Property("PSP_chk_threshold2",
    verbosity level set, such points are written to a file and not
    used when the code is interfaced to an external Monte Carlo 
    using the new BLHA standards.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 3)
+
+config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
+   """\
+   Set the same variable in config.f90
+
+   Threshold on the k-factor to declare a PSP as bad point. According 
+   to the verbosity level set, such points are written to a file and 
+   not used when the code is interfaced to an external Monte Carlo 
+   using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   str, 10000)
 
 properties = [
    process_name,
@@ -969,6 +981,7 @@ properties = [
    config_PSP_chk_threshold1,
    config_PSP_rescue,
    config_PSP_chk_threshold2,
+   config_PSP_chk_kfactor,
 
    reference_vectors,
    abbrev_limit,

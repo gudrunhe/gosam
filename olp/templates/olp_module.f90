@@ -22,7 +22,8 @@ contains
       use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
            & [%$_%]_PSP_verbosity => PSP_verbosity, &
            & [%$_%]_PSP_chk_threshold1 => PSP_chk_threshold1, &
-           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2[%
+           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2, &
+           & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
@@ -109,12 +110,14 @@ contains
       ! PSP_rescue = .true.
       ! PSP_verbosity = [% PSP_verbosity default=2 %]
       ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
-      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %][%
+      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
+      ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0_ki %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
       ! [%$_%]_PSP_verbosity =  PSP_verbosity
       ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
-      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2[%
+      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2
+      ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
       @end @for %]
 
    end subroutine OLP_Start
