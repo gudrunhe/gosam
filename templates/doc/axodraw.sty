@@ -608,6 +608,27 @@ x2 y2 lineto x2 y1 lineto closepath}def }
 } def }
 %
 %		#] vertex :
+%		#[ cross :
+%
+\special{! /cross{
+%
+%   Draws a cross under 45 degrees: x,y,size,width,scale
+%
+    gsw /csize ed p1
+%
+    newpath
+      x1 csize add y1 csize add moveto
+      x1 csize sub y1 csize sub lineto
+    stroke
+    newpath
+      x1 csize add y1 csize sub moveto
+      x1 csize sub y1 csize add lineto
+    stroke
+    grestore
+} def }
+%
+%		#] cross :
+
 %		#[ bcirc :
 %
 \special{! /bcirc{
@@ -1458,6 +1479,14 @@ x2 y2 lineto x2 y1 lineto closepath}def }
 %
 \put(\axoxoff,\axoyoff){\special{"\axocolor #1 \axoxo add #2 \axoyo add #3
  \axoscale vertex showpage}}
+}
+%
+\def\Cross(#1,#2)#3#4{
+%
+%   Draws a 45 degree cross at (x,y) {size} {width}
+%
+\put(\axoxoff,\axoyoff){\special{"\axocolor #1 \axoxo add #2 \axoyo add #3
+ #4 \axoscale cross showpage}}
 }
 %
 \def\Text(#1,#2)[#3]#4{

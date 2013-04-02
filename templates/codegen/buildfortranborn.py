@@ -5,7 +5,13 @@ import sys
 import os
 from optparse import OptionParser
 from t2f import translatefile, getdata
-#from pythonin import dotproducts
+from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+
+config={'parameters' : parameters,
+        'kinematics' : kinematics,
+        'symbols' : symbols,
+        'lambdafunc' : lambdafunc,
+        'dotproducts' : dotproducts}
 
 parser = OptionParser()
 
@@ -38,7 +44,7 @@ datfilename = file_name + '.dat'
 txt_lines=[]
 abb_max=getdata(datfilename)['abbrev_terms']
 
-outdict=translatefile('born.txt')
+outdict=translatefile('born.txt',config)
 f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
 f90file.write('   ! file: '+str(os.getcwd())+'diagramsl0.f90 \n')
 f90file.write('   ! generator: buildfortranborn.py \n')

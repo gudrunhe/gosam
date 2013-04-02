@@ -43,9 +43,16 @@ Vector ZERO, vDUMMYA;
 #EndIf
 [%
 @if extension formopt %]
-CF dotproduct;[% 
+CF dotproduct;
+[% @end @if %]
+[%
+@if genUV %]
+#If `LOOPS' == ct
+   Vector  p1;
+   CFunction deltaM, deltaZ;
+   Symbols epspole1, epsfin;
+#EndIf[%
 @end @if %]
-
 
 *---#[ Process dependent symbol definitions:
 #Define LEGS "[% num_legs %]"

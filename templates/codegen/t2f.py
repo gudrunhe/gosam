@@ -1,14 +1,17 @@
-# Last updated 26.02.2013 - To be tested
+# Last updated 02.04.2013
 
 from cStringIO import StringIO
 from tokenize import generate_tokens
 import re
-#from golem.templates.filter import Fortran90
-from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
 from filter import Fortran90
 
-
 dotproduct_global=[]
+
+def initconfig(con):
+        for p in ['parameters','kinematics','symbols','lambdafunc','dotproducts']:
+                if p not in con.keys():
+                        con[p] = {}
+        return con
 
 def bmatch(lin):
         """
@@ -80,7 +83,7 @@ def tokeniseline(inline):
 		if token[1])
 	return tokens
 
-def replace(function,args):
+def replace(function,args,lambdafunc):
 	# do we ever need more than 3 args?
 	argl=args
 	#.split(',')
@@ -92,13 +95,20 @@ def replace(function,args):
 	elif nargs == 3:
 		return [lambdafunc[function](argl[0],argl[1],argl[2]),nargs]
 
-def translate(tokens):
+def translate(tokens,inconfig):
 	"""
 	Takes a list of tokens and translates and returns a newlist
 	with the required 'translations'
 
 	Can have objects like 'csqrt(5)'...
 	"""
+	config=initconfig(inconfig)
+        parameters=config['parameters']
+        kinematics=config['kinematics']
+        symbols=config['symbols']
+        lambdafunc=config['lambdafunc']
+        dotproducts=config['dotproducts']
+
 	newlist=[]
 	ilist=0
 	itoken=0
@@ -112,23 +122,24 @@ def translate(tokens):
 			newtoken= token + '(%s)' % tokens[itoken+2]
 			newlist.append(newtoken)
 			itoken = itoken+4
+		elif abbpre in parameters.keys() and  parameters[abbpre] == 'matrix':
+			newtoken= token + '(%s,%s)' % (tokens[itoken+2],tokens[itoken+4])
+			newlist.append(newtoken)
+			itoken = itoken+6
 		elif token in lambdafunc.keys():
+			# function(argument,...) 
+			# token is 'function',
 			# the next token is '('
 			l,r = itoken+1, bd[itoken+1]
-			l_abs = l
-			r_abs = r
 			function=token
-			bracklist = tokens[l_abs+1:r_abs]
+			bracklist = tokens[l+1:r]
 			itoken = itoken + len(bracklist)
-			tlist = translate(bracklist)
+			tlist = translate(bracklist,config)
 			args = glue(tlist).split(',')
-#			newlist.append('(')
 			itoken = itoken +1
-			newitem = replace(function,args)
+			newitem = replace(token,args,lambdafunc)
 			newlist.append(newitem[0])
-			itoken = itoken + newitem[1]
-#			newlist.append(')')
-			itoken = itoken + 1
+			itoken = itoken + 2
 		elif token in dotproducts.keys():
 			if token not in dotproduct_global:
 				dotproduct_global.append(token)
@@ -178,20 +189,24 @@ def notblank(line):
 	else:
 		return 
 
-def translatefile(infile_name):
+def translatefile(infile_name,config,keepleft=False):
 	"""
 	Opens infile_name, and parses the input
-	then outputs to a string (outstring)
 
 	The output is a list of dictionary of the format:
 
 	{ 'Abbrevations' : outstring, 'R2' : outstring, 'Diagram' : outstring...}
+
+	If keepleft is set equal to True, then we also have an entry returned
+	that gives a dictionary of all the variables on the left hand side
+	of the expressions
+
 	"""
 
 	outstring=''
 	blockname=''
 	inf=open(infile_name,'r')
-
+	leftlist=[]
       	exit_loop = False
 	outdict = {}
 	while not exit_loop:
@@ -207,12 +222,14 @@ def translatefile(infile_name):
 			rl=st.strip(' \n').split('=')
 			rhs=rl[1]
 			lhs=rl[0]
+			if keepleft==True and lhs not in leftlist:
+				leftlist.append(lhs)
 			end = rhs[-1]
 			while end != ';':
 				rhs += inf.readline().strip(' \n')
 				end = rhs[-1]
 			tokens = tokeniseline(rhs)
-			translated=translate(tokens)
+			translated=translate(tokens,config)
 			outstring=outstring + output(lhs,glue(translated))
 		else:
 			continue
@@ -221,7 +238,8 @@ def translatefile(infile_name):
 	del outdict['']
 	inf.close()
 	outdict['dplist'] = dotproduct_global
-
+	if keepleft==True:
+		outdict['lhs']=leftlist
 	return outdict
 
 def postformat(filename):

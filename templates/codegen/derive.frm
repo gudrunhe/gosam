@@ -17,7 +17,6 @@ Vectors Q[%
    @end @for %][%
 @end @if %];
 Indices iDUMMY1, ..., iDUMMY5;
-Symbols sDUMMY1;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -26,7 +25,8 @@ CTensor SUBSCRIPT;
 AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
-CF Wrapper;[%
+CF Wrapper;
+S sDUMMY1;[%
 @end @if %][%
 @if extension qshift%][%
 @else %]

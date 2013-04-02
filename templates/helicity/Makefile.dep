@@ -79,7 +79,13 @@ ninjah[%helicity%].[%O%]: [%
 		@end @for %][%
 	@end @if extension ninja %][%
 	@end @select %][%
-   @end @if generate_nlo_virt%]
+   @end @if generate_nlo_virt%][%
+	@if generate_uv_counterterms %]
+diagramsct.[%O%]:[%
+     	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.[%O%][%
+		@end @for %][%
+	@end @if generate_uv_counterterms %]
 amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 	   @select r2
 		@case implicit explicit off %][%
@@ -109,4 +115,7 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
             @end @for %][%
          @end @select %][%
       @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct.[%O%][%
+			@end @if %][%
 @end @for %]

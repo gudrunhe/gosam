@@ -45,7 +45,7 @@ LICENSE = [
 "    GoSam or parts of it should make a clear reference to the publication:",
 "",
 "        G. Cullen et al.,",
-"        ``Automated One-Loop Calculations with GoSam,''",
+"        ``Automated One-Loop Calculations with GoSam'',",
 "        arXiv:1111.2034 [hep-ph]"
 ]
 
@@ -85,10 +85,11 @@ CLINES = [
             'GoSam',
             'An Automated One-Loop',
             'Matrix Element Generator',
-            'Version %s' % 
-               ".".join(map(str,golem.installation.GOLEM_VERSION)),
+            'Version %s Rev: %s' %
+              ( ".".join(map(str,golem.installation.GOLEM_VERSION)),
+                golem.installation.GOLEM_REVISION),
             '',
-            '(c) The GoSam Collaboration 2011',
+            '(c) The GoSam Collaboration 2011-2013',
             ''
       ]
 

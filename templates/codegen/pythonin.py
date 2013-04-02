@@ -16,7 +16,8 @@ parameters={[%
    'abb' : 'array',
    'acc' : 'array',
    'acd' : 'array',
-   'abbWrap' : 'array'
+   'abbWrap' : 'array',
+   'mabb' : 'array'
    } 
 
 
@@ -54,7 +55,7 @@ lambdafunc = {  'madf'  :  lambda x,y,z: '%s + %s + %s' % (x,y,z),
                 'pow'  :  lambda x,y : '(%s)**(%s)' % (x,y),
                 'atan2' : lambda x,y : 'atan2(%s, %s)' % (x,y),
                 'fabs' : lambda x : 'abs(%s)' % (x,y),
-                'if' : lambda x,y,z : 'ifpos(%s,%s%s)' % (x,y,z),
+                'if' : lambda x,y,z : 'ifpos(%s,%s,%s)' % (x,y,z),
                 'complexconjugate' : lambda x : 'conjg(%s)' % x,
   	             'SpSqrt' : lambda x : 'sqrt(%s)' % x,
                 'dotproduct' : lambda x,y : 'dotproduct(%s,%s)' % (x,y),

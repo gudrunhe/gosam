@@ -8,7 +8,13 @@ import sys
 import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
-from pythonin import dotproducts
+from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+
+config={'parameters' : parameters,
+        'kinematics' : kinematics,
+        'symbols' : symbols,
+        'lambdafunc' : lambdafunc,
+        'dotproducts' : dotproducts}
 
 
 parser = OptionParser()
@@ -83,7 +89,7 @@ dotprod_kdote=[]
 dotprod_kdotspva=[]
 
 
-outdict=translatefile(diag_name+'.txt')
+outdict=translatefile(diag_name+'.txt',config)
 
 acd_maxl = []
 for irank in range(0,rank+1):
@@ -91,8 +97,6 @@ for irank in range(0,rank+1):
 	if acdmax == '0':
 		acdmax = 1
 	acd_maxl.append(acdmax)
-
-outdict=translatefile(diag_name+'.txt')
 
 
 # Write abbreviation file

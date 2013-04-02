@@ -641,7 +641,6 @@ def init_ew(**options):
    for key in keys:
       parameters[key] = str(options[key])
       types[key] = "R"
-
    if keys == set(["GF", "mW", "mZ"]):
       # mW, mZ --> sw
       functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
@@ -698,6 +697,16 @@ def init_ew(**options):
       # mW, mZ --> sw
       functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
       types["sw"] = "R"
+   elif keys == set(["e", "sw", "GF", "mZ", "mW", "alpha"]):
+      for dummy in ["e", "sw", "GF", "mZ", "mW", "alpha"]:
+         #   parameters[dummy] = '0.0'
+         functions['%sf' % dummy ] = dummy 
+         types[dummy] = "R"
+         types['%sf' % dummy] = "R"
+         try:
+            del slha_locations[dummy]
+         except:
+            continue
    else:
       raise Exception("Invalid EW Scheme.")
 #---#] def init_ew:
@@ -770,7 +779,6 @@ def ckmcalc(
          print("\t'CV%s%s': ['%24.16f', '%24.16f']," % (Y,X, CVYX.real, CVYX.imag))
 
 #---#] def ckmcalc:
-
 #---#[ Electroweak Scheme choice and parameter transfer:
 def init():
    from golem.model.particle import simplify_model
@@ -782,7 +790,15 @@ def init():
    widths = None
 
    for key, value in MODEL_OPTIONS.items():
-      if key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
+      if key == "ewchoose":
+         # the default choice is ewscheme 2
+         EWPARAM['mZ'] = 91.1876
+         EWPARAM['mW'] = 80.376
+         EWPARAM['alpha'] = 1.0/137.035999679
+         EWPARAM['GF'] = 1.16637E-05
+         EWPARAM['sw'] = sqrt(0.23120)
+         EWPARAM['e'] =  0.3028221202
+      elif key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
          EWPARAM[key] = value
       elif key in parameters:
          try:

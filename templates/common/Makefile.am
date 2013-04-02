@@ -7,7 +7,8 @@ libgolem_process[% process_name assuffix=\_ %]_common_la_SOURCES=[%
 	util.f90 scalar_cache.f90 kinematics.f90 dipoles.f90 version.f90[%
 @select r2
 @case implicit explicit off %] groups.f90[%
-@end @select %]
+@end @select %][% @if internal CUSTOM_SPIN2_PROP %] custompropagator.f90[%
+@end @if %]
 nodist_pkginclude_HEADERS=[%
 @if extension pjfry %] \
 	[% process_name asprefix=\_ %]precision_pjfry.mod [%
@@ -28,7 +29,8 @@ nodist_pkginclude_HEADERS=[%
 @select r2
 @case implicit explicit off %] [%
 	   process_name asprefix=\_ %]groups.mod[%
-@end @select %]
+@end @select %][% @if internal CUSTOM_SPIN2_PROP %] [% process_name asprefix=\_ %]custompropagator.mod[%
+@end @if %]
 
 
 CLEANFILES=$(nodist_pkginclude_HEADERS)

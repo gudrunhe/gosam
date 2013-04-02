@@ -67,8 +67,13 @@ OBJECTS= \
 			@end @if %][%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %]
-
+@end @if generate_nlo_virt %][%
+@if generate_uv_counterterms %] \
+	diagramsct.o[%
+	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.o[%
+	@end @for %][%
+@end @if %]
 GENERATED_SRC=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -116,7 +121,13 @@ GENERATED_SRC=[%
 			@end @if %][%
 	@end @for %][%
 	@end @select %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@if generate_uv_counterterms %][%
+	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.f90[%
+	@end @for %] \
+	diagramsct.f90 [%
+@end @if %]
 
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
@@ -183,6 +194,11 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'd*h[%helicity%]l[01].txt' \
 		-or -name 'd*h[%helicity%]l1[23d].txt' \
 		-or -name 'd*h[%helicity%]l1[23d].f90' \
+		-or -name 'd*h[%helicity%]l[01]c.txt' \
+		-or -name 'd*h[%helicity%]l[01]c.f90' \
+		-or -name 'd*h[%helicity%]l[01]d.txt' \
+		-or -name 'd*h[%helicity%]l1d.txt' \
+		-or -name 'd*h[%helicity%]l1d.f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
 		-or -name 'd*h[%helicity%]l[01].dat' \
 		-or -name 'd*h[%helicity%]l[01].abb'[%

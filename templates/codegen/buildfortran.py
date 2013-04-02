@@ -4,8 +4,13 @@ import sys
 import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
-from pythonin import dotproducts
+from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
 
+config={'parameters' : parameters,
+        'kinematics' : kinematics,
+        'symbols' : symbols,
+        'lambdafunc' : lambdafunc,
+        'dotproducts' : dotproducts}
 
 parser = OptionParser()
 
@@ -77,7 +82,7 @@ if acc_max == '0':
 
 #print "--------------------"
 
-outdict=translatefile(diag_name+'.txt')
+outdict=translatefile(diag_name+'.txt',config)
 
 # Write abbreviation file
 abbfile.write('module     [% process_name asprefix=\_ 

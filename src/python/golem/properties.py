@@ -436,6 +436,18 @@ renorm = Property("renorm",
    bool,
    False, experimental=True)
 
+genUV = Property("genUV",
+   """\
+   Indicates if the UV counterterms should be generated
+   using Qgraf.
+
+   Examples:
+   genUV=true
+   genUV=false
+   """,
+   bool,
+   False, experimental=True)
+
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
@@ -500,13 +512,14 @@ extensions = Property("extensions",
                     an olp_module.f90 linkable with Fortran77
    formopt      --- diagram optimization using FORM (works only with
                     abbrev.level=diagram and r2=implicit/explicit).
+   extraopt     --- optimization using FORM for color and model files.
    """,
    list,
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","customspin2prop"])
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -934,6 +947,7 @@ properties = [
    zero,
    one,
    renorm,
+   genUV,
    helicities,
    qgraf_options,
    qgraf_verbatim,
@@ -1045,6 +1059,7 @@ def setInternals(conf):
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
 
    conf["__FORMOPT__"] = "formopt" in extensions
+   conf["__EXTRAOPT__"] = "extraopt" in extensions
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions

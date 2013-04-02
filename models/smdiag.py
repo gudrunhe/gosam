@@ -643,6 +643,28 @@ def init_ew(**options):
       # mW, sw --> mZ
       functions["mZ"] = "mW / sqrt(1-sw*sw)"
       types["mZ"] = "R"
+   elif keys == set(["alpha", "GF", "mZ"]):
+      # alpha --> e
+      functions["e"] = "sqrt(4*pi*alpha))"
+      types["e"] = "R"
+      # GF, mZ, alpha --> mW
+      functions["mW"] = "sqrt(mZ*mZ/2+sqrt(mZ*mZ*mZ*mZ/4-pi*alpha*mZ*mZ/sqrt(2)/GF))"
+      types["mW"] = "R"
+      # mW, mZ --> sw
+      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
+      types["sw"] = "R"
+   elif keys == set(["e", "sw", "GF", "mZ", "mW", "alpha"]):
+      for dummy in ["e", "sw", "GF", "mZ", "mW", "alpha"]:
+         #   parameters[dummy] = '0.0'
+         functions['%sf' % dummy ] = dummy 
+         types[dummy] = "R"
+         types['%sf' % dummy] = "R"
+         try:
+            del slha_locations[dummy]
+         except:
+            continue
+
+
    else:
       raise Exception("Invalid EW Scheme.")
 #---#] def init_ew:
@@ -658,7 +680,15 @@ def init():
    widths = None
 
    for key, value in MODEL_OPTIONS.items():
-      if key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
+      if key == "ewchoose":
+         # the default choice is ewscheme 2
+         EWPARAM['mZ'] = 91.1876
+         EWPARAM['mW'] = 80.376
+         EWPARAM['alpha'] = 1.0/137.035999679
+         EWPARAM['GF'] = 1.16637E-05
+         EWPARAM['sw'] = sqrt(0.23120)
+         EWPARAM['e'] =  0.3028221202
+      elif key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
          EWPARAM[key] = value
       elif key in parameters:
          try:

@@ -27,7 +27,11 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
+[%@if extension extraopt %]
+							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
+[%@else%]
 							+ c(`c1',`c2') * propcolor(`I', `J')
+[%@end @if %]
 						#EndDo
 					#EndDo
 					;
@@ -56,10 +60,113 @@ Repeat Id delta(iDUMMY1?, iDUMMY2?) * delta(iDUMMY2?, iDUMMY3?) =
 	delta(iDUMMY1, iDUMMY3);
 Id delta(iDUMMY1?, iDUMMY1?) = NC;
 
+
+[%@if extension extraopt %]
+* You are using Form Optimization, this is experimental
+* and may crash due to lack of memory
+.sort
+*
+AutoDeclare S T,C;
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				#Do c1=1,`NUMCS'
+					#Do c2=1,`NUMCS'
+						Id T(`I',`J')*c(`c1',`c2') = T`I'`J'c`c1'`c2';
+					#EndDo
+				#EndDo
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+#Do c1=1,`NUMCS'
+	#Do c2=1,`NUMCS'
+	Id c(`c1',`c2') = C`c1'`c2';
+	#EndDo
+#EndDo
+;
+.sort
+Local BIG = CC +
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				+ T`I'T`J'
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+;
+.sort
+Drop CC
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				T`I'T`J',
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+;
+
+.sort
+B 
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				#Do c1=1,`NUMCS'
+					#Do c2=1,`NUMCS'
+						 T`I'`J'c`c1'`c2',
+					#EndDo
+				#EndDo
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+#Do c1=1,`NUMCS'
+	#Do c2=1,`NUMCS'
+		 C`c1'`c2',
+	#EndDo
+#EndDo
+;
+.sort
+#Create <`OUTFILE'.txt>
+#Create <`OUTFILE'.tmp>
+#Write <`OUTFILE'.txt> "#####Color"
+#Write <`OUTFILE'.txt> "NA=NC*NC-1;"
+#If "`INCOLORS'" != ""
+	#Write <`OUTFILE'.txt> "incolors=1%"
+	#Do NC={`INCOLORS'}
+		#Write <`OUTFILE'.txt> " * `NC'%"
+	#EndDo
+	#Write <`OUTFILE'.txt> ";"
+#Else
+	#Write <`OUTFILE'.txt> "incolors=1;"
+#EndIf
+
+ExtraSymbols,vector,cabb;
+Format O[%formopt.level%],stats=off;
+#Optimize BIG;
+#write <`OUTFILE'.txt> "%O"
+#Create <`OUTFILE'.tmp>
+#Create <`OUTFILE'.dat>
+#write <`OUTFILE'.tmp> "*--#[ BIG:"
+#write <`OUTFILE'.tmp> "L BIG=%E;",BIG
+#write <`OUTFILE'.tmp> "*--#] BIG:"
+#write <`OUTFILE'.dat> "number_abbs=`optimmaxvar_'";
+#Close<`OUTFILE'.dat>
+
+#Close<`OUTFILE'.tmp>
+#Close<`OUTFILE'.txt>
+.end
+[% @else %]
+
 Brackets+ c;
 .sort
 #Create <`OUTFILE'.txt>
-
 #Write <`OUTFILE'.txt> "NA=NC*NC-1;"
 #If "`INCOLORS'" != ""
 	#Write <`OUTFILE'.txt> "incolors=1%"
@@ -77,7 +184,6 @@ Brackets+ c;
 	#Write <`OUTFILE'.txt> "CC_`c1'_`c2' = %$;", $t
 #EndDo
 #EndDo
-
 #If `CREATETT'
 	#Do I={`COLORED'}
 		#If `I'0 != 0
@@ -96,3 +202,4 @@ Brackets+ c;
 #EndIf
 #Close <`OUTFILE'.txt>
 .end
+[%@end @if%]
