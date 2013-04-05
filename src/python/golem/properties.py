@@ -1078,5 +1078,6 @@ def setInternals(conf):
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
 
-   conf["__REQUIRE_FR5__"] = not conf["__REGULARIZATION_DRED__"] \
-         and "no-fr5" not in extensions
+   conf["__REQUIRE_FR5__"] = "dred" not in extensions \
+       and "no-fr5" not in extensions
+
