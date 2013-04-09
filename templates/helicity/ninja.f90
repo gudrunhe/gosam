@@ -13,6 +13,7 @@ contains[%
    @for groups var=grp %]
 !-----#[ subroutine ninja_reduce_group[% grp %]:
 subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
+   use iso_c_binding, only: c_ptr, c_loc
    use ninja_module
    use [% process_name asprefix=\_ %]kinematics
    use [% process_name asprefix=\_ %]model[%
@@ -45,7 +46,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    integer, parameter :: effective_group_rank = [% rank %]
 
    !-----------#[ invariants for ninja (not used):
-   real(ki_nin), dimension([% loopsize group=grp %]**2) :: s_mat
+   real(ki_nin), dimension([% loopsize group=grp %]**2), target :: s_mat
    !-----------#] initialize invariants:
    [%
    @if complex_mass_needed group=grp %]complex(ki_nin)[%
@@ -71,6 +72,62 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    !Vi(([% $_ %]-1)*[% loopsize group=grp %]+1:([% $_ %]-1)*[% loopsize group=grp %]+4) = real([% momentum %], ki_nin)
    Vi(([% $_ %]-1)*4+1:([% $_ %]-1)*4+4) = real([% momentum %], ki_nin)[%
    @end @for %]
+   !-----------#[ initialize invariants:[%
+      @for smat upper diagonal
+           group=grp powfmt=%s**%d prodfmt=%s*%s prefix=es %]
+   s_mat([% loopsize group=grp %]*([%rowindex%]-1)+[%colindex%]) = real([%
+            @if re.is_zero %]0.0_ki[% 
+            @else %][%
+               @for elements re delimiter=; var=term first=first_term %][%
+                  @for elements term delimiter=: %][%
+                     @if is_first %][%
+                        @if eval $_ .ge. 0 %][%
+                           @if first_term %][%
+                           @else %]+[%
+                           @end @if %][%
+                        @else %]-[%
+                        @end @if %][%
+   
+                        @select $_
+                        @case 2 -2 %][%
+                        @case 4 -4%]2.0_ki*[%
+                        @else %][%
+                           @with eval .abs. $_ / 2 result=num %][%
+                           num convert=float format=%0.1f_ki%][%
+                           @end @with %]*[%
+                        @end @select %][%
+                     @else %][% $_ %][%
+                     @end @if %][%
+                  @end @for %][%
+               @end @for %][%
+            @end @if %][%
+      
+            @for elements im delimiter=; var=term first=first_term %][%
+               @for elements term delimiter=: %][%
+                  @if is_first %][%
+                     @if eval $_ .ge. 0 %]+[%
+                     @else %]-[%
+                     @end @if %][%
+      
+                     @select $_
+                     @case 2 -2 %][%
+                     @case 4 -4%]2.0_ki*[%
+                     @else %][%
+                        @with eval .abs. $_ / 2 result=num %][%
+                           num convert=float format=%0.1f_ki %][%
+                        @end @with %]*[%
+                     @end @select %][%
+                  @else %][% $_ %][%
+                  @end @if %][%
+               @end @for %][%
+            @end @for %], ki_nin)[%
+      
+            @if eval rowindex .ne. colindex %]
+   s_mat([% loopsize group=grp %]*([% colindex %]-1)+[% rowindex %]) = s_mat([% loopsize group=grp %]*([% 
+                                        rowindex %]-1)+[% colindex %])[%
+            @end @if %][%
+         @end @for %]
+   !-----------#] initialize invariants
 
       !------#[ sum over reduction of single diagrams:[%
    @for diagrams group=grp var=DIAG index=DIAGIDX idxshift=1 %][%
@@ -80,9 +137,9 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
          if(debug_nlo_diagrams) then
             write(logfile,*) "<diagram index='[% DIAG %]'>"
          end if
-         call ninja_select_rm(numerator_diagram[% DIAG %], numerator_t_diagram[% DIAG %], &
-          &  numerator_d_diagram[% DIAG %],  acc, accr, [% loopsize diagram=DIAG %], &
-          & Vi, msq, s_mat, [% rank %], istop0, scale2, &
+         call ninja_select(numerator_diagram[% DIAG %], numerator_t_diagram[% DIAG %], &
+          &  numerator_d_diagram[% DIAG %],  acc, accr, [% loopsize group=grp %], [% loopsize diagram=DIAG %], &
+          & Vi, msq, c_loc( s_mat(1) ), [% rank %], istop0, scale2, &
           & (/[% indices %]/))
          !-----------#[ deallocate invariants:
          ! deallocate(s_mat)

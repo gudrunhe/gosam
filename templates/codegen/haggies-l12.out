@@ -107,6 +107,7 @@ contains[%
    subroutine numerator_d(ncut, loc_beta, a, coeffs) &
    & bind(c, name="[% @with args %][$ process_name asprefix=\_ 
             $]d[% DIAGRAM %]h[% HELICITY %][% @end @with %]_ninja_d")
+      use iso_c_binding, only: c_int 
       use ninja_module, only: ki_nin
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       use [$ process_name asprefix=\_ $]kinematics
@@ -125,7 +126,7 @@ contains[%
       & (0.0_ki_nin, 0.0_ki_nin), (0.0_ki_nin, 0.0_ki_nin)/)
       complex(ki_nin), parameter :: mu2 = (0.0_ki, 0.0_ki)
 
-      integer, intent(in) :: ncut
+      integer(c_int), intent(in) :: ncut
       complex(ki_nin), intent(in) :: loc_beta
       complex(ki_nin), dimension(0:3), intent(in) :: a
       complex(ki_nin), dimension(0:*), intent(out) :: coeffs[%
@@ -149,7 +150,7 @@ contains[%
          @end @select %][$
       @end @if $][%
    @end @with %]
-      if (deg.le.0) return[%
+      if (deg.lt.0) return[%
    @for instructions registers="t%d" %][%
       @select $_ match="(.).*" format="%s"
       @case n %]

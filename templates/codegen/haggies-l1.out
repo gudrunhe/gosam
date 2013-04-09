@@ -270,6 +270,7 @@ contains[%
    subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &
    & bind(c, name="[% @with args %][$ process_name asprefix=\_ 
             $]d[% DIAGRAM %]h[% HELICITY %][% @end @with %]_ninja")
+      use iso_c_binding, only: c_int
       use ninja_module, only: ki_nin
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       use [$ process_name asprefix=\_ $]kinematics
@@ -283,7 +284,7 @@ contains[%
       @end @with %]
       implicit none
 
-      integer, intent(in) :: ncut
+      integer(c_int), intent(in) :: ncut
       complex(ki_nin), dimension(0:3), intent(in) :: Q_ext
       complex(ki_nin), intent(in) :: mu2_ext
       complex(ki_nin), intent(out) :: numerator

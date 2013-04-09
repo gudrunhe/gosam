@@ -74,7 +74,7 @@ contains
       logical :: file_exists
       integer i, j
       character(len=25) :: file_name
-      character(len=3)  :: file_numb
+      character(len=6)  :: file_numb
       character(len=9)  :: file_pre = "gs_badpts"
       character(len=3)  :: file_ext = "log"
       character(len=1)  :: cstage
@@ -110,7 +110,7 @@ contains
             write(42,'(A5)')  "<run>"
          else
             do while(file_exists)
-               write(file_numb, '(I3.1)') i
+               write(file_numb, '(I6.1)') i
                file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
                inquire(file=file_name, exist=file_exists)
                if(file_exists) then
