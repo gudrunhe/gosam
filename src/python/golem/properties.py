@@ -892,9 +892,8 @@ config_PSP_verbosity = Property("PSP_verbosity",
 
    Sets the verbosity of the PSP_check.
    verbosity = 0 : no output
-   verbosity = 1 : output only when rescue fails
-   verbosity = 2 : as 1 but PSPs are written in file bad.pts
-   verbosity = 3 : output whenever the rescue system is used
+   verbosity = 1 : bad point are written in a file gs_badpts.log
+   verbosity = 2 : output whenever the rescue system is used
                    with comment about the success of the rescue
    !!Works only for QCD and with built-in model files!!
    """,

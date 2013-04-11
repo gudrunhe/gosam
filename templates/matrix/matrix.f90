@@ -97,7 +97,7 @@ contains
    @end @if %]
       ! call our banner
       call banner()
-      if(PSP_check .and. PSP_rescue) then
+      if(PSP_check .and. PSP_rescue .and. PSP_verbosity .ge. 1) then
          if(present(stage)) then
             write(cstage,'(i1)') stage
             write(crndseed,'(i4)') rndseed
@@ -193,8 +193,9 @@ contains
       spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
       fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
       kfac = amp(2)/amp(1)
-      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. abs(kfac) > PSP_chk_kfactor) then
-         if(PSP_verbosity .eq. 3) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
+      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. &
+           (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
+         if(PSP_verbosity .eq. 2) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
    @if extension golem95 %]
          if(PSP_rescue) then
             reduction_interoperation = 1
@@ -204,8 +205,9 @@ contains
             spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
             fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
             kfac = amp(2)/amp(1)
-            if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000 .or. abs(kfac) > PSP_chk_kfactor) then
-               if(PSP_verbosity .ge. 2) then
+            if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000 .or. &
+               (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
+               if(PSP_verbosity .ge. 1) then
                   write(42,'(2x,A7)')"<event>"
                   if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
                      write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
@@ -236,14 +238,14 @@ contains
                zero = log(1.0_ki)
                amp(2)= 1.0_ki/zero
             else
-               if(PSP_verbosity .eq. 3) write(*,*) "POINT SAVED !!"
-               if(PSP_verbosity .ge. 3) write(*,*)
+               if(PSP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
+               if(PSP_verbosity .ge. 2) write(*,*)
             end if
             reduction_interoperation = tmp_red_int
          end if[%
    @else %]
          if(PSP_rescue) then
-            if(PSP_verbosity .ge. 2) then
+            if(PSP_verbosity .ge. 1) then
                write(42,'(2x,A7)')"<event>"
                if(spprec1 .le. PSP_chk_threshold1 .and. spprec1 .gt. -10000) then
                   write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
