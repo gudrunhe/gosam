@@ -117,7 +117,7 @@ parameters = {
    'mB': '4.20',
    'mBMS': '4.20', # MSbar mass used in Higgs coupling
    'mT': '171.2',
-   'mH': '114.4', # <----
+   'mH': '125.0', # <----
    # Widths <----
    'wB': '0.0',
    'wT': '0.0',
