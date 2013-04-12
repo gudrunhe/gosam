@@ -4,7 +4,7 @@
 import sys
 import os
 from optparse import OptionParser
-from t2f import translatefile, getdata
+from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
 
 config={'parameters' : parameters,
@@ -97,3 +97,9 @@ f90file.write('!      end if\n')
 f90file.write('   end function     amplitude\n')
 f90file.write('!---#] function amplitude:\n')
 f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
+txtfile.close()
+f90file.close()
+### additional formatting for output files
+
+postformat('diagramsl0.f90')
+

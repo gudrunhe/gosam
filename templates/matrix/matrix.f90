@@ -71,9 +71,10 @@ contains
       integer, optional, intent(in) :: stage
       integer, optional, intent(in) :: rndseed
       logical :: init_third_party
-      logical :: file_exists
+      logical :: file_exists, dir_exists
       integer i, j
       character(len=25) :: file_name
+      character(len=9)  :: dir_name = "BadPoints"
       character(len=6)  :: file_numb
       character(len=9)  :: file_pre = "gs_badpts"
       character(len=3)  :: file_ext = "log"
@@ -98,20 +99,24 @@ contains
       ! call our banner
       call banner()
       if(PSP_check .and. PSP_rescue .and. PSP_verbosity .ge. 1) then
+         inquire(file=dir_name, exist=dir_exists)
+         if(.not. dir_exists) then
+            call system('mkdir BadPoints')
+         end if
          if(present(stage)) then
             write(cstage,'(i1)') stage
             write(crndseed,'(i4)') rndseed
             do j=1,4
                if(crndseed(j:j).eq.' ') crndseed(j:j)='0'
             enddo
-            file_name = file_pre//"-"//cstage//"-"//crndseed//"."//file_ext
+            file_name = dir_name//"/"//file_pre//"-"//cstage//"-"//crndseed//"."//file_ext
             open(unit=42, file=file_name, status='replace', action='write')
             write(42,'(A22)') "<?xml version='1.0' ?>"
             write(42,'(A5)')  "<run>"
          else
             do while(file_exists)
                write(file_numb, '(I6.1)') i
-               file_name = file_pre//trim(adjustl(file_numb))//"."//file_ext
+               file_name = dir_name//"/"//file_pre//trim(adjustl(file_numb))//"."//file_ext
                inquire(file=file_name, exist=file_exists)
                if(file_exists) then
                   write(*,*) "File ", file_name, " already exists!"
