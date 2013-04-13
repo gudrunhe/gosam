@@ -82,7 +82,21 @@ contains
 
       if (ierr .eq. 1) then
          call read_slha_file(line_buf(1:l))
-      end if[%
+      end if
+
+      ! Uncomment to change rescue system setting on all suprocesses
+      ! PSP_rescue = .true.
+      ! PSP_verbosity = [% PSP_verbosity default=2 %]
+      ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
+      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
+      ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
+      @for subprocesses %]
+      ! [%$_%]_PSP_rescue = PSP_rescue
+      ! [%$_%]_PSP_verbosity =  PSP_verbosity
+      ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
+      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2
+      ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
+      @end @for %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
       if(stage.lt.0) then[%
          @for subprocesses %]
@@ -104,21 +118,6 @@ contains
          @end @if %])[%
       @end @for %][%
       @end @if %]
-
-
-      ! Uncomment to change rescue system setting on all suprocesses
-      ! PSP_rescue = .true.
-      ! PSP_verbosity = [% PSP_verbosity default=2 %]
-      ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
-      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
-      ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
-      @for subprocesses %]
-      ! [%$_%]_PSP_rescue = PSP_rescue
-      ! [%$_%]_PSP_verbosity =  PSP_verbosity
-      ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
-      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2
-      ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
-      @end @for %]
 
    end subroutine OLP_Start
 
