@@ -204,8 +204,7 @@
    !  parameters, otherwise default values are used
    !
    integer :: ewchoice = 2 [%
-@end @select%][%@end @select%]
-   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[%
+@end @select%][%@end @select%][%
 @select model @case sm smdiag %][% 
 @select model.options @case ewchoose %]
    !
