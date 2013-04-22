@@ -45,7 +45,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
 
    integer, parameter :: effective_group_rank = [% rank %]
 
-   !-----------#[ invariants for ninja (not used):
+   !-----------#[ invariants for ninja:
    real(ki_nin), dimension([% loopsize group=grp %]**2), target :: s_mat
    !-----------#] initialize invariants:
    [%

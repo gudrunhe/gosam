@@ -136,6 +136,9 @@ f90file.write('   public :: numerator_samurai\n')[%
 @end @if %][%
 @if extension golem95 %]
 f90file.write('   public :: numerator_golem95\n')[%
+@end @if %][%
+@if extension ninja %]
+f90file.write('   public :: numerator_ninja\n')[%
 @end @if %]
 f90file.write('contains\n')
 f90file.write('!---#[ function brack_1:\n')
@@ -242,6 +245,43 @@ f90file.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
 f90file.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_gol)\n')
 f90file.write('   end function numerator_golem95\n')
 f90file.write('   !------#] function numerator_golem95:\n')[%
+@end @if %][%
+@if extension ninja %]
+f90file.write('   !------#[ subroutine numerator_ninja:\n')
+f90file.write('   subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &\n')
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]'+diag_name+'_ninja")\n')
+f90file.write('      use iso_c_binding, only: c_int\n')
+f90file.write('      use ninja_module, only: ki_nin\n')
+f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
+f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      implicit none\n')
+f90file.write('\n')
+f90file.write('      integer(c_int), intent(in) :: ncut\n')
+f90file.write('      complex(ki_nin), dimension(0:3), intent(in) :: Q_ext\n')
+f90file.write('      complex(ki_nin), intent(in) :: mu2_ext\n')
+f90file.write('      complex(ki_nin), intent(out) :: numerator\n')
+f90file.write('      complex(ki) :: d'+diag+'\n')
+f90file.write('\n')
+f90file.write('      ! The Q that goes into the diagram\n')
+f90file.write('      complex(ki), dimension(4) :: Q\n')
+f90file.write('      complex(ki) :: mu2\n')
+if qshift=='0':
+    f90file.write('      Q(1:4)  =cmplx(real('+qsign+'Q_ext(0:3),  ki_nin), aimag('+qsign+'Q_ext(0:3)), ki)\n')
+else:
+    f90file.write('      real(ki), dimension(0:3) :: qshift\n')
+    f90file.write('\n')
+    f90file.write('      qshift = '+qshift+'\n')
+    f90file.write('      Q(1:4)  =cmplx(real('+qsign+'Q_ext(0:3)  -qshift(:),  ki_nin), aimag('+qsign+'Q_ext(0:3)), ki)\n')[%
+@select r2
+@case implicit %]
+f90file.write('      mu2  = cmplx(real(mu2_ext, ki), aimag(mu2_ext), ki)\n')[%
+@end @select %]
+f90file.write('      d'+diag+' = 0.0_ki\n')
+f90file.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
+f90file.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_nin)\n')
+f90file.write('   end subroutine numerator_ninja\n')
+f90file.write('   !------#] subroutine numerator_ninja:\n')[%
 @end @if %]
 f90file.write('!---#] numerator interfaces:\n')
 f90file.write('end module [% process_name asprefix=\_ %]'+diag_name+'\n')

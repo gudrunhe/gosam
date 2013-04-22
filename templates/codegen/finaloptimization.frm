@@ -21,7 +21,23 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;[%
-@end @if %][%
+@else %][% 
+@if internal GENERATE_NINJA_TRIPLE %]
+Vectors Q[%
+@for particles %],k[% index %][%
+   @if is_massive %],l[% index %][%
+   @end @if %][%
+@end @for %][%
+@if internal NUMPOLVEC %][%
+   @for particles lightlike vector %],e[%index%][%
+   @end @for %][%
+@end @if %];
+Vectors vDUMMY1, vDUMMY2;
+CTensors d(symmetric);
+AutoDeclare Vectors spva;
+CF dotproduct(symmetric);
+CF Wrapper;[%
+@end @if %][% @end @if %][%
 @if extension qshift%][%
 @else %]
   CFunction j;                                                                                                                                               
@@ -57,8 +73,20 @@ Symbol Qt2,QspQ[%
    @end @for %][%
 @end @if %];
 
+[%@if internal GENERATE_NINJA_TRIPLE %]
+* For ninja
+Vectors vecA, vecB, vecC;
+Symbols beta;
+[%@end @if %]
+
 [%@if internal GENERATE_DERIVATIVES %]
 #IfNDef `GENERATEDERIVATIVES'
+[%@end @if %]
+[%@if internal GENERATE_NINJA_DOUBLE %]
+#IfNDef `GENERATENINJADOUBLE'
+[%@end @if %]
+[%@if internal GENERATE_NINJA_TRIPLE %]
+#IfNDef `GENERATENINJATRIPLE'
 [%@end @if %]
 
 #append <`OUTFILE'.txt>
@@ -79,8 +107,53 @@ Format O[%formopt.level%],stats=off;
 #Close <`OUTFILE'.txt>
 
 .sort
+[%@if internal GENERATE_NINJA_TRIPLE %]
+#Else
+* GENERATENINJATRIPLE
+
+#Append <`OUTFILE'.dat>
+#Append <`OUTFILE'3.txt>
+
+#include- `OUTFILE'3.hh #nint`LAURIDX'diagram
+.sort
+ExtraSymbols,vector,acd`DIAG';
+Format O[%formopt.level%],stats=off;
+#Optimize nint`LAURIDX';
+#write <`OUTFILE'3.txt> "#####NinjaTriple`LAURIDX'"
+#write <`OUTFILE'3.txt> "%O";
+#write <`OUTFILE'3.txt> "brack = %e",nint`LAURIDX';
+#write <`OUTFILE'.dat> "nint`LAURIDX'diagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'3.txt>
+#Close <`OUTFILE'.dat>
+
+#EndIf
+[%
+@end @if %]
+[%@if internal GENERATE_NINJA_DOUBLE %]
+#Else
+* GENERATENINJADOUBLE
+
+#Append <`OUTFILE'.dat>
+#Append <`OUTFILE'2.txt>
+
+#include- `OUTFILE'2.hh #nind`LAURIDX'diagram
+.sort
+ExtraSymbols,vector,acd`DIAG';
+Format O[%formopt.level%],stats=off;
+#Optimize nind`LAURIDX';
+#write <`OUTFILE'2.txt> "#####NinjaDouble`LAURIDX'"
+#write <`OUTFILE'2.txt> "%O";
+#write <`OUTFILE'2.txt> "brack = %e",nind`LAURIDX';
+#write <`OUTFILE'.dat> "nind`LAURIDX'diagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'2.txt>
+#Close <`OUTFILE'.dat>
+
+#EndIf
+[%
+@end @if %]
 [%@if internal GENERATE_DERIVATIVES %]
 #Else
+* GENERATEDERIVATIVES
 #Append <`OUTFILE'.dat>
 #Append <`OUTFILE'd.txt>
 

@@ -237,11 +237,7 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
-@if internal GENERATE_NINJA_TRIPLE %] d[%$_%]h[%helicity %]l13.txt[%
-@end @if %][%
-@if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%
-@end @if %]: ../diagrams-1.hh
+d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT)[%
 	      @if is_mqse %] \
@@ -313,6 +309,64 @@ d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt
 d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt
 	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_d.py \
+		-i $< \
+		--DIAGRAM=[%$_%] \
+		--GROUP=[%grp%]  \
+		--HELICITY=[%helicity%] \
+		--QSIGN=[%sign%] \
+		--QSHIFT=[%shift%] \
+		--RANK=[%rank%] \
+		--LOOPSIZE=[% loopsize diagram=$_ %][%
+		@end @if %][%
+@if internal GENERATE_NINJA_TRIPLE %] 
+d[%$_%]h[%helicity %]l12.txt d[%$_%]h[%helicity %]l13.txt : d[%$_%]h[%helicity %]l1.txt 
+	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		../codegen/ninja.frm[%
+   @for repeat ninjaidx inclusive=true var=lauridx %]
+	@echo Form is optimizing loop diagram [%$_%] laurent index [%lauridx%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D GENERATENINJATRIPLE=1 \
+		-D LAURIDX=[%lauridx%] \
+		../codegen/finaloptimization.frm[%
+	@end @for%]
+	@echo Form is optimizing loop diagram [%$_%] mu expansion @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D GENERATENINJADOUBLE=1 \
+		-D LAURIDX=0 \
+		../codegen/finaloptimization.frm
+d[%$_%]h[%helicity%]l13.f90 : d[%$_%]h[%helicity%]l13.txt
+	@echo Python is processing ninja t expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_n3.py \
+		-i $< \
+		--DIAGRAM=[%$_%] \
+		--GROUP=[%grp%]  \
+		--HELICITY=[%helicity%] \
+		--QSIGN=[%sign%] \
+		--QSHIFT=[%shift%] \
+		--RANK=[%rank%] \
+		--LOOPSIZE=[% loopsize diagram=$_ %]
+d[%$_%]h[%helicity%]l12.f90 : d[%$_%]h[%helicity%]l12.txt
+	@echo Python is processing ninja mu expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_n2.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
