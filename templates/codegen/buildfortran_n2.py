@@ -97,7 +97,7 @@ if ( int(rank)==int(loopsize) and int(loopsize) >= 4 ):
     n_t_terms = 1
 
 for lidx in range(0,n_t_terms):
-    acdmax=getdata(datfilename)['nind{}diagram_terms'.format(lidx)]
+    acdmax=getdata(datfilename)['nind{0}diagram_terms'.format(lidx)]
     if acdmax == '0':
         acdmax = 1
     acd_maxl.append(acdmax)
@@ -143,7 +143,7 @@ for lidx in range(0,n_t_terms):
 
 f90file.write('!---#[ subroutine numerator_d:\n')
 f90file.write('   subroutine numerator_d(ncut, loc_beta, a, coeffs) &\n' )
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{}h{}_ninja_d")\n'.format(diag,heli) )
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_d")\n'.format(diag,heli) )
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninja_module, only: ki => ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
@@ -177,7 +177,7 @@ f90file.write('      t1 = 0\n')
 
 for lidx in range(0,n_t_terms):
     f90file.write('      coeffs({0}) = (cond(epspow.eq.t1,brack_{0},Q,mu2))\n'.format(lidx))
-    f90file.write('      if (deg.eq.{}) return\n'.format(lidx))
+    f90file.write('      if (deg.eq.{0}) return\n'.format(lidx))
 
 f90file.write('   end subroutine numerator_d \n')
 f90file.write('!---#] subroutine numerator_d: \n')

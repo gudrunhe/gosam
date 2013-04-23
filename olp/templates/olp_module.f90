@@ -261,6 +261,9 @@ contains
       use [% cr.$_ %]_matrix, only: samplitude[%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
+      @end @if %][%
+      @if extension ninja %]
+      use ninja_module, only: ninja_clear_cache[%
       @end @if %]
       implicit none[%
       @select count elements cr.channels
@@ -311,6 +314,9 @@ contains
       @end @select %])[%
       @if extension golem95 %]
       call tear_down_golem95()[%
+      @end @if %][%
+      @if extension ninja %]
+      call ninja_clear_cache()[%
       @end @if %]
 
       if (ok) then
