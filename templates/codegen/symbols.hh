@@ -443,16 +443,16 @@ AutoDeclare CFunctions Lor;
       @for color_line_elements %] *
       T(idx[%io%][%lindex%]C[%rep%]?, [%
          @if is_first %]idx[%first_io%][%first_lidx%]C[%first_rep%][%
-         @else %]idx[%prev%]C3[%
+         @else %]idx[%prev%]C3l[%
          @end @if %]?, [%
          @if is_last %]idx[%last_io%][%last_lidx%]C[%last_rep%][%
-         @else %]idx[%index%]C3[%
+         @else %]idx[%index%]C3l[%
          @end @if %]?)[%
       @end @for %][%
    @end @for %][%
    @for color_traces %][%
       @for color_trace_elements %] *
-      T(idx[%io%][%lindex%]C[%rep%]?, idx[%prev%]C3?, idx[%index%]C3?)[%
+      T(idx[%io%][%lindex%]C[%rep%]?, idx[%prev%]C3t?, idx[%index%]C3t?)[%
       @end @for %][%
    @end @for %] = c[% index %];[%
 @end @for %]
