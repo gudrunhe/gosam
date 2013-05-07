@@ -15,6 +15,10 @@
    use precision_golem, only: ki_gol => ki
    use [% process_name asprefix=\_ %]golem95h[% helicity %][%
       @end @if %][%
+      @if extension ninja %]
+   use ninja_module, only: ki_nin
+   use [% process_name asprefix=\_ %]ninjah[% helicity %][%
+      @end @if %][%
    @end @select %][%
 @end @if %]
    [% @if internal CUSTOM_SPIN2_PROP
@@ -114,7 +118,11 @@ contains
 @select r2 @case only %][%
 @else %]
       use [% process_name asprefix=\_ %]groups[%
-@end @select %]
+@end @select %][%
+      @if generate_uv_counterterms %]
+      use [% process_name asprefix=\_
+      %]diagramscth[%helicity%], only: samplitudect => samplitudect[%
+      @end @if %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
@@ -131,9 +139,13 @@ contains
       [% @if generate_lo_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(-2:0) :: acc
       [% @if generate_lo_diagrams %]real(ki)[% @else 
-      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part
+      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part[%
+      @if generate_uv_counterterms %]
+      real(ki), dimension(3) :: sampct[%
+      @end @if %]
+
       logical :: acc_ok
-      
+
       ok = .true.
       rational2 = 0.0_ki
 
@@ -254,6 +266,12 @@ contains
          @end @for groups %][%
       @end @for %][%
    @end @select %][%
+   @if generate_uv_counterterms %]
+      sampct = samplitudect(scale2)
+      samplitude(0) = samplitude(0) + sampct(3)
+      samplitude(-1) = samplitude(-1) + sampct(2)
+      samplitude(-2) = samplitude(-2) + sampct(1)[%
+   @end @if %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
 @end @if generate_nlo_virt %]
@@ -287,6 +305,10 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]samuraih[% helicity
       %], only: samurai_reduce => reduce_group[% grp %]
    use options, only: samurai_out => iout[%
+      @end @if %][%
+      @if extension ninja %]
+   use [% process_name asprefix=\_ %]ninjah[% helicity
+      %], only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
    real(ki), intent(in) :: scale2
@@ -355,6 +377,15 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
             @end @if %]
       ok = .true.[%
          @end @if %][%
+      @end @if %][%
+      @if extension ninja %]
+   case(21) ! use Ninja only
+      call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
+         @if generate_lo_diagrams %]
+      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
+         @else %]
+      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
+         @end @if %][% 
       @end @if %][%
       @if extension samurai %][%
          @if extension golem95 %]

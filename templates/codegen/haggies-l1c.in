@@ -1,0 +1,82 @@
+@language form -> fortran90;
+
+@type
+	integer = "integer";
+	real    = "real(ki)";
+	complex = "complex(ki)";
+	color   = "complex(ki)";
+	vector  = "real(ki), dimension(4)";
+        formfactor = "complex(ki), dimension(3)";
+@coerce
+	@int -> integer;
+	@int -> real = "(%s.0_ki)";
+	@int -> complex = "(%s.0_ki)";
+	@int/@int -> real = "(%s.0_ki/%s.0_ki)";
+	@int/@int -> complex = "(%s.0_ki/%s.0_ki)";
+	real -> complex;
+	color -> complex;
+        complex -> formfactor = "(/0.0_ki,0.0_ki,%s/)";
+        real -> formfactor = "(/0.0_ki,0.0_ki,%s/)";
+        @int/@int -> formfactor = "(/0.0_ki,0.0_ki,%s.0_ki/%s.0_ki/)";
+
+@operator
+	real * real -> real;
+	real ^ real -> real;
+        real*color -> color;
+	complex * complex -> complex;
+	vector . vector -> real = "dotproduct(%s, %s)";
+        formfactor*complex -> formfactor;
+
+@define[%
+	include codegen/model-define.inc class=Model %][% 
+	include codegen/haggies-common.inc class=Verbatim %][% 
+	include codegen/kinematics-define.inc class=Kinematics
+%]
+
+	abb... : complex;
+
+	TR : real;
+	pi : real;
+	sqrt2, Sqrt2 : real = "sqrt2";
+	i_ : complex;
+
+	log, sqrt, sin, asin, cos, acos, tan, atan, exp : real -> real;
+	pow : real, real -> real = "(%2$s)**(%3$s)";
+	atan2 : real, real -> real = "atan2(%3$s, %2$s)";
+	fabs : real -> real = "abs(%2$s)";
+	sort4 : real, real, real, real, integer -> real;
+	if : real, real, real -> real = "ifpos(%2$s, %3$s, %4$s)";
+	#fhf2 : real, real, real, real, real, real,
+	#	real, real, real, real, real, real, real -> real;
+
+	complexconjugate : complex -> complex = "conjg(%2$s)";
+
+	c1 : complex;
+	deltaCT : real;
+	deltaZ, deltaM : formfactor;
+	deltaMa, deltaMb, deltaMc,deltaMd : real,real,real,real -> real;
+	SpSqrt : real -> complex = "sqrt(cmplx(%2$s, 0.0_ki, ki))";
+	epsfin : formfactor;
+	epspole1 : formfactor;
+	epspolr2 : formfactor;
+	# Return type of the diagrams:
+	d... : formfactor;
+	abb... : complex;
+	EXSYM... : complex;
+
+@polynomial TR, i_;
+@polynomial mdlaEWM1, mdlalp, mdlaS, mdlMA0, mdlMA2, mdlMch1, mdlMch2, mdlMe, mdlMgo, mdlMH, mdlMH01, mdlMH02, mdlmHd2, mdlmHu2, mdlMm, mdlMneu1, mdlMneu2, mdlMneu3, mdlMneu4, mdlMsd1, mdlMsd2, mdlMsd3, mdlMsd4, mdlMsd5, mdlMsd6, mdlMsl1, mdlMsl2, mdlMsl3, mdlMsl4, mdlMsl5, mdlMsl6, mdlMsn1, mdlMsn2, mdlMsn3, mdlMsu1, mdlMsu2, mdlMsu3, mdlMsu4, mdlMsu5, mdlMsu6, mdlMT, mdlMta, mdlMve, mdlMvm, mdlMvt, mdlMW, mdlMZ, mdlRCKM11, mdlRCKM22, mdlRCKM33, mdlRmD211, mdlRmD222, mdlRmD233, mdlRmE211, mdlRmE222, mdlRmE233, mdlRmL211, mdlRmL222, mdlRmL233, mdlRMNS11, mdlRMNS22, mdlRMNS33, mdlRmQ211, mdlRmQ222, mdlRmQ233, mdlRmU211, mdlRmU222, mdlRmU233, mdlRMUH, mdlRMx1, mdlRMx2, mdlRMx3, mdlRNN11, mdlRNN12, mdlRNN13, mdlRNN14, mdlRNN21, mdlRNN22, mdlRNN23, mdlRNN24, mdlRNN31, mdlRNN32, mdlRNN33, mdlRNN34, mdlRNN41, mdlRNN42, mdlRNN43, mdlRNN44, mdlRRd11, mdlRRd22, mdlRRd33, mdlRRd36, mdlRRd44, mdlRRd55, mdlRRd63, mdlRRd66, mdlRRl11, mdlRRl22, mdlRRl33, mdlRRl36, mdlRRl44, mdlRRl55, mdlRRl63, mdlRRl66, mdlRRn11, mdlRRn22, mdlRRn33, mdlRRu11, mdlRRu22, mdlRRu33, mdlRRu36, mdlRRu44, mdlRRu55, mdlRRu63, mdlRRu66, mdlRtd33, mdlRte33, mdlRtu33, mdlRUU11, mdlRUU12, mdlRUU21, mdlRUU22, mdlRVV11, mdlRVV12, mdlRVV21, mdlRVV22, mdlRyd33, mdlRye33, mdlRyu33, mdltb, mdlWA0, mdlWch1, mdlWch2, mdlWgo, mdlWH, mdlWH01, mdlWH02, mdlWneu1, mdlWneu2, mdlWneu3, mdlWneu4, mdlWsd1, mdlWsd2, mdlWsd3, mdlWsd4, mdlWsd5, mdlWsd6, mdlWsl1, mdlWsl2, mdlWsl3, mdlWsl4, mdlWsl5, mdlWsl6, mdlWsn1, mdlWsn2, mdlWsn3, mdlWsu1, mdlWsu2, mdlWsu3, mdlWsu4, mdlWsu5, mdlWsu6, mdlWT, mdlWW, mdlWZ, NC, Nf, Nfgen;
+
+
+@polynomial es12;
+@polynomial es3;
+@polynomial es23;
+@polynomial es4;
+@polynomial spak1k2, spbk1k2;
+@polynomial spak1l3, spbk1l3;
+@polynomial spak1l4, spbk1l4;
+@polynomial spak2l3, spbk2l3;
+@polynomial spak2l4, spbk2l4;
+@polynomial spal3l4, spbl3l4;
+@polynomial c1;
+

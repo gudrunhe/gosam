@@ -277,20 +277,26 @@ def prepare_model_files(conf, output_path=None):
       path = output_path
 
    model_lst = conf.getProperty(golem.properties.model)
+   # new: if we generate UV counterterms we need extra files
+   genUV = conf["generate_uv_counterterms"]
+
    if "setup-file" in conf:
       rel_path = os.path.dirname(conf["setup-file"])
    else:
       rel_path = os.getcwd()
-
    if len(model_lst) == 0:
       model_lst = ['sm']
-
    if len(model_lst) == 1:
       model = model_lst[0]
       src_path = golem_path("models")
       for ext in ["", ".py", ".hh"]:
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
+      if genUV == 'true':
+         print 'Generating UV terms'
+         for ext in [".py", ".hh"]:
+            copy_file(os.path.join(src_path, model + 'ct' + ext),
+                  os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
          model_path = model_lst[1]
@@ -319,7 +325,11 @@ def prepare_model_files(conf, output_path=None):
             model = model_lst[1]
             for ext in ["", ".py", ".hh"]:
                copy_file(os.path.join(model_path, model + ext),
-                     os.path.join(path, MODEL_LOCAL + ext))
+                  os.path.join(path, MODEL_LOCAL + ext))
+            if genUV == 'true':
+               for ext in [".hh", ".py"]:
+                  copy_file(os.path.join(model_path, model + 'ct' + ext),
+                        os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
@@ -336,6 +346,7 @@ def getModel(conf, extra_path=None):
 
 
    golem.model.MODEL_OPTIONS = {}
+
    for opt in conf.getListProperty(golem.properties.model_options):
       idx = -1
       for delim in [" ", ":", "="]:
@@ -355,6 +366,7 @@ def getModel(conf, extra_path=None):
 
    conf.cache["model"] = mod
    return mod
+
 
 def expand_parameter_list(prop, conf):
    params = generate_parameter_list(conf)

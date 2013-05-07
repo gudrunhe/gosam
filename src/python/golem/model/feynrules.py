@@ -89,12 +89,12 @@ class Model:
 					(mname, search_path[0]))
 			mfile, mpath, mdesc = imp.find_module(mname, search_path)
 			mod = imp.load_module(mname, mfile, mpath, mdesc)
+			print mname,mfile,mpath,mdesc
 		except ImportError as exc:
 			error("Problem importing model file: %s" % exc)
 		finally:
 			if mfile is not None:
 				mfile.close()
-
 		self.all_particles  = mod.all_particles
 		self.all_couplings  = mod.all_couplings
 		self.all_parameters = mod.all_parameters
@@ -112,6 +112,9 @@ class Model:
 			l.rank = get_rank(structure)
 
 	def write_python_file(self, f):
+		# Edit : GC- 16.11.12 now have the dictionaries
+		# particlect and parameterct available
+		# if non-empty the model.py file is modified
 		f.write("# vim: ts=3:sw=3\n")
 		f.write("# This file has been generated from the FeynRules model files\n")
 		f.write("# in %s\n" % self.model_orig)
@@ -126,6 +129,7 @@ class Model:
 		mnemonics = {}
 		latex_names = {}
 		line_types = {}
+		particlect = {}	
 
 		for p in self.all_particles:
 			if is_first:
@@ -133,7 +137,10 @@ class Model:
 				f.write("\n")
 			else:
 				f.write(",\n")
-
+			try:
+				particlect[p] = p.counterterm
+			except AttributeError:
+				pass
 			pmass = str(p.mass)
 			pwidth = str(p.width)
 
@@ -213,8 +220,15 @@ class Model:
 		parameters = {}
 		functions = {}
 		types = {}
+		parameterct={}
 		slha_locations = {}
 		for p in self.all_parameters:
+			#  new: collect all the new counterterm pieces (if there are any)
+			try:
+			# use the name (p.name) or the object in the dictionary
+				parameterct[p] = p.counterterm
+			except AttributeError:
+				pass
 			name = self.prefix + p.name
 			if p.nature == 'external':
 				parameters[name] = p.value
@@ -230,7 +244,6 @@ class Model:
 				types[name] = "C"
 			else:
 				error("Parameter's type ('%s') not implemented." % p.type)
-
 		parameters['NC'] = '3.0'
 		types['NC'] = 'R'
 		parameters['Nf'] = '5.0'
@@ -260,7 +273,6 @@ class Model:
 		fsubs = {}
 		is_first = True
 		for name, value in functions.items():
-
 			expr = parser.compile(value)
 			for fn in cmath_functions:
 				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
@@ -280,6 +292,49 @@ class Model:
 			expr.write(f)
 			f.write("'")
 		f.write("\n}\n\n")
+
+#		for c in self.all_ctcouplings:
+#			# generally it is a laurent series in eps
+#			# we have a 'value' and some coefficients
+#			# need to think about the 'order'
+#			print c
+#			name = self.prefix + c.name.replace("_", "")
+#			ctfunctions[name] = c.value
+#			types[name] = "C"
+#			# now loop over the coefficients in the Laurent series
+#			ct = c.counterterm[(1,0)]
+#			l = len(ct)
+#		for k,v in ct.items():
+#					name = self.prefix + c.name.replace("_","") + 'c%s' % l
+#				l = l - 1
+#				ctfunctions[name] = v
+#				types[name] = "C"
+#		message("      Generating counter term function list ...")
+#		f.write("ctfunctions = {")
+#		fcounter = [0]
+#		fsubs = {}
+#		is_first = True
+#		for name, value in ctfunctions.items():
+#
+#			expr = parser.compile(value)
+#			for fn in cmath_functions:
+#				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
+#						ex.SpecialExpression(str(fn)))
+#			expr = expr.prefixSymbolsWith(self.prefix)
+#			expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+#			expr = expr.algsubs(sym_cmplx(
+#				ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+#
+#			if is_first:
+#				is_first = False
+#				f.write("\n")
+#			else:
+#				f.write(",\n")
+#			f.write("\t%r: " % name)
+#			f.write("'")
+#			expr.write(f)
+#			f.write("'")
+#		f.write("\n}\n\n")
 
 		self.floats = list(fsubs.keys())
 
@@ -348,6 +403,12 @@ class Model:
 				f.write(",\n")
 			f.write("\t%r: %r" % (name, value))
 		f.write("\n}\n\n")
+
+		# new for modified UFO files
+		for p in particlect:
+			print p.counterterm
+		for p in parameterct:
+			print p.counterterm
 
 	def write_qgraf_file(self, f):
 		trunc_model = [self.model_orig]
@@ -731,6 +792,109 @@ class Model:
 *---#] Procedure VertexConstants :
 """)
 
+	def write_formct_file(self, f):
+		parser = ex.ExpressionParser()
+		lorex = {}
+		lsubs = {}
+		lcounter = [0]
+		dummy_found = {}
+		for l in self.all_lorentz:
+			name = l.name
+			structure = parser.compile(l.structure)
+			structure = structure.replaceStrings(
+					"ModelDummyIndex", lsubs, lcounter)
+			structure = structure.replaceNegativeIndices(0, "MDLIndex%d",
+					dummy_found)
+			for i in [2]:
+				structure = structure.algsubs(
+					ex.FloatExpression("%d." % i),
+					ex.IntegerExpression("%d" % i))
+
+
+		lwf = LimitedWidthOutputStream(f, 70, 6)
+		f.write("* vim: syntax=form:ts=3:sw=3\n\n")
+		f.write("* This file has been generated from the FeynRule model files\n")
+		f.write("* in %s\n" % self.model_orig)
+		f.write("* for Counter Term Vertices\n\n")
+
+		f.write("*---#[ Symbol Definitions:\n")
+		f.write("*---#[ Parameters:\n")
+
+		params = []
+		for c in self.all_ctcouplings:
+			params.append(self.prefix + c.name.replace("_", ""))
+
+		if len(params) > 0:
+			if len(params) == 1:
+				f.write("Symbol %s;" % params[0])
+			else:
+				f.write("Symbols")
+				lwf.nl()
+				lwf.write(params[0])
+				for p in params[1:]:
+					lwf.write(",")
+					lwf.write(p)
+				lwf.write(";")
+
+		f.write("\n")
+
+		if len(self.floats) == 1:
+			f.write("Symbol %s;\n" % self.floats[0])
+		elif len(self.floats) > 1:
+			f.write("Symbols")
+			lwf.nl()
+			lwf.write(self.floats[0])
+			for p in self.floats[1:]:
+				lwf.write(",")
+				lwf.write(p)
+			lwf.write(";\n")
+
+		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
+		f.write("*---#] Parameters:\n")
+		f.write("*---#] Symbol Definitions:\n")
+		f.write("*---#[ Procedure ReplaceCT :\n")
+		f.write("#Procedure ReplaceCT\n")
+
+		for v in self.all_ctvertices:
+			particles = v.particles
+			names = []
+			fields = []
+			afields = []
+			for p in particles:
+				names.append(p.name)
+				cn = canonical_field_names(p)
+				fields.append(cn[0])
+				afields.append(cn[1])
+
+			deg = len(particles)
+
+			xidx = range(deg)
+
+			fold_name = "(%s) %s CT" % ( v.name, " -- ".join(names))
+			f.write("*---#[ %s:\n" % fold_name)
+			f.write("Identify Once delta(mass")
+			for i in xidx:
+				p = particles[i]
+				field = afields[i]
+				f.write(",\n   [field.%s]" % field)
+			f.write(") =")
+
+			for coord, coupling in v.couplings.items():
+				ic, il = coord
+				f.write("\n   + %s"
+						% (self.prefix + coupling.name.replace("_", "")))
+				for ind in lsubs.values():
+					s = str(ind)
+
+			f.write(";\n")
+
+			f.write("*---#] %s:\n" % fold_name)
+		f.write("#EndProcedure\n")
+		f.write("*---#] Procedure ReplaceCT :\n")
+
+
+
+
 	def containsMajoranaFermions(self):
 		for p in self.all_particles:
 			if p.spin % 2 == 0 and p.selfconjugate:
@@ -741,6 +905,7 @@ class Model:
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
 		self.write_python_file(f)
+		print f
 		f.close()
 
 		message("  Writing QGraf file ...")
@@ -752,6 +917,12 @@ class Model:
 		f = open(os.path.join(path, "%s.hh" % local_name), 'w')
 		self.write_form_file(f)
 		f.close()
+
+#		message("  Writing Form CT file ...")
+#		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
+#		self.write_formct_file(f)
+#		f.close()
+
 
 def canonical_field_names(p):
 	pdg_code = p.pdg_code
@@ -1089,3 +1260,5 @@ def transform_color(expr, colors, xidx):
 			return expr
 	else:
 		return expr
+
+

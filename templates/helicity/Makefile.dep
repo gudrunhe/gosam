@@ -63,22 +63,37 @@ golem95h[%helicity%].[%O%]: [%
 					@if internal GENERATE_DERIVATIVES
 						%] d[%$_%]h[%helicity%]l1d.[%O%][%
 					@end @if %][%
+         	@end @for %][%
+	      @end @if extension golem95 %][%
+
+      	@if extension ninja %]
+ninjah[%helicity%].[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.[%O%][%
 					@if internal GENERATE_NINJA_TRIPLE
 						%] d[%$_%]h[%helicity%]l13.[%O%][%
 					@end @if %][%
 					@if internal GENERATE_NINJA_DOUBLE
 						%] d[%$_%]h[%helicity%]l12.[%O%][%
 					@end @if %][%
-         	@end @for %][%
-	      @end @if extension golem95 %][%
-		@end @select %][%
-   @end @if generate_nlo_virt%]
+		@end @for %][%
+	@end @if extension ninja %][%
+	@end @select %][%
+   @end @if generate_nlo_virt%][%
+	@if generate_uv_counterterms %]
+diagramsct.[%O%]:[%
+     	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.[%O%][%
+		@end @for %][%
+	@end @if generate_uv_counterterms %]
 amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 	   @select r2
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+   	   @end @if %][%
+	      @if extension ninja %] ninjah[%helicity%].[%O%][%
    	   @end @if %][%
 		@end @select %][%
 	   @if generate_lo_diagrams %] \
@@ -100,4 +115,7 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
             @end @for %][%
          @end @select %][%
       @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct.[%O%][%
+			@end @if %][%
 @end @for %]

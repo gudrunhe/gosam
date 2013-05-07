@@ -106,7 +106,7 @@ class diagram:
 			y = height / 2.0 + height / 2.0 * math.cos(math.radians(phi))
 			lg.set_coord(x, y)
 			phi += delta_phi
-		
+
 		if len(loop_vertices) == 1:
 			# in the case of a tadpole diagram pull the tadpole towards 0 degree
 			x = width / 2.0 + width / 2.0 * math.sin(0.0)
@@ -119,7 +119,11 @@ class diagram:
 			self.fin[-1] = lg
 		else:
 			self.ref_point = (width/2.0, height/2.0)
-
+		for p in self.propagators.values():
+				if p.field1.name == 'RENO':
+					p.setInvisible()
+				#print p.field1.linestyle()
+	
 		eqs = self.setup_equations()
 		eqs.solve()
 
@@ -264,7 +268,10 @@ class vertex:
 
 	def draw(self, f, diag, lookup=None, *args, **opts):
 		fields = []
+		ctdiag = False
 		for field in self.rays:
+			if field.name == 'RENO':
+				ctdiag=True
 			fields.append(field.name)
 		sfields = "%% %s vertex" % "-".join(fields)
 
@@ -274,7 +281,11 @@ class vertex:
 			vsize = 2
 
 		x, y = self.get_coord()
-		f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
+
+		if ctdiag== True:
+			f.write("   \\Cross(%0.1f,%0.1f){%s}{1.0} " % (x, y, vsize))
+		else:
+			f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
 		f.write(sfields + "\n")
 
 class propagator:
@@ -461,7 +472,9 @@ class field:
 				'photon': ['\\Photon', '\\PhotonArc', '\\PhotonArc',
 					'pamplitude', 'wiggles'],
 				'chargedscalar' : ['\\DashArrowLine', '\\DashArrowArc', '\\DashArrowArcn',
-					'sdashsize']
+					'sdashsize'],
+				'invisible' : ['', '', '',
+					'']
 			}
 
 		if lookup is not None:

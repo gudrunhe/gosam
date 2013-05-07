@@ -21,7 +21,7 @@ AUTHORS = {
       "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
       "Nicolas Greiner": ["greiner@mpp.mpg.de"],
       "Gavin Cullen": ["gavin.cullen@desy.de"],
-      "Gionata Luisoni": ["gionata.luisoni@durham.ac.uk"]
+      "Gionata Luisoni": ["luisonig@mpp.mpg.de"]
 }
 
 LICENSE = [

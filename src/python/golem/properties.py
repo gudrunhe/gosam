@@ -284,6 +284,28 @@ version_samurai = Property("samurai.version",
    str,
    "2.1.1")
 
+ldflags_ninja = Property("ninja.ldflags",
+   """\
+   LDFLAGS required to link ninja.
+
+   Example:
+   ninja.ldflags=-L/usr/local/lib/ -lninja-gfortran-double
+
+   """,
+   str,
+   "")
+
+fcflags_ninja = Property("ninja.fcflags",
+   """\
+   FCFLAGS required to compile with ninja.
+
+   Example:
+   ninja.fcflags=-I/usr/local/include/ninja
+
+   """,
+   str,
+   "")
+
 zero = Property("zero",
    """\
    A list of symbols that should be treated as identically
@@ -339,6 +361,16 @@ form_bin = Property("form.bin",
    """,
    str,
    "form")
+
+form_threads = Property("form.threads",
+   """\
+   Number of Form threads.
+
+   Example:
+   form.threads=4
+   runs tform, the parallel version of FORM, on 4 cores.
+   """,
+   int,2)
 
 haggies_bin = Property("haggies.bin",
    """\
@@ -404,12 +436,45 @@ renorm = Property("renorm",
    bool,
    False, experimental=True)
 
+genUV = Property("genUV",
+   """\
+   Indicates if the UV counterterms should be generated
+   using Qgraf.
+
+   Examples:
+   genUV=true
+   genUV=false
+   """,
+   bool,
+   False, experimental=True)
+
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
    """,
    str,
    "gfortran")
+
+python_bin = Property("python.bin",
+   """\
+   Denotes the executable file of Python 
+   """,
+   str,
+   "python")
+
+formopt_level = Property("formopt.level",
+   """\
+   There are three levels of Horner Scheme
+   offered and the number here will specify
+   which one we use. It can only be 1,2 or 3.
+   
+   Examples:
+   formopt.level=3
+
+   """,
+   str,
+   "2",
+   experimental=True)
 
 extensions = Property("extensions",
    """\
@@ -439,17 +504,22 @@ extensions = Property("extensions",
                     a limited gauge check (introduces gauge*z variables)
    olp_daemon   --- (OLP interface only): generates a C-program providing
                     network access to the amplitude
+   olp_badpts   --- (OLP interface only): allows to stear the numbering
+                    of the files containing bad points from the MC
    no-fr5       --- do not generate finite gamma5 renormalisation
    numpolvec    --- evaluate polarisation vectors numerically
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
+   formopt      --- diagram optimization using FORM (works only with
+                    abbrev.level=diagram and r2=implicit/explicit).
+   extraopt     --- optimization using FORM for color and model files.
    """,
    list,
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon", "numpolvec",
-      "f77", "no-fr5","ninja","customspin2prop"])
+      "generate-all-helicities", "olp_daemon","olp_badpts", "numpolvec",
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -794,7 +864,7 @@ config_PSP_check = Property("PSP_check",
    Set the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    bool, False)
 
@@ -812,7 +882,7 @@ config_PSP_rescue = Property("PSP_rescue",
    with the extension 'derive' which ensures a stabler 
    reconstruction of the tensor coefficients.
 
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    bool, True)
 
@@ -822,11 +892,10 @@ config_PSP_verbosity = Property("PSP_verbosity",
 
    Sets the verbosity of the PSP_check.
    verbosity = 0 : no output
-   verbosity = 1 : output only when rescue fails
-   verbosity = 2 : as 1 but PSPs are written in file bad.pts
-   verbosity = 3 : output whenever the rescue system is used
+   verbosity = 1 : bad point are written in a file gs_badpts.log
+   verbosity = 2 : output whenever the rescue system is used
                    with comment about the success of the rescue
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 2, options=["0","1","2","3"])
 
@@ -838,7 +907,7 @@ config_PSP_chk_threshold1 = Property("PSP_chk_threshold1",
    amplitude using golem95. The number has to be an integer
    indicating the wished minimum number of digits accuracy
    on the finite part.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 4)
 
@@ -850,9 +919,21 @@ config_PSP_chk_threshold2 = Property("PSP_chk_threshold2",
    verbosity level set, such points are written to a file and not
    used when the code is interfaced to an external Monte Carlo 
    using the new BLHA standards.
-   !!Works for only for QCD and with built-in model files!!
+   !!Works only for QCD and with built-in model files!!
    """,
    int, 3)
+
+config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
+   """\
+   Set the same variable in config.f90
+
+   Threshold on the k-factor to declare a PSP as bad point. According 
+   to the verbosity level set, such points are written to a file and 
+   not used when the code is interfaced to an external Monte Carlo 
+   using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   str, 10000)
 
 properties = [
    process_name,
@@ -865,6 +946,7 @@ properties = [
    zero,
    one,
    renorm,
+   genUV,
    helicities,
    qgraf_options,
    qgraf_verbatim,
@@ -872,9 +954,12 @@ properties = [
    qgraf_verbatim_nlo,
    qgraf_bin,
    form_bin,
+   form_threads,
    form_tmp,
    haggies_bin,
    fc_bin,
+   python_bin,
+   formopt_level,
    group_diagrams,
    sum_diagrams,
    extensions,
@@ -886,6 +971,8 @@ properties = [
    fcflags_samurai,
    ldflags_samurai,
    version_samurai,
+   fcflags_ninja,
+   ldflags_ninja,
 
    select_lo_diagrams,
    select_nlo_diagrams,
@@ -907,6 +994,7 @@ properties = [
    config_PSP_chk_threshold1,
    config_PSP_rescue,
    config_PSP_chk_threshold2,
+   config_PSP_chk_kfactor,
 
    reference_vectors,
    abbrev_limit,
@@ -960,12 +1048,17 @@ def setInternals(conf):
          "__OLP_TRAILING_UNDERSCORE__",
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
+         "__OLP_BADPTSFILE_NUMBERING__",
+         "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
          "__CUSTOM_SPIN2_PROP__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
+
+   conf["__FORMOPT__"] = "formopt" in extensions
+   conf["__EXTRAOPT__"] = "extraopt" in extensions
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
@@ -982,6 +1075,8 @@ def setInternals(conf):
    conf["__OLP_TRAILING_UNDERSCORE__"] = "f77" in extensions
    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
+   conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
 
-   conf["__REQUIRE_FR5__"] = conf["__REGULARIZATION_HV__"] \
-         and "no-fr5" not in extensions
+   conf["__REQUIRE_FR5__"] = "dred" not in extensions \
+       and "no-fr5" not in extensions
+

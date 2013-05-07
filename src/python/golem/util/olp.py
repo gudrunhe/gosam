@@ -614,6 +614,7 @@ def mc_specials(conf, order_file):
       
    if mc_name.startswith("powheg"):
       required_extensions.extend(["f77"])
+      required_extensions.extend(["olp_badpts"])
    elif mc_name.startswith("sherpa"):
       required_extensions.extend(["autotools"])
    elif mc_name.startswith("whizard"):
