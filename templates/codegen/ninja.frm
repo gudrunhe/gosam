@@ -221,7 +221,10 @@ Vector vecA;
 Symbols LaurentT, beta;
 L nd2 = diag;
 
-Id Q = vecA * LaurentT;
+Id Q = vecA * LaurentT;[%
+@select r2 @case implicit %]
+Id Qt2 = vecA.vecA * LaurentT^2;[%
+@end @select %]
 Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
 Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
 

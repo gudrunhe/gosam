@@ -57,6 +57,13 @@
    logical :: samurai_group_numerators = .true.[%
       @end @if extension samurai %]
 
+   [% @if extension ninja %]
+   integer :: ninja_test = 0
+   integer :: ninja_istop = 0
+   ! Ninja should not use the grouping by default (still experimental)
+   logical :: ninja_group_numerators = .false.[%
+      @end @if extension ninja %]
+
    ! Options to control the interoperation between different
    ! reduction methods
    integer :: reduction_interoperation = [%

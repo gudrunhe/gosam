@@ -263,7 +263,7 @@ contains
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
       @if extension ninja %]
-      use ninja_module, only: ninja_clear_cache[%
+      use [% sp.$_%]_groups, only: ninja_exit[%
       @end @if %]
       implicit none[%
       @select count elements cr.channels
@@ -316,7 +316,7 @@ contains
       call tear_down_golem95()[%
       @end @if %][%
       @if extension ninja %]
-      call ninja_clear_cache()[%
+      call ninja_exit()[%
       @end @if %]
 
       if (ok) then
