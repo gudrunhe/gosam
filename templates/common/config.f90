@@ -10,17 +10,17 @@
    ! DOUBLE PRECISION (ki=8):
    integer, parameter :: ki = kind(1.0d0)
 
-   logical, parameter :: debug_lo_diagrams  = [%
+   logical :: debug_lo_diagrams  = [%
       @if anymember lo all debug ignore_case=true %].true.[%
       @else %].false.[%
       @end @if %]
-   logical, parameter :: debug_nlo_diagrams = [%
+   logical :: debug_nlo_diagrams = [%
       @if anymember nlo all debug ignore_case=true %].true.[%
       @else %].false.[%
       @end @if %][%
 
       @if internal NUMPOLVEC %]
-   logical, parameter :: debug_numpolvec    = [%
+   logical :: debug_numpolvec    = [%
          @if anymember numpolvec all debug ignore_case=true %].true.[%
          @else %].false.[%
          @end @if %][%
@@ -56,6 +56,13 @@
    integer :: samurai_istop = 0
    logical :: samurai_group_numerators = .true.[%
       @end @if extension samurai %]
+
+   [% @if extension ninja %]
+   integer :: ninja_test = 0
+   integer :: ninja_istop = 0
+   ! Ninja should not use the grouping by default (still experimental)
+   logical :: ninja_group_numerators = .false.[%
+      @end @if extension ninja %]
 
    ! Options to control the interoperation between different
    ! reduction methods
@@ -182,5 +189,50 @@
              true=.true.
              false=.false. %]
    integer :: PSP_chk_threshold2 = [% PSP_chk_threshold2 %]
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[%
+@select model @case sm smdiag %][% 
+@select model.options @case ewchoose %]
+   !
+   ! The integer ewchoice allows the user to change the 
+   ! ew parameter input scheme at runtime (between 1 and 8)
+   ! The choices are as follows:
+   !  ewchoice :   Input            :  Output
+   !  #---------------------------------------# 
+   !  1        :   GF,mW,mZ         : e,sw
+   !  2        :   alpha, mW, mZ    : e,sw
+   !  3        :   alpha, sw, mZ    : e, mW
+   !  4        :   alpha, sw, GF    : e, mW
+   !  5        :   e, mW, mZ        : em sw, mZ
+   !  6        :   e, sw, mZ        : mW
+   !  7        :   e, sw, GF        : mW, mZ
+   !  8        :   alpha, GF, mZ    : e, mW, sw
+   !
+   !  If one is using the ewchoice, the user should provide the correct input
+   !  parameters, otherwise default values are used
+   !
+   integer :: ewchoice = 2 [%
+@end @select%][%@end @select%][%
+@select model @case sm smdiag %][% 
+@select model.options @case ewchoose %]
+   !
+   ! The integer ewchoice allows the user to change the 
+   ! ew parameter input scheme at runtime (between 1 and 8)
+   ! The choices are as follows:
+   !  ewchoice :   Input            :  Output
+   !  #---------------------------------------# 
+   !  1        :   GF,mW,mZ         : e,sw
+   !  2        :   alpha, mW, mZ    : e,sw
+   !  3        :   alpha, sw, mZ    : e, mW
+   !  4        :   alpha, sw, GF    : e, mW
+   !  5        :   e, mW, mZ        : em sw, mZ
+   !  6        :   e, sw, mZ        : mW
+   !  7        :   e, sw, GF        : mW, mZ
+   !  8        :   alpha, GF, mZ    : e, mW, sw
+   !
+   !  If one is using the ewchoice, the user should provide the correct input
+   !  parameters, otherwise default values are used
+   !
+   integer :: ewchoice = 2 [%
+@end @select%][%@end @select%]
 end module [% process_name asprefix=\_ %]config
 

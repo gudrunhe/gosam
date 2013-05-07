@@ -7,6 +7,8 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].f90[%
    @end @if %][%
+   @if extension ninja %] ninjah[%helicity%].f90[%
+   @end @if %][%
 @end @select %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.f90[%
@@ -63,6 +65,9 @@ nodist_pkginclude_HEADERS=[%
    @end @if %][%
    @if extension samurai %] \
 	[% process_name asprefix=\_ %]samuraih[%helicity%].mod[%
+   @end @if %][%
+   @if extension ninja %] \
+	[% process_name asprefix=\_ %]ninjah[%helicity%].mod[%
    @end @if %][%
 @end @select %][%
 @if generate_lo_diagrams %] \

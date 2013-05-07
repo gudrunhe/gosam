@@ -7,7 +7,10 @@ $]module     [$ process_name asprefix=\_ $]model
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
-   & nlo_prefactors
+   & nlo_prefactors[$ 
+@select model @case sm smdiag $][$ 
+@select model.options @case ewchoose $], ewchoice[$
+@end @select$][$@end @select$]
    implicit none
 
    private :: ki[$
@@ -682,7 +685,12 @@ contains
      &3383279502884197169399375105820974944592307816406286209_ki[%
 @for symbols match="\\$(.*)" format="reg%s" %]
       [% type.repr %] :: [% $_ %][%
-@end @for symbols %][%
+@end @for symbols %][$ 
+@select model @case sm smdiag $][$ 
+@select model.options @case ewchoose $]
+      call ewschemechoice(ewchoice)[$
+@end @select $][$
+@end @select $][%
 @for instructions %][%
    @select $_ match="(.).*" format="%s"
    @case $ %]
@@ -742,4 +750,60 @@ contains
       sort4 = m(n)
    end  function sort4
 !---#] utility functions for model initialization:
+[$ @select model @case sm smdiag $][$ 
+@select model.options @case ewchoose $]
+!---#[ EW scheme choice:
+  subroutine ewschemechoice(ichoice)
+  implicit none
+  integer, intent(in) :: ichoice
+  real(ki), parameter :: pi = 3.14159265358979323846264&
+ &3383279502884197169399375105820974944592307816406286209_ki
+  select case (ichoice)
+        case (1)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+      ! GF, mW, sw --> e
+        e = mW*sw*sqrt(8.0_ki*GF/sqrt(2.0_ki))
+        case (2)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case (3)
+        e = sqrt(4.0_ki*pi*alpha)
+      ! sw, mZ --> mW
+        mW = mZ*sqrt(1.0_ki-sw*sw)
+        case (4)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, sw, alpha --> mW
+        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
+      ! mW, sw --> mZ
+        mZ = mW / sqrt(1.0_ki-sw*sw)
+        case (5)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case (6)
+      ! mZ, sw --> mW
+        mW = mZ*sqrt(1-sw*sw)
+        case(7)
+      ! e, sw, GF --> mW
+        mW = e/2.0_ki/sw/sqrt(sqrt(2.0_ki)*GF)
+      ! mW, sw --> mZ
+        mZ = mW / sqrt(1.0_ki-sw*sw)
+        case(8)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, mZ, alpha --> mW
+      mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
+     & sqrt(2.0_ki)/GF))
+      ! mW, mZ --> sw
+      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+!        case default
+  end select
+  end subroutine
+!---#] EW scheme choice:[$
+@end @select$][$
+@end @select$]
 end module [$ process_name asprefix=\_ $]model
+

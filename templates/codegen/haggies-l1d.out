@@ -38,7 +38,7 @@ contains[%
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
       @select r2
-      @case implicit $], mu2[$
+      @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
       use [$ process_name asprefix=\_ $]kinematics
@@ -54,7 +54,7 @@ contains[%
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
       @select r2
-      @case implicit $]
+      @case implicit explicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
       [% type.repr %] :: brack[% 
@@ -76,7 +76,7 @@ contains[%
 !---#[ function [% $_ %]:
    pure function [% $_ %](Q[$
       @select r2
-      @case implicit $], mu2[$
+      @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
       use [$ process_name asprefix=\_ $]model
       use [$ process_name asprefix=\_ $]kinematics
@@ -92,7 +92,7 @@ contains[%
       implicit none
       complex(ki), dimension(4), intent(in) :: Q[$
       @select r2
-      @case implicit $]
+      @case implicit explicit $]
       complex(ki), intent(in) :: mu2[$
       @end @select $]
       [% type.repr %] :: brack[%
@@ -108,7 +108,7 @@ contains[%
       @end @select
       %] = [% expression bracket="brack_%2$d_%1$d(Q[$
       @select r2
-      @case implicit $], mu2[$
+      @case implicit explicit $], mu2[$
       @end @select $])" %][%
    @end @for instructions %]
    end  function [% $_ %]
@@ -220,14 +220,14 @@ contains[%
       if(deg.eq.[% $_ match="d(\\d+)diagram" format="%s" %]) then
          numerator = [% expression bracket="brack_%d[$
          @select r2
-         @case explicit only off $](Q)[$
+         @case only off $](Q)[$
          @end @select $]" %]
          return
       end if[%
       @else %]
       [% $_ %] = [% expression bracket="brack_%d[$
          @select r2
-         @case explicit only off $](Q)[$
+         @case only off $](Q)[$
          @end @select $]" %][%
       @end @select %][%
    @end @for instructions %]

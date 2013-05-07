@@ -45,10 +45,22 @@ off statistics;
 #Define USETOPOLYNOMIAL "0"[%
 @end @if %]
 
+[%
+@if extension formopt %]
+#If `LOOPS' == 1
+   #Define abb`DIAG' "0"
+   Autodeclare Symbol Qsp;
+   #Include- abbreviate.hh
+   Symbol CC, R2;
+#Else
+   #Include- optimizeborn.hh
+#EndIf[%
+@else %]
 #If `LOOPS' == 1
    #Include- abbreviate.hh
    #Create <`OUTFILE'.abb>
-#EndIf
+#EndIf[%
+@end @if %]
 
 #include- spinney.hh
 #redefine SPCANCEL "0"
@@ -431,18 +443,30 @@ EndArgument;
    Id Qt2 * eps = 0;
    Id eps^sDUMMY1?{>2} = 0;
 
-   #If `LOOPSIZE' > 4
+   #If `LOOPSIZE' > 6
       Id Qt2 = 0;
+
+
+   #ElseIf `LOOPSIZE' == 5
+      ToTensor, Functions, p1, ptens;
+      If(count(ptens,1)==0) Multiply ptens;
+* For pentagons we need to consider integrals of rank 6 only
+      Id Only ptens * Qt2 = 0;
+      Id Only ptens * Qt2^2 = 0;
+      Id Only ptens(iDUMMY1?) * Qt2 = 0;
+      Id Only ptens(iDUMMY1?,iDUMMY2?) * Qt2 = 0;
+      Id Only ptens(iDUMMY1?,iDUMMY2?,iDUMMY3?) * Qt2 = 0;
+      ToVector, ptens, p1;
    #ElseIf `LOOPSIZE' == 4
       ToTensor, Functions, p1, ptens;
       If(count(ptens,1)==0) Multiply ptens;
-* For boxes we need to consider integrals of type mu2*ptens(mu,nu) and
-* mu2^2.
+* For boxes we need to consider integrals of type mu2*ptens(mu,nu),
+* mu2^2 and the one with rank 5
       Id Only ptens * Qt2 = 0;
       Id Only ptens(iDUMMY1?) * Qt2 = 0;
-
       ToVector, ptens, p1;
    #EndIf
+
 #Else
    Id dEps(iDUMMY1?, iDUMMY1?) = 0;
 #EndIf
@@ -473,7 +497,8 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 * Implicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
 * are reduced with the reduction library (Samurai/Golem95/PJFry etc.)
-.sort 5.3;[%
+.sort 5.3;
+Local d`DIAG'R2 = 0;[%
 @case explicit %]
 * Explicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
@@ -483,7 +508,8 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
    Local d`DIAG'R2 = 
       + diagram`DIAG'[eps] * fDUMMY1(eps)
       + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
-      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
+      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2)
+      + diagram`DIAG'[Qt2^3] * fDUMMY1(Qt2^3);
    Id eps = 0;
    Id Qt2 = 0;
    Id fDUMMY1(eps?) = eps;
@@ -510,7 +536,8 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
    Local d`DIAG'R2 = 
       + diagram`DIAG'[eps] * fDUMMY1(eps)
       + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
-      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2);
+      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2)
+      + diagram`DIAG'[Qt2^3] * fDUMMY1(Qt2^3);
    Id eps = 0;
    Id Qt2 = 0;
    Id fDUMMY1(eps?) = eps;
@@ -591,6 +618,73 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 
 .sort:5.2;
 
+[%
+@if extension formopt %][%
+@select r2 
+@case explicit %]
+#If `LOOPS' == 1
+   #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
+   #Call  OptimizeCode(`R2PREFACTOR')
+   #Close <`OUTFILE'.txt>
+   #Close <`OUTFILE'.dat>
+#Else
+   #If `BORNFLG' == 1
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #ElseIf `BORNFLG' == 2
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #EndIf
+#EndIf
+.end[%
+@case implicit %]
+#If `LOOPS' == 1
+   #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
+   #Call  OptimizeCode(0)
+   #Close <`OUTFILE'.txt>
+   #Close <`OUTFILE'.dat>
+#Else
+   #If `BORNFLG' == 1
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag.prc>
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #ElseIf `BORNFLG' == 2
+	#Create <borndiag.prc>
+        #write <borndiag.prc> "#Procedure borndiag"
+	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag.prc> "#EndProcedure"
+        #Call OptimizeBorn()
+   #EndIf
+#EndIf
+.end[%
+@case only off %]
+# message 'FORM optimization implemented only with r2=explicit/implicit!!'
+.end[%
+@end @select %][%
+@else %]
+
 #If `LOOPS' == 1
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
          Q[%
@@ -641,7 +735,7 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Write <`OUTFILE'.dat> "time=`time_'"
 #Close <`OUTFILE'.dat>[%
 
-@select r2 @case implicit %]
+@select r2 @case implicit explicit %]
 #If `LOOPS' > 0
    Multiply epspow(0);
    Id epspow(0) * eps^sDUMMY2? = epspow(sDUMMY2);
@@ -702,7 +796,7 @@ Global diagram = diagram`DIAG'x;[%
    Id p1 = Q;
    #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
          Q,qshift,[%
-     @select r2 @case implicit %],Qt2,eps,epspow[%
+     @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])[%
 @end @if %]
 .store:start derivatives;
@@ -753,22 +847,22 @@ Id fshift(0) = 0;
 Id fshift(?all) = 1;
 Id p1 = Q;[%
 @end @if %]
-Id Q = vecA + vecB * LaurentTi + vecC * LaurentT;
+Id Q = vecA + vecC * LaurentTi + vecB * LaurentT;
 
 Id LaurentT * LaurentTi = 1;
 Id vecB.vecB = 0;
 Id vecC.vecC = 0;
 
 #Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
-#If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
-#Else
-   #Define  MAXLaurentT "`LOOPSIZE'"
-#EndIf
+*#If `RANK' > `LOOPSIZE'
+#Define MAXLaurentT "`RANK'"
+*#Else
+*   #Define  MAXLaurentT "`LOOPSIZE'"
+*#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
       vecA,vecB,vecC,LaurentT,LaurentTi,qshift,[%
-  @select r2 @case implicit %],Qt2,eps,epspow[%
+  @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])
 .sort
 Multiply fDUMMY1(0);
@@ -832,15 +926,15 @@ Id Qt2 = beta * LaurentT^2;[%
 @end @select %]
 
 #Define MINLaurentT "`LOOPSIZE'"
-#If `RANK' > `LOOPSIZE'
-   #Define MAXLaurentT "`RANK'"
-#Else
-   #Define  MAXLaurentT "`LOOPSIZE'"
-#EndIf
+*#If `RANK' > `LOOPSIZE'
+*#Define MAXLaurentT "`RANK'"
+*#Else
+#Define  MAXLaurentT "`LOOPSIZE'"
+*#EndIf
   
 #Call ExtractAbbreviationsBracket(`OUTFILE'.abb,abb`DIAG'n,\
-      vecA,beta,LaurentT,qshift,[%
-  @select r2 @case implicit %],Qt2,eps,epspow[%
+      vecA,beta,LaurentT,qshift[%
+  @select r2 @case implicit explicit %],Qt2,eps,epspow[%
      @end @select %])
 .sort
 Multiply fDUMMY1(0);
@@ -864,4 +958,5 @@ Keep Brackets;
 #Close <`OUTFILE'2.txt>
 #EndIf
 *---#] GENERATENINJADOUBLE:
-.end
+.end[%
+@end @if %]

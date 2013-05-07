@@ -42,18 +42,20 @@
 *------#[ Diagram [%diag%]:
    #case [%diag%][%
       @select loopsize diagram=diag
-      @case 1 2 %]
+      @case 1 2 3 %]
       #call ReduceR2N[%loopsize diagram=diag%]([%
          @for elements indices %][%
             @if is_first %][% @else %],[%
             @end @if %]`r[%$_%]',`m[%$_%]sq'[%
          @end @for %])[%
-      @case 3 4 %]
+      @case 4 %]
       #call ReduceR2N[%loopsize diagram=diag%]([%
          @for elements indices %][%
             @if is_first %][% @else %],[%
             @end @if %]`r[%$_%]'[%
          @end @for %])[%
+      @case 5 %]
+      #call ReduceR2N[%loopsize diagram=diag%][%
       @end @select %][%
       @if diagsum %][%
       @else %][%

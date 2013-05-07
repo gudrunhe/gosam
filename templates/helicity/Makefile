@@ -18,6 +18,8 @@ OBJECTS= \
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].o[%
    @end @if %][%
+   @if extension ninja %] ninjah[%helicity%].o[%
+   @end @if %][%
 @end @select %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.o[%
@@ -65,8 +67,13 @@ OBJECTS= \
 			@end @if %][%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %]
-
+@end @if generate_nlo_virt %][%
+@if generate_uv_counterterms %] \
+	diagramsct.o[%
+	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.o[%
+	@end @for %][%
+@end @if %]
 GENERATED_SRC=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -112,9 +119,15 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_NINJA_DOUBLE %] \
 	d[%$_%]h[%helicity%]l12.f90[%
 			@end @if %][%
-   	@end @for %][%
+	@end @for %][%
 	@end @select %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@if generate_uv_counterterms %][%
+	@for elements topolopy.keep.ct %] \
+	d[%$_%]h[%helicity%]l1c.f90[%
+	@end @for %] \
+	diagramsct.f90 [%
+@end @if %]
 
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
@@ -132,6 +145,26 @@ endif[%
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(MAKE) -f Makefile.source source
 endif
+
+[% @for elements topolopy.keep.virt %] \
+
+d[%$_%]h[%helicity%]l1:[%
+@if diagsum %]
+ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
+	$(shell mv ../diagrams-1.hh ../diags-1.hh)
+	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
+	$(shell rm ../diags-1.hh)
+endif[%
+@end @if %]
+ifeq ($(HAVE_MAKEFILE_SOURCE),1)
+	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.txt
+	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.f90
+	$(MAKE) -f Makefile.source abbrevd[%$_%]h[%helicity%].f90
+	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]h[%helicity%].o -I../common abbrevd[%$_%]h[%helicity%].f90
+	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]h[%helicity%]l1.o -I../common d[%$_%]h[%helicity%]l1.f90
+endif
+
+[% @end @for %]
 
 $(GENERATED_SRC): %:
 	@if [ -f Makefile.source ]; \
@@ -161,11 +194,22 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'd*h[%helicity%]l[01].txt' \
 		-or -name 'd*h[%helicity%]l1[23d].txt' \
 		-or -name 'd*h[%helicity%]l1[23d].f90' \
+		-or -name 'd*h[%helicity%]l[01]c.txt' \
+		-or -name 'd*h[%helicity%]l[01]c.f90' \
+		-or -name 'd*h[%helicity%]l[01]d.txt' \
+		-or -name 'd*h[%helicity%]l1d.txt' \
+		-or -name 'd*h[%helicity%]l1d.f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
 		-or -name 'd*h[%helicity%]l[01].dat' \
 		-or -name 'd*h[%helicity%]l[01].abb'[%
 @if group %] \
 		-or -name 'diagramsl0.f90'[%
+@end @if %][%
+@if extension formopt %] \
+		-or -name 'abbrevd*h[%helicity%].f90' \
+		-or -name 'd*h[%helicity%]l[01].prc' \
+		-or -name 'borndiag.prc' \ 
+		-or -name 'born.txt' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \
 		\) -exec rm \{} \;
