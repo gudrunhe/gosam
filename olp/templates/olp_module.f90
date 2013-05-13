@@ -5,7 +5,9 @@ module     olp_module
 
 contains
 
-   subroutine     OLP_Start(contract_file_name,ierr) &
+   subroutine     OLP_Start(contract_file_name,ierr[%
+   @if internal OLP_BADPTSFILE_NUMBERING %],stage,rndseed[%
+   @end @if %]) &
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_start[%
@@ -16,18 +18,19 @@ contains
    @end @if %]")
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
-      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem[%
-      @if extension golem95 %]
+      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem
       use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
            & [%$_%]_PSP_verbosity => PSP_verbosity, &
            & [%$_%]_PSP_chk_threshold1 => PSP_chk_threshold1, &
-           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2[%
-      @end @if %][%
+           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2, &
+           & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
-      integer(kind=c_int), intent(out) :: ierr
-
+      integer(kind=c_int), intent(out) :: ierr[%
+      @if internal OLP_BADPTSFILE_NUMBERING %]
+      integer(kind=c_int), intent(in) :: stage, rndseed[%
+      @end @if %]
       interface
          function strlen(s) bind(C,name='strlen')
             use, intrinsic :: iso_c_binding
@@ -79,24 +82,40 @@ contains
 
       if (ierr .eq. 1) then
          call read_slha_file(line_buf(1:l))
-      end if[%
-      @for subprocesses %]
-      call [%$_%]_initgolem([% 
-         @if is_first %].true.[% @else %].false.[%
-         @end @if %])[%
-      @end @for %]
+      end if
 
-      [% @if extension golem95 %]
       ! Uncomment to change rescue system setting on all suprocesses
       ! PSP_rescue = .true.
       ! PSP_verbosity = [% PSP_verbosity default=2 %]
       ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
-      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %][%
+      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
+      ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
       ! [%$_%]_PSP_verbosity =  PSP_verbosity
       ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
-      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2[%
+      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2
+      ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
+      @end @for %][%
+      @if internal OLP_BADPTSFILE_NUMBERING %]
+      if(stage.lt.0) then[%
+         @for subprocesses %]
+         call [%$_%]_initgolem([% 
+         @if is_first %].true.[% @else %].false.[%
+         @end @if %])[%
+         @end @for %]
+      else[%
+         @for subprocesses %]
+         call [%$_%]_initgolem([% 
+         @if is_first %].true.[% @else %].false.[%
+         @end @if %],stage,rndseed)[%
+         @end @for %]
+      end if[%
+      @else %][%
+      @for subprocesses %]
+      call [%$_%]_initgolem([% 
+         @if is_first %].true.[% @else %].false.[%
+         @end @if %])[%
       @end @for %][%
       @end @if %]
 
@@ -242,6 +261,9 @@ contains
       use [% cr.$_ %]_matrix, only: samplitude[%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
+      @end @if %][%
+      @if extension ninja %]
+      use [% sp.$_%]_groups, only: ninja_exit[%
       @end @if %]
       implicit none[%
       @select count elements cr.channels
@@ -292,6 +314,9 @@ contains
       @end @select %])[%
       @if extension golem95 %]
       call tear_down_golem95()[%
+      @end @if %][%
+      @if extension ninja %]
+      call ninja_exit()[%
       @end @if %]
 
       if (ok) then

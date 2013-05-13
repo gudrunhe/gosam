@@ -876,6 +876,17 @@ subroutine     tear_down_golem95()
    end if
 end subroutine tear_down_golem95
 !---#] subroutine tear_down_golem95:[%
+   @if extension ninja %]
+!---#[ subroutine ninja_exit:
+subroutine ninja_exit()
+  use ninja_module, only: ninja_clear_cache
+  implicit none
+  !------#[ call ninja_clear_cache():
+  call ninja_clear_cache()
+  !------#] call ninja_clear_cache():
+end subroutine ninja_exit
+!---#] subroutine ninja_exit:[%
+   @end @if extension ninja %][%
 @end @if extension golem95 %][%
 @if extension pjfry %]
 function pga10(b_set, ep)

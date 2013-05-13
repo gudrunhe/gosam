@@ -90,7 +90,7 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	Writes to the file qgraf.dat in the directory specified by 'path'. Creates it
 	if necessary.
 	"""
-	assert (len(r_particles) == 0) or (len(r_particles) == 1 and loops == 0)
+	assert (len(r_particles) == 0) or (len(r_particles) == 1 and loops == 1)
 
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")
 	output_name = os.path.join(path, output_short_name)
@@ -130,12 +130,12 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 		f.write("%s[k%d]" % (str(p), ki))
 
 	# add r-particle if present
-	if len(r_particles) == 1:
-		if comma:
-			f.write(", ")
-		else:
-			comma = True
-		f.write("%s[ZERO]" % str(r_particles[0]))
+#	if len(r_particles) == 1:
+#		if comma:
+#			f.write(", ")
+#		else:
+#			comma = True
+#		f.write("%s[ZERO]" % str(r_particles[0]))
 
 	f.write(";\n")
 
@@ -143,6 +143,9 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 
 	# write line: options = <opt1>, <opt2>, ...;
 	f.write("options=%s;\n" % ", ".join(options))
+	# genUV
+	if len(r_particles) == 1:
+		f.write("true=iprop[%s,1,1];\n" % str(r_particles[0]))
 
 	# append verbatim lines
 	f.write(verbatim)
@@ -302,19 +305,22 @@ def run_qgraf(conf, in_particles, out_particles):
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# ----------------- UV COUNTERTERMS -----------------------------------
+	# This doesn't work...at some point it would be better to add the RENO
+	# fields automatically
+	# Edited on 16.11.12
 	if flag_generate_uv_counterterms:
 		output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
 		
 		if powers is not None:
 			new_verbatim = verbatim + "\n" + \
-					"true=vsum[%s,%s,%s];\n" % (powers[0], powers[2], powers[2])
+					"true=vsum[%s,%s,%s];\n" % (powers[0], str(int(powers[2])-6), str(int(powers[2])-6))
 		else:
 			new_verbatim = verbatim
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name, \
 				options, new_verbatim, in_particles, out_particles, \
-				["RENO"], 0)
+				["RENO"], 1)
 		run_qgraf_dat(conf, output_name, log_name)
 
 		if flag_draw_diagrams:
@@ -322,12 +328,18 @@ def run_qgraf(conf, in_particles, out_particles):
 			log_name    = consts.PATTERN_PYXO_CT + log_ext
 			write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, \
-				["RENO"], 0)
+				["RENO"], 1)
 			run_qgraf_dat(conf, output_name, log_name)
 			golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 					conf=conf)
 			for ext in [python_ext, pyo_ext, pyc_ext]:
 				cleanup_files.append(consts.PATTERN_PYXO_CT + ext)
+		if flag_topolopy:
+			output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+			log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 1)
+			run_qgraf_dat(conf, output_name, log_name)
 
 	# Clean up and leave
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")

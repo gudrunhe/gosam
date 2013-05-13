@@ -1,6 +1,17 @@
+[%@if extension coloropt%]*#####Functions
 [%
 @for functions_resolved %][%
    @if is_first %][%
    @else %]
-[% @end @if %][% $_ %] = [% expression %];[%
+[% @end @if %]
+L [% $_ %]x = [% expression %];[%
+@end @for %][% @else %]
+[%
+@for functions_resolved %][%
+   @if is_first %][%
+   @else %]
+[% @end @if %]
+[% $_ %] = [% expression %];[%
 @end @for %]
+[%@end @if %]
+

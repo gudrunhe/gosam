@@ -111,15 +111,19 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, eprops, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
+	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
 			run_analyzer(path, conf, in_particles, out_particles)
+#	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
+#			run_analyzer(path, conf, in_particles, out_particles)
 
 	props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
 	props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
 	props.setProperty("topolopy.keep.vtot", ",".join(map(str, keep_vtot)))
+	props.setProperty("topolopy.keep.ct", ",".join(map(str, keep_ct)))
 	props.setProperty("topolopy.count.tree", len(keep_tree))
 	props.setProperty("topolopy.count.virt", len(keep_virt))
 	props.setProperty("topolopy.count.docu", len(keep_vtot))
+	props.setProperty("topolopy.count.ct", len(keep_ct))
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
 	props.setProperty("max_rank", conf["__max_rank__"])
@@ -127,6 +131,7 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 	conf["__info.count.docu__"] = len(keep_vtot)
+	conf["__info.count.ct__"] = len(keep_ct)
 
 	for key, value in golem.util.tools.derive_coupling_names(conf).items():
 		props.setProperty("%s_COUPLING_NAME" % key, value)
@@ -158,7 +163,7 @@ def cleanup(path):
 	cleanup_files = []
 
 	for ext in [".tex", ".log", ".py", ".pyc", ".pyo"]:
-		for stub in ["pyxotree", "pyxovirt", "topotree", "topovirt"]:
+		for stub in ["pyxotree", "pyxovirt", "topotree", "topovirt", "pyxoct", "topoct"]:
 			cleanup_files.append(stub + ext)
 
 	if True:
@@ -417,7 +422,7 @@ def workflow(conf):
 	qgraf_options = conf.getProperty(golem.properties.qgraf_options)
 
 	r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
-
+#	formopt = conf.getProperty(golem.properties.formopt)
 	# Prepare a copy of the setup file in the property [% user.setup %]
 	buf = StringIO.StringIO()
 	conf.store(buf, properties=golem.properties.properties,
@@ -446,7 +451,9 @@ def workflow(conf):
 
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = False
+	conf["generate_uv_counterterms"] = conf.getProperty('genUV')
+	#generate_uv_counterterms
+	#False
 
 
 	#if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
@@ -490,6 +497,26 @@ def workflow(conf):
 				"Please, feel free to test this feature but be aware that",
 				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
 
+	# We need to put out an error if we specify formopt and some other extensions
+	ext = golem.properties.getExtensions(conf)
+
+	if 'formopt' in ext:
+		warning("You are Optimizing with Form. This is under development. \n"
+				"Please use Form version >= 4.0. \n ")
+		if 'topolynomial' in ext:
+			raise GolemConfigError(
+						"Your configuaration has select the extension 'topolynomial' \n" 
+						"and optimization by FORM 'formopt'. " +
+						"The two options are not compatible. \nPlease change your input " +
+						"card and re-run.")
+		if 'r2_only' in ext:
+			raise GolemConfigError(
+						"r2 only not supported with extension formopt\n")
+		if conf["abbrev.level"] != "diagram":	
+			raise GolemConfigError(
+						"extension formopt only supported with abbrev.level=diagram\n")
+
+
 	for prop in golem.properties.properties:
 		lines = prop.check(conf)
 		if len(lines) > 0:
@@ -509,11 +536,13 @@ def workflow(conf):
 def run_analyzer(path, conf, in_particles, out_particles):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
+	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
 
 	model = golem.util.tools.getModel(conf)
 		
 	lo_flags = {}
 	virt_flags = {}
+	ct_flags = {}
 
 	if generate_lo:
 		modname = consts.PATTERN_TOPOLOPY_LO
@@ -561,6 +590,22 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		eprops    = {}
 		loopcache     = golem.topolopy.objects.LoopCache()
 		loopcache_tot = golem.topolopy.objects.LoopCache()
+	
+	if generate_ct:
+		modname = consts.PATTERN_TOPOLOPY_CT
+		fname = os.path.join(path, "%s.py" % modname)
+		debug("Loading counter term diagram file %r" % fname)
+		mod_diag_ct = imp.load_source(modname, fname)
+		# keep_tree, tree_signs, tree_flows =
+		keep_ct, ct_signs = \
+				golem.topolopy.functions.analyze_ct_diagrams(
+				mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
+				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+	else:
+		keep_ct = []
+		ct_signs = {}
+	# tree_flows = {}
+
 
 	conf["__heavy_quarks__"] = quark_masses
 	conf["complex_masses"] = complex_masses
@@ -569,8 +614,13 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		lo_flags = dict(enumerate(lo_flags))
 	if not isinstance(virt_flags, dict):
 		virt_flags = dict(enumerate(virt_flags))
+	if not isinstance(ct_flags, dict):
+		ct_flags = dict(enumerate(ct_flags))
 
-	flags = (lo_flags, virt_flags)
+	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, eprops, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
+	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
+
+
+

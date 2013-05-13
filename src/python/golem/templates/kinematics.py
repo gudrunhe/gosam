@@ -312,7 +312,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             props[real_mass]=True
             props[complex_mass]=False          
 
-        yield props
+          yield props
 
    def tree_sign(self, *args, **opts):
       if len(args) == 0:

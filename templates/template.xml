@@ -49,8 +49,18 @@
 			<only if-option="group" value="false"/>
 		</file>
 
-		<file src="haggies-l1.in" class="Multi"/>
-		<file src="haggies-l1.out" class="Kinematics"/>
+		<file src="haggies-l1.in" class="Multi">
+			<except if-extension="formopt" />
+		</file>
+		<file src="haggies-l1.out" class="Kinematics">
+			<except if-extension="formopt" />
+		</file>
+		<file src="pythonin.py" class="Multi">
+			<only if-extension="formopt" />
+		</file>
+		<file src="colorin.py" class="Multi">
+			<only if-extension="extraopt" />
+		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
 		</file>
@@ -60,10 +70,66 @@
 		<file src="haggies-l12.out" class="Kinematics">
 			<only if-internal="GENERATE_NINJA_DOUBLE"/>
 		</file>
+		<file src="haggies-l1c.in" class="Multi">
+			<except if-option="genUV" value="false" />
+		</file>
+		<file src="haggies-l1c.out" class="Kinematics">
+			<except if-option="genUV" value="false" />
+		</file>
+
+		<file src="filter.py" class="Verbatim">
+			<only if-extension="formopt" />
+		</file>
+		<file src="derive.frm" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="derive" />
+		</file>
+		<file src="ninja.frm" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+		</file>
 		<file src="info.frm" class="Kinematics" />
 		<file src="golem.frm" class="Kinematics" />
-		<file src="color.frm" class="Verbatim"/>
-		<file src="abbreviate.hh" class="Verbatim"/>
+		<file src="color.frm" class="Kinematics"/>
+		<file src="coloropt.frm" class="Kinematics">
+			<only if-extension="extraopt" />
+		</file>
+		<file src="modelopt.frm" class="Kinematics">
+			<only if-extension="extraopt" />
+		</file>
+		<file src="abbreviate.hh" class="Kinematics"/>
+		<file src="optimizeborn.hh" class="Integrals">
+			<only if-extension="formopt" />
+		</file>
+		<file src="finaloptimization.frm" class="Kinematics">
+			<only if-extension="formopt" />
+		</file>
+		<file src="buildfortran.py" class="Kinematics">
+			<only if-extension="formopt" />
+		</file>
+		<file src="buildfortran_d.py" class="Kinematics">
+			<only if-extension="formopt" />
+		</file>
+		<file src="buildfortran_n3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+		</file>
+		<file src="buildfortran_n2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+		</file>
+		<file src="buildfortranborn.py" class="Kinematics">
+			<only if-extension="formopt" />
+		</file>
+		<file src="t2f.py" class="Verbatim">
+			<only if-extension="formopt" />
+		</file>
+		<file src="buildmodel.py" class="Model">
+			<only if-extension="formopt" />
+		</file>
+		<file src="buildcolor.py" class="Kinematics">
+			<only if-extension="extraopt" />
+		</file>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>
@@ -77,9 +143,15 @@
 		<file src="lightconedecomp.prc" class="Kinematics"/>
 		<file src="spva.prc" class="Kinematics"/>
 		<file src="func.txt" class="Model" />
+		<file src="func.hh" class="Model" >
+			<only if-extension="extraopt" />
+		</file>
 		<file src="diagsum.frm" dest="diagsum.frm"
 		                class="Integrals" >
 			<only if-option="diagsum" value="true"/>
+		</file>
+		<file src="ct.hh" class="Integrals">
+			<except if-option="genUV" value="false"/>
 		</file>
 	</directory>
 
@@ -95,7 +167,7 @@
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
 		</file>
-		<file src="Makefile.source" class="Verbatim"/>
+		<file src="Makefile.source" class="Kinematics"/>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
@@ -190,6 +262,12 @@
 				<except if-option="r2" value="only" />
 				<filter name="Fortran90" width="80"/>
 			</file>
+			<file src="ninja.f90" dest="ninjah%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+			</file>
 			<file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="golem95" />
@@ -198,6 +276,9 @@
 			<file src="amplitude.f90" dest="amplitudeh%d.f90"
 				arguments="helicity" class="Integrals" />
 			<file src="globals.f90" class="Kinematics" />
+			<file src="diagramsct.f90" class="Multi">
+				<except if-option="genUV" value="false"/>
+			</file>
 		</directory>
 	</foreach>
 </template>

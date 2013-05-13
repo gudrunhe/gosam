@@ -1,0 +1,46 @@
+%=$[$ 
+ ' vim: ts=3:sw=3:syntax=golem
+$]module     [$ process_name asprefix=\_
+				$][% output.file match=".*/(d\\d+h\\d+l1c).f90" format ="%s"%]
+   ! file:      [% output.file %]
+   ! generator: [% program.name %] ([% program.version %])
+   use [$ process_name asprefix=\_ $]config, only: ki
+   use [$ process_name asprefix=\_ $]color, only: numcs
+   implicit none
+   private
+
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)[%
+@for instructions registers="t%d" %][%
+   @select $_ match="(.).*" format="%s"
+   @case E %]
+   complex(ki) :: [% $_ %][%
+   @end @select %][%
+@end @for instructions %]
+   public :: counterterm
+
+contains
+   function counterterm(scale2)
+      use [$ process_name asprefix=\_ $]model
+      use [$ process_name asprefix=\_ $]kinematics
+      use [$ process_name asprefix=\_ $]globals[% output.file match=".*/d\\d+(h\\d+)l1c.f90" format ="%s"%]
+
+      implicit none
+      complex(ki), dimension(3), parameter :: epsfin= (/0.0_ki,0.0_ki,1.0_ki/)
+      complex(ki), dimension(3), parameter :: epspole1= (/0.0_ki,1.0_ki,0.0_ki/)
+
+      real(ki),intent(in) :: scale2
+      complex(ki), dimension(3) :: counterterm
+      complex(ki), dimension(3) :: [%
+        output.file match=".*/(d\\d+)h\\d+l1c.f90" format ="%s"%]
+      [% @for symbols registers="t%s" %]
+      [%    type.repr %] :: [% $_ %][%
+      @end @for %]
+      [% output.file match=".*/(d\\d+)h\\d+l1c.f90" format ="%s"%](:) = 0.0_ki
+      call init_lo()[%
+      @for instructions registers="t%s" %]
+      [% $_ %] = [% expression %][%
+      @end @for instructions%]
+      counterterm = [% output.file match=".*/(d\\d+)h\\d+l1c.f90" format ="%s"%]
+   end function counterterm
+end module [$ process_name asprefix=\_
+	$][% output.file match=".*/(d\\d+h\\d+l1c).f90" format ="%s"%]
