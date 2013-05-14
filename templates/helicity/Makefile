@@ -146,7 +146,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(MAKE) -f Makefile.source source
 endif
 
-[% @for elements topolopy.keep.virt %] \
+[% @for elements topolopy.keep.virt %]
 
 d[%$_%]h[%helicity%]l1:[%
 @if diagsum %]
