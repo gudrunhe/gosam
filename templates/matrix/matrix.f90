@@ -195,9 +195,21 @@ contains
       tmp_red_int=reduction_interoperation[%
    @end @if %]
       call ir_subtraction(vecs, scale2, irp)
-      spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
-      fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-      kfac = amp(2)/amp(1)
+      if((amp(3)-irp(2)) .ne. 0.0_ki) then
+         spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+      else
+         spprec1 = 16
+      endif
+      if((amp(2)-rat2) .ne. 0.0_ki) then
+         fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+      else
+         fpprec1 = -10
+      endif
+      if(amp(1) .ne. 0.0_ki) then
+         kfac = amp(2)/amp(1)
+      else
+         kfac = 0.0_ki
+      endif
       if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. &
            (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
          if(PSP_verbosity .eq. 2) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
@@ -207,9 +219,21 @@ contains
             sam_amp2 = amp(2)
             sam_amp3 = amp(3)
             call samplitudel01(vecs, scale2, amp, rat2, ok, h)
-            spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
-            fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-            kfac = amp(2)/amp(1)
+            if((amp(3)-irp(2)) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+            else
+               spprec2 = 16
+            endif
+            if((amp(2)-rat2) .ne. 0.0_ki) then
+               fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+            else
+               fpprec2 = -10
+            endif
+            if(amp(1) .ne. 0.0_ki) then
+               kfac = amp(2)/amp(1)
+            else
+               kfac = 0.0_ki
+            endif
             if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000 .or. &
                (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
                if(PSP_verbosity .ge. 1) then
