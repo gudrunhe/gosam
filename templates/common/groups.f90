@@ -151,6 +151,9 @@
    public :: update_flags
    private :: update_virt_flags[%
    @end @if %][%
+@end @if %][%
+@if extension ninja %]
+   public :: ninja_exit[%
 @end @if %]
 contains[%
 
