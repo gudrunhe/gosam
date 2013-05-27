@@ -45,6 +45,13 @@
       type(coeff_type_[% eval diag_rank - 2 %]) :: coeffs_[% DIAG %]s2[%
                   @end @if %][%
                @end @if %][%
+               @if eval DIAGLS .eq. 5 %][%
+                  @if eval diag_rank .gt. 5 %]
+      type(coeff_type_[% eval diag_rank - 2 %]) :: coeffs_[% DIAG %]s1
+      type(coeff_type_[% eval diag_rank - 2 %]) :: coeffs_[% DIAG %]s2
+      type(coeff_type_[% eval diag_rank - 2 %]) :: coeffs_[% DIAG %]s3[%
+                  @end @if %][%
+               @end @if %][%
             @end @with %][%
          @end @select %][%
       @end @for diagrams %]
@@ -378,6 +385,15 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
           &     + contract[% loopsize diagram=DIAG %]_[% rank
       %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set)[%
                   @end @if %][%
+               @case 5 %][%
+                  @if eval rank .gt. 5 %]&
+          &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s1(coeffs%coeffs_[% DIAG %]s1, rmomenta, b_set)&
+          &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set)&
+          &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s3(coeffs%coeffs_[% DIAG %]s3, rmomenta, b_set)[%
+                  @end @if %][%
                @end @select %][%
             @end @select %])
       if(debug_nlo_diagrams) then
@@ -549,6 +565,15 @@ function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(
                   @if eval rank .gt. 3 %]&
        &     + contract[% loopsize diagram=DIAG %]_[% rank
       %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set, ep)[%
+                  @end @if %][%
+               @case 5 %][%
+                  @if eval rank .gt. 5 %]&
+       &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s1(coeffs%coeffs_[% DIAG %]s1, rmomenta, b_set, ep)
+       &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set, ep)&
+             &     + contract[% loopsize diagram=DIAG %]_[% rank
+      %]s1(coeffs%coeffs_[% DIAG %]s3, rmomenta, b_set, ep)[%
                   @end @if %][%
                @end @select %][%
             @end @select %])

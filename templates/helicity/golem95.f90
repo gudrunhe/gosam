@@ -63,6 +63,11 @@ subroutine     reconstruct_group[% grp %](coeffs)
                   @if eval rank .gt. 3 %], coeffs%coeffs_[% DIAG %]s2[%
                   @end @if %][%
                @end @if %][%
+               @if eval DIAGLS .eq. 5 %][%
+                  @if eval rank .gt. 5 %], &
+            & coeffs%coeffs_[% DIAG %]s1, coeffs%coeffs_[% DIAG %]s2, coeffs%coeffs_[% DIAG %]s3[%
+                  @end @if %][%
+               @end @if %][%
             @end @with %][%
          @end @select %])[%
       @end @if %][%
