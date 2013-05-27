@@ -49,7 +49,10 @@ f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0
 f90file.write('   ! file: '+str(os.getcwd())+'diagramsl0.f90 \n')
 f90file.write('   ! generator: buildfortranborn.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
-f90file.write('   use [% process_name asprefix=\_ %]config, only: ki\n')
+f90file.write('   use [% process_name asprefix=\_ %]config, only: ki\n')[%
+@if internal CUSTOM_SPIN2_PROP %]
+f90file.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
+@end @if %]
 f90file.write('\n')
 f90file.write('   implicit none\n')
 f90file.write('   private\n')

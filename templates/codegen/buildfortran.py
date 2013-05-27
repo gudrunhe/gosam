@@ -88,7 +88,10 @@ outdict=translatefile(diag_name+'.txt',config)
 abbfile.write('module     [% process_name asprefix=\_ 
             %]abbrevd'+diag+'h'+heli+'\n')
 abbfile.write('   use [% process_name asprefix=\_ %]config, only: ki\n')
-abbfile.write('   use [% process_name asprefix=\_ %]globalsh'+heli+'\n')
+abbfile.write('   use [% process_name asprefix=\_ %]globalsh'+heli+'\n')[%
+@if internal CUSTOM_SPIN2_PROP %]
+abbfile.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
+@end @if %]
 abbfile.write('   implicit none\n')
 abbfile.write('   private\n')
 abbfile.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')
@@ -125,7 +128,10 @@ f90file.write('module     [% process_name asprefix=\_ %]'+diag_name+'\n')
 f90file.write('   ! file: '+str(os.getcwd())+diag_name+'.f90 \n')
 f90file.write('   ! generator: buildfortran.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]config, only: ki\n')
-f90file.write('   use [% process_name asprefix=\_ %]util, only: cond\n')
+f90file.write('   use [% process_name asprefix=\_ %]util, only: cond\n')[%
+@if internal CUSTOM_SPIN2_PROP %]
+f90file.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
+@end @if %]
 f90file.write('\n')
 f90file.write('   implicit none\n')
 f90file.write('   private\n')
