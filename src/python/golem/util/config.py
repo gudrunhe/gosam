@@ -6,6 +6,9 @@ import os
 import os.path
 import subprocess
 import re
+import tempfile
+import shutil
+import shlex
 try:
    import ast
 except ImportError:
@@ -502,6 +505,8 @@ class Component:
       pass
 
    def undohome(self, name):
+      if not name:
+         return name
       home = os.getenv("HOME")
       if home is not None:
          if name == home:
@@ -510,6 +515,12 @@ class Component:
             lh = len(home)
             return "${HOME}" + name[lh:]
       return name
+
+   def dohome(self, name):
+      if not name:
+         return name
+      home = os.getenv("HOME")
+      return name.replace("${HOME}",home)
 
 
    def store(self, conf):
@@ -642,7 +653,6 @@ class Program(Component):
       self.extensions = ["", ".exe", ".com"]
       self.name = cname
 
-
    def examine(self, hints):
       user_home = gpath.get_homedir()
       golem_dir = gpath.golem_path()
@@ -662,7 +672,7 @@ class Program(Component):
                   if dir not in self.locations:
                      self.locations.append(fname)
 
-   def getInstance(self):
+   def getInstance(self,conf=None):
       if len(self.locations) > 0:
          return self.locations[0]
 
@@ -872,8 +882,34 @@ class Fortran(Program):
 
       Program.examine(self, hints)
 
+   def checkCompatibility(self,p,conf):
+      p=self.dohome(p)
+      if "golem95.fcflags" in conf:
+         if not testCompilerLibCompatibility(p,'parametre',self.dohome(conf["golem95.fcflags"])):
+            return False
+      if "samurai.fcflags" in conf:
+         if not testCompilerLibCompatibility(p,'msamurai',self.dohome(conf["samurai.fcflags"])):
+            return False
+      return True
+
+   def getInstance(self,conf=None):
+      if conf:
+         for p in self.locations:
+            print "# ~~~ " + p + " usable with installed Golem95/Samurai? ... ",
+            if self.checkCompatibility(p,conf):
+               print "Yes"
+               return p
+            else:
+              print "No"
+         print("==> Configuration failed:")
+         print("    Libraries not with examined compiler created.")
+         sys.exit(1)
+      elif len(self.locations) > 0:
+         return self.locations[0]
+
+
    def store(self, conf):
-      conf["fc.bin"] = self.undohome(self.getInstance())
+      conf["fc.bin"] = self.undohome(self.getInstance(conf=conf))
 
 class QGraf(Program):
    def __init__(self):
@@ -899,7 +935,19 @@ class Configurator:
 
       not_found = []
 
-      for name, required in components.items():
+      items=components.items()
+
+      def preferLibKey(x):
+         if x[0]=="Golem95":
+            return "  " + x[0]
+         if x[0]=="Samurai":
+            return " " + x[0]
+         return x[0]
+
+      # search first for Golem95/Samurai to find a compatible compiler
+      items.sort(key=preferLibKey)
+
+      for name, required in items:
          if name not in globals():
             raise ConfigurationException("Name '%s' not known" % name)
 
@@ -1007,3 +1055,25 @@ def levenshtein(str1, str2, case_sensitive=False):
 		previous_row = current_row
 
 	return previous_row[-1]
+
+def testCompilerLibCompatibility (compiler,lib,flags):
+   cur_path=os.getcwd()
+   try:
+      tmp_dir=tempfile.mkdtemp()
+      os.chdir(tmp_dir)
+      with open("program.f90","w") as f:
+         f.write("program test\n")
+         f.write("use %s\n" % lib)
+         f.write("end program test\n")
+      p=subprocess.Popen([compiler,"program.f90","-c"] + shlex.split(flags),
+                          stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      (stdout, stderr) = p.communicate()
+      return p.returncode==0
+   finally:
+      os.chdir(cur_path)
+      try:
+         shutil.rmtree(tmp_dir) # delete directory
+      except OSError, e:
+         if e.errno != 2: # no such file or directory
+            raise
