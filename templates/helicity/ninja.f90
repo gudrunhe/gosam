@@ -15,7 +15,7 @@ contains
       @with eval loopsize group=grp result=ls %]
 !-----#[ subroutine numeval_group[% grp %]:
 subroutine     numeval_group[% grp %](icut, Q, mu2, num) &
-   & bind(c, name="gggg_g[% grp %]h[% helicity %]l1_ninja")
+   & bind(c, name="[% process_name asprefix=\_ %]g[% grp %]h[% helicity %]l1_ninja")
   use iso_c_binding, only: c_int
   use ninja_module, only: ki_nin[%
          @for repeat num_legs shift=1 %][%
@@ -144,7 +144,7 @@ end subroutine numeval_group[% grp %]
 !-----#] subroutine numeval_group[% grp %]:
 !-----#[ subroutine numeval_group[% grp %]_d:
 subroutine     numeval_group[% grp %]_d(icut, beta, vperp, v0, coeff) &
-   & bind(c, name="gggg_g[% grp %]h[% helicity %]l12_ninja")
+   & bind(c, name="[% process_name asprefix=\_ %]g[% grp %]h[% helicity %]l12_ninja")
   use iso_c_binding, only: c_int
   use ninja_module, only: ki_nin[%
          @for repeat num_legs shift=1 %][%
@@ -255,7 +255,7 @@ end subroutine numeval_group[% grp %]_d
 !-----#[ subroutine numeval_group[% grp %]_t:
 subroutine     numeval_group[% grp %]_t(icut, mu2, a, b, c, gdeg,&
 			                           & vcut, msqcut, coeff) &
-   & bind(c, name="gggg_g[% grp %]h[% helicity %]l13_ninja")
+   & bind(c, name="[% process_name asprefix=\_ %]g[% grp %]h[% helicity %]l13_ninja")
   use iso_c_binding, only: c_int
   use ninja_module, only: ki_nin, ninja_poly_multiply[%
          @for repeat num_legs shift=1 %][%
