@@ -68,6 +68,20 @@ contains
    subroutine     initgolem(is_first,stage,rndseed)
       implicit none
       logical, optional, intent(in) :: is_first
+<<<<<<< .locale
+      integer, optional, intent(in) :: stage
+      integer, optional, intent(in) :: rndseed
+      logical :: init_third_party
+      logical :: file_exists, dir_exists
+      integer i, j
+      character(len=50) :: file_name
+      character(len=9)  :: dir_name = "BadPoints"
+      character(len=6)  :: file_numb
+      character(len=9)  :: file_pre = "gs_badpts"
+      character(len=3)  :: file_ext = "log"
+      character(len=1)  :: cstage
+      character(len=4)  :: crndseed
+=======
       integer, optional, intent(in) :: stage
       integer, optional, intent(in) :: rndseed
       logical :: init_third_party
@@ -80,6 +94,7 @@ contains
       character(len=3)  :: file_ext = "log"
       character(len=1)  :: cstage
       character(len=4)  :: crndseed
+>>>>>>> .merge-dx.r310
       i = 1
       file_exists =.true.
 
@@ -195,13 +210,97 @@ contains
       tmp_red_int=reduction_interoperation[%
    @end @if %]
       call ir_subtraction(vecs, scale2, irp)
+<<<<<<< .locale
+      if((amp(3)-irp(2)) .ne. 0.0_ki) then
+         spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+      else
+         spprec1 = 16
+      endif
+      if((amp(2)-rat2) .ne. 0.0_ki) then
+         fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+      else
+         fpprec1 = -10
+      endif
+      if(amp(1) .ne. 0.0_ki) then
+         kfac = amp(2)/amp(1)
+      else
+         kfac = 0.0_ki
+      endif
+      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. &
+           (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
+         if(PSP_verbosity .eq. 2) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
+=======
       spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
       fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
       kfac = amp(2)/amp(1)
       if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. &
            (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
          if(PSP_verbosity .eq. 2) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
+>>>>>>> .merge-dx.r310
    @if extension golem95 %]
+<<<<<<< .locale
+         if(PSP_rescue) then
+            reduction_interoperation = 1
+            sam_amp2 = amp(2)
+            sam_amp3 = amp(3)
+            call samplitudel01(vecs, scale2, amp, rat2, ok, h)
+            if((amp(3)-irp(2)) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+            else
+               spprec2 = 16
+            endif
+            if((amp(2)-rat2) .ne. 0.0_ki) then
+               fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
+            else
+               fpprec2 = -10
+            endif
+            if(amp(1) .ne. 0.0_ki) then
+               kfac = amp(2)/amp(1)
+            else
+               kfac = 0.0_ki
+            endif
+            if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000 .or. &
+               (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
+               if(PSP_verbosity .ge. 1) then
+                  write(42,'(2x,A7)')"<event>"
+                  if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
+                     write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
+                          &   "[% process_name %]", "' problem='sinpole","'/>"
+                  else if(abs(kfac) > PSP_chk_kfactor) then
+                     write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
+                          &   "[% process_name %]", "' problem='kfactor","'/>"
+                  end if
+                  write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
+                       &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
+                  write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
+                       &   spprec1, "' fpprec='", fpprec1, "'/>"
+                  write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
+                       &   spprec2, "' fpprec='", fpprec2, "'/>"
+                  write(42,'(4x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
+                       &   "' gol='", amp(3), "' ir='", irp(2),"'/>"
+                  write(42,'(4x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
+                       &   "' rat2='", rat2, "' sam='", sam_amp2, "' gol='", amp(2), "'/>"
+                  write(42,'(4x,A9)') "<momenta>"
+                  do i=1,[%num_legs%]
+                     write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
+                          &     "' py='", vecs(i,3), "' pz='", vecs(i,4), "'/>"
+                  enddo
+                  write(42,'(4x,A10)')"</momenta>"
+                  write(42,'(2x,A8)')"</event>"
+               endif
+               ! Give back a Nan so that point is discarded
+               zero = log(1.0_ki)
+               amp(2)= 1.0_ki/zero
+            else
+               if(PSP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
+               if(PSP_verbosity .ge. 2) write(*,*)
+            end if
+            reduction_interoperation = tmp_red_int
+         end if[%
+   @else %]
+         if(PSP_rescue) then
+            if(PSP_verbosity .ge. 1) then
+=======
          if(PSP_rescue) then
             reduction_interoperation = 1
             sam_amp2 = amp(2)
@@ -251,6 +350,7 @@ contains
    @else %]
          if(PSP_rescue) then
             if(PSP_verbosity .ge. 1) then
+>>>>>>> .merge-dx.r310
                write(42,'(2x,A7)')"<event>"
                if(spprec1 .le. PSP_chk_threshold1 .and. spprec1 .gt. -10000) then
                   write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
