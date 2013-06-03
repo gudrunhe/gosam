@@ -435,6 +435,15 @@ def workflow(conf):
 
 	# Check if path exists. If it doesn't, raise an exception
 	if not os.path.exists(path):
+		try:
+			rp=os.path.relpath(path)
+			if not os.path.sep in rp:
+				os.mkdir(rp)
+				warning("Process path %r created." % path)
+		except OSError,err:
+			raise GolemConfigError("Could not create process path: %r\r%s" % (path,err))
+
+	if not os.path.exists(path):
 		raise GolemConfigError("The process path does not exist: %r" % path)
 
 	check_dont_overwrite(conf)

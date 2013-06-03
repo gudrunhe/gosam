@@ -2,7 +2,7 @@
 * This file takes the input numerator from d*h*l1.txt as a 
 * function of abb(:) 
 * and outputs the file d*h*l1d.hh which has the 
-* exansion of the numerator d`p'diagram
+* expansion of the numerator d`p'diagram
 
 off statistics;
 [% 

@@ -31,6 +31,14 @@ def gosam_contrib_path(*dir):
 		from golem.installation import DATA_DIR
 		# use DATA_DIR and replace last "golem" with "gosam-contrib"
 		path="gosam-contrib".join(DATA_DIR.rsplit("golem"))
+		if not os.path.exists(path):
+			# guess from LD_LIBRARY_PATH
+			ldp = os.getenv("LD_LIBRARY_PATH") or ""
+		        for path in ldp.split(os.path.pathsep):
+				guess_path= os.path.abspath(os.path.join(path,os.path.pardir,"share","gosam-contrib"))
+				if os.path.exists(guess_path):
+					path=os.path.abspath(guess_path)
+					break
 		return os.path.join(path, *dir)
 	except ImportError:
 		# This means we work with the sources rather than
