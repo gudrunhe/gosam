@@ -26,10 +26,10 @@ S sDUMMY1;[%
 @end @if %][%
 @if extension qshift%][%
 @else %]
-  CFunction j;
-  Vector Q, p1;
-  Vector qshift;
-  CFunction fshift;
+CFunction j;
+Vector Q, p1;
+*  Vector qshift;
+*  CFunction fshift;
 [%@end @if %]
 CF abb`DIAG';
 Symbol Qt2,QspQ[%
@@ -115,11 +115,12 @@ Id Qspvae[%index2%]e[%index1%] = Q.spvae[%index2%]e[%index1%];[%
 [%
 @if extension qshift %][%
 @else %]
-Id Q = p1;
-#Call shiftmomenta(`DIAG',1)
-Id fshift(0) = 0;
-Id fshift(?all) = 1;
-Id p1 = Q;[%
+* T.P. : this should be done numerically, e.g. a -> sign * a - qshift
+*Id Q = p1;
+*#Call shiftmomenta(`DIAG',1)
+*Id fshift(0) = 0;
+*Id fshift(?all) = 1;
+*Id p1 = Q;[%
 @end @if %]
 
 * TP: store this expression for usage in triple and double ninja

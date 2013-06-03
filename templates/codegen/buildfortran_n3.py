@@ -111,9 +111,9 @@ f90file.write('   implicit none\n')
 f90file.write('   private\n')
 f90file.write('\n')
 f90file.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
-f90file.write('   complex(ki), dimension(4), private :: vecA, vecB, vecC\n')
+#f90file.write('   complex(ki), dimension(4), private :: vecA, vecB, vecC\n')
 [%@if extension qshift %][% @else %]
-f90file.write('   real(ki), dimension(4), private :: qshift \n')
+#f90file.write('   real(ki), dimension(4), private :: qshift \n')
 [%@end @if %]
 f90file.write('   public :: numerator_t\n')
 f90file.write(' \n')
@@ -121,13 +121,14 @@ f90file.write('contains \n')
 for lidx in range(0,n_t_terms):
 	f90file.write('!---#[ function brack_%s: \n' % lidx)
         # T.P. removed the explicit-implicit mu^2 stuff
-	f90file.write('   pure function brack_%s(Q, mu2) result(brack)\n' % lidx)
+	f90file.write('   pure function brack_%s(vecA, vecB, vecC, mu2) result(brack)\n' % lidx)
 	f90file.write('      use [% process_name asprefix=\_ %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
 	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
 	f90file.write('      implicit none \n')
-	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
+        f90file.write('   complex(ki), dimension(4), intent(in) :: vecA, vecB, vecC\n')
+#	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
 	f90file.write('      complex(ki), intent(in) :: mu2\n')
 	f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
 	f90file.write('      complex(ki) :: brack\n')
@@ -148,29 +149,36 @@ f90file.write('      implicit none \n')
 f90file.write('      integer(c_int), intent(in) :: ncut, deg\n')
 f90file.write('      complex(ki), intent(in) :: mu2 \n')
 f90file.write('      complex(ki), dimension(0:3), intent(in) :: a, b, c\n')
+f90file.write('      complex(ki), dimension(4) :: vecA, vecB, vecC\n')
 f90file.write('      complex(ki), dimension(0:*), intent(out) :: coeffs\n')
 # ???
 f90file.write('      integer :: t1 \n')
 # ???
-f90file.write('      ! The Q that goes into the diagram \n')  # T.P.: This would be useless if it weren't for the form of brack_*(Q,mu^2).  We should use a brack_*(a,b,c,mu^2) instead
-f90file.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
+#f90file.write('      ! The Q that goes into the diagram \n')  # T.P.: This would be useless if it weren't for the form of brack_*(Q,mu^2).  We should use a brack_*(a,b,c,mu^2) instead
+#f90file.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
       @if extension qshift %][%
       @else %]
-if qshift==0:
-	f90file.write('	     qshift(:) = 0.0_ki \n')
+if qshift=='0':
+	f90file.write('	     vecA(1:4) = ' + qsign + ' a(0:3)\n')
+	f90file.write('	     vecB(1:4) = ' + qsign + ' b(0:3)\n')
+	f90file.write('	     vecC(1:4) = ' + qsign + ' c(0:3)\n')
 else:
-	f90file.write('      qshift = %s \n' % qshift)[%
+    f90file.write('      complex(ki), dimension(4) :: qshift\n')
+    f90file.write('      qshift = %s \n' % qshift)
+    f90file.write('	     vecA(1:4) = ' + qsign + ' a(0:3) - qshift(1:4)\n')
+    f90file.write('	     vecB(1:4) = ' + qsign + ' b(0:3)\n')
+    f90file.write('	     vecC(1:4) = ' + qsign + ' c(0:3)\n')[%
       @end @if %]
 
-f90file.write('      vecA = a\n')
-f90file.write('      vecB = b\n')
-f90file.write('      vecC = c\n')
+#f90file.write('      vecA = a\n')
+#f90file.write('      vecB = b\n')
+#f90file.write('      vecC = c\n')
 
 f90file.write('      if (deg.lt.0) return\n')
 f90file.write('      t1 = 0\n')
 
 for lidx in range(0,n_t_terms):
-    f90file.write('      coeffs({0}) = (cond(epspow.eq.t1,brack_{0},Q,mu2))\n'.format(lidx))
+    f90file.write('      coeffs({0}) = (cond(epspow.eq.t1,brack_{0},vecA,vecB,vecC,mu2))\n'.format(lidx))
     f90file.write('      if (deg.eq.{0}) return\n'.format(lidx))
 
 f90file.write('   end subroutine numerator_t \n')

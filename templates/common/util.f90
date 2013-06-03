@@ -13,7 +13,10 @@
 
    interface     cond
       module procedure cond_q_mu2
-      module procedure cond_mu2
+      module procedure cond_mu2[%
+@if extension ninja %][% @if extension formopt %]
+      module procedure cond_abc_mu2[%
+@end @if %][% @end @if %]
    end interface
 
    public :: square
@@ -83,6 +86,35 @@ contains
          cond = (0.0_ki, 0.0_ki)
       end if
    end  function cond_mu2
+
+[% @if extension ninja %][% @if extension formopt %]
+   pure function cond_abc_mu2(cnd, brack, a, b, c, mu2) result(cond)
+      implicit none
+      logical, intent(in) :: cnd
+      complex(ki), dimension(4), intent(in) :: a, b, c
+      complex(ki), intent(in) :: mu2
+
+      complex(ki) :: cond
+
+      interface
+         pure function brack(inner_a, inner_b, inner_c, inner_mu2)
+            use [% process_name asprefix=\_ %]config, only: ki
+            implicit none
+            complex(ki), dimension(4), intent(in) :: inner_a
+            complex(ki), dimension(4), intent(in) :: inner_b
+            complex(ki), dimension(4), intent(in) :: inner_c
+            complex(ki), intent(in) :: inner_mu2
+            complex(ki) :: brack
+         end  function brack
+      end interface
+
+      if (cnd) then
+         cond = brack(a, b, c, mu2)
+      else
+         cond = (0.0_ki, 0.0_ki)
+      end if
+   end  function cond_abc_mu2
+[% @end @if %][% @end @if %]
 
    subroutine     inspect_lo_diagram(values, d, h, unit)
       implicit none
