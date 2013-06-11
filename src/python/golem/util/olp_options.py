@@ -10,10 +10,12 @@ import os.path
 import golem.properties
 from golem.util.olp_objects import OLPError
 from golem.util.tools import warning
+import math
 
 __all_olp_options__ = {}
 __olp_lower_case__ = {}
 __required_olp_options__ = set()
+__required_olp_options_default__ = {} # called with default value if not present
 
 __value_OK__ = "OK"
 __value_ERR__ = "Error:"
@@ -29,7 +31,19 @@ def optional_olp_option(f):
 	__olp_lower_case__[name.lower()] = name
 	__all_olp_options__[name] = f
 
-@required_olp_option
+def required_olp_option_default(default):
+	def wrap(f):
+		name = f.__name__
+		__olp_lower_case__[name.lower()] = name
+		__all_olp_options__[name] = f
+		def wrapped_f(*args):
+			f(default,*args)
+		__required_olp_options_default__[name]=wrapped_f
+		return f
+	return wrap
+
+
+@optional_olp_option
 def MatrixElementSquareType(values, conf, ignore_case):
 	err_flag = False
 	NoTreeLevel = "GX_NoTreeLevel"
@@ -183,6 +197,18 @@ def AlphaPower(values, conf, ignore_case):
 		warning("AlphaPower left blank in order file.")
 		return __value_OK__ + " # WARNING: should not be blank."
 
+@required_olp_option_default(["BLHA1"])
+def InterfaceVersion(values, conf, ignore_case):
+	if len(values)!= 1:
+			return __value_ERR__ + " unknown version"
+	version=str(values[0]).upper()
+	if version=="BLHA1":
+		conf["__OLP_BLHA1__"]=True
+		if not conf["extensions"] or not "olp_blha1" in conf["extensions"]:
+			conf["extensions"]=(conf["extensions"] + "," if conf["extensions"]  else "") + "olp_blha1"
+	elif version=="BLHA2":
+		return __value_OK__
+	return __value_ERR__ + "Interface version %s not supported" % version
 
 @optional_olp_option
 def UFOModel(values, conf, ignore_case):
@@ -281,6 +307,10 @@ def expect_many_keywords(values, conf, ignore_case, key, supported_values):
 	return __value_OK__
 
 def process_olp_options(contract_file, conf, ignore_case, ignore_unknown):
+	global __all_olp_options__, __olp_lower_case__, __required_olp_options__
+	global __required_olp_options_default__
+	backup = (__all_olp_options__,__olp_lower_case__, \
+            __required_olp_options__, __required_olp_options_default__ )
 	error_count = 0
 	missing = set(__required_olp_options__)
 	for name, values in contract_file.options():
@@ -300,14 +330,23 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown):
 
 		if key in missing:
 			missing.remove(key)
+		if key in __required_olp_options_default__.keys():
+			del __required_olp_options_default__[key]
 
 		handler = __all_olp_options__[key]
 		response = handler(values, conf, ignore_case)
 		contract_file.setPropertyResponse(name, response)
 		if not contract_file.isPropertyOk(name):
 			error_count += 1
+	for key in __required_olp_options_default__:
+		handler=__required_olp_options_default__[key]
+		handler(conf,ignore_case)
 
 	if len(missing) > 0:
 		error_count += 1
 		raise OLPError("Missing required options: %s" % ", ".join(missing))
+
+	( __all_olp_options__,__olp_lower_case__,
+			__required_olp_options__, __required_olp_options_default__ ) = backup
+
 	return error_count == 0

@@ -518,7 +518,7 @@ extensions = Property("extensions",
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon","olp_badpts", "numpolvec",
+      "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop"])
 
 select_lo_diagrams = Property("select.lo",
@@ -1049,6 +1049,7 @@ def setInternals(conf):
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
          "__OLP_BADPTSFILE_NUMBERING__",
+         "__OLP_BLHA1__",
          "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
@@ -1076,6 +1077,7 @@ def setInternals(conf):
    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
+   conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
 
    conf["__REQUIRE_FR5__"] = "dred" not in extensions \
        and "no-fr5" not in extensions
