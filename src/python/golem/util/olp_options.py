@@ -198,6 +198,17 @@ def AlphaPower(values, conf, ignore_case):
 		return __value_OK__ + " # WARNING: should not be blank."
 
 @optional_olp_option
+def AmplitudeType(values, conf, ignore_case):
+	if len(values) > 1:
+		return __value_ERR__ + "too many values."
+	supported_values = ["loop","tree"]
+	ret=expect_many_keywords(values, conf, ignore_case,
+		"olp.amplitudetype", supported_values)
+	if ret.startswith(__value_OK__) and conf["olp.amplitudetype"]=="tree":
+		conf["olp.no_tree_level"] = True
+	return ret
+
+@optional_olp_option
 def Precision(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "requires one value."
@@ -212,6 +223,30 @@ def Precision(values, conf, ignore_case):
 		conf["PSP_check"]=True
 		return __value_OK__
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
+
+@optional_olp_option
+def ExcludeParticles(values, conf, ignore_case):
+	excl=[]
+	for p in values:
+		try:
+			excl.append(str(int(p)))
+		except ValueError:
+			return __value_ERR__ + " only PDG codes allowed."
+	conf["__excludeParticles__"] = " ".join(excl);
+	return __value_OK__
+
+
+@optional_olp_option
+def MassiveParticles(values, conf, ignore_case):
+	massive=[]
+	for p in values:
+		try:
+			massive.append(str(int(p)))
+		except ValueError:
+			return __value_ERR__ + " only PDG codes allowed."
+	conf["__massiveParticles__"] = " ".join(massive);
+	return __value_OK__
+
 @optional_olp_option
 def Extra(values, conf, ignore_case):
 	if len(values)>1 and values[0] in __all_olp_options__:
@@ -327,25 +362,27 @@ def expect_many_keywords(values, conf, ignore_case, key, supported_values):
 
 	return __value_OK__
 
-def process_olp_options(contract_file, conf, ignore_case, ignore_unknown):
+def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_lineno=None):
 	global __all_olp_options__, __olp_lower_case__, __required_olp_options__
 	global __required_olp_options_default__
 	backup = (__all_olp_options__,__olp_lower_case__, \
             __required_olp_options__, __required_olp_options_default__ )
 	error_count = 0
 	missing = set(__required_olp_options__)
-	for name, values in contract_file.options():
+	for lineno,name, values in contract_file.options_ordered():
+		if until_lineno and lineno>until_lineno:
+			break
 		if ignore_case and name.lower() in __olp_lower_case__:
 			key = __olp_lower_case__[name.lower()]
 		elif name in __all_olp_options__:
 			key = name
 		elif ignore_unknown:
-			contract_file.setPropertyResponse(name,
-					__value_OK__ + " # Ignored by OLP")
+			contract_file.setPropertyResponseOrdered(name,
+					__value_OK__ + " # Ignored by OLP",lineno)
 			continue
 		else:
-			contract_file.setPropertyResponse(name,
-					"Error: Unknown by OLP")
+			contract_file.setPropertyResponseOrdered(name,
+					"Error: Unknown by OLP",lineno)
 			error_count += 1
 			continue
 
@@ -356,7 +393,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown):
 
 		handler = __all_olp_options__[key]
 		response = handler(values, conf, ignore_case)
-		contract_file.setPropertyResponse(name, response)
+		contract_file.setPropertyResponseOrdered(name, response,lineno)
 		if not contract_file.isPropertyOk(name):
 			error_count += 1
 	for key in __required_olp_options_default__:
