@@ -197,6 +197,27 @@ def AlphaPower(values, conf, ignore_case):
 		warning("AlphaPower left blank in order file.")
 		return __value_OK__ + " # WARNING: should not be blank."
 
+@optional_olp_option
+def Precision(values, conf, ignore_case):
+	if len(values) > 1:
+		return __value_ERR__ + "requires one value."
+	if (len(values)==1):
+		try:
+			prec=-math.log10(float(values[0]))
+		except ValueError:
+			return __value_ERR__ + "not positive float value encountered."
+		#print conf["PSP_chk_threshold1"]
+		conf["PSP_chk_threshold1"]=str(int(prec))
+		#conf["PSP_chk_threshold1"]=0.01
+		conf["PSP_check"]=True
+		return __value_OK__
+	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
+@optional_olp_option
+def Extra(values, conf, ignore_case):
+	if len(values)>1 and values[0] in __all_olp_options__:
+		return __all_olp_options__[values[0]](values[1:], conf, ignore_case)
+	return __value_OK__ + " # Ignored by OLP"
+
 @required_olp_option_default(["BLHA1"])
 def InterfaceVersion(values, conf, ignore_case):
 	if len(values)!= 1:

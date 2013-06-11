@@ -41,7 +41,7 @@
    private
 
    integer :: banner_ch = 6
-      
+
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
@@ -176,13 +176,14 @@ contains
    !---#] subroutine exitgolem :
 
    !---#[ subroutine samplitude :
-   subroutine     samplitude(vecs, scale2, amp, ok, h)
+   subroutine     samplitude(vecs, scale2, amp, ok, h, precision_reached)
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
+      logical, intent(out), optional:: precision_reached
       real(ki) :: rat2, sam_amp2, sam_amp3, kfac, zero
       integer spprec1, fpprec1, i
       real(ki), dimension(2:3) :: irp[%
@@ -190,6 +191,9 @@ contains
       integer :: tmp_red_int, spprec2, fpprec2 [%
    @end @if %]
       call samplitudel01(vecs, scale2, amp, rat2, ok, h)
+      if(present(precision_reached)) then
+         precision_reached=.true.
+      end if
       if(PSP_check) then[%
    @if extension golem95 %]
       tmp_red_int=reduction_interoperation[%
@@ -263,9 +267,13 @@ contains
                   write(42,'(4x,A10)')"</momenta>"
                   write(42,'(2x,A8)')"</event>"
                endif
-               ! Give back a Nan so that point is discarded
-               zero = log(1.0_ki)
-               amp(2)= 1.0_ki/zero
+               if(present(precision_reached)) then
+                  precision_reached=.false.
+               else
+                 ! Give back a Nan so that point is discarded
+                 zero = log(1.0_ki)
+                 amp(2)= 1.0_ki/zero
+               end if
             else
                if(PSP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
                if(PSP_verbosity .ge. 2) write(*,*)
@@ -299,9 +307,13 @@ contains
                write(42,'(4x,A10)')"</momenta>"
                write(42,'(2x,A8)')"</event>"
             endif
-            ! Give back a Nan so that point is discarded
-            zero = log(1.0_ki)
-            amp(2)= 1.0_ki/zero
+            if(.not. present(precision_reached)) then
+              precision_reached=.false.
+            else
+              ! Give back a Nan so that point is discarded
+              zero = log(1.0_ki)
+              amp(2)= 1.0_ki/zero
+            end if
          end if[%
    @end @if %]
       end if

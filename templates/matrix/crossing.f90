@@ -73,7 +73,7 @@ contains
       endif
    end subroutine exitgolem
 
-   subroutine     samplitude(vecs, scale2, amp, ok, h)
+   subroutine     samplitude(vecs, scale2, amp, ok, h, precision_reached)
       use [% process_name asprefix=\_ %]matrix, only: orig_sub => samplitude
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -81,6 +81,7 @@ contains
       real(ki), dimension(4), intent(out) :: amp
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
+      logical, intent(out), optional:: precision_reached
 
       real(ki), dimension([%num_legs%], 4) :: new_vecs
 
@@ -88,12 +89,15 @@ contains
 
       if (present(ok)) then
          if (present(h)) then
-            call orig_sub(new_vecs, scale2, amp, ok, h)
+            call orig_sub(new_vecs, scale2, amp, ok, h, &
+                    precision_reached=precision_reached)
          else
-            call orig_sub(new_vecs, scale2, amp, ok)
+            call orig_sub(new_vecs, scale2, amp, ok, &
+              precision_reached=precision_reached)
          end if
       else
-         call orig_sub(new_vecs, scale2, amp, ok)
+         call orig_sub(new_vecs, scale2, amp, &
+              ok,precision_reached=precision_reached)
       end if
 
       amp = amp * prefactor()

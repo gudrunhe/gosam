@@ -1,7 +1,10 @@
 module     olp_module
+   use, intrinsic :: iso_c_binding;
    implicit none
    private
    public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
+
+   real(kind=c_double) :: cur_alpha_s, cur_alpha;
 
 contains
 
@@ -47,6 +50,11 @@ contains
       integer :: PSP_verbosity, PSP_chk_threshold1, PSP_chk_threshold2, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
+
+      ! init global parameters
+      cur_alpha_s=1d0
+      cur_alpha=1d0
+
 
       ierr = 1
       l = strlen(contract_file_name)
@@ -121,7 +129,65 @@ contains
 
    end subroutine OLP_Start
 
-   subroutine     OLP_EvalSubProcess(label, momenta, mu, parameters, res) &
+   subroutine     OLP_SetParameter(variable_name, real_part, complex_part, success)&
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_setparameter[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_SetParameter[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      character(kind=c_char,len=1), intent(in) :: variable_name
+      real(kind=c_double)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: real_part, complex_part
+      integer(kind=c_int), intent(out) :: success
+
+      interface
+         function strlen(s) bind(C,name='strlen')
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character(kind=c_char,len=1), intent(in) :: s
+            integer(kind=c_int) :: strlen
+         end function strlen
+         function strcasecmp(a,b) bind(C,name='strcasecmp')
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character(kind=c_char,len=1), intent(in) :: a,b
+            integer(kind=c_int) :: strcasecmp
+          end function
+      end interface
+
+      integer :: l;
+
+      l = strlen(variable_name)
+
+      if (strcasecmp(variable_name,"alphaS")==0) then
+              if (complex_part /= 0d0) then
+                      success=0
+              else
+                      cur_alpha_s = real_part
+                      success=1 ! not supported
+              end if
+      else if (strcasecmp(variable_name,"alpha")==0) then
+              if (complex_part /= 0d0) then
+                      success=0 ! not supported
+              else
+                      cur_alpha = real_part
+                      success=0 ! TODO not yet fully implemented
+              end if
+      else
+              write(7,*) "OLP_SetParameter: ", variable_name(1:l), " unknown."
+              success = 2 ! variable unknown, ignore
+      end if
+   end subroutine
+
+
+   ! BLHA1 interface
+   subroutine     OLP_EvalSubProcess(label, momenta, mu,  parameters, res) &
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_evalsubprocess[%
@@ -141,11 +207,10 @@ contains
       real(kind=c_double), dimension(50), intent(in) :: momenta
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(4), intent(out) :: res
-   
-      real(kind=c_double) :: alpha_s
+
       real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
 
-      alpha_s = parameters(1)
+      cur_alpha_s = parameters(1)
 
       select case(label)[%
       @for subprocesses prefix=sp. %][%
@@ -159,7 +224,7 @@ contains
                @for elements cr.channels %]
       case([% $_ %])
               call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
-               %]), mu, parameters, res)[%
+              %]), mu, parameters, res)[%
                @end @for %][%
             @end @select %][%
          @end @for %][%
@@ -168,8 +233,60 @@ contains
          res(:) = 0.0d0
       end select
 
-      res(1:3) = alpha_s * one_over_2pi * res(1:3)
+      res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)
    end subroutine OLP_EvalSubProcess
+
+   ! BLHA2 interface
+   subroutine     OLP_EvalSubProcess2(label, momenta, mu, res, rstatus) &
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_evalsubprocess2[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_EvalSubProcess2[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=c_int)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: label
+      real(kind=c_double)[%
+      @if internal OLP_CALL_BY_VALUE %], value[%
+      @end @if %], intent(in) :: mu
+      real(kind=c_double), dimension(50), intent(in) :: momenta
+      real(kind=c_double), dimension(4), intent(out) :: res
+      integer(kind=c_int), intent(out),optional :: rstatus
+
+      real(kind=c_double), dimension(10) :: parameters
+
+      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
+
+      parameters(1) = cur_alpha_s
+
+      select case(label)[%
+      @for subprocesses prefix=sp. %][%
+         @for crossings include-self prefix=cr. %][%
+            @select count elements cr.channels
+            @case 1 %]
+      case([% cr.channels %])
+              call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
+               %]), mu, parameters, res)[%
+            @else %][%
+               @for elements cr.channels %]
+      case([% $_ %])
+              call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
+              %]), mu, parameters, res,rstatus)[%
+               @end @for %][%
+            @end @select %][%
+         @end @for %][%
+      @end @for %]
+      case default
+         res(:) = 0.0d0
+      end select
+
+      res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)
+   end subroutine OLP_EvalSubProcess2
 
    subroutine     OLP_Finalize() &
    & bind(C,name="[%
@@ -254,7 +371,7 @@ contains
       @select count elements cr.channels
       @case 1 %][%
       @else %]h, [%
-      @end @select %]momenta, mu, parameters, res)
+      @end @select %]momenta, mu, parameters, res, rstatus)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
       use [% sp.$_ %]_model, only: parseline
@@ -281,6 +398,8 @@ contains
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension(4) :: amp
+      integer(kind=c_int), optional :: rstatus
+      logical :: precision_reached
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
@@ -307,11 +426,15 @@ contains
       vecs(:,3) = real(momenta(3::5),ki)
       vecs(:,4) = real(momenta(4::5),ki)
 
+      precision_reached=.true.
+
       call samplitude(vecs, mu*mu, amp, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
-      @end @select %])[%
+      @end @select %][% @if internal OLP_BLHA1%][% @else
+      %], precision_reached=precision_reached[% @end @if
+      %])[%
       @if extension golem95 %]
       call tear_down_golem95()[%
       @end @if %][%
@@ -322,7 +445,15 @@ contains
       if (ok) then
          !
       else
+         precision_reached=.false.
          !
+      end if
+      if(present(rstatus)) then
+        if(precision_reached) then
+           rstatus=1 ! point stable
+        else
+           rstatus=0 ! point did not pass stability test
+        end if
       end if
 
       res(1) = real(amp(4), c_double)
