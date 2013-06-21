@@ -106,7 +106,7 @@ mnemonics = {
 # Masses in GeV
 parameters = {
    'NC': '3.0',
-   'gs': '1.0', # <----
+   'alpha_s': '0.118',
    'alpha_m1': '137.0',
    'me': '0.000510998910',
    'mmu': '0.105658367',
@@ -145,6 +145,7 @@ latex_parameters = {
    'alpha_m1': "\\alpha^{-1}",
    'GF': "G_F",
    'gs': 'g_s',
+   'alpha_s': "\\alpha_s",
    'me': 'm_e',
    'mmu': 'm_\\mu',
    'mtau': 'm_\\tau',
@@ -255,6 +256,7 @@ functions = {
    'NA': 'NC*NC-1',
    'gZ': '1/cw/sw',
    'gW': '1/sqrt2/sw',
+   'gs': 'sqrt(4*pi*alpha_s)',
 
    'gUv':    ' gZ*(1/4 - 2/3*sw^2)',
    'gCv':    ' gZ*(1/4 - 2/3*sw^2)',
@@ -416,6 +418,7 @@ types = {
    'Nf': 'R', 'Nfgen': 'R', 'NA': 'R',
    'Nfrat': 'R',
    'alpha_m1': 'R',
+   'alpha_s': 'R',
    'gUv': 'R', 'gUa': 'R', 'gDv': 'R', 'gDa': 'R',
    'gCv': 'R', 'gCa': 'R', 'gSv': 'R', 'gSa': 'R',
    'gTv': 'R', 'gTa': 'R', 'gBv': 'R', 'gBa': 'R',
@@ -556,7 +559,7 @@ line_styles = {
 slha_locations = {
    'alpha_m1': ('SMINPUTS', [1]),
    'GF': ('SMINPUTS', [2]),
-   'gs': ('SMINPUTS', [3]),
+   'alpha_s': ('SMINPUTS', [3]),
    'mD': ('MASS', [1]),
    'mU': ('MASS', [2]),
    'mS': ('MASS', [3]),
