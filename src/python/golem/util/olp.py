@@ -619,6 +619,9 @@ def mc_specials(conf, order_file):
       required_extensions.extend(["autotools"])
    elif mc_name.startswith("whizard"):
       required_extensions.extend(["autotools"])
+   elif mc_name.startswith("amcatnlo"):
+      required_extensions.extend(["f77"])
+      required_extensions.extend(["autotools"])
 
    extensions = golem.properties.getExtensions(conf)
    add_extensions = []
