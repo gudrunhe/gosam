@@ -86,7 +86,7 @@ contains
 
       ! Uncomment to change rescue system setting on all suprocesses
       ! PSP_rescue = .true.
-      ! PSP_verbosity = [% PSP_verbosity default=2 %]
+      ! PSP_verbosity = [% PSP_verbosity default=1 %]
       ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
       ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
@@ -257,7 +257,9 @@ contains
       @end @select %]momenta, mu, parameters, res)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
-      use [% sp.$_ %]_model, only: parseline
+      use [% sp.$_ %]_model, only: parseline[% 
+      @select olp.alphas @case 1 %], gs[%
+      @end @select %]
       use [% cr.$_ %]_matrix, only: samplitude[%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
@@ -280,7 +282,12 @@ contains
       real(kind=c_double), dimension(4), intent(out) :: res
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
-      real(kind=ki), dimension(4) :: amp
+      real(kind=ki), dimension(4) :: amp[% 
+      @select olp.alphas @case 1 %]
+      real(kind=ki), parameter :: pi = &
+           & 3.14159265358979323846264338328[%
+      @end @select %]
+
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
@@ -291,7 +298,7 @@ contains
       integer :: ierr
 
       !---#[ receive parameters from argument list:[%
-         @for elements olp.parameters shift=1 %]
+         @for elements olp.parameters shift=2 %]
       write(buffer, '(A[% count $_ %],A1,E48.32)') "[% $_ %]", "=", parameters([% index %])
       call parseline(buffer, ierr)
       if(ierr.ne.0) then
@@ -300,6 +307,12 @@ contains
       end if[%
          @end @for %]
       !---#] receive parameters from argument list:[%
+      @end @select %]
+
+      !---#[ alpha_s parameter from argument list:[%
+      @select olp.alphas @case 1 %]
+      gs = sqrt(4.0_ki*pi*parameters(1))
+      !---#[ alpha_s parameter from argument list:[%
       @end @select %]
 
       vecs(:,1) = real(momenta(1::5),ki)
