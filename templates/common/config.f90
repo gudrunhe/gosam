@@ -42,7 +42,8 @@
         olp.include_color_average default=true %].
    logical, parameter :: include_helicity_avg_factor = .[%
         olp.include_helicity_average default=true %].
-   logical, parameter :: include_symmetry_factor = .false.
+   logical, parameter :: include_symmetry_factor = .[%
+        olp.include_symmetry_factor default=false %].
 
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai
