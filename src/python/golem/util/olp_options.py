@@ -36,7 +36,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
 
 	supported_values = ["CHsummed", "CHaveraged",
 			"Csummed", "Caveraged",
-			"Hsummed", "Haveraged","CHsummedSymm", NoTreeLevel]
+			"Hsummed", "Haveraged","CHaveragedSymm","CHsummedSymm", NoTreeLevel]
 
 	lower_case_values = {}
 	for name in supported_values:
@@ -73,6 +73,11 @@ def MatrixElementSquareType(values, conf, ignore_case):
 	elif "CHaveraged" in checked_values:
 		if len(checked_values) > 1:
 			err_flag = True
+	elif "CHaveragedSymm" in checked_values:
+		if len(checked_values) > 1:
+			err_flag = True
+		else:
+			sym_fac = True
 	elif "CHsummedSymm" in checked_values:
 		if len(checked_values) > 1:
 			err_flag = True
