@@ -258,7 +258,8 @@ contains
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
       use [% sp.$_ %]_model, only: parseline[% 
-      @select olp.alphas @case 1 %], gs[%
+      @select olp.alphas default=NONE
+      @case 1 %], gs[%
       @end @select %]
       use [% cr.$_ %]_matrix, only: samplitude[%
       @if extension golem95 %]
@@ -283,7 +284,8 @@ contains
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension(4) :: amp[% 
-      @select olp.alphas @case 1 %]
+      @select olp.alphas default=NONE 
+      @case 1 %]
       real(kind=ki), parameter :: pi = &
            & 3.14159265358979323846264338328[%
       @end @select %]
@@ -307,10 +309,10 @@ contains
       end if[%
          @end @for %]
       !---#] receive parameters from argument list:[%
-      @end @select %]
-
-      !---#[ alpha_s parameter from argument list:[%
-      @select olp.alphas @case 1 %]
+      @end @select %][%
+      @select olp.alphas default=NONE 
+      @case 1 %]
+      !---#[ alpha_s parameter from argument list:
       gs = sqrt(4.0_ki*pi*parameters(1))
       !---#[ alpha_s parameter from argument list:[%
       @end @select %]

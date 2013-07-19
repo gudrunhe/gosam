@@ -73,6 +73,8 @@ def MatrixElementSquareType(values, conf, ignore_case):
 	elif "CHaveraged" in checked_values:
 		if len(checked_values) > 1:
 			err_flag = True
+		else:
+			sym_fac = True
 	elif "CHaveragedSymm" in checked_values:
 		if len(checked_values) > 1:
 			err_flag = True
