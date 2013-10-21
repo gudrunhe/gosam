@@ -257,6 +257,7 @@ contains
       @end @select %]momenta, mu, parameters, res)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
+      use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% sp.$_ %]_model, only: parseline[% 
       @select olp.alphas default=NONE
       @case 1 %], gs[%
@@ -321,6 +322,8 @@ contains
       vecs(:,2) = real(momenta(2::5),ki)
       vecs(:,3) = real(momenta(3::5),ki)
       vecs(:,4) = real(momenta(4::5),ki)
+
+      call boost_to_cms(vecs)
 
       call samplitude(vecs, mu*mu, amp, ok[%
       @select count elements cr.channels

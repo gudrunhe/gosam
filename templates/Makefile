@@ -82,10 +82,12 @@ filelist-source: source
 	@echo Makefile.conf >> $@
 	@echo config.sh >> $@[% 
 @if generate_lo_diagrams %]
-	@echo diagrams-0.log >> $@[%
+	@echo diagrams-0.log >> $@
+	@echo diagrams-0.hh >> $@[%
 @end @if %][% 
 @if generate_nlo_virt %]
-	@echo diagrams-1.log >> $@[%
+	@echo diagrams-1.log >> $@
+	@echo diagrams-1.hh >> $@[%
 @end @if %]
 	@for dir in $(SUBDIRS); \
 	do \

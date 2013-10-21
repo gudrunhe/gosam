@@ -1,7 +1,7 @@
 [% ' vim: syntax=golem
  %]program test
    use [% process_name asprefix=\_ %]config, only: ki, logfile
-   use [% process_name asprefix=\_ %]kinematics, only: dotproduct
+   use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
      & initgolem, ir_subtraction
@@ -36,6 +36,8 @@
    call cpu_time(t1)
    do ievt = 1, NEVT
       call ramb(5.0E+02_ki**2, vecs)
+
+      call boost_to_cms(vecs)
 
       scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
