@@ -1050,10 +1050,12 @@ def setInternals(conf):
          "__OLP_TO_LOWER__",
          "__OLP_BADPTSFILE_NUMBERING__",
          "__OLP_BLHA1__",
+         "__OLP_BLHA2__",
          "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
-         "__CUSTOM_SPIN2_PROP__"]
+         "__CUSTOM_SPIN2_PROP__",
+         "__EWCHOOSE__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
@@ -1078,7 +1080,7 @@ def setInternals(conf):
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
    conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
+   conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
 
    conf["__REQUIRE_FR5__"] = "dred" not in extensions \
        and "no-fr5" not in extensions
-

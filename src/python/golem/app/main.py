@@ -106,6 +106,7 @@ def main(argv=sys.argv):
 
    args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
          argv=argv)
+         
 
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
       golem.installation.GOLEM_VERSION))

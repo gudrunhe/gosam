@@ -11,25 +11,29 @@ class OLPSubprocess:
          process_name,
          process_path,
          p_ini, p_fin,
-         key):
+         key, conf):
       self.id = id
       self.process_name = process_name
       self.process_path = process_path
       self.p_ini = p_ini
       self.p_fin = p_fin
       self.crossings = {}
+      self.crossings_conf = {}
       self.ids = {id: process_name}
       self.channels = {}
       self.key = key
+      self.conf = conf
+      self.crossings_conf[id]=conf
 
       self.num_legs = len(p_ini) + len(p_fin)
       self.num_helicities = -1
       self.generated_helicities = []
 
-   def addCrossing(self, id, process_name, p_ini, p_fin):
+   def addCrossing(self, id, process_name, p_ini, p_fin, conf):
       self.crossings[process_name] = "%s > %s" \
             % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))
       self.ids[id] = process_name
+      self.crossings_conf[id] = conf
 
    def assignChannels(self, id, channels):
       self.channels[id] = channels
@@ -43,6 +47,9 @@ class OLPSubprocess:
 
    def getIDs(self):
       return list(self.ids.keys())
+
+   def getIDConf(self,id):
+      return self.crossings_conf[id]
 
    def __str__(self):
       return self.process_name
@@ -76,7 +83,7 @@ class OLPSubprocess:
       return subproc_conf
 
 
-def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings):
+def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf):
 
    def getparticle(name):
       return golem.util.tools.interpret_particle_name(name, model)
@@ -102,17 +109,61 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    else:
       key = tuple(s_ini + [p.getPartner() for p in p_fin])
 
-   if key in subprocesses:
-      sp = subprocesses[key]
-      sp.addCrossing(id, process_name, p_ini, p_fin)
-      is_new = False
 
+   if use_crossings:
+      # look for existing compatible subprocesses
+      for skey in subprocesses:
+       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf):
+         key = skey
+         break
+
+   if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
+      sp = subprocesses[key]
+      sp.addCrossing(id, process_name, p_ini, p_fin, conf)
+      is_new = False
+      adapt_config(subprocesses[key].conf,conf)
    else:
-      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey)
+      i=0
+      # append digit to distinguish it from other subprocesses
+      while key in subprocesses:
+         key=key+(i,) if i==0 else key[:-1]+(i,)
+         i = i + 1
+      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
       subprocesses[key] = sp
       is_new = True
 
    return sp, is_new
+
+def is_config_compatible(conf1, conf2):
+   """ Checks if a subprocess with conf2 can be a crossing of conf1 """
+   special = {
+         "olp.amplitudetype" : (lambda a,b: True), # => ignored
+         "olp.no_loop_level" : (lambda a,b: True), # => ignored
+         "order" : (lambda a,b: a.startswith(b) or b.startswith(a))
+         }
+   for i in conf1:
+      if not i in conf2 or conf1[i]!=conf2[i]:
+         bval = conf2[i] if i in conf2 else ""
+         if i in special:
+            if special[i](conf1[i], bval):
+               continue
+         return False
+   for i in conf2:
+      if not i in conf1:
+         if i in special:
+            if special[i]("",conf2[i]):
+               continue
+         return False
+   return True
+
+def adapt_config(conf1,conf2):
+   """ Adapt the configuration conf1 of a subprocess
+       that a subprocess with conf2 can be a crossing of it."""
+   conf1["olp.no_tree_level"] = conf1["olp.no_tree_level"] and conf2["olp.no_tree_level"]
+   conf1["olp.no_loop_level"] = conf1["olp.no_loop_level"] and conf2["olp.no_loop_level"]
+   conf1["order"] = max(conf1["order"],conf2["order"]) # take longest
+   return True
+
 
 def derive_output_name(input_name, pattern, dest_dir=None):
    path, file = os.path.split(input_name)
@@ -203,6 +254,7 @@ def get_qgraf_power(conf):
    alphas_power = conf.getProperty("olp.alphaspower", default=None)
    correction_type = conf.getProperty("olp.correctiontype", default=None)
    notreelevel = conf.getBooleanProperty("olp.no_tree_level", default=False)
+   nolooplevel = conf.getBooleanProperty("olp.no_loop_level", default=False)
 
    qcd_name = "QCD"
    qed_name = "QED"
@@ -223,10 +275,12 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD":
+         if correction_type == "QCD" and not nolooplevel:
             return [qcd_name, treepower, ipower + 2]
-         elif correction_type == "EW":
+         elif correction_type == "EW" and not nolooplevel:
             return [qcd_name, treepower, ipower]
+         elif nolooplevel:
+            return [qcd_name, treepower]
    else:
       if alphas_power is None:
          # Only alpha_power present:
@@ -240,10 +294,12 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD":
+         if correction_type == "QCD" and not nolooplevel:
             return [qed_name, treepower, ipower]
-         elif correction_type == "EW":
+         elif correction_type == "EW" and not nolooplevel:
             return [qed_name, treepower, ipower + 2]
+         elif nolooplevel:
+            return [qcd_name, treepower]
       else:
          try:
             iepower = int(alpha_power)
@@ -256,13 +312,20 @@ def get_qgraf_power(conf):
                treepower = "NONE"
             else:
                treepower = icpower
-            return [qcd_name, treepower, icpower + 2]
+            if not nolooplevel:
+               return [qcd_name, treepower, icpower + 2]
+            else:
+               return [qcd_name, treepower]
          elif correction_type == "EW" or correction_type == "QED":
             if notreelevel:
                treepower = "NONE"
             else:
                treepower = iepower
-            return [qed_name, treepower, iepower + 2]
+            if not notreelevel:
+               return [qed_name, treepower, iepower + 2]
+            else:
+               return [qed_name, treepower]
+
    return []
 
 def derive_zero_masses(model_path, slha_file, conf):
@@ -336,10 +399,12 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if len(mc_name_parts) > 1:
       conf["olp.mc.version"] = mc_name_parts[1].lower()
 
-   # Set default options # TODO check if correct
-   conf["olp.include_color_average"] = False
-   conf["olp.include_helicity_average"] = False
+   # Set default options
+   conf["olp.include_color_average"] = True
+   conf["olp.include_helicity_average"] = True
+   conf["olp.include_symmetry_factor"] = True
    conf["olp.no_tree_level"] = False
+   conf["olp.amplitudetype"] = "loop"
 
 
    #---#[ Read order file:
@@ -409,7 +474,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       #---#[ Setup excluded and massive particles :
       for lconf in [conf] + subprocesses_conf:
          list_exclude=[]
-         for i in [int(p) for p in lconf["__excludeParticles__"].split()] if lconf["__excludeParticles__"] \
+         for i in [int(p) for p in lconf["__excludedParticles__"].split()] if lconf["__excludedParticles__"] \
                else []:
             for n in model.particles:
                particle=model.particles[n]
@@ -422,31 +487,31 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                lconf["qgraf.verbatim"]=lconf["qgraf.verbatim"] + \
                   "\ntrue=iprop[%s,0,0];" % (",".join(list_exclude))
 
-         lconf["__excludeParticles__"]=None
+         lconf["__excludedParticles__"]=None
 
          # TODO: check if massless list is complete
          possible_massless_particles = set( range(1,6) + [11,13])
          set_massiveParticles=set()
-         for i in [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] \
-               else []:
-            for n in model.particles:
-               particle=model.particles[n]
-               if particle.getPDGCode() == i:
-                  set_massiveParticles.add(particle.getPDGCode())
-                  set_massiveParticles.add(-particle.getPDGCode())
-
          list_zero_values=[];
-         for n in model.particles:
-               particle=model.particles[n]
-               if not particle.getPDGCode() in set_massiveParticles \
-                     and abs(particle.getPDGCode()) in possible_massless_particles:
-                        mass=particle.getMass()
-                        if mass !="0" and mass not in list_zero_values:
-                           list_zero_values.append(mass)
-                        width=particle.getMass()
-                        if width !="0" and width not in list_zero_values:
-                           list_zero_values.append(width)
+         if lconf["__OLP_BLHA2__"]=="True": # only supported in BLHA2
+            for i in [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] \
+                  else []:
+               for n in model.particles:
+                  particle=model.particles[n]
+                  if particle.getPDGCode() == i:
+                     set_massiveParticles.add(particle.getPDGCode())
+                     set_massiveParticles.add(-particle.getPDGCode())
 
+            for n in model.particles:
+                  particle=model.particles[n]
+                  if not particle.getPDGCode() in set_massiveParticles \
+                        and abs(particle.getPDGCode()) in possible_massless_particles:
+                     mass=particle.getMass()
+                     if mass !="0" and mass not in list_zero_values:
+                        list_zero_values.append(mass)
+                     width=particle.getWidth()
+                     if width !="0" and width not in list_zero_values:
+                        list_zero_values.append(width)
          if list_zero_values:
             if lconf["zero"]:
                lconf["zero"]= lconf["zero"] + "," + ",".join(list_zero_values)
@@ -520,11 +585,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    subprocesses = {}
    subprocesses_flav = {}
 
+   subprocesses_conf_short = []
+
    if file_ok:
       for lineno,id, inp, outp in contract_file.processes_ordered():
          subprocess, is_new = getSubprocess(
                olp_process_name, id, inp, outp, subprocesses, subprocesses_flav, model,
-               use_crossings)
+               use_crossings, subprocesses_conf[id])
          if is_new:
             subdir = str(subprocess)
             process_path = os.path.join(path, subdir)
@@ -542,56 +609,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
       for subprocess in subprocesses.values():
          process_path = subprocess.getPath(path)
-## -- gio start
-         key = subprocess.getkey()
-         for lconf in [conf] + subprocesses_conf:
-            lconf["symmetries"] = start_symmetries
-            if lconf["modeltype"] == 'sm' or lconf["modeltype"] == 'smdiag' or lconf["modeltype"] == 'smehc':
-               # check D,Dbar
-               if key.count('D')*10+key.count('Dbar') == 1 and 'mD' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-1=+"
-               elif key.count('D')*10+key.count('Dbar') == 10  and 'mD' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %1=-"
-               # check U,Ubar
-               if key.count('U')*10+key.count('Ubar') == 1  and 'mU' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-2=+"
-               elif key.count('U')*10+key.count('Ubar') == 10  and 'mU' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %2=-"
-               # check S,Sbar
-               if key.count('S')*10+key.count('Sbar') == 1 and 'mS' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-3=+"
-               elif key.count('S')*10+key.count('Sbar') == 10  and 'mS' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %3=-"
-               # check C,Cbar
-               if key.count('C')*10+key.count('Cbar') == 1  and 'mC' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-4=+"
-               elif key.count('C')*10+key.count('Cbar') == 10  and 'mC' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %4=-"
-               # check B,Bbar
-               if key.count('B')*10+key.count('Bbar') == 1 and 'mB' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-5=+"
-               elif key.count('B')*10+key.count('Bbar') == 10  and 'mB' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %5=-"
-               # check T,Tbar
-               if key.count('T')*10+key.count('Tbar') == 1  and 'mT' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %-6=+"
-               elif key.count('T')*10+key.count('Tbar') == 10  and 'mT' in lconf[golem.properties.zero]:
-                  lconf["symmetries"] += ", %6=-"
-               # neutrinos:
-               if key.count('ne') != 0:
-                  lconf["symmetries"] += ", %12=-"
-               if key.count('nmu') != 0:
-                  lconf["symmetries"] += ", %14=-"
-               if key.count('ntau') != 0:
-                  lconf["symmetries"] += ", %16=-"
-               if key.count('nebar') != 0:
-                  lconf["symmetries"] += ", %-12=+"
-               if key.count('nmubar') != 0:
-                  lconf["symmetries"] += ", %-14=+"
-               if key.count('ntaubar') != 0:
-                  lconf["symmetries"] += ", %-16=+"
-## -- gio end
-
          subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
          subprocess_conf["golem.name"] = "GoSam"
          subprocess_conf["golem.version"] = ".".join(map(str,
@@ -636,6 +653,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             result = 1
             for id in subprocess.getIDs():
                contract_file.setProcessError(id, "Error: %s" % err)
+
+         subprocesses_conf_short.append(subprocess_conf)
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")
@@ -666,6 +685,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(True),
          conf=conf,
          subprocesses=list(subprocesses.values()),
+         subprocesses_conf=subprocesses_conf_short,
          contract=contract_file,
          user="olp")
    #---#] Process global templates:

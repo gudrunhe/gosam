@@ -143,7 +143,7 @@ ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 endif[%
 @end @if %]
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 [% @for elements topolopy.keep.virt %]
@@ -157,11 +157,12 @@ ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 endif[%
 @end @if %]
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.txt
-	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.f90
-	$(MAKE) -f Makefile.source abbrevd[%$_%]h[%helicity%].f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]h[%helicity%].o -I../common abbrevd[%$_%]h[%helicity%].f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]h[%helicity%]l1.o -I../common d[%$_%]h[%helicity%]l1.f90
+	$(MAKE) $(S) -f Makefile.source d[%$_%]h[%helicity%]l1.txt
+	$(MAKE) $(S) -f Makefile.source d[%$_%]h[%helicity%]l1.f90
+	$(MAKE) $(S) -f Makefile.source abbrevd[%$_%]h[%helicity%].f90
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]h[%helicity%].o -I../common abbrevd[%$_%]h[%helicity%].f90
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]h[%helicity%]l1.o -I../common d[%$_%]h[%helicity%]l1.f90
 endif
 
 [% @end @for %]
@@ -169,26 +170,27 @@ endif
 $(GENERATED_SRC): %:
 	@if [ -f Makefile.source ]; \
 	then \
-		$(MAKE) -f Makefile.source "$@"; \
+		$(MAKE) $(S) -f Makefile.source "$@"; \
 	fi
 
 $(OBJECTS): %.o: %.f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ -I../common $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ -I../common $<
 
 amplitude[%helicity%].a: $(OBJECTS)
-	ar rs $@ $+
+	$(Q) ar rs $@ $+
 
 doc:
 
 clean:
-	$(FIND) $(FIND_OPT) . \( -name '*.o' \
+	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
 		-or -name '*.mod' \) \
 		-exec rm \{} \;
 
 very-clean: clean
-	rm -f filelist-source
+	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(FIND) $(FIND_OPT) . \( \
+	$(Q)$(FIND) $(FIND_OPT) . \( \
 		-name 'd*h[%helicity%]l[01].f90' \
 		-or -name 'd*h[%helicity%]l[01]fr5.f90' \
 		-or -name 'd*h[%helicity%]l[01].txt' \
@@ -208,7 +210,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 @if extension formopt %] \
 		-or -name 'abbrevd*h[%helicity%].f90' \
 		-or -name 'd*h[%helicity%]l[01].prc' \
-		-or -name 'borndiag.prc' \ 
+		-or -name 'borndiag.prc' \
 		-or -name 'born.txt' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \
@@ -216,7 +218,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 endif
 
 filelist-source: source
-	$(FIND) $(FIND_OPT) . \( \
+	$(Q)$(FIND) $(FIND_OPT) . \( \
 		-name '*.f90' \
 		-or -name 'Makefile' \
 		-or -name 'Makefile.dep' \

@@ -21,19 +21,19 @@ compile: source common.a
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 doc:
 
 common.a: $(OBJECTS)
-	ar rs $@ $+
+	$(Q) ar rs $@ $+
 
 clean:
-	rm -f *.o *.mod
+	$(Q)rm -f *.o *.mod
 
 very-clean: clean
-	rm -f filelist-source
+	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(FIND) $(FIND_OPT) . \( \
 		-name 'color.f90' \
@@ -42,7 +42,8 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 endif
 
 $(OBJECTS):%.o:%.f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
 
 color.f90 model.f90: source
 

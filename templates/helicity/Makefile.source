@@ -32,7 +32,7 @@ FORM_OPT=[%
 	[%@end @for%] -D PROCESSPATH=.. \
 	-D PWD=. \
 	-p ..:../codegen \
-	-w$(FORM_THREADS) -M -q
+	-M -q
 
 DIAGRAMS_TREE=[%
 @if group %][%
@@ -142,6 +142,7 @@ born.txt: ../diagrams-0.hh[%
 @for elements topolopy.keep.tree %]
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \[% 
@@ -179,6 +180,7 @@ abbrevh[%helicity%].f90: $(TXT_VIRT)
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
@@ -239,7 +241,8 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 
 d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT)[%
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
@@ -290,6 +293,7 @@ d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l
 d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt 
 	@echo Form is optimizing loop diagram derivatives [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
@@ -393,7 +397,8 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
 @if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%
 @end @if %]: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT)[%
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
@@ -499,6 +504,7 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 d[%$_%]h[%helicity%]l1c.txt: ../diagrams-ct.hh
 	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=ct	\
 		-D LOOPSIZE=1 \

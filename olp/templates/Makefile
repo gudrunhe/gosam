@@ -26,13 +26,13 @@ LEX_OPTS=
 YACC=yacc
 YACC_OPTS=
 
-F_OBJECTS=olp_module.o
+F_OBJECTS=olp_module.o olp_model.f90
 C_OBJECTS=[%
 @if internal OLP_DAEMON %]olp_parser.o olp_lexer.o olp_daemon.o[%
 @end @if %]
 
 DISTFILES= \
-	Makefile olp.h config.sh olp_module.f90[%
+	Makefile olp.h config.sh olp_module.f90 olp_model.f90[%
 @if internal OLP_DAEMON %] \
 	olp_daemon.c olp_daemon.h olp_lexer.l olp_parser.y \
 	olp_lexer.c olp_parser.c olp_parser.h[%
@@ -40,7 +40,7 @@ DISTFILES= \
 
 .PHONY: compile_subprocesses compile source doc clean very-clean
 
-compile: olp_module.o compile_subprocesses
+compile: olp_module.o olp_model.f90 compile_subprocesses
 
 compile_subprocesses:
 	for dir in $(SUBDIRS); \

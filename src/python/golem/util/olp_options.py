@@ -168,6 +168,39 @@ def SubdivideSubprocess(values, conf, ignore_case):
 		"olp.subdivide", supported_values)
 
 @optional_olp_option
+def Model(values, conf, ignore_case):
+ 	supported_values = ["SMdiag", "SMnondiag"]
+ 	return expect_one_keyword(values, conf, ignore_case,
+ 		   "model", supported_values)
+
+@optional_olp_option
+def CouplingPower(values, conf, ignore_case):
+	if len(values) > 2:
+		return __value_ERR__ + "too many values."
+
+	elif len(values) == 2:
+		
+		if values[0].lower() == 'qcd':
+			try:
+				power = int(values[1])
+				conf["olp.alphaspower"] = str(power)
+				return __value_OK__
+			except ValueError:
+				return __value_ERR__ + "non-integer value encountered."
+			
+		elif values[0].lower() == 'qed':
+			try:
+				power = int(values[1])
+				conf["olp.alphapower"] = str(power)
+				return __value_OK__
+			except ValueError:
+				return __value_ERR__ + "non-integer value encountered."
+			else:
+				return __value_ERR__ + "unrecognized type of CouplingPower."
+	else:
+		return __value_ERR__ + "too few arguments in CouplingPower."
+
+@optional_olp_option
 def AlphasPower(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
@@ -198,14 +231,43 @@ def AlphaPower(values, conf, ignore_case):
 		return __value_OK__ + " # WARNING: should not be blank."
 
 @optional_olp_option
+def EWScheme(values, conf, ignore_case):
+	if len(values) > 1:
+		return __value_ERR__ + "too many values."
+	
+	supported_values = ["alphaGF","alpha0","alphaMZ","alphaRUN","alphaMSbar","OLPDefined"]
+	ret=expect_one_keyword(values, conf, True,
+		"olp.ewscheme", supported_values)
+	return ret
+
+
+@optional_olp_option
+def WidthScheme(values, conf, ignore_case):
+	if len(values) > 1:
+		return __value_ERR__ + "too many values."
+	
+	supported_values = ["ComplexMass","FixedWidth"]
+	ret=expect_one_keyword(values, conf, True,
+		"olp.widthscheme", supported_values)
+	if ret == "ComplexMass":
+		warning("Complex Mass scheme not yet fully implemented!")
+	return ret
+
+
+@optional_olp_option
 def AmplitudeType(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	supported_values = ["loop","tree"]
-	ret=expect_many_keywords(values, conf, ignore_case,
+	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced"]
+	ret=expect_one_keyword(values, conf, True,
 		"olp.amplitudetype", supported_values)
-	if ret.startswith(__value_OK__) and conf["olp.amplitudetype"]=="tree":
+	if ret.startswith(__value_OK__) and 'tree' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_tree_level"] = False
+		conf["olp.no_loop_level"] = True
+	if ret.startswith(__value_OK__) and 'loopinduced' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = True
+	if ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_loop_level"] = False
 	return ret
 
 @optional_olp_option
@@ -225,19 +287,21 @@ def Precision(values, conf, ignore_case):
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
 
 @optional_olp_option
-def ExcludeParticles(values, conf, ignore_case):
+def ExcludedParticles(values, conf, ignore_case):
 	excl=[]
 	for p in values:
 		try:
 			excl.append(str(int(p)))
 		except ValueError:
 			return __value_ERR__ + " only PDG codes allowed."
-	conf["__excludeParticles__"] = " ".join(excl);
+	conf["__excludedParticles__"] = " ".join(excl);
 	return __value_OK__
 
 
 @optional_olp_option
 def MassiveParticles(values, conf, ignore_case):
+	if conf["__OLP_BLHA2__"]=="False" or conf["__OLP_BLHA2__"] is None:
+		return __value_ERR__ + " option only allowed with InterfaceVersion BLHA2."
 	massive=[]
 	for p in values:
 		try:
@@ -260,9 +324,12 @@ def InterfaceVersion(values, conf, ignore_case):
 	version=str(values[0]).upper()
 	if version=="BLHA1":
 		conf["__OLP_BLHA1__"]=True
+		conf["__OLP_BLHA2__"]=False
 		if not conf["extensions"] or not "olp_blha1" in conf["extensions"]:
 			conf["extensions"]=(conf["extensions"] + "," if conf["extensions"]  else "") + "olp_blha1"
 	elif version=="BLHA2":
+		conf["__OLP_BLHA1__"]=False
+		conf["__OLP_BLHA2__"]=True
 		return __value_OK__
 	return __value_ERR__ + "Interface version %s not supported" % version
 

@@ -3,6 +3,17 @@ module     olp_module
    implicit none
    private
    public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
+   public :: OLP_EvalSubProcess2, OLP_Polvec, OLP_SetParameter, OLP_Info
+   public :: strncpy
+
+   interface
+     subroutine strncpy(dest, src, n) bind(C)
+       import
+       character(kind=c_char),  intent(out) :: dest(*)
+       character(kind=c_char),  intent(in)  :: src(*)
+       integer(c_size_t), value, intent(in) :: n
+     end subroutine strncpy
+  end interface   
 
    real(kind=c_double) :: cur_alpha_s, cur_alpha;
 
@@ -129,7 +140,50 @@ contains
 
    end subroutine OLP_Start
 
-   subroutine     OLP_SetParameter(variable_name, real_part, complex_part, success)&
+   subroutine OLP_Info(olp_name, olp_version, message)&
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_info[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_Info[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
+   use, intrinsic :: iso_c_binding, only: C_CHAR, C_NULL_CHAR[%
+   @for subprocesses %][%
+       @if is_first %]
+   use [%$_%]_version, only: gosamversion, gosamrevision[%
+       @end @if %][%
+   @end @for %]
+   
+   implicit none
+   character(kind=c_char), intent(inout), dimension(15)  :: olp_name
+   character(kind=c_char), intent(inout), dimension(15)  :: olp_version
+   character(kind=c_char), intent(inout), dimension(255) :: message
+   character(len=254) :: msg
+   character(len=6)   :: rev
+   character(len=1)   :: ver1, ver2
+
+   write(ver1,'(I1)') gosamversion(1)
+   write(ver2,'(I1)') gosamversion(2)
+   write(rev,'(I6)')  gosamrevision
+
+   msg = new_line('C')//'Please cite the following references when using this program:'//&
+        &new_line('C')//'Mastrolia:2010nb, Binoth:2008uq, Cullen:2011kv, Cullen:2011ac'
+
+   call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
+        len(c_char_'GoSam-'//ver1//'.'//ver2,kind=c_size_t))
+
+   call strncpy(olp_version, c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
+        len(c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
+
+   call strncpy(message, c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR, &
+        len(c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR,kind=c_size_t))
+
+   end subroutine OLP_Info
+   
+
+   subroutine OLP_SetParameter(variable_name, real_part, complex_part, success)&
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_setparameter[%
@@ -141,9 +195,7 @@ contains
       use, intrinsic :: iso_c_binding
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
-      real(kind=c_double)[%
-      @if internal OLP_CALL_BY_VALUE %], value[%
-      @end @if %], intent(in) :: real_part, complex_part
+      real(kind=c_double), intent(in) :: real_part, complex_part
       integer(kind=c_int), intent(out) :: success
 
       interface
@@ -165,14 +217,14 @@ contains
 
       l = strlen(variable_name)
 
-      if (strcasecmp(variable_name,"alphaS")==0) then
+      if (strcasecmp(variable_name,"alphaS" // char(0))==0) then
               if (complex_part /= 0d0) then
                       success=0
               else
                       cur_alpha_s = real_part
                       success=1 ! not supported
               end if
-      else if (strcasecmp(variable_name,"alpha")==0) then
+      else if (strcasecmp(variable_name,"alpha" // char(0))==0) then
               if (complex_part /= 0d0) then
                       success=0 ! not supported
               else
@@ -206,7 +258,7 @@ contains
       @end @if %], intent(in) :: mu
       real(kind=c_double), dimension(50), intent(in) :: momenta
       real(kind=c_double), dimension(10), intent(in) :: parameters
-      real(kind=c_double), dimension(4), intent(out) :: res
+      real(kind=c_double), dimension(60), intent(out) :: res
 
       real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
 
@@ -227,17 +279,21 @@ contains
               %]), mu, parameters, res)[%
                @end @for %][%
             @end @select %][%
+         @if eval cr.amplitudetype ~ "scTree"
+         %][% @elif eval cr.amplitudetype ~ "ccTree"
+         %][% @else %]
+              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
+         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
          res(:) = 0.0d0
       end select
 
-      res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)
    end subroutine OLP_EvalSubProcess
 
    ! BLHA2 interface
-   subroutine     OLP_EvalSubProcess2(label, momenta, mu, res, rstatus) &
+   subroutine     OLP_EvalSubProcess2(label, momenta, mu, res, acc) &
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_evalsubprocess2[%
@@ -248,15 +304,11 @@ contains
    @end @if %]")
       use, intrinsic :: iso_c_binding
       implicit none
-      integer(kind=c_int)[%
-      @if internal OLP_CALL_BY_VALUE %], value[%
-      @end @if %], intent(in) :: label
-      real(kind=c_double)[%
-      @if internal OLP_CALL_BY_VALUE %], value[%
-      @end @if %], intent(in) :: mu
+      integer(kind=c_int), intent(in) :: label
+      real(kind=c_double), intent(in) :: mu
       real(kind=c_double), dimension(50), intent(in) :: momenta
-      real(kind=c_double), dimension(4), intent(out) :: res
-      integer(kind=c_int), intent(out),optional :: rstatus
+      real(kind=c_double), dimension(60), intent(out) :: res
+      real(kind=c_double), intent(out) :: acc
 
       real(kind=c_double), dimension(10) :: parameters
 
@@ -276,16 +328,19 @@ contains
                @for elements cr.channels %]
       case([% $_ %])
               call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
-              %]), mu, parameters, res,rstatus)[%
+              %]), mu, parameters, res,acc)[%
                @end @for %][%
             @end @select %][%
+         @if eval cr.amplitudetype ~ "scTree"
+         %][% @elif eval cr.amplitudetype ~ "ccTree"
+         %][% @else %]
+              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
+         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
          res(:) = 0.0d0
       end select
-
-      res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)
    end subroutine OLP_EvalSubProcess2
 
    subroutine     OLP_Finalize() &
@@ -371,17 +426,18 @@ contains
       @select count elements cr.channels
       @case 1 %][%
       @else %]h, [%
-      @end @select %]momenta, mu, parameters, res, rstatus)
+      @end @select %]momenta, mu, parameters, res, acc)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
       use [% sp.$_ %]_model, only: parseline
-      use [% cr.$_ %]_matrix, only: samplitude[%
+      use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
       @if extension ninja %]
       use [% sp.$_%]_groups, only: ninja_exit[%
       @end @if %]
+
       implicit none[%
       @select count elements cr.channels
       @case 1 %][%
@@ -390,14 +446,19 @@ contains
       @end @select %]
       real(kind=c_double), dimension([%
          eval 5 * sp.num_legs %]), intent(in) :: momenta
-      real(kind=c_double)[%
-      @if internal OLP_CALL_BY_VALUE %], value[%
-      @end @if %], intent(in) :: mu
+      real(kind=c_double), intent(in) :: mu
       real(kind=c_double), dimension(10), intent(in) :: parameters
-      real(kind=c_double), dimension(4), intent(out) :: res
+      real(kind=c_double), dimension(60), intent(out) :: res
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
-      real(kind=ki), dimension(4) :: amp
+      real(kind=ki), dimension([% @if eval cr.amplitudetype ~ "scTree"
+      %][% eval 2 * sp.num_legs * sp.num_legs
+      %][%@elif eval cr.amplitudetype ~ "ccTree" %][%
+                eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
+      %]) :: amp
+      real(kind=c_double), optional :: acc
+      logical :: precision_reached
+      integer :: i
       integer(kind=c_int), optional :: rstatus
       logical :: precision_reached
       logical :: ok[%
@@ -408,6 +469,7 @@ contains
       @else %]
       character(len=255) :: buffer
       integer :: ierr
+
 
       !---#[ receive parameters from argument list:[%
          @for elements olp.parameters shift=1 %]
@@ -421,6 +483,7 @@ contains
       !---#] receive parameters from argument list:[%
       @end @select %]
 
+
       vecs(:,1) = real(momenta(1::5),ki)
       vecs(:,2) = real(momenta(2::5),ki)
       vecs(:,3) = real(momenta(3::5),ki)
@@ -428,42 +491,100 @@ contains
 
       precision_reached=.true.
 
+      [% @if eval cr.amplitudetype ~ "scTree"
+      %]call OLP_spin_correlated_lo2(vecs,amp);
+      ok=.true.[%
+      @else %][%
+      @if eval cr.amplitudetype ~ "ccTree" %]
+      call OLP_color_correlated(vecs,amp);
+      ok=.true.[%
+      @else %]
       call samplitude(vecs, mu*mu, amp, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
       @end @select %][% @if internal OLP_BLHA1%][% @else
       %], precision_reached=precision_reached[% @end @if
-      %])[%
+      %])[%@end @if %][%
       @if extension golem95 %]
       call tear_down_golem95()[%
+      @end @if %][%
       @end @if %][%
       @if extension ninja %]
       call ninja_exit()[%
       @end @if %]
-
       if (ok) then
          !
       else
          precision_reached=.false.
          !
       end if
-      if(present(rstatus)) then
+      if(present(acc)) then
         if(precision_reached) then
-           rstatus=1 ! point stable
+           acc=0 ! point stable
         else
-           rstatus=0 ! point did not pass stability test
+           acc=1E5_ki ! point did not pass stability test
         end if
       end if
 
+      [% @if eval cr.amplitudetype ~ "scTree"
+      %]do i=1, size(amp)
+        res(i) = real(amp(i), c_double)
+      end do
+      [%@elif eval cr.amplitudetype ~ "ccTree" %]
+      do i=1, size(amp)
+        res(i) = real(amp(i), c_double)
+      end do[%
+      @else%]
       res(1) = real(amp(4), c_double)
       res(2) = real(amp(3), c_double)
       res(3) = real(amp(2), c_double)
-      res(4) = real(amp(1), c_double)
+      res(4) = real(amp(1), c_double)[%
+      @end @if %]
+
    end subroutine eval[% cr.id %]
    !---#] subroutine eval[% cr.id %] :[%
    @end @for %][%
 @end @for %]
+
+   !---#[ OLP Polarization vector:
+   subroutine OLP_Polvec(p,q,eps) &
+       & bind(C,name="[%
+       @if internal OLP_TO_LOWER %][%
+          olp.process_name asprefix=\_ convert=lower %]olp_polvec[%
+       @else %][%
+          olp.process_name asprefix=\_ %]OLP_Polvec[%
+       @end @if %][%
+       @if internal OLP_TRAILING_UNDERSCORE %]_[%
+       @end @if %]")
+      use, intrinsic :: iso_c_binding[%
+      @for subprocesses %][%
+       @if is_first %]
+      use [%$_%]_config , only:ki
+      use [%$_%]_model
+      use [%$_%]_kinematics, only: Spab3, Spaa [%
+      @end @if %] [%
+      @end @for %]
+      implicit none
+      real(kind=c_double), dimension(0:3), intent(in) :: p,q
+      real(kind=c_double), dimension(0:7), intent(out) :: eps
+      complex(kind=c_double), dimension(4) :: eps_complex
+      complex(kind=c_double), dimension(0:3) :: Sp
+
+      sp=Spab3(q, p)
+
+      eps_complex(:)=Sp(:)/Spaa(q,p)/sqrt2
+      eps(0)=real(eps_complex(1),ki)
+      eps(1)=aimag(eps_complex(1))
+      eps(2)=real(eps_complex(2),ki)
+      eps(3)=aimag(eps_complex(2))
+      eps(4)=real(eps_complex(3),ki)
+      eps(5)=aimag(eps_complex(3))
+      eps(6)=real(eps_complex(4),ki)
+      eps(7)=aimag(eps_complex(4))
+
+   end subroutine OLP_Polvec
+   !---#] OLP Polarization vector:
 
    subroutine     read_slha_file(line)[%
    @for subprocesses %]

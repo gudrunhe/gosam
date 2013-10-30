@@ -23,26 +23,29 @@ compile: matrix.a
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 matrix.a: $(OBJECTS)
 	ar rs $@ $+
 
 $(OBJECTS) test.o:%.o:%.f90
-	$(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
 
 ph_test.o:%.o:%.f
-	$(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
 
 %.exe: %.o $(OBJECTS)
-	$(FC) -o $@ $+ $(PROCESS_LDFLAGS) $(LDFLAGS)
+	$(vecho) "-> Creating executable $@ .."
+	$(Q) $(FC) -o $@ $+ $(PROCESS_LDFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f *.o *.mod
+	$(Q)rm -f *.o *.mod
 
 very-clean: clean
-	rm -f filelist-source
+	$(Q)rm -f filelist-source
 
 filelist-source: source
 	@ $(FIND) $(FIND_OPT) . \( \

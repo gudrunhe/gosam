@@ -6,6 +6,7 @@ import golem.util.tools
 
 from golem.util.config import Properties
 import golem.util.parser
+from golem.model import MODEL_OPTIONS
 
 class KinematicsTemplate(golem.util.parser.Template):
    """
@@ -529,11 +530,15 @@ class KinematicsTemplate(golem.util.parser.Template):
       color_name = self._setup_name("color", prefix + "color", opts)
       latex_name = self._setup_name("latex", prefix + "latex", opts)
       reference_name = self._setup_name("reference", prefix + "reference", opts)
+      n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
+      n_sc1=self._setup_name("n_sc1", prefix + "n_sc1", opts)      
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
 
       is_first = True
       base = 1
+      nsc=-1
+      
 
       color_filter = []
       spin_filter = []
@@ -640,6 +645,10 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          props.setProperty(fin_name, index >= self._num_in)
          props.setProperty(color_name, color)
+         nsc+=2
+         nsc1=nsc+1
+         props.setProperty(n_sc, nsc)
+         props.setProperty(n_sc1, nsc1)         
          yield props
 
    def pairs(self, *args, **opts):
@@ -687,10 +696,14 @@ class KinematicsTemplate(golem.util.parser.Template):
             prefix + "reference2", opts)
       latex2_name = self._setup_name("latex2",
             prefix + "latex2", opts)
+      n_color_corr=self._setup_name("n_color_corr", prefix + "n_color_corr", opts)
+      n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
       is_first = True
       base = 1
+      nres=0
+      nsc=-3
 
       color1_filter = []
       if "white1" in args:
@@ -851,6 +864,12 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty(color2_name, color2)
             props.setProperty(first_name, is_first)
             props.setProperty(latex2_name, self._latex[index2])
+#            props.setProperty(n_color_corr, index2+1+(self._num_legs)*(index1)-index1*(index1-1)/2-index1)
+            if index1 != index2:
+              nsc+=4
+              nres+=1                          
+            props.setProperty(n_color_corr, nres)              
+            props.setProperty(n_sc, nsc)
             is_first = False
             yield props
 
@@ -1928,3 +1947,89 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          yield props
          prev = idx
+
+   def olp_spin_correlated_twist(self, *args, **opts):
+       index_name = self._setup_name("index", "index", opts)
+       var_name = self._setup_name("var", "$_", opts)
+       sign_name = self._setup_name("sign", "sign", opts)
+       crossed_particles = [prop.getIntegerProperty("$_") for prop in self.crossing()]
+       orig_particles = [prop.getIntegerProperty("index") for prop in self.crossing()]
+       gluons = [prop.getIntegerProperty("index") for prop in self.particles("gluons")]
+       colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
+       
+       for i in range(len(crossed_particles)):
+          if not crossed_particles[i] in gluons:
+	     continue
+          orig_pos_ii = orig_particles[i]-1
+          cros_pos_ii = crossed_particles[i]-1
+          for j in range(len(crossed_particles)):
+             if not crossed_particles[j] in colored:
+                continue
+             if i == j:
+                continue
+             orig_pos_jj = orig_particles[j]-1
+             cros_pos_jj =crossed_particles[j]-1
+             sign_temp='+'
+             if (orig_pos_ii>1 and cros_pos_ii<=1) or (orig_pos_ii<=1 and cros_pos_ii>1):
+		sign_temp='-'
+             props = Properties()
+             props.setProperty(var_name, str(2*(orig_pos_ii + orig_pos_jj*self._num_legs)+1))
+             props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+1))
+             props.setProperty(sign_name,'+' )
+             yield props
+             props.setProperty(var_name, str(2*(orig_pos_ii+ orig_pos_jj*self._num_legs )+2))
+             props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+2))
+             props.setProperty(sign_name,sign_temp )
+             yield props
+
+   def olp_color_correlated_twist(self, *args, **opts):
+      def calcpos(ix,jx):
+         if ix<jx:
+           return ix-1+(jx-1)*(jx-2)//2 +1
+         else:
+           return jx-1+(ix-1)*(ix-2)//2 +1
+
+      index_name = self._setup_name("index", "index", opts)
+      var_name = self._setup_name("var", "$_", opts)
+      crossed_particles = [prop.getIntegerProperty("$_") for prop in self.crossing()]
+      orig_particles = [prop.getIntegerProperty("index") for prop in self.crossing()]
+      colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
+      crossed_colored = list(crossed_particles)
+      for i in crossed_particles:
+	if i not in colored:
+	  del crossed_colored[crossed_colored.index(i)]
+     
+      for i in range(len(colored)-1):
+	for j in range(i+1,len(colored)):
+	  if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
+	    props=Properties()
+	    props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
+	    props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
+	    yield props
+	  
+
+      
+
+   def ewchoose(self, *args, ** opts):
+      return golem.model.MODEL_OPTIONS["ewchoose"]
+
+   def starting_choice(self, *args, ** opts):
+      if self.e_not_one(args,opts):
+         if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+            return '2'
+         else:
+            return golem.model.MODEL_OPTIONS["users_choice"]
+      else:
+         if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+            return '2'
+         else:
+            return golem.model.MODEL_OPTIONS["users_choice"]
+
+   def e_not_one(self, *args, ** opts):
+      ones = golem.model.MODEL_ONES
+      if "e" in ones:
+         e_not_one = False
+      else:
+         e_not_one = True
+      return e_not_one
+

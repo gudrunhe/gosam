@@ -42,7 +42,8 @@
         olp.include_color_average default=true %].
    logical, parameter :: include_helicity_avg_factor = .[%
         olp.include_helicity_average default=true %].
-   logical, parameter :: include_symmetry_factor = .false.
+   logical, parameter :: include_symmetry_factor = .[%
+        olp.include_symmetry_factor default=false %].
 
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai
@@ -189,9 +190,8 @@
              true=.true.
              false=.false. %]
    integer :: PSP_chk_threshold2 = [% PSP_chk_threshold2 %]
-   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[%
-@select model @case sm smdiag %][% 
-@select model.options @case ewchoose %]
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[% 
+@if ewchoose %]
    !
    ! The integer ewchoice allows the user to change the 
    ! ew parameter input scheme at runtime (between 1 and 8)
@@ -202,37 +202,23 @@
    !  2        :   alpha, mW, mZ    : e,sw
    !  3        :   alpha, sw, mZ    : e, mW
    !  4        :   alpha, sw, GF    : e, mW
-   !  5        :   e, mW, mZ        : em sw, mZ
-   !  6        :   e, sw, mZ        : mW
-   !  7        :   e, sw, GF        : mW, mZ
-   !  8        :   alpha, GF, mZ    : e, mW, sw
+   !  5        :   alpha, GF, mZ    : e, mW, sw[% 
+@if e_not_one %]
+   !  6        :   e, mW, mZ        : sw
+   !  7        :   e, sw, mZ        : mW
+   !  8        :   e, sw, GF        : mW, mZ[%
+@else %]
    !
-   !  If one is using the ewchoice, the user should provide the correct input
-   !  parameters, otherwise default values are used
+   !  WARNING:
+   !  Since 'e' was set to ONE algebraically, it cannot
+   !  be used as an input parameter, and will also not
+   !  be computed from the other parameters.[%
+@end @if %]
    !
-   integer :: ewchoice = 2 [%
-@end @select%][%@end @select%][%
-@select model @case sm smdiag %][% 
-@select model.options @case ewchoose %]
+   !  If one is using the ewchoice, the user should provide the 
+   !  correct input parameters, otherwise default values are used.
    !
-   ! The integer ewchoice allows the user to change the 
-   ! ew parameter input scheme at runtime (between 1 and 8)
-   ! The choices are as follows:
-   !  ewchoice :   Input            :  Output
-   !  #---------------------------------------# 
-   !  1        :   GF,mW,mZ         : e,sw
-   !  2        :   alpha, mW, mZ    : e,sw
-   !  3        :   alpha, sw, mZ    : e, mW
-   !  4        :   alpha, sw, GF    : e, mW
-   !  5        :   e, mW, mZ        : em sw, mZ
-   !  6        :   e, sw, mZ        : mW
-   !  7        :   e, sw, GF        : mW, mZ
-   !  8        :   alpha, GF, mZ    : e, mW, sw
-   !
-   !  If one is using the ewchoice, the user should provide the correct input
-   !  parameters, otherwise default values are used
-   !
-   integer :: ewchoice = 2 [%
-@end @select%][%@end @select%]
+   integer :: ewchoice = [% starting_choice %][%
+   @end @if %]
 end module [% process_name asprefix=\_ %]config
 

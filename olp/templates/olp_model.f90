@@ -1,7 +1,7 @@
 %=$[$ ' vim:syntax=golem
-$]module     [$ process_name asprefix=\_ $]model
+$]module olp_model
    ! Model parameters for the model: [$ model $]
-   use [$ process_name asprefix=\_ $]config, only: ki[$
+   use olp_config, only: ki[$
 @if extension samurai $], &
    & samurai_scalar, samurai_verbosity, samurai_test, &
    & samurai_group_numerators, samurai_istop[$
@@ -9,8 +9,8 @@ $]module     [$ process_name asprefix=\_ $]model
    & renormalisation, reduction_interoperation, deltaOS, &
    & nlo_prefactors[$ 
 @select model @case sm smdiag $][$ 
-@if ewchoose $], ewchoice[$
-@end @if$][$@end @select$]
+@select model.options @case ewchoose $], ewchoice[$
+@end @select$][$@end @select$]
    implicit none
 
    private :: ki[$
@@ -682,25 +682,19 @@ contains
       implicit none
       complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
       real(ki), parameter :: pi = 3.14159265358979323846264&
-     &3383279502884197169399375105820974944592307816406286209_ki[%
-@for symbols match="\\$(.*)" format="reg%s" %]
-      [% type.repr %] :: [% $_ %][%
-@end @for symbols %][$ 
+     &3383279502884197169399375105820974944592307816406286209_ki[$
+@for floats $]
+     real(ki), parameter :: [$ $_ $] = [$ value convert=float format=%24.15f_ki $][$
+@end @for $][$
+@for functions_resolved_fortran $]
+     [$ $_ $] = [$ expression $][$
+@end @for $][$ 
 @select model @case sm smdiag $][$ 
-@if ewchoose $]
+@select model.options @case ewchoose $]
       call ewschemechoice(ewchoice)[$
-@end @if $][$
-@end @select $][%
-@for instructions %][%
-   @select $_ match="(.).*" format="%s"
-   @case $ %]
-      [% $_ match="\\$(.*)" format="reg%s" %][%
-   @else %]
-      [% $_ %][%
-   @end @select %] = [%
-          expression match="\\$(.*)" format="reg%s" %][%
-@end @for @instructions %]
-   end subroutine init_functions
+@end @select $][$
+@end @select $]
+end subroutine init_functions
 !---#] subroutine init_functions:
 !---#[ utility functions for model initialization:
    pure function ifpos(x0, x1, x2)
@@ -750,9 +744,9 @@ contains
       sort4 = m(n)
    end  function sort4
 !---#] utility functions for model initialization:
-!---#[ EW scheme choice:[$ 
-@if ewchoose $][$ @if
-e_not_one $]
+[$ @select model @case sm smdiag $][$ 
+@select model.options @case ewchoose $]
+!---#[ EW scheme choice:
   subroutine ewschemechoice(ichoice)
   implicit none
   integer, intent(in) :: ichoice
@@ -780,59 +774,30 @@ e_not_one $]
         mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
       ! mW, sw --> mZ
         mZ = mW / sqrt(1.0_ki-sw*sw)
-        case(5)
-      ! alpha --> e
-        e = sqrt(4.0_ki*pi*alpha)
-      ! GF, mZ, alpha --> mW
-        mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
-     & sqrt(2.0_ki)/GF))
+        case (5)
       ! mW, mZ --> sw
         sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-        case(6)
-      ! mW, mZ --> sw
-        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-        case(7)
+        case (6)
       ! mZ, sw --> mW
         mW = mZ*sqrt(1-sw*sw)
-        case(8)
+        case(7)
       ! e, sw, GF --> mW
         mW = e/2.0_ki/sw/sqrt(sqrt(2.0_ki)*GF)
       ! mW, sw --> mZ
         mZ = mW / sqrt(1.0_ki-sw*sw)
-  end select
-  end subroutine[$
-@else $]
-  subroutine ewschemechoice(ichoice)
-  implicit none
-  integer, intent(in) :: ichoice
-  real(ki), parameter :: pi = 3.14159265358979323846264&
- &3383279502884197169399375105820974944592307816406286209_ki
-  ! e is algebraically set to one, do not calculate it here
-  select case (ichoice)
-        case (1)
-      ! mW, mZ --> sw
-        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-        case (2)
-      ! mW, mZ --> sw
-        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-        case (3)
-      ! sw, mZ --> mW
-        mW = mZ*sqrt(1.0_ki-sw*sw)
-        case (4)
-      ! GF, sw, alpha --> mW
-        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
-      ! mW, sw --> mZ
-        mZ = mW / sqrt(1.0_ki-sw*sw)
-        case(5)
+        case(8)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
       ! GF, mZ, alpha --> mW
       mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)        
+      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+!        case default
   end select
-  end subroutine[$
-@end @if$][$
-@end @if$]
-!---#] EW scheme choice:
-end module [$ process_name asprefix=\_ $]model
+  end subroutine
+!---#] EW scheme choice:[$
+@end @select$][$
+@end @select$]
+end module olp_model
 
