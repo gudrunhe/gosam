@@ -459,8 +459,6 @@ contains
       real(kind=c_double), optional :: acc
       logical :: precision_reached
       integer :: i
-      integer(kind=c_int), optional :: rstatus
-      logical :: precision_reached
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
