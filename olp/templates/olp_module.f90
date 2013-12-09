@@ -323,12 +323,12 @@ contains
             @case 1 %]
       case([% cr.channels %])
               call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
-               %]), mu, parameters, res)[%
+               %]), mu, parameters, res, acc)[%
             @else %][%
                @for elements cr.channels %]
       case([% $_ %])
               call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
-              %]), mu, parameters, res,acc)[%
+              %]), mu, parameters, res, acc)[%
                @end @for %][%
             @end @select %][%
          @if eval cr.amplitudetype ~ "scTree"
@@ -497,7 +497,7 @@ contains
       call OLP_color_correlated(vecs,amp);
       ok=.true.[%
       @else %]
-      call samplitude(vecs, mu*mu, amp, ok[%
+      call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
@@ -566,20 +566,20 @@ contains
       implicit none
       real(kind=c_double), dimension(0:3), intent(in) :: p,q
       real(kind=c_double), dimension(0:7), intent(out) :: eps
-      complex(kind=c_double), dimension(4) :: eps_complex
-      complex(kind=c_double), dimension(0:3) :: Sp
+      complex(kind=ki), dimension(4) :: eps_complex
+      complex(kind=ki), dimension(0:3) :: Sp
 
-      sp=Spab3(q, p)
+      Sp=Spab3(real(q,ki), real(p,ki))
 
-      eps_complex(:)=Sp(:)/Spaa(q,p)/sqrt2
-      eps(0)=real(eps_complex(1),ki)
-      eps(1)=aimag(eps_complex(1))
-      eps(2)=real(eps_complex(2),ki)
-      eps(3)=aimag(eps_complex(2))
-      eps(4)=real(eps_complex(3),ki)
-      eps(5)=aimag(eps_complex(3))
-      eps(6)=real(eps_complex(4),ki)
-      eps(7)=aimag(eps_complex(4))
+      eps_complex(:)=Sp(:)/Spaa(real(q,ki),real(p,ki))/sqrt2
+      eps(0)=real(eps_complex(1),c_double)
+      eps(1)=real(aimag(eps_complex(1)),c_double)
+      eps(2)=real(eps_complex(2),c_double)
+      eps(3)=real(aimag(eps_complex(2)),c_double)
+      eps(4)=real(eps_complex(3),c_double)
+      eps(5)=real(aimag(eps_complex(3)),c_double)
+      eps(6)=real(eps_complex(4),c_double)
+      eps(7)=real(aimag(eps_complex(4)),c_double)
 
    end subroutine OLP_Polvec
    !---#] OLP Polarization vector:
