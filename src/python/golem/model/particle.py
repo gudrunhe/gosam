@@ -6,11 +6,12 @@ class Particle:
 	"""
 	Store basic facts about particles.
 	"""
-	def __init__(self, field, twospin, mass, color, partner, width, pdg_code):
+	def __init__(self, field, twospin, mass, color, partner, width, pdg_code, charge):
 		self._field = field
 		self._twospin = twospin
 		self._mass = mass
 		self._color = color
+		self._charge = charge
 		if partner is None:
 			self._partner = field
 		else:
@@ -111,6 +112,15 @@ class Particle:
 
 	def referenceRequired(self, zeroes={}):
 		return self.getSpin() >= 2 or self.isMassive(zeroes)
+	      
+	def getCharge(self):
+	  """
+	  Return electric charge of the particle
+	  """
+	  return self._charge
+	
+	def getField(self):
+	  return self._field
 
 def simplify_model(particles, parameters, types, functions, masses, widths):
 	for p in particles.values():

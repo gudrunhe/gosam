@@ -61,8 +61,10 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._tree_signs = tree_signs
       # self._tree_flows = tree_flows
       self._crossings = []
+      self._charge = []
 
       self._msubs_stack = []
+      
 
       for i, crossing in enumerate(
             conf.getProperty(golem.properties.crossings)):
@@ -76,9 +78,26 @@ class KinematicsTemplate(golem.util.parser.Template):
          color   = sign * p.getColor()
          acolor  = p.getColor()
          latex   = p.getLaTeXName()
+         charge  = p.getCharge()
+         
 
          self._masses.append(mass)
          self._latex.append(latex)
+         if p.getPDGCode() > 0:
+	   if p.getField().lower()=='u' or p.getField().lower()=='c' or p.getField().lower()=='t':
+             self._charge.append(-charge*sign)
+           elif p.getField().lower()=='d' or p.getField().lower()=='s' or p.getField().lower()=='b':
+	     self._charge.append(charge*sign)
+	   else:
+	     self._charge.append(charge*sign)
+         else:
+	   if p.getField().lower()=='ubar' or p.getField().lower()=='cbar' or p.getField().lower()=='tbar':
+             self._charge.append(charge*sign)
+           elif p.getField().lower()=='dbar' or p.getField().lower()=='sbar' or p.getField().lower()=='bbar':
+	     self._charge.append(-charge*sign)
+	   else:
+	     self._charge.append(-charge*sign)	   
+
 
          self._lightlike.append(not p.isMassive(zeroes))
 
@@ -119,6 +138,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       props.setProperty("in_helicities",
             golem.util.tools.product(map(len,self._helicities[:num_in])))
       props.setProperty("symmetry_factor", symmetry_factor)
+      props.setProperty("charge", self._charge)
 
       # predict the number of colors:
       F = 0
@@ -531,7 +551,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       latex_name = self._setup_name("latex", prefix + "latex", opts)
       reference_name = self._setup_name("reference", prefix + "reference", opts)
       n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
-      n_sc1=self._setup_name("n_sc1", prefix + "n_sc1", opts)      
+      n_sc1=self._setup_name("n_sc1", prefix + "n_sc1", opts) 
+      charge_name =self._setup_name("charge", prefix + "charge", opts)
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
 
@@ -542,6 +563,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       color_filter = []
       spin_filter = []
+      charge_filter = []
 
       if "white" in args:
          color_filter.extend([1, -1])
@@ -574,6 +596,8 @@ class KinematicsTemplate(golem.util.parser.Template):
          spin_filter.extend([-4,-2,0,2,4])
       if "fermion" in args:
          spin_filter.extend([-3,-1,3,1])
+      if "charged" in args:
+	 charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
 
       if len(spin_filter) == 0:
          spin_filter = [-4,-3,-2,-1,0,1,2,3,4]
@@ -606,6 +630,10 @@ class KinematicsTemplate(golem.util.parser.Template):
          tspin = self._twospin[index]
          if tspin not in spin_filter:
             continue
+	  
+	 charge = self._charge[index]
+	 #if charge not in charge_filter:
+	   #continue
 
          props.setProperty(first_name, is_first)
          is_first = False
@@ -617,6 +645,7 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(lightlike_name, self._lightlike[index])
          props.setProperty(massive_name, not self._lightlike[index])
          props.setProperty(ini_name, index < self._num_in)
+         props.setProperty(charge_name, charge)
          if index >= self._num_in:
             props.setProperty(out_index_name, index + base - self._num_in)
          else:
@@ -698,6 +727,9 @@ class KinematicsTemplate(golem.util.parser.Template):
             prefix + "latex2", opts)
       n_color_corr=self._setup_name("n_color_corr", prefix + "n_color_corr", opts)
       n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
+      charge1_name = self._setup_name("charge1", prefix + "charge1",opts)
+      charge2_name = self._setup_name("charge2", prefix + "charge2",opts)
+      photon1_name = self._setup_name("photon1", prefix + "photon1",opts)
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
       is_first = True
@@ -739,6 +771,19 @@ class KinematicsTemplate(golem.util.parser.Template):
       if len(color2_filter) == 0:
          color2_filter = [1, -1, 3, -3, 8, -8]
 
+      charge1_filter = []
+      if "charged1" in args:
+	charge1_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+		     
+      charge2_filter = []
+      if "charged2" in args:
+	charge2_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])	
+	
+      photon1_filter = []
+      if "photon1" in args:
+	photon1_filter.extend(["A"])
+
+
       props = Properties()
 
       if "initial1" in inout1_filter:
@@ -772,6 +817,14 @@ class KinematicsTemplate(golem.util.parser.Template):
          color1 = self._color[index1]
          if color1 not in color1_filter:
             continue
+	  
+         charge1= self._charge[index1]
+         #if charge1 not in charge1_filter:
+	   #continue
+	 
+	 photon1= self._field_info[index1][0]	  
+	 #if photon1 not in photon1_filter:
+	   #continue
 
          props.setProperty(index1_name, index1 + base)
          props.setProperty(mass1_name, self._masses[index1])
@@ -783,6 +836,8 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(fin1_name, index1 >= self._num_in)
          props.setProperty(color1_name, color1)
          props.setProperty(latex1_name, self._latex[index1])
+         props.setProperty(charge1_name,charge1)
+         props.setProperty(photon1_name,photon1)
          if index1 >= self._num_in:
             props.setProperty(out_index1_name, index1 + base - self._num_in)
          else:
@@ -827,6 +882,10 @@ class KinematicsTemplate(golem.util.parser.Template):
             color2 = self._color[index2]
             if color2 not in color2_filter:
                continue
+	     
+            charge2= self._charge[index2]
+            #if charge2 not in charge2_filter:
+	      #continue
 
             if index2 >= self._num_in:
                props.setProperty(out_index2_name,
@@ -864,6 +923,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty(color2_name, color2)
             props.setProperty(first_name, is_first)
             props.setProperty(latex2_name, self._latex[index2])
+            props.setProperty(charge2_name,charge2)
 #            props.setProperty(n_color_corr, index2+1+(self._num_legs)*(index1)-index1*(index1-1)/2-index1)
             if index1 != index2:
               nsc+=4
@@ -1982,32 +2042,50 @@ class KinematicsTemplate(golem.util.parser.Template):
              props.setProperty(sign_name,sign_temp )
              yield props
 
-   def olp_color_correlated_twist(self, *args, **opts):
+    def olp_color_correlated_twist(self, *args, **opts):
       def calcpos(ix,jx):
          if ix<jx:
-           return ix-1+(jx-1)*(jx-2)//2 +1
+           ##return ix-1+(jx-1)*(jx-2)//2 +1
+           return ix+jx*(jx-1)//2
          else:
-           return jx-1+(ix-1)*(ix-2)//2 +1
+           ##return jx-1+(ix-1)*(ix-2)//2 +1
+           return jx+ix*(ix-1)//2
+
+
+             
 
       index_name = self._setup_name("index", "index", opts)
       var_name = self._setup_name("var", "$_", opts)
       crossed_particles = [prop.getIntegerProperty("$_") for prop in self.crossing()]
       orig_particles = [prop.getIntegerProperty("index") for prop in self.crossing()]
       colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
-      crossed_colored = list(crossed_particles)
-      for i in crossed_particles:
-	if i not in colored:
-	  del crossed_colored[crossed_colored.index(i)]
+      #crossed_colored = list(crossed_particles)
+      #for i in crossed_particles:
+	#if i not in colored:
+	 # del crossed_colored[crossed_colored.index(i)]
      
-      for i in range(len(colored)-1):
-	for j in range(i+1,len(colored)):
-	  if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
-	    props=Properties()
-	    props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
-	    props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
-	    yield props
-	  
+      #for i in range(len(colored)-1):
+	#for j in range(i+1,len(colored)):
+	 # if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
+	  #  props=Properties()
+	   # props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
+	    #props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
+	    #yield props
 
+      for i in range(len(crossed_particles)):
+          if not crossed_particles[i] in colored:
+             continue
+          orig_pos_ii = orig_particles[i]-1
+          for j in range(len(crossed_particles)):
+             if not crossed_particles[j] in colored:
+                continue
+             if i >= j:
+                   continue
+             orig_pos_jj = orig_particles[j]-1
+             props = Properties()
+             props.setProperty(index_name, str(calcpos(crossed_particles[i]-1,crossed_particles[j]-1)+1))
+             props.setProperty(var_name, str(calcpos(orig_pos_ii,orig_pos_jj)+1))
+             yield props
       
 
    def ewchoose(self, *args, ** opts):
