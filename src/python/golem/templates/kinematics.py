@@ -2030,6 +2030,8 @@ class KinematicsTemplate(golem.util.parser.Template):
              orig_pos_jj = orig_particles[j]-1
              cros_pos_jj =crossed_particles[j]-1
              sign_temp='+'
+             if (orig_pos_ii>1 and cros_pos_ii<=1) or (orig_pos_ii<=1 and cros_pos_ii>1):
+                sign_temp='-'
              props = Properties()
              props.setProperty(var_name, str(2*(orig_pos_ii + orig_pos_jj*self._num_legs)+1))
              props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+1))
