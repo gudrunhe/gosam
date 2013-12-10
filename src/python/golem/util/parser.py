@@ -623,11 +623,10 @@ class Template:
                try:
                   value = int(value, radix)
                except ValueError:
-#                  print value
                   try:
                     value = float(value)
                   except:
-		    value=0
+                    value=0
          elif opts["convert"] == "float":
             value = float(value)
 
@@ -1370,7 +1369,9 @@ class Template:
       def push(arg):
          value = arg
          if value.startswith("'") or value.startswith("\""):
-            value = value[1:]            
+            value = value[1:]
+            if value.endswith("'") or value.endswith("\""):
+               value = value[:-1]
          elif value not in ["+", "-", ".",
                "0", "1", "2", "3", "4",
                "5", "6", "7", "8", "9"]:
