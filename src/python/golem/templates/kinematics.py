@@ -2030,8 +2030,6 @@ class KinematicsTemplate(golem.util.parser.Template):
              orig_pos_jj = orig_particles[j]-1
              cros_pos_jj =crossed_particles[j]-1
              sign_temp='+'
-             if (orig_pos_ii>1 and cros_pos_ii<=1) or (orig_pos_ii<=1 and cros_pos_ii>1):
-		sign_temp='-'
              props = Properties()
              props.setProperty(var_name, str(2*(orig_pos_ii + orig_pos_jj*self._num_legs)+1))
              props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+1))
@@ -2042,7 +2040,7 @@ class KinematicsTemplate(golem.util.parser.Template):
              props.setProperty(sign_name,sign_temp )
              yield props
 
-    def olp_color_correlated_twist(self, *args, **opts):
+   def olp_color_correlated_twist(self, *args, **opts):
       def calcpos(ix,jx):
          if ix<jx:
            ##return ix-1+(jx-1)*(jx-2)//2 +1
