@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% process_name asprefix=\_ %]config, only: ki, logfile
+   use [% process_name asprefix=\_ %]config, only: ki, logfile, PSP_rescue
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
@@ -17,7 +17,7 @@
    real(ki) :: scale2
    real(ki), dimension(0:3) :: amp
    real(ki), dimension(2:3) :: irp
-   real :: t1, t2
+   real(ki) :: t1, t2
 
    open(unit=logfile,status='unknown',action='write',file='debug.xml')
 
@@ -28,6 +28,8 @@
    else
       print*, "No file 'param.dat' found. Using defaults"
    end if
+
+   PSP_rescue = .false.
 
    call initgolem()
 
@@ -41,6 +43,7 @@
 
       scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
+      call print_parameters(scale2)
       call samplitude(vecs, scale2, amp)
       call ir_subtraction(vecs, scale2, irp)
       if(ievt.eq.NEVT) then[%
@@ -74,4 +77,60 @@
       & 1.0E+03 * (t2 - t1) / real(NEVT)
 
    close(logfile)
+
+ contains
+
+subroutine  print_parameters(scale2)
+   use udeneg_config, only: renormalisation, convert_to_cdr, reduction_interoperation
+   use udeneg_model
+   implicit none
+   real(ki) :: scale2
+
+
+   write(*,'(A1,1x,A26)') "#", "--------- SETUP ---------"
+   write(*,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
+
+   if(convert_to_cdr) then 
+      write(*,'(A1,1x,A9,A3)') "#", "scheme = ", "CDR"
+   else
+      write(*,'(A1,1x,A9,A4)') "#", "scheme = ", "DRED"
+   end if
+
+   if(reduction_interoperation.eq.0) then
+      write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "SAMURAI"
+   else if(reduction_interoperation.eq.1) then
+      write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
+   else if(reduction_interoperation.eq.2) then
+      write(*,'(A1,1x,A15,A15)') "#", "reduction with ", "SAMURAI+GOLEM95"
+   else if(reduction_interoperation.eq.31) then
+      write(*,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
+   end if
+
+   write(*,'(A1,1x,A25)') "#", "--- PARAMETERS VALUES ---"
+   write(*,'(A1,1x,A13)') "#", "Boson masses & widths:"
+   write(*,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
+   write(*,'(A1,1x,A5,G23.16)') "#", "mW = ", mW
+   write(*,'(A1,1x,A5,G23.16)') "#", "mH = ", mH
+   write(*,'(A1,1x,A5,G23.16)') "#", "wZ = ", wZ
+   write(*,'(A1,1x,A5,G23.16)') "#", "wW = ", wW
+   write(*,'(A1,1x,A5,G23.16)') "#", "wH = ", wH
+   write(*,'(A1,1x,A20)') "#", "Active light quarks:"
+   write(*,'(A1,1x,A7,G23.16)') "#", "Nf    =", Nf
+   write(*,'(A1,1x,A7,G23.16)') "#", "Nfgen =", Nfgen
+   write(*,'(A1,1x,A13)') "#", "Fermion masses & width:"
+   write(*,'(A1,1x,A7,G23.16)') "#", "mc   = ", mC
+   write(*,'(A1,1x,A7,G23.16)') "#", "mb   = ", mB
+   write(*,'(A1,1x,A7,G23.16)') "#", "mbMS = ", mBMS
+   write(*,'(A1,1x,A7,G23.16)') "#", "wb   = ", wB
+   write(*,'(A1,1x,A7,G23.16)') "#", "mt   = ", mT
+   write(*,'(A1,1x,A7,G23.16)') "#", "wt   = ", wT
+   write(*,'(A1,1x,A7,G23.16)') "#", "mtau = ", mtau
+   write(*,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
+   write(*,'(A1,1x,A25)') "#", "-------------------------"
+   write(*,'(A1,1x,A22)') "#", "Renormalisation scale:"
+   write(*,'(A1,1x,A5,G23.16)') "#", "mu = ", sqrt(scale2)
+   write(*,'(A1,1x,A25)') "#", "-------------------------"
+
+end subroutine print_parameters
+
 end program test

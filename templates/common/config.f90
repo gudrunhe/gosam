@@ -38,12 +38,12 @@
    logical :: include_eps_terms = [%
       @if extension dred %].false.[% @else %].true.[% @end @if %]
 
-   logical, parameter :: include_color_avg_factor = .[%
+   logical :: include_color_avg_factor = .[%
         olp.include_color_average default=true %].
-   logical, parameter :: include_helicity_avg_factor = .[%
+   logical :: include_helicity_avg_factor = .[%
         olp.include_helicity_average default=true %].
-   logical, parameter :: include_symmetry_factor = .[%
-        olp.include_symmetry_factor default=false %].
+   logical :: include_symmetry_factor = .[%
+        olp.include_symmetry_factor default=true %].
 
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai

@@ -1074,7 +1074,7 @@ contains
         else
            sqrt_s = sqrt(s_cms)
         end if
-        call lorentz_boost(sqrt_s,-p_cms,vecs)
+        call lorentz_boost(sqrt_s,p_cms,vecs)
      end if
      return
    end subroutine boost_to_cms
