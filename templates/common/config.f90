@@ -60,9 +60,7 @@
 
    [% @if extension ninja %]
    integer :: ninja_test = 0
-   integer :: ninja_istop = 0
-   ! Ninja should not use the grouping by default (still experimental)
-   logical :: ninja_group_numerators = .false.[%
+   integer :: ninja_istop = 0[%
       @end @if extension ninja %]
 
    ! Options to control the interoperation between different

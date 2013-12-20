@@ -59,11 +59,10 @@ OBJECTS= \
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.o[%
 			@end @if %][%
-		   @if internal GENERATE_NINJA_TRIPLE %] \
-	d[%$_%]h[%helicity%]l13.o[%
-			@end @if %][%
-		   @if internal GENERATE_NINJA_DOUBLE %] \
-	d[%$_%]h[%helicity%]l12.o[%
+		   @if extension ninja %] \
+	d[%$_%]h[%helicity%]l131.o \
+	d[%$_%]h[%helicity%]l132.o \
+	d[%$_%]h[%helicity%]l121.o[%
 			@end @if %][%
       @end @for %][%
    @end @select %][%
@@ -113,11 +112,10 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
 			@end @if %][%
-		   @if internal GENERATE_NINJA_TRIPLE %] \
-	d[%$_%]h[%helicity%]l13.f90[%
-			@end @if %][%
-		   @if internal GENERATE_NINJA_DOUBLE %] \
-	d[%$_%]h[%helicity%]l12.f90[%
+		   @if extension ninja %] \
+	d[%$_%]h[%helicity%]l131.f90 \
+	d[%$_%]h[%helicity%]l132.f90 \
+	d[%$_%]h[%helicity%]l121.f90[%
 			@end @if %][%
 	@end @for %][%
 	@end @select %][%

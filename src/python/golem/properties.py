@@ -289,7 +289,7 @@ ldflags_ninja = Property("ninja.ldflags",
    LDFLAGS required to link ninja.
 
    Example:
-   ninja.ldflags=-L/usr/local/lib/ -lninja-gfortran-double
+   ninja.ldflags=-L/usr/local/lib/ -lninja
 
    """,
    str,

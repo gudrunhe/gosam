@@ -13,15 +13,24 @@
 
    interface     cond
       module procedure cond_q_mu2
-      module procedure cond_mu2[%
-@if extension ninja %][% @if extension formopt %]
-      module procedure cond_abc_mu2[%
-@end @if %][% @end @if %]
+      module procedure cond_mu2
    end interface
+
+[% @if extension ninja %]
+   interface     cond_t
+      module procedure cond_mu_r1
+      module procedure cond_mu_r2
+      module procedure cond_abc_p2
+      module procedure cond_abc_p3
+   end interface
+[% @end @if %]
 
    public :: square
    public :: inspect_lo_diagram
    public :: cond[%
+@if extension ninja %]
+   public :: cond_t[%
+@end @if %][%
 @if extension samurai %]
    public :: cmplx_sam, cmplx_ki, metric_tensor[%
 @end @if %]
@@ -87,34 +96,98 @@ contains
       end if
    end  function cond_mu2
 
-[% @if extension ninja %][% @if extension formopt %]
-   pure function cond_abc_mu2(cnd, brack, a, b, c, mu2) result(cond)
+[% @if extension ninja %]
+   pure subroutine cond_mu_r1(cnd, brack, a, coeffs)
+      implicit none
+      logical, intent(in) :: cnd
+      complex(ki), dimension(4), intent(in) :: a
+      complex(ki), dimension(0:*), intent(inout) :: coeffs
+
+      interface
+         pure subroutine brack(inner_a, inner_co)
+            use [% process_name asprefix=\_ %]config, only: ki
+            implicit none
+            complex(ki), dimension(4), intent(in) :: inner_a
+            complex(ki), dimension(0:*), intent(inout) :: inner_co
+         end  subroutine brack
+      end interface
+
+      if (cnd) then
+         call brack(a, coeffs)
+      end if
+   end  subroutine cond_mu_r1
+
+   pure subroutine cond_mu_r2(cnd, brack, a, b, coeffs)
+      implicit none
+      logical, intent(in) :: cnd
+      complex(ki), dimension(4), intent(in) :: a, b
+      complex(ki), dimension(0:*), intent(inout) :: coeffs
+
+      interface
+         pure subroutine brack(inner_a, inner_b, inner_co)
+            use [% process_name asprefix=\_ %]config, only: ki
+            implicit none
+            complex(ki), dimension(4), intent(in) :: inner_a
+            complex(ki), dimension(4), intent(in) :: inner_b
+            complex(ki), dimension(0:*), intent(inout) :: inner_co
+         end  subroutine brack
+      end interface
+
+      if (cnd) then
+         call brack(a, b, coeffs)
+      end if
+   end  subroutine cond_mu_r2
+
+   pure subroutine cond_abc_p3(cnd, brack, a, b, c, param, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a, b, c
-      complex(ki), intent(in) :: mu2
-
-      complex(ki) :: cond
+      complex(ki), intent(in) :: param
+      complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure function brack(inner_a, inner_b, inner_c, inner_mu2)
+         pure subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
             use [% process_name asprefix=\_ %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
             complex(ki), dimension(4), intent(in) :: inner_c
-            complex(ki), intent(in) :: inner_mu2
-            complex(ki) :: brack
-         end  function brack
+            complex(ki), intent(in) :: inner_param
+            complex(ki), dimension(0:*), intent(inout) :: inner_co
+         end  subroutine brack
       end interface
 
       if (cnd) then
-         cond = brack(a, b, c, mu2)
-      else
-         cond = (0.0_ki, 0.0_ki)
+         call brack(a, b, c, param, coeffs)
       end if
-   end  function cond_abc_mu2
-[% @end @if %][% @end @if %]
+   end  subroutine cond_abc_p3
+
+   pure subroutine    cond_abc_p2(cnd, brack, a0, a1, b, c, param, coeffs)
+      implicit none
+      logical, intent(in) :: cnd
+      complex(ki), dimension(4), intent(in) :: a0, a1, b, c
+      complex(ki), dimension(0:2), intent(in) :: param
+      complex(ki), dimension(0:*), intent(inout) :: coeffs
+
+      interface
+         pure subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
+           & inner_co)
+            use [% process_name asprefix=\_ %]config, only: ki
+            implicit none
+            complex(ki), dimension(4), intent(in) :: inner_a0
+            complex(ki), dimension(4), intent(in) :: inner_a1
+            complex(ki), dimension(4), intent(in) :: inner_b
+            complex(ki), dimension(4), intent(in) :: inner_c
+            complex(ki), dimension(0:2), intent(in) :: inner_param
+            complex(ki), dimension(0:*), intent(inout) :: inner_co
+         end  subroutine brack
+      end interface
+
+      if (cnd) then
+         call brack(a0, a1, b, c, param, coeffs)
+      end if
+   end  subroutine cond_abc_p2
+[% @end @if %]
 
    subroutine     inspect_lo_diagram(values, d, h, unit)
       implicit none

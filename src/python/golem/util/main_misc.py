@@ -524,6 +524,10 @@ def workflow(conf):
 		if conf["abbrev.level"] != "diagram":	
 			raise GolemConfigError(
 						"extension formopt only supported with abbrev.level=diagram\n")
+	if ('ninja' in ext) and ('formopt' not in ext):
+		raise GolemConfigError(
+			"Extension ninja is only supported with extension formopt\n" +
+			"Please either add formopt or remove ninja in the input card\n")
 
 
 	for prop in golem.properties.properties:

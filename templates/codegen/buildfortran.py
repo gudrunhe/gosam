@@ -251,13 +251,14 @@ f90file.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
 f90file.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_gol)\n')
 f90file.write('   end function numerator_golem95\n')
 f90file.write('   !------#] function numerator_golem95:\n')[%
-@end @if %][%
+@end @if %]
+[%
 @if extension ninja %]
 f90file.write('   !------#[ subroutine numerator_ninja:\n')
 f90file.write('   subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &\n')
 f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]'+diag_name+'_ninja")\n')
 f90file.write('      use iso_c_binding, only: c_int\n')
-f90file.write('      use ninja_module, only: ki_nin\n')
+f90file.write('      use ninjago_module, only: ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')

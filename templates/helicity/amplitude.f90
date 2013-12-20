@@ -16,7 +16,7 @@
    use [% process_name asprefix=\_ %]golem95h[% helicity %][%
       @end @if %][%
       @if extension ninja %]
-   use ninja_module, only: ki_nin
+   use ninjago_module, only: ki_nin
    use [% process_name asprefix=\_ %]ninjah[% helicity %][%
       @end @if %][%
    @end @select %][%
@@ -379,7 +379,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @end @if %][%
       @end @if %][%
       @if extension ninja %]
-   case(21) ! use Ninja only
+   case(31) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
          @if generate_lo_diagrams %]
       samplitude(:) = 2.0_ki * real(tot(:), ki)[%

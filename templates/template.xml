@@ -64,12 +64,6 @@
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
 		</file>
-		<file src="haggies-l13.out" class="Kinematics">
-			<only if-internal="GENERATE_NINJA_TRIPLE"/>
-		</file>
-		<file src="haggies-l12.out" class="Kinematics">
-			<only if-internal="GENERATE_NINJA_DOUBLE"/>
-		</file>
 		<file src="haggies-l1c.in" class="Multi">
 			<except if-option="genUV" value="false" />
 		</file>
@@ -104,17 +98,24 @@
 		<file src="finaloptimization.frm" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
+		<file src="ninjafinalopt.frm" class="Kinematics">
+			<only if-extension="ninja" />
+		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
 		<file src="buildfortran_d.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
-		<file src="buildfortran_n3.py" class="Kinematics">
+		<file src="buildfortran_tn2.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
 		</file>
-		<file src="buildfortran_n2.py" class="Kinematics">
+		<file src="buildfortran_tn3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+		</file>
+		<file src="buildfortran_tmu.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
 		</file>

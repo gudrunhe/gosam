@@ -908,11 +908,11 @@ end subroutine tear_down_golem95
    @if extension ninja %]
 !---#[ subroutine ninja_exit:
 subroutine ninja_exit()
-  use ninja_module, only: ninja_clear_cache
+  use ninjago_module, only: ninja_clear_integral_cache
   implicit none
-  !------#[ call ninja_clear_cache():
-  call ninja_clear_cache()
-  !------#] call ninja_clear_cache():
+  !------#[ call ninja_clear_integral_cache():
+  call ninja_clear_integral_cache()
+  !------#] call ninja_clear_integral_cache():
 end subroutine ninja_exit
 !---#] subroutine ninja_exit:[%
    @end @if extension ninja %][%
