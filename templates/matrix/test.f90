@@ -81,8 +81,8 @@
  contains
 
 subroutine  print_parameters(scale2)
-   use udeneg_config, only: renormalisation, convert_to_cdr, reduction_interoperation
-   use udeneg_model
+   use [% process_name asprefix=\_ %]config, only: renormalisation, convert_to_cdr, reduction_interoperation
+   use [% process_name asprefix=\_ %]model
    implicit none
    real(ki) :: scale2
 
