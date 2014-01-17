@@ -241,6 +241,7 @@ contains[%
       implicit none
       complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
       complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
+      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
 
       type(tensrec_info_group[% GROUP %]), intent(out) :: coeffs[$
    @select r2 @case implicit $][%
@@ -248,6 +249,11 @@ contains[%
       @select RANK @case 0 1 2 3 %][%
       @else %]
       complex(ki) :: x1, x2[%
+      @end @select %][%
+    @case 5 %][%
+      @select RANK @case 0 1 2 3 4 5%][%
+      @else %]
+      complex(ki) :: x1, x2, x3[%
       @end @select %][%
      @end @select %][$
    @end @select $][$
@@ -284,7 +290,8 @@ contains[%
 
 
       @select r2 @case implicit $][%
-        @select LOOPSIZE @case 0 1 2 3 4 %][$
+        @select LOOPSIZE @case 0 1 2 3 4 5 %][%
+         @select LOOPSIZE @case 0 1 2 3 4 %][$
          @select rk @case 0 1 $][$
          @case 2 3 $]
       !---#[ reconstruct coeffs%coeffs_[% DIAGRAM %]s1:[$
@@ -309,7 +316,7 @@ contains[%
                   @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
                   @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
                   @select coeff @case 0 $][$
-                  @else $]([$k$],[$i$])[$
+                  @else $]([$kmap$],[$imap$])[$
                   @end @select $][$
                @end @for tens_rec_info rkk $][$
             @end @with eval rkk $]
@@ -331,7 +338,7 @@ contains[%
                   @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
                   @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
                   @select coeff @case 0 $][$
-                  @else $]([$k$],[$i$])[$
+                  @else $]([$kmap$],[$imap$])[$
                   @end @select $]
       x2 = [$
                   @select sign @case -1 $]-[$
@@ -346,7 +353,7 @@ contains[%
                   @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
                   @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
                   @select coeff @case 0 $][$
-                  @else $]([$k$],[$i$])[$
+                  @else $]([$kmap$],[$imap$])[$
                   @end @select $]
       coeffs%coeffs_[% DIAGRAM %]s1[$
                   @if eval rkk .gt. 0 $]%c[$ coeff $][$
@@ -364,6 +371,79 @@ contains[%
             @end @with eval rkk $]
       !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2:[$
          @end @select rk $][%
+        @else %][$
+        @select rk @case 0 1 2 3 4 5 $][$ @else $]
+      !---#[ reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2 and s3:[$
+            @with eval rk - 2 result=rkk $][$
+               @for tens_rec_info rkk shift_args=1 $]
+      x1 = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $] cone[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$kmap$],[$imap$])[$
+                  @end @select $]
+      x2 = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $]-cone[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$kmap$],[$imap$])[$
+                  @end @select $]
+      x3 = [$
+                  @select sign @case -1 $]-[$
+                  @end @select $]derivative([$
+                  @if internal DERIVATIVES_AT_ZERO $][$
+                  @else $]Q,[$
+                  @end @if $]ctwo[$
+
+                  @for elements args delim=, $],[$ $_ $][$
+                  @end @for $])[$
+
+                  @if eval symmetry .gt. 1 $] / [$ symmetry $].0_ki[$
+                  @end @if $] - coeffs%coeffs_[% DIAGRAM %]%c[$ coeff $][$
+                  @select coeff @case 0 $][$
+                  @else $]([$kmap$],[$imap$])[$
+                  @end @select $]
+      coeffs%coeffs_[% DIAGRAM %]s1[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = x1 - x2/3._ki - x3/6._ki
+      coeffs%coeffs_[% DIAGRAM %]s2[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = 0.5_ki * (x1 + x2)
+      coeffs%coeffs_[% DIAGRAM %]s3[$
+                  @if eval rkk .gt. 0 $]%c[$ coeff $][$
+                     @select coeff @case 0 $][$
+                     @else $]([$k$],[$i$])[$
+                     @end @select $][$
+                  @end @if $] = (x3 - x2)/6._ki - 0.5_ki * x1[$
+               @end @for tens_rec_info $][$
+            @end @with eval rkk $]
+      !---#] reconstruct coeffs%coeffs_[% DIAGRAM %]s1 and s2 and s3:[$
+        @end @select rk $][%
+        @end @select %][%
         @end @select %][$
       @end @select r2 $][[$ ' $]%[$
    @end @for repeat max_rank $]

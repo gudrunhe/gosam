@@ -230,11 +230,14 @@ f90file.write('      use [% process_name asprefix=\_ %]groups, only: tensrec_inf
 f90file.write('      implicit none \n')
 f90file.write('      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki) \n')
 f90file.write('      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki) \n')
+f90file.write('      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki) \n')
 f90file.write('      type(tensrec_info_group%s), intent(out) :: coeffs \n' % group)[%
 	@select r2 @case implicit %]
-if int(loopsize) in [0,1,2,3,4]:
-	if int(rank) not in [0,1,2,3]:
-		f90file.write('      complex(ki) :: x1,x2\n')[%
+if int(loopsize) in [0,1,2,3,4,5]:
+	if int(rank) not in [0,1,2,3] and int(loopsize)<5:
+		f90file.write('      complex(ki) :: x1,x2\n')
+	if int(loopsize)==5 and int(rank)>=6:
+		f90file.write('      complex(ki) :: x1,x2,x3\n')[%
 	@end @select %][%
 	@if internal DERIVATIVES_AT_ZERO %][%
 	@else %]
@@ -272,14 +275,14 @@ elif int(rank) == [% rk %]:[%
          @end @for %]
 	f90file.write(')')[%
          @if eval symmetry .gt. 1 %] 
-	f90file.write('/ [% symmetry %].0_ki')[%
+	f90file.write('/[% symmetry %].0_ki')[%
          @end @if %]
 	f90file.write('\n')[%
       @end @for tens_rec_info rk %]
 	f90file.write('      !---#] reconstruct coeffs%%coeffs_%s:\n' % diagram)[%
       @select r2 @case implicit %]
-	if int(loopsize) in [0,1,2,3,4]:
-		if int(rank) in [2,3]:
+	if int(loopsize) in [0,1,2,3,4,5]:
+		if int(rank) in [2,3] and int(loopsize)<5:
 			f90file.write('      !---#[ reconstruct coeffs%%coeffs_%ss1:\n' % diagram)[%
             @with eval rk - 2 result=rkk %][%
                @for tens_rec_info rkk shift_args=1 %]
@@ -311,17 +314,17 @@ elif int(rank) == [% rk %]:[%
 			f90file.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
                   @select coeff @case 0 %][%
                   @else %]
-			f90file.write('([%k%],[%i%])')[%
+			f90file.write('([%kmap%],[%imap%])')[%
                   @end @select %]
 			f90file.write('\n')[%
                @end @for tens_rec_info rkk %][%
             @end @with eval rkk %]
 			f90file.write('      !---#] reconstruct coeffs%%coeffs_%ss1:\n' % diagram )
-		elif int(rank) not in [0,1]:
+		elif int(rank) not in [0,1] and int(loopsize)<5:
 			f90file.write('      !---#[ reconstruct coeffs%%coeffs_%ss1 and s2:\n' % diagram)[%
             @with eval rk - 2 result=rkk %][%
                @for tens_rec_info rkk shift_args=1 %]
-			f90file.write('      x1 =')[%
+			f90file.write('      x1 = ')[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
@@ -341,7 +344,7 @@ elif int(rank) == [% rk %]:[%
 			f90file.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
                   @select coeff @case 0 %][%
                   @else %]
-			f90file.write('([%k%],[%i%])')[%
+			f90file.write('([%kmap%],[%imap%])')[%
                   @end @select %]
 			f90file.write('\n')
 			f90file.write('      x2 = ')[%
@@ -361,10 +364,10 @@ elif int(rank) == [% rk %]:[%
                   @if eval symmetry .gt. 1 %]
 			f90file.write('/ [% symmetry %].0_ki')[%
                   @end @if %] 
-			f90file.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+			f90file.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
                   @select coeff @case 0 %][%
                   @else %]
-			f90file.write('([%k%],[%i%])')[%
+			f90file.write('([%kmap%],[%imap%])')[%
                   @end @select %]
 			f90file.write('\n')
 			f90file.write('      coeffs%%coeffs_%ss1' % diagram)[%
@@ -389,7 +392,114 @@ elif int(rank) == [% rk %]:[%
 			f90file.write('\n')[%
                @end @for tens_rec_info %][%
             @end @with eval rkk %]
-			f90file.write('      !---#] reconstruct coeffs%%coeffs_%ss1 and s2:\n' % diagram)[%
+			f90file.write('      !---#] reconstruct coeffs%%coeffs_%ss1 and s2:\n' % diagram)
+		elif int(loopsize)==5 and int(rank)>=6:
+			f90file.write('      !---#[ reconstruct coeffs%%coeffs_%ss1, s2 and s3:\n' % diagram)[%
+            @with eval rk - 2 result=rkk %][%
+               @for tens_rec_info rkk shift_args=1 %]
+			f90file.write('      x1 =')[%
+                  @select sign @case -1 %]
+			f90file.write('-')[%
+                  @end @select %]
+			f90file.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file.write('Q,')[%
+                  @end @if %]
+			f90file.write('cone')[%
+                  @for elements args delim=, %]
+			f90file.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file.write('\n')
+			f90file.write('      x2 = ')[%
+                  @select sign @case -1 %]
+			f90file.write('-')[%
+                  @end @select %]
+			f90file.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file.write('Q,')[%
+                  @end @if %]
+			f90file.write('-cone')[%
+                  @for elements args delim=, %]
+			f90file.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file.write('\n')
+			f90file.write('      x3 = ')[%
+                  @select sign @case -1 %]
+			f90file.write('-')[%
+                  @end @select %]
+			f90file.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file.write('Q,')[%
+                  @end @if %]
+			f90file.write('ctwo')[%
+                  @for elements args delim=, %]
+			f90file.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file.write('\n')
+
+			f90file.write('      coeffs%%coeffs_%ss1' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file.write('= x1 - x2/3._ki - x3/6._ki')
+			f90file.write('\n')
+			f90file.write('      coeffs%%coeffs_%ss2' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file.write('= 0.5_ki * (x1 + x2)')
+			f90file.write('\n')
+			f90file.write('      coeffs%%coeffs_%ss3' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file.write('= (x3 - x2)/6._ki - 0.5_ki * x1')
+			f90file.write('\n')[%
+               @end @for tens_rec_info %][%
+            @end @with eval rkk %]
+			f90file.write('      !---#] reconstruct coeffs%%coeffs_%ss1, s2 and s3:\n' % diagram)[%
       @end @select r2 %][%
    @end @for repeat max_rank %]
 
