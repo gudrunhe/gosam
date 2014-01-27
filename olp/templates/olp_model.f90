@@ -799,5 +799,61 @@ end subroutine init_functions
 !---#] EW scheme choice:[$
 @end @select$][$
 @end @select$]
+[$ @select model @case sm_complex  $][$ 
+@select model.options @case ewchoose $]
+!---#[ EW scheme choice:
+  subroutine ewschemechoice(ichoice)
+  implicit none
+  integer, intent(in) :: ichoice
+  real(ki), parameter :: pi = 3.14159265358979323846264&
+ &3383279502884197169399375105820974944592307816406286209_ki
+  complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+  select case (ichoice)
+        case (1)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+      ! GF, mW, sw --> e
+        e = sqrt(mW*mW-i_*mW*wW)*sw*sqrt(8.0_ki*GF/sqrt(2.0_ki))
+        case (2)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case (3)
+        e = sqrt(4.0_ki*pi*alpha)
+      ! sw, mZ --> mW
+        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)
+        case (4)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, sw, alpha --> mW
+        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
+      ! mW, sw --> mZ
+        mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
+        case (5)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case (6)
+      ! mZ, sw --> mW
+        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)
+        case(7)
+      ! e, sw, GF --> mW
+        mW = e/2.0_ki/sw/sqrt(sqrt(2.0_ki)*GF)
+      ! mW, sw --> mZ
+        mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
+        case(8)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, mZ, alpha --> mW
+      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
+     & sqrt(2.0_ki)/GF))
+      ! mW, mZ --> sw
+      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+!        case default
+  end select
+  end subroutine
+!---#] EW scheme choice:[$
+@end @select$][$
+@end @select$]
 end module olp_model
 
