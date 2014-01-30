@@ -124,8 +124,6 @@ parameters = {
    'wZ': '2.4952',
    'wW': '2.124',
    'wtau': '0.0',
-   'wchi': '0.0',
-   'wphi': '0.0',
    'wH': '0.0',
    'wghZ': '0.0',
    'wghWp': '0.0',
@@ -253,6 +251,9 @@ functions = {
    'NA': 'NC*NC-1',
    'gZ': '1/cw/sw',
    'gW': '1/sqrt2/sw',
+
+   'wchi': 'wZ',
+   'wphi': 'wW',
 
    'gUv':    ' gZ*(1/4 - 2/3*sw^2)',
    'gCv':    ' gZ*(1/4 - 2/3*sw^2)',

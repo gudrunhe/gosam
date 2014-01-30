@@ -14,6 +14,7 @@ integer, parameter :: golemlogf = 19
 integer, dimension(2) :: channels
 integer :: ic, ch
 
+integer :: prec
 double precision, parameter :: eps = 1.0d-4
 
 logical :: success
@@ -156,10 +157,10 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    ! rescaling of all dimensionful quantities that enter the calculation
 
    call shake_gauge_parameters(0.0_ki)
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
 
    call shake_gauge_parameters(5.0_ki)
-   call samplitude(vecs, scale2, gauge_amp, gok)
+   call samplitude(vecs, scale2, gauge_amp, prec, gok)
 
    diff = abs(rel_diff(amp, gauge_amp))
 

@@ -26,4 +26,6 @@ helicities=-+-++, -+-+-
 abbrev.level=diagram
 
 #process.extensions=dred,derive,numpolvec
-process.extensions=dred,derive,numpolvec,formopt
+process.extensions=dred,derive,numpolvec,formopt,ninja
+ninja.fcflags=-I/home/pcl305a/luisonig/local/ninja_gfortran/include/ninja
+ninja.ldflags=-L/home/pcl305a/luisonig/local/ninja_gfortran/lib -lninja

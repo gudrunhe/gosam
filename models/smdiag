@@ -60,7 +60,7 @@
                       AUX='0', CONJ=('+','-')]
 
 % S: scalars
-[chi, chi,         +; TWOSPIN=0, COLOR=1, MASS='mZ', WIDTH='wZ',
+[chi, chi,         +; TWOSPIN=0, COLOR=1, MASS='mZ', WIDTH='wchi',
                       AUX='0', CONJ=('+')]
 [phim, phip,       +; TWOSPIN=0, COLOR=1, MASS='mW', WIDTH='wphi',
                       AUX='0', CONJ=('+','-')]

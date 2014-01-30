@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% process_name asprefix=\_ %]config, only: ki, logfile, PSP_rescue
+   use [% process_name asprefix=\_ %]config, only: ki, logfile
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
@@ -12,7 +12,7 @@
 
    integer :: NEVT = 1
 
-   integer :: ievt, ierr
+   integer :: ievt, ierr, prec
    real(ki), dimension([%num_legs%], 4) :: vecs
    real(ki) :: scale2
    real(ki), dimension(0:3) :: amp
@@ -29,8 +29,6 @@
       print*, "No file 'param.dat' found. Using defaults"
    end if
 
-   PSP_rescue = .false.
-
    call initgolem()
 
    call random_seed
@@ -44,7 +42,7 @@
       scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
       call print_parameters(scale2)
-      call samplitude(vecs, scale2, amp)
+      call samplitude(vecs, scale2, amp, prec)
       call ir_subtraction(vecs, scale2, irp)
       if(ievt.eq.NEVT) then[%
       @if generate_lo_diagrams %]
@@ -81,7 +79,9 @@
  contains
 
 subroutine  print_parameters(scale2)
-   use [% process_name asprefix=\_ %]config, only: renormalisation, convert_to_cdr, reduction_interoperation
+   use [% process_name asprefix=\_ %]config, only: renormalisation, & 
+        convert_to_cdr, reduction_interoperation, & 
+        reduction_interoperation_rescue
    use [% process_name asprefix=\_ %]model
    implicit none
    real(ki) :: scale2
@@ -101,9 +101,15 @@ subroutine  print_parameters(scale2)
    else if(reduction_interoperation.eq.1) then
       write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
-      write(*,'(A1,1x,A15,A15)') "#", "reduction with ", "SAMURAI+GOLEM95"
-   else if(reduction_interoperation.eq.31) then
       write(*,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
+   end if
+
+   if(reduction_interoperation_rescue.eq.0) then
+      write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "SAMURAI"
+   else if(reduction_interoperation_rescue.eq.1) then
+      write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "GOLEM95"
+   else if(reduction_interoperation_rescue.eq.2) then
+      write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
    end if
 
    write(*,'(A1,1x,A25)') "#", "--- PARAMETERS VALUES ---"

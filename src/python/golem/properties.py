@@ -831,7 +831,18 @@ config_renorm_gamma5 = Property("renorm_gamma5",
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Set the same variable in config.f90. A value of '-1' lets gosam
+   decide depending on the specified extensions. 
+   Defaults reduction program.
+
+   See common/config.f90 for details.
+   """,
+   int, -1)
+
+config_reduction_interoperation_rescue = Property("reduction_interoperation_rescue",
+   """
+   Set the same variable in config.f90. A value of '-1' lets gosam
    decide depending on the specified extensions.
+   Rescue reduction program.
 
    See common/config.f90 for details.
    """,
@@ -891,37 +902,49 @@ config_PSP_verbosity = Property("PSP_verbosity",
    Set the same variable in config.f90
 
    Sets the verbosity of the PSP_check.
-   verbosity = 0 : no output
-   verbosity = 1 : bad point are written in a file gs_badpts.log
-   verbosity = 2 : output whenever the rescue system is used
-                   with comment about the success of the rescue
+   verbosity = False: no output
+   verbosity = True : bad point are written in a file gs_badpts.log
    !!Works only for QCD and with built-in model files!!
    """,
-   int, 2, options=["0","1","2","3"])
+   bool, False)
 
-config_PSP_chk_threshold1 = Property("PSP_chk_threshold1",
+config_PSP_chk_th1 = Property("PSP_chk_th1",
    """\
    Set the same variable in config.f90
 
-   Threshold to activate the recalculation of the full
-   amplitude using golem95. The number has to be an integer
-   indicating the wished minimum number of digits accuracy
-   on the finite part.
+   Threshold to activate accept the point without further treatments.
+   The number has to be an integer indicating the wished minimum number 
+   of digits accuracy on the pole. For poles more precise than this
+   threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
    """,
-   int, 4)
+   int, 8)
 
-config_PSP_chk_threshold2 = Property("PSP_chk_threshold2",
+config_PSP_chk_th2 = Property("PSP_chk_th2",
    """\
    Set the same variable in config.f90
 
-   Threshold to declare a PSP as bad point. According to the
+   Threshold to declare a PSP as bad point, based of the precision of the pole.
+   Points with precision less than this threshold are directly reprocessed with 
+   the rescue system (if available), or declared as unstable. According to the
+   verbosity level set, such points are written to a file and not used when
+   the code is interfaced to an external Monte Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 3)
+
+config_PSP_chk_th3 = Property("PSP_chk_th3",
+   """\
+   Set the same variable in config.f90
+
+   Threshold to declare a PSP as bad point, based on the precision of 
+   the finite part estimated with a rotation. According to the
    verbosity level set, such points are written to a file and not
    used when the code is interfaced to an external Monte Carlo 
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
-   int, 3)
+   int, 5)
 
 config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
@@ -987,13 +1010,15 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_reduction_interoperation,
+   config_reduction_interoperation_rescue,
    config_samurai_scalar,
    config_nlo_prefactors,
    config_PSP_check,
-   config_PSP_verbosity,
-   config_PSP_chk_threshold1,
    config_PSP_rescue,
-   config_PSP_chk_threshold2,
+   config_PSP_verbosity,
+   config_PSP_chk_th1,
+   config_PSP_chk_th2,
+   config_PSP_chk_th3,
    config_PSP_chk_kfactor,
 
    reference_vectors,
@@ -1006,7 +1031,7 @@ properties = [
    pyxodraw
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "pjfry"]
+REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
 
 def getExtensions(conf):
    ext_name = str(extensions)

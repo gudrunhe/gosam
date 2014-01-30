@@ -21,8 +21,8 @@ contains
       use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem
       use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
            & [%$_%]_PSP_verbosity => PSP_verbosity, &
-           & [%$_%]_PSP_chk_threshold1 => PSP_chk_threshold1, &
-           & [%$_%]_PSP_chk_threshold2 => PSP_chk_threshold2, &
+           & [%$_%]_PSP_chk_th1 => PSP_chk_th1, &
+           & [%$_%]_PSP_chk_th2 => PSP_chk_th2, &
            & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @for %]
       implicit none
@@ -86,15 +86,15 @@ contains
 
       ! Uncomment to change rescue system setting on all suprocesses
       ! PSP_rescue = .true.
-      ! PSP_verbosity = [% PSP_verbosity default=1 %]
-      ! PSP_chk_threshold1 = [% PSP_chk_threshold1 default=4 %]
-      ! PSP_chk_threshold2 = [% PSP_chk_threshold2 default=3 %]
+      ! PSP_verbosity = .false.
+      ! PSP_chk_th1 = [% PSP_chk_threshold1 default=4 %]
+      ! PSP_chk_th2 = [% PSP_chk_threshold2 default=3 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
       ! [%$_%]_PSP_verbosity =  PSP_verbosity
-      ! [%$_%]_PSP_chk_threshold1 = PSP_chk_threshold1
-      ! [%$_%]_PSP_chk_threshold2 = PSP_chk_threshold2
+      ! [%$_%]_PSP_chk_th1 = PSP_chk_th1
+      ! [%$_%]_PSP_chk_th2 = PSP_chk_th2
       ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
       @end @for %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
@@ -282,7 +282,7 @@ contains
       @end @if %], intent(in) :: mu
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(4), intent(out) :: res
-
+      integer :: prec
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension(4) :: amp[% 
       @select olp.alphas default=NONE 
@@ -325,7 +325,7 @@ contains
 
       call boost_to_cms(vecs)
 
-      call samplitude(vecs, mu*mu, amp, ok[%
+      call samplitude(vecs, mu*mu, amp, prec, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
