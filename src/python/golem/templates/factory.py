@@ -131,12 +131,13 @@ class TemplateFactory:
             elif class_name == "OLP":
                if "contract" not in opts or \
                      "subprocesses" not in opts or \
+                     "subprocesses_conf" not in opts or \
                      "conf" not in opts:
                   raise golem.util.parser.TemplateError(
                         "Cannot use template 'OLP' here.")
                template = golem.templates.olp.OLPTemplate(f_template)
                template.init_contract(opts["contract"])
-               template.init_channels(opts["subprocesses"])
+               template.init_channels(opts["subprocesses"],opts["subprocesses_conf"])
             elif class_name == "Multi":
                if "conf" not in opts:
                   raise golem.util.parser.TemplateError(

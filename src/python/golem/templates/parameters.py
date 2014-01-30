@@ -1,11 +1,12 @@
 # vim: ts=3:sw=3
 
 import StringIO
-
 from golem.util.config import Properties
 from golem.util.parser import Template
-
 import golem.util.tools
+import golem.model.expressions as ex
+from golem.model.feynrules import cmath_functions, shortcut_functions, \
+		unprefixed_symbols, sym_cmath, sym_cmplx, i_
 
 class ModelTemplate(Template):
 	"""
@@ -30,6 +31,8 @@ class ModelTemplate(Template):
 		self._parameters = {}
 		self._functions = {}
 		name_length = 0
+		self._floats = {}
+		self._functions_fortran = {}
 		
 		for name, value in self._mod.parameters.items():
 			t = self._mod.types[name]
@@ -89,6 +92,20 @@ class ModelTemplate(Template):
 
 		self._slha_entry_stack = []
 
+		model_options = conf.getProperty(golem.properties.model_options)
+		if "ewchoose" in golem.model.MODEL_OPTIONS:
+			props.setProperty("ewchoose", str(golem.model.MODEL_OPTIONS["ewchoose"]))
+		else:
+			golem.model.MODEL_OPTIONS["ewchoose"] = False
+
+		ones = conf.getProperty(golem.properties.one)
+		if "e" in ones:
+			props.setProperty("e_not_one", False)
+		else:
+			props.setProperty("e_not_one", True)
+
+		
+
 	def add_kinematics_parameters(self, in_particles, out_particles):
 
 		def add_param(name, value):
@@ -137,6 +154,8 @@ class ModelTemplate(Template):
 		nfunctions = len(model_mod.functions)
 
 		golem.util.tools.message("Compiling functions ...")
+
+
 		parser = golem.model.expressions.ExpressionParser()
 		functions = {}
 		i = 0
@@ -183,6 +202,8 @@ class ModelTemplate(Template):
 		nfunctions = len(model_mod.functions)
 
 		golem.util.tools.message("Compiling functions ...")
+
+
 		parser = golem.model.expressions.ExpressionParser()
 		functions = {}
 		i = 0
@@ -480,4 +501,96 @@ class ModelTemplate(Template):
 			props.setProperty(hex_name, hex_ascii)
 
 			yield props
+
+	def functions_resolved_fortran(self, *args, **opts):
+		"""
+		New method for writing the model file when GoSam is
+		the OLP : writes directly into fortran
+		"""
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expression_name  = self._setup_name("expression", "expression", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		model_mod = self._mod
+	
+		nfunctions = len(model_mod.functions)
+
+		golem.util.tools.message("Compiling functions ...")
+		process_functions=False
+		if self._functions_fortran == {}:
+			process_functions=True
+		if process_functions:
+			specials={}
+			for expr in shortcut_functions:
+				specials[str(expr)] = expr
+			for expr in unprefixed_symbols:
+				specials[str(expr)] = expr
+			parser = golem.model.expressions.ExpressionParser(**specials)
+			functions = {}
+			fcounter=[0]
+			fsubs={}
+			i = 0
+			tmp=open('tmp','w')
+
+			for name, value in model_mod.functions.items():
+				i += 1
+				if i % 100 == 0:
+					golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+				expr = parser.compile(value)
+				prefix='mdl'
+				for fn in cmath_functions:
+					expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
+							ex.SpecialExpression(str(fn)))
+					expr = expr.replaceIntegerPowers(fn)
+				expr = expr.algsubs(sym_cmplx(
+					ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+				expr = expr.replaceFloats(prefix + "float", fsubs, fcounter)
+				functions[name] = expr
+			self._functions_fortran = functions
+			self._floats = fsubs
+		else:
+			functions = self._functions_fortran
+
+		golem.util.tools.message("Resolving dependencies between functions ...")
+		program = golem.model.expressions.resolve_dependencies(functions)
+		nlines = len(program)
+
+		props = Properties()
+		for i, name in enumerate(program):
+			if i % 100 == 0:
+				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+
+			ast = functions[name]
+			buf =""
+			try:
+				buf += ast.write_fortran()
+
+				props.setProperty(name_name, name)
+				props.setProperty(expression_name, buf)
+				props.setProperty(index_name, i)
+				props.setProperty(first_name, i == 0)
+				props.setProperty(last_name, i == nlines - 1)
+			except:
+				golem.util.tools.error("Could not set property in model file %s" % name)
+			yield props
+
+	def floats(self, *args, **opts):
+		if self._floats == {}:
+			list(self.functions_resolved_fortran(args,opts))
+		float_name = self._setup_name("float", "$_", opts)
+		value_name = self._setup_name("value", "value", opts)
+		local_floats = self._floats
+		props = Properties()
+		for name in local_floats:
+			try:
+				props.setProperty(float_name, name)
+				props.setProperty(value_name, local_floats[name])
+			except:
+				golem.util.tools.error("Floats not defined %s" % name)
+			yield props
+
+
+
+
 

@@ -286,6 +286,7 @@ d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l
 d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt 
 	@echo Form is optimizing loop diagram derivatives [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%

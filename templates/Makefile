@@ -42,26 +42,26 @@ dist: [% process_name asprefix=\_ %]matrix.tar.gz
 compile:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 doc:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 clean:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 very-clean:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 else
 	@echo =====  This would delete most of the Fortran90 sources. =====
@@ -73,7 +73,7 @@ endif
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 

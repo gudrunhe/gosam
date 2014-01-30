@@ -41,10 +41,11 @@
    private
 
    integer :: banner_ch = 6
-      
+
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
+   public :: OLP_color_correlated, OLP_spin_correlated_lo2
 contains
    !---#[ subroutine banner:
    subroutine     banner()
@@ -932,6 +933,80 @@ contains
       end if[%
    @end @if %]
    end subroutine color_correlated_lo2
+
+
+   pure subroutine OLP_color_correlated_lo(color_vector,res)
+      use [% process_name asprefix=\_ %]color, only: [%
+      @for pairs colored1 colored2 ordered %][%
+      @if is_first %][% @else %], &
+      & [% @end @if %]T[%index1%]T[%index2%][%
+      @end @for pairs %]
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: color_vector
+      real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: res
+      res(:)=0.0_ki[%
+      @for pairs colored1 colored2 ordered %] [%
+      @if eval index1 .ne. index2 %]
+      res([% eval index1 - 1 + ( index2 - 1 ) * ( index2 - 2 ) // 2 + 1 %]) = square(color_vector,T[%
+        index1%]T[%index2%])[%
+      @end @if %] [%
+      @end @for pairs %]
+   end subroutine OLP_color_correlated_lo
+
+
+   subroutine OLP_color_correlated(vecs,ampcc)
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension(num_legs, 4), intent(in) :: vecs
+      real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
+      real(ki), dimension(num_legs,num_legs) :: borncc
+      real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli
+      real(ki), dimension(num_legs, 4) :: pvecs
+      complex(ki), dimension(numcs) :: color_vector
+      ampcc(:) = 0.0_ki[%
+  @if generate_lo_diagrams %][%
+  @for helicities %]
+      !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+      call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+      !---#] reinitialize kinematics:
+      color_vector = amplitude[%map.index%]l0()
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+      ampcc(:) = ampcc(:) + ampcc_heli(:)[%
+  @end @for helicities %]
+      if (include_helicity_avg_factor) then
+         ampcc = ampcc / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         ampcc = ampcc / incolors
+      end if
+      if (include_symmetry_factor) then
+         ampcc = ampcc / real(symmetry_factor, ki)
+      end if[%
+   @end @if %]
+
+
+   end subroutine OLP_color_correlated
+
+
    !---#] color correlated ME :
    !---#[ spin correlated ME :
    subroutine spin_correlated_lo2(vecs, bornsc)
@@ -1056,7 +1131,100 @@ contains
       end if[%
 @end @if generate_lo_diagrams %]
    end subroutine spin_correlated_lo2
+
+
+
+
+   subroutine OLP_spin_correlated_lo2(vecs, ampsc)
+      use [% process_name asprefix=\_ %]kinematics
+      implicit none
+      real(ki), dimension(num_legs, 4), intent(in) :: vecs
+      real(ki), dimension(2*num_legs*num_legs) :: ampsc
+      real(ki), dimension(num_legs, 4) :: pvecs
+      integer :: i
+      complex(ki) :: pm, mp[%
+@if generate_lo_diagrams %][%
+   @for particles lightlike vector %][%
+      @if is_first %][%
+         @for helicities %]
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
+         @end @for %][%
+      @end @if is_first %]
+      complex(ki), dimension(4) :: eps[%index%][%
+   @end @for %][%
+@end @if generate_lo_diagrams %]
+
+      ampsc(:) = 0.0_ki
+      !---#[ Initialize helicity amplitudes :[%
+@if generate_lo_diagrams %][%
+   @for particles lightlike vector %][%
+      @if is_first %][%
+         @for helicities %]
+      !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+      call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+      !---#] reinitialize kinematics:
+      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
+         @end @for helicities %][%
+      @end @if is_first %][%
+   @end @for %]
+      !---#] Initialize helicity amplitudes :
+
+      [%
+   @for pairs gluons1 colored2 %][%
+     @if eval index1 .ne. index2 %]
+      !---#[ pair [%index1%][%index2%] :
+
+      mp  = 0.0_ki[%
+      @for helicities where=index1.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index1 to=L
+                symbol_plus=X symbol_minus=L var=mhelicity%] &
+      &          + square_[%index1%]_[%index2%]_sc(heli_amp[%
+                          mhelicity%],heli_amp[%helicity%])[%
+         @end @for modified_helicity %][%
+      @end @for helicities %]
+
+
+      ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+1)   = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+2) = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair [%index1%][%index2%] :
+     [% @end @if %] [%
+   @end @for %]
+
+
+      if (include_helicity_avg_factor) then
+         ampsc = ampsc / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         ampsc = ampsc / incolors
+      end if
+      if (include_symmetry_factor) then
+         ampsc = ampsc / real(symmetry_factor, ki)
+      end if[%
+@end @if generate_lo_diagrams %]
+   end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :
+
+
    !---#[ construct polarisation tensor :
    pure subroutine construct_polarization_tensor(eps1, eps2, tens)
       implicit none
@@ -1072,6 +1240,7 @@ contains
       end do
    end  subroutine construct_polarization_tensor
    !---#] construct polarisation tensor :
+
    pure function square_0l_0l_sc(color_vector1, color_vector2) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
       implicit none
@@ -1083,5 +1252,24 @@ contains
       v2 = conjg(color_vector1)
       amp = sum(v1(:) * v2(:))
    end function  square_0l_0l_sc
+
+
+   [% @for pairs gluons1 colored2 %][%
+     @if eval index1 .ne. index2 %]
+   pure function square_[%index1%]_[%index2%]_sc(color_vector1, color_vector2) result(amp)
+      use [% process_name asprefix=\_ %]color, only: cmat => [%@if eval index1 < index2%]T[%index1%]T[%index2%]
+      [% @else %]T[%index2%]T[%index1%]
+      [% @end @if %]
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: color_vector1, color_vector2
+      complex(ki) :: amp
+      complex(ki), dimension(numcs) :: v1, v2
+
+      v1 = matmul(cmat, color_vector2)
+      v2 = conjg(color_vector1)
+      amp = sum(v1(:) * v2(:))
+   end function  square_[%index1%]_[%index2%]_sc
+     [% @end @if %] [%
+   @end @for %]
 
 end module [% process_name asprefix=\_ %]matrix

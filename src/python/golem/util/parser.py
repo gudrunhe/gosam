@@ -1368,6 +1368,8 @@ class Template:
          value = arg
          if value.startswith("'") or value.startswith("\""):
             value = value[1:]
+            if value.endswith("'") or value.endswith("\""):
+               value = value[:-1]
          elif value not in ["+", "-", ".",
                "0", "1", "2", "3", "4",
                "5", "6", "7", "8", "9"]:
@@ -1468,7 +1470,6 @@ class Template:
             " ~< ":     [255, lambda x, y: str(x).startswith(str(y))],
             " ~> ":     [255, lambda x, y: str(x).endswith(str(y))],
             " ~ ":      [255, lambda x, y: str(y) in str(x)],
-
             " + ":      [300, lambda x, y: x + y],
             " . ":      [300, lambda x, y: str(x) + str(y)],
             " - ":      [300, lambda x, y: x - y],
@@ -1724,7 +1725,6 @@ class Template:
          ignore_case = opts["ignore_case"].lower() in true_values
       else:
          ignore_case = False
-
       lst1 = args[:-1]
       lst2 = self._evaluate_command(args[-1], [], opts)
 

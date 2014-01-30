@@ -222,6 +222,7 @@ def enumerate_helicities(conf):
 
 def enumerate_and_reduce_helicities(conf):
    in_particles, out_particles = generate_particle_lists(conf)
+   conf = golem.algorithms.helicity.filter_helicities(conf, in_particles, out_particles)
    helicities = [h for h in enumerate_helicities(conf)]
    group = golem.algorithms.helicity.find_symmetry_group(helicities,
          conf, in_particles, out_particles, error)
@@ -277,7 +278,16 @@ def prepare_model_files(conf, output_path=None):
       path = output_path
 
    model_lst = conf.getProperty(golem.properties.model)
-   # new: if we generate UV counterterms we need extra files
+
+   # For BLHA2 standards: conversion to GoSam internal keywords of SM:
+   if len(model_lst) == 1 and str(model_lst[0]).lower() == 'smdiag':
+      model_lst[0] = 'smdiag'
+      conf.setProperty("model","smdiag")
+   if len(model_lst) == 1 and str(model_lst[0]).lower() == 'smnondiag':
+      model_lst[0] = 'sm'
+      conf.setProperty("model","sm")
+   
+  # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
 
    if "setup-file" in conf:
@@ -286,6 +296,7 @@ def prepare_model_files(conf, output_path=None):
       rel_path = os.getcwd()
    if len(model_lst) == 0:
       model_lst = ['sm']
+      conf.setProperty("model","sm")
    if len(model_lst) == 1:
       model = model_lst[0]
       src_path = golem_path("models")
@@ -346,6 +357,9 @@ def getModel(conf, extra_path=None):
 
 
    golem.model.MODEL_OPTIONS = {}
+   golem.model.MODEL_ONES = conf.getListProperty(golem.properties.one)
+
+   model_shortname = conf["model"]
 
    for opt in conf.getListProperty(golem.properties.model_options):
       idx = -1
@@ -360,12 +374,83 @@ def getModel(conf, extra_path=None):
       else:
          golem.model.MODEL_OPTIONS[opt.strip()] = True
 
+   # --[ EW scheme management:
+   models_ewsupp = ['sm']
+   ew_supp = False
+   
+   if conf["modeltype"] is not None:
+      if any(item.startswith(conf["modeltype"]) for item in models_ewsupp):
+         ew_supp = True
+   if conf["model"] is not None:
+      if any(item.startswith(conf["model"]) for item in models_ewsupp):
+         ew_supp = True
+
+   # Adapt EW scheme to order file request:
+   if conf["olp.ewscheme"] is not None and ew_supp == True:
+         select_olp_EWScheme(conf)
+   elif conf["olp.ewscheme"] is not None and ew_supp == False:
+         error("EWScheme tag in orderfile incompatible with model.")
+
+   # Modify EW setting for model file:
+   if ew_supp == True and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+      if golem.model.MODEL_OPTIONS["ewchoose"] == True:
+         golem.model.MODEL_OPTIONS["users_choice"] = '0'
+      else:
+         golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
+         golem.model.MODEL_OPTIONS["ewchoose"] = True
+   elif ew_supp == True and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
+      golem.model.MODEL_OPTIONS["ewchoose"] = False
+      golem.model.MODEL_OPTIONS["users_choice"] = '0'
+   elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+      error("ewchoose option in model.options is not supported with the chosen model.")
+
+   # --] EW scheme management
+
    fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
    debug("Loading model file %r" % fname)
    mod = imp.load_source("model", fname)
 
    conf.cache["model"] = mod
    return mod
+
+def select_olp_EWScheme(conf):
+   ewparameters = ['mW','mZ','alpha','GF','sw','e','vev','ewchoose']
+   ewscheme = conf["olp.ewscheme"]
+   raisewarn = False
+   for key, value in golem.model.MODEL_OPTIONS.items():
+      if any(item.startswith(str(key)) for item in ewparameters):
+         raisewarn = True
+#  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
+   if ewscheme == "alphaGF":
+      golem.model.MODEL_OPTIONS["ewchoose"]='1'
+      print "OLP EWScheme --> alphaGF (Gmu scheme)"
+
+   if ewscheme == "alpha0":
+      golem.model.MODEL_OPTIONS["ewchoose"]='2'
+      golem.model.MODEL_OPTIONS["alpha"]='0.007297352536480967'
+      print "OLP EWScheme --> alpha0"
+
+   if ewscheme == "alphaMZ":
+      golem.model.MODEL_OPTIONS["ewchoose"]='2'
+      # Value of alpha(Mz)^-1=128.944 from Nucl.Phys.Proc.Suppl. 225-227 (2012) 282-287
+      golem.model.MODEL_OPTIONS["alpha"]='0.007755305'
+      print "OLP EWScheme --> alphaMZ"
+
+   if ewscheme == "alphaRUN":
+      print "OLP EWScheme --> alphaRUN"
+      print "EW not supported yet!"
+   if ewscheme == "alphaMSbar":
+      print "OLP EWScheme --> alphaMSbar"
+      print "EW not supported yet!"
+   if ewscheme == "OLPDefined":
+      print "OLP EWScheme --> OLPDefined: GoSam default taken"
+      golem.model.MODEL_OPTIONS["ewchoose"]=2
+      
+   if raisewarn == True:
+      warning("Warning: EWScheme setting from orderfile will override the model.options\n" + \
+                 " setting from input card if incompatible!")
+   # print golem.model.MODEL_OPTIONS
+   return
 
 
 def expand_parameter_list(prop, conf):
