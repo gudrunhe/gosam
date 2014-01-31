@@ -710,6 +710,7 @@ def init_ew(e_one=False,**options):
          types[dummy] = "R"
          types['%sf' % dummy] = "R"
          types["sw"] = "C"
+         types["swf"]= "C"
          try:
             del slha_locations[dummy]
          except:
