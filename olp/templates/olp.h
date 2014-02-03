@@ -125,13 +125,13 @@ void [% olp.process_name asprefix=\_ %]OLP_Option(char* line, int* stat);
  *
  *  The first argument should be the name of a parameter.
  *  The second option is the real part, the third
- *  option the complex part of the parameter.
+ *  option the imaginary part of the parameter.
  *  The fourth option will be set by the function:
  *  a value of 1 reports success, a value of 0 failure (-> stop),
  *  a value of 2 means unknown/ignored (-> continue).
  *
  */
-void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real_part, double *cmplx_part, int* status);
+void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real_part, double *imag_part, int* status);
 
 
 /** This routine returns the gluon polarization vector

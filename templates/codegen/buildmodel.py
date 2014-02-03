@@ -45,8 +45,8 @@ modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 @end @if $]
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
-modelfile.write('   & nlo_prefactors\n')[$ 
-@select model @case sm smdiag $][$ 
+modelfile.write('   & nlo_prefactors\n')[$
+@select model @case sm smdiag sm_complex $][$
 @select model.options @case ewchoose $]
 modelfile.write(', ewchoice\n')[$
 @end @select$][$@end @select$]
@@ -118,6 +118,19 @@ modelfile.write(',')[$
    @end @if $][$
    @end @for$]
 modelfile.write('\n')
+[$ @if ewchoose $]
+modelfile.write('   ! for automatic choosing the right EW scheme in set_parameters\n$'
+modelfile.write('   integer, private :: choosen_ew_parameters ! bit-set of EW parameters\n$'
+modelfile.write('   character(len=5), private, dimension(6) :: ew_parameters = &\n$'
+modelfile.write('          &(/\'mW   \',&\n$'
+modelfile.write('          &  \'mZ   \',&\n$'
+modelfile.write('          &  \'alpha\',&\n$'
+modelfile.write('          &  \'GF   \',&\n$'
+modelfile.write('          &  \'sw   \',&\n$'
+modelfile.write('          &  \'e    \'/)\n$'
+modelfile.write('   integer, private :: choosen_ew_parameters_count = 0 ! bitset of EW parameters\n$'
+modelfile.write('   integer, private :: orig_ewchoice = -1 ! saves the original ewchoice\n'
+[$@end @if$]
 modelfile.write("   private :: digit, parsereal, names, cc\n")
 modelfile.write("\n")
 modelfile.write("contains\n")
@@ -469,7 +482,7 @@ modelfile.write("            ! set mass according to PDG code\n")
 modelfile.write("            select case(pdg)\n")[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = parsereal(value, ierr, lnr)\n")[$
@@ -727,6 +740,326 @@ modelfile.write("   end subroutine read_slha_block_[$ $_ $]\n")[$
    @end @for $]
 modelfile.write("!---#] SLHA READER:\n")[$
 @end @if has_slha_locations $]
+modelfile.write("!---#[ subroutine set_parameter\n")
+modelfile.write("   recursive subroutine set_parameter(name, re, im, ierr)\n")
+modelfile.write("      implicit none\n")
+modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
+modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
+modelfile.write("      character(len=*), intent(in) :: name\n")
+modelfile.write("      real(ki), intent(in) :: re, im\n")
+modelfile.write("      integer, intent(out) :: ierr\n")
+modelfile.write("\n")
+modelfile.write("      integer :: err, pdg, nidx, idx\n")
+modelfile.write("\n")
+modelfile.write("      logical :: must_be_real\n")
+modelfile.write("      must_be_real = .false.\n")
+modelfile.write("\n")[$
+@select model @case sm smdiag smehc sm_complex $]
+modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\") then\n")
+modelfile.write("         gs = 2.0_ki*sqrt(pi)*sqrt(re)\n")
+modelfile.write("         must_be_real = .true.\n")
+modelfile.write("      elseif (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
+modelfile.write("         alpha = re\n")
+modelfile.write("         must_be_real = .true.\n")[$
+@select model @case sm sm_complex smehc $]
+modelfile.write("      elseif (name.eq.\"VV12\") then\n")
+modelfile.write("         call set_parameter(\"VUD\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV23\") then\n")
+modelfile.write("         call set_parameter(\"VUS\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV25\") then\n")
+modelfile.write("         call set_parameter(\"VUB\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV14\") then\n")
+modelfile.write("         call set_parameter(\"VCB\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV34\") then\n")
+modelfile.write("         call set_parameter(\"VCS\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV35\") then\n")
+modelfile.write("         call set_parameter(\"VCS\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV16\") then\n")
+modelfile.write("         call set_parameter(\"VTD\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV36\") then\n")
+modelfile.write("         call set_parameter(\"VTS\",re,im,ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("      elseif (name.eq.\"VV56\") then\n")
+modelfile.write("         call set_parameter(\"VTB\",re,im,ierr)\n")
+modelfile.write("         return\n")[$
+@end @select $][$
+@select model @case sm_complex $]
+modelfile.write("      elseif (name.eq.\"sw2\") then\n")
+modelfile.write("         sw = sqrt(cmplx(re,im,ki))\n")[$
+@else $]
+modelfile.write("      elseif (name.eq.\"sw2\") then\n")
+modelfile.write("         sw = sqrt(re)\n")
+modelfile.write("         must_be_real = .true.\n")[$
+@end @select $][$
+@end @select $]
+modelfile.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>7) then\n")
+modelfile.write("         idx = scan(name,\")\",.false.)\n")
+modelfile.write("         if (idx.eq.0) then\n")
+modelfile.write("            idx=len_trim(name)+1\n")
+modelfile.write("         end if\n")
+modelfile.write("         read(name(6:idx-1),*, iostat=err) pdg\n")
+modelfile.write("         if (err.ne.0) then\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("            return\n")
+modelfile.write("         end if\n")
+modelfile.write("         must_be_real = .true.\n")
+modelfile.write("         select case(pdg)\n")
+[$@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case mass $][$
+         @for slha_entries $]
+modelfile.write("            case([$index$])\n")
+modelfile.write("               [$ $_ $] = re\n")[$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+modelfile.write("            case default\n")
+modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set mass for PDG code:\", pdg\n")
+modelfile.write("               ierr = 1\n")
+modelfile.write("               return\n")
+modelfile.write("            end select\n")
+modelfile.write("     elseif (len_trim(name)>8 .and. name(1:6).eq.\"width(\") then\n")
+modelfile.write("         idx = scan(name,\")\",.false.)\n")
+modelfile.write("         if (idx.eq.0) then\n")
+modelfile.write("            idx=len_trim(name)+1\n")
+modelfile.write("         end if\n")
+modelfile.write("         read(name(7:idx-1),*, iostat=err) pdg\n")
+modelfile.write("         if (err.ne.0) then\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("            return\n")
+modelfile.write("         end if\n")
+modelfile.write("         must_be_real = .true.\n")
+modelfile.write("         select case(pdg)\n")
+[$@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case decay $][$
+         @for slha_entries $]
+modelfile.write("            case([$index$])\n")
+modelfile.write("               [$ $_ $] = re\n")[$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+modelfile.write("            case default\n")
+modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set width for PDG code:\", pdg\n")
+modelfile.write("               ierr = 0 !FAIL\n")
+modelfile.write("               return\n")
+modelfile.write("            end select\n")
+modelfile.write("      elseif (name .eq. \"renormalisation\") then\n")
+modelfile.write("          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("             renormalisation = int(re)\n")
+modelfile.write("          else\n")
+modelfile.write("             ierr=0 !FAIL\n")
+modelfile.write("          end if\n")
+modelfile.write("      elseif (name .eq. \"nlo_prefactors\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            nlo_prefactors = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"deltaOS\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            deltaOS = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"reduction_interoperation\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            reduction_interoperation = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+[$@if extension samurai $]
+modelfile.write("      elseif (name .eq. \"samurai_scalar\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            samurai_scalar = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"samurai_verbosity\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            samurai_verbosity = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"samurai_test\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            samurai_test = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"samurai_istop\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            samurai_istop = int(re)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+modelfile.write("      elseif (name .eq. \"samurai_group_numerators\") then\n")
+modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
+modelfile.write("            samurai_group_numerators = (int(re).ne.0)\n")
+modelfile.write("         else\n")
+modelfile.write("            ierr=0 !FAIL\n")
+modelfile.write("         end if\n")
+[$@end @if $]
+modelfile.write("     elseif (any(names .eq. name)) then\n")
+modelfile.write("         do nidx=1,size(names)\n")
+modelfile.write("            if (names(nidx) .eq. name) exit\n")
+modelfile.write("         end do\n")
+modelfile.write("         select case (nidx)\n")
+[$ @for parameters R C $]
+modelfile.write("         case([$index$])\n")
+modelfile.write("            [$ $_ $] = ")
+[$@select type @case C$]
+modelfile.write("cmplx(re, im, ki)\n")
+[$@else $]
+modelfile.write("re\n")
+[$@end @select $][$@select type @case R$]
+modelfile.write("            must_be_real=.true.\n")
+[$@end @select$]
+[$@end @for$]
+modelfile.write("         end select\n")
+modelfile.write("     else\n")
+modelfile.write("         if (name(1:3) /= \"mdl\") then\n")
+modelfile.write("            call set_parameter(\"mdl\" // name(4:),re,im,ierr)\n")
+modelfile.write("            return\n")
+modelfile.write("         end if\n")
+modelfile.write("         ierr = 0 !FAIL / UNKNOWN\n")
+modelfile.write("     end if\n")
+modelfile.write("     if (must_be_real .and. im /= 0.0_ki) then\n")
+modelfile.write("        ierr = 0 ! FAIL\n")
+modelfile.write("     else\n")
+modelfile.write("        ierr = 1 ! OK\n")
+modelfile.write("     end if\n")
+modelfile.write("\n")
+[$ @if ewchoose $]
+modelfile.write("     if(any(ew_parameters .eq. name)) then\n")
+modelfile.write("         do nidx=1,size(ew_parameters)\n")
+modelfile.write("            if (ew_parameters(nidx) .eq. name) exit\n")
+modelfile.write("         end do\n")
+modelfile.write("         if (.not. btest(choosen_ew_parameters,nidx)) then\n")
+modelfile.write("            choosen_ew_parameters_count = choosen_ew_parameters_count + 1\n")
+modelfile.write("            choosen_ew_parameters = ibset(choosen_ew_parameters, nidx)\n")
+[$ ' python program to calculate numbers below:\n")
+ '   p=['mW','mZ','alpha','GF','sw','e']\n")
+ '   print sum([2**(p.index(i.strip())+1) for i in \"GF,mW,mZ\".split(\",\")])\n")
+ '   from itertools import combinations\n")
+ '   ([sum([2**(p.index(i.strip())+1) for i in j]) for j in combinations(\"GF,mW,mZ\".split(\",\"),2)]) $]
+modelfile.write("            if (choosen_ew_parameters_count == 1) then\n")
+modelfile.write("               orig_ewchoice = ewchoice\n")
+modelfile.write("               if(ewchoice > 0) then\n")
+modelfile.write("                 select case(choosen_ew_parameters)\n")
+modelfile.write("                      case(2) ! mW\n")
+modelfile.write("                        if (ewchoice /= 1 .and. ewchoice /= 2 .and. &\n")
+modelfile.write("                            &   ewchoice /= 6) then\n")
+modelfile.write("                          ewchoice = 1\n")
+modelfile.write("                        end if\n")
+modelfile.write("                      case(4) ! mZ\n")
+modelfile.write("                        if (ewchoice /= 1 .and. ewchoice /= 2 .and. &\n")
+modelfile.write("                            &   ewchoice /= 6) then\n")
+modelfile.write("                          ewchoice = 1\n")
+modelfile.write("                        end if\n")
+modelfile.write("                      case(8) ! alpha\n")
+modelfile.write("                        if (ewchoice /= 2 .and. ewchoice /= 3 .and. &\n")
+modelfile.write("                            &   ewchoice /= 4 .and. ewchoice /= 5) then\n")
+modelfile.write("                          ewchoice = 2\n")
+modelfile.write("                        end if\n")
+modelfile.write("                      case(16) ! GF\n")
+modelfile.write("                        if (ewchoice /= 1 .and. ewchoice /= 4 .and. &\n")
+modelfile.write("                            &   ewchoice /= 8) then\n")
+modelfile.write("                          ewchoice = 1\n")
+modelfile.write("                        end if\n")
+modelfile.write("                     case(32) ! sw\n")
+modelfile.write("                        if (ewchoice /= 3 .and. ewchoice /= 4 .and. &\n")
+modelfile.write("                             &   ewchoice /= 7 .and. ewchoice /= 8) then\n")
+modelfile.write("                          ewchoice = 1\n")
+modelfile.write("                        end if\n")
+[$@if e_not_one$]
+modelfile.write("                      case(64) ! e\n")
+modelfile.write("                        if (ewchoice < 6) then\n")
+modelfile.write("                           ewchoice = 6\n")
+modelfile.write("                        end if\n")
+[$@end @if$]
+modelfile.write("                    end select\n")
+modelfile.write("                end if\n")
+modelfile.write("            elseif (choosen_ew_parameters_count == 2) then\n")
+modelfile.write("                if (choosen_ew_parameters == 18 .or. choosen_ew_parameters == 20 &\n")
+modelfile.write("                   & .or. choosen_ew_parameters == 6) then\n")
+modelfile.write("                   ewchoice = 1\n")
+modelfile.write("                elseif (choosen_ew_parameters == 10 .or. choosen_ew_parameters == 12) then\n")
+modelfile.write("                   ewchoice = 2\n")
+modelfile.write("                elseif (choosen_ew_parameters == 40 .or. choosen_ew_parameters == 36) then\n")
+modelfile.write("                   ewchoice = 3\n")
+modelfile.write("                elseif (choosen_ew_parameters == 24 .or. choosen_ew_parameters == 48) then\n")
+modelfile.write("                   ewchoice = 4\n")
+modelfile.write("                elseif (choosen_ew_parameters == 20) then\n")
+modelfile.write("                   ewchoice = 5\n")
+[$@if e_not_one$]
+modelfile.write("                 elseif (choosen_ew_parameters == 66 .or. choosen_ew_parameters == 68) then\n")
+modelfile.write("                   ewchoice = 6\n")
+modelfile.write("                 elseif (choosen_ew_parameters == 96) then\n")
+modelfile.write("                   ewchoice = 7\n")
+modelfile.write("                 elseif (choosen_ew_parameters == 80) then\n")
+modelfile.write("                   ewchoice = 8\n")
+[$@end @if$]
+modelfile.write("                 else\n")
+modelfile.write("                 ewchoice = orig_ewchoice\n")
+modelfile.write("                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&\n")
+modelfile.write("                                     ewchoice\n")
+modelfile.write("                 ierr = 1\n")
+modelfile.write("                end if\n")
+modelfile.write("            elseif (choosen_ew_parameters_count >= 4) then\n")
+modelfile.write("                 write(*,'(A,A,A)') 'EW parameter \"', name, '\" is already determined.'\n")
+modelfile.write("                 write(*,'(A)') 'New values are ignored.'\n")
+modelfile.write("                 write(*,'(A17,1x,I3)') 'Current EW choice:', ewchoice\n")
+modelfile.write("                 ierr = -1 ! IGNORE\n")
+modelfile.write("            elseif(choosen_ew_parameters_count == 3) then\n")
+modelfile.write("               select case(choosen_ew_parameters)\n")
+modelfile.write("                case(22) ! GF,mW,mZ -> e,sw\n")
+modelfile.write("                        ewchoice = 1\n")
+modelfile.write("                case(14) ! alpha, mW, mZ  -> e,sw\n")
+modelfile.write("                        ewchoice = 2\n")
+modelfile.write("                case(44) ! alpha, sw, mZ -> e, mW\n")
+modelfile.write("                        ewchoice = 3\n")
+modelfile.write("                case(56) ! alpha, sw, GF ->  e, mW\n")
+modelfile.write("                        ewchoice = 4\n")
+modelfile.write("                case(28) ! alpha, GF, mZ ->  e, mW, sw\n")
+modelfile.write("                        ewchoice = 5\n")
+[$@if e_not_one$]
+modelfile.write("                case(70) ! e, mW, mZ -> sw\n")
+modelfile.write("                        ewchoice = 6\n")
+modelfile.write("                case(100) ! e, sw, mZ -> mW\n")
+modelfile.write("                        ewchoice = 7\n")
+modelfile.write("                case(112) ! e, sw, GF -> mW, mZ\n")
+modelfile.write("                        ewchoice = 8\n")
+[$@end @if$]
+modelfile.write("                case default\n")
+modelfile.write("                 ewchoice = orig_ewchoice\n")
+modelfile.write("                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&\n")
+modelfile.write("                                     ewchoice\n")
+modelfile.write("                 ierr = 1\n")
+modelfile.write("               end select\n")
+modelfile.write("            end if\n")
+modelfile.write("         end if\n")
+modelfile.write("     end if\n")
+[$@end @if$]
+modelfile.write("\n")
+modelfile.write("\n")
+modelfile.write("     call init_functions()\n")
+modelfile.write("      ! TODO init_color\n")
+modelfile.write("   end subroutine\n")
+modelfile.write("!---#] subroutine set_parameter\n")
+
+
+
+
 modelfile.write("!---#[ subroutine init_functions:\n")
 modelfile.write("   subroutine     init_functions()\n")
 modelfile.write("      implicit none\n")
@@ -735,7 +1068,7 @@ modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n"
 modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
 if abb_max != '0':
    modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$ 
-@select model @case sm smdiag $][$ 
+@select model @case sm smdiag sm_complex $][$
 @select model.options @case ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @select $][$
@@ -791,7 +1124,7 @@ modelfile.write("\n")
 modelfile.write("      sort4 = m(n)\n")
 modelfile.write("   end  function sort4\n")
 modelfile.write("!---#] utility functions for model initialization:\n")
-[$ @select model @case sm smdiag $][$ 
+[$ @select model @case sm smdiag $][$
 @select model.options @case ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
@@ -846,7 +1179,7 @@ modelfile.write("  end subroutine\n")
 modelfile.write("!---#] EW scheme choice:\n")[$
 @end @select$][$
 @end @select$]
-[$ @select model @case sm_complex  $][$ 
+[$ @select model @case sm_complex  $][$
 @select model.options @case ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")

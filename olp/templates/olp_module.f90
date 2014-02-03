@@ -13,9 +13,7 @@ module     olp_module
        character(kind=c_char),  intent(in)  :: src(*)
        integer(c_size_t), value, intent(in) :: n
      end subroutine strncpy
-  end interface   
-
-   real(kind=c_double) :: cur_alpha_s, cur_alpha;
+  end interface
 
 contains
 
@@ -61,11 +59,6 @@ contains
       integer :: PSP_verbosity, PSP_chk_threshold1, PSP_chk_threshold2, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
-
-      ! init global parameters
-      cur_alpha_s=1d0
-      cur_alpha=1d0
-
 
       ierr = 1
       l = strlen(contract_file_name)
@@ -119,20 +112,20 @@ contains
       @if internal OLP_BADPTSFILE_NUMBERING %]
       if(stage.lt.0) then[%
          @for subprocesses %]
-         call [%$_%]_initgolem([% 
+         call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %])[%
          @end @for %]
       else[%
          @for subprocesses %]
-         call [%$_%]_initgolem([% 
+         call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %],stage,rndseed)[%
          @end @for %]
       end if[%
       @else %][%
       @for subprocesses %]
-      call [%$_%]_initgolem([% 
+      call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %])[%
       @end @for %][%
@@ -155,7 +148,7 @@ contains
    use [%$_%]_version, only: gosamversion, gosamrevision[%
        @end @if %][%
    @end @for %]
-   
+
    implicit none
    character(kind=c_char), intent(inout), dimension(15)  :: olp_name
    character(kind=c_char), intent(inout), dimension(15)  :: olp_version
@@ -181,9 +174,9 @@ contains
         len(c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR,kind=c_size_t))
 
    end subroutine OLP_Info
-   
 
-   subroutine OLP_SetParameter(variable_name, real_part, complex_part, success)&
+
+   subroutine OLP_SetParameter(variable_name, real_part, imag_part, success)&
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_setparameter[%
@@ -192,10 +185,13 @@ contains
    @end @if %][%
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
-      use, intrinsic :: iso_c_binding
+      use, intrinsic :: iso_c_binding[%
+   @for subprocesses %]
+      use [%$_%]_model, only: [%$_%]_set_parameter => set_parameter[%
+   @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
-      real(kind=c_double), intent(in) :: real_part, complex_part
+      real(kind=c_double), intent(in) :: real_part, imag_part
       integer(kind=c_int), intent(out) :: success
 
       interface
@@ -205,36 +201,17 @@ contains
             character(kind=c_char,len=1), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
-         function strcasecmp(a,b) bind(C,name='strcasecmp')
-            use, intrinsic :: iso_c_binding
-            implicit none
-            character(kind=c_char,len=1), intent(in) :: a,b
-            integer(kind=c_int) :: strcasecmp
-          end function
       end interface
 
       integer :: l;
 
-      l = strlen(variable_name)
-
-      if (strcasecmp(variable_name,"alphaS" // char(0))==0) then
-              if (complex_part /= 0d0) then
-                      success=0
-              else
-                      cur_alpha_s = real_part
-                      success=1 ! not supported
-              end if
-      else if (strcasecmp(variable_name,"alpha" // char(0))==0) then
-              if (complex_part /= 0d0) then
-                      success=0 ! not supported
-              else
-                      cur_alpha = real_part
-                      success=0 ! TODO not yet fully implemented
-              end if
-      else
-              write(7,*) "OLP_SetParameter: ", variable_name(1:l), " unknown."
-              success = 2 ! variable unknown, ignore
-      end if
+      l = strlen(variable_name)[%
+   @for subprocesses %]
+      call [%$_%]_set_parameter(variable_name(1:l),real_part,imag_part,success)
+      if(success==0) then ! return immediately on error
+          return
+      end if[%
+   @end @for %]
    end subroutine
 
 
@@ -259,10 +236,9 @@ contains
       real(kind=c_double), dimension(50), intent(in) :: momenta
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(60), intent(out) :: res
+      integer(kind=c_int) :: succ
 
-      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
-
-      cur_alpha_s = parameters(1)
+      call OLP_SetParameter("alphaS",parameters(1),0.0d0,succ)
 
       select case(label)[%
       @for subprocesses prefix=sp. %][%
@@ -279,11 +255,6 @@ contains
               %]), mu, parameters, res)[%
                @end @for %][%
             @end @select %][%
-         @if eval cr.amplitudetype ~ "scTree"
-         %][% @elif eval cr.amplitudetype ~ "ccTree"
-         %][% @else %]
-              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
-         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
@@ -314,8 +285,6 @@ contains
 
       real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
 
-      parameters(1) = cur_alpha_s
-
       select case(label)[%
       @for subprocesses prefix=sp. %][%
          @for crossings include-self prefix=cr. %][%
@@ -331,11 +300,6 @@ contains
               %]), mu, parameters, res, acc)[%
                @end @for %][%
             @end @select %][%
-         @if eval cr.amplitudetype ~ "scTree"
-         %][% @elif eval cr.amplitudetype ~ "ccTree"
-         %][% @else %]
-              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
-         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
