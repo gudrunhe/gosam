@@ -90,9 +90,9 @@ class Particle:
 		return self._field
 
 	def __repr__(self):
-		return "Particle(%r, %r, %r, %r, %r)" % (
+		return "Particle(%r, %r, %r, %r, %r, %r, %r, %r)" % (
 			self._field, self._twospin, self._mass,
-			self._color, self._partner)
+			self._color, self._partner, self._width, self.pdg_code, self.charge)
 
 	def getHelicityStates(self, zeroes={}):
 		sp = abs(self.getSpin())

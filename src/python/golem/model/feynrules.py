@@ -176,9 +176,9 @@ class Model:
 			else:
 				width = self.prefix + pwidth
 
-			f.write("\t%r: Particle(%r, %d, %r, %d, %r, %r, %d)" %
+			f.write("\t%r: Particle(%r, %d, %r, %d, %r, %r, %d, %r)" %
 					(canonical_name, canonical_name, spin, mass,
-						p.color, canonical_anti, width, pdg_code))
+						p.color, canonical_anti, width, pdg_code, p.charge))
 
 		f.write("\n}\n\n")
 
