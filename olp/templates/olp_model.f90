@@ -7,10 +7,10 @@ $]module olp_model
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
-   & nlo_prefactors[$ 
-@select model @case sm smdiag $][$ 
-@select model.options @case ewchoose $], ewchoice[$
-@end @select$][$@end @select$]
+   & nlo_prefactors[$
+@select modeltype @case sm smdiag sm_complex $][$
+@if ewchoose $], ewchoice[$
+@end @if$][$@end @select$]
    implicit none
 
    private :: ki[$
@@ -73,6 +73,20 @@ $]module olp_model
    @for comment_chars $]'[$$_$]'[$ @if is_last $]/)[$ @else $], [$
    @end @if $][$
    @end @for$]
+
+[$ @if ewchoose $]
+   ! for automatic choosing the right EW scheme in set_parameters
+   integer, private :: choosen_ew_parameters ! bit-set of EW parameters
+   character(len=5), private, dimension(6) :: ew_parameters = &
+          &(/'mW   ',&
+          &  'mZ   ',&
+          &  'alpha',&
+          &  'GF   ',&
+          &  'sw   ',&
+          &  'e    '/)
+   integer, private :: choosen_ew_parameters_count = 0 ! bitset of EW parameters
+   integer, private :: orig_ewchoice = -1 ! saves the original ewchoice[$
+@end @if$]
 
    private :: digit, parsereal, names, cc
 
@@ -193,7 +207,7 @@ contains
       name = adjustl(line(1:idx-1))
       value = adjustl(line(idx+1:len(line)))
       idx = scan(value, ',', .false.)
-      
+
       if (name .eq. "renormalisation") then
          re = parsereal(value, ierr, lnr)
          if (ierr .ne. 0) then
@@ -488,35 +502,35 @@ contains
       implicit none
       integer, intent(in) :: ch
       integer, intent(out), optional :: ierr
-   
+
       integer :: lnr, i, l, ofs, ios
       character(len=255) :: line
-   
+
       integer :: block
-   
+
       ofs = iachar('A') - iachar('a')
-   
+
       lnr = 0
       loop1: do
          read(unit=ch,fmt='(A[$buffer_length$])',iostat=ios) line
          if(ios .ne. 0) exit
          lnr = lnr + 1
-   
+
          i = scan(line, '#', .false.)
          if (i .eq. 0) then
             l = len_trim(line)
          else
             l = i - 1
          end if
-   
+
          if (l .eq. 0) cycle loop1
-   
+
          ucase: do i = 1, l
             if (line(i:i) >= 'a' .and. line(i:i) <= 'z') then
                line(i:i) = achar(iachar(line(i:i))+ofs)
             end if
          end do ucase
-   
+
          if (line(1:1) .eq. 'B') then
             if (line(1:5) .eq. 'BLOCK') then
                line = adjustl(line(6:l))
@@ -541,13 +555,13 @@ contains
                if (present(ierr)) ierr = 1
                return
             end if[$
-         @for slha_blocks lower $][$ 
+         @for slha_blocks lower $][$
             @select $_ @case decay $]
          elseif (line(1:1) .eq. 'D') then
             if (line(1:5) .eq. 'DECAY') then
                line = adjustl(line(6:l))
                call read_slha_line_decay(line, i)
-               block = 2            
+               block = 2
             else
                write(*,'(A37,I5)') "Illegal statement in SLHA file, line ", lnr
                if (present(ierr)) ierr = 1
@@ -575,10 +589,10 @@ contains
       end do loop1
       if (present(ierr)) ierr = 0
    end subroutine read_slha[$
-   @for slha_blocks lower dimension=1 $][$ 
+   @for slha_blocks lower dimension=1 $][$
       @select $_ @case decay $]
    subroutine read_slha_block_[$ $_ $](line, ierr)
-   !  This subroutine reads the 'branching ratios' of 
+   !  This subroutine reads the 'branching ratios' of
    !  the slha file: these are just thrown away
       implicit none
       character(len=*), intent(in) :: line
@@ -640,7 +654,7 @@ contains
          @end @if is_last $][$
       @end @for$]
       if (present(ierr)) ierr = 0
-   end subroutine read_slha_block_[$ $_ $][$ 
+   end subroutine read_slha_block_[$ $_ $][$
    @end @select $][$
    @end @for $][$
    @for slha_blocks lower dimension=2 $]
@@ -677,6 +691,326 @@ contains
    @end @for $]
 !---#] SLHA READER:[$
 @end @if has_slha_locations $]
+!---#[ subroutine set_parameter
+   recursive subroutine set_parameter(name, re, im, ierr)
+      implicit none
+      real(ki), parameter :: pi = 3.14159265358979323846264&
+     &3383279502884197169399375105820974944592307816406286209_ki
+      character(len=*), intent(in) :: name
+      real(ki), intent(in) :: re, im
+      integer, intent(out) :: ierr
+
+      integer :: err, pdg, nidx, idx
+
+      logical :: must_be_real
+      must_be_real = .false.
+[$
+@select modeltype @case sm smdiag smehc sm_complex $][$
+@if gs_not_one $]
+      if (name.eq."aS" .or. name.eq."alphaS") then
+         gs = 2.0_ki*sqrt(pi)*sqrt(re)
+         must_be_real = .true.
+      else[$@else$]
+      [$
+@end @if$][$@if alpha_not_one$]if (name.eq."alphaEW" .or. name.eq."alpha") then
+         alpha = re
+         must_be_real = .true.[$@end @if$][$
+@select modeltype @case sm sm_complex smehc$][$
+@if eval ( gs_not_one .or. alpha_not_one ) $]
+      else[$@else$]
+      [$@end @if$]if (name.eq."VV12") then
+         call set_parameter("VUD",re,im,ierr)
+         return
+      elseif (name.eq."VV23") then
+         call set_parameter("VUS",re,im,ierr)
+         return
+      elseif (name.eq."VV25") then
+         call set_parameter("VUB",re,im,ierr)
+         return
+      elseif (name.eq."VV14") then
+         call set_parameter("VCB",re,im,ierr)
+         return
+      elseif (name.eq."VV34") then
+         call set_parameter("VCS",re,im,ierr)
+         return
+     elseif (name.eq."VV35") then
+         call set_parameter("VCS",re,im,ierr)
+         return
+     elseif (name.eq."VV16") then
+         call set_parameter("VTD",re,im,ierr)
+         return
+     elseif (name.eq."VV36") then
+         call set_parameter("VTS",re,im,ierr)
+         return
+     elseif (name.eq."VV56") then
+         call set_parameter("VTB",re,im,ierr)
+         return[$
+@select modeltype @case sm_complex $]
+      elseif (name.eq."sw2") then
+         sw = sqrt(cmplx(re,im,ki))[$
+@else $]
+      elseif (name.eq."sw2") then
+         sw = sqrt(re)
+         must_be_real = .true.[$
+@end @select $][$
+@end @select $]
+      else[$
+@end @select $]if (name(1:5).eq."mass(" .and. len_trim(name)>7) then
+         idx = scan(name,")",.false.)
+         if (idx.eq.0) then
+            idx=len_trim(name)+1
+         end if
+         read(name(6:idx-1),*, iostat=err) pdg
+         if (err.ne.0) then
+            ierr=0 !FAIL
+            return
+         end if
+         must_be_real = .true.
+         select case(pdg)[$
+@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case masses $][$
+         @for slha_entries $]
+            case([$index$])
+               [$ $_ $] = re [$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+            case default
+               write(*,'(A20,1x,I10)') "Cannot set mass for PDG code:", pdg
+               ierr = 1
+               return
+            end select
+     elseif (len_trim(name)>8 .and. name(1:6).eq."width(") then
+         idx = scan(name,")",.false.)
+         if (idx.eq.0) then
+            idx=len_trim(name)+1
+         end if
+         read(name(7:idx-1),*, iostat=err) pdg
+         if (err.ne.0) then
+            ierr=0 !FAIL
+            return
+         end if
+         must_be_real = .true.
+         select case(pdg)[$
+@if has_slha_locations $][$
+   @for slha_blocks lower $][$
+      @select $_ @case decay $][$
+         @for slha_entries $]
+            case([$index$])
+               [$ $_ $] = re [$
+         @end @for $][$
+      @end @select $][$
+   @end @for $][$
+@end @if $]
+            case default
+               write(*,'(A20,1x,I10)') "Cannot set width for PDG code:", pdg
+               ierr = 0 !FAIL
+               return
+            end select
+      elseif (name .eq. "renormalisation") then
+          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+             renormalisation = int(re)
+          else
+             ierr=0 !FAIL
+          end if
+      elseif (name .eq. "nlo_prefactors") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            nlo_prefactors = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "deltaOS") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            deltaOS = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "reduction_interoperation") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            reduction_interoperation = int(re)
+         else
+            ierr=0 !FAIL
+         end if[$
+@if extension samurai $]
+      elseif (name .eq. "samurai_scalar") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            samurai_scalar = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "samurai_verbosity") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            samurai_verbosity = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "samurai_test") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            samurai_test = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "samurai_istop") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            samurai_istop = int(re)
+         else
+            ierr=0 !FAIL
+         end if
+      elseif (name .eq. "samurai_group_numerators") then
+         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
+            samurai_group_numerators = (int(re).ne.0)
+         else
+            ierr=0 !FAIL
+         end if[$
+@end @if $]
+     elseif (any(names .eq. name)) then
+         do nidx=1,size(names)
+            if (names(nidx) .eq. name) exit
+         end do
+         select case (nidx)[$
+         @for parameters R C $]
+         case([$index$])
+            [$ $_ $] = [$
+         @select type
+         @case C$]cmplx(re, im, ki)[$
+         @else $]re[$
+         @end @select $][$@select type @case R$]
+            must_be_real=.true.[$@end @select$][$
+         @end @for $]
+         end select
+     else
+         if (name(1:3) /= "mdl") then
+            call set_parameter("mdl" // name(4:),re,im,ierr)
+            return
+         end if
+         ierr = 0 !FAIL / UNKNOWN
+     end if
+     if (must_be_real .and. im /= 0.0_ki) then
+        ierr = 0 ! FAIL
+     else
+        ierr = 1 ! OK
+     end if
+
+[$ @if ewchoose $]
+     if(any(ew_parameters .eq. name)) then
+         do nidx=1,size(ew_parameters)
+            if (ew_parameters(nidx) .eq. name) exit
+         end do
+         if (.not. btest(choosen_ew_parameters,nidx)) then
+            choosen_ew_parameters_count = choosen_ew_parameters_count + 1
+            choosen_ew_parameters = ibset(choosen_ew_parameters, nidx)
+[$ ' python program to calculate numbers below:
+ '   p=['mW','mZ','alpha','GF','sw','e']
+ '   print sum([2**(p.index(i.strip())+1) for i in "GF,mW,mZ".split(",")])
+ '   from itertools import combinations
+ '   ([sum([2**(p.index(i.strip())+1) for i in j]) for j in combinations("GF,mW,mZ".split(","),2)]) $]
+            if (choosen_ew_parameters_count == 1) then
+               orig_ewchoice = ewchoice
+               if(ewchoice > 0) then
+                 select case(choosen_ew_parameters)
+                      case(2) ! mW
+                        if (ewchoice /= 1 .and. ewchoice /= 2 .and. &
+                            &   ewchoice /= 6) then
+                          ewchoice = 1
+                        end if
+                      case(4) ! mZ
+                        if (ewchoice /= 1 .and. ewchoice /= 2 .and. &
+                            &   ewchoice /= 6) then
+                          ewchoice = 1
+                        end if
+                      case(8) ! alpha
+                        if (ewchoice /= 2 .and. ewchoice /= 3 .and. &
+                            &   ewchoice /= 4 .and. ewchoice /= 5) then
+                          ewchoice = 2
+                        end if
+                      case(16) ! GF
+                        if (ewchoice /= 1 .and. ewchoice /= 4 .and. &
+                            &   ewchoice /= 8) then
+                          ewchoice = 1
+                        end if
+                     case(32) ! sw
+                        if (ewchoice /= 3 .and. ewchoice /= 4 .and. &
+                             &   ewchoice /= 7 .and. ewchoice /= 8) then
+                          ewchoice = 1
+                        end if[$
+@if e_not_one$]
+                      case(64) ! e
+                        if (ewchoice < 6) then
+                           ewchoice = 6
+                        end if[$
+@end @if$]
+                    end select
+                end if
+            elseif (choosen_ew_parameters_count == 2) then
+                if (choosen_ew_parameters == 18 .or. choosen_ew_parameters == 20 &
+                   & .or. choosen_ew_parameters == 6) then
+                   ewchoice = 1
+                elseif (choosen_ew_parameters == 10 .or. choosen_ew_parameters == 12) then
+                   ewchoice = 2
+                elseif (choosen_ew_parameters == 40 .or. choosen_ew_parameters == 36) then
+                   ewchoice = 3
+                elseif (choosen_ew_parameters == 24 .or. choosen_ew_parameters == 48) then
+                   ewchoice = 4
+                elseif (choosen_ew_parameters == 20) then
+                   ewchoice = 5[$
+@if e_not_one$]
+                 elseif (choosen_ew_parameters == 66 .or. choosen_ew_parameters == 68) then
+                   ewchoice = 6
+                 elseif (choosen_ew_parameters == 96) then
+                   ewchoice = 7
+                 elseif (choosen_ew_parameters == 80) then
+                   ewchoice = 8[$
+@end @if$]
+                 else
+                 ewchoice = orig_ewchoice
+                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&
+                                     ewchoice
+                 ierr = 1
+                end if
+            elseif (choosen_ew_parameters_count >= 4) then
+                 write(*,'(A,A,A)') 'EW parameter "', name, '" is already determined.'
+                 write(*,'(A)') 'New values are ignored.'
+                 write(*,'(A17,1x,I3)') 'Current EW choice:', ewchoice
+                 ierr = -1 ! IGNORE
+            elseif(choosen_ew_parameters_count == 3) then
+               select case(choosen_ew_parameters)
+                case(22) ! GF,mW,mZ -> e,sw
+                        ewchoice = 1
+                case(14) ! alpha, mW, mZ  -> e,sw
+                        ewchoice = 2
+                case(44) ! alpha, sw, mZ -> e, mW
+                        ewchoice = 3
+                case(56) ! alpha, sw, GF ->  e, mW
+                        ewchoice = 4
+                case(28) ! alpha, GF, mZ ->  e, mW, sw
+                        ewchoice = 5[$
+@if e_not_one$]
+                case(70) ! e, mW, mZ -> sw
+                        ewchoice = 6
+                case(100) ! e, sw, mZ -> mW
+                        ewchoice = 7
+                case(112) ! e, sw, GF -> mW, mZ
+                        ewchoice = 8[$
+@end @if$]
+                case default
+                 ewchoice = orig_ewchoice
+                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&
+                                     ewchoice
+                 ierr = 1
+               end select
+            end if
+         end if
+     end if
+[$
+@end @if$]
+
+
+     call init_functions()
+      ! TODO init_color
+   end subroutine
+!---#] subroutine set_parameter
 !---#[ subroutine init_functions:
    subroutine     init_functions()
       implicit none
@@ -686,14 +1020,14 @@ contains
 @for floats $]
      real(ki), parameter :: [$ $_ $] = [$ value convert=float format=%24.15f_ki $][$
 @end @for $][$
+@select modeltype @case sm smdiag sm_complex $][$
+@if ewchoose $]
+      call ewschemechoice(ewchoice)[$
+@end @if $][$
+@end @select $][$
 @for functions_resolved_fortran $]
      [$ $_ $] = [$ expression $][$
-@end @for $][$ 
-@select model @case sm smdiag $][$ 
-@select model.options @case ewchoose $]
-      call ewschemechoice(ewchoice)[$
-@end @select $][$
-@end @select $]
+@end @for$]
 end subroutine init_functions
 !---#] subroutine init_functions:
 !---#[ utility functions for model initialization:
@@ -744,9 +1078,11 @@ end subroutine init_functions
       sort4 = m(n)
    end  function sort4
 !---#] utility functions for model initialization:
-[$ @select model @case sm smdiag $][$ 
-@select model.options @case ewchoose $]
-!---#[ EW scheme choice:
+[$
+@select modeltype @case sm smdiag $]
+!---#[ EW scheme choice:[$
+@if ewchoose $][$ @if
+e_not_one $]
   subroutine ewschemechoice(ichoice)
   implicit none
   integer, intent(in) :: ichoice
@@ -774,34 +1110,65 @@ end subroutine init_functions
         mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
       ! mW, sw --> mZ
         mZ = mW / sqrt(1.0_ki-sw*sw)
-        case (5)
+        case(5)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, mZ, alpha --> mW
+        mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
+     & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
         sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-        case (6)
+        case(6)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case(7)
       ! mZ, sw --> mW
         mW = mZ*sqrt(1-sw*sw)
-        case(7)
+        case(8)
       ! e, sw, GF --> mW
         mW = e/2.0_ki/sw/sqrt(sqrt(2.0_ki)*GF)
       ! mW, sw --> mZ
         mZ = mW / sqrt(1.0_ki-sw*sw)
-        case(8)
-      ! alpha --> e
-        e = sqrt(4.0_ki*pi*alpha)
+  end select
+  end subroutine[$
+@else $]
+  subroutine ewschemechoice(ichoice)
+  implicit none
+  integer, intent(in) :: ichoice
+  real(ki), parameter :: pi = 3.14159265358979323846264&
+ &3383279502884197169399375105820974944592307816406286209_ki
+  ! e is algebraically set to one, do not calculate it here
+  select case (ichoice)
+        case (1)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case (2)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case (3)
+      ! sw, mZ --> mW
+        mW = mZ*sqrt(1.0_ki-sw*sw)
+        case (4)
+      ! GF, sw, alpha --> mW
+        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
+      ! mW, sw --> mZ
+        mZ = mW / sqrt(1.0_ki-sw*sw)
+        case(5)
       ! GF, mZ, alpha --> mW
       mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
       sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
-!        case default
   end select
-  end subroutine
-!---#] EW scheme choice:[$
-@end @select$][$
-@end @select$]
-[$ @select model @case sm_complex  $][$ 
-@select model.options @case ewchoose $]
-!---#[ EW scheme choice:
+  end subroutine[$
+@end @if$][$
+@end @if$]
+!---#] EW scheme choice:
+[$@end @select$]
+[$@select modeltype @case sm_complex $]
+!---#[ EW scheme choice:[$
+@if ewchoose $][$ @if
+e_not_one $]
   subroutine ewschemechoice(ichoice)
   implicit none
   integer, intent(in) :: ichoice
@@ -851,9 +1218,42 @@ end subroutine init_functions
       sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
 !        case default
   end select
-  end subroutine
-!---#] EW scheme choice:[$
-@end @select$][$
-@end @select$]
+  end subroutine[$
+@else $]
+  subroutine ewschemechoice(ichoice)
+  implicit none
+  integer, intent(in) :: ichoice
+  real(ki), parameter :: pi = 3.14159265358979323846264&
+ &3383279502884197169399375105820974944592307816406286209_ki
+  complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+  ! e is algebraically set to one, do not calculate it here
+  select case (ichoice)
+        case (1)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case (2)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case (3)
+      ! sw, mZ --> mW
+        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)
+        case (4)
+      ! GF, sw, alpha --> mW
+        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw
+      ! mW, sw --> mZ
+        mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
+        case(5)
+      ! GF, mZ, alpha --> mW
+      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
+     & sqrt(2.0_ki)/GF))
+      ! mW, mZ --> sw
+      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+  end select
+  end subroutine[$
+@end @if$][$
+@end @if$]
+!---#] EW scheme choice:
+[$@end @select$]
+
 end module olp_model
 

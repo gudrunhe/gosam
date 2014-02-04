@@ -15,7 +15,7 @@ config={'parameters' : parameters,
 
 parser = OptionParser()
 
-parser.add_option("-i", "--input", dest="input",                   
+parser.add_option("-i", "--input", dest="input",
                   action="store", type="string",
                   help="input file", metavar="INPUT")
 
@@ -46,10 +46,10 @@ modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors\n')[$
-@select model @case sm smdiag sm_complex $][$
-@select model.options @case ewchoose $]
+@select modeltype @case sm smdiag sm_complex $][$
+@if ewchoose $]
 modelfile.write(', ewchoice\n')[$
-@end @select$][$@end @select$]
+@end @if$][$@end @select$]
 modelfile.write('   implicit none\n')
 modelfile.write('\n')
 modelfile.write('   private :: ki\n')[$
@@ -78,7 +78,7 @@ modelfile.write('   real(ki),parameter :: [$$_$] = [$ real convert=float format=
 modelfile.write('   complex(ki), parameter :: [$$_$] = ([$ real convert=float format=%24.15f_ki $], [$imag convert=float format=%24.15f_ki $])\n')[$
          @end @select type $][$
       @end @for parameters $][$
-      @for functions $][$ 
+      @for functions $][$
          @select type
             @case R $]
 modelfile.write('   real(ki) :: [$$_$]\n')[$
@@ -87,7 +87,7 @@ modelfile.write('   complex(ki) :: [$$_$]\n')[$
          @end @select type $][$
       @end @for functions $]
 modelfile.write('   integer, parameter, private :: line_length = [$buffer_length$]\n')
-#      
+#
 #   ' what is our longest extra name ?
 #   ' 0   0    1    1    2    2
 #   ' 1---5----0----5----0----5
@@ -99,7 +99,7 @@ modelfile.write('   integer, parameter, private :: line_length = [$buffer_length
 #   ' samurai_test
 #   '
 #   ' ==> the longest is 24
-#   
+#
 modelfile.write('   integer, parameter, private :: name_length = max([$name_length$],24)\n')
 modelfile.write('   character(len=name_length), dimension([$ count R C $]) :: names = (/&\n')[$
    @for parameters R C  $]
@@ -250,7 +250,7 @@ modelfile.write("      end if\n")
 modelfile.write("      name = adjustl(line(1:idx-1))\n")
 modelfile.write("      value = adjustl(line(idx+1:len(line)))\n")
 modelfile.write("      idx = scan(value, ',', .false.)\n")
-modelfile.write("      \n")
+modelfile.write("\n")
 modelfile.write("      if (name .eq. \"renormalisation\") then\n")
 modelfile.write("         re = parsereal(value, ierr, lnr)\n")
 modelfile.write("         if (ierr .ne. 0) then\n")
@@ -482,7 +482,7 @@ modelfile.write("            ! set mass according to PDG code\n")
 modelfile.write("            select case(pdg)\n")[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case mass $][$
+      @select $_ @case masses $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = parsereal(value, ierr, lnr)\n")[$
@@ -549,35 +549,35 @@ modelfile.write("   subroutine     read_slha(ch, ierr)\n")
 modelfile.write("      implicit none\n")
 modelfile.write("      integer, intent(in) :: ch\n")
 modelfile.write("      integer, intent(out), optional :: ierr\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("      integer :: lnr, i, l, ofs, ios\n")
 modelfile.write("      character(len=255) :: line\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("      integer :: block\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("      ofs = iachar('A') - iachar('a')\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("      lnr = 0\n")
 modelfile.write("      loop1: do\n")
 modelfile.write("         read(unit=ch,fmt='(A[$buffer_length$])',iostat=ios) line\n")
 modelfile.write("         if(ios .ne. 0) exit\n")
 modelfile.write("         lnr = lnr + 1\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("         i = scan(line, '#', .false.)\n")
 modelfile.write("         if (i .eq. 0) then\n")
 modelfile.write("            l = len_trim(line)\n")
 modelfile.write("         else\n")
 modelfile.write("            l = i - 1\n")
 modelfile.write("         end if\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("         if (l .eq. 0) cycle loop1\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("         ucase: do i = 1, l\n")
 modelfile.write("            if (line(i:i) >= 'a' .and. line(i:i) <= 'z') then\n")
 modelfile.write("               line(i:i) = achar(iachar(line(i:i))+ofs)\n")
 modelfile.write("            end if\n")
 modelfile.write("         end do ucase\n")
-modelfile.write("   \n")
+modelfile.write("\n")
 modelfile.write("         if (line(1:1) .eq. 'B') then\n")
 modelfile.write("            if (line(1:5) .eq. 'BLOCK') then\n")
 modelfile.write("               line = adjustl(line(6:l))\n")
@@ -604,13 +604,13 @@ modelfile.write("               write(*,'(A37,I5)') \"Illegal statement in SLHA 
 modelfile.write("               if (present(ierr)) ierr = 1\n")
 modelfile.write("               return\n")
 modelfile.write("            end if\n")[$
-         @for slha_blocks lower $][$ 
+         @for slha_blocks lower $][$
             @select $_ @case decay $]
 modelfile.write("         elseif (line(1:1) .eq. 'D') then\n")
 modelfile.write("            if (line(1:5) .eq. 'DECAY') then\n")
 modelfile.write("               line = adjustl(line(6:l))\n")
 modelfile.write("               call read_slha_line_decay(line, i)\n")
-modelfile.write("               block = 2            \n")
+modelfile.write("               block = 2\n")
 modelfile.write("            else\n")
 modelfile.write("               write(*,'(A37,I5)') \"Illegal statement in SLHA file, line \", lnr\n")
 modelfile.write("               if (present(ierr)) ierr = 1\n")
@@ -638,10 +638,10 @@ modelfile.write("         end if\n")
 modelfile.write("      end do loop1\n")
 modelfile.write("      if (present(ierr)) ierr = 0\n")
 modelfile.write("   end subroutine read_slha\n")[$
-   @for slha_blocks lower dimension=1 $][$ 
+   @for slha_blocks lower dimension=1 $][$
       @select $_ @case decay $]
 modelfile.write("   subroutine read_slha_block_[$ $_ $](line, ierr)\n")
-modelfile.write("   !  This subroutine reads the 'branching ratios' of \n")
+modelfile.write("   !  This subroutine reads the 'branching ratios' of\n")
 modelfile.write("   !  the slha file: these are just thrown away\n")
 modelfile.write("      implicit none\n")
 modelfile.write("      character(len=*), intent(in) :: line\n")
@@ -703,7 +703,7 @@ modelfile.write("      end select\n")[$
          @end @if is_last $][$
       @end @for$]
 modelfile.write("      if (present(ierr)) ierr = 0\n")
-modelfile.write("   end subroutine read_slha_block_[$ $_ $]\n")[$ 
+modelfile.write("   end subroutine read_slha_block_[$ $_ $]\n")[$
    @end @select $][$
    @end @for $][$
    @for slha_blocks lower dimension=2 $]
@@ -754,15 +754,26 @@ modelfile.write("\n")
 modelfile.write("      logical :: must_be_real\n")
 modelfile.write("      must_be_real = .false.\n")
 modelfile.write("\n")[$
-@select model @case sm smdiag smehc sm_complex $]
+@select modeltype @case sm smdiag smehc sm_complex $][$
+@if gs_not_one $]
 modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\") then\n")
 modelfile.write("         gs = 2.0_ki*sqrt(pi)*sqrt(re)\n")
 modelfile.write("         must_be_real = .true.\n")
-modelfile.write("      elseif (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
+modelfile.write("      else")[$
+@else $]
+modelfile.write("     ")[$
+@end @if $][$ @if alpha_not_one $]
+modelfile.write("if (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
 modelfile.write("         alpha = re\n")
 modelfile.write("         must_be_real = .true.\n")[$
-@select model @case sm sm_complex smehc $]
-modelfile.write("      elseif (name.eq.\"VV12\") then\n")
+@end @if$][$
+@select modeltype @case sm sm_complex smehc $]
+[$ @if eval ( gs_not_one .or. alpha_not_one ) $]
+modelfile.write("         else")[$
+@else$]
+modelfile.write("         ")[$
+@end @if$]
+modelfile.write("if (name.eq.\"VV12\") then\n")
 modelfile.write("         call set_parameter(\"VUD\",re,im,ierr)\n")
 modelfile.write("         return\n")
 modelfile.write("      elseif (name.eq.\"VV23\") then\n")
@@ -790,7 +801,7 @@ modelfile.write("      elseif (name.eq.\"VV56\") then\n")
 modelfile.write("         call set_parameter(\"VTB\",re,im,ierr)\n")
 modelfile.write("         return\n")[$
 @end @select $][$
-@select model @case sm_complex $]
+@select modeltype @case sm_complex $]
 modelfile.write("      elseif (name.eq.\"sw2\") then\n")
 modelfile.write("         sw = sqrt(cmplx(re,im,ki))\n")[$
 @else $]
@@ -813,7 +824,7 @@ modelfile.write("         must_be_real = .true.\n")
 modelfile.write("         select case(pdg)\n")
 [$@if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case mass $][$
+      @select $_ @case masses $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = re\n")[$
@@ -1067,11 +1078,11 @@ modelfile.write("      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
 modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
 modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
 if abb_max != '0':
-   modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$ 
-@select model @case sm smdiag sm_complex $][$
-@select model.options @case ewchoose $]
+   modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$
+@select modeltype @case sm smdiag sm_complex $][$
+@if ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
-@end @select $][$
+@end @if $][$
 @end @select $]
 modelfile.write("%s" % outdict['Functions'])
 modelfile.write("end subroutine init_functions\n")
@@ -1124,8 +1135,8 @@ modelfile.write("\n")
 modelfile.write("      sort4 = m(n)\n")
 modelfile.write("   end  function sort4\n")
 modelfile.write("!---#] utility functions for model initialization:\n")
-[$ @select model @case sm smdiag $][$
-@select model.options @case ewchoose $]
+[$ @select modeltype @case sm smdiag $][$
+@if ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
 modelfile.write("  implicit none\n")
@@ -1177,10 +1188,10 @@ modelfile.write("!        case default\n")
 modelfile.write("  end select\n")
 modelfile.write("  end subroutine\n")
 modelfile.write("!---#] EW scheme choice:\n")[$
-@end @select$][$
+@end @if$][$
 @end @select$]
-[$ @select model @case sm_complex  $][$
-@select model.options @case ewchoose $]
+[$ @select modeltype @case sm_complex  $][$
+@if ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
 modelfile.write("  implicit none\n")
@@ -1233,7 +1244,7 @@ modelfile.write("!        case default\n")
 modelfile.write("  end select\n")
 modelfile.write("  end subroutine\n")
 modelfile.write("!---#] EW scheme choice:\n")[$
-@end @select$][$
+@end @if$][$
 @end @select$]
 modelfile.write("end module [$ process_name asprefix=\_ $]model\n")
 

@@ -24,7 +24,10 @@ class ModelTemplate(Template):
 		self._ones = conf.getProperty(golem.properties.one)
 		self._mod = golem.util.tools.getModel(conf)
 		self._model = self._mod.model_name
-	
+		self._modeltype =  conf.getProperty("modeltype")
+		if not self._modeltype:
+			self._modeltype = conf.getProperty("model")
+
 		self._comment_chars = ['#', '!', ';']
 		self._buffer_length = 80
 
@@ -66,6 +69,7 @@ class ModelTemplate(Template):
 		props = Properties()
 
 		props.setProperty("model", self._model)
+		props.setProperty("modeltype", self._modeltype)
 		props.setProperty("name_length", str(name_length))
 		props.setProperty("len_comment_chars", str(len(self._comment_chars)))
 		props.setProperty("buffer_length", str(self._buffer_length))
@@ -103,8 +107,15 @@ class ModelTemplate(Template):
 			props.setProperty("e_not_one", False)
 		else:
 			props.setProperty("e_not_one", True)
+		if "gs" in ones:
+			props.setProperty("gs_not_one", False)
+		else:
+			props.setProperty("gs_not_one", True)
+		if "alpha" in ones:
+			props.setProperty("alpha_not_one", False)
+		else:
+			props.setProperty("alpha_not_one", True)
 
-		
 
 	def add_kinematics_parameters(self, in_particles, out_particles):
 

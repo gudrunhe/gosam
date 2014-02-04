@@ -7,8 +7,8 @@ $]module     [$ process_name asprefix=\_ $]model
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
-   & nlo_prefactors[$ 
-@select model @case sm smdiag sm_complex $][$
+   & nlo_prefactors[$
+@select modeltype @case sm smdiag sm_complex $][$
 @if ewchoose $], ewchoice[$
 @end @if$][$@end @select$]
    implicit none
@@ -207,7 +207,7 @@ contains
       name = adjustl(line(1:idx-1))
       value = adjustl(line(idx+1:len(line)))
       idx = scan(value, ',', .false.)
-      
+
       if (name .eq. "renormalisation") then
          re = parsereal(value, ierr, lnr)
          if (ierr .ne. 0) then
@@ -435,7 +435,7 @@ contains
             select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case mass $][$
+      @select $_ @case masses $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = parsereal(value, ierr, lnr)[$
@@ -502,35 +502,35 @@ contains
       implicit none
       integer, intent(in) :: ch
       integer, intent(out), optional :: ierr
-   
+
       integer :: lnr, i, l, ofs, ios
       character(len=255) :: line
-   
+
       integer :: block
-   
+
       ofs = iachar('A') - iachar('a')
-   
+
       lnr = 0
       loop1: do
          read(unit=ch,fmt='(A[$buffer_length$])',iostat=ios) line
          if(ios .ne. 0) exit
          lnr = lnr + 1
-   
+
          i = scan(line, '#', .false.)
          if (i .eq. 0) then
             l = len_trim(line)
          else
             l = i - 1
          end if
-   
+
          if (l .eq. 0) cycle loop1
-   
+
          ucase: do i = 1, l
             if (line(i:i) >= 'a' .and. line(i:i) <= 'z') then
                line(i:i) = achar(iachar(line(i:i))+ofs)
             end if
          end do ucase
-   
+
          if (line(1:1) .eq. 'B') then
             if (line(1:5) .eq. 'BLOCK') then
                line = adjustl(line(6:l))
@@ -555,13 +555,13 @@ contains
                if (present(ierr)) ierr = 1
                return
             end if[$
-         @for slha_blocks lower $][$ 
+         @for slha_blocks lower $][$
             @select $_ @case decay $]
          elseif (line(1:1) .eq. 'D') then
             if (line(1:5) .eq. 'DECAY') then
                line = adjustl(line(6:l))
                call read_slha_line_decay(line, i)
-               block = 2            
+               block = 2
             else
                write(*,'(A37,I5)') "Illegal statement in SLHA file, line ", lnr
                if (present(ierr)) ierr = 1
@@ -589,10 +589,10 @@ contains
       end do loop1
       if (present(ierr)) ierr = 0
    end subroutine read_slha[$
-   @for slha_blocks lower dimension=1 $][$ 
+   @for slha_blocks lower dimension=1 $][$
       @select $_ @case decay $]
    subroutine read_slha_block_[$ $_ $](line, ierr)
-   !  This subroutine reads the 'branching ratios' of 
+   !  This subroutine reads the 'branching ratios' of
    !  the slha file: these are just thrown away
       implicit none
       character(len=*), intent(in) :: line
@@ -654,7 +654,7 @@ contains
          @end @if is_last $][$
       @end @for$]
       if (present(ierr)) ierr = 0
-   end subroutine read_slha_block_[$ $_ $][$ 
+   end subroutine read_slha_block_[$ $_ $][$
    @end @select $][$
    @end @for $][$
    @for slha_blocks lower dimension=2 $]
@@ -705,15 +705,20 @@ contains
       logical :: must_be_real
       must_be_real = .false.
 [$
-@select model @case sm smdiag smehc sm_complex $]
+@select modeltype @case sm smdiag smehc sm_complex $][$
+@if gs_not_one $]
       if (name.eq."aS" .or. name.eq."alphaS") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
          must_be_real = .true.
-      elseif (name.eq."alphaEW" .or. name.eq."alpha") then
+      else[$@else$]
+      [$
+@end @if$][$@if alpha_not_one$]if (name.eq."alphaEW" .or. name.eq."alpha") then
          alpha = re
-         must_be_real = .true.[$
-@select model @case sm sm_complex smehc $]
-      elseif (name.eq."VV12") then
+         must_be_real = .true.[$@end @if$][$
+@select modeltype @case sm sm_complex smehc$][$
+@if eval ( gs_not_one .or. alpha_not_one ) $]
+      else[$@else$]
+      [$@end @if$]if (name.eq."VV12") then
          call set_parameter("VUD",re,im,ierr)
          return
       elseif (name.eq."VV23") then
@@ -740,7 +745,7 @@ contains
      elseif (name.eq."VV56") then
          call set_parameter("VTB",re,im,ierr)
          return[$
-@select model @case sm_complex $]
+@select modeltype @case sm_complex $]
       elseif (name.eq."sw2") then
          sw = sqrt(cmplx(re,im,ki))[$
 @else $]
@@ -764,7 +769,7 @@ contains
          select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case mass $][$
+      @select $_ @case masses $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = re [$
@@ -1014,8 +1019,8 @@ contains
      &3383279502884197169399375105820974944592307816406286209_ki[%
 @for symbols match="\\$(.*)" format="reg%s" %]
       [% type.repr %] :: [% $_ %][%
-@end @for symbols %][$ 
-@select model @case sm smdiag sm_complex $][$
+@end @for symbols %][$
+@select modeltype @case sm smdiag sm_complex $][$
 @if ewchoose $]
       call ewschemechoice(ewchoice)[$
 @end @if $][$
@@ -1079,9 +1084,9 @@ contains
       sort4 = m(n)
    end  function sort4
 !---#] utility functions for model initialization:
-[$ 
-@select model @case sm smdiag $]
-!---#[ EW scheme choice:[$ 
+[$
+@select modeltype @case sm smdiag $]
+!---#[ EW scheme choice:[$
 @if ewchoose $][$ @if
 e_not_one $]
   subroutine ewschemechoice(ichoice)
@@ -1159,15 +1164,15 @@ e_not_one $]
       mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)        
+      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
   end select
   end subroutine[$
 @end @if$][$
 @end @if$]
 !---#] EW scheme choice:
 [$@end @select$]
-[$@select model @case sm_complex $]
-!---#[ EW scheme choice:[$ 
+[$@select modeltype @case sm_complex $]
+!---#[ EW scheme choice:[$
 @if ewchoose $][$ @if
 e_not_one $]
   subroutine ewschemechoice(ichoice)
@@ -1248,7 +1253,7 @@ e_not_one $]
       mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))        
+      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
   end select
   end subroutine[$
 @end @if$][$
