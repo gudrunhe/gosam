@@ -8,7 +8,7 @@ $]module     [$ process_name asprefix=\_ $]model
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
    & nlo_prefactors[$
-@select modeltype @case sm smdiag sm_complex $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $], ewchoice[$
 @end @if$][$@end @select$]
    implicit none
@@ -705,7 +705,7 @@ contains
       logical :: must_be_real
       must_be_real = .false.
 [$
-@select modeltype @case sm smdiag smehc sm_complex $][$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $][$
 @if gs_not_one $]
       if (name.eq."aS" .or. name.eq."alphaS") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
@@ -745,7 +745,7 @@ contains
      elseif (name.eq."VV56") then
          call set_parameter("VTB",re,im,ierr)
          return[$
-@select modeltype @case sm_complex $]
+@select modeltype @case sm_complex smdiag_complex $]
       elseif (name.eq."sw2") then
          sw = sqrt(cmplx(re,im,ki))[$
 @else $]
@@ -1020,7 +1020,7 @@ contains
 @for symbols match="\\$(.*)" format="reg%s" %]
       [% type.repr %] :: [% $_ %][%
 @end @for symbols %][$
-@select modeltype @case sm smdiag sm_complex $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
       call ewschemechoice(ewchoice)[$
 @end @if $][$
@@ -1085,7 +1085,7 @@ contains
    end  function sort4
 !---#] utility functions for model initialization:
 [$
-@select modeltype @case sm smdiag $]
+@select modeltype @case sm smdiag smehc $]
 !---#[ EW scheme choice:[$
 @if ewchoose $][$ @if
 e_not_one $]
@@ -1171,7 +1171,7 @@ e_not_one $]
 @end @if$]
 !---#] EW scheme choice:
 [$@end @select$]
-[$@select modeltype @case sm_complex $]
+[$@select modeltype @case sm_complex smdiag_complex $]
 !---#[ EW scheme choice:[$
 @if ewchoose $][$ @if
 e_not_one $]

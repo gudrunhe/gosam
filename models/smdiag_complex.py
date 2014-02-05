@@ -1,10 +1,9 @@
 # vim: ts=3:sw=3:expandtab
 from golem.model.particle import Particle
-from golem.model import MODEL_OPTIONS
 import golem.util.tools
 from math import sqrt
 
-model_name = "Standard Model in Feynman Gauge (Diagonal CKM)"
+model_name = "Standard Model in Feynman Gauge (Diagonal CKM, complex masses)"
 #---#[ particles:
 particles = {
    'U':       Particle('U',        1,   'mU',  3, 'Ubar',  '0',        2,     2.0/3.0),
@@ -177,6 +176,7 @@ latex_parameters = {
    'gWWZZ': 'g_{W^+W^-ZZ}', 'gWWAZ': 'g_{W^+W^-\\gamma Z}',
    'gWWAA': 'g_{W^+W^-\\gamma\\gamma}', 'gWWWW': 'g_{W^+W^-W^+W^-}',
    'gWWZ': 'g_{W^+W^-Z}',
+
    'gHHHH': 'g_{HHHH}', 'gXXXX': 'g_{\\chi\\chi\\chi\\chi}',
    'gHHXX': 'g_{HH\\chi\\chi}',
    'gHHPP': 'g_{HH\\phi^+\\phi^-}',
@@ -244,10 +244,10 @@ latex_parameters = {
    'gGWZP': 'g_{\\bar{u}_{W^\\pm}u_{Z}\\phi^{\\mp}}',
 
    'gZ': 'g_Z',
-   'gW': 'g_W'
+   'gW': 'g_W',
+   'gH': 'g_H'
 }
 #---#] latex_parameters:
-
 #---#[ functions:
 functions = {
    'NA': 'NC*NC-1',
@@ -325,15 +325,15 @@ functions = {
    'gWWWW': ' (1/sw^2)',
    'gWWZ': '-(cw/sw)',
 
-   'gHHHH': '- 3/(4*sw*sw) * mH*mH/mW/mW',
-   'gXXXX': '- 3/(4*sw*sw) * mH*mH/mW/mW',
-   'gHHXX': '- mH*mH/mW/mW/(4*sw*sw)',
-   'gHHPP': '- mH*mH/mW/mW/(4*sw*sw)',
-   'gXXPP': '- mH*mH/mW/mW/(4*sw*sw)',
-   'gPPPP': '- 2*mH*mH/mW/mW/(4*sw*sw)',
-   'gHHH': '- 3/2/sw * mH*mH/mW',
-   'gHXX': '- 1/2/sw * mH*mH/mW',
-   'gHPP': '- 1/2/sw * mH*mH/mW',
+   'gHHHH': '- 3/(4*sw*sw) * mH*mH/(mW*mW-i_*mW*wW)',
+   'gXXXX': '- 3/(4*sw*sw) * mH*mH/(mW*mW-i_*mW*wW)',
+   'gHHXX': '- mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
+   'gHHPP': '- mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
+   'gXXPP': '- mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
+   'gPPPP': '- 2*mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
+   'gHHH': '- 3/2/sw * mH*mH/csqrt(mW*mW-i_*mW*wW)',
+   'gHXX': '- 1/2/sw * mH*mH/csqrt(mW*mW-i_*mW*wW)',
+   'gHPP': '- 1/2/sw * mH*mH/csqrt(mW*mW-i_*mW*wW)',
 
    'gZZHH': '1/2/cw/cw/sw/sw',
    'gZZXX': '1/2/cw/cw/sw/sw',
@@ -354,46 +354,47 @@ functions = {
    'gWPH': '-1/2/sw',
    'gWPX': '-i_/2/sw',
 
-   'gHZZ': '  mW/(cw^2*sw)',
-   'gHWW': '  mW/sw',
-   'gPWA': '- mW',
-   'gPWZ': '- mW * sw/cw',
+   'gHZZ': '  csqrt(mW*mW-i_*mW*wW)/(cw^2*sw)',
+   'gHWW': '  csqrt(mW*mW-i_*mW*wW)/sw',
+   'gPWA': '- csqrt(mW*mW-i_*mW*wW)',
+   'gPWZ': '- csqrt(mW*mW-i_*mW*wW) * sw/cw',
 
-   'gHU': '- mU/mW / 2/sw',
-   'gHD': '- mD/mW / 2/sw',
-   'gHC': '- mC/mW / 2/sw',
-   'gHS': '- mS/mW / 2/sw',
-   'gHB': '- mBMS/mW / 2/sw',
-   'gHT': '- mT/mW / 2/sw',
-   'gHe': '- me/mW / 2/sw',
-   'gHmu': '- mmu/mW / 2/sw',
-   'gHtau': '- mtau/mW / 2/sw',
-   'gXU': '- mU/mW * (+1/2)/sw',
-   'gXD': '- mD/mW * (-1/2)/sw',
-   'gXC': '- mC/mW * (+1/2)/sw',
-   'gXS': '- mS/mW * (-1/2)/sw',
-   'gXB': '- mBMS/mW * (-1/2)/sw',
-   'gXT': '- mT/mW * (+1/2)/sw',
-   'gXe': '- me/mW * (-1/2)/sw',
-   'gXmu': '- mmu/mW * (-1/2)/sw',
-   'gXtau': '- mtau/mW * (-1/2)/sw',
-   'gPU': 'mU/mW/sqrt2/sw',
-   'gPD': 'mD/mW/sqrt2/sw',
-   'gPC': 'mC/mW/sqrt2/sw',
-   'gPS': 'mS/mW/sqrt2/sw',
-   'gPB': 'mBMS/mW/sqrt2/sw',
-   'gPT': 'mT/mW/sqrt2/sw',
-   'gPe': 'me/mW/sqrt2/sw',
-   'gPmu': 'mmu/mW/sqrt2/sw',
-   'gPtau': 'mtau/mW/sqrt2/sw',
+   'gHU': '- mU/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHD': '- mD/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHC': '- mC/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHS': '- mS/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHB': '- mBMS/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHT': '- mT/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHe': '- me/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHmu': '- mmu/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gHtau': '- mtau/csqrt(mW*mW-i_*mW*wW) / 2/sw',
+   'gXU': '- mU/csqrt(mW*mW-i_*mW*wW) * (+1/2)/sw',
+   'gXD': '- mD/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gXC': '- mC/csqrt(mW*mW-i_*mW*wW) * (+1/2)/sw',
+   'gXS': '- mS/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gXB': '- mBMS/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gXT': '- mT/csqrt(mW*mW-i_*mW*wW) * (+1/2)/sw',
+   'gXe': '- me/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gXmu': '- mmu/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gXtau': '- mtau/csqrt(mW*mW-i_*mW*wW) * (-1/2)/sw',
+   'gPU': 'mU/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPD': 'mD/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPC': 'mC/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPS': 'mS/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPB': 'mBMS/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPT': 'mT/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPe': 'me/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPmu': 'mmu/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
+   'gPtau': 'mtau/csqrt(mW*mW-i_*mW*wW)/sqrt2/sw',
 
-   'gGWX': '- i_*mW/2/sw',
-   'gGWH': '- mW/2/sw',
-   'gGZH': '- mW/(2*cw*cw*sw)',
-   'gGWZP': '- (cw*cw-sw*sw)/(2*cw*sw)*mW',
-   'gGZWP': 'mW/(2*cw*sw)',
+   'gGWX': '- i_*csqrt(mW*mW-i_*mW*wW)/2/sw',
+   'gGWH': '- csqrt(mW*mW-i_*mW*wW)/2/sw',
+   'gGZH': '- csqrt(mW*mW-i_*mW*wW)/(2*cw*cw*sw)',
+   'gGWZP': '- (cw*cw-sw*sw)/(2*cw*sw)*csqrt(mW*mW-i_*mW*wW)',
+   'gGZWP': 'csqrt(mW*mW-i_*mW*wW)/(2*cw*sw)',
+   'gH': '1/(24*pi*pi*csqrt(mW*mW-i_*mW*wW)*sw)',
 
-   'cw': '(mW/mZ)',
+   'cw': '(csqrt(mW*mW-i_*mW*wW)/csqrt(mZ*mZ-i_*mZ*wZ))',
 
    'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'
 }
@@ -409,40 +410,40 @@ types = {
    'wZ': 'R', 'wW': 'R', 'wH': 'R',
    'wghZ': 'R', 'wghWp': 'R', 'wghWm': 'R',
    'wchi': 'R', 'wphi': 'R',
-   'cw': 'R',
+   'cw': 'C',
    'mBMS': 'R',
    'Nf': 'R', 'Nfgen': 'R', 'NA': 'R',
    'Nfrat': 'R',
-   'gUv': 'R', 'gUa': 'R', 'gDv': 'R', 'gDa': 'R',
-   'gCv': 'R', 'gCa': 'R', 'gSv': 'R', 'gSa': 'R',
-   'gTv': 'R', 'gTa': 'R', 'gBv': 'R', 'gBa': 'R',
-   'gnev': 'R', 'gnea': 'R', 'gnmuv': 'R', 'gnmua': 'R',
-   'gntauv': 'R', 'gntaua': 'R', 'gev': 'R', 'gea': 'R',
-   'gmuv': 'R', 'gmua': 'R', 'gtauv': 'R', 'gtaua': 'R',
-   'gUl': 'R', 'gUr': 'R', 'gDl': 'R', 'gDr': 'R',
-   'gCl': 'R', 'gCr': 'R', 'gSl': 'R', 'gSr': 'R',
-   'gTl': 'R', 'gTr': 'R', 'gBl': 'R', 'gBr': 'R',
-   'gnel': 'R', 'gner': 'R', 'gnmul': 'R', 'gnmur': 'R',
-   'gntaul': 'R', 'gntaur': 'R', 'gel': 'R', 'ger': 'R',
-   'gmul': 'R', 'gmur': 'R', 'gtaul': 'R', 'gtaur': 'R',
-   'gWWZZ': 'R', 'gWWAZ': 'R', 'gWWAA': 'R', 'gWWWW': 'R',
-   'gWWZ': 'R',
-   'gHHHH': 'R', 'gXXXX': 'R', 'gHHXX': 'R', 'gHHPP': 'R',
-   'gXXPP': 'R', 'gPPPP': 'R', 'gHHH': 'R', 'gHXX': 'R', 'gHPP': 'R',
-   'gZZHH': 'R', 'gZZXX': 'R', 'gWWHH': 'R', 'gWWXX': 'R', 'gWWPP': 'R',
-   'gAAPP': 'R', 'gAZPP': 'R', 'gZZPP': 'R', 'gWAPH': 'R', 'gWZPH': 'R',
+   'gUv': 'C', 'gUa': 'C', 'gDv': 'C', 'gDa': 'C',
+   'gCv': 'C', 'gCa': 'C', 'gSv': 'C', 'gSa': 'C',
+   'gTv': 'C', 'gTa': 'C', 'gBv': 'C', 'gBa': 'C',
+   'gnev': 'C', 'gnea': 'C', 'gnmuv': 'C', 'gnmua': 'C',
+   'gntauv': 'C', 'gntaua': 'C', 'gev': 'C', 'gea': 'C',
+   'gmuv': 'C', 'gmua': 'C', 'gtauv': 'C', 'gtaua': 'C',
+   'gUl': 'C', 'gUr': 'C', 'gDl': 'C', 'gDr': 'C',
+   'gCl': 'C', 'gCr': 'C', 'gSl': 'C', 'gSr': 'C',
+   'gTl': 'C', 'gTr': 'C', 'gBl': 'C', 'gBr': 'C',
+   'gnel': 'C', 'gner': 'C', 'gnmul': 'C', 'gnmur': 'C',
+   'gntaul': 'C', 'gntaur': 'C', 'gel': 'C', 'ger': 'C',
+   'gmul': 'C', 'gmur': 'C', 'gtaul': 'C', 'gtaur': 'C',
+   'gWWZZ': 'C', 'gWWAZ': 'C', 'gWWAA': 'C', 'gWWWW': 'C',
+   'gWWZ': 'C',
+   'gHHHH': 'C', 'gXXXX': 'C', 'gHHXX': 'C', 'gHHPP': 'C',
+   'gXXPP': 'C', 'gPPPP': 'C', 'gHHH': 'C', 'gHXX': 'C', 'gHPP': 'C',
+   'gZZHH': 'C', 'gZZXX': 'C', 'gWWHH': 'C', 'gWWXX': 'C', 'gWWPP': 'C',
+   'gAAPP': 'C', 'gAZPP': 'C', 'gZZPP': 'C', 'gWAPH': 'C', 'gWZPH': 'C',
    'gWZPX': 'C', 'gWAPX': 'C',
-   'gZXH': 'C', 'gAPP': 'R', 'gZPP': 'R', 'gWPH': 'R', 'gWPX': 'C',
-   'gHZZ': 'R', 'gHWW': 'R', 'gPWA': 'R', 'gPWZ': 'R',
-   'gHU': 'R', 'gHD': 'R', 'gHC': 'R', 'gHS': 'R', 'gHB': 'R',
-   'gHT': 'R', 'gHe': 'R', 'gHmu': 'R', 'gHtau': 'R',
-   'gXU': 'R', 'gXD': 'R', 'gXC': 'R', 'gXS': 'R', 'gXB': 'R',
-   'gXT': 'R', 'gXe': 'R', 'gXmu': 'R', 'gXtau': 'R',
-   'gPU': 'R', 'gPD': 'R', 'gPC': 'R', 'gPS': 'R', 'gPB': 'R',
-   'gPT': 'R', 'gPe': 'R', 'gPmu': 'R', 'gPtau': 'R',
-   'gGWX': 'C', 'gGWH': 'R', 'gGZH': 'R', 'gGWZP': 'R', 'gGZWP': 'R',
+   'gZXH': 'C', 'gAPP': 'R', 'gZPP': 'C', 'gWPH': 'C', 'gWPX': 'C',
+   'gHZZ': 'C', 'gHWW': 'C', 'gPWA': 'C', 'gPWZ': 'C',
+   'gHU': 'C', 'gHD': 'C', 'gHC': 'C', 'gHS': 'C', 'gHB': 'C',
+   'gHT': 'C', 'gHe': 'C', 'gHmu': 'C', 'gHtau': 'C',
+   'gXU': 'C', 'gXD': 'C', 'gXC': 'C', 'gXS': 'C', 'gXB': 'C',
+   'gXT': 'C', 'gXe': 'C', 'gXmu': 'C', 'gXtau': 'C',
+   'gPU': 'C', 'gPD': 'C', 'gPC': 'C', 'gPS': 'C', 'gPB': 'C',
+   'gPT': 'C', 'gPe': 'C', 'gPmu': 'C', 'gPtau': 'C',
+   'gGWX': 'C', 'gGWH': 'C', 'gGZH': 'C', 'gGWZP': 'C', 'gGZWP': 'C',
 
-   'gZ': 'R', 'gW': 'R'
+   'gZ': 'C', 'gW': 'C', 'gH': 'C'
 }
 #---#] types:
 #---#[ latex_names:
@@ -597,41 +598,41 @@ def init_ew(e_one=False,**options):
 
    """
    global parameters, functions, types
+
    keys = set(options.keys())
    for key in keys:
       parameters[key] = str(options[key])
       types[key] = "R"
-
    if keys == set(["GF", "mW", "mZ"]):
       # mW, mZ --> sw
-      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
-      types["sw"] = "R"
+      functions["sw"] = "csqrt(1-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))"
+      types["sw"] = "C"
       # GF, mW, sw --> e
       functions["e"] = "mW*sw*sqrt(8*GF/sqrt(2))"
-      types["e"] = "R"
+      types["e"] = "C"
    elif keys == set(["alpha", "mW", "mZ"]):
       # alpha --> e
       functions["e"] = "sqrt(4*pi*alpha))"
       types["e"] = "R"
       # mW, mZ --> sw
-      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
-      types["sw"] = "R"
+      functions["sw"] = "csqrt(1-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))"
+      types["sw"] = "C"
    elif keys == set(["alpha", "sw", "mZ"]):
       # alpha --> e
       functions["e"] = "sqrt(4*pi*alpha))"
       types["e"] = "R"
       # sw, mZ --> mW
-      functions["mW"] = "mZ*sqrt(1-sw*sw)"
+      functions["mW"] = "mZ*sqrt(1-real(sw*sw))"
       types["mW"] = "R"
    elif keys == set(["alpha", "sw", "GF"]):
       # alpha --> e
       functions["e"] = "sqrt(4*pi*alpha))"
       types["e"] = "R"
       # GF, sw, alpha --> mW
-      functions["mW"] = "sqrt(alpha*pi/sqrt(2)/GF) / sw"
+      functions["mW"] = "sqrt(alpha*pi/sqrt(2)/GF) / real(sw)"
       types['mW'] = 'R'
       # mW, sw --> mZ
-      functions["mZ"] = "mW / sqrt(1-sw*sw)"
+      functions["mZ"] = "mW / sqrt(1-real(sw*sw))"
       types["mZ"] = "R"
    elif keys == set(["alpha", "GF", "mZ"]):
       # alpha --> e
@@ -641,22 +642,23 @@ def init_ew(e_one=False,**options):
       functions["mW"] = "sqrt(mZ*mZ/2+sqrt(mZ*mZ*mZ*mZ/4-pi*alpha*mZ*mZ/sqrt(2)/GF))"
       types["mW"] = "R"
       # mW, mZ --> sw
-      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
-      types["sw"] = "R"
+      functions["sw"] = "csqrt(1-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ)"
+      types["sw"] = "C"
    elif keys == set(["e", "mW", "mZ"]):
       # mW, mZ --> sw
-      functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
-      types["sw"] = "R"
+      functions["sw"] = "csqrt(1-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ)"
+      types["sw"] = "C"
    elif keys == set(["e", "sw", "mZ"]):
+      gosam_choice = 7
       # mZ, sw --> mW
-      functions["mW"] = "mZ*sqrt(1-sw*sw)"
+      functions["mW"] = "mZ*sqrt(1-real(sw*sw))"
       types["mW"] = "R"
    elif keys == set(["e", "sw", "GF"]):
       # e, sw, GF --> mW
       functions["mW"] = "e/2/sw/sqrt(sqrt(2)*GF)"
       types["mW"] = "R"
       # mW, sw --> mZ
-      functions["mZ"] = "mW / sqrt(1-sw*sw)"
+      functions["mZ"] = "mW / sqrt(1-real(sw*sw))"
       types["mZ"] = "R"
    elif keys == set(["e", "sw", "GF", "mZ", "mW", "alpha"]):
       for dummy in ["e", "sw", "GF", "mZ", "mW", "alpha"]:
@@ -664,6 +666,8 @@ def init_ew(e_one=False,**options):
          functions['%sf' % dummy ] = dummy
          types[dummy] = "R"
          types['%sf' % dummy] = "R"
+         types["sw"] = "C"
+         types["swf"]= "C"
          #try:
          #   del slha_locations[dummy]
          #except:
@@ -674,6 +678,7 @@ def init_ew(e_one=False,**options):
       if "e" in functions.keys():
          del functions["e"]
 #---#] def init_ew:
+
 #---#[ def ew_gosam_choice:
 
 def ew_gosam_choice(keys, size_set):
@@ -765,8 +770,12 @@ def init():
    eone = False
 
    gosam_choice = int(ew_gosam_choice(input_params, icount))
-   user_choice = int(keys["users_choice"])
-   ewchoose = keys["ewchoose"]
+   try:
+     user_choice = int(keys["users_choice"])
+     ewchoose = keys["ewchoose"]
+   except:
+     user_choice=0
+     ewchoose=False
    param=""
 
    golem.util.tools.debug("GS: %r" % gosam_choice)
@@ -858,5 +867,21 @@ def init():
             widths = value.split()
    simplify_model(particles, parameters, types, functions, masses, widths)
    init_ew(e_one=eone,**ew_input)
+
 #---#] def init:
+
+
+
+
+#---#[ def fill_dict:
+
+def fill_dict(ad,bd):
+   """
+   Put this somewhere else
+   """
+   cd = dict( (key, bd[key]) for key in bd if (key not in ad ))
+   for key in cd:
+      ad[key] = bd[key]
+   return ad
+#---#] def fill_dict:
 init()

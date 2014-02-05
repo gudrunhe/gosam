@@ -46,7 +46,7 @@ modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors\n')[$
-@select modeltype @case sm smdiag sm_complex $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice\n')[$
 @end @if$][$@end @select$]
@@ -754,7 +754,7 @@ modelfile.write("\n")
 modelfile.write("      logical :: must_be_real\n")
 modelfile.write("      must_be_real = .false.\n")
 modelfile.write("\n")[$
-@select modeltype @case sm smdiag smehc sm_complex $][$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex $][$
 @if gs_not_one $]
 modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\") then\n")
 modelfile.write("         gs = 2.0_ki*sqrt(pi)*sqrt(re)\n")
@@ -801,7 +801,7 @@ modelfile.write("      elseif (name.eq.\"VV56\") then\n")
 modelfile.write("         call set_parameter(\"VTB\",re,im,ierr)\n")
 modelfile.write("         return\n")[$
 @end @select $][$
-@select modeltype @case sm_complex $]
+@select modeltype @case sm_complex smdiag_complex $]
 modelfile.write("      elseif (name.eq.\"sw2\") then\n")
 modelfile.write("         sw = sqrt(cmplx(re,im,ki))\n")[$
 @else $]
@@ -1079,7 +1079,7 @@ modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n"
 modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
 if abb_max != '0':
    modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$
-@select modeltype @case sm smdiag sm_complex $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @if $][$
@@ -1135,7 +1135,7 @@ modelfile.write("\n")
 modelfile.write("      sort4 = m(n)\n")
 modelfile.write("   end  function sort4\n")
 modelfile.write("!---#] utility functions for model initialization:\n")
-[$ @select modeltype @case sm smdiag $][$
+[$ @select modeltype @case sm smdiag smehc $][$
 @if ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
@@ -1190,7 +1190,7 @@ modelfile.write("  end subroutine\n")
 modelfile.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
-[$ @select modeltype @case sm_complex  $][$
+[$ @select modeltype @case sm_complex smdiag_complex  $][$
 @if ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")

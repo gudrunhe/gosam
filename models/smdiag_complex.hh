@@ -32,8 +32,6 @@ Symbols gH`f', gX`f', gP`f';
 #Do f={U,D,C,S,T,B,ne,nmu,ntau,e,mu,tau}
 Symbols g`f'v, g`f'a, g`f'l, g`f'r;
 #EndDo
-Symbols VUD,  VUS,  VUB,  VCD,  VCS,  VCB,  VTD,  VTS,  VTB,
-	CVDU, CVSU, CVBU, CVDC, CVSC, CVBC, CVDT, CVST, CVBT;
 *---#] Symbol Definitions :
 *---#[ Procedure VertexConstants :
 #Procedure VertexConstants
@@ -150,16 +148,18 @@ Id C([field.phim], [field.Wp], [field.Z]) = PREFACTOR(e * gPWZ);
 *---#] VFF (QCD) (2.4.32) :
 *---#[ VFF (A.2.21) :
 *---#[   WQQ :
-#do u={U,C,T}
-	#do d={D,S,B}
-		Id CL([field.`u'bar], [field.`d'], [field.Wp]) =
-			PREFACTOR(e * gW * V`u'`d');
-		Id CL([field.`d'bar], [field.`u'], [field.Wm]) =
-			PREFACTOR(e * gW * CV`d'`u');
-		Id CR([field.`u'bar], [field.`d'], [field.Wp]) = 0;
-		Id CR([field.`d'bar], [field.`u'], [field.Wm]) = 0;
-	#enddo
-#enddo
+Id CL([field.Ubar], [field.D], [field.Wp]) = PREFACTOR(e * gW);
+Id CL([field.Dbar], [field.U], [field.Wm]) = PREFACTOR(e * gW);
+Id CL([field.Cbar], [field.S], [field.Wp]) = PREFACTOR(e * gW);
+Id CL([field.Sbar], [field.C], [field.Wm]) = PREFACTOR(e * gW);
+Id CL([field.Tbar], [field.B], [field.Wp]) = PREFACTOR(e * gW);
+Id CL([field.Bbar], [field.T], [field.Wm]) = PREFACTOR(e * gW);
+Id CR([field.Ubar], [field.D], [field.Wp]) = 0;
+Id CR([field.Dbar], [field.U], [field.Wm]) = 0;
+Id CR([field.Cbar], [field.S], [field.Wp]) = 0;
+Id CR([field.Sbar], [field.C], [field.Wm]) = 0;
+Id CR([field.Tbar], [field.B], [field.Wp]) = 0;
+Id CR([field.Bbar], [field.T], [field.Wm]) = 0;
 *---#]   WQQ :
 *---#[   Wll :
 #do l={e,mu,tau}
@@ -237,18 +237,21 @@ Id C([field.phim], [field.Wp], [field.Z]) = PREFACTOR(e * gPWZ);
 #EndDo
 *---#]   chiFF :
 *---#[   phiFF :
-#do u={U,C,T}
-	#do d={D,S,B}
-		Id CL([field.`u'bar], [field.`d'], [field.phip]) =
-			+PREFACTOR(e) * gP`u' * V`u'`d';
-		Id CR([field.`u'bar], [field.`d'], [field.phip]) =
-			-PREFACTOR(e) * gP`d' * V`u'`d';
-		Id CL([field.`d'bar], [field.`u'], [field.phim]) =
-			-PREFACTOR(e) * gP`d' * CV`d'`u';
-		Id CR([field.`d'bar], [field.`u'], [field.phim]) =
-			+PREFACTOR(e) * gP`u' * CV`d'`u';
-	#enddo
-#enddo
+	Id CL([field.Ubar], [field.D], [field.phip]) = +PREFACTOR(e) * gPU;
+	Id CR([field.Ubar], [field.D], [field.phip]) = -PREFACTOR(e) * gPD;
+	Id CL([field.Dbar], [field.U], [field.phim]) = -PREFACTOR(e) * gPD;
+	Id CR([field.Dbar], [field.U], [field.phim]) = +PREFACTOR(e) * gPU;
+
+	Id CL([field.Cbar], [field.S], [field.phip]) = +PREFACTOR(e) * gPC;
+	Id CR([field.Cbar], [field.S], [field.phip]) = -PREFACTOR(e) * gPS;
+	Id CL([field.Sbar], [field.C], [field.phim]) = -PREFACTOR(e) * gPS;
+	Id CR([field.Sbar], [field.C], [field.phim]) = +PREFACTOR(e) * gPC;
+
+	Id CL([field.Tbar], [field.B], [field.phip]) = +PREFACTOR(e) * gPT;
+	Id CR([field.Tbar], [field.B], [field.phip]) = -PREFACTOR(e) * gPB;
+	Id CL([field.Bbar], [field.T], [field.phim]) = -PREFACTOR(e) * gPB;
+	Id CR([field.Bbar], [field.T], [field.phim]) = +PREFACTOR(e) * gPT;
+
 #do l={e,mu,tau}
 	Id CL([field.n`l'bar], [field.`l'm], [field.phip]) = 0;
 	Id CR([field.n`l'bar], [field.`l'm], [field.phip]) =

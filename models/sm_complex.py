@@ -362,7 +362,7 @@ functions = {
    'gWWWW': ' (1/sw^2)',
    'gWWZ': '-(cw/sw)',
 
-   'gHHHH': '- 3/(4*sw*sw) * mH*mH/(mW*mW-i_*mW*wW)', 
+   'gHHHH': '- 3/(4*sw*sw) * mH*mH/(mW*mW-i_*mW*wW)',
    'gXXXX': '- 3/(4*sw*sw) * mH*mH/(mW*mW-i_*mW*wW)',
    'gHHXX': '- mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
    'gHHPP': '- mH*mH/(mW*mW-i_*mW*wW)/(4*sw*sw)',
@@ -634,7 +634,7 @@ def init_ew(e_one=False,**options):
         sw^2 = 1 - mW^2 / mZ^2
 
    We have access to the "user_choice" from options
-   and if any parameters were specified we determine 
+   and if any parameters were specified we determine
    gosam_choice from the input parameters
 
    Then we compare...
@@ -692,7 +692,6 @@ def init_ew(e_one=False,**options):
       functions["sw"] = "csqrt(1-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ)"
       types["sw"] = "C"
    elif keys == set(["e", "sw", "mZ"]):
-      gosam_choice = 7
       # mZ, sw --> mW
       functions["mW"] = "mZ*sqrt(1-real(sw*sw))"
       types["mW"] = "R"
@@ -706,15 +705,15 @@ def init_ew(e_one=False,**options):
    elif keys == set(["e", "sw", "GF", "mZ", "mW", "alpha"]):
       for dummy in ["e", "sw", "GF", "mZ", "mW", "alpha"]:
          #   parameters[dummy] = '0.0'
-         functions['%sf' % dummy ] = dummy 
+         functions['%sf' % dummy ] = dummy
          types[dummy] = "R"
          types['%sf' % dummy] = "R"
          types["sw"] = "C"
          types["swf"]= "C"
-         try:
-            del slha_locations[dummy]
-         except:
-            continue
+         #try:
+         #   del slha_locations[dummy]
+         #except:
+         #   continue
    else:
       raise Exception("Invalid EW Scheme.")
    if e_one:
@@ -797,7 +796,7 @@ def ew_gosam_choice(keys, size_set):
       Returns GoSam's prefered choice of electroweak scheme based on the
       input parameters in "keys"
 
-      The values are 1-8, with the special results 
+      The values are 1-8, with the special results
        0 : no parameters specified
       -1 : less than 3 parameters specified (so a unique choice
            cannot be made)
@@ -844,7 +843,7 @@ def init():
 
    1. gosam_choice : the ew_scheme that gosam would choose based on the input
    parameters given in model.option (e.g. mZ=X,mW=Y,alpha=Z => gosam_choice=2)
-   2. user_choice  : the ew_scheme the user chose i.e. ewchoose=n 
+   2. user_choice  : the ew_scheme the user chose i.e. ewchoose=n
    This is 0 if ewchoose is specified without a number
    3. ewchoose     : A boolean value, True means a choice
    of ew scheme as specified in the file config.f90
@@ -868,7 +867,7 @@ def init():
    DEFAULT['e'] =  0.3028221202
 
    keys = MODEL_OPTIONS
-   
+
    icount = 0
    for key, value in MODEL_OPTIONS.items():
       if key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
@@ -975,9 +974,9 @@ def init():
          if value.strip().lower() == "none":
             widths = []
          else:
-            widths = value.split()  
+            widths = value.split()
    simplify_model(particles, parameters, types, functions, masses, widths)
-   init_ew(e_one=eone,**ew_input) 
+   init_ew(e_one=eone,**ew_input)
 
 #---#] def init:
 

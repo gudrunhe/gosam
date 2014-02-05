@@ -375,7 +375,7 @@ def getModel(conf, extra_path=None):
          golem.model.MODEL_OPTIONS[opt.strip()] = True
 
    # --[ EW scheme management:
-   models_ewsupp = ['sm','sm_complex']
+   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
    ew_supp = False
    
    if conf["modeltype"] is not None:
