@@ -64,7 +64,7 @@ $]module     [$ process_name asprefix=\_ $]model
    ' ==> the longest is 24
    $]
    integer, parameter, private :: name_length = max([$name_length$],24)
-   character(len=name_length), dimension([$ count R C $]) :: names = (/& [$
+   character(len=name_length), dimension([$ count R C $]) :: names = (/&[$
    @for parameters R C  $]
       & "[$ $_ $][$ alignment $]"[$
          @if is_last $]/)[$ @else $], &[$ @end @if $][$
@@ -165,7 +165,7 @@ contains
    write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs
    write(unit,'(A1,1x,A9,G23.16)') "#", "alpha  = ", alpha
    write(unit,'(A1,1x,A9,G23.16)') "#", "e      = ", e
-   write(unit,'(A1,1x,A9,G23.16)') "#", "GF     = ", GF [$
+   write(unit,'(A1,1x,A9,G23.16)') "#", "GF     = ", GF[$
 @select modeltype @case sm_complex smdiag_complex $]
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw     = ", sw
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw2    = ", sw*sw[$
@@ -813,13 +813,15 @@ contains
       integer, intent(out) :: ierr
 
       integer :: err, pdg, nidx, idx
+      complex(ki) :: tmp
 
       logical :: must_be_real
       must_be_real = .false.
+      ierr = 1 ! OK
 [$
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $][$
 @if gs_not_one $]
-      if (name.eq."aS" .or. name.eq."alphaS") then
+      if (name.eq."aS" .or. name.eq."alphaS" .or. name.eq."alphas") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
          must_be_real = .true.
       else[$@else$]
@@ -857,16 +859,15 @@ contains
      elseif (name.eq."VV56") then
          call set_parameter("VTB",re,im,ierr)
          return[$
-@select modeltype @case sm_complex smdiag_complex $]
-      elseif (name.eq."sw2") then
-         sw = sqrt(cmplx(re,im,ki))[$
-@else $]
-      elseif (name.eq."sw2") then
-         sw = sqrt(re)
-         must_be_real = .true.[$
-@end @select $][$
 @end @select $]
-      else[$
+      elseif (name.eq."Gf") then
+         call set_parameter("GF",re,im,ierr)
+         return
+      elseif (name.eq."sw2") then
+         tmp=sqrt(cmplx(re,im,ki))
+         call set_parameter("sw",real(tmp,ki),aimag(tmp),ierr)
+         return
+     else[$
 @end @select $]if (name(1:5).eq."mass(" .and. len_trim(name)>7) then
          idx = scan(name,")",.false.)
          if (idx.eq.0) then
@@ -884,14 +885,14 @@ contains
       @select $_ @case masses $][$
          @for slha_entries $]
             case([$index$])
-               [$ $_ $] = re [$
+               [$ $_ $] = re[$
          @end @for $][$
       @end @select $][$
    @end @for $][$
 @end @if $]
             case default
                write(*,'(A20,1x,I10)') "Cannot set mass for PDG code:", pdg
-               ierr = 1
+               ierr = 0
                return
             end select
      elseif (len_trim(name)>8 .and. name(1:6).eq."width(") then
@@ -911,7 +912,7 @@ contains
       @select $_ @case decay $][$
          @for slha_entries $]
             case([$index$])
-               [$ $_ $] = re [$
+               [$ $_ $] = re[$
          @end @for $][$
       @end @select $][$
    @end @for $][$
@@ -999,17 +1000,21 @@ contains
          end if
          ierr = 0 !FAIL / UNKNOWN
      end if
-     if (must_be_real .and. im /= 0.0_ki) then
+     if (must_be_real .and. im /= 0.0_ki .and. ierr.eq.1) then
         ierr = 0 ! FAIL
-     else
-        ierr = 1 ! OK
      end if
 
 [$ @if ewchoose $]
-     if(any(ew_parameters .eq. name)) then
+     if(any(ew_parameters .eq. name) .or. (name.eq."mass(23)") .or. &
+        (name.eq."mass(24)"))  then
          do nidx=1,size(ew_parameters)
             if (ew_parameters(nidx) .eq. name) exit
          end do
+         if(name.eq."mass(23)") then
+            nidx=2
+         elseif(name.eq."mass(24)") then
+            nidx=1
+         end if
          if (.not. btest(choosen_ew_parameters,nidx)) then
             choosen_ew_parameters_count = choosen_ew_parameters_count + 1
             choosen_ew_parameters = ibset(choosen_ew_parameters, nidx)
@@ -1079,7 +1084,7 @@ contains
                  ewchoice = orig_ewchoice
                  write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&
                                      ewchoice
-                 ierr = 1
+                 ierr = 0
                 end if
             elseif (choosen_ew_parameters_count >= 4) then
                  write(*,'(A,A,A)') 'EW parameter "', name, '" is already determined.'
@@ -1110,15 +1115,13 @@ contains
                  ewchoice = orig_ewchoice
                  write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&
                                      ewchoice
-                 ierr = 1
+                 ierr = 0
                end select
             end if
          end if
      end if
 [$
 @end @if$]
-
-
      call init_functions()
       ! TODO init_color
    end subroutine
@@ -1374,4 +1377,3 @@ e_not_one $]
 [$@end @select$]
 
 end module [$ process_name asprefix=\_ $]model
-

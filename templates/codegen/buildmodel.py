@@ -120,17 +120,17 @@ modelfile.write(',')[$
    @end @for$]
 modelfile.write('\n')
 [$ @if ewchoose $]
-modelfile.write('   ! for automatic choosing the right EW scheme in set_parameters\n$'
-modelfile.write('   integer, private :: choosen_ew_parameters ! bit-set of EW parameters\n$'
-modelfile.write('   character(len=5), private, dimension(6) :: ew_parameters = &\n$'
-modelfile.write('          &(/\'mW   \',&\n$'
-modelfile.write('          &  \'mZ   \',&\n$'
-modelfile.write('          &  \'alpha\',&\n$'
-modelfile.write('          &  \'GF   \',&\n$'
-modelfile.write('          &  \'sw   \',&\n$'
-modelfile.write('          &  \'e    \'/)\n$'
-modelfile.write('   integer, private :: choosen_ew_parameters_count = 0 ! bitset of EW parameters\n$'
-modelfile.write('   integer, private :: orig_ewchoice = -1 ! saves the original ewchoice\n'
+modelfile.write('   ! for automatic choosing the right EW scheme in set_parameters\n')
+modelfile.write('   integer, private :: choosen_ew_parameters ! bit-set of EW parameters\n')
+modelfile.write('   character(len=5), private, dimension(6) :: ew_parameters = &\n')
+modelfile.write('          &(/\'mW   \',&\n')
+modelfile.write('          &  \'mZ   \',&\n')
+modelfile.write('          &  \'alpha\',&\n')
+modelfile.write('          &  \'GF   \',&\n')
+modelfile.write('          &  \'sw   \',&\n')
+modelfile.write('          &  \'e    \'/)\n')
+modelfile.write('   integer, private :: choosen_ew_parameters_count = 0 ! bitset of EW parameters\n')
+modelfile.write('   integer, private :: orig_ewchoice = -1 ! saves the original ewchoice\n')
 [$@end @if$]
 modelfile.write("   private :: digit, parsereal, names, cc\n")
 modelfile.write("\n")
@@ -863,13 +863,15 @@ modelfile.write("      real(ki), intent(in) :: re, im\n")
 modelfile.write("      integer, intent(out) :: ierr\n")
 modelfile.write("\n")
 modelfile.write("      integer :: err, pdg, nidx, idx\n")
+modelfile.write("      complex(ki) :: tmp\n")
 modelfile.write("\n")
 modelfile.write("      logical :: must_be_real\n")
 modelfile.write("      must_be_real = .false.\n")
+modelfile.write("      ierr = 1 ! OK\n")
 modelfile.write("\n")[$
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex $][$
 @if gs_not_one $]
-modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\") then\n")
+modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\" .or. name.eq.\"alphas\") then\n")
 modelfile.write("         gs = 2.0_ki*sqrt(pi)*sqrt(re)\n")
 modelfile.write("         must_be_real = .true.\n")
 modelfile.write("      else")[$
@@ -913,15 +915,15 @@ modelfile.write("         return\n")
 modelfile.write("      elseif (name.eq.\"VV56\") then\n")
 modelfile.write("         call set_parameter(\"VTB\",re,im,ierr)\n")
 modelfile.write("         return\n")[$
-@end @select $][$
-@select modeltype @case sm_complex smdiag_complex $]
+@end @select $]
+modelfile.write("      elseif (name.eq.\"Gf\") then\n")
+modelfile.write("         call set_parameter(\"GF\",re,im,ierr)\n")
+modelfile.write("         return\n")
 modelfile.write("      elseif (name.eq.\"sw2\") then\n")
-modelfile.write("         sw = sqrt(cmplx(re,im,ki))\n")[$
-@else $]
-modelfile.write("      elseif (name.eq.\"sw2\") then\n")
-modelfile.write("         sw = sqrt(re)\n")
-modelfile.write("         must_be_real = .true.\n")[$
-@end @select $][$
+modelfile.write("         tmp=sqrt(cmplx(re,im,ki))\n")
+modelfile.write("         call set_parameter(\"sw\",real(tmp,ki),aimag(tmp),ierr)\n")
+modelfile.write("         return\n")
+modelfile.write("     else")[$
 @end @select $]
 modelfile.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>7) then\n")
 modelfile.write("         idx = scan(name,\")\",.false.)\n")
@@ -947,7 +949,7 @@ modelfile.write("               [$ $_ $] = re\n")[$
 @end @if $]
 modelfile.write("            case default\n")
 modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set mass for PDG code:\", pdg\n")
-modelfile.write("               ierr = 1\n")
+modelfile.write("               ierr = 0\n")
 modelfile.write("               return\n")
 modelfile.write("            end select\n")
 modelfile.write("     elseif (len_trim(name)>8 .and. name(1:6).eq.\"width(\") then\n")
@@ -1057,17 +1059,21 @@ modelfile.write("            return\n")
 modelfile.write("         end if\n")
 modelfile.write("         ierr = 0 !FAIL / UNKNOWN\n")
 modelfile.write("     end if\n")
-modelfile.write("     if (must_be_real .and. im /= 0.0_ki) then\n")
+modelfile.write("     if (must_be_real .and. im /= 0.0_ki .and. ierr.eq.1) then\n")
 modelfile.write("        ierr = 0 ! FAIL\n")
-modelfile.write("     else\n")
-modelfile.write("        ierr = 1 ! OK\n")
 modelfile.write("     end if\n")
 modelfile.write("\n")
 [$ @if ewchoose $]
-modelfile.write("     if(any(ew_parameters .eq. name)) then\n")
+modelfile.write("     if(any(ew_parameters .eq. name) .or. (name.eq.\"mass(23)\") .or. &\n")
+modelfile.write("        (name.eq.\"mass(24)\"))  then\n")
 modelfile.write("         do nidx=1,size(ew_parameters)\n")
 modelfile.write("            if (ew_parameters(nidx) .eq. name) exit\n")
 modelfile.write("         end do\n")
+modelfile.write("         if(name.eq.\"mass(23)\") then\n")
+modelfile.write("            nidx=2\n")
+modelfile.write("         elseif(name.eq.\"mass(24)\") then\n")
+modelfile.write("            nidx=1\n")
+modelfile.write("         end if\n")
 modelfile.write("         if (.not. btest(choosen_ew_parameters,nidx)) then\n")
 modelfile.write("            choosen_ew_parameters_count = choosen_ew_parameters_count + 1\n")
 modelfile.write("            choosen_ew_parameters = ibset(choosen_ew_parameters, nidx)\n")
@@ -1137,7 +1143,7 @@ modelfile.write("                 else\n")
 modelfile.write("                 ewchoice = orig_ewchoice\n")
 modelfile.write("                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&\n")
 modelfile.write("                                     ewchoice\n")
-modelfile.write("                 ierr = 1\n")
+modelfile.write("                 ierr = 0\n")
 modelfile.write("                end if\n")
 modelfile.write("            elseif (choosen_ew_parameters_count >= 4) then\n")
 modelfile.write("                 write(*,'(A,A,A)') 'EW parameter \"', name, '\" is already determined.'\n")
@@ -1168,7 +1174,7 @@ modelfile.write("                case default\n")
 modelfile.write("                 ewchoice = orig_ewchoice\n")
 modelfile.write("                 write(*,'(A,1x,I2)') 'Unknown/Invalid EW scheme. Falling back to No.',&\n")
 modelfile.write("                                     ewchoice\n")
-modelfile.write("                 ierr = 1\n")
+modelfile.write("                 ierr = 0\n")
 modelfile.write("               end select\n")
 modelfile.write("            end if\n")
 modelfile.write("         end if\n")
@@ -1250,7 +1256,8 @@ modelfile.write("   end  function sort4\n")
 modelfile.write("!---#] utility functions for model initialization:\n")
 [$ @select modeltype @case sm smdiag smehc $][$
 @if ewchoose $]
-modelfile.write("!---#[ EW scheme choice:\n")
+modelfile.write("!---#[ EW scheme choice:\n")[$
+@if e_not_one $]
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
 modelfile.write("  implicit none\n")
 modelfile.write("  integer, intent(in) :: ichoice\n")
@@ -1301,11 +1308,44 @@ modelfile.write("!        case default\n")
 modelfile.write("  end select\n")
 modelfile.write("  end subroutine\n")
 modelfile.write("!---#] EW scheme choice:\n")[$
+@else $]
+modelfile.write("  subroutine ewschemechoice(ichoice)\n")
+modelfile.write("  implicit none\n")
+modelfile.write("  integer, intent(in) :: ichoice\n")
+modelfile.write("  real(ki), parameter :: pi = 3.14159265358979323846264&\n")
+modelfile.write(" &3383279502884197169399375105820974944592307816406286209_ki\n")
+modelfile.write("  ! e is algebraically set to one, do not calculate it here\n")
+modelfile.write("  select case (ichoice)\n")
+modelfile.write("        case (1)\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)\n")
+modelfile.write("        case (2)\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)\n")
+modelfile.write("        case (3)\n")
+modelfile.write("      ! sw, mZ --> mW\n")
+modelfile.write("        mW = mZ*sqrt(1.0_ki-sw*sw)\n")
+modelfile.write("        case (4)\n")
+modelfile.write("      ! GF, sw, alpha --> mW\n")
+modelfile.write("        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw\n")
+modelfile.write("      ! mW, sw --> mZ\n")
+modelfile.write("        mZ = mW / sqrt(1.0_ki-sw*sw)\n")
+modelfile.write("        case(5)\n")
+modelfile.write("      ! GF, mZ, alpha --> mW\n")
+modelfile.write("      mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&\n")
+modelfile.write("     & sqrt(2.0_ki)/GF))\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)\n")
+modelfile.write("  end select\n")
+modelfile.write("  end subroutine\n")[$
+@end @if$]
+modelfile.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
 [$ @select modeltype @case sm_complex smdiag_complex  $][$
 @if ewchoose $]
-modelfile.write("!---#[ EW scheme choice:\n")
+modelfile.write("!---#[ EW scheme choice:\n")[$
+@if e_not_one $]
 modelfile.write("  subroutine ewschemechoice(ichoice)\n")
 modelfile.write("  implicit none\n")
 modelfile.write("  integer, intent(in) :: ichoice\n")
@@ -1355,7 +1395,39 @@ modelfile.write("      ! mW, mZ --> sw\n")
 modelfile.write("      sw = sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
 modelfile.write("!        case default\n")
 modelfile.write("  end select\n")
-modelfile.write("  end subroutine\n")
+modelfile.write("  end subroutine\n")[$
+@else $]
+modelfile.write("  subroutine ewschemechoice(ichoice)\n")
+modelfile.write("  implicit none\n")
+modelfile.write("  integer, intent(in) :: ichoice\n")
+modelfile.write("  real(ki), parameter :: pi = 3.14159265358979323846264&\n")
+modelfile.write(" &3383279502884197169399375105820974944592307816406286209_ki\n")
+modelfile.write("  complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
+modelfile.write("  ! e is algebraically set to one, do not calculate it here\n")
+modelfile.write("  select case (ichoice)\n")
+modelfile.write("        case (1)\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
+modelfile.write("        case (2)\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
+modelfile.write("        case (3)\n")
+modelfile.write("      ! sw, mZ --> mW\n")
+modelfile.write("        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)\n")
+modelfile.write("        case (4)\n")
+modelfile.write("      ! GF, sw, alpha --> mW\n")
+modelfile.write("        mW = sqrt(alpha*pi/sqrt(2.0_ki)/GF) / sw\n")
+modelfile.write("      ! mW, sw --> mZ\n")
+modelfile.write("        mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)\n")
+modelfile.write("        case(5)\n")
+modelfile.write("      ! GF, mZ, alpha --> mW\n")
+modelfile.write("      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&\n")
+modelfile.write("     & sqrt(2.0_ki)/GF))\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
+modelfile.write("  end select\n")
+modelfile.write("  end subroutine\n")[$
+@end @if$]
 modelfile.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
