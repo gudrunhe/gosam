@@ -7,7 +7,7 @@ $]module olp_model
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
-   & nlo_prefactors[$
+   & nlo_prefactors, convert_to_cdr[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $], ewchoice[$
 @end @if$][$@end @select$]
@@ -91,6 +91,118 @@ $]module olp_model
    private :: digit, parsereal, names, cc
 
 contains
+
+
+!---#[ print_parameter:
+   ! Print current parameters / setup to stdout or output_unit
+   subroutine   print_parameter(verbose,output_unit)
+      implicit none
+      logical, intent(in), optional :: verbose
+      integer, intent(in), optional :: output_unit
+      logical :: is_verbose
+      integer :: unit
+
+      real(ki), parameter :: pi = 3.14159265358979323846264&
+     &3383279502884197169399375105820974944592307816406286209_ki
+      is_verbose = .false.
+      if(present(verbose)) then
+          is_verbose = verbose
+      end if
+
+      unit = 6 ! stdout
+      if(present(output_unit)) then
+          unit = output_unit
+      end if
+
+
+   write(unit,'(A1,1x,A26)') "#", "--------- SETUP ---------"
+   write(unit,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
+   if(convert_to_cdr) then
+      write(unit,'(A1,1x,A9,A3)') "#", "scheme = ", "CDR"
+   else
+      write(unit,'(A1,1x,A9,A4)') "#", "scheme = ", "DRED"
+   end if
+   if(reduction_interoperation.eq.0) then
+      write(unit,'(A1,1x,A15,A7)') "#", "reduction with ", "SAMURAI"
+   else if(reduction_interoperation.eq.1) then
+      write(unit,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
+   else if(reduction_interoperation.eq.2) then
+      write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "SAMURAI+GOLEM95"
+   else if(reduction_interoperation.eq.31) then
+      write(unit,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
+   end if[$
+@if ewchoose $]
+    write(unit,'(A1,1x,A11,I2)') "#", "ewchoice = ", ewchoice[$
+@end @if$][$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+   write(unit,'(A1,1x,A27)') "#", "--- PARAMETERS Overview ---"
+   write(unit,'(A1,1x,A22)') "#", "Boson masses & widths:"
+   write(unit,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
+   write(unit,'(A1,1x,A5,G23.16)') "#", "mW = ", mW
+   write(unit,'(A1,1x,A5,G23.16)') "#", "mH = ", mH
+   write(unit,'(A1,1x,A5,G23.16)') "#", "wZ = ", wZ
+   write(unit,'(A1,1x,A5,G23.16)') "#", "wW = ", wW
+   write(unit,'(A1,1x,A5,G23.16)') "#", "wH = ", wH
+   write(unit,'(A1,1x,A20)') "#", "Active light quarks:"
+   write(unit,'(A1,1x,A7,G23.16)') "#", "Nf    =", Nf
+   write(unit,'(A1,1x,A7,G23.16)') "#", "Nfgen =", Nfgen
+   write(unit,'(A1,1x,A23)') "#", "Fermion masses & width:"
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mU   = ", mU
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mD   = ", mD
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mS   = ", mS
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mC   = ", mC
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mB   = ", mB
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mBMS = ", mBMS
+   write(unit,'(A1,1x,A7,G23.16)') "#", "wB   = ", wB
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mT   = ", mT
+   write(unit,'(A1,1x,A7,G23.16)') "#", "wT   = ", wT
+   write(unit,'(A1,1x,A7,G23.16)') "#", "me   = ", me
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mmu  = ", mmu
+   write(unit,'(A1,1x,A7,G23.16)') "#", "mtau = ", mtau
+   write(unit,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
+   write(unit,'(A1,1x,A14)') "#", "Couplings etc.:"
+   write(unit,'(A1,1x,A9,G23.16)') "#", "alphaS = ", gs*gs/4._ki/pi
+   write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs
+   write(unit,'(A1,1x,A9,G23.16)') "#", "alpha  = ", alpha
+   write(unit,'(A1,1x,A9,G23.16)') "#", "e      = ", e
+   write(unit,'(A1,1x,A9,G23.16)') "#", "GF     = ", GF [$
+@select modeltype @case sm_complex smdiag_complex $]
+   write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw     = ", sw
+   write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw2    = ", sw*sw[$
+@else $]
+   write(unit,'(A1,1x,A9,G23.16)') "#", "sw     = ", sw
+   write(unit,'(A1,1x,A9,G23.16)') "#", "sw2    = ", sw*sw
+[$ @end @select$]
+   if(is_verbose) then[$
+@end @select $]
+   write(unit,'(A1,1x,A21)') "#", "--- ALL PARAMETERS ---"[$
+@for parameters $][$
+   @select type @case R $]
+   write(unit,'(A1,1x,A7,G23.16)') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @case C $]
+   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @case RP $]
+   write(unit,'(A1,1x,A7,G23.16,"const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @case CP $]
+   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")","const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @end @select type $][$
+@end @for parameters $]
+   if(is_verbose) then
+[$
+@for functions $][$
+   @select type @case R $]
+   write(unit,'(A1,1x,A7,G23.16,"calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @case C $]
+   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")"," calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   @end @select type $][$
+@end @for functions $]
+   end if[$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+   end if[$
+@end @select$]
+   write(unit,'(A1,1x,A25)') "#", "-------------------------"
+   end subroutine
+!---#] print_parameter:
 
    function     digit(ch, lnr) result(d)
       implicit none

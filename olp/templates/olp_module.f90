@@ -4,16 +4,8 @@ module     olp_module
    private
    public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
    public :: OLP_EvalSubProcess2, OLP_Polvec, OLP_SetParameter, OLP_Info
-   public :: strncpy
+   public :: OLP_PrintParameter
 
-   interface
-     subroutine strncpy(dest, src, n) bind(C)
-       import
-       character(kind=c_char),  intent(out) :: dest(*)
-       character(kind=c_char),  intent(in)  :: src(*)
-       integer(c_size_t), value, intent(in) :: n
-     end subroutine strncpy
-  end interface
 
 contains
 
@@ -156,6 +148,15 @@ contains
    character(len=254) :: msg
    character(len=6)   :: rev
    character(len=1)   :: ver1, ver2
+
+   interface
+     subroutine strncpy(dest, src, n) bind(C)
+       import
+       character(kind=c_char),  intent(out) :: dest(*)
+       character(kind=c_char),  intent(in)  :: src(*)
+       integer(c_size_t), value, intent(in) :: n
+     end subroutine strncpy
+   end interface
 
    write(ver1,'(I1)') gosamversion(1)
    write(ver2,'(I1)') gosamversion(2)
@@ -547,6 +548,58 @@ contains
 
    end subroutine OLP_Polvec
    !---#] OLP Polarization vector:
+
+   !---#[ OLP_PrintParameter
+   subroutine OLP_PrintParameter(filename) &
+       & bind(C,name="[%
+       @if internal OLP_TO_LOWER %][%
+          olp.process_name asprefix=\_ convert=lower %]olp_printparameter[%
+       @else %][%
+          olp.process_name asprefix=\_ %]OLP_PrintParameter[%
+       @end @if %][%
+       @if internal OLP_TRAILING_UNDERSCORE %]_[%
+       @end @if %]")
+
+      use, intrinsic :: iso_c_binding[%
+      @for subprocesses %]
+      use [%$_%]_model, only: [%$_%]_print_parameter => print_parameter[%
+      @end @for %]
+      implicit none
+      character(kind=c_char,len=1), intent(in) :: filename
+      integer :: ierr, l
+      logical :: exists
+
+      interface
+         function strlen(s) bind(C,name='strlen')
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character(kind=c_char,len=1), intent(in) :: s
+            integer(kind=c_int) :: strlen
+         end function strlen
+      end interface
+
+      l = strlen(filename)
+
+      inquire(file=filename(1:l), exist=exists)
+      if (exists) then
+         open(unit=27,file=filename(1:l),status="old", position="append", action="write",iostat=ierr)
+      else
+         open(unit=27,file=filename(1:l),status="new",iostat=ierr)
+      end if
+      if (ierr .ne. 0) then
+         write(7,*) "OLP_PrintParameter: Could not open/create:", filename(1:l), "!"
+         ierr = -1
+      end if[%
+      @for subprocesses %]
+      write (27, "(A)") "####### Setup of SubProcess [%$_%] #######"
+      call [%$_%]_print_parameter(.true.,27)
+      write (27, *)[%
+      @end @for%]
+
+      close(27)
+
+   end subroutine OLP_PrintParameter
+   !---#] OLP_PrintParameter
 
    subroutine     read_slha_file(line)[%
    @for subprocesses %]

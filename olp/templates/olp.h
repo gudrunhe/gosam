@@ -148,5 +148,17 @@ void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real
 
 void [% olp.process_name asprefix=\_ %]OLP_Polvec(double* p, double* q, double* eps);
 
+/** This routine writes the current parameters to an output file
+ *
+ *  The subroutine \c OLP_PrintParameter is part of the BLHA2
+ *  interface.
+ *
+ *  The first parameter should contain a filename into which the parameters are written.
+ *  If the file already exists, the output is appended.
+ *
+ */
+
+void [% olp.process_name asprefix=\_ %]OLP_PrintParameter(char* filename);
+
 #endif
 

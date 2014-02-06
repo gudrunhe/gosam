@@ -45,11 +45,12 @@ modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 @end @if $]
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
-modelfile.write('   & nlo_prefactors\n')[$
+modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice\n')[$
-@end @if$][$@end @select$]
+@else$]modelfile.write("\n")[$@end @if$][$
+@end @select$]
 modelfile.write('   implicit none\n')
 modelfile.write('\n')
 modelfile.write('   private :: ki\n')[$
@@ -135,6 +136,118 @@ modelfile.write("   private :: digit, parsereal, names, cc\n")
 modelfile.write("\n")
 modelfile.write("contains\n")
 modelfile.write("\n")
+
+modelfile.write("!---#[ print_parameter:\n")
+modelfile.write("   ! Print current parameters / setup to stdout or output_unit\n")
+modelfile.write("   subroutine   print_parameter(verbose,output_unit)\n")
+modelfile.write("      implicit none\n")
+modelfile.write("      logical, intent(in), optional :: verbose\n")
+modelfile.write("      integer, intent(in), optional :: output_unit\n")
+modelfile.write("      logical :: is_verbose\n")
+modelfile.write("      integer :: unit\n")
+modelfile.write("\n")
+modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
+modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
+modelfile.write("      is_verbose = .false.\n")
+modelfile.write("      if(present(verbose)) then\n")
+modelfile.write("          is_verbose = verbose\n")
+modelfile.write("      end if\n")
+modelfile.write("\n")
+modelfile.write("      unit = 6 ! stdout\n")
+modelfile.write("      if(present(output_unit)) then\n")
+modelfile.write("          unit = output_unit\n")
+modelfile.write("      end if\n")
+modelfile.write("\n")
+modelfile.write("\n")
+modelfile.write("   write(unit,'(A1,1x,A26)') \"#\", \"--------- SETUP ---------\"\n")
+modelfile.write("   write(unit,'(A1,1x,A18,I2)') \"#\", \"renormalisation = \", renormalisation\n")
+modelfile.write("   if(convert_to_cdr) then\n")
+modelfile.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"CDR\"\n")
+modelfile.write("   else\n")
+modelfile.write("      write(unit,'(A1,1x,A9,A4)') \"#\", \"scheme = \", \"DRED\"\n")
+modelfile.write("   end if\n")
+modelfile.write("   if(reduction_interoperation.eq.0) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"SAMURAI\"\n")
+modelfile.write("   else if(reduction_interoperation.eq.1) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"GOLEM95\"\n")
+modelfile.write("   else if(reduction_interoperation.eq.2) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"SAMURAI+GOLEM95\"\n")
+modelfile.write("   else if(reduction_interoperation.eq.31) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"NINJA\"\n")
+modelfile.write("   end if\n")
+[$ @if ewchoose $]
+modelfile.write("    write(unit,'(A1,1x,A11,I2)') \"#\", \"ewchoice = \", ewchoice\n")[$
+@end @if$][$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+modelfile.write("   write(unit,'(A1,1x,A27)') \"#\", \"--- PARAMETERS Overview ---\"\n")
+modelfile.write("   write(unit,'(A1,1x,A22)') \"#\", \"Boson masses & widths:\"\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"mZ = \", mZ\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"mW = \", mW\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"mH = \", mH\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"wZ = \", wZ\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"wW = \", wW\n")
+modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"wH = \", wH\n")
+modelfile.write("   write(unit,'(A1,1x,A20)') \"#\", \"Active light quarks:\"\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"Nf    =\", Nf\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"Nfgen =\", Nfgen\n")
+modelfile.write("   write(unit,'(A1,1x,A23)') \"#\", \"Fermion masses & width:\"\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mU   = \", mU\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mD   = \", mD\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mS   = \", mS\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mC   = \", mC\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mB   = \", mB\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mBMS = \", mBMS\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"wB   = \", wB\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mT   = \", mT\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"wT   = \", wT\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"me   = \", me\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mmu  = \", mmu\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"mtau = \", mtau\n")
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"wtau = \", wtau\n")
+modelfile.write("   write(unit,'(A1,1x,A14)') \"#\", \"Couplings etc.:\"\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"alphaS = \", gs*gs/4._ki/pi\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"gs     = \", gs\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"alpha  = \", alpha\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"e      = \", e\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"GF     = \", GF\n")
+[$@select modeltype @case sm_complex smdiag_complex $]
+modelfile.write("   write(unit,'(A1,1x,A9,\"(\",G23.16,G23.16,\")\")') \"#\", \"sw     = \", sw\n")
+modelfile.write("   write(unit,'(A1,1x,A9,\"(\",G23.16,G23.16,\")\")') \"#\", \"sw2    = \", sw*sw\n")
+[$@else $]
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"sw     = \", sw\n")
+modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"sw2    = \", sw*sw\n")
+[$ @end @select$]
+modelfile.write("   if(is_verbose) then\n")
+[$@end @select $]
+modelfile.write("   write(unit,'(A1,1x,A21)') \"#\", \"--- ALL PARAMETERS ---\"\n")
+[$@for parameters $][$
+   @select type @case R $]
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@case C $]
+modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@case RP $]
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@case CP $]
+modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@end @select type $][$
+@end @for parameters $]
+modelfile.write("   if(is_verbose) then\n")
+[$
+@for functions $][$
+   @select type @case R $]
+modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@case C $]
+modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\" calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+[$@end @select type $][$
+@end @for functions $]
+modelfile.write("   end if\n")
+[$@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+modelfile.write("   end if\n")
+[$@end @select$]
+modelfile.write("   write(unit,'(A1,1x,A25)') \"#\", \"-------------------------\"\n")
+modelfile.write("   end subroutine\n")
+modelfile.write("!---#] print_parameter:\n")
+
 modelfile.write("   function     digit(ch, lnr) result(d)\n")
 modelfile.write("      implicit none\n")
 modelfile.write("      character(len=1), intent(in) :: ch\n")
