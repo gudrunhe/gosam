@@ -166,7 +166,7 @@ contains
         &new_line('C')//'Mastrolia:2010nb, Binoth:2008uq, Cullen:2011kv, Cullen:2011ac'
 
    call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
-        len(c_char_'GoSam-'//ver1//'.'//ver2,kind=c_size_t))
+        len(c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR,kind=c_size_t))
 
    call strncpy(olp_version, c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
         len(c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
