@@ -925,7 +925,7 @@ modelfile.write("         call set_parameter(\"sw\",real(tmp,ki),aimag(tmp),ierr
 modelfile.write("         return\n")
 modelfile.write("     else")[$
 @end @select $]
-modelfile.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>7) then\n")
+modelfile.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>=7) then\n")
 modelfile.write("         idx = scan(name,\")\",.false.)\n")
 modelfile.write("         if (idx.eq.0) then\n")
 modelfile.write("            idx=len_trim(name)+1\n")
@@ -952,7 +952,7 @@ modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set mass for PD
 modelfile.write("               ierr = 0\n")
 modelfile.write("               return\n")
 modelfile.write("            end select\n")
-modelfile.write("     elseif (len_trim(name)>8 .and. name(1:6).eq.\"width(\") then\n")
+modelfile.write("     elseif (len_trim(name)>=8 .and. name(1:6).eq.\"width(\") then\n")
 modelfile.write("         idx = scan(name,\")\",.false.)\n")
 modelfile.write("         if (idx.eq.0) then\n")
 modelfile.write("            idx=len_trim(name)+1\n")

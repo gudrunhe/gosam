@@ -868,7 +868,7 @@ contains
          call set_parameter("sw",real(tmp,ki),aimag(tmp),ierr)
          return
      else[$
-@end @select $]if (name(1:5).eq."mass(" .and. len_trim(name)>7) then
+@end @select $]if (name(1:5).eq."mass(" .and. len_trim(name)>=7) then
          idx = scan(name,")",.false.)
          if (idx.eq.0) then
             idx=len_trim(name)+1
@@ -895,7 +895,7 @@ contains
                ierr = 0
                return
             end select
-     elseif (len_trim(name)>8 .and. name(1:6).eq."width(") then
+     elseif (len_trim(name)>=8 .and. name(1:6).eq."width(") then
          idx = scan(name,")",.false.)
          if (idx.eq.0) then
             idx=len_trim(name)+1
