@@ -623,8 +623,10 @@ class Template:
                try:
                   value = int(value, radix)
                except ValueError:
-                  print value
-                  value = float(value)
+                  try:
+                    value = float(value)
+                  except:
+                    value=0
          elif opts["convert"] == "float":
             value = float(value)
 

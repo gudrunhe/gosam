@@ -405,6 +405,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    conf["olp.include_symmetry_factor"] = True
    conf["olp.no_tree_level"] = False
    conf["olp.amplitudetype"] = "loop"
+   conf["nlo_prefactors"] = 2
 
 
    #---#[ Read order file:
@@ -550,6 +551,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                if coupling not in ones:
                   ones.append(coupling)
             lconf[golem.properties.one] = ",".join(ones)
+            conf["nlo_prefactors"] = 0
       #---#] Setup couplings :
       #---#[ Select regularisation scheme:
       for lconf in [conf] + subprocesses_conf:

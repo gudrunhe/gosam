@@ -4,18 +4,7 @@ module     olp_module
    private
    public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
    public :: OLP_EvalSubProcess2, OLP_Polvec, OLP_SetParameter, OLP_Info
-   public :: strncpy
-
-   interface
-     subroutine strncpy(dest, src, n) bind(C)
-       import
-       character(kind=c_char),  intent(out) :: dest(*)
-       character(kind=c_char),  intent(in)  :: src(*)
-       integer(c_size_t), value, intent(in) :: n
-     end subroutine strncpy
-  end interface   
-
-   real(kind=c_double) :: cur_alpha_s, cur_alpha;
+   public :: OLP_PrintParameter
 
 contains
 
@@ -61,11 +50,6 @@ contains
       integer :: PSP_verbosity, PSP_chk_threshold1, PSP_chk_threshold2, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
-
-      ! init global parameters
-      cur_alpha_s=1d0
-      cur_alpha=1d0
-
 
       ierr = 1
       l = strlen(contract_file_name)
@@ -119,20 +103,20 @@ contains
       @if internal OLP_BADPTSFILE_NUMBERING %]
       if(stage.lt.0) then[%
          @for subprocesses %]
-         call [%$_%]_initgolem([% 
+         call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %])[%
          @end @for %]
       else[%
          @for subprocesses %]
-         call [%$_%]_initgolem([% 
+         call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %],stage,rndseed)[%
          @end @for %]
       end if[%
       @else %][%
       @for subprocesses %]
-      call [%$_%]_initgolem([% 
+      call [%$_%]_initgolem([%
          @if is_first %].true.[% @else %].false.[%
          @end @if %])[%
       @end @for %][%
@@ -155,7 +139,7 @@ contains
    use [%$_%]_version, only: gosamversion, gosamrevision[%
        @end @if %][%
    @end @for %]
-   
+
    implicit none
    character(kind=c_char), intent(inout), dimension(15)  :: olp_name
    character(kind=c_char), intent(inout), dimension(15)  :: olp_version
@@ -163,6 +147,15 @@ contains
    character(len=254) :: msg
    character(len=6)   :: rev
    character(len=1)   :: ver1, ver2
+
+   interface
+     subroutine strncpy(dest, src, n) bind(C)
+       import
+       character(kind=c_char),  intent(out) :: dest(*)
+       character(kind=c_char),  intent(in)  :: src(*)
+       integer(c_size_t), value, intent(in) :: n
+     end subroutine strncpy
+   end interface
 
    write(ver1,'(I1)') gosamversion(1)
    write(ver2,'(I1)') gosamversion(2)
@@ -172,7 +165,7 @@ contains
         &new_line('C')//'Mastrolia:2010nb, Binoth:2008uq, Cullen:2011kv, Cullen:2011ac'
 
    call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
-        len(c_char_'GoSam-'//ver1//'.'//ver2,kind=c_size_t))
+        len(c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR,kind=c_size_t))
 
    call strncpy(olp_version, c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
         len(c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
@@ -181,9 +174,9 @@ contains
         len(c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR,kind=c_size_t))
 
    end subroutine OLP_Info
-   
 
-   subroutine OLP_SetParameter(variable_name, real_part, complex_part, success)&
+
+   subroutine OLP_SetParameter(variable_name, real_part, imag_part, success)&
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_setparameter[%
@@ -192,10 +185,13 @@ contains
    @end @if %][%
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
-      use, intrinsic :: iso_c_binding
+      use, intrinsic :: iso_c_binding[%
+   @for subprocesses %]
+      use [%$_%]_model, only: [%$_%]_set_parameter => set_parameter[%
+   @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
-      real(kind=c_double), intent(in) :: real_part, complex_part
+      real(kind=c_double), intent(in) :: real_part, imag_part
       integer(kind=c_int), intent(out) :: success
 
       interface
@@ -205,36 +201,17 @@ contains
             character(kind=c_char,len=1), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
-         function strcasecmp(a,b) bind(C,name='strcasecmp')
-            use, intrinsic :: iso_c_binding
-            implicit none
-            character(kind=c_char,len=1), intent(in) :: a,b
-            integer(kind=c_int) :: strcasecmp
-          end function
       end interface
 
       integer :: l;
 
-      l = strlen(variable_name)
-
-      if (strcasecmp(variable_name,"alphaS" // char(0))==0) then
-              if (complex_part /= 0d0) then
-                      success=0
-              else
-                      cur_alpha_s = real_part
-                      success=1 ! not supported
-              end if
-      else if (strcasecmp(variable_name,"alpha" // char(0))==0) then
-              if (complex_part /= 0d0) then
-                      success=0 ! not supported
-              else
-                      cur_alpha = real_part
-                      success=0 ! TODO not yet fully implemented
-              end if
-      else
-              write(7,*) "OLP_SetParameter: ", variable_name(1:l), " unknown."
-              success = 2 ! variable unknown, ignore
-      end if
+      l = strlen(variable_name)[%
+   @for subprocesses %]
+      call [%$_%]_set_parameter(variable_name(1:l),real_part,imag_part,success)
+      if(success==0) then ! return immediately on error
+          return
+      end if[%
+   @end @for %]
    end subroutine
 
 
@@ -259,10 +236,9 @@ contains
       real(kind=c_double), dimension(50), intent(in) :: momenta
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(60), intent(out) :: res
+      integer(kind=c_int) :: succ
 
-      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
-
-      cur_alpha_s = parameters(1)
+      call OLP_SetParameter("alphaS",parameters(1),0.0d0,succ)
 
       select case(label)[%
       @for subprocesses prefix=sp. %][%
@@ -313,8 +289,6 @@ contains
       real(kind=c_double), dimension(10) :: parameters
 
       real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
-
-      parameters(1) = cur_alpha_s
 
       select case(label)[%
       @for subprocesses prefix=sp. %][%
@@ -429,11 +403,8 @@ contains
       @end @select %]momenta, mu, parameters, res, acc)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki
+      use [% sp.$_ %]_model, only: parseline
       use [% sp.$_ %]_kinematics, only: boost_to_cms
-      use [% sp.$_ %]_model, only: parseline[% 
-      @select olp.alphas default=NONE
-      @case 1 %], gs[%
-      @end @select %]
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
@@ -453,14 +424,6 @@ contains
       real(kind=c_double), intent(in) :: mu
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(60), intent(out) :: res
-      integer :: prec
-      real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
-      real(kind=ki), dimension(4) :: amp[% 
-      @select olp.alphas default=NONE 
-      @case 1 %]
-      real(kind=ki), parameter :: pi = &
-           & 3.14159265358979323846264338328[%
-      @end @select %]
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
       real(kind=ki), dimension([% @if eval cr.amplitudetype ~ "scTree"
@@ -469,7 +432,7 @@ contains
                 eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
       %]) :: amp
       real(kind=c_double), optional :: acc
-      integer :: prec
+      logical :: precision_reached
       integer :: i
       logical :: ok[%
       @select olp.parameters default=NONE
@@ -515,11 +478,13 @@ contains
       call OLP_color_correlated(vecs,amp);
       ok=.true.[%
       @else %]
-      call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok[%
+      call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
-      @end @select %])[%@end @if %][%
+      @end @select %][% @if internal OLP_BLHA1%][% @else
+      %], precision_reached=precision_reached[% @end @if
+      %])[%@end @if %][%
       @if extension golem95 %]
       call tear_down_golem95()[%
       @end @if %][%
@@ -599,6 +564,58 @@ contains
 
    end subroutine OLP_Polvec
    !---#] OLP Polarization vector:
+
+   !---#[ OLP_PrintParameter
+   subroutine OLP_PrintParameter(filename) &
+       & bind(C,name="[%
+       @if internal OLP_TO_LOWER %][%
+          olp.process_name asprefix=\_ convert=lower %]olp_printparameter[%
+       @else %][%
+          olp.process_name asprefix=\_ %]OLP_PrintParameter[%
+       @end @if %][%
+       @if internal OLP_TRAILING_UNDERSCORE %]_[%
+       @end @if %]")
+
+      use, intrinsic :: iso_c_binding[%
+      @for subprocesses %]
+      use [%$_%]_model, only: [%$_%]_print_parameter => print_parameter[%
+      @end @for %]
+      implicit none
+      character(kind=c_char,len=1), intent(in) :: filename
+      integer :: ierr, l
+      logical :: exists
+
+      interface
+         function strlen(s) bind(C,name='strlen')
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character(kind=c_char,len=1), intent(in) :: s
+            integer(kind=c_int) :: strlen
+         end function strlen
+      end interface
+
+      l = strlen(filename)
+
+      inquire(file=filename(1:l), exist=exists)
+      if (exists) then
+         open(unit=27,file=filename(1:l),status="old", position="append", action="write",iostat=ierr)
+      else
+         open(unit=27,file=filename(1:l),status="new",iostat=ierr)
+      end if
+      if (ierr .ne. 0) then
+         write(7,*) "OLP_PrintParameter: Could not open/create:", filename(1:l), "!"
+         ierr = -1
+      end if[%
+      @for subprocesses %]
+      write (27, "(A)") "####### Setup of SubProcess [%$_%] #######"
+      call [%$_%]_print_parameter(.true.,27)
+      write (27, *)[%
+      @end @for%]
+
+      close(27)
+
+   end subroutine OLP_PrintParameter
+   !---#] OLP_PrintParameter
 
    subroutine     read_slha_file(line)[%
    @for subprocesses %]

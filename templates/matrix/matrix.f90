@@ -33,7 +33,7 @@
       @end @if %][%
    @end @for %]
    use [% process_name asprefix=\_
-      %]dipoles, only: insertion_operator
+      %]dipoles, only: insertion_operator, insertion_operator_qed
 
    implicit none
    save
@@ -805,8 +805,12 @@ contains
          nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
       @end @select %]
       end if
-
-      oper = insertion_operator(real(scale2,ki), vecs)
+     
+      if (corrections_are_qcd) then
+        oper = insertion_operator(real(scale2,ki), vecs)
+      else
+        oper = insertion_operator_qed(real(scale2,ki), vecs)
+      endif
       amp(:) = 0.0_ki[%
   @if generate_lo_diagrams %][%
   @for helicities %]
@@ -837,8 +841,13 @@ contains
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
-         heli_amp(1) = square(color_vectorl0, oper(:,:,1))
-         heli_amp(2) = square(color_vectorl0, oper(:,:,2))
+         if (corrections_are_qcd) then
+           heli_amp(1) = square(color_vectorl0, oper(:,:,1))
+           heli_amp(2) = square(color_vectorl0, oper(:,:,2))
+         else
+           heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
+           heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
+         endif
          amp = amp + heli_amp
       endif[%
   @end @for helicities %]

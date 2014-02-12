@@ -125,13 +125,13 @@ void [% olp.process_name asprefix=\_ %]OLP_Option(char* line, int* stat);
  *
  *  The first argument should be the name of a parameter.
  *  The second option is the real part, the third
- *  option the complex part of the parameter.
+ *  option the imaginary part of the parameter.
  *  The fourth option will be set by the function:
  *  a value of 1 reports success, a value of 0 failure (-> stop),
  *  a value of 2 means unknown/ignored (-> continue).
  *
  */
-void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real_part, double *cmplx_part, int* status);
+void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real_part, double *imag_part, int* status);
 
 
 /** This routine returns the gluon polarization vector
@@ -147,6 +147,18 @@ void [% olp.process_name asprefix=\_ %]OLP_SetParameter(char* line, double* real
  */
 
 void [% olp.process_name asprefix=\_ %]OLP_Polvec(double* p, double* q, double* eps);
+
+/** This routine writes the current parameters to an output file
+ *
+ *  The subroutine \c OLP_PrintParameter is part of the BLHA2
+ *  interface.
+ *
+ *  The first parameter should contain a filename into which the parameters are written.
+ *  If the file already exists, the output is appended.
+ *
+ */
+
+void [% olp.process_name asprefix=\_ %]OLP_PrintParameter(char* filename);
 
 #endif
 
