@@ -6,60 +6,60 @@ from math import sqrt
 model_name = "Standard Model in Feynman Gauge"
 #---#[ particles:
 particles = {
-   'U':       Particle('U',        1,   'mU',  3, 'Ubar',  '0',        2),
-   'Ubar':    Particle('Ubar',    -1,   'mU', -3, 'U',     '0',       -2),
-   'D':       Particle('D',        1,   'mD',  3, 'Dbar',  '0',        1),
-   'Dbar':    Particle('Dbar',    -1,   'mD', -3, 'D',     '0',       -1),
-   'S':       Particle('S',        1,   'mS',  3, 'Sbar',  '0',        3),
-   'Sbar':    Particle('Sbar',    -1,   'mS', -3, 'S',     '0',       -3),
-   'C':       Particle('C',        1,   'mC',  3, 'Cbar',  '0',        4),
-   'Cbar':    Particle('Cbar',    -1,   'mC', -3, 'C',     '0',       -4),
-   'T':       Particle('T',        1,   'mT',  3, 'Tbar', 'wT',        6),
-   'Tbar':    Particle('Tbar',    -1,   'mT', -3, 'T',    'wT',       -6),
-   'B':       Particle('B',        1,   'mB',  3, 'Bbar', 'wB',        5),
-   'Bbar':    Particle('Bbar',    -1,   'mB', -3, 'B',    'wB',       -5),
-   'gh':      Particle('gh',       0,      0,  8, 'ghbar', '0',  9000001),
-   'ghbar':   Particle('ghbar',    0,      0,  8, 'gh',    '0', -9000001),
-   'g':       Particle('g',        2,      0,  8, None,    '0',       21),
-   'A':       Particle('A',        2,      0,  1, None,    '0',       22),
-   'Z':       Particle('Z',        2,   'mZ',  1, None,   'wZ',       23),
-   'Wm':      Particle('Wm',       2,   'mW',  1, 'Wp',   'wW',      -24),
-   'Wp':      Particle('Wp',       2,   'mW',  1, 'Wm',   'wW',       24),
+   'U':       Particle('U',        1,   'mU',  3, 'Ubar',  '0',        2,     2.0/3.0),
+   'Ubar':    Particle('Ubar',    -1,   'mU', -3, 'U',     '0',       -2,    -2.0/3.0),
+   'D':       Particle('D',        1,   'mD',  3, 'Dbar',  '0',        1,    -1.0/3.0),
+   'Dbar':    Particle('Dbar',    -1,   'mD', -3, 'D',     '0',       -1,     1.0/3.0),
+   'S':       Particle('S',        1,   'mS',  3, 'Sbar',  '0',        3,    -1.0/3.0),
+   'Sbar':    Particle('Sbar',    -1,   'mS', -3, 'S',     '0',       -3,     1.0/3.0),
+   'C':       Particle('C',        1,   'mC',  3, 'Cbar',  '0',        4,     2.0/3.0),
+   'Cbar':    Particle('Cbar',    -1,   'mC', -3, 'C',     '0',       -4,    -2.0/3.0),
+   'T':       Particle('T',        1,   'mT',  3, 'Tbar', 'wT',        6,     2.0/3.0),
+   'Tbar':    Particle('Tbar',    -1,   'mT', -3, 'T',    'wT',       -6,    -2.0/3.0),
+   'B':       Particle('B',        1,   'mB',  3, 'Bbar', 'wB',        5,    -1.0/3.0),
+   'Bbar':    Particle('Bbar',    -1,   'mB', -3, 'B',    'wB',       -5,     1.0/3.0),
+   'gh':      Particle('gh',       0,      0,  8, 'ghbar', '0',  9000001,     0.0),
+   'ghbar':   Particle('ghbar',    0,      0,  8, 'gh',    '0', -9000001,     0.0),
+   'g':       Particle('g',        2,      0,  8, None,    '0',       21,     0.0),
+   'A':       Particle('A',        2,      0,  1, None,    '0',       22,     0.0),
+   'Z':       Particle('Z',        2,   'mZ',  1, None,   'wZ',       23,     0.0),
+   'Wm':      Particle('Wm',       2,   'mW',  1, 'Wp',   'wW',      -24,    -1.0),
+   'Wp':      Particle('Wp',       2,   'mW',  1, 'Wm',   'wW',       24,     1.0),
 
-   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11),
-   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11),
-   'ne':      Particle('ne',       1,      0,  1, 'nebar', '0',       12),
-   'nebar':   Particle('nebar',   -1,      0,  1, 'ne',    '0',      -12),
+   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11,    -1.0),
+   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11,     1.0),
+   'ne':      Particle('ne',       1,      0,  1, 'nebar', '0',       12,     0.0),
+   'nebar':   Particle('nebar',   -1,      0,  1, 'ne',    '0',      -12,     0.0),
 
-   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13),
-   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13),
-   'nmu':     Particle('nmu',      1,      0,  1, 'nmubar', '0',      14),
-   'nmubar':  Particle('nmubar',  -1,      0,  1, 'nmu',   '0',      -14),
+   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13,    -1.0),
+   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13,     1.0),
+   'nmu':     Particle('nmu',      1,      0,  1, 'nmubar', '0',      14,     0.0),
+   'nmubar':  Particle('nmubar',  -1,      0,  1, 'nmu',   '0',      -14,     0.0),
 
-   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15),
-   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15),
-   'ntau':    Particle('ntau',     1,      0,  1, 'ntaubar', '0',     16),
-   'ntaubar': Particle('ntaubar', -1,      0,  1, 'ntau',   '0',     -16),
+   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15,    -1.0),
+   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15,     1.0),
+   'ntau':    Particle('ntau',     1,      0,  1, 'ntaubar', '0',     16,     0.0),
+   'ntaubar': Particle('ntaubar', -1,      0,  1, 'ntau',   '0',     -16,     0.0),
 
-   'H':       Particle('H',        0,   'mH',  1, 'H',      'wH',     25),
-   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251),
-   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251),
-   'chi':     Particle('chi',      0,   'mZ',  1, 'chi',  'wchi',    250),
+   'H':       Particle('H',        0,   'mH',  1, 'H',      'wH',     25,     0.0),
+   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251,    -1.0),
+   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251,     1.0),
+   'chi':     Particle('chi',      0,   'mZ',  1, 'chi',  'wchi',    250,     0.0),
 
-   'ghA':     Particle('ghA',      0,      0,  1, 'ghAbar', '0', 9000002),
-   'ghAbar':  Particle('ghAbar',   0,      0,  1, 'ghA',   '0', -9000002),
+   'ghA':     Particle('ghA',      0,      0,  1, 'ghAbar', '0', 9000002,     0.0),
+   'ghAbar':  Particle('ghAbar',   0,      0,  1, 'ghA',   '0', -9000002,     0.0),
    'ghZ':     Particle('ghZ',      0,   'mZ',  1, 'ghZbar', 'wghZ',
-                                                            9000003),
+                                                            9000003,     0.0),
    'ghZbar':  Particle('ghZbar',   0,   'mZ',  1, 'ghZ',    'wghZ',
-                                                           -9000003),
+                                                           -9000003,     0.0),
    'ghWp':    Particle('ghWp',     0,   'mW',  1, 'ghWpbar', 'wghWp',
-                                                       9000004),
+                                                       9000004,     1.0),
    'ghWpbar': Particle('ghWpbar',  0,   'mW',  1, 'ghWp',    'wghWp',
-                                                      -9000004),
+                                                      -9000004,    -1.0),
    'ghWm':    Particle('ghWm',     0,   'mW',  1, 'ghWmbar', 'wghWm',
-                                                       9000005),
+                                                       9000005,    -1.0),
    'ghWmbar': Particle('ghWmbar',  0,   'mW',  1, 'ghWm',    'wghWm',
-                                                      -9000005)
+                                                      -9000005,     1.0)
 }
 #---#] particles:
 #---#[ mnemonics:
@@ -362,7 +362,7 @@ functions = {
    'gWWWW': ' (1/sw^2)',
    'gWWZ': '-(cw/sw)',
 
-   'gHHHH': '- 3/(4*sw*sw) * mH*mH/mW/mW', 
+   'gHHHH': '- 3/(4*sw*sw) * mH*mH/mW/mW',
    'gXXXX': '- 3/(4*sw*sw) * mH*mH/mW/mW',
    'gHHXX': '- mH*mH/mW/mW/(4*sw*sw)',
    'gHHPP': '- mH*mH/mW/mW/(4*sw*sw)',
@@ -379,7 +379,7 @@ functions = {
    'gWWPP': '1/2/sw/sw',
    'gAAPP': '2',
    'gAZPP': '- (cw*cw-sw*sw)/cw/sw',
-   'gZZPP': ' ((cw*cw-sw*sw)/cw/sw)^2/2',
+   'gZZPP': '((cw*cw-sw*sw)/cw/sw)^2/2',
    'gWAPH': '- 1/2/sw',
    'gWZPH': '- 1/2/cw',
    'gWAPX': '- i_/2/sw',
@@ -634,7 +634,7 @@ def init_ew(e_one=False,**options):
         sw^2 = 1 - mW^2 / mZ^2
 
    We have access to the "user_choice" from options
-   and if any parameters were specified we determine 
+   and if any parameters were specified we determine
    gosam_choice from the input parameters
 
    Then we compare...
@@ -692,7 +692,6 @@ def init_ew(e_one=False,**options):
       functions["sw"] = "sqrt(1-mW*mW/mZ/mZ)"
       types["sw"] = "R"
    elif keys == set(["e", "sw", "mZ"]):
-      gosam_choice = 7
       # mZ, sw --> mW
       functions["mW"] = "mZ*sqrt(1-sw*sw)"
       types["mW"] = "R"
@@ -706,13 +705,13 @@ def init_ew(e_one=False,**options):
    elif keys == set(["e", "sw", "GF", "mZ", "mW", "alpha"]):
       for dummy in ["e", "sw", "GF", "mZ", "mW", "alpha"]:
          #   parameters[dummy] = '0.0'
-         functions['%sf' % dummy ] = dummy 
+         functions['%sf' % dummy ] = dummy
          types[dummy] = "R"
          types['%sf' % dummy] = "R"
-         try:
-            del slha_locations[dummy]
-         except:
-            continue
+         #try:
+         #   del slha_locations[dummy]
+         #except:
+         #   continue
    else:
       raise Exception("Invalid EW Scheme.")
    if e_one:
@@ -795,7 +794,7 @@ def ew_gosam_choice(keys, size_set):
       Returns GoSam's prefered choice of electroweak scheme based on the
       input parameters in "keys"
 
-      The values are 1-8, with the special results 
+      The values are 1-8, with the special results
        0 : no parameters specified
       -1 : less than 3 parameters specified (so a unique choice
            cannot be made)
@@ -842,7 +841,7 @@ def init():
 
    1. gosam_choice : the ew_scheme that gosam would choose based on the input
    parameters given in model.option (e.g. mZ=X,mW=Y,alpha=Z => gosam_choice=2)
-   2. user_choice  : the ew_scheme the user chose i.e. ewchoose=n 
+   2. user_choice  : the ew_scheme the user chose i.e. ewchoose=n
    This is 0 if ewchoose is specified without a number
    3. ewchoose     : A boolean value, True means a choice
    of ew scheme as specified in the file config.f90
@@ -866,7 +865,7 @@ def init():
    DEFAULT['e'] =  0.3028221202
 
    keys = MODEL_OPTIONS
-   
+
    icount = 0
    for key, value in MODEL_OPTIONS.items():
       if key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
@@ -969,20 +968,8 @@ def init():
          if value.strip().lower() == "none":
             widths = []
          else:
-            widths = value.split()  
+            widths = value.split()
    simplify_model(particles, parameters, types, functions, masses, widths)
-   init_ew(e_one=eone,**ew_input) 
-
+   init_ew(e_one=eone,**ew_input)
 #---#] def init:
-#---#[ def fill_dict:
-
-def fill_dict(ad,bd):
-   """
-   Put this somewhere else
-   """
-   cd = dict( (key, bd[key]) for key in bd if (key not in ad ))
-   for key in cd:
-      ad[key] = bd[key]
-   return ad
-#---#] def fill_dict:
 init()

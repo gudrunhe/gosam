@@ -118,7 +118,7 @@ Id C([field.Z], [field.Z], [field.phip], [field.phim]) =	PREFACTOR(e^2 * gZZPP);
 Id C([field.Wp], [field.A], [field.phim], [field.H]) = PREFACTOR(e^2 * gWAPH);
 Id C([field.Wm], [field.A], [field.phip], [field.H]) = PREFACTOR(e^2 * gWAPH);
 Id C([field.Wp], [field.A], [field.phim], [field.chi]) = PREFACTOR(e^2 * gWAPX);
-Id C([field.Wm], [field.A], [field.phip], [field.chi]) = 
+Id C([field.Wm], [field.A], [field.phip], [field.chi]) =
    PREFACTOR(-e^2 * gWAPX);
 Id C([field.Wp], [field.Z], [field.phim], [field.H]) = PREFACTOR(e^2 * gWZPH);
 Id C([field.Wm], [field.Z], [field.phip], [field.H]) = PREFACTOR(e^2 * gWZPH);
