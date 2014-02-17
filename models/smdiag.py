@@ -672,7 +672,7 @@ def init_ew(e_one=False,**options):
       raise Exception("Invalid EW Scheme.")
    if e_one:
       if "e" in functions.keys():
-         del functions["e"]
+         functions["e"] = "1"
 #---#] def init_ew:
 #---#[ def ew_gosam_choice:
 

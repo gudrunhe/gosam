@@ -162,10 +162,12 @@ contains
    write(unit,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
    write(unit,'(A1,1x,A14)') "#", "Couplings etc.:"
    write(unit,'(A1,1x,A9,G23.16)') "#", "alphaS = ", gs*gs/4._ki/pi
-   write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs
+   write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs[$
+@if ewchoose$]
    write(unit,'(A1,1x,A9,G23.16)') "#", "alpha  = ", alpha
    write(unit,'(A1,1x,A9,G23.16)') "#", "e      = ", e
    write(unit,'(A1,1x,A9,G23.16)') "#", "GF     = ", GF[$
+@end @if$][$
 @select modeltype @case sm_complex smdiag_complex $]
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw     = ", sw
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw2    = ", sw*sw[$
