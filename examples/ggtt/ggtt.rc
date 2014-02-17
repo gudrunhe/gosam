@@ -16,3 +16,4 @@ model.options=Nfgen:1, masses: mT, widths: none
 one=gs,e
 
 filter.nlo=lambda d: not d.isScaleless()
+extensions=golem95

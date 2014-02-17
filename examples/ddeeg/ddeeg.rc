@@ -27,7 +27,9 @@ one=gs,e
 # There are only two non-zero helicities
 helicities=[dD=+-]D[eE=+-]E[g=+-]
 
-#process.extensions=fr5
+# no default extensions
+extensions=
+#extensions=fr5
 
 filter.nlo= madloop_filter
 filter.module=filter.py

@@ -15,4 +15,4 @@ helicities=[dD=+-]D[+-][+-]
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT
 
-process.extensions=dred
+extensions=dred

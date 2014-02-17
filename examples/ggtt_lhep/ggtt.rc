@@ -15,7 +15,7 @@ model=../model/Standard_Model_LanHep, 4
 zero=mdlMb,mdlMc,mdlMs,mdlwtop
 one=mdlEE,mdlGG
 
-process.extensions=dred
+extensions=dred
 
 filter.nlo=lambda d: not d.isScaleless()
 r2=implicit

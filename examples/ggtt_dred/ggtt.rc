@@ -13,6 +13,6 @@ model.options=Nfgen:1
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT
 
-process.extensions=dred
+extensions=dred
 
 filter.nlo=lambda d: not d.isScaleless()

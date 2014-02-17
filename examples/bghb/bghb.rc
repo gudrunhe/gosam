@@ -16,6 +16,9 @@ model.options= masses: mH mT, widths: none
 helicities=[bB=+-][+-]0B
 +symmetries=parity
 
+# no default extensions
+extensions=
+
 
 # Single Pole check is set to false
 # because Yukawa renormalization is done

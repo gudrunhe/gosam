@@ -15,6 +15,6 @@ helicities=[eE=+-]E[uU=+-]U
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT,me
 
-process.extensions=dred
+extensions=dred
 
 debug=all

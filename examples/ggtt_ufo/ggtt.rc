@@ -13,7 +13,7 @@ model.options=Nfgen:1
 model=FeynRules, ../model/Standard_Model_UFO
 zero=mdlMB,mdlWT
 
-process.extensions=dred
+extensions=dred
 
 filter.nlo=lambda d: not d.isScaleless()
 r2=explicit

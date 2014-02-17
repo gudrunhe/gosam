@@ -17,5 +17,8 @@ one=gs,e
 
 helicities=++++
 
+#do not use default extensions
+extensions=
+
 abbrev.level=diagram
 filter.nlo= lambda d: not d.isScaleless()

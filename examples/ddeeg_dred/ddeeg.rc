@@ -27,7 +27,7 @@ one=gs,e
 # There are only two non-zero helicities
 helicities=[dD=+-]D[eE=+-]E[g=+-]
 
-process.extensions=dred
+extensions=dred
 
 
 filter.nlo= madloop_filter

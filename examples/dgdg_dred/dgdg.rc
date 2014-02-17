@@ -17,4 +17,4 @@ zero=mU,mD
 
 helicities=++++, +++-, +-++, +-+-
 
-process.extensions=dred
+extensions=dred

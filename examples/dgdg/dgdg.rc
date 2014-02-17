@@ -17,3 +17,6 @@ zero=mU,mD
 
 helicities=++++, +++-, +-++, +-+-
 symmetries=flavour, parity
+
+# do not use default extensions
+extensions=

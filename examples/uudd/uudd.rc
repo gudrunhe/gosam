@@ -16,3 +16,6 @@ one=gs,e
 zero=mU,mD
 
 helicities=[uU=+-]U[dD=+-]D
+
+# no default extensions
+extensions=

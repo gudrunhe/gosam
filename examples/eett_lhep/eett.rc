@@ -19,7 +19,7 @@ zero=mdlwtop
 
 # We add golem95 already here in order to have it ready in the
 # file ngolem/config.sh
-process.extensions=golem95, dred
+extensions=golem95, dred
 
 reference-vectors=3:2,4:2
 debug=all

@@ -15,6 +15,7 @@ qgraf.verbatim=true=chord[U,S,C,B,0,0];
 
 helicities=[dD=+-]D[+-][+-]
 
-#process.extensions=fr5
+#extensions=fr5
+extensions=
 
 one=gs,e

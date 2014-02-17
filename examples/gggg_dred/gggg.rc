@@ -17,7 +17,7 @@ one=gs,e
 
 helicities=++++
 
-process.extensions=dred
+extensions=dred
 
 abbrev.level=group
 filter.nlo= lambda d: not d.isScaleless()

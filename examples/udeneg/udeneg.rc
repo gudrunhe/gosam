@@ -9,6 +9,8 @@ process_path=ngolem
 in=2, -1
 out=12, -11, 21
 
+model=sm
+
 order=QCD, 1, 3
 
 # Only W+ in s-channel, no Goldstone bosons
@@ -22,4 +24,7 @@ zero=mU,mD,me
 
 # There are only two non-zero helicities
 helicities=-+-++, -+-+-
+
+# no default extensions
+extensions=
 

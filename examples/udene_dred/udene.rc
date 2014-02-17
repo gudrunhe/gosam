@@ -11,6 +11,8 @@ out=11, -12
 
 order=QCD, 0, 2
 
+model=sm
+
 # Only W+ in s-channel, no Goldstone bosons
 qgraf.verbatim=\
 true=bridge[Wp,Wm,1,100];
@@ -23,4 +25,4 @@ zero=mU,mD,me
 # There's only one non-zero helicity
 helicities=+--+
 
-process.extensions=dred
+extensions=dred

@@ -24,4 +24,4 @@ helicities=+--+
 
 # Note: we have not implemented fr5 in the UFO model file yet.
         Therefore we use dred
-process.extensions=dred
+extensions=dred

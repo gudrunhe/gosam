@@ -9,6 +9,9 @@ order=gs, 2, 2
 
 one=gs,e
 
+# overwrite default extensions
+extensions=
+
 
 # Two of the three helicities must be zero at tree level,
 # we keep them as a check.
