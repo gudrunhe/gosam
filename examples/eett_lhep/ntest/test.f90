@@ -174,6 +174,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
 
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
+   integer :: prec
 
    logical :: ok
 
@@ -184,7 +185,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    mdlMZ = mdlMZ / Q
    mdlwZ = mdlwZ / Q
 
-   call samplitude(xvecs, xscale2, amp, ok)
+   call samplitude(xvecs, xscale2, amp, prec, ok)
 
    mdlMtop = mdlMtop * Q
    mdlMZ = mdlMZ * Q

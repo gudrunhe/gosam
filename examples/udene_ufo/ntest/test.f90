@@ -158,6 +158,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+   integer :: prec
 
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
@@ -170,7 +171,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    mdlMW = mdlMW / Q
    mdlWW = mdlWW / Q
 
-   call samplitude(xvecs, xscale2, amp, ok)
+   call samplitude(xvecs, xscale2, amp, prec, ok)
    amp(0) = amp(0) / mdlee**4 / abs(mdlCKM11)**2
    amp(1:3) = amp(1:3) / mdlee**4 / mdlG**2 / abs(mdlCKM11)**2
 

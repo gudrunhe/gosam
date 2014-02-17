@@ -151,12 +151,13 @@ subroutine     compute_golem_result(vecs, scale2, amp)
 
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
+   integer :: prec
 
    ! rescaling of all dimensionful quantities that enter the calculation
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
 
-   call samplitude(xvecs, xscale2, amp)
+   call samplitude(xvecs, xscale2, amp, prec)
    call ir_subtraction(xvecs, xscale2, irp)
 
    ! we computed only half of the helicities so far.

@@ -127,6 +127,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(5, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+   integer :: prec
 
    logical :: ok
 
@@ -135,7 +136,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    pi = 4.0d0 * atan(1.0d0)
    GF =  pi * alpha / sqrt(2.0_ki) / sw**2 / mW**2
 
-   call samplitude(vecs, real(scale2, dbl), amp, ok)
+   call samplitude(vecs, real(scale2, dbl), amp, prec, ok)
       
    ! factor 1/16/pi/mH for converting to width
    ! factor 2 for summing over helicities

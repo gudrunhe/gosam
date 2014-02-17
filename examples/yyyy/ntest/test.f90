@@ -29,6 +29,7 @@ program test
    double precision, dimension(0:num_helis-1) :: reference_amps
    double precision, dimension(0:num_helis-1) :: gauge_amps
    logical :: ok, h_ok, success
+   integer :: prec
 
    integer, dimension(2) :: channels
    integer :: ic, ch
@@ -58,7 +59,7 @@ program test
       ! compute golem result
       call shake_gauge_parameters(0.0_ki)
       do ihel = 0, num_helis - 1
-         call samplitude(vecs, scale2, amp, h_ok, ihel)
+         call samplitude(vecs, scale2, amp, prec, h_ok, ihel)
          golem_amps(ihel) = amp(1)
          ok = ok .and. h_ok
       end do
@@ -66,7 +67,7 @@ program test
       ! recompute golem result for a different choice of gauge parameters
       call shake_gauge_parameters(10.0_ki)
       do ihel = 0, 2
-         call samplitude(vecs, scale2, amp, h_ok, ihel)
+         call samplitude(vecs, scale2, amp, prec, h_ok, ihel)
          gauge_amps(ihel) = amp(1)
          ok = ok .and. h_ok
       end do

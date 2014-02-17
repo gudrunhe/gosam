@@ -140,8 +140,9 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    double precision, dimension(0:3), intent(out) :: amp
 
    logical :: ok
+   integer :: prec
 
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
 
 
    do ic = 1, 2

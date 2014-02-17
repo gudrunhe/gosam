@@ -83,7 +83,6 @@ contains
       integer, intent(out) :: prec
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      logical, intent(out), optional:: precision_reached
 
       real(ki), dimension([%num_legs%], 4) :: new_vecs
 

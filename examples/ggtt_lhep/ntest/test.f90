@@ -134,8 +134,9 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(4, 4), intent(in) :: vecs
    double precision, intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+   integer :: prec
 
-   call samplitude(vecs, scale2, amp)
+   call samplitude(vecs, scale2, amp, prec)
 
    amp(0) = amp(0) / gs ** 4
    amp(1:3) = amp(1:3) / gs ** 6

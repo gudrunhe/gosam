@@ -151,6 +151,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(0:3) :: gauge_amp, diff
+   integer :: prec
 
    logical :: ok, gok
 
