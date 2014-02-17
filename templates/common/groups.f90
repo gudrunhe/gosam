@@ -866,8 +866,8 @@ subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    @end @if %]
 
    if(samurai_verbosity > 0) then
-      write(samurai_out,*) "[golem-2.0] numetens_group[% grp %]"
-      write(samurai_out,*) "[golem-2.0] epspow=", epspow
+      write(samurai_out,*) "[GoSam] numetens_group[% grp %]"
+      write(samurai_out,*) "[GoSam] epspow=", epspow
    end if
    call samurai[%
    @if version_newer samurai.version 2.1 %][%

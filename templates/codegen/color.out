@@ -97,7 +97,7 @@ contains
       character :: ch1, ch2, ch3
 
       ch3 = ","
-      write (unit,'(A13)') "golem_color=["
+      write (unit,'(A13)') "gosam_color=["
       do i=1,numcs
          do j=1,numcs
             if (j==1) then
