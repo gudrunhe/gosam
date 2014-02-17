@@ -660,7 +660,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")
-   f_contract.write("#@OLP GOLEM %s\n" % ".".join(map(str,
+   f_contract.write("#@OLP GoSam %s\n" % ".".join(map(str,
       golem.installation.GOLEM_VERSION)))
    f_contract.write("#@IgnoreUnknown %s\n" % ignore_unknown)
    f_contract.write("#@IgnoreCase %s\n" % ignore_case)
