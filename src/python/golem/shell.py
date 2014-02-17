@@ -696,9 +696,7 @@ class GENERATE(Command):
 
          extensions = [e.lower() for e in golem.properties.getExtensions(conf)]
          if generate_nlo:
-            if not ("samurai" in extensions
-                  or "golem95" in extensions
-                  or "pjfry" in extensions):
+            if not any([e in extensions for e in REDUCTION_EXTENSIONS]):
                shell.recommendations["+add.extensions"] = "samurai"
                flag=True
                
