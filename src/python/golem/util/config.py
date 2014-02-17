@@ -39,10 +39,10 @@ class Property:
    without affecting the source code in many places.
    """
    def __init__(self, name, description, type=str, default=None,
-         experimental=False, options=None):
+         experimental=False, options=None, sep=None):
       """
-      Note, in the case of type=list default encodes the
-      delimiter character (';' or ',') with if default=None
+      Note, in the case of type=list sep encodes the
+      delimiter character (';' or ',') with if sep=None
       the comma is used.
       """
       self._name = name
@@ -51,6 +51,7 @@ class Property:
       self._default = default
       self._experimental = experimental
       self._options = options
+      self._sep = sep
 
    def _guess_correct(self, options, *given):
       result = []
@@ -105,13 +106,14 @@ class Property:
          if self._options is not None:
             odds = []
             default = self.getDefault()
+            sep = self.getSep()
             sval = conf.getProperty(str(self))
             if sval is not None:
-               if default is None:
+               if sep is None:
                   values = sval.split(',')
                else:
-                  values = sval.split(default)
-   
+                  values = sval.split(sep)
+
                for value in values:
                   vls = value.lower().strip()
                   if vls == "":
@@ -148,6 +150,9 @@ class Property:
 
    def getDefault(self):
       return self._default
+
+   def getSep(self):
+      return self._sep
 
    def __str__(self):
       return self.getName()
@@ -197,15 +202,16 @@ class Properties:
          type = key.getType()
          name = str(key)
          default = key.getDefault()
+         sep = key.getSep()
          if(type == int):
             return self.getIntegerProperty(name, default)
          elif(type == bool):
             return self.getBooleanProperty(name, default)
          elif(type == list):
-            if default is None:
-               return self.getListProperty(name, ',')
+            if sep is None:
+               return self.getListProperty(name, default, ',')
             else:
-               return self.getListProperty(name, default)
+               return self.getListProperty(name, default, sep)
          else:
             return self.getProperty(name, default)
       else:
@@ -229,15 +235,18 @@ class Properties:
                return result.decode("string_escape")
          else:
             return result
-            
 
-   def getListProperty(self, key, delimiter=','):
+
+   def getListProperty(self, key, default=None, delimiter=','):
       name = str(key)
       if name in self:
          value = self[name].split(delimiter)
          return list(map(lambda x: x.strip(), value))
       else:
-         return []
+         if default:
+            return default.split(delimiter)
+         else:
+            return []
 
    def getBooleanProperty(self, key, default=False):
       true_values = ["1", "true", ".true.", "t", ".t.", "yes", "y"]

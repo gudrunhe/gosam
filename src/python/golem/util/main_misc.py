@@ -62,6 +62,19 @@ def generate_process_files(conf, from_scratch=False):
 	This routine is a wrapper around anything that needs to be done
 	for creating a new process.
 	"""
+	# properties will be filled later:
+	props = golem.util.config.Properties()
+
+	# This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		props.setProperty(str(p), conf.getProperty(p))
+		if conf.getProperty(p):
+			conf.setProperty(str(p), conf.getProperty(p))
+
+	extensions = golem.properties.getExtensions(conf)
+	if not conf["extensions"]:
+		conf["extensions"]=props["extensions"]
+
 	golem.properties.setInternals(conf)
 
 	path = golem.util.tools.process_path(conf)
@@ -71,15 +84,6 @@ def generate_process_files(conf, from_scratch=False):
 
 	if templates is None or len(templates) == 0:
 		templates = golem_path("templates")
-
-	extensions = golem.properties.getExtensions(conf)
-
-	# properties will be filled later:
-	props = golem.util.config.Properties()
-
-	# This fills in the defaults where no option is given:
-	for p in golem.properties.properties:
-		props.setProperty(str(p), conf.getProperty(p))
 
 	for name in conf:
 		props[name] = conf[name]
@@ -521,7 +525,7 @@ def workflow(conf):
 		if 'r2_only' in ext:
 			raise GolemConfigError(
 						"r2 only not supported with extension formopt\n")
-		if conf["abbrev.level"] != "diagram":	
+		if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
 			raise GolemConfigError(
 						"extension formopt only supported with abbrev.level=diagram\n")
 	if ('ninja' in ext) and ('formopt' not in ext):
