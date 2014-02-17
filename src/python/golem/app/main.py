@@ -78,6 +78,7 @@ def main(argv=sys.argv):
 
    Usage: golem-main.py {options} [--template] {file or directory}
    -h, --help           -- prints this help screen
+   --olp                -- switch to OLP mode. Use --olp --help to get more options.
    -d, --debug          -- prints out debug messages
    -p, --profile        -- generates profiling information
    -v, --verbose        -- prints out status messages
@@ -95,6 +96,8 @@ def main(argv=sys.argv):
    -z, --scratch        -- overwrite all files
    -i, --interactive    -- start an interactive interface
    -y, --no-pyxodraw    -- do not attempt to draw diagrams.
+
+   --version            -- output current GoSam version
 
    -------------------------------------------------------------------
    Static variables:
