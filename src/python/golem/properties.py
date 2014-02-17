@@ -225,7 +225,7 @@ qgraf_verbatim_lo = Property("qgraf.verbatim.lo",
 
 qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
    """\
-   Same as qgraf.verbatim but only applied to LO diagrams.
+   Same as qgraf.verbatim but only applied to NLO diagrams.
 
    See also: qgraf.verbatim, qgraf.verbatim.nlo
    """,
