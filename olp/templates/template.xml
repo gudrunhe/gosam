@@ -34,5 +34,4 @@
 	<file src="olp_parser.y" class="Verbatim" usedby="olp">
 		<only if-internal="OLP_DAEMON"/>
 	</file>
-	<file src="olp_model.f90" class="Model" usedby="olp"/>
 </template>
