@@ -89,7 +89,7 @@ CLINES = [
               ( ".".join(map(str,golem.installation.GOLEM_VERSION)),
                 golem.installation.GOLEM_REVISION),
             '',
-            '(c) The GoSam Collaboration 2011-2013',
+            '(c) The GoSam Collaboration 2011-2014',
             ''
       ]
 
