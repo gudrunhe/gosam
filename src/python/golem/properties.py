@@ -1106,7 +1106,7 @@ def setInternals(conf):
    conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-   conf["__REGULARIZATION_HV__"] = not conf["__REGULARIZATION_DRED__"]
+   conf["__REGULARIZATION_HV__"] = not "dred" in extensions
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
