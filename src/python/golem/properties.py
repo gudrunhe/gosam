@@ -521,13 +521,15 @@ extensions = Property("extensions",
                     abbrev.level=diagram and r2=implicit/explicit).
    extraopt     --- optimization using FORM for color and model files.
                     (experimental)
+   shared       --- create shared libraries (=dynamically linkable code),
+                    enabled by default with autotools extension
    """,
    list,",".join(DEFAULT_EXTENSIONS),
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop"])
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -1094,6 +1096,10 @@ def setInternals(conf):
          "__GENERATE_NINJA_DOUBLE__",
          "__CUSTOM_SPIN2_PROP__",
          "__EWCHOOSE__"]
+
+   if "shared" in extensions:
+      conf["shared.fcflags"]="-fPIC"
+      conf["shared.ldflags"]="-fPIC"
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions

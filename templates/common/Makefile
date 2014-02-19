@@ -22,7 +22,11 @@ OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
 
+[% @if extension shared %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_common.so
+[% @else %]
 compile: source common.a
+[% @end @if %]
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
@@ -31,11 +35,22 @@ endif
 
 doc:
 
+[% @if extension shared %]
+libgosam_process[% process_name assuffix=\_ %]_common.so: $(OBJECTS)
+	$(vecho) "-> Linking $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -shared -o $@ $+
+
+clean:
+	$(Q)rm -f *.o *.mod libgosam_process[% process_name assuffix=\_ %]_common.so
+[% @else %]
 common.a: $(OBJECTS)
+	$(vecho) "-> Creating $@ .."
 	$(Q) ar rs $@ $+
 
 clean:
-	$(Q)rm -f *.o *.mod
+	$(Q)rm -f *.o *.mod common.a
+[% @end @if %]
+
 
 very-clean: clean
 	$(Q)rm -f filelist-source

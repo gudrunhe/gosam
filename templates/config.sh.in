@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
       -fortcom)
               printf " $FC"
    ;;
-      -help)
+      -help|--help)
               echo
               echo This script helps constructing the command line
               echo for linking the matrix element with an existing

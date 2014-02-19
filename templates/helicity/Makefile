@@ -12,7 +12,7 @@ include ../Makefile.conf[%
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
 @if diagsum %]
-HAVE_ORIG_DIAGRAM_FILE=$(if $(shell grep 'Local' ../diagrams-1.hh),1,0)[%
+HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && grep 'Local' ../diagrams-1.hh),1,0)[%
 @end @if %]
 
 OBJECTS= \
@@ -135,7 +135,11 @@ GENERATED_SRC=[%
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
 
+[% @if extension shared %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so
+[% @else %]
 compile: source amplitude[%helicity%].a
+[% @end @if %]
 
 source:[%
 @if diagsum %]
@@ -180,14 +184,21 @@ $(OBJECTS): %.o: %.f90
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ -I../common $<
 
+[% @if extension shared %]
+libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so: $(OBJECTS)
+	$(vecho) "-> Linking $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -shared -Wl,-rpath="\$ORIGIN/../common" -o $@ $+ 
+[% @else %]
 amplitude[%helicity%].a: $(OBJECTS)
+	$(vecho) "-> Creating $@ .."
 	$(Q) ar rs $@ $+
+[% @end @if %]
 
 doc:
 
 clean:
 	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
-		-or -name '*.mod' \) \
+		-or -name '*.mod' -or -name '*.a' -or -name '*.so' \) \
 		-exec rm \{} \;
 
 very-clean: clean
