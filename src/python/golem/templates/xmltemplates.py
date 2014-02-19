@@ -97,7 +97,7 @@ class _TemplateState:
          message("Creating directory %r ..." % dest)
          os.mkdir(dest)
 
-   def transform_template_file(self, in_file, out_file, class_name, filter):
+   def transform_template_file(self, in_file, out_file, class_name, filter, executable):
       if out_file in self.produced_files:
          warning("File %r has been overwritten while processing %r" % \
                (out_file, in_file))
@@ -105,7 +105,7 @@ class _TemplateState:
          self.produced_files.append(out_file)
 
       self.factory.process(in_file, out_file, class_name,
-            self.props, self.opts, self.opts, filter=filter)
+            self.props, self.opts, self.opts, filter=filter, executable=executable)
 
    def start_template(self, attrs):
       for name in ["description", "version",
@@ -189,6 +189,7 @@ class _TemplateState:
       else:
          result["class name"] = "Verbatim"
 
+      result["executable"]= "executable" in attrs
 
       return result
 
@@ -219,7 +220,8 @@ class _TemplateState:
          out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
          class_name = env["class name"]
          filter = env.get("filter", None)
-      
+         executable = env.get("executable", False)
+
          extra_props = golem.util.config.Properties()
          for name in env:
             extra_props.setProperty(name, env[name])
@@ -227,7 +229,7 @@ class _TemplateState:
          self.props.append(extra_props)
 
          message("Generating file %s" % env["output file name"])
-         self.transform_template_file(in_file, out_file, class_name, filter)
+         self.transform_template_file(in_file, out_file, class_name, filter, executable)
          self.props.pop()
 
    def expand_directory(self, env, attrs):

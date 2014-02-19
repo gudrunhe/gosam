@@ -3,13 +3,13 @@
   -->
 <template name="GoSam default template" version="1.0"
 	description="This template is used by golem-main.py"
-	author="Thomas Reiter"
-	author-email="thomasr@nikhef.nl">
+	author="The GoSam Collaboration"
+	author-email="gosam@projects.hepforge.org">
 
 	<file src="configure.ac" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
-	<file src="autogen.sh" class="Verbatim">
+	<file src="autogen.sh" class="Verbatim" executable="yes">
 		<only if-extension="autotools" />
 	</file>
 	<file src="Makefile.am" class="Kinematics">
@@ -23,7 +23,7 @@
 		<except if-file="exists" in-mode="normal" />
 		<except if-internal="OLP_MODE" />
 	</file>
-	<file src="config.sh" class="Kinematics">
+	<file src="config.sh" class="Kinematics" executable="yes">
 		<except if-extension="autotools" />
 	</file>
 	<file src="config.sh.in" class="Kinematics">
