@@ -1,7 +1,12 @@
 [% ' vim: syntax=golem
 %]
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 PROCESS_CFLAGS=[%
 	@for helicities %] \

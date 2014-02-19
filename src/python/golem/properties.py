@@ -1086,6 +1086,7 @@ def setInternals(conf):
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
          "__OLP_BADPTSFILE_NUMBERING__",
+         "__OLP_MODE__",
          "__OLP_BLHA1__",
          "__OLP_BLHA2__",
          "__FORMOPT__",
@@ -1118,6 +1119,8 @@ def setInternals(conf):
    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
    conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
+   if not "__OLP_MODE__" in conf:
+      conf["__OLP_MODE__"] =  False
 
    conf["__REQUIRE_FR5__"] = "dred" not in extensions \
        and "no-fr5" not in extensions

@@ -1,5 +1,10 @@
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 FORM_OPT=\
 	-t $(TEMP) \

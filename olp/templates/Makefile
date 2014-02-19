@@ -2,7 +2,8 @@
 SUBDIRS=[% @for subprocesses %] \
 	[% path %][% @end @for %]
 
-FC=$(shell sh config.sh -fortcom)
+include Makefile.conf
+
 FCFLAGS=$(shell sh config.sh -fcflags)
 CFLAGS=$(shell sh config.sh -cflags)
 LDFLAGS=$(shell sh config.sh -libs)

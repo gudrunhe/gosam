@@ -1,7 +1,12 @@
 # vim: ts=3:sw=3
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 
 OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \

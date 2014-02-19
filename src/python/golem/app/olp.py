@@ -177,6 +177,7 @@ def main(argv=sys.argv):
 		defaults.append(cmd_defaults)
 
 	default_conf = golem.util.config.Properties()
+	default_conf.setProperty("__OLP_MODE__","True")
 	for c in defaults:
 		default_conf += c
 

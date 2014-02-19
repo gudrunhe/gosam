@@ -2,7 +2,12 @@
 	Template file for the Makefile in process_dir/doc
 ' %]# vim: ts=3:sw=3
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 # latex and dvips
 #

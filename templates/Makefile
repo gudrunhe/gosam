@@ -8,7 +8,11 @@ SUBDIRS=doc common[%
 @for helicities generated %] helicity[% helicity %][%
 @end @for helicities %] matrix
 
-include Makefile.conf
+[% @if internal OLP_MODE %]
+include ../Makefile.conf[%
+@else %]
+include Makefile.conf[%
+@end @if %]
 
 # Stream editor.
 #

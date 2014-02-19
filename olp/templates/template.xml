@@ -15,6 +15,9 @@
 	<file src="Makefile.am" class="OLP" usedby="olp">
 		<only if-extension="autotools"/>
 	</file>
+	<file src="Makefile.conf" class="OLP" usedby="olp">
+		<except if-file="exists" in-mode="normal" />
+	</file>
 	<file src="configure.ac" class="OLP" usedby="olp">
 		<only if-extension="autotools"/>
 	</file>

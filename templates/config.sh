@@ -2,27 +2,33 @@
 
 PWD=`dirname $0`
 
-FC=`sed -n 'H
+[% @if internal OLP_MODE %]
+MAKEFILECONF=$PWD/../Makefile.conf[%
+@else %]
+MAKEFILECONF=$PWD/Makefile.conf[%
+@end @if %]
+
+FC="$(sed -n 'H
    ${
    g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
+   s/\\[ \t]*\n[ \t]*//g
    p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*FC[ \\t]*='|sed 's/^[ \\t]*FC[ \\t]*=//'`
-LDFLAGS=`sed -n 'H
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FC[ \t?]*='|sed 's/^[ \t]*FC[ \t?]*=//')"
+LDFLAGS="$(sed -n 'H
    ${
    g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
+   s/\\[ \t]*\n[ \t]*//g
    p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*LDFLAGS[ \\t]*='|sed 's/^[ \\t]*LDFLAGS[ \\t]*=//'`
-CFLAGS=`sed -n 'H
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*LDFLAGS[ \t?]*='|sed 's/^[ \t]*LDFLAGS[ \t?]*=//')"
+CFLAGS="$(sed -n 'H
    ${
    g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
+   s/\\[ \t]*\n[ \t]*//g
    p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*FCFLAGS[ \\t]*='|sed 's/^[ \\t]*FCFLAGS[ \\t]*=//'`
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
 
 PROCESS_LDFLAGS=" $PWD/matrix/matrix.a[%
 	@for helicities generated %] \

@@ -21,6 +21,7 @@
 	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
+		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="config.sh" class="Kinematics">
 		<except if-extension="autotools" />
