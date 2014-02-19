@@ -12,6 +12,9 @@ class OLPTemplate(golem.util.parser.Template):
 		self._contract_file = contract_file
 		self._subprocesses = None
 		self._pstack = []
+		self._listed_flags=set()
+		self._listed_flags_length=0
+
 
 	def init_channels(self, subprocesses, subprocesses_conf):
 		self._subprocesses = subprocesses
@@ -135,3 +138,24 @@ class OLPTemplate(golem.util.parser.Template):
 
 			yield props
 
+	def flags_filter(self, *args, **opts):
+		assert args == ("$_",)
+		flags=self._stack[-1]["$_"]
+		ret=""
+		for f in flags.split():
+			if f not in self._listed_flags:
+				self._listed_flags_length += len(f)
+				if self._listed_flags_length > 80:
+					self._listed_flags_length=0
+					ret = ret + "\\\n "
+					self._listed_flags_length += len(f)
+				ret = ret + f + " "
+				self._listed_flags.add(f)
+		if self._stack[-1]["is_last"]=="True":
+			ret=ret.rstrip()
+		return ret
+
+	def reset_flags_filter(self, *args, **opts):
+		self._listed_flags=set()
+		self._listed_flags_length=0
+		return ""
