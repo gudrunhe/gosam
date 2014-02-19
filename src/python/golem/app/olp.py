@@ -177,9 +177,18 @@ def main(argv=sys.argv):
 		defaults.append(cmd_defaults)
 
 	default_conf = golem.util.config.Properties()
+	props = golem.util.config.Properties()
+
+	## This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		props.setProperty(str(p), default_conf.getProperty(p))
+
 	default_conf.setProperty("__OLP_MODE__","True")
 	for c in defaults:
 		default_conf += c
+
+	if not default_conf["extensions"]:
+		default_conf["extensions"]=props["extensions"]
 
 	skipped = 0
 	for arg in args:
