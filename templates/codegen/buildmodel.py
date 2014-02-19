@@ -885,7 +885,7 @@ modelfile.write("     ")[$
 modelfile.write("if (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
 modelfile.write("         alpha = re\n")
 modelfile.write("         must_be_real = .true.\n")
-modelfile.write("         else\n")
+modelfile.write("      else")
 [$ @else$]
 modelfile.write("         ")[$ @end @if $][$
 @else $]modelfile.write("         ")[$
