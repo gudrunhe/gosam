@@ -27,15 +27,29 @@
             @end @if %][%
          @end @if %][%
       @end @if %][%
-   @else %][% reduction_interoperation %][%
+   @else %][% -1 %][%
    @end @select %]
+   ! Rescue reduction method. The rescue system is disabled
+   ! if it is equal to reduction_interoperation
    integer :: reduction_interoperation_rescue = [%
    @select reduction_interoperation_rescue default="-1"
    @case -1 %][%
       @if extension golem95 %]GOLEM95[%
-      @else %]reduction_interoperation[%
+      @else %][%
+           @select reduction_interoperation default="-1"
+           @case -1 %][%
+              @if extension ninja %]NINJA[%
+              @else %][%
+                 @if extension samurai %]SAMURAI[%
+                 @else %][%
+                    @if extension golem95 %]GOLEM95[%
+                    @end @if %][%
+                 @end @if %][%
+              @end @if %][%
+           @else %][% -1 %][%
+           @end @select %][%
       @end @if %][%
-   @else %][% reduction_interoperation_rescue %][%
+   @else %][% -1 %][%
    @end @select %]
 
    ! Debugging settings
