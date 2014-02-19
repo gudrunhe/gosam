@@ -26,6 +26,7 @@ contains
            & [%$_%]_PSP_verbosity => PSP_verbosity, &
            & [%$_%]_PSP_chk_th1 => PSP_chk_th1, &
            & [%$_%]_PSP_chk_th2 => PSP_chk_th2, &
+           & [%$_%]_PSP_chk_th3 => PSP_chk_th3, &
            & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @for %]
       implicit none
@@ -47,7 +48,7 @@ contains
       character(len=128) :: line_buf
       character(len=9) :: kw[%
       @if extension golem95 %]
-      integer :: PSP_verbosity, PSP_chk_threshold1, PSP_chk_threshold2, PSP_chk_kfactor
+      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
 
@@ -90,14 +91,16 @@ contains
       ! Uncomment to change rescue system setting on all suprocesses
       ! PSP_rescue = .true.
       ! PSP_verbosity = .false.
-      ! PSP_chk_th1 = [% PSP_chk_threshold1 default=4 %]
-      ! PSP_chk_th2 = [% PSP_chk_threshold2 default=3 %]
+      ! PSP_chk_th1 = [% PSP_chk_th1 default=8 %]
+      ! PSP_chk_th2 = [% PSP_chk_th2 default=3 %]
+      ! PSP_chk_th3 = [% PSP_chk_th3 default=5 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
       ! [%$_%]_PSP_verbosity =  PSP_verbosity
       ! [%$_%]_PSP_chk_th1 = PSP_chk_th1
       ! [%$_%]_PSP_chk_th2 = PSP_chk_th2
+      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3
       ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
       @end @for %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
@@ -255,11 +258,6 @@ contains
               %]), mu, parameters, res)[%
                @end @for %][%
             @end @select %][%
-         @if eval cr.amplitudetype ~ "scTree"
-         %][% @elif eval cr.amplitudetype ~ "ccTree"
-         %][% @else %]
-              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
-         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
@@ -305,11 +303,6 @@ contains
               %]), mu, parameters, res, acc)[%
                @end @for %][%
             @end @select %][%
-         @if eval cr.amplitudetype ~ "scTree"
-         %][% @elif eval cr.amplitudetype ~ "ccTree"
-         %][% @else %]
-              res(1:3) = cur_alpha_s * one_over_2pi * res(1:3)[%
-         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
@@ -402,7 +395,7 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki
+      use [% sp.$_ %]_config, only: ki, PSP_chk_th3
       use [% sp.$_ %]_model, only: parseline
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
@@ -432,8 +425,8 @@ contains
                 eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
       %]) :: amp
       real(kind=c_double), optional :: acc
-      logical :: precision_reached
-      integer :: i
+      real(kind=ki) :: zero
+      integer :: i, prec
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
@@ -445,7 +438,7 @@ contains
 
 
       !---#[ receive parameters from argument list:[%
-         @for elements olp.parameters shift=2 %]
+         @for elements olp.parameters shift=1 %]
       write(buffer, '(A[% count $_ %],A1,E48.32)') "[% $_ %]", "=", parameters([% index %])
       call parseline(buffer, ierr)
       if(ierr.ne.0) then
@@ -454,12 +447,6 @@ contains
       end if[%
          @end @for %]
       !---#] receive parameters from argument list:[%
-      @end @select %][%
-      @select olp.alphas default=NONE 
-      @case 1 %]
-      !---#[ alpha_s parameter from argument list:
-      gs = sqrt(4.0_ki*pi*parameters(1))
-      !---#[ alpha_s parameter from argument list:[%
       @end @select %]
 
 
@@ -477,14 +464,12 @@ contains
       @if eval cr.amplitudetype ~ "ccTree" %]
       call OLP_color_correlated(vecs,amp);
       ok=.true.[%
-      @else %]
-      call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, ok[%
+      @else 
+      %]call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok[%
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
-      @end @select %][% @if internal OLP_BLHA1%][% @else
-      %], precision_reached=precision_reached[% @end @if
-      %])[%@end @if %][%
+      @end @select %])[%@end @if %][%
       @if extension golem95 %]
       call tear_down_golem95()[%
       @end @if %][%
@@ -495,15 +480,17 @@ contains
       if (ok) then
          !
       else
-         precision_reached=.false.
          !
       end if
       if(present(acc)) then
-        if(precision_reached) then
-           acc=0 ! point stable
-        else
-           acc=1E5_ki ! point did not pass stability test
+         acc=10.0_ki**(-prec) ! point accuracy
+      else
+         if(prec.lt.PSP_chk_th3) then
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
+        acc=1E5_ki ! dummy accuracy which is not used
       end if
 
       [% @if eval cr.amplitudetype ~ "scTree"

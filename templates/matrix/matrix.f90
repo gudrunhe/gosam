@@ -304,9 +304,8 @@ contains
             write(42,'(4x,A10)')"</momenta>"
             write(42,'(2x,A8)')"</event>"
          endif
-         ! Give back a Nan so that point is discarded
-         !      zero = log(1.0_ki)
-         !      amp(2)= 1.0_ki/zero
+      else
+         prec = 16 ! If PSP_check is off, we assume point has double precision
       end if
  end subroutine samplitude
    !---#] subroutine samplitude :
