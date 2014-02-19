@@ -311,7 +311,7 @@ class _TemplateState:
          <... if-option="name" value="value"/>
          <... if-option="name" list="value,value,value..."/>
          <... in-mode="scratch"/>
-         <... if-internal="name" />
+         <... if-internal="name,name,..." [require="all/some/none"] />
       """
 
       l = len(attrs)
@@ -410,16 +410,46 @@ class _TemplateState:
                return option_value in values
 
       if "if-internal" in attrs:
-         option_name = "__%s__" % (attrs["if-internal"].upper())
-         internals = self._getproperty("__INTERNALS__")
-         if option_name in internals:
-            return str(self._getproperty(option_name)).lower() == 'true'
-         else:
-            return False
+         tmpinternals = attrs["if-internal"].split(",")
+         tmpinternals = [ "__%s__" % (i.upper()) for i in tmpinternals ]
 
-      if len(attrs) != 1:
-         raise TemplateXMLError(
-            "Unknown attributes encountered near 'if-internal'")
+         internals = self._getproperty("__INTERNALS__")
+
+         if "required" in attrs:
+            required = attrs["required"]
+            rlen = 2
+         elif len(tmpinternals) == 1:
+            required = "all"
+            rlen = 1
+         else:
+            raise TemlateXMLException(
+               "Attribute 'required' is mandantory if more than one " +
+               "extension is listed in 'if-extension'.")
+
+         if l != rlen:
+            raise TemplateXMLError(
+                  "Unknown attributes encountered near 'if-extension'")
+
+         if required == "all":
+            for i in tmpinternals:
+               if i not in internals or str(self._getproperty(i)).lower() != 'true':
+                  return False
+            return True
+         elif required == "some":
+            for ex in extensions:
+               if i in internals and str(self._getproperty(i)).lower() == 'true':
+                  return True
+            return False
+         elif required == "none":
+            for i in tmpinternals:
+               if i in internals and str(self._getproperty(i)).lower() == 'true':
+                  return False
+            return True
+         else:
+            raise TemplateXMLError(
+                  "Unknown value %r for attribute 'required' " % required +
+                  "near 'if-internal'. " +
+                  "Must be one of: all, some, none.")
 
    def start_except(self, attrs):
       envs = self.stack.pop()
