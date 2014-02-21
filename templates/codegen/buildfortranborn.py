@@ -6,6 +6,7 @@ import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+import tempfile, shutil
 
 config={'parameters' : parameters,
         'kinematics' : kinematics,
@@ -37,7 +38,8 @@ print 'Diagram written in: %s' % 'diagramsl0.f90'
 print '----------------------------------'
 
 txtfile = open(file_name+'.txt','r')
-f90file = open('diagramsl0.f90', 'w')
+tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
+f90file = os.fdopen(tmp_handle,"w")
 datfilename = file_name + '.dat'
 
 # import txt file
@@ -104,5 +106,6 @@ txtfile.close()
 f90file.close()
 ### additional formatting for output files
 
-postformat('diagramsl0.f90')
+postformat(tmpname)
 
+shutil.move(tmpname,'diagramsl0.f90')

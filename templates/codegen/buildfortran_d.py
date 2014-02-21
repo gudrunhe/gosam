@@ -9,6 +9,7 @@ import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+import tempfile, shutil
 
 config={'parameters' : parameters,
         'kinematics' : kinematics,
@@ -78,7 +79,8 @@ loopsize=options.loopsize
 # print '----------------------------------'
 
 txtfile = open(diag_name+'.txt','r')
-f90file = open(diag_name+'.f90', 'w')
+tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
+f90file = os.fdopen(tmp_handle,"w")
 datfilename = diag_name.rstrip('d') + '.dat'
 # import txt file
 txt_lines=[]
@@ -516,5 +518,6 @@ f90file.write('end module     [% process_name asprefix=\_%]'+diag_name+'\n')
 f90file.close()   
 ### additional formatting for output files
 
-postformat(diag_name + '.f90')
+postformat(tmpname)
 
+shutil.move(tmpname,diag_name+'.f90')
