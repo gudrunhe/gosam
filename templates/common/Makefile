@@ -44,7 +44,6 @@ clean:
 	$(Q)rm -f *.o *.mod libgosam_process[% process_name assuffix=\_ %]_common.so
 [% @else %]
 common.a: $(OBJECTS)
-	$(vecho) "-> Creating $@ .."
 	$(Q) ar rs $@ $+
 
 clean:

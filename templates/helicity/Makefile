@@ -190,7 +190,6 @@ libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so: $(OBJEC
 	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -shared -Wl,-rpath="\$ORIGIN/../common" -o $@ $+ 
 [% @else %]
 amplitude[%helicity%].a: $(OBJECTS)
-	$(vecho) "-> Creating $@ .."
 	$(Q) ar rs $@ $+
 [% @end @if %]
 

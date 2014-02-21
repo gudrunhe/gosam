@@ -45,8 +45,7 @@ libgosam_process[% process_name assuffix=\_ %]_matrix.so: $(OBJECTS)
         %] -shared -o $@ $+
 [% @else %]
 matrix.a: $(OBJECTS)
-	$(vecho) "-> Creating $@ .."
-	ar rs $@ $+
+	$(Q) ar rs $@ $+
 [% @end @if %]
 
 $(OBJECTS) test.o:%.o:%.f90
