@@ -9,6 +9,13 @@ include ../../Makefile.conf[%
 include ../Makefile.conf[%
 @end @if %]
 
+[% @if extension shared %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so
+[% @else %]
+compile: source amplitude[%helicity%].a
+[% @end @if %]
+
+-include Makefile.source
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
 @if diagsum %]
@@ -135,11 +142,6 @@ GENERATED_SRC=[%
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
 
-[% @if extension shared %]
-compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so
-[% @else %]
-compile: source amplitude[%helicity%].a
-[% @end @if %]
 
 source:[%
 @if diagsum %]
@@ -155,7 +157,7 @@ endif
 
 [% @for elements topolopy.keep.virt %]
 
-d[%$_%]h[%helicity%]l1:[%
+d[%$_%]h[%helicity%]l1: d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90[%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell mv ../diagrams-1.hh ../diags-1.hh)
@@ -173,12 +175,6 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 endif
 
 [% @end @for %]
-
-$(GENERATED_SRC): %:
-	@if [ -f Makefile.source ]; \
-	then \
-		$(MAKE) $(S) -f Makefile.source "$@"; \
-	fi
 
 $(OBJECTS): %.o: %.f90
 	$(vecho) "-> Compiling $@ .."
@@ -212,6 +208,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'd*h[%helicity%]l[01]c.txt' \
 		-or -name 'd*h[%helicity%]l[01]c.f90' \
 		-or -name 'd*h[%helicity%]l[01]d.txt' \
+		-or -name 'd*h[%helicity%]l[01]d.hh' \
 		-or -name 'd*h[%helicity%]l1d.txt' \
 		-or -name 'd*h[%helicity%]l1d.f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
@@ -224,7 +221,9 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'abbrevd*h[%helicity%].f90' \
 		-or -name 'd*h[%helicity%]l[01].prc' \
 		-or -name 'borndiag.prc' \
-		-or -name 'born.txt' [%
+		-or -name 'born.txt' \
+		-or -name 'born.dat' \
+		-or -name '*-stamp' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \
 		\) -exec rm \{} \;

@@ -57,6 +57,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(FIND) $(FIND_OPT) . \( \
 		-name 'color.f90' \
 		-or -name 'model.f90' \
+		-or -name 'version.f90' \
 		\) -exec rm \{} \;
 endif
 
@@ -64,7 +65,7 @@ $(OBJECTS):%.o:%.f90
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
 
-color.f90 model.f90: source
+version.f90 color.f90 model.f90: source
 
 filelist-source: source
 	echo Makefile > $@

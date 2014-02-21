@@ -70,5 +70,3 @@ color.txt: ../codegen/color.frm
 	@$(FORM) $(FORM_OPT) ../codegen/coloropt.frm[%
 @end @if %]
 
-
-
