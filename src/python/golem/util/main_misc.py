@@ -68,12 +68,6 @@ def generate_process_files(conf, from_scratch=False):
 	# This fills in the defaults where no option is given:
 	for p in golem.properties.properties:
 		props.setProperty(str(p), conf.getProperty(p))
-		if conf.getProperty(p):
-			conf.setProperty(str(p), conf.getProperty(p))
-
-	extensions = golem.properties.getExtensions(conf)
-	if not conf["extensions"]:
-		conf["extensions"]=props["extensions"]
 
 	golem.properties.setInternals(conf)
 
@@ -243,6 +237,9 @@ def write_template_file(fname, defaults, format=None):
 	for prop in golem.properties.properties:
 		if prop.isExperimental():
 			continue
+		if prop.isHidden():
+			continue
+
 
 		if prop.getType() == str:
 			stype = "text"
@@ -436,8 +433,38 @@ def workflow(conf):
 	conf.setProperty("user.setup", buf.getvalue())
 	buf.close()
 
+	# properties will be filled later:
+	props = golem.util.config.Properties()
 
-	# Check if path exists. If it doesn't, raise an exception
+	experimentals = map(str,
+			filter(lambda p: p.isExperimental(), golem.properties.properties))
+	for name in conf:
+		if name in experimentals:
+			warning(
+				("Your configuration sets the property %r " % name) +
+				"which is an undocumented and only partially tested feature.",
+				"Please, feel free to test this feature but be aware that",
+				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
+
+
+	# This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		if conf.getProperty(p):
+			conf.setProperty(str(p), conf.getProperty(p))
+
+	if not conf["extensions"] and props["extensions"]:
+		conf["extensions"]=props["extensions"]
+
+	tmp_ext = golem.properties.getExtensions(conf)
+
+	for p in conf["reduction_programs"].split(","):
+		if not p in tmp_ext:
+			if conf["gosam-auto-reduction.extensions"]:
+				conf["gosam-auto-reduction.extensions"] = p + "," + conf["gosam-auto-reduction.extensions"]
+			else:
+				conf["gosam-auto-reduction.extensions"]  = p
+
+	# Check if path exists. If it doesn't, try to create it
 	if not os.path.exists(path):
 		try:
 			rp=os.path.relpath(path)
@@ -489,7 +516,9 @@ def workflow(conf):
 					"Please, make sure that at least one of the following",
 					"is added to 'extensions':",
 					", ".join(golem.properties.REDUCTION_EXTENSIONS),)
-			conf["gosam-auto.extensions"] = "samurai"
+			conf["gosam-auto-reduction.extensions"] = "samurai"
+	if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
+			conf["gosam-auto-reduction.extensions"]=""
 
 	if len(ini) > 2:
 		warning("You specified a process with %d incoming particles." %
@@ -500,38 +529,52 @@ def workflow(conf):
 				"",
 				"====== BUT WE DON'T GUARANTEE FOR ANYTHING! =====")
 
-	experimentals = map(str,
-			filter(lambda p: p.isExperimental(), golem.properties.properties))
-	for name in conf:
-		if name in experimentals:
-			warning(
-				("Your configuration sets the property %r " % name) +
-				"which is an undocumented and only partially tested feature.",
-				"Please, feel free to test this feature but be aware that",
-				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
-
-	# We need to put out an error if we specify formopt and some other extensions
+	# retrive final extensions from other options
 	ext = golem.properties.getExtensions(conf)
 
+	if "noformopt" not in ext:
+		ext.append("formopt")
+	if "noderive" not in ext:
+		ext.append("derive")
+
+	if conf["regularisation_scheme"]=="dred" and not "dred" in ext:
+		ext.append("dred")
+	if conf["regularisation_scheme"]=="cdr" and "dred" in ext:
+		ext.remove("dred")
+
+	if "cdr" in ext and "dred" in ext:
+		warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
+		ext.remove("dred")
+
+
+	# We need to put out an error if we specify formopt and some other extensions
 	if 'formopt' in ext:
-		warning("You are Optimizing with Form. This is under development. \n"
-				"Please use Form version >= 4.0. \n ")
 		if 'topolynomial' in ext:
 			raise GolemConfigError(
-						"Your configuaration has select the extension 'topolynomial' \n" 
+						"Your configuaration has select the extension 'topolynomial' \n"
 						"and optimization by FORM 'formopt'. " +
 						"The two options are not compatible. \nPlease change your input " +
-						"card and re-run.")
+						"card (remove topolynomial or add noformopt) and re-run.")
 		if 'r2_only' in ext:
 			raise GolemConfigError(
-						"r2 only not supported with extension formopt\n")
+						"r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
 		if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
 			raise GolemConfigError(
-						"extension formopt only supported with abbrev.level=diagram\n")
+						"formopt only supported with abbrev.level=diagram\n")
 	if ('ninja' in ext) and ('formopt' not in ext):
 		raise GolemConfigError(
-			"Extension ninja is only supported with extension formopt\n" +
-			"Please either add formopt or remove ninja in the input card\n")
+			"The ninja reduction method is only supported with formopt.\n" +
+			"Please either remove noformopt or ninja in the input card\n")
+
+	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
+	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
+
+	if "shared" in ext:
+		conf["shared.fcflags"]="-fPIC"
+		conf["shared.ldflags"]="-fPIC"
+
+	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in  ext:
+		ext.add("numpolvec")
 
 
 	for prop in golem.properties.properties:
@@ -539,6 +582,7 @@ def workflow(conf):
 		if len(lines) > 0:
 			warning(*lines)
 
+	conf["extensions"] = ext
 
 	# the following commands will need to import 'model.py'
 	# here we create it:

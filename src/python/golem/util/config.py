@@ -39,7 +39,7 @@ class Property:
    without affecting the source code in many places.
    """
    def __init__(self, name, description, type=str, default=None,
-         experimental=False, options=None, sep=None):
+         experimental=False, options=None, sep=None, hidden=False):
       """
       Note, in the case of type=list sep encodes the
       delimiter character (';' or ',') with if sep=None
@@ -52,6 +52,7 @@ class Property:
       self._experimental = experimental
       self._options = options
       self._sep = sep
+      self._hidden = hidden
 
    def _guess_correct(self, options, *given):
       result = []
@@ -138,6 +139,10 @@ class Property:
 
    def isExperimental(self):
       return self._experimental
+
+   def isHidden(self):
+      return self._hidden
+
 
    def getName(self):
       return self._name
@@ -350,9 +355,11 @@ class Properties:
 
       if properties is not None:
          for propty in properties:
+            key = str(propty)
+            if propty.isHidden():
+               continue
             format_comment(propty)
 
-            key = str(propty)
             if key in keys:
                stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
                keys.remove(key)

@@ -15,6 +15,7 @@
    integer, parameter :: SAMURAI = 0
    integer, parameter :: GOLEM95 = 1
    integer, parameter :: NINJA   = 2
+   integer, parameter :: PJFRY   = 3 ! experimental
    ! Reduction methods
    integer :: reduction_interoperation = [%
    @select reduction_interoperation default="-1"
@@ -24,10 +25,12 @@
          @if extension samurai %]SAMURAI[%
          @else %][%
             @if extension golem95 %]GOLEM95[%
+             @else%][%@if extension pjfry  %]PJFRY[%
+              @else%]-1[%@end @if%][%
             @end @if %][%
          @end @if %][%
       @end @if %][%
-   @else %][% -1 %][%
+   @else %]-1[%
    @end @select %]
    ! Rescue reduction method. The rescue system is disabled
    ! if it is equal to reduction_interoperation
@@ -43,13 +46,15 @@
                  @if extension samurai %]SAMURAI[%
                  @else %][%
                     @if extension golem95 %]GOLEM95[%
+                     @else%][%@if extension pjfry  %]PJFRY[%
+                         @else %]-1[%@end @if%][%
                     @end @if %][%
                  @end @if %][%
               @end @if %][%
-           @else %][% -1 %][%
+           @else %]-1[%
            @end @select %][%
       @end @if %][%
-   @else %][% -1 %][%
+   @else %]-1[%
    @end @select %]
 
    ! Debugging settings
