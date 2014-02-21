@@ -514,6 +514,10 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @else %]without[%
       @end @if %] support for Samurai."
       print*, "* This code was generated [%
+      @if extension ninja %]with[%
+      @else %]without[%
+      @end @if %] support for Ninja."
+      print*, "* This code was generated [%
       @if extension golem95 %]with[%
       @else %]without[%
       @end @if %] support for Golem95."[%
