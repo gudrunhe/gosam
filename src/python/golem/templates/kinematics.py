@@ -88,15 +88,20 @@ class KinematicsTemplate(golem.util.parser.Template):
              self._charge.append(-charge*sign)
            elif p.getField().lower()=='d' or p.getField().lower()=='s' or p.getField().lower()=='b':
 	     self._charge.append(charge*sign)
+	   elif p.getPDGCode()==24:
+	     self._charge.append(-charge*sign)
 	   else:
-	     self._charge.append(charge*sign)
+	     self._charge.append(charge*sign)	     
          else:
 	   if p.getField().lower()=='ubar' or p.getField().lower()=='cbar' or p.getField().lower()=='tbar':
              self._charge.append(charge*sign)
            elif p.getField().lower()=='dbar' or p.getField().lower()=='sbar' or p.getField().lower()=='bbar':
 	     self._charge.append(-charge*sign)
+	   elif p.getPDGCode()==-24:
+	     self._charge.append(-charge*sign)
 	   else:
-	     self._charge.append(-charge*sign)	   
+	     self._charge.append(-charge*sign)	 
+	   
 
 
          self._lightlike.append(not p.isMassive(zeroes))

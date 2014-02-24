@@ -20,7 +20,7 @@
    real(ki), parameter :: pi = &
    & 3.1415926535897932384626433832795028841971693993751_ki
 
-   private :: V_SING, GAMMA_F, GAMMA_A
+   private :: V_SING, V_SING_QED, GAMMA_F, GAMMA_A
    private :: I_ff, I_if, I_ii, I_ii_qed, I_if_qed, I_ff_qed
 contains
    function insertion_operator(mu_sq, vec, I, J)
@@ -476,11 +476,11 @@ contains
 
       if (flag) then
               ncs=1.0_ki
-              term = V_SING(s_ja, [%
+              term = V_SING_QED(s_ja, [%
               @if is_massive_j %][% mass_j %][%
               @else %]0.0_ki[% 
               @end @if %], 0.0_ki)
-              term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki)
+              term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki/9.0_ki)
               term(1) = term(1) + log_s * term(2)
 
               I_if_qed(:,:,1) = I_if_qed(:,:,1) + term(1) * matrix(:,:)
@@ -496,11 +496,11 @@ contains
 
       if (flag) then
               ncs=1.0_ki
-              term = V_SING(s_ja, [%
+              term = V_SING_QED(s_ja, [%
               @if is_massive_j %][% mass_j %][%
               @else %]0.0_ki[% 
               @end @if %], 0.0_ki)
-              term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki)
+              term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki/9.0_ki)
               term(1) = term(1) + log_s * term(2)
 
               I_if_qed(:,:,1) = I_if_qed(:,:,1) + term(1) * matrix(:,:)
@@ -551,9 +551,9 @@ contains
 
               ncs=1.0_ki
 
-              term(1) = ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(1) = (3.0_ki/2.0_ki*term(1) + log_s * term(2) )
+              term(1) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(1) = term(1)*(3.0_ki/2.0_ki + log_s )
 
               I_ii_qed(:,:,1) = I_ii_qed(:,:,1) + term(1) * matrix(:,:)
               I_ii_qed(:,:,2) = I_ii_qed(:,:,2) + term(2) * matrix(:,:)
@@ -570,9 +570,9 @@ contains
                
               ncs=1.0_ki
 
-              term(1) = ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(1) = (3.0_ki/2.0_ki*term(1) + log_s * term(2) )
+              term(1) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(1) = term(1)*(3.0_ki/2.0_ki + log_s )
 
               I_ii_qed(:,:,1) = I_ii_qed(:,:,1) + term(1) * matrix(:,:)
               I_ii_qed(:,:,2) = I_ii_qed(:,:,2) + term(2) * matrix(:,:)
@@ -621,6 +621,43 @@ contains
               end if
       end if
    end  function V_SING
+
+   function V_SING_QED(s_jk, m_j, m_k)
+      implicit none
+      real(ki), intent(in) :: s_jk, m_j, m_k
+      real(ki), dimension(2) :: V_SING_QED
+
+      real(ki) :: Q_jk, v_jk, rho, mu1_2, mu2_2, m1_2, m2_2
+
+      m1_2  = m_j*m_j
+      m2_2  = m_k*m_k
+
+      if (m_j .gt. 0.0_ki) then
+               if(m_k .gt. 0.0_ki) then
+                      Q_jk  = s_jk + m1_2 + m2_2
+                      mu1_2 = m1_2 / Q_jk
+                      mu2_2 = m2_2 / Q_jk
+                      v_jk  = sqrt(lambda(1.0_ki, mu1_2, mu2_2)) &
+                            &      / (1.0_ki - mu1_2 - mu2_2)
+                      rho   = sqrt((1.0_ki - v_jk)/(1.0_ki + v_jk))
+                      ! (6.20), case 1, both massive
+                      V_SING_QED(1) = log(rho)/v_jk
+                      V_SING_QED(2) = 0.0_ki
+               else
+                       V_SING_QED(1) = 0.5_ki * (5.0_ki/2.0_ki+log(m1_2/s_jk))
+                       V_SING_QED(2) = 0.5_ki
+               end if
+      else
+              if(m_k .gt. 0.0_ki) then
+                      V_SING_QED(1) = 0.5_ki * (5.0_ki/2.0_ki +log(m2_2/s_jk))
+                      V_SING_QED(2) = 0.5_ki
+              else
+                      V_SING_QED(1) = 0.0_ki
+                      V_SING_QED(2) = 1.0_ki
+              end if
+      end if
+   end  function V_SING_QED
+
 
    function GAMMA_A()
       ! Equation (6.27)
