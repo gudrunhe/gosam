@@ -71,6 +71,23 @@ class KinematicsTemplate(golem.util.parser.Template):
          if ":" in crossing:
             pos = crossing.index(":")
             self._crossings.append(crossing[:pos].strip())
+            
+      def get_qed_sign(pdg,sign):
+	if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
+	  qed_sign=1
+	elif (pdg>0 and pdg<20 and sign <0) or (pdg<0 and pdg>-20 and sign>0):
+	  qed_sign=-1
+	elif pdg==24:
+	  qed_sign=-1
+	elif pdg==-24:
+	  qed_sign=1
+	else:
+	  qed_sign=0
+	
+	return qed_sign
+	  
+	
+	
 
       def examine_particle(p, sign):
          mass    = p.getMass(zeroes)
@@ -79,28 +96,31 @@ class KinematicsTemplate(golem.util.parser.Template):
          acolor  = p.getColor()
          latex   = p.getLaTeXName()
          charge  = p.getCharge()
-         
-
+        
          self._masses.append(mass)
          self._latex.append(latex)
-         if p.getPDGCode() > 0:
-	   if p.getField().lower()=='u' or p.getField().lower()=='c' or p.getField().lower()=='t':
-             self._charge.append(-charge*sign)
-           elif p.getField().lower()=='d' or p.getField().lower()=='s' or p.getField().lower()=='b':
-	     self._charge.append(charge*sign)
-	   elif p.getPDGCode()==24:
-	     self._charge.append(-charge*sign)
-	   else:
-	     self._charge.append(charge*sign)	     
-         else:
-	   if p.getField().lower()=='ubar' or p.getField().lower()=='cbar' or p.getField().lower()=='tbar':
-             self._charge.append(charge*sign)
-           elif p.getField().lower()=='dbar' or p.getField().lower()=='sbar' or p.getField().lower()=='bbar':
-	     self._charge.append(-charge*sign)
-	   elif p.getPDGCode()==-24:
-	     self._charge.append(-charge*sign)
-	   else:
-	     self._charge.append(-charge*sign)	 
+         
+         qed_sign=get_qed_sign(p.getPDGCode(),sign)
+         self._charge.append(qed_sign*charge)
+         #print 'p', p
+         #if p.getPDGCode() > 0:
+	   #if p.getField().lower()=='u' or p.getField().lower()=='c' or p.getField().lower()=='t':
+             #self._charge.append(-charge*sign)
+           #elif p.getField().lower()=='d' or p.getField().lower()=='s' or p.getField().lower()=='b':
+	     #self._charge.append(charge*sign)
+	   #elif p.getPDGCode()==24:
+	     #self._charge.append(-charge*sign)
+	   #else:
+	     #self._charge.append(charge*sign)	     
+         #else:
+	   #if p.getField().lower()=='ubar' or p.getField().lower()=='cbar' or p.getField().lower()=='tbar':
+             #self._charge.append(charge*sign)
+           #elif p.getField().lower()=='dbar' or p.getField().lower()=='sbar' or p.getField().lower()=='bbar':
+	     #self._charge.append(-charge*sign)
+	   #elif p.getPDGCode()==-24:
+	     #self._charge.append(-charge*sign)
+	   #else:
+	     #self._charge.append(-charge*sign)	 
 	   
 
 

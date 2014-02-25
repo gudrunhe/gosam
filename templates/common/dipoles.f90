@@ -401,11 +401,11 @@ contains
       if (flag) then
               ncs=1.0_ki
 
-              term = V_SING(s_jk, real([% mass1 %], ki), real([% mass2%], ki))
-              term(1) = (term(1) + log_s * term(2) ) * ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(2) = term(2)* ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              I_ff_qed(:,:,1) = I_ff_qed(:,:,1) + term(1) * matrix(:,:)
-              I_ff_qed(:,:,2) = I_ff_qed(:,:,2) + term(2) * matrix(:,:)
+              term = V_SING_QED(s_jk, real([% mass1 %], ki), real([% mass2%], ki))
+              term(1) = (term(1) + log_s * term(2) ) * ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(2) = term(2)* ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              I_ff_qed(:,:,1) = I_ff_qed(:,:,1) - term(1) * matrix(:,:)
+              I_ff_qed(:,:,2) = I_ff_qed(:,:,2) - term(2) * matrix(:,:)
       end if
 
       ! T[% index2 %].T[% index1 %]/T[% index2 %]^2
@@ -418,11 +418,11 @@ contains
       if (flag) then
               ncs=1.0_ki
 
-              term = V_SING(s_jk, real([% mass1 %], ki), real([% mass2%], ki))
-              term(1) = (term(1) + log_s * term(2) ) * ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              term(2) = term(2)* ncs*([%charge1%]_ki)*([%charge2%]_ki)
-              I_ff_qed(:,:,1) = I_ff_qed(:,:,1) + term(1) * matrix(:,:)
-              I_ff_qed(:,:,2) = I_ff_qed(:,:,2) + term(2) * matrix(:,:)
+              term = V_SING_QED(s_jk, real([% mass1 %], ki), real([% mass2%], ki))
+              term(1) = (term(1) + log_s * term(2) ) * ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              term(2) = term(2)* ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
+              I_ff_qed(:,:,1) = I_ff_qed(:,:,1) - term(1) * matrix(:,:)
+              I_ff_qed(:,:,2) = I_ff_qed(:,:,2) - term(2) * matrix(:,:)
       end if
 [% @end @for %]
    end  function I_ff_qed
@@ -483,8 +483,8 @@ contains
               term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki/9.0_ki)
               term(1) = term(1) + log_s * term(2)
 
-              I_if_qed(:,:,1) = I_if_qed(:,:,1) + term(1) * matrix(:,:)
-              I_if_qed(:,:,2) = I_if_qed(:,:,2) + term(2) * matrix(:,:)
+              I_if_qed(:,:,1) = I_if_qed(:,:,1) - term(1) * matrix(:,:)
+              I_if_qed(:,:,2) = I_if_qed(:,:,2) - term(2) * matrix(:,:)
       end if
 
       ! T[% index_a %].T[% index_j %]/T[% index_a %]^2
@@ -503,8 +503,8 @@ contains
               term=term*ncs*([%charge_a%]_ki)*([%charge_j%]_ki/9.0_ki)
               term(1) = term(1) + log_s * term(2)
 
-              I_if_qed(:,:,1) = I_if_qed(:,:,1) + term(1) * matrix(:,:)
-              I_if_qed(:,:,2) = I_if_qed(:,:,2) + term(2) * matrix(:,:)
+              I_if_qed(:,:,1) = I_if_qed(:,:,1) - term(1) * matrix(:,:)
+              I_if_qed(:,:,2) = I_if_qed(:,:,2) - term(2) * matrix(:,:)
       end if[%
      @end @for %][%
   @end @if is_massive %][%
@@ -555,8 +555,8 @@ contains
               term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
               term(1) = term(1)*(3.0_ki/2.0_ki + log_s )
 
-              I_ii_qed(:,:,1) = I_ii_qed(:,:,1) + term(1) * matrix(:,:)
-              I_ii_qed(:,:,2) = I_ii_qed(:,:,2) + term(2) * matrix(:,:)
+              I_ii_qed(:,:,1) = I_ii_qed(:,:,1) - term(1) * matrix(:,:)
+              I_ii_qed(:,:,2) = I_ii_qed(:,:,2) - term(2) * matrix(:,:)
       end if
 
       ! T[% index2 %].T[% index1 %]/T[% index2 %]^2
@@ -574,8 +574,8 @@ contains
               term(2) = ncs*([%charge1%]_ki)*([%charge2%]_ki)/9.0_ki
               term(1) = term(1)*(3.0_ki/2.0_ki + log_s )
 
-              I_ii_qed(:,:,1) = I_ii_qed(:,:,1) + term(1) * matrix(:,:)
-              I_ii_qed(:,:,2) = I_ii_qed(:,:,2) + term(2) * matrix(:,:)
+              I_ii_qed(:,:,1) = I_ii_qed(:,:,1) - term(1) * matrix(:,:)
+              I_ii_qed(:,:,2) = I_ii_qed(:,:,2) - term(2) * matrix(:,:)
       end if
 [% @end @for %]
    end  function I_ii_qed
@@ -652,7 +652,7 @@ contains
                       V_SING_QED(1) = 0.5_ki * (5.0_ki/2.0_ki +log(m2_2/s_jk))
                       V_SING_QED(2) = 0.5_ki
               else
-                      V_SING_QED(1) = 0.0_ki
+                      V_SING_QED(1) = 3.0_ki/2.0_ki
                       V_SING_QED(2) = 1.0_ki
               end if
       end if
