@@ -103,19 +103,10 @@ class ModelTemplate(Template):
 			golem.model.MODEL_OPTIONS["ewchoose"] = False
 
 		ones = conf.getProperty(golem.properties.one)
-		if "e" in ones:
-			props.setProperty("e_not_one", False)
-		else:
-			props.setProperty("e_not_one", True)
-		if "gs" in ones:
-			props.setProperty("gs_not_one", False)
-		else:
-			props.setProperty("gs_not_one", True)
-		if "alpha" in ones:
-			props.setProperty("alpha_not_one", False)
-		else:
-			props.setProperty("alpha_not_one", True)
 
+		props.setProperty("e_not_one", not "e" in ones)
+		props.setProperty("gs_not_one", not "gs" in ones)
+		props.setProperty("alpha_not_one", not "alpha" in ones)
 
 	def add_kinematics_parameters(self, in_particles, out_particles):
 
