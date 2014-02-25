@@ -9,7 +9,6 @@ order=QCD, 0, 2
 
 model=sm
 
-qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=chord[U,S,C,B,0,0];\\n\\\ntrue=iprop[H,chi,0,0];
 
 helicities=[dD=+-]D[+-][+-]
@@ -17,9 +16,7 @@ helicities=[dD=+-]D[+-][+-]
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT,me
 
-# We add golem95 already here in order to have it ready in the
-# file ngolem/config.sh
-extensions=golem95, dred
-
 reference-vectors=3:2,4:2
 debug=all
+
+reduction_programs=golem95

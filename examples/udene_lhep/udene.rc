@@ -15,7 +15,6 @@ order=QCD, 0, 2
 qgraf.verbatim=\
 true=bridge[part24,anti24,1,100];
 
-qgraf.options=onshell,notadpole,nosnail
 
 model=../model/Standard_Model_LanHep, 4
 
@@ -24,6 +23,5 @@ one=mdlEE, mdlGG
 # There's only one non-zero helicity
 helicities=+--+
 
-# no default extensions
-extensions=
+regularisation_scheme=cdr
 #extensions=fr5

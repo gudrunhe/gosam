@@ -7,12 +7,9 @@ out=6,-6
 
 order=QCD, 2, 4
 
-qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=chord[U,S,C,B,0,0];
 
 helicities=[dD=+-]D[+-][+-]
 
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT
-
-extensions=dred

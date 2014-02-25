@@ -11,13 +11,9 @@ order=QCD, 2, 4
 qgraf.verbatim=\
 true=iprop[U,D,S,C,B,T,0,0];
 
-qgraf.options=onshell,notadpole,nosnail
 
 one=gs,e
 
 helicities=++++
 
-extensions=dred
-
-abbrev.level=group
 filter.nlo= lambda d: not d.isScaleless()

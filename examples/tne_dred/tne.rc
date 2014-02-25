@@ -17,5 +17,3 @@ qgraf.options=onshell,nosnail,notadpole
 qgraf.verbatim=\\\n\
      true = iprop[phim,phip,chi,H,0,0];\\n\\\n\
      true = iprop[Wp,1,1];
-
-extensions=dred
