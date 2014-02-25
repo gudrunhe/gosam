@@ -202,9 +202,9 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(Q)$(FIND) $(FIND_OPT) . \( \
 		-name 'd*h[%helicity%]l[01].f90' \
 		-or -name 'd*h[%helicity%]l[01]fr5.f90' \
-		-or -name 'd*h[%helicity%]l[01].txt' \
-		-or -name 'd*h[%helicity%]l1[23d].txt' \
-		-or -name 'd*h[%helicity%]l1[23d].f90' \
+		-or -name 'd*h[%helicity%]l[014]*.txt' \
+		-or -name 'd*h[%helicity%]l1[123dmu]*.txt' \
+		-or -name 'd*h[%helicity%]l1[123dmu]*.f90' \
 		-or -name 'd*h[%helicity%]l[01]c.txt' \
 		-or -name 'd*h[%helicity%]l[01]c.f90' \
 		-or -name 'd*h[%helicity%]l[01]d.txt' \
