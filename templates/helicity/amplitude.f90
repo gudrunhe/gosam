@@ -329,8 +329,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension samurai %]
    complex(ki_sam), dimension(-2:0) :: tot
    complex(ki_sam) :: totr
-   logical :: samurai_ok[%
-      @end @if %]
+   logical :: samurai_ok[% @else
+     %][% @if extension ninja %]
+   complex(ki_nin), dimension(-2:0) :: tot
+   complex(ki_nin) :: totr[%
+      @end @if %][% @end @if %]
 
    if(debug_nlo_diagrams) then
       write(logfile,*) "<diagram-group index='[% grp %]'>"
@@ -367,8 +370,8 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @if generate_lo_diagrams %]
       samplitude(:) = 2.0_ki * real(tot(:), ki)[%
          @else %]
-      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-         @end @if %][% 
+      samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
+         @end @if %][%
       @end @if %][%
          @if extension pjfry %]
    case(3) ! use PJFry only

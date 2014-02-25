@@ -27,12 +27,13 @@
 
    public :: square
    public :: inspect_lo_diagram
+   public :: metric_tensor
    public :: cond[%
 @if extension ninja %]
    public :: cond_t[%
 @end @if %][%
 @if extension samurai %]
-   public :: cmplx_sam, cmplx_ki, metric_tensor[%
+   public :: cmplx_sam, cmplx_ki[%
 @end @if %]
 contains
    pure function metric_tensor(mu,nu) result(d)
