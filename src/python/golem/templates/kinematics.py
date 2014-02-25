@@ -102,7 +102,6 @@ class KinematicsTemplate(golem.util.parser.Template):
          
          qed_sign=get_qed_sign(p.getPDGCode(),sign)
          self._charge.append(qed_sign*charge)
-         #print 'p', p
          #if p.getPDGCode() > 0:
 	   #if p.getField().lower()=='u' or p.getField().lower()=='c' or p.getField().lower()=='t':
              #self._charge.append(-charge*sign)
