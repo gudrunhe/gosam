@@ -7,12 +7,11 @@
 
 \input lstform
 \input lstolp
-\newcommand{\golemversion}{{1{.}0}}
-\newcommand{\golem}{{\tt GoSam}\xspace}
-%\newcommand{\golemv}[1][\golemversion]{{{\tt Golem}~\golemversion}\xspace}
-\newcommand{\golemv}[1][\golemversion]{{\tt GoSam}\xspace}
-\newcommand{\golemVC}{{\tt golem95}\xspace}
-\newcommand{\packagename}{{gosam-\golemversion}}
+\newcommand{\gosamversion}{{2{.}0}}
+\newcommand{\gosam}{{\sc GoSam}\xspace}
+\newcommand{\gosamv}[1][\gosamversion]{{\sc GoSam}\xspace}
+\newcommand{\golemVC}{{\tt golem95C}\xspace}
+\newcommand{\packagename}{{gosam-\gosamversion}}
 \newcommand{\hepforge}{{\sc HepForge}\xspace}
 
 \newcommand{\qgraf}{{\tt QGraf}\xspace}
@@ -23,121 +22,296 @@
 \newcommand{\pjfry}{{\tt PJFry}\xspace}
 \newcommand{\haggies}{{\tt haggies}\xspace}
 \newcommand{\samurai}{{\sc Samurai}\xspace}
+\newcommand{\ninja}{{\sc Ninja}\xspace}
 
 \newcommand{\contl}{{\ensuremath{\hookrightarrow}}}
 \newcommand{\fmslash}[1]{{#1}\!\!\!/}
 \newcommand{\pslash}[1][{}]{\ensuremath{\fmslash{p}_{#1}}}
 \newcommand{\kslash}[1][{}]{\ensuremath{\fmslash{k}_{#1}}}
+\newcommand{\bea}{\begin{eqnarray*}}
+\newcommand{\eea}{\end{eqnarray*}\noindent}
+\newcommand{\bcen}{\begin{center}}
+\newcommand{\ecen}{\end{center}}
+\newcommand{\nn}{\nonumber}
+\def\eps{\epsilon}
 
-\title{\golemv Manual}
+\title{{\sc GoSam}\,2.0 Manual}
 \author{The GoSam Collaboration}
 \date{Version \today}
 
 \begin{document}
 \hypersetup{%
 	pdfborder={0 0 0},%
-	pdftitle={GoSam \golemversion{} Manual},%
-	pdfauthor={Thomas Reiter, The GoSam Collaboration},%
+	pdftitle={GoSam \gosamversion{} Manual},%
+	pdfauthor={The GoSam Collaboration},%
 	pdfsubject={High Energy Physics/Higher Order Corrections},%
 	pdfkeywords={NLO, automatization},%
-	pdfdisplaydoctitle
+	%pdfdisplaydoctitle
 }
+
+
 
 \begin{fullpage}
 \maketitle
 \tableofcontents
 \end{fullpage}
 
+
 \chapter{Introduction}
 \section{Synopsis}
-\golemv is a general one-loop evaluator for matrix elements.
-The program produces \fortranXC code from a given process
-description by evaluating Feynman diagrams and translating
-the associated one-loop diagrams into a numerical representation
-of the numerator such that it can be evaluated and reduced
-numerically with either
-the \golemVC library~\cite{Golem95:2008,Cullen:2011kv}
-or \samurai~\cite{Mastrolia:2010nb}
-or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
+\gosamv is a program package for the automated generation and evaluation of one-loop amplitudes.
+It can also produce spin-and colour correlated tree amplitudes.
+The program produces \fortranXC code for a given process
+by generating Feynman diagrams and translating
+the corresponding one-loop expressions into a form where the integrand
+can be reduced and evaluated numerically with either
+\samurai~\cite{Mastrolia:2010nb} or 
+\golemVC~\cite{Golem95:2008,Cullen:2011kv}
+or \ninja~\cite{Mastrolia:2012bu,vanDeurzen:2013saa}.
+%or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
+
+
 
 \section{Conventions}
-In this manual, shell commands are indicated
-by lines starting with a dollar sign (\texttt{\$})
-and are given for the \texttt{bash} shell only.
+In this manual, shell commands 
+(for the {\tt bash} shell) are indicated
+by lines starting with a dollar sign {\tt \$}.
 Lines that are broken for type setting reasons and should
 continue the previous line(s) start with a \contl.
 
-\python program fragments are denoted by the `\texttt{>>>}' and
-`\texttt{...}' (for continuation lines) prompts.
+\python program fragments are denoted by the `\texttt{>>>}' 
+prompts, with 
+`\texttt{...}' for continuation lines.
 
-\chapter{Setup}
+\chapter{Download and Installation}
 \section{Prerequisites}
-The generation of matrix element code using \golemv can be understood
-as a three step process, although the three steps are not necessarily
-obvious to the user. In principle, each step could be run on a different
-machine and the programs listed below only need to be available during
-the respective step.
+
+The distribution of \gosam-\gosamversion{}, together with the install script, 
+will provide all external and auxiliary programs which are necessary 
+to successfully run \gosam. 
+Therefore, the user does not have to install any external programs manually.
+
+The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
+The system requirements are
+\python~($\geq2.6$), 
+a {\tt fortran} compiler (gfortran or ifort), 
+a C/C++ compiler (gcc/icc). 
+By default, \gosam uses the gfortran/gcc  compilers from the GNU Compiler Suite.
+To use an Intel compiler  (ifort/icc), the {\tt --intel} option can be used.
+Specific paths to the compilers can be provided using the {\tt --fc, --cc, --cxx}  options.
+
+
+\section{Download}
+
+The \gosam-\gosamversion{} source code 
+will be downloaded automatically by the install script {\tt gosam\_installer.py}. 
+The install script can be downloaded by \\
+{\$  \tt wget http://gosam.hepforge.org/gosam-installer/gosam\_installer.py}\\
+or by going to the webpage \\
+{\tt http://gosam.hepforge.org/}
+and clicking on {\tt installation script}.
+
+
+
+The \gosam-\gosamversion{} package can also be downloaded 
+manually either via \texttt{subversion}
+or via  download from the {\sc HepForge} webpage.
+
+\subsection*{HTTP Download}
+At the URL \\
+\url{http://www.hepforge.org/downloads/gosam/}\\
+one can download the package
+\gosam-\gosamversion{}  as a tar-ball. 
+one can unpack it using the command
+\begin{example}
+\$ tar xzvf \packagename{}.tar.gz
+\end{example}
+
+\subsection*{Subversion}
+One can check-out a working copy of the repository with the command
+\begin{example}
+\$ svn co http://svn.hepforge.org/gosam/trunk/ gosam-\gosamversion{}
+\end{example}
+This will create a folder \texttt{gosam-\gosamversion} in your current directory.
+Authenticated users can use 
+\begin{example}
+\$ svn co svn+ssh://svn.hepforge.org/hepforge/svn/\\
+   \contl{}gosam/trunk/ gosam-\gosamversion{}
+\end{example}
+to gain read and write access to the project files.
+
+
+\section{Installation}
+
+The installation of \gosam-\gosamversion{} is very simple when using the installation script.
+The latter can be downloaded by\\
+%\bcen
+\$   {\tt wget  http://gosam.hepforge.org/gosam-installer/}\\
+\contl{}{\tt gosam\_installer.py}
+%\ecen
+By default \gosam{} and the external programs it uses  will be 
+installed into a subfolder {\tt ./local}
+of the current directory. A different path can be specified 
+using the {\tt --prefix=PATH\_where\_to\_install} option.
+
+\noindent To run the script the user should execute the following commands\\
+{\tt \$  chmod +x gosam\_installer.py\\
+     \$  ./gosam\_installer.py     [--prefix=...]
+}\\ 
+ or\\
+{\tt           
+\$ python gosam\_installer.py   [--prefix=...]
+}\\
+Upon installation, the installer will ask some questions, which are described in 
+detail below. To use the default installation all the questions can 
+be ``answered" by hitting the {\tt ENTER} key.
+
+As soon as all questions are answered, the main installation process will start. 
+The components will be downloaded, built and installed. 
+The whole procedure takes about 10-30 minutes.
+
+At the end of the installation process, 
+a script {\tt gosam\_setup\_env.sh} will be created in the
+{\tt bin/} subdirectory of the install location, 
+which will (temporarily) set all environment
+variables, as soon as the script is sourced into a shell 
+(by {\tt source [path]/gosam\_setup\_env.sh}).
+The installer also gives  a recommendation how
+these environment variables can be set permanently.
+The script can be used in all {\tt tcsh}- and {\tt bash}-compatible shells.
+
+All  files which have been installed are tracked in the {\tt installer-log.ini} file.
+Please keep this file and the install script. They are needed to update and
+uninstall \gosam. 
+
+For the default installation, internet access is required.
+
+\subsection{Additional information about the installation process}
+
+Before the installation starts, the installer first checks if a new version of
+the installation script is available on the \gosam webpage,  
+and if this is the case, asks if it is allowed to update the script.
+
+Then the installer searches for existing components (\qgraf,\,{\tt FORM}).
+
+If they are not found, one can either 
+press {\tt ENTER} to have them installed by the script, or provide a path to
+the binary (tab-completion can be used).
+
+If they are found, their version is checked, 
+and if needed the installation
+of a version which has been tested to run with \gosam is suggested.
+
+All files are downloaded to the GoSam subfolder and extracted.
+The build files remain on the system. One can delete the GoSam subfolder after
+the installation. However, as they contain examples (./GoSam/gosam/examples)
+and documentation, this is not recommended.
+
+
+By default, \gosam uses the gfortran/gcc from the GNU Compiler Suite compiler.
+If one wants to use the compiler from Intel (ifort/icc), the --intel option can be used.
+Specific paths to the compilers can be provided using the {\tt --fc, --cc} and 
+{\tt --cxx} option.
+
+All installation options can be listed with the --help flag:\\
+{\tt \$ ./gosam\_installer.py --help}
+
+
+\subsection{Updating an existing installation}
+
+To update an existing installation, the installer can be started again without
+any option. It determines the install location from the {\tt installer-log.ini} file
+which is searched for in the current directory. The script will search 
+online for updates and ask if they should be installed.
+
+Before overwriting or deleting existing files which have been modified by the user, 
+the installer stops. One can use the {\tt -f} flag to force the action.
+
+\subsection{Uninstalling}
+To uninstall \gosam, including the installed auxiliary libraries,
+the installer needs to be started with the {\tt -u} or {\tt --uninstall} flag.
+
+As in the case of updates, the install script searches for the file 
+{\tt installer-log.ini} in the current directory.
+
+Modified files are not deleted. Use the {\tt -f} flag to force the action of
+deleting them.
+
+%In some rare conditions it might be necessary to run the uninstaller twice.
+
+
+
+\section{Description of the components}
+
+
+The generation of matrix element code using \gosamv can be understood
+as a three step process. 
+In principle, each step could be run on a different machine.
+% and the programs listed below only need to be available during the respective step.
 \begin{enumerate}
-\item During the {\bf setup of the process directory} \python
-and \qgraf need to be installed. This phase is initiated by
-running \texttt{gosam.py}
-or any user written \python script of similar functionality.
-\item During the {\bf code generation} only \form and \haggies are run.
+\item  {\bf diagram generation}: \python
+and \qgraf are used. This phase is initiated by
+running \texttt{gosam.py}.
+\item {\bf code generation}: only \form and \haggies are run.
 This phase is initiated by running \texttt{make source}.
-\item During the {\bf compilation and running} of the matrix element
-a \fortranXC compiler and the chosen reduction libraries need to be installed.
-At the level of the matrix element, this phase is initiated
+\item {\bf compilation and running}: 
+a {\tt fortran} compiler and the chosen reduction libraries need to be present.
+This phase is initiated
 by running \texttt{make compile}. Please note that running
 \texttt{make compile} will invoke \texttt{make source} if the latter
-has not been run successfully before that.
+has not been run (successfully) before.
 \end{enumerate}
 
-Before running the \golemv package, Please ensure that
-the following programs are available on your system.
-The numbers indicate during which phase of the code generation
-the tools will be required.
+If you use the \gosamv package, you should be aware that
+the following programs are used.
+(The numbers indicate during which phase of the code generation
+the tools will be required).
 
 \marginlabel{\qgraf (1)} \qgraf~\cite{Nogueira:1991ex}
 is required in version 3{.}1 or
-higher and can be downloaded from
+higher. 
+The install script coming with \gosamv[2] will download and install \qgraf
+automatically.
+It can be also downloaded manually from
 \url{http://cfif.ist.utl.pt/~paulo/qgraf.html}.
 
-\marginlabel{\python (1)} This program has been tested with \python{}
+\marginlabel{\python (1)} The program has been tested with \python{}
 versions 2{.}6, 2{.}7 and 3{.}1.
 %It is currently not guaranteed to work with any other version. 
 %Since \python{} 3{.}x introduces many new
 %language features there might be conflicts which have to be resolved before
 %this program is ready to be run with versions of \python{} 3{.}x.
-Please see also \url{http://python.org}.
+%Please see also \url{http://python.org}.
 
-\marginlabel{\form (2)} You will need \form~\cite{Vermaseren:2000nd}
-version 3{.}3 (build
-11--aug--2010 or later).
-The most recent version is available from
+\marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
+version 4{.}0 or higher is required to profit from all optimisation features.
+\form is also distributed with the \gosam-2.0 package for the user's convenience.
+For manual download, \form is available from
 \url{http://www.nikhef.nl/~form/}.
 
 \marginlabel{\haggies (2)} The code generator \haggies{}~\cite{Reiter:2009ts}
-is included in the \golemv{} distribution already.
+is also included in the \gosamv{} distribution already.
 Alternatively, it can also be obtained separately from the URL
-\url{http://sourceforge.net/projects/haggies/}.
+\url{http://sourceforge.net/projects/haggies/}.\\
 \haggies requires \texttt{Java} in version~1{.}5 or higher.
-The current version of \golemv requires \haggies{} in version 1{.}1 or
-higher.
+%The current version of \gosamv requires \haggies{} in version 1{.}1 or higher.
 
-\marginlabel{\golemVC/\samurai/\pjfry (3)}
+\marginlabel{\ninja/\golemVC/\samurai (3)}
 For one-loop calculations, at least one of these three libraries is
-required. If the program is used for the extraction of the $R_2$ term
-only, the libraries are not required.
+required. 
+%If the program is used for the extraction of the $R_2$ term
+%only, the libraries are not required.\\
+The libraries are already distributed with the code. Alternatively, 
 \begin{itemize}
-\item \golemVC can be downloaded from
+\item \golemVC can be downloaded from\\
 \url{http://projects.hepforge.org/golem/}.
-\item \samurai can be downloaded from
+\item \samurai can be downloaded from\\
 \url{http://projects.hepforge.org/samurai/}.
-\item \pjfry can be obtained via \texttt{git} from
-\url{https://github.com/Vayu/PJFry/}.
+%\item \pjfry can be obtained via \texttt{git} from
+%r\url{https://github.com/Vayu/PJFry/}.
 \end{itemize}
 
-\marginlabel{\texttt{refrep.cls} (3)} The documentation
+\marginlabel{\texttt{refrep.cls} (3)} The generation of documentation (optional)
 is based on the \LaTeX-class \texttt{refrep}, which appears
 not to be in the default installation of all \LaTeX{}
 distributions. It can be downloaded from \url{http://www.ctan.org/}
@@ -147,93 +321,181 @@ which generates some documentation for the matrix element.
 
 \attention Please note that these programs might have
 license policies which are different from the license
-applying to \golemv. The authors of \golem do \emph{not}
+applying to \gosamv. The authors of \gosamv do \emph{not}
 take any responsibility for any problems related to the
 above mentioned software packages.
 
-\section{Download}
-The \golemv{} source code can be downloaded either via \texttt{subversion}
-or via HTTP download.
-
-\subsection{Subversion}
-You can check-out a working copy of the repository with the command
-\begin{example}
-\$ svn co http://svn.hepforge.org/gosam/trunk/ gosam-\golemversion{}
-\end{example}
-This will create a folder \texttt{gosam-\golemversion} in your current directory.
-Authenticated users can use the URL
-\begin{example}
-\$ svn co svn+ssh://svn.hepforge.org/hepforge/svn/\\
-   \contl{}gosam/trunk/ gosam-\golemversion{}
-\end{example}
-to gain read and write access to the project files.
-
-\subsection{HTTP Download}
-Under \url{http://www.hepforge.org/downloads/gosam/}
-you can download the sources of \golemv{} using a web browser or a
-HTTP client like \texttt{wget} or \texttt{curl}.
-If you received \golemv{} as a tar-ball you can unpack it using the command
-\begin{example}
-\$ tar xzvf \packagename{}.tar.gz
-\end{example}
-
-\section{Installation}
-\golemv{} is distributed as a \python package.
-The installation of the source package is done by running
-the setup script. One of the following scenarios will be
-encountered most probably:
-\begin{itemize}
-\item If the \python installation resides in \texttt{/usr} or
-   \texttt{/usr/local}
-   and the user has super-user privileges:
-\begin{example}
-\$ sudo python setup.py install
-\end{example}
-
-\item If the user wants (or has to) maintain an alternative installation
-   path for \python modules. $\mathtt{<XXXX>}$ here denotes the name of the
-   alternative installation tree:
-\begin{example}
-\$ python setup.py install --prefix=<XXXX>
-\end{example}
-   The \texttt{prefix} option can also be permanently set in the
-   user's \texttt{pydistutils} config file\footnote{%
-   On Unix systems and MacOS this file is called
-   \texttt{\$HOME/.pydistutils.cfg}, on Windows it is
-   \texttt{\%HOME\%\textbackslash{}pydistutils.cfg}.} by adding the
-   following lines.
-\begin{example}
-[install]\\
-prefix=<XXXX>
-\end{example}
-   After successful installation the user should also update the
-   environment variable:
-\begin{example}
-PATH=\$PATH:<XXXX>/bin\\
-\end{example}
-
-   For Bourne shell compatible shells (bash, zsh, \dots), the \verb!PATH! environment
-   variable can be permanently changed by adding the following lines to \verb!~/.profile!:
-\begin{example}
-   PATH="\$PATH:<XXXX>/bin"\\
-   export PATH
-\end{example}
-
-   For csh compatible shells (tcsh, \dots), the following line need to be added to \verb!~/.cshrc!:
-\begin{example}
-   setenv PATH "\$PATH:<XXXX>/bin"\\
-\end{example}
 
 
-To enable this environment variables change, you need to run \verb!source ~/.profile! or
-\verb!source ~/.cshrc! and \verb!rehash!, or re-login.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Setup of a Process}
+\section{Introduction}
+\label{chp:setup-of-a-process}
+In order to generate the matrix element for a given process the user should
+create a process specific setup file, which we call {\em process card}. 
 
-\end{itemize}
-%  A more complete tutorial on the installation of \python packages
-%  can be found at \url{http://docs.python.org/install/}.
+The syntax of this file is
+closely related to that of Java \texttt{.properties} files.
+The detailed syntax and a 
+full list of options are given in 
+Appendix~\ref{chp:appendix-template.in}.
+%\seealso{Appendix \ref{chp:appendix-template.in}}
+Here we give a commented example, which should be sufficient to explain the 
+most important features of a {\em process card}. 
+
+
+
+\section{Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
+at NLO in QCD}
+
+It is recommended to generate and modify a template file for the 
+process card instead of
+starting from scratch. This can be done by invoking the shell command
+\begin{example}
+\$ gosam.py --template eett.in
+\end{example}
+This generates the file \texttt{eett.in} with some documentation
+for all defined options. The options are filled with some default values,
+which can be set in a global configuration file.
+The script will search\footnote{in this order} in the \gosamv{} directory,
+in the user's home directory and in the current working directory for a file
+named `\texttt{.gosam}' or `\texttt{gosam.in}'. Such a file can be generated
+with the following command:
+\begin{example}
+\$ gosam-config.py > gosam.in
+\end{example}
+
+In the following brief tutorial it is assumed that the process
+$e^+e^-\rightarrow t\bar{t}$ should be calculated to order
+$\mathcal{O}(\alpha\alpha_s)$ (virtual QCD corrections;
+the tree-level process is of order $\mathcal{O}(\alpha))$. We neglect
+the exchange of a $Z$ or a Higgs boson and treat the electron massless.
+The output directory is assumed to be in the relative path
+\texttt{eett}. 
+We only list the basic setup, detailed explanations of all options 
+can be found in Appendix~\ref{chp:appendix-template.in}.
+
+\begin{lstlisting}[gobble=3,%
+     numbers=left,caption={{\tt eett.in}},%
+     basicstyle=\ttfamily]
+ 1 process_path=eett
+ 2 process_name=eett
+ 3 in=    e+, e-
+ 4 out=   t, t~
+ 5 model= sm
+ 6 order= gs, 0, 2
+ 7 zero=me
+ 8 one=gs,e
+ 9 qgraf.options=nosnails,notadpoles,onshell
+10 qgraf.verbatim=\
+11    true=iprop[Z, 0, 0];\n\
+12    true=iprop[H, 0, 0];
+13 extensions=samurai,numpolvec
+14 samurai.fcflags=path_to_gosam-contrib/include_files
+15 samurai.ldflags=path_to_gosam-contrib/libraries
+\end{lstlisting}
+
+The above lines are discussed one by one. The line numbers on the left
+are only included for better readability and \emph{must not} be included
+in the setup file.
+\begin{enumerate}
+\item[1] The option \texttt{process\_path} specifies the directory
+to which all generated files and directories are written.
+The directory which is specified here must already exist.
+\\Specification of a process path is mandatory.
+\item[2] Setting a process name is optional but recommended. All module
+names will be prefixed with the  process name (e.g. \texttt{precision}
+$\to$ \texttt{eett\_precision}). This will avoid name conflicts if at
+a later stage more than one matrix elements are linked into one
+executable.
+\item[3--4] The options \texttt{in} and \texttt{out} specify the particles
+of the initial and final state. The particle names must be defined in the
+selected model file. As the model files usually define mnemonics for the
+particle names there might be several ways of specifying the same process.
+Instead of `\lstinline[basicstyle=\ttfamily]{e+}'
+one could have written `\lstinline[basicstyle=\ttfamily]{ep}'
+or `\lstinline[basicstyle=\ttfamily]{positron}'.
+\seealso{Appendix~\ref{chp:model-files}}
+For a complete list of
+alternative particle names please refer to the documentation of the
+corresponding model file.
+\\Specifying \texttt{in} and \texttt{out} particles is mandatory.
+\item[5] The option \texttt{model} specifies which model files should
+be used in order to generate and evaluate the diagrams. 
+How to import models in {\tt UFO} or {\tt LanHep} format is described in 
+section \ref{sec:model}.
+%It is only possible to refer to files that are located in
+%\texttt{\$GOLEMPATH/models}.
+\\This option is mandatory.
+\item[6] The option \texttt{order} is a comma separated list with
+three entries. The first entry specifies a symbol that denotes a coupling
+constant. In the Standard Model file \texttt{sm} the only two possibilities
+are `\lstinline[basicstyle=\ttfamily]{gs}' for the strong coupling constant
+$g_s$ and `\lstinline[basicstyle=\ttfamily]{e}' for the electroweak coupling.
+The second number is the power of the chosen coupling constant for the
+tree-level diagrams and the third number specifies the power of that
+coupling constant for the one-loop diagrams.
+\attention Note that the numbers
+refer to the powers in the diagrams of the amplitude
+rather than the squared amplitude. In the above example the
+string `\lstinline[basicstyle=\ttfamily]{gs, 0, 2}' specifies that
+the tree-level diagrams should be of order $g_s^0$ and the one-loop
+diagrams should be of order $g_s^2$ and an unspecified
+power of $e$ in both cases. 
+If there is no tree level, i.e. the process is loop induced, 
+the keyword \texttt{NONE} should be put as second item in the list,
+instead of the tree level power of the coupling.
+
+The value of this option is
+translated into a \texttt{vsum} constraint in the file \texttt{qgraf.dat}.
+\\This option is mandatory.
+\item[7--8] The keywords \texttt{zero} and \texttt{one} specify
+a set of symbols that should be treated as zero (resp. one). These
+simplifications are applied at the symbolical level. Only symbols
+that appear in the \form interface of the model file should be
+specified here (masses, couplings, CKM-matrix elements, etc).
+In the example we specify the electron mass
+`\lstinline[basicstyle=\ttfamily]{me}' to be zero and we do not keep
+the coupling constants in the calculation explicitly ($g_s=e=1$).
+\\These options can be omitted.
+\item[9--12] The option
+\texttt{qgraf.options} creates the line
+`\lstinline[basicstyle=\ttfamily]{options=}\dots;' in the file
+\texttt{qgraf.dat}. The value of the option \texttt{qgraf.verbatim} is
+passed verbatim to the file \texttt{qgraf.dat}.
+In our example we specify that loops of size one and self-energy insertions
+at external lines should be omitted in the graph generation. Lines
+10--12 suppress the generation of diagrams containing Higgs and $Z$ bosons.
+\attention As these commands are passed verbatim to \qgraf no mnemonic names
+are allowed here, e.g. the Higgs particle has to be denoted by
+`\lstinline[basicstyle=\ttfamily]{H}' and cannot be replaced by
+`\lstinline[basicstyle=\ttfamily]{h}'.
+For a complete list of available options, please consult the
+\qgraf manual. For a complete list of particle names see 
+Appendix \ref{sec:model-files:sm} resp. the
+documentation of the model file.
+\\These options can be omitted.
+\item[13] The option \texttt{extensions} contains a list of extensions
+to the core of the program. It should contain at least one of the reduction libraries 
+
+\item[16--17] For each extension one can add options of the form
+\textit{extension}{.}\textit{name}. Currently the program is scanning
+for options of the form \textit{extension}{.}\texttt{ldflags} and
+\textit{extension}{.}\texttt{fcflags}. These options are copied
+to the contens of the according variables (\texttt{FCFLAGS} and
+\texttt{LDFLAGS}) in the makefiles.
+\end{enumerate}
+
+In order to populate the specified process directory with files
+one invokes
+\begin{example}
+\$ gosam.py eett.in
+\end{example}
+
+\section{Process Directory Structure}
 
 \section{Directory Structure}
-The \golemv{} source directory has the structure as described below:
+The \gosamv{} source directory has the structure as described below:
 
 \marginlabel{\texttt{doc/}} This directory contains the documentation
 and example setup files. You can run \texttt{make} in this directory
@@ -243,18 +505,19 @@ are currently reading.
 \marginlabel{\texttt{models/}} For each implemented model this directory
 contains the \qgraf model file (no extension), a \form interface
 (\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
-only the Standard Model (\texttt{sm}) is distributed with \golemv.
+only the Standard Model (\texttt{sm}) is distributed with \gosamv.
 A second version of the Standard Model (\texttt{smdiag}) implements
 diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$)
 The structure of the model files is discussed in more detail in
 Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
-LanHEP~\cite{Semenov:2010qt} and FeynRules/UFO~\cite{Degrande:2011ua}  
+FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
 can be found in the directory 
 \texttt{examples/model/}.
 
 \marginlabel{\texttt{templates/}} Contains templates for the creation
 of the files in the process directory. The contents are transformed
-by the class \texttt{golem.util.parser.Template} and its subclasses
+by the class\\
+\texttt{golem.util.parser.Template} and its subclasses
 in \texttt{golem.templates.*}. The translation of the templates is
 controled by the file \texttt{templates.xml} of the same directory.
 
@@ -282,179 +545,18 @@ please run
 \$ python setup.py --help-commands
 \end{example}
 
-\marginlabel{\texttt{examples}} This directory contains some simple example
-processes for which \golemv{} has been compared to the literature.
+\marginlabel{\texttt{examples}} This directory contains some simple examples
+of validated processes.
 
 \marginlabel{\texttt{olp}} Files in this directory are used by
-\texttt{gosam.py --olp}, which is \golemv's implementation of the
-Les Houches interface for one-loop programs~\cite{Binoth:2010xt}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Setup of a Process}
-\section{Introduction}
-\label{chp:setup-of-a-process}
-This chapter provides a step by step guide how to
-set up a new process. 
-
-In order to generate the matrix element for a given process one has to
-create a process specific setup file, which we call {\em process card}. 
-
-The syntax of this file is
-closely related to that of Java \texttt{.properties} files.
-The detailed syntax and a 
-full list of options are given in 
-Appendix~\ref{chp:appendix-template.in}.
-%\seealso{Appendix \ref{chp:appendix-template.in}}
-Here we first give a commented example, which should be sufficient to explain the 
-most important features of a {\em process card}. 
+\texttt{gosam.py --olp}, which is \gosamv's implementation of the
+Binoth Les Houches interface for one-loop programs (BLHA).
+Both the original standards ~\cite{Binoth:2010xt} and the new standards 
+(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv2.0.
 
 
 
-\section{Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
-at NLO in QCD}
 
-It is recommended to generate and modify a template file for the 
-process card instead of
-starting from scratch. This can be done by invoking the shell command
-\begin{example}
-\$ gosam.py --template eett.in
-\end{example}
-This would generate the file \texttt{eett.in} with some documentation
-for all accepted options. The options are filled with some default values,
-which can be set in a global configuration file.
-The script will search\footnote{in this order} in the \golemv{} directory,
-in the user's home directory and in the current working directory for a file
-named `\texttt{.golem}' or `\texttt{golem.in}'. Such a file can be generated
-with the following command:
-\begin{example}
-\$ golem-config.py > golem.in
-\end{example}
-
-In the following brief tutorial it is assumed that the process
-$e^+e^-\rightarrow t\bar{t}$ should be calculated to order
-$\mathcal{O}(\alpha)\mathcal{O}(\alpha_s)$ (virtual corrections);
-the tree-level process is of order $\mathcal{O}(\alpha)$. We neglect
-the exchange of a $Z$ or a Higgs boson and treat the electron massless.
-The output directory is assumed to be in the relative path
-\texttt{eett}.
-
-\begin{lstlisting}[gobble=3,%
-     numbers=left,caption={{\tt eett.in}},%
-     basicstyle=\ttfamily]
- 1 process_path=eett
- 2 process_name=eett
- 3 in=    e+, e-
- 4 out=   t, t~
- 5 model= sm
- 6 order= gs, 0, 2
- 7 
- 8 qgraf.options=nosnails,notadpoles,onshell
- 9 qgraf.verbatim=\
-10    true=iprop[Z, 0, 0];\n\
-11    true=iprop[H, 0, 0];
-12 zero=me
-13 one=gs,e
-14
-15 extensions=samurai
-16 samurai.fcflags=`pkg-config --cflags samurai`
-17 samurai.ldflags=`pkg-config --libs samurai`
-\end{lstlisting}
-
-The above lines are discussed one by one. The line numbers on the left
-are only included for better readability and \emph{must not} be included
-in the setup file.
-\begin{enumerate}
-\item[1] The option \texttt{process\_path} specifies the directory
-to which all generated files and directories are written.
-The directory which is specified here must already exist.
-\\Specification of a process path is mandatory.
-\item[2] Setting a process name is optional but recommended. All module
-names will be prefixed with the  process name (e.g. \texttt{precision}
-$\to$ \texttt{eett\_precision}). This will avoid name conflicts if at
-a later stage more than one matrix elements are linked into one
-executable.
-\item[3--4] The options \texttt{in} and \texttt{out} specify the particles
-of the initial and final state. The particle names must be defined in the
-selected model file. As the model files usually define mnemonics for the
-particle names there might be several ways of specifying the same process.
-Instead of `\lstinline[basicstyle=\ttfamily]{e+}'
-one could have written `\lstinline[basicstyle=\ttfamily]{ep}'
-or `\lstinline[basicstyle=\ttfamily]{positron}'.
-\seealso{Appendix~\ref{chp:model-files}}
-For a complete list of
-alternative particle names please refer to the documentation of the
-according model file.
-\\Specifying \texttt{in} and \texttt{out} particles is mandatory.
-\item[5] The option \texttt{model} specifies which model files should
-be used in order to generate and evaluate the diagrams. 
-%It is only possible to refer to files that are located in
-%\texttt{\$GOLEMPATH/models}.
-\\This option is mandatory.
-\item[6] The option \texttt{order} is a comma separated list with
-three entries. The first entry specifies a symbol that denotes a coupling
-constant. In the Standard Model file \texttt{sm} the only two possibilities
-are `\lstinline[basicstyle=\ttfamily]{gs}' for the strong coupling constant
-$g_s$ and `\lstinline[basicstyle=\ttfamily]{e}' for the electro-weak coupling.
-The second number is the power of the chosen coupling constant for the
-tree-level diagrams and the third parameter specifies the power of that
-coupling constant for the one-loop diagrams.
-\attention Note that the numbers
-refer to the powers in the diagrams of the amplitude
-rather than the squared amplitude. In the above example the
-string `\lstinline[basicstyle=\ttfamily]{gs, 0, 2}' specifies that
-the tree-level diagrams should be of order $g_s^0$ and the one-loop
-diagrams should be of order $g_s^2$ and an unspecified
-power of $e$ in both cases. 
-If there is no tree level, i.e. the process is loop induced, 
-the keyword \texttt{NONE} should be put as second item in the list,
-instead of the tree level power of the coupling.
-
-The value of this option is
-translated into a \texttt{vsum} constraint in the file \texttt{qgraf.dat}.
-\\This option is mandatory.
-\item[8--11] The option
-\texttt{qgraf.options} creates the line
-`\lstinline[basicstyle=\ttfamily]{options=}\dots;' in the file
-\texttt{qgraf.dat}. The value of the option \texttt{qgraf.verbatim} is
-passed verbatim to the file \texttt{qgraf.dat}.
-In our example we specify that loops of size one and self-energy insertions
-at external lines should be omitted in the graph generation. Lines
-9--11 suppress the generation of diagrams containing Higgs and $Z$ bosons.
-\attention As these commands are passed verbatim to \qgraf no mnemonic names
-are allowed here, e.g. the Higgs particle has to be denoted by
-`\lstinline[basicstyle=\ttfamily]{H}' and cannot be replaced by
-`\lstinline[basicstyle=\ttfamily]{h}'.
-For a complete list of available options, Please consult the
-\qgraf manual. For a complete list of particle names see 
-Appendix \ref{sec:model-files:sm} resp. the
-documentation of the model file.
-\\These options can be omitted.
-\item[12--13] The keywords \texttt{zero} and \texttt{one} specify
-a set of symbols that should be treated as zero (resp. one). These
-simplifications are applied at the symbolical level. Only symbols
-that appear in the \form interface of the model file should be
-specified here (masses, couplings, CKM-matrix elements, etc).
-In the example we specify the electron mass
-`\lstinline[basicstyle=\ttfamily]{me}' to be zero and we do not keep
-the coupling constants in the calculation explicitly ($g_s=e=1$).
-\\These options can be omitted.
-\item[15] The option \texttt{extensions} contains a list of extensions
-to the core of the program.
-\item[16--17] For each extension one can add options of the form
-\textit{extension}{.}\textit{name}. Currently the program is scanning
-for options of the form \textit{extension}{.}\texttt{ldflags} and
-\textit{extension}{.}\texttt{fcflags}. These options are copied
-to the contens of the according variables (\texttt{FCFLAGS} and
-\texttt{LDFLAGS}) in the makefiles.
-\end{enumerate}
-
-In order to populate the specified process directory with files
-one invokes
-\begin{example}
-\$ gosam.py eett.in
-\end{example}
-
-\section{Process Directory Structure}
 After running \texttt{golem} with an appropriate setup file the
 process directory contains a number of files which are described below.
 
@@ -482,7 +584,7 @@ the helicity amplitudes into a matrix element. Here one also finds
 the test program \texttt{test.f90}. This folder is always compiled last.
 
 \marginlabel{\tt model,model.hh,model.py} The files from the \texttt{model/}
-directory of \golemv. The original files are renamed, e.g.
+directory of \gosamv. The original files are renamed, e.g.
 \texttt{sm} $\to$ \texttt{model}, \texttt{sm.py} $\to$ \texttt{model.py}
 and \texttt{sm.hh} $\to$ \texttt{model.hh}.
 
@@ -700,13 +802,14 @@ is the spring constant of the leg $k$ if it is connected to vertex $i$
 and zero otherwise.
 
 \section{Import of Model Files}
+\label{sec:model}
 
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
 
 \subsection{Import from FeynRules}
-A model description in the UFO~\cite{Degrande:2011} format consists of a \texttt{Python} package
-stored in a directory. In order to import the model into \golem{} one needs
+A model description in the UFO~\cite{Degrande:2011ua} format consists of a \texttt{Python} package
+stored in a directory. In order to import the model into \gosam{} one needs
 to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
 in front of the directory name, where we assume that
 the model description is in the directory \texttt{\$HOME/models/MSSM\_UFO}.
@@ -720,7 +823,7 @@ have to be taken:
 \begin{enumerate}
 \item When generating the tables using LanHEP, one should include the
    following option to ensure that the generated tables have the correct
-   headings\footnote{\golemv{} relies on the column names rather than
+   headings\footnote{\gosamv{} relies on the column names rather than
    some specific order.}. The number of spaces in the column headers are
    irrelevant as long as the columns are wide enough to contain the
    respective values.
@@ -838,7 +941,7 @@ program \texttt{gosam.py}:
 \end{lstlisting}
 
 \section{Advanced Diagram Selection}
-\golemv implements several ways of selecting subsets of diagrams:
+\gosamv implements several ways of selecting subsets of diagrams:
 \begin{itemize}
 \item by restricting QGraf,
 \item by selecting specific diagrams by their number,
@@ -852,7 +955,7 @@ happens already at the earliest possible stage.
 However, QGraf's built-in filters are sometimes
 too limited in order to express more advanced criteria.
 
-\golemv{} allows one to pass information to QGraf through the option
+\gosamv{} allows one to pass information to QGraf through the option
 \texttt{qgraf.options} and through \texttt{qgraf.verbatim},
 \texttt{qgraf.verbatim.lo} and \texttt{qgraf.verbatim.nlo}.
 For the exact syntax the user is refered to the QGraf documentation.
@@ -903,13 +1006,13 @@ Alternative predefined functions and functors are also given.
 \item[\texttt{d.vertices(f1,f2,\ldots)}] returns the number of vertices
    in the diagram with the specified fields. The arguments \texttt{f1},
    \texttt{f2}, \dots are lists of field names.\\
-   $\mathtt{VERTICES(f1,f2,\ldots)}\equiv%
+   $\mathtt{VERTICES(f1,f2,\ldots)}\equiv
     \lambda\mathtt{d}.(\mathtt{d.vertices(\mathtt{f1},\mathtt{f2},\ldots)})$
 \item[\texttt{d.loopvertices(f1,f2,\ldots)}]
    same as \texttt{vertices}, but only counts vertices which have
    loop propagators attached.\\
-   $\mathtt{LOOPVERTICES(f1,f2,\ldots)}\equiv%
-    \lambda\mathtt{d}.(\mathtt{d.loopvertices(%
+   $\mathtt{LOOPVERTICES(f1,f2,\ldots)}\equiv
+    \lambda\mathtt{d}.(\mathtt{d.loopvertices(
     \mathtt{f1},\mathtt{f2},\ldots)})$
 \item[\texttt{d.iprop(f,**opts)}] returns the number of propagators
    of the given fields. Optional arguments are
@@ -918,20 +1021,20 @@ Alternative predefined functions and functors are also given.
    \texttt{massive} to specify whether massive or massless propagators
    should be considered and \texttt{color} to filter for certain color
    representations.\\
-   $\mathtt{IPROP(\ldots)}\equiv%
+   $\mathtt{IPROP(\ldots)}\equiv
     \lambda\mathtt{d}.(\mathtt{d.iprop(\ldots)})$
 \item[\texttt{d.chord(f,**opts)}] same as \texttt{iprop}
    but only counts loop propagators.\\
-   $\mathtt{CHORD(\ldots)}\equiv%
+   $\mathtt{CHORD(\ldots)}\equiv
     \lambda\mathtt{d}.(\mathtt{d.chord(\ldots)})$
 \item[\texttt{d.bridge(f,**opts)}] same as \texttt{iprop}
    but only counts propagators which are not in a loop.\\
-   $\mathtt{BRIDGE(\ldots)}\equiv%
+   $\mathtt{BRIDGE(\ldots)}\equiv
     \lambda\mathtt{d}.(\mathtt{d.bridge(\ldots)})$
 \item[\texttt{d.QuarkBubbleMasses()}] returns a list of
    all different masses in a closed quark loop of size two
    or an empty list if the diagram is not a quark bubble.\\
-   $\mathtt{QBMASSES}\equiv%
+   $\mathtt{QBMASSES}\equiv
     \lambda\mathtt{d}.(\mathtt{d.QuarkBubbleMasses()})$
 \end{description}
 
@@ -953,7 +1056,7 @@ Furthermore, the following predefined filters exist:
 \chapter{The Binoth Les Houches Accord Interface}
 
 \section{Initialisation Phase}
-The script \texttt{gosam.py --olp} which comes with \golemv{} can be used to generate
+The script \texttt{gosam.py --olp} which comes with \gosamv{} can be used to generate
 matrix elements compatible with the specifications of the Binoth Les Houches
 Accord~\cite{Binoth:2010xt}. This script expects at least the name of an order file.
 This order file is usually but not necessarily created by a Monte Carlo program. An
@@ -980,7 +1083,7 @@ CorrectionType          QCD
 The line numbers are not part of the file.
 The arrow `$\rightarrow$' is generated by the two characters `\verb|->|'.
 The following options are part of the Standard and accepted by
-\golemv{}:
+\gosamv{}:
 \lstset{language=olp}
 \begin{description}
 \item[\texttt{MatrixElementSquareType}] accepts the values
@@ -994,12 +1097,12 @@ The following options are part of the Standard and accepted by
 MatrixElementSquareType Hsummed Caveraged
 \end{lstlisting}
 
-        In \golemv{} this statement is optional.
+        In \gosamv{} this statement is optional.
 	Any quantity which is not explicitely averaged is assumed to be
 	summed
 \item[\texttt{CorrectionType}] accepts the values
         \lstinline!QCD!, \lstinline!QED! and \lstinline!EW!, whereas
-	\golemv{} does not distinguish between the latter two (this behaviour
+	\gosamv{} does not distinguish between the latter two (this behaviour
 	might change in the future when appropriate model files are available).
 
 	This statement is mandatory and must not be omitted.
@@ -1020,7 +1123,7 @@ MatrixElementSquareType Hsummed Caveraged
 	a warning is issued, reminding the user that no UV-counterterms for
 	massive particles are implemented yet.
 \item[\texttt{IRsubtractionMethod}] accepts the value \lstinline!None! only.
-	\golemv{} does not provide any subtracted output.
+	\gosamv{} does not provide any subtracted output.
 
 	This statement is optional.
 \item[\texttt{ModelFile}] accepts the name of parameter file in the
@@ -1103,7 +1206,7 @@ supplements the options given in the configuration files.
 \item[\texttt{-C}, \texttt{--no-defaults}]
       The script will not search for configuration
       files (\texttt{.golem} and \texttt{golem.in}) in the standard locations
-      (\golemv{} installation directory, user's home directory and
+      (\gosamv{} installation directory, user's home directory and
       current working directory).
 \item[\texttt{-f}, \texttt{--force}] Overwrite contract files without asking.
       The default behaviour is that contract files are not overwritten. If
@@ -1154,10 +1257,10 @@ supplements the options given in the configuration files.
       would be preserved (\texttt{Makefile.conf}, \texttt{config.f90} etc).
 \end{description}
 
-\subsection{\golem{} Extensions to the Original Standard}
+\subsection{\gosam{} Extensions to the Original Standard}
 \label{sec:olp:extensions}
 Modern file systems allow for path names which cannot be expressed in
-the original formulation of the Les Houches accord. Therefore \golemv{}
+the original formulation of the Les Houches accord. Therefore \gosamv{}
 implements syntax extensions for order and contract files for including
 special characters in statements, especially in file names (as in
 \lstinline!ModelFile!).
@@ -1193,13 +1296,13 @@ special characters in statements, especially in file names (as in
 \end{description}
 
 Different extensions might prove useful on different operating systems.
-On a Windows system, the file name \verb!F:\Golem Files\mssm.slha! can
+On a Windows system, the file name \verb!F:\gosam Files\mssm.slha! can
 only be expressed with the proposed syntax extensions and would have the
 following three equivalent representations:
 \begin{itemize}
-\item \verb!F:\\Golem\ Files\\mssm.slha!
-\item \verb!'F:\Golem Files\mssm.slha'!
-\item \verb!"F:\\Golem Files\\mssm.slha"!
+\item \verb!F:\\gosam\ Files\\mssm.slha!
+\item \verb!'F:\gosam Files\mssm.slha'!
+\item \verb!"F:\\gosam Files\\mssm.slha"!
 \end{itemize}
 
 The three extensions can be switched on by the command line options
@@ -1255,7 +1358,7 @@ os.mkdir("proc/")
 
 # Add own options
 conf[golem.properties.model] = \
-   "FeynRules, ${HOME}/models/mssm_ufo"
+   "FeynRules, \${HOME}/models/mssm_ufo"
 conf[golem.properties.fc_bin] = "gfortran"
 err_flag = golem.util.olp.process_order_file(\
    "proc.olo", f, "proc/", conf)
@@ -1314,7 +1417,7 @@ together with the matrix element. The integer \lstinline!success! is
 initialized by \lstinline!OLP_Start! to either the value one, indicating
 success, or zero, indicating that an error occurred during initialization.
 
-Matrix elements generated with \golemv{} will try to read the SLHA model
+Matrix elements generated with \gosamv{} will try to read the SLHA model
 file specified by the option \lstset{language=olp}\lstinline!ModelFile!
 in the contract file. It is not required that the contract file used in
 the runtime phase points to the same model file as used during the
@@ -1356,7 +1459,7 @@ The last argument is an array of length four. Its entries are, in this order,
 \item the square of the Born amplitude.
 \end{enumerate}
 
-Matrix elements generated by \golemv{} use the convention that in case
+Matrix elements generated by \gosamv{} use the convention that in case
 of an error during the evaluation of the matrix element, the fourth
 entry is set to $(-1)$. It is therefore recommended that client programs
 check for the positiveness of the Born matrix element.
@@ -1384,7 +1487,7 @@ containing a textual representation of the requested assignment. The
 second argument will be set by the function according to the success
 of the request.
 
-Matrix elements generated with \golemv{} accept any string which would
+Matrix elements generated with \gosamv{} accept any string which would
 also be valid as a (non-comment) line in a parameter
 file (see~\texttt{model.f90}). Typical calls would be
 \begin{lstlisting}[language=C]
@@ -1397,74 +1500,6 @@ OLP_Option("Nf=5", &flag);
 OLP_Option("mH=124.5", &flag);
 \end{lstlisting}
 
-\subsection{The OLP Socket Protocol}
-The necessity to link the client program each time another OLP is used
-might become cumbersome, especially when one likes to work with more than
-one OLP at the same time. We have therefore developed a socket protocol
-which enables any client program to access the same functionality as
-defined in the Les Houches accord~\cite{Binoth:2010xt} through a TCP/IP
-connection with a server hosting the OLP. In this way it is possible
-to access multiple OLPs simultaneously and to load OLPs at runtime.
-
-\subsubsection{The OLP Socket Server}
-OLPs generated with \golemv{} contain additional files in their
-top-level directory implementing a server for the OLP Socket protocol.
-These files are
-\begin{description}
-\item[\texttt{olp\_daemon.c}] ANSI-C file with service routines especially
-    network related routines,
-\item[\texttt{olp\_daemon.h}] ANSI-C file, header for \texttt{olp\_daemon.c},
-\item[\texttt{olp\_protocol.l}] Lex/Flex file, part of the grammar definition
-    of the protocol and
-\item[\texttt{olp\_protocol.y}] Yacc/Bison file, part of the grammar
-    definition of the protocol, contains the main program.
-\end{description}
-These files are compiled with the command
-\begin{example}
-\$ make olp\_daemon EXTRA\_LDFLAGS=\dots
-\end{example}
-It is often necessary to specify the variable \verb!EXTRA_LDFLAGS!
-to provide the necessary run-time libraries of the \fortranXC{} compiler.
-
-The compiled program can be run with the following options
-\begin{example}
-\$ olp\_daemon [-p \textit{port}] [-s|-S] [-f] \textit{file-name}
-\end{example}
-\begin{description}
-\item[\texttt{-f}\textit{file-name}] name of a contract file (required).
-\item[\texttt{-p}\textit{port}] port at which the program accepts connections,
-   default: 7711.
-\item[\texttt{-s}/\texttt{-S}] forbid resp. allow the
-   \texttt{SHUTDOWN} command, default: allow.
-\item[\texttt{-r}/\texttt{-R}] forbid resp. allow the
-   \texttt{RESTART} command, default: allow.
-\item[\texttt{-d}] detach from terminal (run as daemon).
-\end{description}
-
-\subsubsection{OLP Socket Clients}
-Sample client implementations for \texttt{C++}, \texttt{Java} and
-\python{} are provided in the directory \texttt{olp/contrib/}.
-Below, a brief example for the \texttt{C++} case is given:
-\begin{lstlisting}[language=C]
-olp::OLPClient OLP_EvalSubProcess("localhost", 7711);
-OLP_EvalSubProcess(0, num_legs, mom, scale,
-                   num_param, param, amp);
-OLP_EvalSubprocess.close();
-\end{lstlisting}
-The class \texttt{OLPClient} overwrites the operater \texttt{()}
-emulating the original protocol as closely as possible. For technical
-reasons, two additional arguments (\texttt{num\_legs} and \texttt{num\_param})
-are required, specifying the number of external legs and the length of the
-array \texttt{param} respectively.
-
-\subsubsection{Definition of the Protocol}
-The protocol consists of statements sent by the client to the server.
-Each statement is terminated by a newline character. The server responds
-with one line starting with a three digit number followed by a space
-and an optional message. The three digit number contains the response code.
-A response code of 200 signals success, all other values denote an error.
-
-% \TODO{complete description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX %
@@ -1494,20 +1529,20 @@ The integration measure for the internal momentum $k$ is
  \frac{\mu^{2\varepsilon}{\mathrm d}^nk}{i\pi^{n/2}}.
 \end{equation}
 
-\section{Convention of \golemv}
+\section{Convention of \gosamv}
 The factor from above which does not go into the integral definition of
 \golemVC{} can be written as
 \begin{equation}
 \frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}=
 \frac{(4\pi)^\varepsilon}{(2\pi)(4\pi)}\frac{i}{2}
 \end{equation}
-The factor of $i/2$ is included in the amplitude definition of \golemv{}.
+The factor of $i/2$ is included in the amplitude definition of \gosamv{}.
 The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
 $\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
 
 In the following we assume that the coupling constants\footnote{
 $e$ and $g_s$ in the standard model} have been set to one in the
-setup of \golemv{}. This ensures that the one-loop matrix
+setup of \gosamv{}. This ensures that the one-loop matrix
 element in QCD is calculated in the $\overline{\mathrm{MS}}$ scheme as
 \begin{equation}
 \left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}=
@@ -1516,7 +1551,7 @@ element in QCD is calculated in the $\overline{\mathrm{MS}}$ scheme as
 +{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q})
 \end{equation}
 The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
-appearing in the squared tree-level matrix element. \golemv{} will
+appearing in the squared tree-level matrix element. \gosamv{} will
 return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
 
 The conversion between different conventions for the $\Gamma$-functions
@@ -1664,7 +1699,7 @@ All other integrals of that type are identically zero.
 \label{chp:model-files}
 
 \section{Format of the Model Files}\label{sec:modelfiles}
-\golemv{} expects three files for a proper model definition:
+\gosamv{} expects three files for a proper model definition:
 \begin{description}
 \item[$\langle model\rangle$\texttt{.hh}] \form{} file containing the Feynman rules
 \item[$\langle model\rangle$\texttt{.py}] \python{} file
@@ -1714,12 +1749,12 @@ The propagators in the \qgraf{} file must contain the following functions:
 \end{description}
 
 The vertices must provide all fields that should be accessible in \texttt{VSUM} statements
-and therefore also the ones that \golemv{} uses in the \texttt{order} option.
+and therefore also the ones that \gosamv{} uses in the \texttt{order} option.
 
 \subsection{The \form{} File}
 There are two possible ways of specifying the Feynman rules in the \form{} file.
 If a model contains only Standard Model like interactions one can make use of
-the file \texttt{src/form/vertices.hh} in the \golemv{} directory and just define
+the file \texttt{src/form/vertices.hh} in the \gosamv{} directory and just define
 the coefficients \texttt{CL} and \texttt{CR} in front of the vertices. This
 strategy is implemented by the modelfiles \texttt{models/sm}. The file
 \form{} contains a procedure \texttt{VertexConstants} which
@@ -1759,14 +1794,14 @@ Identify Once vertex(iv?,
 #EndProcedure
 \end{lstlisting}
 \end{maxipage}
-It should be noted that \golemv{} expects the procedure \texttt{VertexConstants}
+It should be noted that \gosamv{} expects the procedure \texttt{VertexConstants}
 to exist in both cases. If all the constants are already substituted inside
 \texttt{ReplaceVertices} the file must still provide a possibly empty empty
-implementation of \texttt{VertexConstants}. \golemv{} ensures that
+implementation of \texttt{VertexConstants}. \gosamv{} ensures that
 \texttt{VertexConstants} is always called after \texttt{ReplaceVertices}.
 
 It is recommended to wrap any factors that are global prefactors to the diagram
-into the argument of the function \texttt{PREFACTOR} as \golemv{} scans for these
+into the argument of the function \texttt{PREFACTOR} as \gosamv{} scans for these
 functions and brackets them out. Each vertex definition must contain a factor
 \texttt{node} which contains the indices\footnote{In \qgraf's terminology
 these indices are a combination of vertex and ray index of the field.}
@@ -1961,7 +1996,7 @@ Name & Symbol & Description\\
 \hline
 \end{tabular}
 
-\chapter{Template for a Process Setup File}
+\chapter{Commented Template for a Process Setup File}
 \label{chp:appendix-template.in}
 \seealso{Chapter \ref{chp:setup-of-a-process}}
 In order to create a new process setup file one can invoke
@@ -2029,18 +2064,29 @@ recognized.
 \end{fullpage}
 
 \chapter*{Conditions of Use}
-    GoSam -- An automated One-Loop matrix element generator.\\
-    Copyright (C) 2011, 2012  The GoSam Collaboration\\
-    \begin{itemize}               
+    GoSam-1.0 -- An automated One-Loop matrix element generator.\\
+    Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
+    {\bf GoSam-2.0}  \\
+    Copyright (C) 2014  The GoSam Collaboration\\
+     \begin{itemize}               
                 \item Gavin Cullen
+		\item Hans van Deurzen
                 \item Nicolas Greiner
                 \item Gudrun Heinrich
                 \item Gionata Luisoni
                 \item Pierpaolo Mastrolia
+		\item Edoardo Mirabella
                 \item Giovanni Ossola
-                \item Thomas Reiter
+		\item Tiziano Peraro
+		\item Johannes Schlenk
+		\item Johann Felix von Soden-Fraunhofen
                 \item Francesco Tramontano
     \end{itemize}
+   
+%\bf{The program is distributed under the 
+% terms and conditions of the GNU General Public License Version 3}
+    We are indebted to {\bf Thomas Reiter} for his invaluable contributions 
+    to the development of GoSam-1.0.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2050,11 +2096,10 @@ recognized.
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    GNU General Public License for more details, 
+    \url{http://www.gnu.org/licenses/}.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see \url{http://www.gnu.org/licenses/}.
-
+   
     Scientific publications prepared using the present version of
     GoSam or any modified version of it or any code linking to
     GoSam or parts of it should make a clear reference to the publication:
@@ -2065,721 +2110,10 @@ recognized.
         arXiv:1111.2034 [hep-ph]\\
     \end{quote}
 
-\section*{The GNU General Public License Version 3}
 
-\begin{fullpage}
-\begin{center}
-{\parindent 0in
 
-Copyright \copyright\  2007 Free Software Foundation, Inc. \texttt{http://fsf.org/}
 
-\bigskip
-Everyone is permitted to copy and distribute verbatim copies of this
-
-license document, but changing it is not allowed.}
-
-\end{center}
-
-\begin{center}
-{\Large \sc Preamble}
-\end{center}
-The GNU General Public License is a free, copyleft license for
-software and other kinds of works.
-
-The licenses for most software and other practical works are designed
-to take away your freedom to share and change the works.  By contrast,
-the GNU General Public License is intended to guarantee your freedom to
-share and change all versions of a program--to make sure it remains free
-software for all its users.  We, the Free Software Foundation, use the
-GNU General Public License for most of our software; it applies also to
-any other work released this way by its authors.  You can apply it to
-your programs, too.
-
-When we speak of free software, we are referring to freedom, not
-price.  Our General Public Licenses are designed to make sure that you
-have the freedom to distribute copies of free software (and charge for
-them if you wish), that you receive source code or can get it if you
-want it, that you can change the software or use pieces of it in new
-free programs, and that you know you can do these things.
-
-To protect your rights, we need to prevent others from denying you
-these rights or asking you to surrender the rights.  Therefore, you have
-certain responsibilities if you distribute copies of the software, or if
-you modify it: responsibilities to respect the freedom of others.
-
-For example, if you distribute copies of such a program, whether
-gratis or for a fee, you must pass on to the recipients the same
-freedoms that you received.  You must make sure that they, too, receive
-or can get the source code.  And you must show them these terms so they
-know their rights.
-
-Developers that use the GNU GPL protect your rights with two steps:
-(1) assert copyright on the software, and (2) offer you this License
-giving you legal permission to copy, distribute and/or modify it.
-
-For the developers' and authors' protection, the GPL clearly explains
-that there is no warranty for this free software.  For both users' and
-authors' sake, the GPL requires that modified versions be marked as
-changed, so that their problems will not be attributed erroneously to
-authors of previous versions.
-
-Some devices are designed to deny users access to install or run
-modified versions of the software inside them, although the manufacturer
-can do so.  This is fundamentally incompatible with the aim of
-protecting users' freedom to change the software.  The systematic
-pattern of such abuse occurs in the area of products for individuals to
-use, which is precisely where it is most unacceptable.  Therefore, we
-have designed this version of the GPL to prohibit the practice for those
-products.  If such problems arise substantially in other domains, we
-stand ready to extend this provision to those domains in future versions
-of the GPL, as needed to protect the freedom of users.
-
-Finally, every program is threatened constantly by software patents.
-States should not allow patents to restrict development and use of
-software on general-purpose computers, but in those that do, we wish to
-avoid the special danger that patents applied to a free program could
-make it effectively proprietary.  To prevent this, the GPL assures that
-patents cannot be used to render the program non-free.
-
-The precise terms and conditions for copying, distribution and
-modification follow.
-
-\begin{center}
-{\Large \sc Terms and Conditions}
-\end{center}
-
-
-\begin{enumerate}
-
-\addtocounter{enumi}{-1}
-
-\item Definitions.
-
-``This License'' refers to version 3 of the GNU General Public License.
-
-``Copyright'' also means copyright-like laws that apply to other kinds of
-works, such as semiconductor masks.
-
-``The Program'' refers to any copyrightable work licensed under this
-License.  Each licensee is addressed as ``you''.  ``Licensees'' and
-``recipients'' may be individuals or organizations.
-
-To ``modify'' a work means to copy from or adapt all or part of the work
-in a fashion requiring copyright permission, other than the making of an
-exact copy.  The resulting work is called a ``modified version'' of the
-earlier work or a work ``based on'' the earlier work.
-
-A ``covered work'' means either the unmodified Program or a work based
-on the Program.
-
-To ``propagate'' a work means to do anything with it that, without
-permission, would make you directly or secondarily liable for
-infringement under applicable copyright law, except executing it on a
-computer or modifying a private copy.  Propagation includes copying,
-distribution (with or without modification), making available to the
-public, and in some countries other activities as well.
-
-To ``convey'' a work means any kind of propagation that enables other
-parties to make or receive copies.  Mere interaction with a user through
-a computer network, with no transfer of a copy, is not conveying.
-
-An interactive user interface displays ``Appropriate Legal Notices''
-to the extent that it includes a convenient and prominently visible
-feature that (1) displays an appropriate copyright notice, and (2)
-tells the user that there is no warranty for the work (except to the
-extent that warranties are provided), that licensees may convey the
-work under this License, and how to view a copy of this License.  If
-the interface presents a list of user commands or options, such as a
-menu, a prominent item in the list meets this criterion.
-
-\item Source Code.
-
-The ``source code'' for a work means the preferred form of the work
-for making modifications to it.  ``Object code'' means any non-source
-form of a work.
-
-A ``Standard Interface'' means an interface that either is an official
-standard defined by a recognized standards body, or, in the case of
-interfaces specified for a particular programming language, one that
-is widely used among developers working in that language.
-
-The ``System Libraries'' of an executable work include anything, other
-than the work as a whole, that (a) is included in the normal form of
-packaging a Major Component, but which is not part of that Major
-Component, and (b) serves only to enable use of the work with that
-Major Component, or to implement a Standard Interface for which an
-implementation is available to the public in source code form.  A
-``Major Component'', in this context, means a major essential component
-(kernel, window system, and so on) of the specific operating system
-(if any) on which the executable work runs, or a compiler used to
-produce the work, or an object code interpreter used to run it.
-
-The ``Corresponding Source'' for a work in object code form means all
-the source code needed to generate, install, and (for an executable
-work) run the object code and to modify the work, including scripts to
-control those activities.  However, it does not include the work's
-System Libraries, or general-purpose tools or generally available free
-programs which are used unmodified in performing those activities but
-which are not part of the work.  For example, Corresponding Source
-includes interface definition files associated with source files for
-the work, and the source code for shared libraries and dynamically
-linked subprograms that the work is specifically designed to require,
-such as by intimate data communication or control flow between those
-subprograms and other parts of the work.
-
-The Corresponding Source need not include anything that users
-can regenerate automatically from other parts of the Corresponding
-Source.
-
-The Corresponding Source for a work in source code form is that
-same work.
-
-\item Basic Permissions.
-
-All rights granted under this License are granted for the term of
-copyright on the Program, and are irrevocable provided the stated
-conditions are met.  This License explicitly affirms your unlimited
-permission to run the unmodified Program.  The output from running a
-covered work is covered by this License only if the output, given its
-content, constitutes a covered work.  This License acknowledges your
-rights of fair use or other equivalent, as provided by copyright law.
-
-You may make, run and propagate covered works that you do not
-convey, without conditions so long as your license otherwise remains
-in force.  You may convey covered works to others for the sole purpose
-of having them make modifications exclusively for you, or provide you
-with facilities for running those works, provided that you comply with
-the terms of this License in conveying all material for which you do
-not control copyright.  Those thus making or running the covered works
-for you must do so exclusively on your behalf, under your direction
-and control, on terms that prohibit them from making any copies of
-your copyrighted material outside their relationship with you.
-
-Conveying under any other circumstances is permitted solely under
-the conditions stated below.  Sublicensing is not allowed; section 10
-makes it unnecessary.
-
-\item Protecting Users' Legal Rights From Anti-Circumvention Law.
-
-No covered work shall be deemed part of an effective technological
-measure under any applicable law fulfilling obligations under article
-11 of the WIPO copyright treaty adopted on 20 December 1996, or
-similar laws prohibiting or restricting circumvention of such
-measures.
-
-When you convey a covered work, you waive any legal power to forbid
-circumvention of technological measures to the extent such circumvention
-is effected by exercising rights under this License with respect to
-the covered work, and you disclaim any intention to limit operation or
-modification of the work as a means of enforcing, against the work's
-users, your or third parties' legal rights to forbid circumvention of
-technological measures.
-
-\item Conveying Verbatim Copies.
-
-You may convey verbatim copies of the Program's source code as you
-receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy an appropriate copyright notice;
-keep intact all notices stating that this License and any
-non-permissive terms added in accord with section 7 apply to the code;
-keep intact all notices of the absence of any warranty; and give all
-recipients a copy of this License along with the Program.
-
-You may charge any price or no price for each copy that you convey,
-and you may offer support or warranty protection for a fee.
-
-\item Conveying Modified Source Versions.
-
-You may convey a work based on the Program, or the modifications to
-produce it from the Program, in the form of source code under the
-terms of section 4, provided that you also meet all of these conditions:
-  \begin{enumerate}
-  \item The work must carry prominent notices stating that you modified
-  it, and giving a relevant date.
-
-  \item The work must carry prominent notices stating that it is
-  released under this License and any conditions added under section
-  7.  This requirement modifies the requirement in section 4 to
-  ``keep intact all notices''.
-
-  \item You must license the entire work, as a whole, under this
-  License to anyone who comes into possession of a copy.  This
-  License will therefore apply, along with any applicable section 7
-  additional terms, to the whole of the work, and all its parts,
-  regardless of how they are packaged.  This License gives no
-  permission to license the work in any other way, but it does not
-  invalidate such permission if you have separately received it.
-
-  \item If the work has interactive user interfaces, each must display
-  Appropriate Legal Notices; however, if the Program has interactive
-  interfaces that do not display Appropriate Legal Notices, your
-  work need not make them do so.
-\end{enumerate}
-A compilation of a covered work with other separate and independent
-works, which are not by their nature extensions of the covered work,
-and which are not combined with it such as to form a larger program,
-in or on a volume of a storage or distribution medium, is called an
-``aggregate'' if the compilation and its resulting copyright are not
-used to limit the access or legal rights of the compilation's users
-beyond what the individual works permit.  Inclusion of a covered work
-in an aggregate does not cause this License to apply to the other
-parts of the aggregate.
-
-\item Conveying Non-Source Forms.
-
-You may convey a covered work in object code form under the terms
-of sections 4 and 5, provided that you also convey the
-machine-readable Corresponding Source under the terms of this License,
-in one of these ways:
-  \begin{enumerate}
-  \item Convey the object code in, or embodied in, a physical product
-  (including a physical distribution medium), accompanied by the
-  Corresponding Source fixed on a durable physical medium
-  customarily used for software interchange.
-
-  \item Convey the object code in, or embodied in, a physical product
-  (including a physical distribution medium), accompanied by a
-  written offer, valid for at least three years and valid for as
-  long as you offer spare parts or customer support for that product
-  model, to give anyone who possesses the object code either (1) a
-  copy of the Corresponding Source for all the software in the
-  product that is covered by this License, on a durable physical
-  medium customarily used for software interchange, for a price no
-  more than your reasonable cost of physically performing this
-  conveying of source, or (2) access to copy the
-  Corresponding Source from a network server at no charge.
-
-  \item Convey individual copies of the object code with a copy of the
-  written offer to provide the Corresponding Source.  This
-  alternative is allowed only occasionally and noncommercially, and
-  only if you received the object code with such an offer, in accord
-  with subsection 6b.
-
-  \item Convey the object code by offering access from a designated
-  place (gratis or for a charge), and offer equivalent access to the
-  Corresponding Source in the same way through the same place at no
-  further charge.  You need not require recipients to copy the
-  Corresponding Source along with the object code.  If the place to
-  copy the object code is a network server, the Corresponding Source
-  may be on a different server (operated by you or a third party)
-  that supports equivalent copying facilities, provided you maintain
-  clear directions next to the object code saying where to find the
-  Corresponding Source.  Regardless of what server hosts the
-  Corresponding Source, you remain obligated to ensure that it is
-  available for as long as needed to satisfy these requirements.
-
-  \item Convey the object code using peer-to-peer transmission, provided
-  you inform other peers where the object code and Corresponding
-  Source of the work are being offered to the general public at no
-  charge under subsection 6d.
-  \end{enumerate}
-
-A separable portion of the object code, whose source code is excluded
-from the Corresponding Source as a System Library, need not be
-included in conveying the object code work.
-
-A ``User Product'' is either (1) a ``consumer product'', which means any
-tangible personal property which is normally used for personal, family,
-or household purposes, or (2) anything designed or sold for incorporation
-into a dwelling.  In determining whether a product is a consumer product,
-doubtful cases shall be resolved in favor of coverage.  For a particular
-product received by a particular user, ``normally used'' refers to a
-typical or common use of that class of product, regardless of the status
-of the particular user or of the way in which the particular user
-actually uses, or expects or is expected to use, the product.  A product
-is a consumer product regardless of whether the product has substantial
-commercial, industrial or non-consumer uses, unless such uses represent
-the only significant mode of use of the product.
-
-``Installation Information'' for a User Product means any methods,
-procedures, authorization keys, or other information required to install
-and execute modified versions of a covered work in that User Product from
-a modified version of its Corresponding Source.  The information must
-suffice to ensure that the continued functioning of the modified object
-code is in no case prevented or interfered with solely because
-modification has been made.
-
-If you convey an object code work under this section in, or with, or
-specifically for use in, a User Product, and the conveying occurs as
-part of a transaction in which the right of possession and use of the
-User Product is transferred to the recipient in perpetuity or for a
-fixed term (regardless of how the transaction is characterized), the
-Corresponding Source conveyed under this section must be accompanied
-by the Installation Information.  But this requirement does not apply
-if neither you nor any third party retains the ability to install
-modified object code on the User Product (for example, the work has
-been installed in ROM).
-
-The requirement to provide Installation Information does not include a
-requirement to continue to provide support service, warranty, or updates
-for a work that has been modified or installed by the recipient, or for
-the User Product in which it has been modified or installed.  Access to a
-network may be denied when the modification itself materially and
-adversely affects the operation of the network or violates the rules and
-protocols for communication across the network.
-
-Corresponding Source conveyed, and Installation Information provided,
-in accord with this section must be in a format that is publicly
-documented (and with an implementation available to the public in
-source code form), and must require no special password or key for
-unpacking, reading or copying.
-
-\item Additional Terms.
-
-``Additional permissions'' are terms that supplement the terms of this
-License by making exceptions from one or more of its conditions.
-Additional permissions that are applicable to the entire Program shall
-be treated as though they were included in this License, to the extent
-that they are valid under applicable law.  If additional permissions
-apply only to part of the Program, that part may be used separately
-under those permissions, but the entire Program remains governed by
-this License without regard to the additional permissions.
-
-When you convey a copy of a covered work, you may at your option
-remove any additional permissions from that copy, or from any part of
-it.  (Additional permissions may be written to require their own
-removal in certain cases when you modify the work.)  You may place
-additional permissions on material, added by you to a covered work,
-for which you have or can give appropriate copyright permission.
-
-Notwithstanding any other provision of this License, for material you
-add to a covered work, you may (if authorized by the copyright holders of
-that material) supplement the terms of this License with terms:
-  \begin{enumerate}
-  \item Disclaiming warranty or limiting liability differently from the
-  terms of sections 15 and 16 of this License; or
-
-  \item Requiring preservation of specified reasonable legal notices or
-  author attributions in that material or in the Appropriate Legal
-  Notices displayed by works containing it; or
-
-  \item Prohibiting misrepresentation of the origin of that material, or
-  requiring that modified versions of such material be marked in
-  reasonable ways as different from the original version; or
-
-  \item Limiting the use for publicity purposes of names of licensors or
-  authors of the material; or
-
-  \item Declining to grant rights under trademark law for use of some
-  trade names, trademarks, or service marks; or
-
-  \item Requiring indemnification of licensors and authors of that
-  material by anyone who conveys the material (or modified versions of
-  it) with contractual assumptions of liability to the recipient, for
-  any liability that these contractual assumptions directly impose on
-  those licensors and authors.
-  \end{enumerate}
-
-All other non-permissive additional terms are considered ``further
-restrictions'' within the meaning of section 10.  If the Program as you
-received it, or any part of it, contains a notice stating that it is
-governed by this License along with a term that is a further
-restriction, you may remove that term.  If a license document contains
-a further restriction but permits relicensing or conveying under this
-License, you may add to a covered work material governed by the terms
-of that license document, provided that the further restriction does
-not survive such relicensing or conveying.
-
-If you add terms to a covered work in accord with this section, you
-must place, in the relevant source files, a statement of the
-additional terms that apply to those files, or a notice indicating
-where to find the applicable terms.
-
-Additional terms, permissive or non-permissive, may be stated in the
-form of a separately written license, or stated as exceptions;
-the above requirements apply either way.
-
-\item Termination.
-
-You may not propagate or modify a covered work except as expressly
-provided under this License.  Any attempt otherwise to propagate or
-modify it is void, and will automatically terminate your rights under
-this License (including any patent licenses granted under the third
-paragraph of section 11).
-
-However, if you cease all violation of this License, then your
-license from a particular copyright holder is reinstated (a)
-provisionally, unless and until the copyright holder explicitly and
-finally terminates your license, and (b) permanently, if the copyright
-holder fails to notify you of the violation by some reasonable means
-prior to 60 days after the cessation.
-
-Moreover, your license from a particular copyright holder is
-reinstated permanently if the copyright holder notifies you of the
-violation by some reasonable means, this is the first time you have
-received notice of violation of this License (for any work) from that
-copyright holder, and you cure the violation prior to 30 days after
-your receipt of the notice.
-
-Termination of your rights under this section does not terminate the
-licenses of parties who have received copies or rights from you under
-this License.  If your rights have been terminated and not permanently
-reinstated, you do not qualify to receive new licenses for the same
-material under section 10.
-
-\item Acceptance Not Required for Having Copies.
-
-You are not required to accept this License in order to receive or
-run a copy of the Program.  Ancillary propagation of a covered work
-occurring solely as a consequence of using peer-to-peer transmission
-to receive a copy likewise does not require acceptance.  However,
-nothing other than this License grants you permission to propagate or
-modify any covered work.  These actions infringe copyright if you do
-not accept this License.  Therefore, by modifying or propagating a
-covered work, you indicate your acceptance of this License to do so.
-
-\item Automatic Licensing of Downstream Recipients.
-
-Each time you convey a covered work, the recipient automatically
-receives a license from the original licensors, to run, modify and
-propagate that work, subject to this License.  You are not responsible
-for enforcing compliance by third parties with this License.
-
-An ``entity transaction'' is a transaction transferring control of an
-organization, or substantially all assets of one, or subdividing an
-organization, or merging organizations.  If propagation of a covered
-work results from an entity transaction, each party to that
-transaction who receives a copy of the work also receives whatever
-licenses to the work the party's predecessor in interest had or could
-give under the previous paragraph, plus a right to possession of the
-Corresponding Source of the work from the predecessor in interest, if
-the predecessor has it or can get it with reasonable efforts.
-
-You may not impose any further restrictions on the exercise of the
-rights granted or affirmed under this License.  For example, you may
-not impose a license fee, royalty, or other charge for exercise of
-rights granted under this License, and you may not initiate litigation
-(including a cross-claim or counterclaim in a lawsuit) alleging that
-any patent claim is infringed by making, using, selling, offering for
-sale, or importing the Program or any portion of it.
-
-\item Patents.
-
-A ``contributor'' is a copyright holder who authorizes use under this
-License of the Program or a work on which the Program is based.  The
-work thus licensed is called the contributor's ``contributor version''.
-
-A contributor's ``essential patent claims'' are all patent claims
-owned or controlled by the contributor, whether already acquired or
-hereafter acquired, that would be infringed by some manner, permitted
-by this License, of making, using, or selling its contributor version,
-but do not include claims that would be infringed only as a
-consequence of further modification of the contributor version.  For
-purposes of this definition, ``control'' includes the right to grant
-patent sublicenses in a manner consistent with the requirements of
-this License.
-
-Each contributor grants you a non-exclusive, worldwide, royalty-free
-patent license under the contributor's essential patent claims, to
-make, use, sell, offer for sale, import and otherwise run, modify and
-propagate the contents of its contributor version.
-
-In the following three paragraphs, a ``patent license'' is any express
-agreement or commitment, however denominated, not to enforce a patent
-(such as an express permission to practice a patent or covenant not to
-sue for patent infringement).  To ``grant'' such a patent license to a
-party means to make such an agreement or commitment not to enforce a
-patent against the party.
-
-If you convey a covered work, knowingly relying on a patent license,
-and the Corresponding Source of the work is not available for anyone
-to copy, free of charge and under the terms of this License, through a
-publicly available network server or other readily accessible means,
-then you must either (1) cause the Corresponding Source to be so
-available, or (2) arrange to deprive yourself of the benefit of the
-patent license for this particular work, or (3) arrange, in a manner
-consistent with the requirements of this License, to extend the patent
-license to downstream recipients.  ``Knowingly relying'' means you have
-actual knowledge that, but for the patent license, your conveying the
-covered work in a country, or your recipient's use of the covered work
-in a country, would infringe one or more identifiable patents in that
-country that you have reason to believe are valid.
-
-If, pursuant to or in connection with a single transaction or
-arrangement, you convey, or propagate by procuring conveyance of, a
-covered work, and grant a patent license to some of the parties
-receiving the covered work authorizing them to use, propagate, modify
-or convey a specific copy of the covered work, then the patent license
-you grant is automatically extended to all recipients of the covered
-work and works based on it.
-
-A patent license is ``discriminatory'' if it does not include within
-the scope of its coverage, prohibits the exercise of, or is
-conditioned on the non-exercise of one or more of the rights that are
-specifically granted under this License.  You may not convey a covered
-work if you are a party to an arrangement with a third party that is
-in the business of distributing software, under which you make payment
-to the third party based on the extent of your activity of conveying
-the work, and under which the third party grants, to any of the
-parties who would receive the covered work from you, a discriminatory
-patent license (a) in connection with copies of the covered work
-conveyed by you (or copies made from those copies), or (b) primarily
-for and in connection with specific products or compilations that
-contain the covered work, unless you entered into that arrangement,
-or that patent license was granted, prior to 28 March 2007.
-
-Nothing in this License shall be construed as excluding or limiting
-any implied license or other defenses to infringement that may
-otherwise be available to you under applicable patent law.
-
-\item No Surrender of Others' Freedom.
-
-If conditions are imposed on you (whether by court order, agreement or
-otherwise) that contradict the conditions of this License, they do not
-excuse you from the conditions of this License.  If you cannot convey a
-covered work so as to satisfy simultaneously your obligations under this
-License and any other pertinent obligations, then as a consequence you may
-not convey it at all.  For example, if you agree to terms that obligate you
-to collect a royalty for further conveying from those to whom you convey
-the Program, the only way you could satisfy both those terms and this
-License would be to refrain entirely from conveying the Program.
-
-\item Use with the GNU Affero General Public License.
-
-Notwithstanding any other provision of this License, you have
-permission to link or combine any covered work with a work licensed
-under version 3 of the GNU Affero General Public License into a single
-combined work, and to convey the resulting work.  The terms of this
-License will continue to apply to the part which is the covered work,
-but the special requirements of the GNU Affero General Public License,
-section 13, concerning interaction through a network will apply to the
-combination as such.
-
-\item Revised Versions of this License.
-
-The Free Software Foundation may publish revised and/or new versions of
-the GNU General Public License from time to time.  Such new versions will
-be similar in spirit to the present version, but may differ in detail to
-address new problems or concerns.
-
-Each version is given a distinguishing version number.  If the
-Program specifies that a certain numbered version of the GNU General
-Public License ``or any later version'' applies to it, you have the
-option of following the terms and conditions either of that numbered
-version or of any later version published by the Free Software
-Foundation.  If the Program does not specify a version number of the
-GNU General Public License, you may choose any version ever published
-by the Free Software Foundation.
-
-If the Program specifies that a proxy can decide which future
-versions of the GNU General Public License can be used, that proxy's
-public statement of acceptance of a version permanently authorizes you
-to choose that version for the Program.
-
-Later license versions may give you additional or different
-permissions.  However, no additional obligations are imposed on any
-author or copyright holder as a result of your choosing to follow a
-later version.
-
-\item Disclaimer of Warranty.
-
-\begin{sloppypar}
- THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
- APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE
- COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM ``AS IS''
- WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
- INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE
- RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
- SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
- NECESSARY SERVICING, REPAIR OR CORRECTION.
-\end{sloppypar}
-
-\item Limitation of Liability.
-
- IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN
- WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES
- AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR
- DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL
- DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM
- (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED
- INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE
- OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH
- HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
- DAMAGES.
-
-\item Interpretation of Sections 15 and 16.
-
-If the disclaimer of warranty and limitation of liability provided
-above cannot be given local legal effect according to their terms,
-reviewing courts shall apply local law that most closely approximates
-an absolute waiver of all civil liability in connection with the
-Program, unless a warranty or assumption of liability accompanies a
-copy of the Program in return for a fee.
-
-\begin{center}
-{\Large\sc End of Terms and Conditions}
-
-\bigskip
-How to Apply These Terms to Your New Programs
-\end{center}
-
-If you develop a new program, and you want it to be of the greatest
-possible use to the public, the best way to achieve this is to make it
-free software which everyone can redistribute and change under these terms.
-
-To do so, attach the following notices to the program.  It is safest
-to attach them to the start of each source file to most effectively
-state the exclusion of warranty; and each file should have at least
-the ``copyright'' line and a pointer to where the full notice is found.
-
-{\footnotesize
-\begin{verbatim}
-<one line to give the program's name and a brief idea of what it does.>
-
-Copyright (C) <textyear>  <name of author>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-\end{verbatim}
-}
-
-Also add information on how to contact you by electronic and paper mail.
-
-If the program does terminal interaction, make it output a short
-notice like this when it starts in an interactive mode:
-
-{\footnotesize
-\begin{verbatim}
-<program>  Copyright (C) <year>  <name of author>
-
-This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
-This is free software, and you are welcome to redistribute it
-under certain conditions; type `show c' for details.
-\end{verbatim}
-}
-
-The hypothetical commands {\tt show w} and {\tt show c} should show
-the appropriate
-parts of the General Public License.  Of course, your program's commands
-might be different; for a GUI interface, you would use an ``about box''.
-
-You should also get your employer (if you work as a programmer) or
-school, if any, to sign a ``copyright disclaimer'' for the program, if
-necessary.  For more information on this, and how to apply and follow
-the GNU GPL, see \texttt{http://www.gnu.org/licenses/}.
-
-The GNU General Public License does not permit incorporating your
-program into proprietary programs.  If your program is a subroutine
-library, you may consider it more useful to permit linking proprietary
-applications with the library.  If this is what you want to do, use
-the GNU Lesser General Public License instead of this License.  But
-first, please read \texttt{http://www.gnu.org/philosophy/why-not-lgpl.html}.
-
-\end{enumerate}
-\end{fullpage}
-
-\bibliographystyle{amsalpha}
+\bibliographystyle{JHEP}
 \begin{fullpage}
 \bibliography{refman}
 \end{fullpage}
