@@ -15,7 +15,7 @@
 \newcommand{\hepforge}{{\sc HepForge}\xspace}
 
 \newcommand{\qgraf}{{\tt QGraf}\xspace}
-\newcommand{\form}{{\tt Form}\xspace}
+\newcommand{\form}{{\tt FORM}\xspace}
 \newcommand{\python}{{\tt Python}\xspace}
 \newcommand{\fortranXC}{{\tt Fortran\,95}\xspace}
 \newcommand{\fortranMMIII}{{\tt Fortran\,2003}\xspace}
@@ -174,13 +174,15 @@ At the end of the installation process,
 a script {\tt gosam\_setup\_env.sh} will be created in the
 {\tt bin/} subdirectory of the install location, 
 which will (temporarily) set all environment
-variables, as soon as the script is sourced into a shell 
-(by {\tt source [path]/gosam\_setup\_env.sh}).
+variables, as soon as the script is sourced into a shell,  
+by \\
+{\tt \$ source [path]/gosam\_setup\_env.sh}.
 The installer also gives  a recommendation how
 these environment variables can be set permanently.
 The script can be used in all {\tt tcsh}- and {\tt bash}-compatible shells.
 
-All  files which have been installed are tracked in the {\tt installer-log.ini} file.
+All  files which have been installed are tracked in the file \\
+{\tt installer-log.ini}.
 Please keep this file and the install script. They are needed to update and
 uninstall \gosam. 
 
@@ -202,9 +204,9 @@ If they are found, their version is checked,
 and if needed the installation
 of a version which has been tested to run with \gosam is suggested.
 
-All files are downloaded to the GoSam subfolder and extracted.
-The build files remain on the system. One can delete the GoSam subfolder after
-the installation. However, as they contain examples (./GoSam/gosam/examples)
+All files are downloaded to the {\tt GoSam} subfolder and extracted.
+The build files remain on the system. One can delete the {\tt GoSam} subfolder after
+the installation. However, as they contain examples ({\tt ./GoSam/gosam/examples})
 and documentation, this is not recommended.
 
 
@@ -220,7 +222,7 @@ All installation options can be listed with the --help flag:\\
 \subsection{Updating an existing installation}
 
 To update an existing installation, the installer can be started again without
-any option. It determines the install location from the {\tt installer-log.ini} file
+any option. It determines the install location from the file {\tt installer-log.ini}
 which is searched for in the current directory. The script will search 
 online for updates and ask if they should be installed.
 
@@ -251,15 +253,16 @@ In principle, each step could be run on a different machine.
 \begin{enumerate}
 \item  {\bf diagram generation}: \python
 and \qgraf are used. This phase is initiated by
-running \texttt{gosam.py}.
+running \texttt{gosam.py process.in}, where {\tt process.in} contains the 
+user input for the process to be calculated.
 \item {\bf code generation}: only \form and \haggies are run.
-This phase is initiated by running \texttt{make source}.
+This phase is initiated by  \texttt{\$ make source}.
 \item {\bf compilation and running}: 
-a {\tt fortran} compiler and the chosen reduction libraries need to be present.
+a {\tt fortran} compiler and the chosen reduction libraries are used.
 This phase is initiated
-by running \texttt{make compile}. Please note that running
+by  \texttt{\$ make compile}. Please note that running
 \texttt{make compile} will invoke \texttt{make source} if the latter
-has not been run (successfully) before.
+has not been run  before, or if some of the source files are missing.
 \end{enumerate}
 
 If you use the \gosamv package, you should be aware that
@@ -285,12 +288,12 @@ versions 2{.}6, 2{.}7 and 3{.}1.
 
 \marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
 version 4{.}0 or higher is required to profit from all optimisation features.
-\form is also distributed with the \gosam-2.0 package for the user's convenience.
+\form is  distributed with the \gosam-2.0 package for the user's convenience.
 For manual download, \form is available from
 \url{http://www.nikhef.nl/~form/}.
 
 \marginlabel{\haggies (2)} The code generator \haggies{}~\cite{Reiter:2009ts}
-is also included in the \gosamv{} distribution already.
+is also included in the \gosam{} distribution already.
 Alternatively, it can also be obtained separately from the URL
 \url{http://sourceforge.net/projects/haggies/}.\\
 \haggies requires \texttt{Java} in version~1{.}5 or higher.
@@ -301,7 +304,8 @@ For one-loop calculations, at least one of these three libraries is
 required. 
 %If the program is used for the extraction of the $R_2$ term
 %only, the libraries are not required.\\
-The libraries are already distributed with the code. Alternatively, 
+The libraries are already distributed with the code and compiled by the install script.
+Alternatively, 
 \begin{itemize}
 \item \golemVC can be downloaded from\\
 \url{http://projects.hepforge.org/golem/}.
@@ -312,14 +316,15 @@ The libraries are already distributed with the code. Alternatively,
 \end{itemize}
 
 \marginlabel{\texttt{refrep.cls} (3)} The generation of documentation (optional)
-is based on the \LaTeX-class \texttt{refrep}, which appears
-not to be in the default installation of all \LaTeX{}
+is based on the \LaTeX-class \texttt{refrep}, which may not be
+present in all \LaTeX{}
 distributions. It can be downloaded from \url{http://www.ctan.org/}
 as part of the \texttt{refman} package.
 This file is only needed if one intends to run \texttt{make doc},
-which generates some documentation for the matrix element.
+which generates some documentation like drawing the diagrams, 
+listing the colour structures, etc.
 
-\attention Please note that these programs might have
+\attention Please note that some of these programs may have
 license policies which are different from the license
 applying to \gosamv. The authors of \gosamv do \emph{not}
 take any responsibility for any problems related to the
@@ -329,9 +334,9 @@ above mentioned software packages.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Setup of a Process}
-\section{Introduction}
+%\section{Introduction}
 \label{chp:setup-of-a-process}
-In order to generate the matrix element for a given process the user should
+In order to generate the matrix element for a given process, the user should
 create a process specific setup file, which we call {\em process card}. 
 
 The syntax of this file is
@@ -355,21 +360,22 @@ starting from scratch. This can be done by invoking the shell command
 \$ gosam.py --template eett.in
 \end{example}
 This generates the file \texttt{eett.in} with some documentation
-for all defined options. The options are filled with some default values,
-which can be set in a global configuration file.
-The script will search\footnote{in this order} in the \gosamv{} directory,
+for all defined options. Some options, e.g. the paths to the reduction libraries, 
+have been set by the installation script.
+The other options are filled with some default values,
+which also can be changed either in the individual process cards, 
+or in a global configuration file\footnote{
+For the latter, the script will search (in this order) in the \gosamv{} directory,
 in the user's home directory and in the current working directory for a file
 named `\texttt{.gosam}' or `\texttt{gosam.in}'. Such a file can be generated
-with the following command:
-\begin{example}
-\$ gosam-config.py > gosam.in
-\end{example}
+with the command
+{\tt \$ gosam-config.py > gosam.in}}.
 
 In the following brief tutorial it is assumed that the process
 $e^+e^-\rightarrow t\bar{t}$ should be calculated to order
-$\mathcal{O}(\alpha\alpha_s)$ (virtual QCD corrections;
-the tree-level process is of order $\mathcal{O}(\alpha))$. We neglect
-the exchange of a $Z$ or a Higgs boson and treat the electron massless.
+$\mathcal{O}(\alpha\alpha_s)$ (virtual QCD corrections).
+%the tree-level process is of order $\mathcal{O}(\alpha))$). 
+We neglect the exchange of a $Z$ or a Higgs boson and treat the electron as massless.
 The output directory is assumed to be in the relative path
 \texttt{eett}. 
 We only list the basic setup, detailed explanations of all options 
@@ -384,15 +390,13 @@ can be found in Appendix~\ref{chp:appendix-template.in}.
  4 out=   t, t~
  5 model= sm
  6 order= gs, 0, 2
- 7 zero=me
- 8 one=gs,e
- 9 qgraf.options=nosnails,notadpoles,onshell
-10 qgraf.verbatim=\
-11    true=iprop[Z, 0, 0];\n\
-12    true=iprop[H, 0, 0];
-13 extensions=samurai,numpolvec
-14 samurai.fcflags=path_to_gosam-contrib/include_files
-15 samurai.ldflags=path_to_gosam-contrib/libraries
+ 7 zero=  me
+ 8 one=   gs,e
+ 9 qgraf.verbatim=\
+10    true=iprop[Z, 0, 0];\n\
+11    true=iprop[H, 0, 0];
+12 regularisation_scheme=dred
+13 reduction_programs=ninja,golem95,samurai
 \end{lstlisting}
 
 The above lines are discussed one by one. The line numbers on the left
@@ -401,33 +405,32 @@ in the setup file.
 \begin{enumerate}
 \item[1] The option \texttt{process\_path} specifies the directory
 to which all generated files and directories are written.
-The directory which is specified here must already exist.
-\\Specification of a process path is mandatory.
+The directory which is specified here will be created if it does not exist.
 \item[2] Setting a process name is optional but recommended. All module
 names will be prefixed with the  process name (e.g. \texttt{precision}
 $\to$ \texttt{eett\_precision}). This will avoid name conflicts if at
-a later stage more than one matrix elements are linked into one
+a later stage several matrix elements are linked into one
 executable.
 \item[3--4] The options \texttt{in} and \texttt{out} specify the particles
 of the initial and final state. The particle names must be defined in the
 selected model file. As the model files usually define mnemonics for the
-particle names there might be several ways of specifying the same process.
+particle names, there are several ways of specifying the same process.
 Instead of `\lstinline[basicstyle=\ttfamily]{e+}'
 one could have written `\lstinline[basicstyle=\ttfamily]{ep}'
 or `\lstinline[basicstyle=\ttfamily]{positron}'.
 \seealso{Appendix~\ref{chp:model-files}}
 For a complete list of
 alternative particle names please refer to the documentation of the
-corresponding model file.
-\\Specifying \texttt{in} and \texttt{out} particles is mandatory.
+corresponding model file in Appendix~\ref{chp:model-files}.
+Specifying \texttt{in} and \texttt{out} particles is mandatory.
 \item[5] The option \texttt{model} specifies which model files should
 be used in order to generate and evaluate the diagrams. 
 How to import models in {\tt UFO} or {\tt LanHep} format is described in 
 section \ref{sec:model}.
 %It is only possible to refer to files that are located in
 %\texttt{\$GOLEMPATH/models}.
-\\This option is mandatory.
-\item[6] The option \texttt{order} is a comma separated list with
+The default for {\tt model} is {\tt smdiag}.
+\item[6] The keyword \texttt{order} requires a comma separated list with
 three entries. The first entry specifies a symbol that denotes a coupling
 constant. In the Standard Model file \texttt{sm} the only two possibilities
 are `\lstinline[basicstyle=\ttfamily]{gs}' for the strong coupling constant
@@ -443,12 +446,12 @@ the tree-level diagrams should be of order $g_s^0$ and the one-loop
 diagrams should be of order $g_s^2$ and an unspecified
 power of $e$ in both cases. 
 If there is no tree level, i.e. the process is loop induced, 
-the keyword \texttt{NONE} should be put as second item in the list,
+the word \texttt{NONE} should be put as second item in the list,
 instead of the tree level power of the coupling.
 
-The value of this option is
+The value of the keyword {\tt order} is
 translated into a \texttt{vsum} constraint in the file \texttt{qgraf.dat}.
-\\This option is mandatory.
+Specifying {\tt order} is mandatory.
 \item[7--8] The keywords \texttt{zero} and \texttt{one} specify
 a set of symbols that should be treated as zero (resp. one). These
 simplifications are applied at the symbolical level. Only symbols
@@ -457,33 +460,39 @@ specified here (masses, couplings, CKM-matrix elements, etc).
 In the example we specify the electron mass
 `\lstinline[basicstyle=\ttfamily]{me}' to be zero and we do not keep
 the coupling constants in the calculation explicitly ($g_s=e=1$).
-\\These options can be omitted.
-\item[9--12] The option
-\texttt{qgraf.options} creates the line
-`\lstinline[basicstyle=\ttfamily]{options=}\dots;' in the file
-\texttt{qgraf.dat}. The value of the option \texttt{qgraf.verbatim} is
+These options can be omitted. The default is that all SM 
+fermions are treated as massless excpt for the top quark and the tau lepton.
+Please note that this default setting is switched off when \gosam is used 
+as an OLP for a Monte Carlo program within the BLHA interface.\\
+\attention{\it comment: check!}
+\item[9-11] 
+%The option \texttt{qgraf.options} creates the line
+%`\lstinline[basicstyle=\ttfamily]{options=}\dots;' in the file
+%\texttt{qgraf.dat}. 
+%In our example we specify that loops of size one and self-energy insertions
+%at external lines should be omitted in the graph generation.
+The value of the option \texttt{qgraf.verbatim} is
 passed verbatim to the file \texttt{qgraf.dat}.
-In our example we specify that loops of size one and self-energy insertions
-at external lines should be omitted in the graph generation. Lines
-10--12 suppress the generation of diagrams containing Higgs and $Z$ bosons.
-\attention As these commands are passed verbatim to \qgraf no mnemonic names
+The staements suppress the generation of diagrams containing Higgs and $Z$ bosons.
+\attention As these commands are passed verbatim to \qgraf, no mnemonic names
 are allowed here, e.g. the Higgs particle has to be denoted by
 `\lstinline[basicstyle=\ttfamily]{H}' and cannot be replaced by
 `\lstinline[basicstyle=\ttfamily]{h}'.
-For a complete list of available options, please consult the
+For a complete list of available \qgraf options, please consult the
 \qgraf manual. For a complete list of particle names see 
 Appendix \ref{sec:model-files:sm} resp. the
 documentation of the model file.
-\\These options can be omitted.
-\item[13] The option \texttt{extensions} contains a list of extensions
-to the core of the program. It should contain at least one of the reduction libraries 
-
-\item[16--17] For each extension one can add options of the form
-\textit{extension}{.}\textit{name}. Currently the program is scanning
-for options of the form \textit{extension}{.}\texttt{ldflags} and
-\textit{extension}{.}\texttt{fcflags}. These options are copied
-to the contens of the according variables (\texttt{FCFLAGS} and
-\texttt{LDFLAGS}) in the makefiles.
+These options can be omitted.
+\item[12] The option \texttt{regularisation\_scheme} 
+can take the values {\tt dred} (dimensionl reduction) or 
+{\tt cdr} (conventional dimensional regularisation).
+The default is {\tt dred}.
+\item[13]  The option {\tt reduction\_programs} 
+specifies the reduction libraries which will be used. 
+Specifying several libraries allows to switch between different libraries 
+at runtime. The default is {\tt ninja}.
+%\item[14] For each extension one can add options of the form
+%\textit{extension}{.}\textit{name}. 
 \end{enumerate}
 
 In order to populate the specified process directory with files
@@ -494,77 +503,16 @@ one invokes
 
 \section{Process Directory Structure}
 
-\section{Directory Structure}
-The \gosamv{} source directory has the structure as described below:
-
-\marginlabel{\texttt{doc/}} This directory contains the documentation
-and example setup files. You can run \texttt{make} in this directory
-to generate the document \texttt{refman.pdf}; this is the document you
-are currently reading.
-
-\marginlabel{\texttt{models/}} For each implemented model this directory
-contains the \qgraf model file (no extension), a \form interface
-(\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
-only the Standard Model (\texttt{sm}) is distributed with \gosamv.
-A second version of the Standard Model (\texttt{smdiag}) implements
-diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$)
-The structure of the model files is discussed in more detail in
-Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
-FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
-can be found in the directory 
-\texttt{examples/model/}.
-
-\marginlabel{\texttt{templates/}} Contains templates for the creation
-of the files in the process directory. The contents are transformed
-by the class\\
-\texttt{golem.util.parser.Template} and its subclasses
-in \texttt{golem.templates.*}. The translation of the templates is
-controled by the file \texttt{templates.xml} of the same directory.
-
-\marginlabel{\texttt{src/python/}} All model independent \python modules
-can be found in this directory tree.
-
-\marginlabel{\texttt{src/form/}} Here one finds all \form files
-which are not part of the template.
-
-\marginlabel{\texttt{build}} This directory is created during
-building and installation of this package by running \texttt{setup.py}.
-The files in this directory are of temporary nature and can be safely
-removed.
-
-\marginlabel{\texttt{dist}} This directory is created by running
-\texttt{setup.py} with the \texttt{sdist} or \texttt{bdist} command
-and contains the distributable package files.
-To create a tar-ball from the working copy, Please run
-\begin{example}
-\$ python setup.py sdist --formats=gztar
-\end{example}
-For more information
-please run
-\begin{example}
-\$ python setup.py --help-commands
-\end{example}
-
-\marginlabel{\texttt{examples}} This directory contains some simple examples
-of validated processes.
-
-\marginlabel{\texttt{olp}} Files in this directory are used by
-\texttt{gosam.py --olp}, which is \gosamv's implementation of the
-Binoth Les Houches interface for one-loop programs (BLHA).
-Both the original standards ~\cite{Binoth:2010xt} and the new standards 
-(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv2.0.
 
 
-
-
-After running \texttt{golem} with an appropriate setup file the
+After running \texttt{gosam.py} with an appropriate setup file the
 process directory contains a number of files which are described below.
 
 \marginlabel{\tt codegen/} This directory contains files which are only
-relevant for code generation. These files will therefore not be included
+relevant for code ge\-ne\-ration. These files will therefore not be included
 in a tar-ball created with \texttt{make dist}.
 
-\marginlabel{\tt common/} Fortran files which are common to all helicity
+\marginlabel{\tt common/} Contains {\tt Fortran} files which are common to all helicity
 amplitudes and to the constructed matrix element code. This directory
 is always compiled first.
 
@@ -572,51 +520,50 @@ is always compiled first.
 \texttt{pyxotree.tex} and \texttt{pyxovirt.tex}) which are
 necessary for creating
 \texttt{doc/process.ps}, which lists all Feynman diagrams of this process, 
-together with colour and helicity info.
+together with colour and helicity information.
 
-\marginlabel{\tt helicity*} This directory contains all files for a specific
-helicity amplitude. The labeling of the helicities can be found in
+\marginlabel{\tt helicity[i]} These directories contain all files for a specific
+helicity amplitude (labelled by {\tt i}). The labeling of the helicities can be found in
 \texttt{doc/process.ps}. Before invoking \texttt{make source}, 
 this directory only contains the makefiles.
+Note that the code will automatically map equivalent helicity 
+configurations onto one single helicity and perform the corresponding book-keeping.
 
 \marginlabel{\tt matrix} This folder contains the code to combine
 the helicity amplitudes into a matrix element. Here one also finds
 the test program \texttt{test.f90}. This folder is always compiled last.
 
-\marginlabel{\tt model,model.hh,model.py} The files from the \texttt{model/}
-directory of \gosamv. The original files are renamed, e.g.
-\texttt{sm} $\to$ \texttt{model}, \texttt{sm.py} $\to$ \texttt{model.py}
-and \texttt{sm.hh} $\to$ \texttt{model.hh}.
+\marginlabel{\tt model.hh} 
+Contains model specific definitions needed by the \form code
+which is generating the symbolic expressions for the amplitude.
+The original files from the \texttt{model/} directory of \gosamv. 
+are renamed, e.g.
+\texttt{sm} $\to$ \texttt{model}, \texttt{sm.hh} $\to$ \texttt{model.hh}.
 
 \marginlabel{\tt diagrams-[01].hh} The diagram files generated
 by \qgraf.
 
 \marginlabel{\tt config.sh} This script facilitates linking with external
 programs. For details, run
-\begin{example}
-\$ sh ./config.sh -help
-\end{example}
+{\tt \$ sh ./config.sh -help}.
 
-\marginlabel{\tt process.hh} contains the process dependent definitions
-for \form. This file is used by \texttt{golem.frm} to generate the expressions
-for each diagram in every helicity configuration.
-
-\marginlabel{\tt process.dat} contains the on-shell conditions, the number of
-incoming particles and an expression for momentum conservation. This
-file is needed by the program \texttt{golem-analyzer.py}.
-
-\marginlabel{\tt func.txt} Defines dependencies between parameters of
-the model files.
+%\marginlabel{\tt process.hh} contains the process dependent definitions
+%for \form. This file is used by \texttt{codegen/golem.frm} to generate the expressions
+%for each diagram in every helicity configuration.
+%\marginlabel{\tt process.dat} contains the on-shell conditions, the number of
+%incoming particles and an expression for momentum conservation. This
+%file is needed by the program \texttt{golem-analyzer.py}.
+%\marginlabel{\tt func.txt} Defines dependencies between parameters of the model files.
 
 \marginlabel{\tt Makefile.conf} This files contains the settings
-which might need to be modified by the user. Please check the contents
-of this file if you have trouble running the makefiles.
+which are global for all helicity configurations, 
+like e.g. the paths to the reduction libraries, compiler options, etc.
 
-\marginlabel{\tt Makefile\\Makefile.source} These two files are part of
-each directory. \texttt{Makefile.source} is used when calling
+\marginlabel{\tt Makefile\\Makefile.source} 
+ \texttt{Makefile.source} is used when calling
 \texttt{make source}. Running \texttt{make} from the process
 directory will pass through all subdirectories. The following
-targets of \texttt{make} are recommended for direct use:
+targets of \texttt{make} are available for direct use:
 \begin{description}
 \item[\texttt{help}] lists all major targets.
 \item[\texttt{source}] generate source files, mainly \fortranXC files.
@@ -644,21 +591,21 @@ the \texttt{source} target if necessary.
 
 A simple test program,
 which gives the value of the amplitude at a randomly generated phase space point,
-can be found in the directory \texttt{matrix/},
-in order to compile and run it, type
+can be found in the directory \texttt{matrix/}.
+In order to compile and run it, type
 \begin{example}
-\$ cd matrix
-\$ make test.exe
+\$ cd matrix\\
+\$ make test.exe\\
 \$ ./test.exe
 \end{example}
 The program will generate a file \texttt{\_debug.xml},
-which, depending on the settings contains the values of helicity amplitudes
-and diagrams for a set of phase space points.
+which, depending on the settings, contains the values of individual  helicity amplitudes
+and diagrams for the set of phase space points used in {\tt test.f90}.
 
 \subsection{Customization}
 \paragraph{Runtime Parameters.}
 Many settings can be changed without recompiling the code, by
-creating and modifying the file \texttt{matrix/param.dat}.
+creating and modifying a file \texttt{matrix/param.dat}.
 This file has a very simple format:
 \begin{itemize}
 \item Lines starting with a comment character (`!', `\#', `;')
@@ -670,8 +617,8 @@ This file has a very simple format:
 \textit{name} = \textit{float}, \textit{float}
 \end{example}
       where the first line defines a real number and the second
-      line defines a complex number, and \textit{name} is a 
-      parameter de.
+      line defines a complex number, and \textit{name} is a defined
+      parameter.
 \item Whitespace is ignored but must not appear inside names or
       literals. Physical lines can not be continued nor can
       multiple entries appear on one line.
@@ -1995,6 +1942,67 @@ Name & Symbol & Description\\
 \tt CVTB & $V_{bt}^{\dagger}$ & --- '' ---\\
 \hline
 \end{tabular}
+
+\section{\gosam{} Directory Structure}
+The \gosamv{} source directory has the structure as described below:
+
+\marginlabel{\texttt{doc/}} This directory contains the documentation
+and example setup files. You can run \texttt{make} in this directory
+to generate the document \texttt{refman.pdf}; this is the document you
+are currently reading.
+
+\marginlabel{\texttt{models/}} For each implemented model this directory
+contains the \qgraf model file (no extension), a \form interface
+(\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
+only the Standard Model (\texttt{sm}) is distributed with \gosamv.
+A second version of the Standard Model (\texttt{smdiag}) implements
+diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$)
+The structure of the model files is discussed in more detail in
+Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
+FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
+can be found in the directory 
+\texttt{examples/model/}.
+
+\marginlabel{\texttt{templates/}} Contains templates for the creation
+of the files in the process directory. The contents are transformed
+by the class\\
+\texttt{golem.util.parser.Template} and its subclasses
+in \texttt{golem.templates.*}. The translation of the templates is
+controled by the file \texttt{templates.xml} of the same directory.
+
+\marginlabel{\texttt{src/python/}} All model independent \python modules
+can be found in this directory tree.
+
+\marginlabel{\texttt{src/form/}} Here one finds all \form files
+which are not part of the template.
+
+\marginlabel{\texttt{build}} This directory is created during
+building and installation of this package by running \texttt{setup.py}.
+The files in this directory are of temporary nature and can be safely
+removed.
+
+\marginlabel{\texttt{dist}} This directory is created by running
+\texttt{setup.py} with the \texttt{sdist} or \texttt{bdist} command
+and contains the distributable package files.
+To create a tar-ball from the working copy, Please run
+\begin{example}
+\$ python setup.py sdist --formats=gztar
+\end{example}
+For more information
+please run
+\begin{example}
+\$ python setup.py --help-commands
+\end{example}
+
+\marginlabel{\texttt{examples}} This directory contains some simple examples
+of validated processes.
+
+\marginlabel{\texttt{olp}} Files in this directory are used by
+\texttt{gosam.py --olp}, which is \gosamv's implementation of the
+Binoth Les Houches interface for one-loop programs (BLHA).
+Both the original standards ~\cite{Binoth:2010xt} and the new standards 
+(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv2.0.
+
 
 \chapter{Commented Template for a Process Setup File}
 \label{chp:appendix-template.in}
