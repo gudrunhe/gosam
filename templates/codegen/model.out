@@ -826,8 +826,7 @@ contains
       if (name.eq."aS" .or. name.eq."alphaS" .or. name.eq."alphas") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
          must_be_real = .true.
-      else[$@else$]
-      [$
+      else[$@else$][$
 @end @if$][$@if eval ( alpha_not_one .and. ewchoose )$]if (name.eq."alphaEW" .or. name.eq."alpha") then
          alpha = re
          must_be_real = .true.
