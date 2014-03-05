@@ -573,8 +573,8 @@ def workflow(conf):
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
 
-	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in  ext:
-		ext.add("numpolvec")
+	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
+		ext.append("numpolvec")
 
 
 	for prop in golem.properties.properties:
