@@ -280,11 +280,11 @@ version_samurai = Property("samurai.version",
    The version of the samurai library in use.
 
    Example:
-   samurai.version=2.1.0
+   samurai.version=2.1.1
 
    """,
    str,
-   "2.1.1")
+   "2.1.1", hidden=True)
 
 ldflags_ninja = Property("ninja.ldflags",
    """\
@@ -1031,6 +1031,7 @@ properties = [
    group_diagrams,
    sum_diagrams,
    reduction_programs,
+   polvec_method,
    extensions,
    debug_flags,
 
