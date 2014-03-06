@@ -537,14 +537,17 @@ def workflow(conf):
 	if "noderive" not in ext:
 		ext.append("derive")
 
-	if conf["regularisation_scheme"]=="dred" and not "dred" in ext:
-		ext.append("dred")
-	if conf["regularisation_scheme"]=="cdr" and "dred" in ext:
-		ext.remove("dred")
-
 	if "cdr" in ext and "dred" in ext:
 		warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
-		ext.remove("dred")
+
+	if "no-fr5" in ext:
+		warning("no-fr5 is not supported anymore.")
+
+	if not "dred" in ext:
+		ext.append("dred")
+	if conf["regularisation_scheme"]=="cdr" or "cdr" in ext:
+		conf["olp.irregularisation"]="CDR"
+
 
 
 	# We need to put out an error if we specify formopt and some other extensions

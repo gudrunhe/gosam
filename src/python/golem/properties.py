@@ -543,7 +543,6 @@ extensions = Property("extensions",
 #   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
 #                    not compatible with the formopt option.
 #   qshift       --- apply the shift of Q already at the FORM level
-#   no-fr5       --- do not generate finite gamma5 renormalisation
 #   numpolvec    --- evaluate polarisation vectors numerically
 #   extraopt     --- optimization using FORM for color and model files.
 #                     (experimental)
@@ -1167,5 +1166,6 @@ def setInternals(conf):
    if not "__OLP_MODE__" in conf:
       conf["__OLP_MODE__"] =  False
 
-   conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-       and "no-fr5" not in extensions
+   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
+   #    and "no-fr5" not in extensions
+   conf["__REQUIRE_FR5__"]  = False
