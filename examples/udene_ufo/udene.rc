@@ -18,6 +18,8 @@ true=bridge[part24,anti24,1,100];
 
 model=FeynRules, ../model/Standard_Model_UFO
 
+model.options=
+
 # There's only one non-zero helicity
 helicities=+--+
 

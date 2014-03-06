@@ -21,5 +21,3 @@ zero=w*, mD
 helicities=+-++,+-+-,+-+0
 
 regularisation_scheme=cdr
-
-#extensions=fr5

@@ -26,8 +26,6 @@ one=gs,e
 # There are only two non-zero helicities
 helicities=[dD=+-]D[eE=+-]E[g=+-]
 
-#extensions=fr5
-
 regularisation_scheme=cdr
 
 filter.nlo= madloop_filter

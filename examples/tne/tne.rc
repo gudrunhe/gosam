@@ -18,5 +18,3 @@ qgraf.verbatim=\\\n\
      true = iprop[Wp,1,1];
 
 regularisation_scheme=cdr
-
-#extensions= fr5

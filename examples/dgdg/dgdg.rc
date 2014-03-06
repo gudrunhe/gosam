@@ -16,5 +16,6 @@ zero=mU,mD
 
 helicities=++++, +++-, +-++, +-+-
 symmetries=flavour, parity
+reduction_programs=samurai,golem95
 
 regularisation_scheme=cdr

@@ -14,8 +14,6 @@ qgraf.verbatim=true=chord[U,S,C,B,0,0];
 
 helicities=[dD=+-]D[+-][+-]
 
-#extensions=fr5
-
 regularisation_scheme=cdr
 
 one=gs,e
