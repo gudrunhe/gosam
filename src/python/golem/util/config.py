@@ -752,6 +752,36 @@ class QCDLoop(Library):
 
       conf["+qcdloop.ldflags"] = "-L%s -lqcdloop" % path
 
+class Ninja(Library):
+   def __init__(self):
+      Library.__init__(self, "Ninja", "libninja")
+
+   def examine(self, hints):
+      Library.examine(self, hints)
+      if len(self.locations) > 0:
+         self.incdirs = self.findIncludeDir("ninja", "ninjago_module", hints,
+               ".mod") or self.findIncludeDir("gosam-contrib", "ninjago_module", hints,
+               ".mod")
+         if len(self.incdirs) == 0:
+            self.locations = []
+
+   def store(self, conf):
+      paths = self.getInstallationPath()
+      if len(paths) == 0:
+         return
+
+      path = self.undohome(paths[0])
+      incd = self.undohome(self.incdirs[0])
+
+      if "+installed.extensions" in conf:
+         conf["+installed.extensions"] += ", ninja"
+      else:
+         conf["+installed.extensions"] = "ninja"
+
+      conf["ninja.fcflags"] = "-I%s" % incd
+      conf["ninja.ldflags"] = "-L%s -lninja" % path
+
+
 
 class Samurai(Library):
    def __init__(self):
