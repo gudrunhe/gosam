@@ -337,15 +337,15 @@ def read_golem_dir_file(path):
 			if gv > v:
 				raise GolemConfigError(
 						"This directory has been generated with an older version "+
-						"of golem (%s).\n" % result["golem-version"]+
+						"of GoSam (%s).\n" % result["golem-version"]+
 						"Please, remove all files, including '.golem.dir' "+
-						"and rerun golem-main.py.")
+						"and rerun gosam.py.")
 			elif gv < v:
 				raise GolemConfigError(
 						"This directory has been generated with a newer version "+
-						"of golem (%s).\n" % result["golem-version"]+
+						"of GoSam (%s).\n" % result["golem-version"]+
 						"Please, remove all files, including '.golem.dir' "+
-						"and rerun golem-main.py.")
+						"and rerun gosam.py.")
 
 	return result
 

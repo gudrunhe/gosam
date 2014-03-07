@@ -19,7 +19,7 @@ process_path = Property("process_path",
    """\
    The path to which all Form output is written.
    If no absolute path is given, the path is interpreted relative
-   to the working directory from which golem-main.py is run.
+   to the working directory from which gosam.py is run.
 
    Example:
    process_path=/scratch/golem_processes/process1

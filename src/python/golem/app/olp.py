@@ -114,7 +114,7 @@ def main(argv=sys.argv):
 	This is the golem OLP client of GoSam for the initialization phase
 	of the Binoth Accord.
 
-	Usage: golem-init.py {options} {file or directory} {name=value}
+	Usage: gosam-init.py {options} {file or directory} {name=value}
 	-h, --help           -- prints this help screen
 	-d, --debug          -- prints out debug messages
 	-v, --verbose        -- prints out status messages

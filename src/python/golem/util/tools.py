@@ -715,11 +715,11 @@ def check_script_name(name):
    pname, sname = os.path.split(name)
    sbase, sext  = os.path.splitext(sname)
    flag = False
-   if sbase.lower() == "golem-main":
+   if sbase.lower() == "gosam-main":
       flag = True
       chunk1 = ""
       chunk2 = "It"
-   elif sbase.lower() == "golem-init":
+   elif sbase.lower() == "gosam-init":
       flag = True
       chunk1 = "with the option --olp "
       chunk2 = "Apart from that, it"

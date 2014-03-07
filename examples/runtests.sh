@@ -14,7 +14,7 @@ echo ------------------------------------------------------------
 
 if [ ! -f "setup.in" ]
 then
-	golem-config.py setup.in
+	gosam-config.py setup.in
 fi
 
 if [ "$#" == "0" ]; then

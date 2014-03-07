@@ -2,7 +2,7 @@
 <!-- vim: ts=3:sw=3
   -->
 <template name="GoSam default template" version="1.0"
-	description="This template is used by golem-main.py"
+	description="This template is used by gosam.py"
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
 

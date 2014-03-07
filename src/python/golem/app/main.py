@@ -76,7 +76,7 @@ def main(argv=sys.argv):
    """
    This is the main program of GoSam.
 
-   Usage: golem-main.py {options} [--template] {file or directory}
+   Usage: gosam.py {options} [--template] {file or directory}
    -h, --help           -- prints this help screen
    --olp                -- switch to OLP mode. Use --olp --help to get more options.
    -d, --debug          -- prints out debug messages

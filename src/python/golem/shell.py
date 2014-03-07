@@ -645,7 +645,7 @@ class GENERATE(Command):
             [
                "Generates the files for the current process.",
                "",
-               "This is equivalent to running golem-main.py on",
+               "This is equivalent to running gosam.py on",
                "the respective process card.",
                "",
                "If an argument is specified it must refer to the file name",
