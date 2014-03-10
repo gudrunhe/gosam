@@ -830,8 +830,7 @@ contains
 @end @if$][$@if eval ( alpha_not_one .and. ewchoose )$]if (name.eq."alphaEW" .or. name.eq."alpha") then
          alpha = re
          must_be_real = .true.
-      else[$@else$]
-      [$
+      else[$
 @end @if$][$
 @select modeltype @case sm sm_complex smehc
 $]if (name.eq."VV12") then

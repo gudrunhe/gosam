@@ -885,10 +885,7 @@ modelfile.write("if (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
 modelfile.write("         alpha = re\n")
 modelfile.write("         must_be_real = .true.\n")
 modelfile.write("      else")
-[$ @else$]
-modelfile.write("         ")[$ @end @if $][$
-@else $]modelfile.write("         ")[$
-@end @if$][$
+[$ @end @if $][$ @end @if$][$
 @select modeltype @case sm sm_complex smehc $]
 modelfile.write("if (name.eq.\"VV12\") then\n")
 modelfile.write("         call set_parameter(\"VUD\",re,im,ierr)\n")
