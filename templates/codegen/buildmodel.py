@@ -49,7 +49,8 @@ modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice\n')[$
-@else$]modelfile.write("\n")[$@end @if$][$
+@else$]
+modelfile.write("\n")[$@end @if$][$
 @end @select$]
 modelfile.write('   implicit none\n')
 modelfile.write('\n')
