@@ -10,6 +10,7 @@ import re
 import golem.model
 import golem.properties
 import golem.algorithms.helicity
+import golem.installation
 
 from golem.util.path import golem_path
 from golem.util.config import GolemConfigError
@@ -31,6 +32,8 @@ DEFAULT_CMD_LINE_ARGS = [
       ('l', "log-file=",
          "writes a log file with the current level of verbosity"),
       ('r', "report", "generate post-mortem debug file"),
+      ('', "olp", "switch to OLP mode. Use --olp --help for more options."),
+      ('', "version", "prints the current version of GoSam")
    ]
 
 POSTMORTEM_LOG = []
@@ -637,6 +640,7 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
             long_width = len(long_arg) + i
 
    help_fmt = "-%s, --%-" + str(long_width) + "s -- %s"
+   help_fmt_only_long = "--%-" + str(long_width+4) + "s -- %s"
    help_msgs = [
          "Usage: %s {options} %s" % (argv[0], extra_msg)
       ]
@@ -646,7 +650,10 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          arg_opt = "<ARG>"
       else:
          arg_opt = ""
-      help_msgs.append(help_fmt % (short_arg, long_arg + arg_opt, help_text))
+      if short_arg:
+         help_msgs.append(help_fmt % (short_arg, long_arg + arg_opt, help_text))
+      else:
+         help_msgs.append(help_fmt_only_long % (long_arg + arg_opt, help_text))
 
    default_logger = add_logger_with_level(WARNING)
 
@@ -675,6 +682,12 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          sys.exit()
       elif o in ("-r", "--report"):
          POSTMORTEM_DO = True
+      elif o in ("--version"):
+         print("GoSam %s (rev %s)" % (".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION))
+         print("Copyright (C) 2011-2014  The GoSam Collaboration")
+         print("This is free software; see the source for copying conditions.  There is NO\n" +
+               "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
+         sys.exit()
       else:
          if handler is None:
             error("Unhandled command line option: %s" % o)
@@ -702,11 +715,11 @@ def check_script_name(name):
    pname, sname = os.path.split(name)
    sbase, sext  = os.path.splitext(sname)
    flag = False
-   if sbase.lower() == "golem-main":
+   if sbase.lower() == "gosam-main":
       flag = True
       chunk1 = ""
       chunk2 = "It"
-   elif sbase.lower() == "golem-init":
+   elif sbase.lower() == "gosam-init":
       flag = True
       chunk1 = "with the option --olp "
       chunk2 = "Apart from that, it"

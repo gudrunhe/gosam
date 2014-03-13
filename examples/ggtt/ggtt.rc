@@ -7,7 +7,6 @@ out=6,-6
 
 order=QCD, 2, 4
 
-qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=chord[U,S,C,B,0,0];
 
 model=smdiag
@@ -16,3 +15,5 @@ model.options=Nfgen:1, masses: mT, widths: none
 one=gs,e
 
 filter.nlo=lambda d: not d.isScaleless()
+
+reduction_program=golem95

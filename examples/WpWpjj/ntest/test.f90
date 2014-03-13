@@ -158,12 +158,13 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    !double precision, dimension(2:3) :: irp
+   integer :: prec
 
    logical :: ok
 
    ! rescaling of all dimensionful quantities that enter the calculation
 
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
  
    write(logf,*) "GOLEM AMP(0):       ", amp(0)
    write(logf,*) "GOLEM AMP(1)/AMP(0):", amp(1)/amp(0)

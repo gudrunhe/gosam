@@ -179,7 +179,7 @@ Brackets+ c;
 #EndIf
 
 #Do c1=1,`NUMCS'
-#Do c2=1,`NUMCS'
+#Do c2=`c1',`NUMCS'
 	#$t=CC[c(`c1',`c2')];
 	#Write <`OUTFILE'.txt> "CC_`c1'_`c2' = %$;", $t
 #EndDo

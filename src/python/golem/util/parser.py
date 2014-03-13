@@ -1472,7 +1472,6 @@ class Template:
             " ~< ":     [255, lambda x, y: str(x).startswith(str(y))],
             " ~> ":     [255, lambda x, y: str(x).endswith(str(y))],
             " ~ ":      [255, lambda x, y: str(y) in str(x)],
-
             " + ":      [300, lambda x, y: x + y],
             " . ":      [300, lambda x, y: str(x) + str(y)],
             " - ":      [300, lambda x, y: x - y],
@@ -1728,7 +1727,6 @@ class Template:
          ignore_case = opts["ignore_case"].lower() in true_values
       else:
          ignore_case = False
-
       lst1 = args[:-1]
       lst2 = self._evaluate_command(args[-1], [], opts)
 
@@ -1838,15 +1836,39 @@ class Template:
       else:
          shift_args = 0
 
+      if "return_as_map" in opts: # internal usage only, may not be used in the template
+         coeff_name = "coeff"
+         args_name = "args"
+         symmetry_name = "symmetry"
+         sign_name = "sign"
+         k_name = "k"
+         i_name = "i"
+         kmap_name = "kmap"
+         imap_name = "imap"
 
-      coeff_name = self._setup_name("coeff", "coeff", opts)
-      args_name = self._setup_name("args", "args", opts)
-      symmetry_name = self._setup_name("symmetry", "symmetry", opts)
-      sign_name = self._setup_name("sign", "sign", opts)
-      k_name = self._setup_name("k", "k", opts)
-      i_name = self._setup_name("i", "i", opts)
+         props = {}
+         tworankhigher = {}
 
-      props = Properties()
+      else: # normal case
+         coeff_name = self._setup_name("coeff", "coeff", opts)
+         args_name = self._setup_name("args", "args", opts)
+         symmetry_name = self._setup_name("symmetry", "symmetry", opts)
+         sign_name = self._setup_name("sign", "sign", opts)
+         k_name = self._setup_name("k", "k", opts)
+         i_name = self._setup_name("i", "i", opts)
+
+         # corresponding entries in rank+2 (used with the derive extension)
+         kmap_name = self._setup_name("kmap", "kmap", opts)
+         imap_name = self._setup_name("imap", "imap", opts)
+
+         props = Properties()
+
+         # get all k,i from rank+2
+         new_opts = dict(opts) # copy
+         new_opts["return_as_map"]=True
+         tworankhigher = {}
+         for x in self.tens_rec_info(str(R+2),*args[1:], **new_opts):
+            tworankhigher[ tuple(x["args"]) ] = (x["k"],x["i"])
 
       props[coeff_name] = 0
       props[args_name] = []
@@ -1878,6 +1900,9 @@ class Template:
                props[k_name] = lab
                props[i_name] = i+1
                props[sign_name] = sign
+               if tuple(args) in tworankhigher:
+                  props[kmap_name] = tworankhigher[tuple(args)][0]
+                  props[imap_name] = tworankhigher[tuple(args)][1]
                yield props
 
 def unescape_value(v):

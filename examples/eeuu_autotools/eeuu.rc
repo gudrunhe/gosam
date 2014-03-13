@@ -7,7 +7,6 @@ out=2,-2
 
 order=QCD, 0, 2
 
-qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=chord[S,C,B,T,0,0];\\n\\\ntrue=iprop[H,chi,0,0];
 
 helicities=[eE=+-]E[uU=+-]U
@@ -15,6 +14,6 @@ helicities=[eE=+-]E[uU=+-]U
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT,me
 
-process.extensions=dred, autotools
+extensions=autotools
 
 debug=all

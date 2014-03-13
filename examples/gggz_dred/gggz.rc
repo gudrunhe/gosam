@@ -14,12 +14,9 @@ order=QCD, NONE, 3
 qgraf.verbatim=\
    true=iprop[S,C,B,T,0,0];\\n\\\n\
    true=chord[U,D,3,4];
-qgraf.options=onshell,notadpole,nosnail
 
 one=gs,e
 zero=w*, mD
 
 helicities=+-++,+-+-,+-+0
 
-# dred: switch on dimensional reduction
-process.extensions=dred

@@ -50,7 +50,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
 
 	supported_values = ["CHsummed", "CHaveraged",
 			"Csummed", "Caveraged",
-			"Hsummed", "Haveraged", NoTreeLevel]
+			"Hsummed", "Haveraged","CHaveragedSymm","CHsummedSymm", NoTreeLevel]
 
 	lower_case_values = {}
 	for name in supported_values:
@@ -71,6 +71,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
 
 	col_avg = True
 	hel_avg = True
+	sym_fac = False
 	no_tree = False
 
 	if NoTreeLevel in checked_values:
@@ -86,6 +87,20 @@ def MatrixElementSquareType(values, conf, ignore_case):
 	elif "CHaveraged" in checked_values:
 		if len(checked_values) > 1:
 			err_flag = True
+		else:
+			sym_fac = True
+	elif "CHaveragedSymm" in checked_values:
+		if len(checked_values) > 1:
+			err_flag = True
+		else:
+			sym_fac = True
+	elif "CHsummedSymm" in checked_values:
+		if len(checked_values) > 1:
+			err_flag = True
+		else:
+			col_avg = False
+			hel_avg = False
+			sym_fac = True
 	else:
 		if len(checked_values) != 2:
 			err_flag = True
@@ -110,10 +125,12 @@ def MatrixElementSquareType(values, conf, ignore_case):
 				"#    CHaveraged\n" + \
 				"#    Csummed Haveraged\n" + \
 				"#    Hsummed Caveraged\n" + \
+				"#    CHsummedSymm\n" + \
 				"#    GX_NoTreeLevel\n"
 	else:
 		conf["olp.include_color_average"] = col_avg
 		conf["olp.include_helicity_average"] = hel_avg
+		conf["olp.include_symmetry_factor"] = sym_fac
 		conf["olp.no_tree_level"] = no_tree
 
 		return __value_OK__
@@ -354,7 +371,16 @@ def Parameters(values, conf, ignore_case):
 	"""
 	NOT YET PART OF THE STANDARD
 	"""
-	conf["olp.parameters"] = values
+	#conf["olp.parameters"] = values
+	if values[0] == "alpha_s":
+		values.remove("alpha_s")		
+		conf["olp.alphas"] = 1
+		conf["olp.parameters"] = values
+	else:
+		conf["olp.alphas"] = 0
+		conf["olp.parameters"] = values
+		warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+		return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
 	
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):

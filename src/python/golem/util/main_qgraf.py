@@ -2,7 +2,7 @@
 
 """
 This file contains routines for the communication with QGraf
-and is only used in golem-main.py
+and is only used in gosam.py
 """
 import subprocess
 import os.path

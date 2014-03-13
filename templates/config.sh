@@ -1,36 +1,55 @@
 #!/bin/sh
 
-PWD=`dirname $0`
+PWD="$(dirname $(realpath "$0"))"
 
-FC=`sed -n 'H
-   ${
-   g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
-   p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*FC[ \\t]*='|sed 's/^[ \\t]*FC[ \\t]*=//'`
-LDFLAGS=`sed -n 'H
-   ${
-   g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
-   p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*LDFLAGS[ \\t]*='|sed 's/^[ \\t]*LDFLAGS[ \\t]*=//'`
-CFLAGS=`sed -n 'H
-   ${
-   g
-   s/\\\\[ \\t]*\\n[ \\t]*//g
-   p
-   }' $PWD/Makefile.conf|\
-   grep '^[ \\t]*FCFLAGS[ \\t]*='|sed 's/^[ \\t]*FCFLAGS[ \\t]*=//'`
+[% @if internal OLP_MODE %]
+MAKEFILECONF=$PWD/../Makefile.conf[%
+@else %]
+MAKEFILECONF=$PWD/Makefile.conf[%
+@end @if %]
 
-PROCESS_LDFLAGS=" $PWD/matrix/matrix.a[%
+FC="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FC[ \t?]*='|sed 's/^[ \t]*FC[ \t?]*=//')"
+LDFLAGS="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*LDFLAGS[ \t?]*='|sed 's/^[ \t]*LDFLAGS[ \t?]*=//')"
+CFLAGS="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
+
+[% @if extension shared %]
+PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
+	@for helicities generated %] \
+-L$PWD/helicity[%helicity%] -Wl,-rpath=$PWD/helicity[%helicity%] [%
+	@end @for helicities %] \
+-L$PWD/common -Wl,-rpath=$PWD/common \
+-lgosam_process[% process_name assuffix=\_ %]_matrix[%
+	@for helicities generated %] \
+-lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][%
+	@end @for helicities %] \
+-lgosam_process[% process_name assuffix=\_ %]_common"
+[% @else %]
+PROCESS_LDFLAGS="$PWD/matrix/matrix.a[%
 	@for helicities generated %] \
 $PWD/helicity[%helicity%]/amplitude[%helicity%].a[%
 	@end @for helicities %] \
 $PWD/common/common.a"
+[% @end @if %]
 
-PROCESS_CFLAGS=" -I$PWD/matrix[%
+PROCESS_CFLAGS="-I$PWD/matrix[%
 	@for helicities generated %] \
 -I$PWD/helicity[%helicity%][%
 	@end @for helicities %] \
@@ -56,13 +75,20 @@ while [ $# -gt 0 ]; do
       -ocflags)
               printf " $CFLAGS"
    ;;
+      -deps)[%
+	      @if extension shared %]
+	      printf ""[%
+	      @else %]
+              printf " $PROCESS_LDFLAGS"[%
+	@end @if %]
+   ;;
       -name)
               printf " [% process_name%]"
    ;;
       -fortcom)
               printf " $FC"
    ;;
-      -help)
+      -help|--help)
               echo
               echo This script helps constructing the command line
               echo for linking the matrix element with an existing
@@ -84,6 +110,7 @@ while [ $# -gt 0 ]; do
               echo "            does not include dependencies"
               echo "   -ocflags prints the compilation flags pointing to"
               echo "            include paths of dependencies"
+              echo "   -deps    prints the paths to the files used by -libs"
               echo "   -fortcom the name of the fortran compiler in use"
               echo "   -name    prints the process name"
               echo "   -help    prints this screen"

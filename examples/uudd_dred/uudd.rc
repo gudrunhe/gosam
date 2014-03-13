@@ -10,11 +10,8 @@ order=QCD, 2, 4
 qgraf.verbatim=\
 true=chord[S,C,B,T,0,0];
 
-qgraf.options=onshell,notadpole,nosnail
 
 one=gs,e
 zero=mU,mD
 
 helicities=+-+-,+--+,-++-,-+-+
-
-process.extensions=dred

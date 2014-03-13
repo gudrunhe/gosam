@@ -184,6 +184,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(0:3) :: gauge_amp, diff
    real(ki), dimension(2:3) :: irp
+   integer :: prec
 
    logical :: ok, gok
 
@@ -194,10 +195,10 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    e = sqrt(4.0d0 * pi * alpha)
 
    call shake_gauge_parameters(0.0_ki)
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
 
    call shake_gauge_parameters(5.0_ki)
-   call samplitude(vecs, scale2, gauge_amp, gok)
+   call samplitude(vecs, scale2, gauge_amp, prec, gok)
    call ir_subtraction(vecs, scale2, irp)
 
    diff = abs(rel_diff(amp, gauge_amp))
@@ -232,6 +233,7 @@ subroutine     compute_crossed_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    real(ki), dimension(2:3) :: irp
+   integer :: prec
 
    logical :: ok, gok
 
@@ -242,7 +244,7 @@ subroutine     compute_crossed_golem_result(vecs, scale2, amp)
    e = sqrt(4.0d0 * pi * alpha)
 
    call shake_gauge_parameters(0.0_ki)
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
    call ir_subtraction(vecs, scale2, irp)
 
    amp = (e**2 * gs)**2 * amp

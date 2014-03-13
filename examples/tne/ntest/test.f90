@@ -143,8 +143,9 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    double precision, dimension(0:3), intent(out) :: amp
    integer, dimension(2) :: ch = (/logf, 6/)
    integer :: ich
+   integer :: prec
 
-   call samplitude(vecs, real(scale2, dbl), amp)
+   call samplitude(vecs, real(scale2, dbl), amp, prec)
 
    do ich=1,2
       write(ch(ich),*) "GOSAM     AMP(0):       ", amp(0)

@@ -164,10 +164,11 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+   integer :: prec
 
    logical :: ok
 
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
 
    do ic = 1, 2
       ch = channels(ic)

@@ -150,12 +150,13 @@ subroutine     compute_golem_result(vecs, scale2, amp)
 
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
+   integer :: prec
 
    ! rescaling of all dimensionful quantities that enter the calculation
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
 
-   call samplitude(xvecs, xscale2, amp)
+   call samplitude(xvecs, xscale2, amp, prec)
 
    do ic = 1, 2
       ch = channels(ic)

@@ -49,7 +49,8 @@ modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice\n')[$
-@else$]modelfile.write("\n")[$@end @if$][$
+@else$]
+modelfile.write("\n")[$@end @if$][$
 @end @select$]
 modelfile.write('   implicit none\n')
 modelfile.write('\n')
@@ -207,9 +208,11 @@ modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"wtau = \", wtau\n")
 modelfile.write("   write(unit,'(A1,1x,A14)') \"#\", \"Couplings etc.:\"\n")
 modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"alphaS = \", gs*gs/4._ki/pi\n")
 modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"gs     = \", gs\n")
+[$@if ewchoose $]
 modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"alpha  = \", alpha\n")
 modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"e      = \", e\n")
 modelfile.write("   write(unit,'(A1,1x,A9,G23.16)') \"#\", \"GF     = \", GF\n")
+[$@end @if $]
 [$@select modeltype @case sm_complex smdiag_complex $]
 modelfile.write("   write(unit,'(A1,1x,A9,\"(\",G23.16,G23.16,\")\")') \"#\", \"sw     = \", sw\n")
 modelfile.write("   write(unit,'(A1,1x,A9,\"(\",G23.16,G23.16,\")\")') \"#\", \"sw2    = \", sw*sw\n")
@@ -877,17 +880,14 @@ modelfile.write("         must_be_real = .true.\n")
 modelfile.write("      else")[$
 @else $]
 modelfile.write("     ")[$
-@end @if $][$ @if alpha_not_one $]
+@end @if $][$
+@if ewchoose $][$ @if alpha_not_one $]
 modelfile.write("if (name.eq.\"alphaEW\" .or. name.eq.\"alpha\") then\n")
 modelfile.write("         alpha = re\n")
-modelfile.write("         must_be_real = .true.\n")[$
-@end @if$][$
+modelfile.write("         must_be_real = .true.\n")
+modelfile.write("      else")
+[$ @end @if $][$ @end @if$][$
 @select modeltype @case sm sm_complex smehc $]
-[$ @if eval ( gs_not_one .or. alpha_not_one ) $]
-modelfile.write("         else")[$
-@else$]
-modelfile.write("         ")[$
-@end @if$]
 modelfile.write("if (name.eq.\"VV12\") then\n")
 modelfile.write("         call set_parameter(\"VUD\",re,im,ierr)\n")
 modelfile.write("         return\n")
@@ -914,9 +914,10 @@ modelfile.write("         call set_parameter(\"VTS\",re,im,ierr)\n")
 modelfile.write("         return\n")
 modelfile.write("      elseif (name.eq.\"VV56\") then\n")
 modelfile.write("         call set_parameter(\"VTB\",re,im,ierr)\n")
-modelfile.write("         return\n")[$
+modelfile.write("         return\n")
+modelfile.write("      else")[$
 @end @select $]
-modelfile.write("      elseif (name.eq.\"Gf\") then\n")
+modelfile.write("if (name.eq.\"Gf\") then\n")
 modelfile.write("         call set_parameter(\"GF\",re,im,ierr)\n")
 modelfile.write("         return\n")
 modelfile.write("      elseif (name.eq.\"sw2\") then\n")

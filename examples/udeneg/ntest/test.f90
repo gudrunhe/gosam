@@ -151,16 +151,17 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(0:3) :: gauge_amp, diff
+   integer :: prec
 
    logical :: ok, gok
 
    ! rescaling of all dimensionful quantities that enter the calculation
 
    call shake_gauge_parameters(0.0_ki)
-   call samplitude(vecs, scale2, amp, ok)
+   call samplitude(vecs, scale2, amp, prec, ok)
 
    call shake_gauge_parameters(5.0_ki)
-   call samplitude(vecs, scale2, gauge_amp, gok)
+   call samplitude(vecs, scale2, gauge_amp, prec, gok)
 
    diff = abs(rel_diff(amp, gauge_amp))
 

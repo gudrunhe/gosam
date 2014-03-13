@@ -430,7 +430,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          ignore_case, ignore_unknown)
    if not file_ok:
       golem.util.tools.warning(
-            "Please, check configuration files for errors!")
+            "Please, check configuration and contract files for errors!")
 
    for lineo,_,_,_ in order_file.processes_ordered():
       subconf=orig_conf.copy()
@@ -560,12 +560,10 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          uext = map(lambda s: s.upper(), ext)
          if ir_scheme == "DRED":
             if "DRED" not in uext:
-               ext.append("DRED")
-               lconf[golem.properties.extensions] = ",".join(ext)
+               lconf["olp."+str(golem.properties.extensions)] = "DRED"
          if ir_scheme == "CDR":
             if "DRED" not in uext:
-               ext.append("DRED")
-               lconf[golem.properties.extensions] = ",".join(ext)
+               lconf["olp."+str(golem.properties.extensions)] = "DRED"
          else:
             if "DRED" in uext:
                i = uext.index("DRED")
@@ -660,7 +658,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")
-   f_contract.write("#@OLP GOLEM %s\n" % ".".join(map(str,
+   f_contract.write("#@OLP GoSam %s\n" % ".".join(map(str,
       golem.installation.GOLEM_VERSION)))
    f_contract.write("#@IgnoreUnknown %s\n" % ignore_unknown)
    f_contract.write("#@IgnoreCase %s\n" % ignore_case)
@@ -680,7 +678,10 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if templates == "":
       templates = golem.util.tools.golem_path("olp", "templates")
 
-
+	# This fills in the defaults where no option is given:
+   for p in golem.properties.properties:
+		if conf.getProperty(p):
+			conf.setProperty(str(p), conf.getProperty(p))
 
    golem.properties.setInternals(conf)
 
@@ -690,6 +691,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          subprocesses_conf=subprocesses_conf_short,
          contract=contract_file,
          user="olp")
+
    #---#] Process global templates:
    return result
 
@@ -718,6 +720,9 @@ def mc_specials(conf, order_file):
    elif mc_name.startswith("sherpa"):
       required_extensions.extend(["autotools"])
    elif mc_name.startswith("whizard"):
+      required_extensions.extend(["autotools"])
+   elif mc_name.startswith("amcatnlo"):
+      required_extensions.extend(["f77"])
       required_extensions.extend(["autotools"])
 
    extensions = golem.properties.getExtensions(conf)

@@ -7,6 +7,8 @@ import golem.templates.integrals_doc
 import golem.templates.multi
 import golem.templates.olp
 import golem.util.parser
+import os
+import stat
 
 from golem.util.tools import debug, warning, error, message, \
       copy_file
@@ -16,7 +18,7 @@ class TemplateFactory:
       pass
 
    def process(self, in_file, out_file, class_name, props, conf, opts,
-         filter=None):
+         filter=None,executable=False):
       debug("Transforming file %r by template class %sTemplate" % 
             (in_file, class_name))
 
@@ -33,6 +35,7 @@ class TemplateFactory:
             return result
          else:
             copy_file(in_file, out_file)
+            set_executable_bit_if_needed(out_file,executable)
       else:
          try:
             f_template = open(in_file, "r")
@@ -169,9 +172,15 @@ class TemplateFactory:
                for chunk in template(*props):
                   f_out.write(chunk)
                f_out.close()
+               set_executable_bit_if_needed(out_file,executable)
 
          except golem.util.parser.TemplateError as ex:
             error("While processing '%s': %s" % (in_file, ex))
 
 
+def set_executable_bit_if_needed(out_file,executable):
+   if executable:
+      umask=os.umask(0)
+      os.umask(umask)
+      os.chmod(out_file, (~umask) & ( os.stat(out_file).st_mode | stat.S_IXUSR | stat.S_IXGRP |  stat.S_IXOTH ))
 

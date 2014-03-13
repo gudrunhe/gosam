@@ -5,6 +5,7 @@ import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+import tempfile, shutil
 
 config={'parameters' : parameters,
         'kinematics' : kinematics,
@@ -62,8 +63,11 @@ qshift=options.qshift
 # print '----------------------------------'
 
 txtfile = open(diag_name+'.txt','r')
-abbfile = open('abbrevd'+diag+'h'+heli+'.f90', 'w')
-f90file = open(diag_name+'.f90', 'w')
+tmp_abb_handle , abb_tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
+abbfile = os.fdopen(tmp_abb_handle,"w")
+f90_tmp_handle , f90_tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
+f90file = os.fdopen(f90_tmp_handle,"w")
+
 datfilename = diag_name + '.dat'
 # import txt file
 txt_lines=[]
@@ -251,13 +255,14 @@ f90file.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
 f90file.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_gol)\n')
 f90file.write('   end function numerator_golem95\n')
 f90file.write('   !------#] function numerator_golem95:\n')[%
-@end @if %][%
+@end @if %]
+[%
 @if extension ninja %]
 f90file.write('   !------#[ subroutine numerator_ninja:\n')
 f90file.write('   subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &\n')
 f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]'+diag_name+'_ninja")\n')
 f90file.write('      use iso_c_binding, only: c_int\n')
-f90file.write('      use ninja_module, only: ki_nin\n')
+f90file.write('      use ninjago_module, only: ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
@@ -296,13 +301,8 @@ abbfile.close()
 f90file.close()
 ### additional formatting for output files
 
-postformat(diag_name + '.f90')
-postformat('abbrevd'+diag+'h'+heli+'.f90')
+postformat(abb_tmpname)
+postformat(f90_tmpname)
 
-
-
-
-
-
-
-
+shutil.move(abb_tmpname,'abbrevd'+diag+'h'+heli+'.f90')
+shutil.move(f90_tmpname,diag_name + '.f90')

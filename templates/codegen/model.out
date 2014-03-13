@@ -162,10 +162,12 @@ contains
    write(unit,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
    write(unit,'(A1,1x,A14)') "#", "Couplings etc.:"
    write(unit,'(A1,1x,A9,G23.16)') "#", "alphaS = ", gs*gs/4._ki/pi
-   write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs
+   write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs[$
+@if ewchoose$]
    write(unit,'(A1,1x,A9,G23.16)') "#", "alpha  = ", alpha
    write(unit,'(A1,1x,A9,G23.16)') "#", "e      = ", e
    write(unit,'(A1,1x,A9,G23.16)') "#", "GF     = ", GF[$
+@end @if$][$
 @select modeltype @case sm_complex smdiag_complex $]
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw     = ", sw
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw2    = ", sw*sw[$
@@ -824,15 +826,14 @@ contains
       if (name.eq."aS" .or. name.eq."alphaS" .or. name.eq."alphas") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
          must_be_real = .true.
-      else[$@else$]
-      [$
-@end @if$][$@if alpha_not_one$]if (name.eq."alphaEW" .or. name.eq."alpha") then
+      else[$@else$][$
+@end @if$][$@if eval ( alpha_not_one .and. ewchoose )$]if (name.eq."alphaEW" .or. name.eq."alpha") then
          alpha = re
-         must_be_real = .true.[$@end @if$][$
-@select modeltype @case sm sm_complex smehc$][$
-@if eval ( gs_not_one .or. alpha_not_one ) $]
-      else[$@else$]
-      [$@end @if$]if (name.eq."VV12") then
+         must_be_real = .true.
+      else[$
+@end @if$][$
+@select modeltype @case sm sm_complex smehc
+$]if (name.eq."VV12") then
          call set_parameter("VUD",re,im,ierr)
          return
       elseif (name.eq."VV23") then
@@ -858,9 +859,9 @@ contains
          return
      elseif (name.eq."VV56") then
          call set_parameter("VTB",re,im,ierr)
-         return[$
-@end @select $]
-      elseif (name.eq."Gf") then
+         return
+     else[$
+@end @select $]if (name.eq."Gf") then
          call set_parameter("GF",re,im,ierr)
          return
       elseif (name.eq."sw2") then

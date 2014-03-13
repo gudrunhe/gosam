@@ -15,7 +15,8 @@ order=QCD, 1, 3
 qgraf.verbatim=\
 true=bridge[Wp,Wm,1,100];
 
-qgraf.options=onshell,notadpole,nosnail
+model=sm
+
 
 one=gs,e
 zero=mU,mD,me
@@ -23,7 +24,3 @@ zero=mU,mD,me
 # There are only two non-zero helicities
 helicities=-+-++, -+-+-
 
-abbrev.level=diagram
-
-#process.extensions=dred,derive,numpolvec
-process.extensions=dred,derive,numpolvec,formopt

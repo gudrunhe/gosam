@@ -22,7 +22,7 @@ AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;[%
 @else %][% 
-@if internal GENERATE_NINJA_TRIPLE %]
+@if extension ninja %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -73,20 +73,13 @@ Symbol Qt2,QspQ[%
    @end @for %][%
 @end @if %];
 
-[%@if internal GENERATE_NINJA_TRIPLE %]
-* For ninja
-Vectors vecA, vecB, vecC;
-Symbols beta;
-[%@end @if %]
-
 [%@if internal GENERATE_DERIVATIVES %]
 #IfNDef `GENERATEDERIVATIVES'
 [%@end @if %]
-[%@if internal GENERATE_NINJA_DOUBLE %]
-#IfNDef `GENERATENINJADOUBLE'
-[%@end @if %]
-[%@if internal GENERATE_NINJA_TRIPLE %]
-#IfNDef `GENERATENINJATRIPLE'
+[%@if extension ninja %]
+#IfNDef `GENERATENINJAMU'
+#IfNDef `GENERATENINJAT2'
+#IfNDef `GENERATENINJAT3'
 [%@end @if %]
 
 #append <`OUTFILE'.txt>
@@ -107,50 +100,141 @@ Format O[%formopt.level%],stats=off;
 #Close <`OUTFILE'.txt>
 
 .sort
-[%@if internal GENERATE_NINJA_TRIPLE %]
+[%@if extension ninja %]
+** NINJA STUFF
 #Else
-* GENERATENINJATRIPLE
+* GENERATENINJAT3
+
+Vector vecA, vecB, vecC;
+Symbol LaurentMu2;
+Symbol LaurentP;
 
 #Append <`OUTFILE'.dat>
-#Append <`OUTFILE'3.txt>
+#Append <`OUTFILE'31.txt>
 
-#include- `OUTFILE'3.hh #nint`LAURIDX'diagram
+#include- `OUTFILE'31.hh #nint`LAURIDX'diagram
+Id abb`DIAG'(LaurentP?) = Wrapper(abb`DIAG',LaurentP);
+Id vecA?.vecB? = dotproduct(vecA,vecB);
+Bracket LaurentMu2;
+
 .sort
 ExtraSymbols,vector,acd`DIAG';
+Keep Brackets;
 Format O[%formopt.level%],stats=off;
 #Optimize nint`LAURIDX';
-#write <`OUTFILE'3.txt> "#####NinjaTriple`LAURIDX'"
-#write <`OUTFILE'3.txt> "%O";
-#write <`OUTFILE'3.txt> "brack = %e",nint`LAURIDX';
-#write <`OUTFILE'.dat> "nint`LAURIDX'diagram_terms=`optimmaxvar_'";
-#Close <`OUTFILE'3.txt>
+Bracket LaurentMu2;
+
+.sort
+#Define tpow "{`RANK'-`LAURIDX'}"
+Keep Brackets;
+Hide;
+#Do mupow=0,`RANK'-`tpow',2
+      Local nd3Pmu`mupow' = nint`LAURIDX'[LaurentMu2^{`mupow'/2}];
+#EndDo
+.sort
+
+#write <`OUTFILE'31.txt> "#####NinjaTriangles`LAURIDX'"
+#write <`OUTFILE'31.txt> "%O";
+#Do mupow=0,`RANK'-`tpow',2
+  #write <`OUTFILE'31.txt> "brack(jext`LAURIDX'mu`mupow') = %e",nd3Pmu`mupow';
+#EndDo
+#write <`OUTFILE'.dat> "nin3t`LAURIDX'diagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'31.txt>
 #Close <`OUTFILE'.dat>
 
 #EndIf
-[%
-@end @if %]
-[%@if internal GENERATE_NINJA_DOUBLE %]
+
 #Else
-* GENERATENINJADOUBLE
+* GENERATENINJAT2
+
+Vector vecA, vecB, vecC, vecA0, vecA1;
+Symbol LaurentX1, LaurentMu2;
+Symbol LaurentP, LaurentP0, LaurentP1, LaurentP2;
 
 #Append <`OUTFILE'.dat>
-#Append <`OUTFILE'2.txt>
+#Append <`OUTFILE'32.txt>
 
-#include- `OUTFILE'2.hh #nind`LAURIDX'diagram
+#include- `OUTFILE'31.hh #nint`LAURIDX'diagram
+
+Id vecA = vecA0 + vecA1*LaurentX1;
+Id LaurentP = LaurentP0 + LaurentP1*LaurentX1 + LaurentP2*LaurentX1^2;
+Id vecA1.vecB = 0;
+Id vecA1.vecC = 0;
+Id abb`DIAG'(LaurentP?) = Wrapper(abb`DIAG',LaurentP);
+Id vecA?.vecB? = dotproduct(vecA,vecB);
+Bracket LaurentX1, LaurentMu2;
+
 .sort
 ExtraSymbols,vector,acd`DIAG';
+Keep Brackets;
 Format O[%formopt.level%],stats=off;
-#Optimize nind`LAURIDX';
-#write <`OUTFILE'2.txt> "#####NinjaDouble`LAURIDX'"
-#write <`OUTFILE'2.txt> "%O";
-#write <`OUTFILE'2.txt> "brack = %e",nind`LAURIDX';
-#write <`OUTFILE'.dat> "nind`LAURIDX'diagram_terms=`optimmaxvar_'";
-#Close <`OUTFILE'2.txt>
+#Optimize nint`LAURIDX';
+Bracket LaurentX1, LaurentMu2;
+
+.sort
+#Define tpow "{`RANK'-`LAURIDX'}"
+Keep Brackets;
+Hide;
+#Do xpow=0,`RANK'-`tpow'
+#Do mupow=0,`RANK'-`tpow'-`xpow',2
+    Local nd3Px`xpow'Pmu`mupow' = nint`LAURIDX'[LaurentX1^{`xpow'}*LaurentMu2^{`mupow'/2}];
+#EndDo
+#EndDo
+.sort
+
+#write <`OUTFILE'32.txt> "#####NinjaBubbles`LAURIDX'"
+#write <`OUTFILE'32.txt> "%O";
+#Do xpow=0,`RANK'-`tpow'
+#Do mupow=0,`RANK'-`tpow'-`xpow',2
+  #write <`OUTFILE'32.txt> "brack(jext`LAURIDX'x`xpow'mu`mupow') = %e",nd3Px`xpow'Pmu`mupow';
+#EndDo
+#EndDo
+#write <`OUTFILE'.dat> "nin2t`LAURIDX'diagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'32.txt>
 #Close <`OUTFILE'.dat>
 
 #EndIf
-[%
-@end @if %]
+
+#Else
+* GENERATENINJAMU
+
+Vector vecA;
+Vector vecB;
+Symbols LaurentT;
+
+#Append <`OUTFILE'.dat>
+#Append <`OUTFILE'21.txt>
+
+#include- `OUTFILE'21.hh #ninddiagram
+Bracket LaurentT;
+.sort
+
+ExtraSymbols,vector,acd`DIAG';
+Format O[%formopt.level%],stats=off;
+#Optimize nind;
+Bracket LaurentT;
+.sort
+
+Keep Brackets;
+Hide;
+#Do pow=0,`RANK'-`LOOPSIZE', 1
+    Local nind`pow' = nind[LaurentT^{`RANK'-`LOOPSIZE'-`pow'}];
+#EndDo
+.sort
+
+#write <`OUTFILE'21.txt> "#####NinjaMusq"
+#write <`OUTFILE'21.txt> "%O";
+#Do pow=0,`RANK'-`LOOPSIZE', 1
+  #write <`OUTFILE'21.txt> "brack(`pow') = %e",nind`pow';
+#enddo
+#write <`OUTFILE'.dat> "ninddiagram_terms=`optimmaxvar_'";
+#Close <`OUTFILE'21.txt>
+#Close <`OUTFILE'.dat>
+
+#EndIf
+** END NINJA STUFF
+[% @end @if %]
+
 [%@if internal GENERATE_DERIVATIVES %]
 #Else
 * GENERATEDERIVATIVES

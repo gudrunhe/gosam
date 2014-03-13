@@ -151,6 +151,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(2:3) :: irp
+   integer :: prec
 
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
@@ -159,7 +160,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
 
-   call samplitude(xvecs, xscale2, amp)
+   call samplitude(xvecs, xscale2, amp, prec)
    call ir_subtraction(xvecs, xscale2, irp)
 
 

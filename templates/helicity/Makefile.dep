@@ -69,13 +69,7 @@ golem95h[%helicity%].[%O%]: [%
       	@if extension ninja %]
 ninjah[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.[%O%][%
-					@if internal GENERATE_NINJA_TRIPLE
-						%] d[%$_%]h[%helicity%]l13.[%O%][%
-					@end @if %][%
-					@if internal GENERATE_NINJA_DOUBLE
-						%] d[%$_%]h[%helicity%]l12.[%O%][%
-					@end @if %][%
+	d[%$_%]h[%helicity%]l1.[%O%] d[%$_%]h[%helicity%]l131.[%O%] d[%$_%]h[%helicity%]l132.[%O%] d[%$_%]h[%helicity%]l121.[%O%][%
 		@end @for %][%
 	@end @if extension ninja %][%
 	@end @select %][%

@@ -126,6 +126,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
    logical :: ok
+   integer :: prec
 
    integer :: h
 
@@ -133,11 +134,11 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    
-   call samplitude(xvecs, xscale2, res, ok, 0)
+   call samplitude(xvecs, xscale2, res, prec, ok, 0)
    amp(0) = res(0)
-   call samplitude(xvecs, xscale2, res, ok, 1)
+   call samplitude(xvecs, xscale2, res, prec, ok, 1)
    amp(1) = res(0)
-   call samplitude(xvecs, xscale2, res, ok, 2)
+   call samplitude(xvecs, xscale2, res, prec, ok, 2)
    amp(2) = res(0)
 
    do ic = 1, 2

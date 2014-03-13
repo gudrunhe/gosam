@@ -866,8 +866,8 @@ subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    @end @if %]
 
    if(samurai_verbosity > 0) then
-      write(samurai_out,*) "[golem-2.0] numetens_group[% grp %]"
-      write(samurai_out,*) "[golem-2.0] epspow=", epspow
+      write(samurai_out,*) "[GoSam] numetens_group[% grp %]"
+      write(samurai_out,*) "[GoSam] epspow=", epspow
    end if
    call samurai[%
    @if version_newer samurai.version 2.1 %][%
@@ -908,11 +908,11 @@ end subroutine tear_down_golem95
    @if extension ninja %]
 !---#[ subroutine ninja_exit:
 subroutine ninja_exit()
-  use ninja_module, only: ninja_clear_cache
+  use ninjago_module, only: ninja_clear_integral_cache
   implicit none
-  !------#[ call ninja_clear_cache():
-  call ninja_clear_cache()
-  !------#] call ninja_clear_cache():
+  !------#[ call ninja_clear_integral_cache():
+  call ninja_clear_integral_cache()
+  !------#] call ninja_clear_integral_cache():
 end subroutine ninja_exit
 !---#] subroutine ninja_exit:[%
    @end @if extension ninja %][%

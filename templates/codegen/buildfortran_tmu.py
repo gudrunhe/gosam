@@ -1,6 +1,4 @@
-[%
- ' vim: ts=3:sw=3:syntax=golem
-%]#! /usr/bin/env python
+#! /usr/bin/env python
 
 
 import sys
@@ -8,6 +6,7 @@ import os
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
+import tempfile, shutil
 
 config={'parameters' : parameters,
         'kinematics' : kinematics,
@@ -77,8 +76,9 @@ loopsize=options.loopsize
 # print '----------------------------------'
 
 txtfile = open(diag_name+'.txt','r')
-f90file = open(diag_name+'.f90', 'w')
-datfilename = diag_name.rstrip('2') + '.dat'
+tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
+f90file = os.fdopen(tmp_handle,"w")
+datfilename = diag_name[:-1] + '.dat'
 # import txt file
 txt_lines=[]
 dotprod_spva=[]
@@ -93,11 +93,11 @@ outdict=translatefile(diag_name+'.txt',config)
 acd_maxl = []
 
 n_t_terms = 0
-if ( int(rank)==int(loopsize) and int(loopsize) >= 4 ):
+if (int(rank) >= int(loopsize) and int(loopsize) >= 4):
     n_t_terms = 1
 
 for lidx in range(0,n_t_terms):
-    acdmax=getdata(datfilename)['nind{0}diagram_terms'.format(lidx)]
+    acdmax=getdata(datfilename)['ninMu2diagram_terms']
     if acdmax == '0':
         acdmax = 1
     acd_maxl.append(acdmax)
@@ -105,89 +105,103 @@ for lidx in range(0,n_t_terms):
 
 # Write abbreviation file
 
-f90file.write('module     [% process_name asprefix=\_%]'+diag_name+'\n')
-f90file.write('   ! file: '+str(os.getcwd())+diag_name+'.f90 \n')
+f90file.write('module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21\n')
+f90file.write('   ! file: '+str(os.getcwd())+diag_name[:-1]+'21.f90 \n')
 f90file.write('   ! generator: buildfortran_n3.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]config, only: ki \n')
-f90file.write('   use [% process_name asprefix=\_ %]util, only: cond, d => metric_tensor \n')
+f90file.write('   use [% process_name asprefix=\_ %]util, only: cond_t, d => metric_tensor \n')
 f90file.write('\n')
 f90file.write('   implicit none\n')
 f90file.write('   private\n')
 f90file.write('\n')
 f90file.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
-#f90file.write('   complex(ki), dimension(4), private :: vecA\n')
-#f90file.write('   complex(ki), private :: beta\n')
-[%@if extension qshift %][% @else %]
-#f90file.write('   real(ki), dimension(4), private :: qshift \n')
-[%@end @if %]
-f90file.write('   public :: numerator_d\n')
+if (int(rank)>=int(loopsize)+1):
+    f90file.write('   integer, parameter :: ninjaidxt1 = 0\n')
+    f90file.write('   integer, parameter :: ninjaidxt0 = 1\n')
+else:
+    f90file.write('   integer, parameter :: ninjaidxt0 = 0\n')
+f90file.write('   public :: numerator_tmu\n')
 f90file.write(' \n')
 f90file.write('contains \n')
+
+extra_arg = ''
+if (int(rank)>=int(loopsize)+1):
+    extra_arg = ' ninjaA1,'
+
 for lidx in range(0,n_t_terms):
-	f90file.write('!---#[ function brack_%s: \n' % lidx)
-        # T.P. removed the explicit-implicit mu^2 stuff
-	f90file.write('   pure function brack_%s(vecA,beta) result(brack)\n' % lidx)
-	f90file.write('      use [% process_name asprefix=\_ %]model \n')
-	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
-	f90file.write('      implicit none \n')
-        f90file.write('   complex(ki), dimension(4), intent(in) :: vecA\n')
-        f90file.write('   complex(ki), intent(in) :: beta\n')
-	#f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
-	#f90file.write('      complex(ki), intent(in) :: mu2\n')
-	f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
-	f90file.write('      complex(ki) :: brack\n')
+    f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
+    f90file.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+                  + extra_arg + ' brack)\n')
+    f90file.write('      use [% process_name asprefix=\_ %]model \n')
+    f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
+    f90file.write('      use [% process_name asprefix=\_ %]color \n')
+    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+    f90file.write('      implicit none \n')
+    f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA1\n')
+    f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
+    f90file.write('      complex(ki), dimension (0:*), intent(inout) :: brack\n')
+    
+    f90file.write(outdict['NinjaMu2'])
+    f90file.write('   end subroutine brack_%s\n' % lidx)
+    f90file.write('!---#] subroutine brack_%s: \n' % lidx)
 
-	f90file.write(outdict['NinjaDouble%s' % str(lidx)])
-	f90file.write('   end function brack_%s\n' % lidx)
-	f90file.write('!---#] function brack_%s: \n' % lidx)
+if (extra_arg):
+    extra_arg = ' vecA1,'
 
-f90file.write('!---#[ subroutine numerator_d:\n')
-f90file.write('   subroutine numerator_d(ncut, loc_beta, a, coeffs) &\n' )
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_d")\n'.format(diag,heli) )
+f90file.write('!---#[ subroutine numerator_tmu:\n')
+f90file.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_tmu")\n'.format(diag,heli) )
 f90file.write('      use iso_c_binding, only: c_int\n')
-f90file.write('      use ninja_module, only: ki => ki_nin\n')
+f90file.write('      use ninjago_module, only: ki => ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
 f90file.write('      implicit none \n')
 f90file.write('      integer(c_int), intent(in) :: ncut\n')
-f90file.write('      complex(ki), intent(in) :: loc_beta \n')
-f90file.write('      complex(ki), dimension(0:3), intent(in) :: a\n')
+f90file.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')
 f90file.write('      complex(ki), dimension(0:*), intent(out) :: coeffs\n')
-# ???
 f90file.write('      integer :: t1 \n')
-# ???
-f90file.write('      integer, parameter :: deg = 0 \n')
-f90file.write('      complex(ki) :: mu2\n')
-f90file.write('      complex(ki), dimension(4) :: vecA\n')[%
-      @if extension qshift %][%
-      @else %]
-#if qshift==0:
-f90file.write('	     vecA(1:4) = ' + qsign + ' a(0:3)\n')
-#	f90file.write('	     qshift(:) = 0.0_ki \n')
-#else:
-#	f90file.write('      qshift = %s \n' % qshift)[%
-      @end @if %]
+if qshift=='0':
+    if (int(rank)>=int(loopsize)):
+        f90file.write('      complex(ki), dimension(4) :: vecA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file.write('      complex(ki), dimension(4) :: vecA1\n')
+    if (int(rank)>=int(loopsize)):
+        f90file.write('	     vecA0(1:4) = ' + qsign + ' a(0:3,0)\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file.write('	     vecA1(1:4) = ' + qsign + ' a(0:3,1)\n')
+else:
+    if (int(rank)>=int(loopsize)):
+        f90file.write('      complex(ki), dimension(4) :: qshift\n')
+        f90file.write('      complex(ki), dimension(4) :: vecA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file.write('      complex(ki), dimension(4) :: vecA1\n')
+    if (int(rank)>=int(loopsize)):
+        f90file.write('      qshift = %s \n' % qshift)
+        f90file.write('	     vecA0(1:4) = ' + qsign + ' a(0:3,0)\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file.write('	     vecA1(1:4) = ' + qsign + ' a(0:3,1) - qshift(1:4)\n')
 
-#f90file.write('      beta = loc_beta\n')
-#f90file.write('      vecA = a\n')
-
-f90file.write('      if (deg.lt.0) return\n')
 f90file.write('      t1 = 0\n')
 
+# avoids some warnings
+if (n_t_terms==0):
+    f90file.write('      coeffs(0) = 0.0_ki\n')
+
 for lidx in range(0,n_t_terms):
-    f90file.write('      coeffs({0}) = (cond(epspow.eq.t1,brack_{0},vecA,loc_beta))\n'.format(lidx))
-    f90file.write('      if (deg.eq.{0}) return\n'.format(lidx))
+    f90file.write('      call cond_t(epspow.eq.t1,brack_{0},vecA0,'.format(lidx)
+                  + extra_arg + ' coeffs)\n')
 
-f90file.write('   end subroutine numerator_d \n')
-f90file.write('!---#] subroutine numerator_d: \n')
+f90file.write('   end subroutine numerator_tmu \n')
+f90file.write('!---#] subroutine numerator_tmu: \n')
 
 
-f90file.write('end module     [% process_name asprefix=\_%]'+diag_name+'\n')
+f90file.write('end module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21\n')
 f90file.close()   
 ### additional formatting for output files
 
-postformat(diag_name + '.f90')
+postformat(tmpname)
 
+shutil.move(tmpname,diag_name[:-1]+'21.f90')

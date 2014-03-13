@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
 %]module     [% process_name asprefix=\_ %]pjfry95pg
   ! Code by courtesy of Valery Yundin
-  ! adapted to golem-2.0 by T. Reiter 07/06/2011
+  ! adapted to GoSam by T. Reiter 07/06/2011
   implicit none
 
   interface

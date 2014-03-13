@@ -8,9 +8,9 @@
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
-     & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_threshold1, &
-     & PSP_chk_threshold2, PSP_chk_kfactor, reduction_interoperation, &
-     & convert_to_cdr[%
+     & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
+     & PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor, reduction_interoperation, &
+     & reduction_interoperation_rescue, convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
 @end @if %]
@@ -99,7 +99,7 @@ contains
    @end @if %]
       ! call our banner
       call banner()
-      if(PSP_check .and. PSP_rescue .and. PSP_verbosity .ge. 1) then
+      if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
          inquire(file=dir_name, exist=dir_exists)
          if(.not. dir_exists) then
             call system('mkdir BadPoints')
@@ -167,7 +167,7 @@ contains
    @if extension golem95 %]
          call tear_down_golem95()[%
    @end @if %]
-         if(PSP_check .and. PSP_rescue) then
+         if(PSP_check.and.PSP_rescue) then
             write(42,'(A6)')  "</run>"
             close(unit=42)
          endif
@@ -177,149 +177,137 @@ contains
    !---#] subroutine exitgolem :
 
    !---#[ subroutine samplitude :
-   subroutine     samplitude(vecs, scale2, amp, ok, h, precision_reached)
+   subroutine     samplitude(vecs, scale2, amp, prec, ok, h)
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%num_legs%], 4) :: vecsrot
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
+      real(ki), dimension(1:4) :: amprot, ampres, ampresrot
+      real(ki) :: rat2, kfac, zero, angle
+      real(ki), dimension(2:3) :: irp
+      integer, intent(out) :: prec
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
-      logical, intent(out), optional:: precision_reached
-      real(ki) :: rat2, sam_amp2, sam_amp3, kfac, zero
-      integer spprec1, fpprec1, i
-      real(ki), dimension(2:3) :: irp[%
-   @if extension golem95 %]
-      integer :: tmp_red_int, spprec2, fpprec2 [%
-   @end @if %]
+      integer spprec1, fpprec1, spprec2, fpprec2
+      integer tmp_red_int, icheck, i, irot
+      icheck = 1
+      angle = 1.234_ki
+      fpprec1 = 18
+      fpprec2 = 18
+      if(reduction_interoperation.eq.reduction_interoperation_rescue) & 
+           & PSP_rescue=.false.
+      tmp_red_int = reduction_interoperation
       call samplitudel01(vecs, scale2, amp, rat2, ok, h)
-      if(present(precision_reached)) then
-         precision_reached=.true.
-      end if
-      if(PSP_check) then[%
-   @if extension golem95 %]
-      tmp_red_int=reduction_interoperation[%
-   @end @if %]
-      call ir_subtraction(vecs, scale2, irp)
-      if((amp(3)-irp(2)) .ne. 0.0_ki) then
-         spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
-      else
-         spprec1 = 16
-      endif
-      if((amp(2)-rat2) .ne. 0.0_ki) then
-         fpprec1 = spprec1 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-      else
-         fpprec1 = -10
-      endif
-      if(amp(1) .ne. 0.0_ki) then
-         kfac = amp(2)/amp(1)
-      else
-         kfac = 0.0_ki
-      endif
-      if(spprec1 .lt. PSP_chk_threshold1 .and. spprec1 .gt. -10000 .or. &
-           (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
-         if(PSP_verbosity .eq. 2) write(*,*) "UNSTABLE PHASE SPACE POINT !!"[%
-   @if extension golem95 %]
-         if(PSP_rescue) then
-            reduction_interoperation = 1
-            sam_amp2 = amp(2)
-            sam_amp3 = amp(3)
-            call samplitudel01(vecs, scale2, amp, rat2, ok, h)
-            if((amp(3)-irp(2)) .ne. 0.0_ki) then
-               spprec2 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+
+      if(PSP_check) then
+         call ir_subtraction(vecs, scale2, irp)
+         if((amp(3)-irp(2)) .ne. 0.0_ki) then
+            spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+         else
+            spprec1 = 16
+         endif
+         if(amp(1) .ne. 0.0_ki) then
+            kfac = amp(2)/amp(1)
+         else
+            kfac = 0.0_ki
+         endif
+         if(spprec1.lt.PSP_chk_th1.and.spprec1.gt.PSP_chk_th2) icheck=2 ! ROTATION
+         if(spprec1.lt.PSP_chk_th2) icheck=3                            ! RESCUE
+      
+         if(icheck.eq.2) then
+            do irot = 1,[%num_legs%]
+               vecsrot(irot,1) = vecs(irot,1)
+               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle) 
+               vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+               vecsrot(irot,4) = vecs(irot,4)
+            enddo
+            call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
+            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
+               fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
+            else
+               fpprec1 = 16
+            endif
+            if(fpprec1.ge.PSP_chk_th3) icheck=1                          ! ACCEPTED
+            if(fpprec1.lt.PSP_chk_th3) icheck=3                          ! RESCUE
+         endif
+         prec = min(spprec1,fpprec1)
+
+         if(icheck.eq.3.and.PSP_rescue) then
+            icheck=1
+            reduction_interoperation = reduction_interoperation_rescue
+            call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
+            if((ampres(3)-irp(2)) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
             else
                spprec2 = 16
             endif
-            if((amp(2)-rat2) .ne. 0.0_ki) then
-               fpprec2 = spprec2 + int(log10(abs(amp(2)/(amp(2)-rat2))))
-            else
-               fpprec2 = -10
-            endif
-            if(amp(1) .ne. 0.0_ki) then
-               kfac = amp(2)/amp(1)
+            if(ampres(1) .ne. 0.0_ki) then
+               kfac = ampres(2)/ampres(1)
             else
                kfac = 0.0_ki
             endif
-            if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000 .or. &
-               (abs(kfac) > PSP_chk_kfactor .and. PSP_chk_kfactor > 0)) then
-               if(PSP_verbosity .ge. 1) then
-                  write(42,'(2x,A7)')"<event>"
-                  if(spprec2 .le. PSP_chk_threshold2 .and. spprec2 .gt. -10000) then
-                     write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
-                          &   "[% process_name %]", "' problem='sinpole","'/>"
-                  else if(abs(kfac) > PSP_chk_kfactor) then
-                     write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
-                          &   "[% process_name %]", "' problem='kfactor","'/>"
-                  end if
-                  write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
-                       &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
-                  write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
-                       &   spprec1, "' fpprec='", fpprec1, "'/>"
-                  write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precGol spprec='", &
-                       &   spprec2, "' fpprec='", fpprec2, "'/>"
-                  write(42,'(4x,A18,D23.16,A7,D23.16,A6,D23.16,A3)') "<singlePoles sam='", sam_amp3, &
-                       &   "' gol='", amp(3), "' ir='", irp(2),"'/>"
-                  write(42,'(4x,A17,D23.16,A8,D23.16,2(A7,D23.16),A3)') "<amplitude born='", amp(1), &
-                       &   "' rat2='", rat2, "' sam='", sam_amp2, "' gol='", amp(2), "'/>"
-                  write(42,'(4x,A9)') "<momenta>"
-                  do i=1,[%num_legs%]
-                     write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
-                          &     "' py='", vecs(i,3), "' pz='", vecs(i,4), "'/>"
-                  enddo
-                  write(42,'(4x,A10)')"</momenta>"
-                  write(42,'(2x,A8)')"</event>"
-               endif
-               if(present(precision_reached)) then
-                  precision_reached=.false.
-               else
-                 ! Give back a Nan so that point is discarded
-                 zero = log(1.0_ki)
-                 amp(2)= 1.0_ki/zero
-               end if
-            else
-               if(PSP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
-               if(PSP_verbosity .ge. 2) write(*,*)
-            end if
-            reduction_interoperation = tmp_red_int
-         end if[%
-   @else %]
-         if(PSP_rescue) then
-            if(PSP_verbosity .ge. 1) then
-               write(42,'(2x,A7)')"<event>"
-               if(spprec1 .le. PSP_chk_threshold1 .and. spprec1 .gt. -10000) then
-                  write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
-                       &   "[% process_name %]", "' problem='sinpole","'/>"
-               else if(abs(kfac) > PSP_chk_kfactor) then
-                  write(42,'(4x,A15,A[% process_name asstringlength=\ %],A18,A3)') "<process name='", &
-                       &   "[% process_name %]", "' problem='kfactor","'/>"
-               end if
-               write(42,'(4x,A27,I2.1,A14,I2.1,A3)') "<pspThresholds threshold1='", &
-                    &   PSP_chk_threshold1, "' threshold2='", PSP_chk_threshold2, "'/>"
-               write(42,'(4x,A17,I2.1,A10,I2.1,A3)') "<precSam spprec='", &
-                    &   spprec1, "' fpprec='", fpprec1, "'/>"
-               write(42,'(4x,A18,D23.16,A6,D23.16,A3)') "<singlePoles sam='", amp(3), &
-                    &   "' ir='", irp(2),"'/>"
-               write(42,'(4x,A17,D23.16,A8,D23.16,A7,D23.16,A3)') "<amplitude born='", amp(1), &
-                    &   "' rat2='", rat2, "' sam='", amp(2), "'/>"
-               write(42,'(4x,A9)') "<momenta>"
-               do i=1,[%num_legs%]
-                  write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), "' px='", vecs(i,2), &
-                       &     "' py='", vecs(i,3), "' pz='", vecs(i,4), "'/>"
+            if(spprec2.lt.PSP_chk_th1.and.spprec2.gt.PSP_chk_th2) icheck=2 ! ROTATION
+            if(spprec2.lt.PSP_chk_th2) icheck=3                            ! DISCARD
+            
+            if(icheck.eq.2) then
+               do irot = 1,[%num_legs%]
+                  vecsrot(irot,1) = vecs(irot,1)
+                  vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle) 
+                  vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+                  vecsrot(irot,4) = vecs(irot,4)
                enddo
-               write(42,'(4x,A10)')"</momenta>"
-               write(42,'(2x,A8)')"</event>"
+               call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
+               if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
+                  fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
+               else
+                  fpprec2 = 16
+               endif
+               if(fpprec2.ge.PSP_chk_th3) icheck=1                          ! ACCEPTED
+               if(fpprec2.lt.PSP_chk_th3) icheck=3                          ! DISCARD
             endif
-            if(.not. present(precision_reached)) then
-              precision_reached=.false.
-            else
-              ! Give back a Nan so that point is discarded
-              zero = log(1.0_ki)
-              amp(2)= 1.0_ki/zero
-            end if
-         end if[%
-   @end @if %]
+            reduction_interoperation = tmp_red_int
+            prec = min(spprec2,fpprec2)
+         endif         
+
+         if(icheck.eq.3.and.PSP_verbosity) then
+            write(42,'(2x,A7)')"<event>"
+            write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') & 
+                 &  "<process name='","[% process_name %]","'/>"
+            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A3)') &
+                 &  "<PSP_thresholds th1='", PSP_chk_th1, &
+                 &                "' th2='", PSP_chk_th2, &
+                 &                "' th3='", PSP_chk_th3,"'/>"
+            write(42,'(4x,A16,D23.16,A3)') &
+                 &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
+            write(42,'(4x,A15,I2.1,A6,I2.1,A3)') & 
+                 &  "<PSP_prec1 sp='", spprec1, "' fp='", fpprec1, "'/>"
+            write(42,'(4x,A15,I2.1,A6,I2.1,A3)') & 
+                 &  "<PSP_prec2 sp='", spprec2, "' fp='", fpprec2, "'/>"
+            write(42,'(4x,A10,D23.16,A3)') &
+                 &  "<rat2 r2='", rat2, "'/>"
+            write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
+                 &  "<amp       sp='", amp(3)      ,"' ir='", irp(2),"' fp='", amp(2)   ,"'/>"
+            write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
+                 &  "<amprot    sp='", amprot(3)   ,"' ir='", irp(2),"' fp='", amprot(2),"'/>"
+            write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
+                 &  "<ampres    sp='", ampres(3)   ,"' ir='", irp(2),"' fp='", ampres(2)   ,"'/>"
+            write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
+                 &  "<ampresrot sp='", ampresrot(3),"' ir='", irp(2),"' fp='", ampresrot(2),"'/>"
+            write(42,'(4x,A9)') "<momenta>"
+            do i=1,[%num_legs%]
+               write(42,'(8x,A8,3(D23.16,A6),D23.16,A3)') "<mom e='", vecs(i,1), &
+                    &  "' px='", vecs(i,2), &
+                    &  "' py='", vecs(i,3), &
+                    &  "' pz='", vecs(i,4), "'/>"
+            enddo
+            write(42,'(4x,A10)')"</momenta>"
+            write(42,'(2x,A8)')"</event>"
+         endif
+      else
+         prec = 16 ! If PSP_check is off, we assume point has double precision
       end if
-   end if   
-   end subroutine samplitude
+ end subroutine samplitude
    !---#] subroutine samplitude :
 
    !---#[ subroutine samplitudel01 :

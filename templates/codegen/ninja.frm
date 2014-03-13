@@ -2,11 +2,9 @@
 * This file takes the input numerator from d*h*l1.txt as a 
 * function of abb(:) 
 * and outputs the file d*h*l1d.hh which has the 
-* exansion of the numerator d`p'diagram
+* expansion of the numerator d`p'diagram
 
 off statistics;
-[% 
-@if internal GENERATE_NINJA_TRIPLE %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -23,7 +21,6 @@ AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
 S sDUMMY1;[%
-@end @if %][%
 @if extension qshift%][%
 @else %]
 CFunction j;
@@ -57,6 +54,13 @@ Symbol Qt2,QspQ[%
       @end @if %][%
    @end @for %][%
 @end @if %];
+
+S ninjaMu2;
+V ninjaQ;
+CF ninjaMP;
+S ninjaT, ninjaTi, ninjaX;
+S ninjaP, ninjaP0, ninjaP1, ninjaP2;
+V ninjaA, ninjaA0, ninjaA1, ninjaE3, ninjaE4; 
 
 
 #Include `OUTFILE'.prc
@@ -123,143 +127,153 @@ Id Qspvae[%index2%]e[%index1%] = Q.spvae[%index2%]e[%index1%];[%
 *Id p1 = Q;[%
 @end @if %]
 
-* TP: store this expression for usage in triple and double ninja
-.sort
-Hide;
-.sort
 
-********************
-* TP: triple ninja *
-********************
-Vectors vecA, vecB, vecC;
-Symbol LaurentT, LaurentTi;
 
-L nd3 = diag;
-
-* TP: from old golem.frm
-Id Q = vecA + vecC * LaurentTi + vecB * LaurentT;
-Id LaurentT * LaurentTi = 1;
-Id vecB.vecB = 0;
-Id vecC.vecC = 0;
-
-* TP: symplification
-Id LaurentTi = 0;
-
-Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
-Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
-
-* TP: from old golem.frm
-*#Define MINLaurentT "{{`LOOPSIZE'-3}-{`GLOOPSIZE'-`LOOPSIZE'}}"
-* TP: CHECK!!!
-#If `LOOPSIZE' > 3
-   #Define MINLaurentT "{`LOOPSIZE'-3}"
-#Else
-   #Define MINLaurentT "0"
-#Endif
-#Define MAXLaurentT "`RANK'"
-
-* TP: the following is taken from the old golem.frm, and modified by
-* using only LaurentT instead of fDUMMY1
-Brackets LaurentT;
-
-.sort
-Keep Brackets;
-#Do pow=`MINLaurentT',`MAXLaurentT'
-* TP: if pow < 0 then do-nothing!
-*   #If `pow' < 0
-*      Local nd3M{-`pow'} = 0;
-*   #Else
-*   #If `pow' >= 0
-      Local nd3P`pow' = nd3[LaurentT^`pow'];
-*   #EndIf
-#EndDo
-
-.sort
-#Create <`OUTFILE'3.hh>
-#Do pow=`MAXLaurentT',`MINLaurentT',-1
-* TP: commented, because if pow < 0 then I don't need it
-*   #If `pow' < 0
-*      #$nd3M{-`pow'}terms = termsin_(nd3M{-`pow'});
-*      #If `$nd3M{-`pow'}terms' > 0
-*         #Write <`OUTFILE'3.hh> \
-*              "nint{`MAXLaurentT'-`pow'}=%e",nd3M{-`pow'}
-*      #Else
-*         #Write <`OUTFILE'3.hh> \
-*              "nint{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
-*      #EndIf
-*   #Else
-**TP      #$nd3P{`pow'}terms = termsin_(nd3P{`pow'});
-**TP      #If `$nd3P`pow'terms' > 0
-         #write <`OUTFILE'3.hh> "*--#[ nint{`MAXLaurentT'-`pow'}diagram:"
-         #Write <`OUTFILE'3.hh> \
-              "L nint{`MAXLaurentT'-`pow'}=%e",nd3P{`pow'}
-         #write <`OUTFILE'3.hh> "*--#] nint{`MAXLaurentT'-`pow'}diagram:"
-**TP      #Else
-**TP         #write <`OUTFILE'3.hh> "*--#[ nint{`MAXLaurentT'-`pow'}diagram:"
-**TP         #Write <`OUTFILE'3.hh> \
-**TP              "L nint{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
-**TP         #write <`OUTFILE'3.hh> "*--#] nint{`MAXLaurentT'-`pow'}diagram:"
-**TP      #EndIf
-*   #EndIf
-#EndDo
-#Close <`OUTFILE'3.hh>
+* What follows are contents of the file ninja_laurent.frm which comes
+* with the Ninja library, slightly modified for GoSam. (T.P.)
+*
+* Changes w.r.t. ninja_laurent.frm:
+* -   `OUTFILE' --> `OUTFILE'.hh
 
 .sort
 Hide;
 .sort
 
+* Some conversions
+#define QVAR "Q"
+#define MU2VAR "Qt2"
+#define DIAGNAME "diag"
+#define DIAGN "`LOOPSIZE'"
+#define DIAGRANK "`RANK'" 
 
+S ninjaT, ninjaTi, ninjaX;
+S ninjaP, ninjaP0, ninjaP1, ninjaP2;
+V ninjaA, ninjaA0, ninjaA1, ninjaE3, ninjaE4; 
+S ninjaMu2;
+V ninjaQ;
 
-********************
-* TP: double ninja *
-********************
-#Create <`OUTFILE'2.hh>
+L ninjaDiag = `DIAGNAME';
 
-* TP: only needed for LOOPSIZE == RANK
-#If `LOOPSIZE' == `RANK'
+multiply, replace_(`QVAR',ninjaQ,`MU2VAR',ninjaMu2);
 
-Vector vecA;
-Symbols LaurentT, beta;
-L nd2 = diag;
-
-Id Q = vecA * LaurentT;[%
-@select r2 @case implicit %]
-Id Qt2 = vecA.vecA * LaurentT^2;[%
-@end @select %]
-Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
-Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
-
-#Define MINLaurentT "`LOOPSIZE'"
-#Define  MAXLaurentT "`LOOPSIZE'"
-
-Brackets LaurentT;
 .sort
-Keep Brackets;
-#Do pow=`MINLaurentT',`MAXLaurentT'
-   Local nd2P`pow' = nd2[LaurentT^`pow'];
-#EndDo
+Hide;
 .sort
 
-#Do pow=`MAXLaurentT',`MINLaurentT',-1
-**TP   #$nd2P`pow'terms = termsin_(nd2P`pow'); 
-**TP   #If `$nd2P`pow'terms' > 0
-      #write <`OUTFILE'2.hh> "*--#[ nind{`MAXLaurentT'-`pow'}diagram:"
-      #Write <`OUTFILE'2.hh> "L nind{`MAXLaurentT'-`pow'}=%e", nd2P`pow'
-      #write <`OUTFILE'2.hh> "*--#] nind{`MAXLaurentT'-`pow'}diagram:"
-**TP   #Else
-**TP      #write <`OUTFILE'2.hh> "*--#[ nind{`MAXLaurentT'-`pow'}diagram:"
-**TP      #Write <`OUTFILE'2.hh> "L nind{`MAXLaurentT'-`pow'}=NULL*epspow(0);"
-**TP      #write <`OUTFILE'2.hh> "*--#] nind{`MAXLaurentT'-`pow'}diagram:"
-**TP   #EndIf
-#EndDo
+L ninjaDiag3 = ninjaDiag;
 
-* `LOOPSIZE' == `RANK'
-#Else
-   #write <`OUTFILE'2.hh> "*--#[ nind0diagram:"
-   #Write <`OUTFILE'2.hh> "L nind0=0;"
-   #write <`OUTFILE'2.hh> "*--#] nind0diagram:"
-#EndIf
+#if `DIAGN' >= 3
+multiply, ninjaTi^{`DIAGN'-3};
+#else
+multiply, ninjaT^{3-`DIAGN'};
+#endif
 
-#Close <`OUTFILE'2.hh>
+id ninjaQ = ninjaA + ninjaE3*ninjaT + (ninjaP+ninjaMu2)*ninjaTi*ninjaE4;
+
+id ninjaT * ninjaTi = 1;
+id ninjaTi = 0;
+
+id ninjaE3.ninjaE3 = 0;
+id ninjaE4.ninjaE4 = 0;
+id ninjaE3.ninjaE4 = 1/2;
+
+Bracket ninjaT;
+.sort
+
+L ninjaDiag31 = 0
+#if `DIAGRANK' >= `DIAGN'
++ ninjaDiag3[ninjaT^4]*ninjaT^4
+#endif
++ ninjaDiag3[ninjaT^3]*ninjaT^3
++ ninjaDiag3[ninjaT^2]*ninjaT^2;
+
+#if `DIAGN' >= 3
+L ninjaDiag32 = ninjaDiag3[ninjaT^1]*ninjaT^1 + ninjaDiag3[ninjaT^0];
+#endif
+
+.sort
+
+#write <`OUTFILE'.hh> "*--#[ ninjaDiag31:"
+#write <`OUTFILE'.hh> "L ninjaDiag31 = %e", ninjaDiag31;
+#write <`OUTFILE'.hh> "*--#] ninjaDiag31:"
+
+#if `DIAGN' >= 3
+#write <`OUTFILE'.hh> "*--#[ ninjaDiag32:"
+#write <`OUTFILE'.hh> "L ninjaDiag32 = %e", ninjaDiag32;
+#write <`OUTFILE'.hh> "*--#] ninjaDiag32:"
+#else
+#write <`OUTFILE'.hh> "*--#[ ninjaDiag32:"
+#write <`OUTFILE'.hh> "L ninjaDiag32 = 0;"
+#write <`OUTFILE'.hh> "*--#] ninjaDiag32:"
+#endif
+
+.sort
+Hide;
+.sort
+
+L ninjaDiag2 = ninjaDiag3;
+
+multiply, ninjaTi;
+id ninjaT * ninjaTi = 1;
+id ninjaTi = 0;
+
+id ninjaA = ninjaA0 + ninjaA1*ninjaX;
+id ninjaP = ninjaP0 + ninjaP1*ninjaX + ninjaP2*ninjaX^2;
+id ninjaA1.ninjaE3 = 0;
+id ninjaA1.ninjaE4 = 0;
+
+Bracket ninjaT;
+.sort
+
+L ninjaDiag21 = 0
+#if `DIAGRANK' >= `DIAGN'
++ ninjaDiag2[ninjaT^3]*ninjaT^3
+#endif
++ ninjaDiag2[ninjaT^2]*ninjaT^2
++ ninjaDiag2[ninjaT]*ninjaT;
+
+L ninjaDiag22 = ninjaDiag2[ninjaT^0];
+
+.sort
+
+#write <`OUTFILE'.hh> "*--#[ ninjaDiag21:"
+#write <`OUTFILE'.hh> "L ninjaDiag21 = %e", ninjaDiag21;
+#write <`OUTFILE'.hh> "*--#] ninjaDiag21:"
+
+#write <`OUTFILE'.hh> "*--#[ ninjaDiag22:"
+#write <`OUTFILE'.hh> "L ninjaDiag22 = %e", ninjaDiag22;
+#write <`OUTFILE'.hh> "*--#] ninjaDiag22:"
+
+.sort
+
+#if (`DIAGRANK' >= `DIAGN') && (`DIAGN' >= 4)
+
+Hide;
+.sort
+
+L ninjaDiagMu2 = ninjaDiag * ninjaTi^{`DIAGN'};
+
+id ninjaQ = ninjaA0 * ninjaT
+#if (`DIAGRANK' > `DIAGN')
+ + ninjaA1
+#endif
+;
+id ninjaMu2 = ninjaA0.ninjaA0 * ninjaT^2;
+id ninjaT * ninjaTi = 1;
+id ninjaTi = 0;
+
+.sort
+
+#write <`OUTFILE'.hh> "*--#[ ninjaDiagMu2:"
+#write <`OUTFILE'.hh> "L ninjaDiagMu2 = %e", ninjaDiagMu2;
+#write <`OUTFILE'.hh> "*--#] ninjaDiagMu2:"
+
+#else
+
+#write <`OUTFILE'.hh> "*--#[ ninjaDiagMu2:"
+#write <`OUTFILE'.hh> "L ninjaDiagMu2 = 0;"
+#write <`OUTFILE'.hh> "*--#] ninjaDiagMu2:"
+
+#endif
 
 .end

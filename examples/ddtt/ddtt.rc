@@ -10,11 +10,10 @@ order=QCD, 2, 4
 model=smdiag
 model.options=masses: mT, widths: none
 
-qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=chord[U,S,C,B,0,0];
 
 helicities=[dD=+-]D[+-][+-]
 
-#process.extensions=fr5
+regularisation_scheme=cdr
 
 one=gs,e

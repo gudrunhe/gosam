@@ -15,13 +15,14 @@ order=QCD, 0, 2
 qgraf.verbatim=\
 true=bridge[part24,anti24,1,100];
 
-qgraf.options=onshell,notadpole,nosnail
 
 model=FeynRules, ../model/Standard_Model_UFO
+
+model.options=
 
 # There's only one non-zero helicity
 helicities=+--+
 
 # Note: we have not implemented fr5 in the UFO model file yet.
-        Therefore we use dred
-process.extensions=dred
+#        Therefore we use dred (default)
+#regularisation_scheme=dred 

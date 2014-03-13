@@ -143,6 +143,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    real(ki), dimension(5, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+   integer :: prec
 
    logical :: ok
 
@@ -158,7 +159,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    print*, "Gamma_Z = ", wZ
    print*, "Gamma_t = ", wT
 
-   call samplitude(vecs, real(scale2, dbl), amp, ok)
+   call samplitude(vecs, real(scale2, dbl), amp, prec, ok)
 
    do ic = 1, 2
       ch = channels(ic)
