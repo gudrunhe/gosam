@@ -362,7 +362,7 @@ form_bin = Property("form.bin",
       form.bin=/home/my_user_name/bin/form
    """,
    str,
-   "form")
+   "tform")
 
 form_threads = Property("form.threads",
    """\

@@ -562,16 +562,17 @@ class Component:
          if d not in result:
             result.append(d)
 
-      for path in [
-            os.path.join("/usr", suffix),
-            os.path.join("/usr", "local", suffix),
-            os.path.join(user_home, suffix),
-            os.path.join(user_home, "local", suffix),
-            os.path.join(golem_dir, suffix),
-            os.path.join(curdir, suffix),
-            os.path.join(curdir, "local", suffix)]:
+      for path in [ os.path.join(golem_dir, suffix) ]:
          if path not in result:
             result.append(path)
+
+      if suffix == "bin":
+         ldp = os.getenv("PATH")
+         if ldp:
+            for path in ldp.split(os.path.pathsep):
+               if path not in result:
+                  result.append(path)
+
 
       if suffix == "lib":
          ldp = os.getenv("LD_LIBRARY_PATH")
@@ -589,12 +590,17 @@ class Component:
                if guess_path not in result:
                   result.append(guess_path)
 
-      if suffix == "bin":
-         ldp = os.getenv("PATH")
-         if ldp:
-            for path in ldp.split(os.path.pathsep):
-               if path not in result:
-                  result.append(path)
+      for path in [
+            os.path.join(golem_dir, suffix),
+            os.path.join("/usr", suffix),
+            os.path.join("/usr", "local", suffix),
+            os.path.join(user_home, suffix),
+            os.path.join(user_home, "local", suffix),
+            os.path.join(curdir, suffix),
+            os.path.join(curdir, "local", suffix)]:
+         if path not in result:
+            result.append(path)
+
       return result
 
 class Library(Component):
