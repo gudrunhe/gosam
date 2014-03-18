@@ -516,7 +516,7 @@ def workflow(conf):
 					"Please, make sure that at least one of the following",
 					"is added to 'extensions':",
 					", ".join(golem.properties.REDUCTION_EXTENSIONS),)
-			conf["gosam-auto-reduction.extensions"] = "samurai"
+			conf["gosam-auto-reduction.extensions"] = "ninja,golem95"
 	if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
 			conf["gosam-auto-reduction.extensions"]=""
 

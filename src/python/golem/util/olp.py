@@ -621,6 +621,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
          try:
             golem.util.main_misc.workflow(subprocess_conf)
+            merge_extensions(subprocess_conf,conf)
+
             golem.util.main_misc.generate_process_files(subprocess_conf,
                   from_scratch)
 
@@ -732,4 +734,18 @@ def mc_specials(conf, order_file):
          add_extensions.append(ext)
    if len(add_extensions) > 0:
       conf.setProperty("%s-auto.extensions" % mc_name,
+            ",".join(add_extensions))
+
+def merge_extensions(conf_a,conf_b):
+   """ merge extensions from conf_a into conf_b """
+
+   extensions_a = golem.properties.getExtensions(conf_a)
+   extensions_b = golem.properties.getExtensions(conf_b)
+
+   add_extensions=[]
+   for ext in extensions_a:
+      if ext and ext not in extensions_b and ext not in add_extensions:
+         add_extensions.append(ext)
+   if add_extensions:
+      conf_b.setProperty("merge-auto.extensions",
             ",".join(add_extensions))
