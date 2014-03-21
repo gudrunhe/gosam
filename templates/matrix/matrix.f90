@@ -883,16 +883,16 @@ contains
          if(corrections_are_qcd) then[%
          @select QCD_COUPLING_NAME
          @case 0 1 %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 2.0_ki / pi[%
+            amp(:) = amp(:) * nlo_coupling / 2.0_ki / pi[%
          @else %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
+            amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi[%
          @end @select %]
          else[%
          @select QED_COUPLING_NAME
          @case 0 1 %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 2.0_ki / pi[%
+            amp(:) = amp(:) * nlo_coupling / 2.0_ki / pi[%
          @else %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
+            amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi[%
          @end @select %]
          end if
       end select
