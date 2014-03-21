@@ -531,21 +531,7 @@ contains
       case(1)
          amp(2:4) = amp(2:4) * nlo_coupling
       case(2)
-         if(corrections_are_qcd) then[%
-         @select QCD_COUPLING_NAME
-         @case 0 1 %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 2.0_ki / pi[%
-         @else %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
-         @end @select %]
-         else[%
-         @select QED_COUPLING_NAME
-         @case 0 1 %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 2.0_ki / pi[%
-         @else %]
-            amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
-         @end @select %]
-         end if
+         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi
       end select
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
@@ -880,21 +866,7 @@ contains
       case(1)
          amp(:) = amp(:) * nlo_coupling
       case(2)
-         if(corrections_are_qcd) then[%
-         @select QCD_COUPLING_NAME
-         @case 0 1 %]
-            amp(:) = amp(:) * nlo_coupling / 2.0_ki / pi[%
-         @else %]
-            amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi[%
-         @end @select %]
-         else[%
-         @select QED_COUPLING_NAME
-         @case 0 1 %]
-            amp(:) = amp(:) * nlo_coupling / 2.0_ki / pi[%
-         @else %]
-            amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi[%
-         @end @select %]
-         end if
+         amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi
       end select
    end subroutine ir_subtraction
    !---#] subroutine ir_subtraction :
