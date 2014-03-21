@@ -464,6 +464,8 @@ def expand_parameter_list(prop, conf):
 
    new_values = set([])
    for value in lst:
+      if not value:
+         continue
       if "*" in value:
          pat = value.replace("*", r'(\w*)') + "$"
          cpat = re.compile(pat)
