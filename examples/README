@@ -2,7 +2,7 @@ OVERVIEW
 ========
 
 This file contains a list of processes that has been used to validate
-gosam.
+GoSam.
 
 gggg       g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^4
            Purely gluonic process without quark-loops, only one helicity.
@@ -57,7 +57,7 @@ setup.in.template:
    that file.
 
    If no such file exists, only the default values and the values
-   from config files (such as ${HOME}/.golem) are used.
+   from config files are used.
 
 summarize.sh:
    By running summarize.sh the user obtains a printout of the status
@@ -70,12 +70,12 @@ runtests.sh:
 HOW TO RUN THE EXAMPLES
 =======================
 
-After gosam has been successfully installed via the setup script
-(python setup.py install) each example can be run by executing 'make test'
-for the respective subdirectory. The script 'runtests.sh' can be invoked to
-run all tests. The script 'summarize.sh' gives a one-line summary for each
-test that has been run so far. By setting up the file 'setup.in' (see
-setup.in.template) one can impose default options for all tests.
+After GoSam has been successfully installed, each example can be run by
+executing 'make test' for the respective subdirectory. The script 'runtests.sh'
+can be invoked to run all tests. The script 'summarize.sh' gives a one-line
+summary for each test that has been run so far. By setting up the file
+'setup.in' (see setup.in.template) one can impose default options for all
+tests.
 
 AUTHORS
 =======
@@ -83,5 +83,4 @@ AUTHORS
 In case you encounter failing tests, please, contact the authors. Bug reports,
 including the corresponding 'ntest/test.log' can be sent to
 
-Thomas Reiter <thomasr@nikhef.nl>
-
+The GoSam collaboration http://gosam.hepforge.org/

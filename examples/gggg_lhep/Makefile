@@ -1,8 +1,8 @@
 
 PROCESS=gggg
 
-GOLEM=gosam.py
-GOLEM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
+GOSAM=gosam.py
+GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
 
@@ -27,10 +27,10 @@ golem: $(PROCESS).log
 $(PROCESS).log: $(PROCESS).in
 	@echo setting up ngolem ...
 	@if [ ! -d ngolem ]; then mkdir ngolem; fi
-	$(GOLEM) -z $< -l $@
+	$(GOSAM) -z $< -l $@
 
 $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
-	$(GOLEM) $(GOLEM_RC) -t $@
+	$(GOSAM) $(GOSAM_RC) -t $@
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
