@@ -4,6 +4,7 @@ process_path=ngolem
 # PDG codes # Gluon: 21
 in=21,21
 out=21,21
+model.options=
 
 order=QCD, 2, 4
 

@@ -1,5 +1,6 @@
 process_name=udene
 process_path=ngolem
+model.options=
 
 # PDG codes
 # u: 2, d: 1

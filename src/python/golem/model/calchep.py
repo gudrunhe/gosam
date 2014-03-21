@@ -781,7 +781,7 @@ from math import sqrt
 		max_rlen = str(max_rlen+2)
 		line_fmt = "\t\t%" + max_len + "r:" + \
 			" Particle(%" + max_len + "r, %2d, %" + max_mlen + "r, %2d," + \
-			" %" + max_len + "r, %r, %r)"
+			" %" + max_len + "r, %r, %r, %r)"
 
 		for row in self.expand_field_list(prtcls, prefix):
 			row[3]  = int(row[3])
@@ -795,14 +795,15 @@ from math import sqrt
 
 			name = names[row[1]] # qgraf_escape(row[1])
 			anti_name = names[row[2]] # qgraf_escape(row[2])
+			charge = 0 #FIXME not yet implemented
 
 			if(row[1] != row[2]):
 				f.write(line_fmt %
 					(anti_name, anti_name, -row[3], row[4], -row[6], name,
-						row[5], -row[10]))
+						row[5], -row[10], -charge))
 				f.write(",\n")
 			f.write(line_fmt %
-				(name, name, row[3], row[4], row[6], anti_name, row[5], row[10]))
+				(name, name, row[3], row[4], row[6], anti_name, row[5], row[10], charge))
 		f.write("\n}\n\n")
 
 		f.write("""\
@@ -837,13 +838,13 @@ mnemonics = {
 			f.write("}\n\n")
 
 		counter = [0]
-		fsubs = {}
+		self.fsubs = {}
 		fprefix = prefix + "float"
 		f.write("functions = {\n")
 		f.write("\t'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'")
 		for row in self.func_list(funcs, prefix):
 			name = row[0]
-			expr = row[1].replaceFloats(fprefix, fsubs, counter)
+			expr = row[1].replaceFloats(fprefix, self.fsubs, counter)
 			f.write(",\n")
 			if len(row) > 2:
 				f.write("\t\t# %s\n" % row[2])
@@ -860,7 +861,7 @@ mnemonics = {
 		f.write("\t\t'Nf': '5.0',")
 		f.write("\t\t'Nfgen': '-1.0'")
 
-		for name, value in fsubs.items():
+		for name, value in self.fsubs.items():
 			f.write(",\n")
 			f.write("\t\t%r: " % name)
 			f.write("'")
@@ -878,7 +879,7 @@ mnemonics = {
 		f.write("\t\t'Nf': 'N_f',\n")
 		f.write("\t\t'Nfgen': 'N_f^{gen}'")
 
-		for name, value in fsubs.items():
+		for name, value in self.fsubs.items():
 			f.write(",\n")
 			f.write("\t\t%r: %r" % (name, "\\text{" + name + "}"))
 			
@@ -888,7 +889,7 @@ mnemonics = {
 
 		f.write("types = {\n")
 		f.write("\t\t'NC': 'R', 'Nf': 'R', 'Nfgen': 'R', 'Nfrat': 'R'")
-		for name in fsubs.iterkeys():
+		for name in self.fsubs.iterkeys():
 			f.write(",\n")
 			f.write("\t\t%r: 'RP'" % name)
 		for row in self.var_list(vars, prtcls, prefix):
@@ -1009,6 +1010,10 @@ mnemonics = {
 			if len(row) > 2:
 				f.write("* %s\n" % row[2])
 			f.write("Symbol %s;\n" % row[0])
+
+		for row in self.fsubs:
+			f.write("Symbol %s;\n" % row)
+
 		f.write("*---#] Parameters :\n")
 		f.write("*---#] Symbol Definitions :\n")
 
