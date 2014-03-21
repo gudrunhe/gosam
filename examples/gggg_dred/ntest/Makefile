@@ -1,9 +1,9 @@
 
 FC=$(shell sh ../ngolem/config.sh -fortcom)
 CFLAGS=$(shell sh ../ngolem/config.sh -cflags) -I../nfort/
-LDFLAGS=../ngolem/matrix/matrix.a \
-	$(shell sh ../ngolem/config.sh -libs) \
+LDFLAGS=$(shell sh ../ngolem/config.sh -libs) \
 	../nfort/four_gluon.o
+DEPS=$(shell sh ../ngolem/config.sh -deps)
 
 .PHONY: compile test clean
 
@@ -12,8 +12,8 @@ compile: test_program
 test.o: test.f90
 	$(FC) $(CFLAGS) -o $@ -c $<
 
-test_program: test.o
-	$(FC) -o $@ $+ $(LDFLAGS)
+test_program: test.o $(DEPS)
+	$(FC) -o $@ $< $(LDFLAGS)
 
 test: test.log
 

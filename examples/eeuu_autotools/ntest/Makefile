@@ -5,7 +5,7 @@ LDFLAGS=$(shell sh ../ngolem/config.sh -libs)
 
 OBJECTS=test.o
 
-.PHONY: compile test
+.PHONY: compile test clean
 
 compile: test_program
 
