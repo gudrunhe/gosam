@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% process_name asprefix=\_ %]config, only: ki, logfile
+   use [% process_name asprefix=\_ %]config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
@@ -32,6 +32,9 @@
    call initgolem()
 
    call random_seed
+
+   nlo_prefactors=0  ! Do not include any NLO prefactors in order to recognize
+                     ! rational numbers for the pole coefficients
 
    call cpu_time(t1)
    do ievt = 1, NEVT
