@@ -1,12 +1,12 @@
 program test
-use ddtt_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
-use ddtt_matrix, only: initgolem, exitgolem
-use ddtt_kinematics, only: inspect_kinematics, init_event
+use bghb_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
+use bghb_matrix, only: initgolem, exitgolem
+use bghb_kinematics, only: inspect_kinematics, init_event
 implicit none
 
 ! unit of the log file
 integer, parameter :: logf = 27
-integer, parameter :: golemlogf = 19
+integer, parameter :: gosamlogf = 19
 
 integer, dimension(2) :: channels
 integer :: ic, ch
@@ -18,7 +18,7 @@ logical :: success
 real(ki), dimension(4, 4) :: vecs
 real(ki) :: scale2
 
-double precision, dimension(0:3) :: golem_amp, ref_amp, diff
+double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
 channels(2) = 6
@@ -27,7 +27,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="gosam.log", unit=golemlogf)
+   open(file="gosam.log", unit=gosamlogf)
 end if
 
 call setup_parameters()
@@ -38,10 +38,10 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 
-call compute_golem_result(vecs, scale2, golem_amp)
+call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -80,42 +80,49 @@ end if
 close(unit=logf)
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   close(unit=golemlogf)
+   close(unit=gosamlogf)
 end if
 
 call exitgolem()
 
 contains
 
-pure subroutine load_reference_kinematics(vecs, scale2)
-   use ddtt_kinematics, only: adjust_kinematics
-   use ddtt_model, only: mT
+!pure 
+subroutine load_reference_kinematics(vecs, scale2)
+   use bghb_kinematics, only: adjust_kinematics, dotproduct
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
- 
-   vecs(1,:) = (/ 74.7646520969852_ki, 0.0_ki, 0.0_ki, 74.7646520969852_ki /)
-   vecs(2,:) = (/ 6067.88254935176_ki, 0.0_ki, 0.0_ki, -6067.88254935176_ki /)
-   vecs(3,:) = (/ 5867.13826404309_ki,  16.7946967430656_ki, &
-               &  169.437140279981_ki, -5862.12966020487_ki /)
-   vecs(4,:) = (/ 275.508937405653_ki, -16.7946967430656_ki, &
-               & -169.437140279981_ki, -130.988237049907_ki /)
-   ! In order to increase the precision of the kinematical
-   ! constraints (on-shell conditions and momentum conservation)
-   ! we call the following routine.
+
+   ! This kinematics was specified in 1103.0621v1 [hep-ph]
+   vecs(1,:) = (/250.0_ki,  0.0_ki, 0.0_ki,  250.0_ki/)
+   vecs(2,:) = (/250.0_ki,  0.0_ki, 0.0_ki, -250.0_ki/)
+   vecs(3,:) = (/264.4_ki, -83.84841332241601_ki, -86.85350630148753_ki, &
+             &  -202.3197272300720_ki/)
+   vecs(4,:) = (/235.6_ki,  83.84841332241601_ki,  86.85350630148753_ki, &
+             &   202.3197272300720_ki/)
+
    call adjust_kinematics(vecs)
 
-   scale2 = mT*mT
-
+   scale2 = 91.188_ki ** 2
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ddtt_config, only: renormalisation, convert_to_cdr !, &
-        !     & samurai_test, samurai_verbosity, samurai_scalar
-   use ddtt_model, only: Nf, Nfgen, mT
+   use bghb_config, only: renormalisation !, &
+     !        & samurai_test, samurai_verbosity, samurai_scalar, &
+     !        & samurai_group_numerators, &
+     !        & reduction_interoperation
+   use bghb_model, only: mBMS, mH, sw, cw, alpha, mW, mZ
    implicit none
 
+   real(ki), parameter :: vev = 246.2185_ki
+   real(ki), parameter :: my_sw = 0.47229_ki
+   real(ki), parameter :: pi =  3.14159265358979323846264338327948_ki
+
    renormalisation = 1
+
+   !reduction_interoperation = 0
+   !samurai_group_numerators = .true.
 
    ! settings for samurai:
    ! verbosity: we keep it zero here unless you want some extra files.
@@ -125,43 +132,28 @@ subroutine     setup_parameters()
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 1
 
-   mT = 172.5_ki
+   alpha = 1.0_ki/(4.0_ki*pi)
+   mBMS = 2.937956_ki
+   mH = 120.0_ki
+   mW = vev / my_sw * 0.5_ki
+   mZ = mW / sqrt(1.0_ki - my_sw*my_sw)
 
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
-
-   convert_to_cdr = .false.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
-   use ddtt_matrix, only: samplitude
-   use ddtt_model, only: mT
+subroutine     compute_gosam_result(vecs, scale2, amp)
+   use bghb_matrix, only: samplitude
+   use bghb_model, only: mW, wW, mH, mBMS
    implicit none
-   ! The amplitude should be a homogeneous function
-   ! in the energy dimension and scale like
-   !     A(Q*E) = A(E)
-   ! We use this fact as
-   !  - an additional test for the amplitude
-   !  - to enhance precision
-   real(ki), parameter :: Q = 172.0_ki
-   !real(ki), parameter :: Q = 1.0E+00
 
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
-
-   real(ki), dimension(4, 4) :: xvecs
-   real(ki) :: xscale2
    integer :: prec
 
-   ! rescaling of all dimensionful quantities that enter the calculation
-   xvecs = vecs / Q
-   xscale2 = scale2 / Q ** 2
-   mT = mT / Q
+   call samplitude(vecs, scale2, amp, prec)
 
-   call samplitude(xvecs, xscale2, amp, prec)
-
-   mT = mT * Q
+   ! Renormalization of the Yukawa Coupling
+   amp(2) = amp(2) - 4.0_ki * amp(0)
 
    do ic = 1, 2
       ch = channels(ic)
@@ -170,36 +162,44 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
       write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
-   use ddtt_kinematics, only: dotproduct, lo_qcd_couplings
-   use ddtt_matrix, only: ir_subtraction
-   use ddtt_model, only: mT
-   use ddtt_color, only: CA, TR
+   use bghb_kinematics, only: dotproduct
+   use bghb_matrix, only: ir_subtraction
+   use bghb_model, only: mW, wW, sw, NC, mH, mBMS, alpha
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
+
+   double precision :: s, t, u, l, yB, vev
    double precision, dimension(2:3) :: irp
 
-   double precision, parameter :: alphas = 0.13d0
-   double precision :: s, tau1, tau2, rho
-
-   s =  2.0d0 * dotproduct(vecs(1,:), vecs(2,:))
-   tau1 = 2.0d0 * dotproduct(vecs(1,:), vecs(3,:)) / s
-   tau2 = 2.0d0 * dotproduct(vecs(2,:), vecs(3,:)) / s
-   rho = 4.0d0 * mT**2 / s
+   ! MCFM/MadLoop results
+   double precision, parameter :: pi = &
+   & 3.14159265358979323846264338327948_ki
+   double precision, parameter :: alpha_s = 0.118d0
+   double precision, parameter :: a0 =  3.11285493372811162D-007
+   double precision, parameter :: c0 = -1.4107608671538634D-007
+   double precision, parameter :: c1 =  6.99063829676930686D-008
+   double precision, parameter :: c2 = -3.31275018959846227E-008
 
    call ir_subtraction(vecs, scale2, irp)
 
-   ! Formula from Table 10.2 in Ellis, Stirling, Webber: ``QCD and Collider Physics''
-   amp(0) = 4.0d0/9.0d0 * (tau1**2 + tau2**2 + rho/2.0d0)
-   
-   ! MCFM
-   amp(1) = -21.193567709324736D0 * amp(0)
-   amp(2:3) = irp(2:3)
+   s =  2.0d0 * dotproduct(vecs(1,:), vecs(2,:))
+   t = -2.0d0 * dotproduct(vecs(1,:), vecs(3,:)) + mH**2
+   u = mH**2 - s - t
+
+   vev = 0.5d0 * sw * mW
+   yB = mBMS / vev
+
+   amp(0) = - 0.25_ki * yB**2 * (mH**4 + u**2) / s / t / 24.0d0
+
+   amp(1) = c0/a0 * amp(0)/(alpha_s/2/pi)
+   amp(2) = c1/a0 * amp(0)/(alpha_s/2/pi)
+   amp(3) = -17.0d0/3.0d0 * amp(0)
 
    do ic = 1, 2
       ch = channels(ic)

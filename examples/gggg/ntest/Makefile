@@ -1,9 +1,9 @@
 
-FC=$(shell sh ../ngolem/config.sh -fortcom)
-CFLAGS=$(shell sh ../ngolem/config.sh -cflags) -I../nfort/
-LDFLAGS=$(shell sh ../ngolem/config.sh -libs) \
+FC=$(shell sh ../ngosam/config.sh -fortcom)
+CFLAGS=$(shell sh ../ngosam/config.sh -cflags) -I../nfort/
+LDFLAGS=$(shell sh ../ngosam/config.sh -libs) \
 	../nfort/four_gluon.o
-DEPS=$(shell sh ../ngolem/config.sh -deps)
+DEPS=$(shell sh ../ngosam/config.sh -deps)
 
 .PHONY: compile test clean
 

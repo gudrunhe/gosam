@@ -5,23 +5,23 @@ GOSAM=gosam.py
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-.PHONY: all golem ntest test clean
+.PHONY: all golem test test clean very-clean
 
-all: golem ntest
+all: golem test
 
-test: ntest
+test: test
 	@echo Running test programm
-	$(MAKE) -C ntest test
+	$(MAKE) -C test test
 
-ntest: golem
-	$(MAKE) -C ntest compile
+test: golem
+	$(MAKE) -C test compile
 
 golem: $(PROCESS).log
-	$(MAKE) -C ngolem compile
+	$(MAKE) -C virtual compile
 
 $(PROCESS).log: $(PROCESS).in filter.py
-	@echo setting up ngolem ...
-	@if [ ! -d ngolem ]; then mkdir ngolem; fi
+	@echo setting up virtual ...
+	@if [ ! -d virtual ]; then mkdir virtual; fi
 	$(GOSAM) -z $< -l $@
 
 $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
@@ -29,6 +29,12 @@ $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C ntest clean
-	rm -f ngolem/.golem.dir
-	$(MAKE) -C ngolem clean
+	$(MAKE) -C test clean
+	rm -f virtual/.golem.dir
+	$(MAKE) -C virtual clean
+
+very-clean:
+	rm -f $(PROCESS).in $(PROCESS).log
+	$(MAKE) -C test clean
+	rm -f virtual/.golem.dir
+	rm -fr virtual

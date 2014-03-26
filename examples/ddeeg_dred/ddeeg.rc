@@ -1,5 +1,5 @@
 process_name=ddeeg
-process_path=ngolem
+process_path=virtual
 
 crossings=dgeed: 1 21 > 11 -11 1
 

@@ -504,7 +504,8 @@ contains
             zero = log(1.0_ki)
             amp(2)= 1.0_ki/zero
         end if
-        acc=1E5_ki ! dummy accuracy which is not used
+        ! Cannot be assigned if present(acc)=F --> commented out!
+        ! acc=1E5_ki ! dummy accuracy which is not used
       end if
 
       [% @if eval cr.amplitudetype ~ "scTree"
