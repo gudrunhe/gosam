@@ -5,15 +5,15 @@ GOSAM=gosam.py
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-.PHONY: all gosam test test clean very-clean
+.PHONY: all gosam test comptest clean very-clean
 
 all: gosam test
 
-test: test
+test: comptest
 	@echo Running test programm
 	$(MAKE) -C test test
 
-test: gosam
+comptest: gosam
 	$(MAKE) -C test compile
 
 gosam: $(PROCESS).log

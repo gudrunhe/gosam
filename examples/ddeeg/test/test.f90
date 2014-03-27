@@ -9,7 +9,7 @@ implicit none
 
 ! unit of the log file
 integer, parameter :: logf = 27
-integer, parameter :: golemlogf = 19
+integer, parameter :: gosamlogf = 19
 
 integer, dimension(2) :: channels
 integer :: ic, ch
@@ -21,7 +21,7 @@ logical :: success
 real(ki), dimension(5, 4) :: vecs
 real(ki) :: scale2
 
-double precision, dimension(0:3) :: golem_amp, ref_amp, diff
+double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
 channels(2) = 6
@@ -30,7 +30,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="gosam.log", unit=golemlogf)
+   open(file="gosam.log", unit=gosamlogf)
 end if
 
 call setup_parameters()
@@ -41,10 +41,10 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 
-call compute_golem_result(vecs, scale2, golem_amp)
+call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -74,10 +74,10 @@ if (diff(2) .gt. eps) then
    success = .false.
 end if
 
-call compute_crossed_golem_result(vecs, scale2, golem_amp)
+call compute_crossed_gosam_result(vecs, scale2, gosam_amp)
 call compute_crossed_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -116,7 +116,7 @@ end if
 close(unit=logf)
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   close(unit=golemlogf)
+   close(unit=gosamlogf)
 end if
 
 call exitgolem()
@@ -159,7 +159,7 @@ subroutine     setup_parameters()
    ! verbosity: we keep it zero here unless you want some extra files.
    ! samurai_verbosity = 0
    ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 1
+   ! samurai_scalar = 2 
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 1
 
@@ -174,7 +174,7 @@ subroutine     setup_parameters()
    convert_to_cdr = .false.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
+subroutine     compute_gosam_result(vecs, scale2, amp)
    use ddeeg_matrix, only: samplitude, ir_subtraction
    use ddeeg_model, only: alpha
    implicit none
@@ -212,8 +212,6 @@ subroutine     compute_golem_result(vecs, scale2, amp)
 
    amp = (e**2 * gs)**2 * amp
    irp = (e**2 * gs)**2 * irp
-   ! Convert to DRED
-   amp(1) = amp(1) + amp(0) * 11.0_ki/6.0_ki
 
    do ic = 1, 2
       ch = channels(ic)
@@ -224,9 +222,9 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM      IR(2)/AMP(0):", irp(2)/amp(0)
       write(ch,*) "GOSAM      IR(3)/AMP(0):", irp(3)/amp(0)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
-subroutine     compute_crossed_golem_result(vecs, scale2, amp)
+subroutine     compute_crossed_gosam_result(vecs, scale2, amp)
    use dgeed_matrix, only: samplitude, ir_subtraction
    use ddeeg_model, only: alpha
    implicit none
@@ -235,12 +233,12 @@ subroutine     compute_crossed_golem_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    real(ki), dimension(2:3) :: irp
+   integer :: prec
 
    logical :: ok, gok
 
    double precision :: pi, gs, e
-   integer :: prec
-
+  
    pi = 4.0d0 * atan(1.0d0)
    gs = sqrt(4.0d0 * pi * 0.118d0)
    e = sqrt(4.0d0 * pi * alpha)
@@ -251,8 +249,6 @@ subroutine     compute_crossed_golem_result(vecs, scale2, amp)
 
    amp = (e**2 * gs)**2 * amp
    irp = (e**2 * gs)**2 * irp
-   ! Convert to DRED
-   amp(1) = amp(1) + amp(0) * 11.0_ki/6.0_ki
 
    do ic = 1, 2
       ch = channels(ic)
@@ -263,7 +259,7 @@ subroutine     compute_crossed_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM      IR(2)/AMP(0):", irp(2)/amp(0)
       write(ch,*) "GOSAM      IR(3)/AMP(0):", irp(3)/amp(0)
    end do
-end subroutine compute_crossed_golem_result
+end subroutine compute_crossed_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
    use ddeeg_kinematics, only: dotproduct

@@ -6,7 +6,7 @@ implicit none
 
 ! unit of the log file
 integer, parameter :: logf = 27
-integer, parameter :: golemlogf = 19
+integer, parameter :: gosamlogf = 19
 
 integer, dimension(2) :: channels
 integer :: ic, ch
@@ -18,7 +18,7 @@ logical :: success
 real(ki), dimension(4, 4) :: vecs
 real(ki) :: scale2
 
-double precision, dimension(0:3) :: golem_amp, ref_amp, diff
+double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
 channels(2) = 6
@@ -27,7 +27,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="gosam.log", unit=golemlogf)
+   open(file="gosam.log", unit=gosamlogf)
 end if
 
 call setup_parameters()
@@ -38,10 +38,10 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 
-call compute_golem_result(vecs, scale2, golem_amp)
+call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -80,7 +80,7 @@ end if
 close(unit=logf)
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   close(unit=golemlogf)
+   close(unit=gosamlogf)
 end if
 
 call exitgolem()
@@ -113,7 +113,8 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use dgdg_config
+   use dgdg_config, only: renormalisation, convert_to_cdr !, &
+       !      & samurai_test, samurai_verbosity, samurai_scalar
    use dgdg_model, only: Nf, Nfgen
    implicit none
 
@@ -126,13 +127,14 @@ subroutine     setup_parameters()
    ! samurai_scalar = 2
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 2
-    samurai_group_numerators = .false.
 
    Nf    = 2.0_ki
    Nfgen = 2.0_ki
+
+   convert_to_cdr = .true.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
+subroutine     compute_gosam_result(vecs, scale2, amp)
    use dgdg_matrix, only: samplitude, ir_subtraction
    implicit none
    ! The amplitude should be a homogeneous function
@@ -171,10 +173,10 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM     AMP(1)/AMP(0):", amp(1)/amp(0)
       write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
       write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
-      write(ch,*) "GOSAM      IR(2)/AMP(0):", irp(2)/amp(0)
-      write(ch,*) "GOSAM      IR(3)/AMP(0):", irp(3)/amp(0)
+      write(ch,*) "GOSAM  IR(2)/AMP(0):", irp(2)/amp(0)
+      write(ch,*) "GOSAM  IR(3)/AMP(0):", irp(3)/amp(0)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
    use dgdg_kinematics, only: dotproduct

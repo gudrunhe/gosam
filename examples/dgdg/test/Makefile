@@ -1,11 +1,10 @@
 
-FC=$(shell sh ../ngolem/config.sh -fortcom)
-CFLAGS=$(shell sh ../ngolem/config.sh -cflags)
-LDFLAGS=$(shell sh ../ngolem/config.sh -libs)
-DEPS=$(shell sh ../ngolem/config.sh -deps)
+FC=$(shell sh ../virtual/config.sh -fortcom)
+CFLAGS=$(shell sh ../virtual/config.sh -cflags)
+LDFLAGS=$(shell sh ../virtual/config.sh -libs)
+DEPS=$(shell sh ../virtual/config.sh -deps)
 
 .PHONY: compile test clean
-
 
 compile: test_program
 
