@@ -1,19 +1,12 @@
 program test
-use eett_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
-use eett_matrix, only: initgolem, exitgolem
-use eett_kinematics, only: inspect_kinematics, init_event
-use eett_groups, only: tear_down_golem95
+use eeuu_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
+use eeuu_matrix, only: initgolem, exitgolem
+use eeuu_kinematics, only: inspect_kinematics, init_event
 implicit none
-
-! Note: I also did a cross-check with CalcHEP for the leading order.
-! |ME|^2 = 2.58146098703207 + 2.816625880343903 + 0.963982317687123
-!                     (A-A)               (A-Z)               (Z-Z)
-!        = 6.362069185063096
-
 
 ! unit of the log file
 integer, parameter :: logf = 27
-integer, parameter :: golemlogf = 19
+integer, parameter :: gosamlogf = 19
 
 integer, dimension(2) :: channels
 integer :: ic, ch
@@ -25,7 +18,7 @@ logical :: success
 real(ki), dimension(4, 4) :: vecs
 real(ki) :: scale2
 
-double precision, dimension(0:3) :: golem_amp, ref_amp, diff
+double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
 channels(2) = 6
@@ -34,7 +27,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="golem.log", unit=golemlogf)
+   open(file="gosam.log", unit=gosamlogf)
 end if
 
 call setup_parameters()
@@ -45,13 +38,10 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 
-call compute_golem_result(vecs, scale2, golem_amp)
-
-call exitgolem()
-
+call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -74,10 +64,10 @@ if (diff(2) .gt. eps) then
    success = .false.
 end if
 
-if (diff(2) .gt. eps) then
+if (diff(3) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A30)") "==>", &
    & "Comparison of NLO/double pole failed!"
-   write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(2)
+   write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(3)
    success = .false.
 end if
 
@@ -90,42 +80,44 @@ end if
 close(unit=logf)
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   close(unit=golemlogf)
+   close(unit=gosamlogf)
 end if
+
+call exitgolem()
 
 contains
 
 pure subroutine load_reference_kinematics(vecs, scale2)
-   use eett_kinematics, only: adjust_kinematics
-   use eett_model, only: mT
+   use eeuu_kinematics, only: adjust_kinematics, dotproduct
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
- 
-   vecs(1,:) = (/ 74.7646520969852_ki, 0.0_ki, 0.0_ki, 74.7646520969852_ki /)
-   vecs(2,:) = (/ 6067.88254935176_ki, 0.0_ki, 0.0_ki, -6067.88254935176_ki /)
-   vecs(3,:) = (/ 5867.13826404309_ki,  16.7946967430656_ki, &
-               &  169.437140279981_ki, -5862.12966020487_ki /)
-   vecs(4,:) = (/ 275.508937405653_ki, -16.7946967430656_ki, &
-               & -169.437140279981_ki, -130.988237049907_ki /)
-   ! In order to increase the precision of the kinematical
-   ! constraints (on-shell conditions and momentum conservation)
-   ! we call the following routine.
-   !call adjust_kinematics(vecs)
-  
-   scale2 = 29756.25_ki
+
+   real(ki), parameter :: phi   = 2.46_ki
+   real(ki), parameter :: theta = 1.35_ki
+   real(ki), parameter :: E = 74.7646520969852_ki
+
+   vecs(1,:) =  (/ E, 0.0_ki, 0.0_ki,  E /)
+   vecs(2,:) =  (/ E, 0.0_ki, 0.0_ki, -E /)
+   vecs(3,1) =  E
+   vecs(3,2) =  E * sin(theta) * sin(phi)
+   vecs(3,3) =  E * sin(theta) * cos(phi)
+   vecs(3,4) =  E * cos(theta)
+   vecs(4,1) =  E
+   vecs(4,2) = -E * sin(theta) * sin(phi)
+   vecs(4,3) = -E * sin(theta) * cos(phi)
+   vecs(4,4) = -E * cos(theta)
+
+   scale2 = (2.0_ki*E)**2
 
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_cdr !, &
+   use eeuu_config, only: renormalisation, convert_to_cdr !, &
        !      & samurai_test, samurai_verbosity, samurai_scalar, &
        !      & reduction_interoperation
-   use eett_model, only: Nf, Nfgen, mT, mZ, wZ, mW
-   use analytic, only: include_Z
+   use eeuu_model, only: Nf, Nfgen, mZ, wZ, mW
    implicit none
-
-   real(ki) :: my_sw, my_cw
 
    renormalisation = 0
 
@@ -133,32 +125,22 @@ subroutine     setup_parameters()
    ! verbosity: we keep it zero here unless you want some extra files.
    ! samurai_verbosity = 0
    ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 1
+   ! samurai_scalar = 2
    ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
    ! samurai_test = 1
-   ! reduction_interoperation = 1
-
-   my_sw = 0.47303762_ki
-   my_cw = sqrt(1.0_ki - my_sw**2)
-
-   mT = 172.5_ki
 
    mZ = 91.1876_ki
    wZ = 2.4952_ki
-
-   mW = my_cw * mZ
+   mW = mZ * sqrt(1.0_ki - 0.47303762_ki**2)
 
    Nf    = 5.0_ki
    Nfgen = 1.0_ki
 
-   include_Z = .true.
-
-   convert_to_cdr = .false.
+   convert_to_cdr = .true.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
-   use eett_matrix, only: samplitude
-   use eett_model, only: mT, sw, cw
+subroutine     compute_gosam_result(vecs, scale2, amp)
+   use eeuu_matrix, only: samplitude
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
@@ -166,9 +148,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
    double precision, dimension(0:3), intent(out) :: amp
    integer :: prec
 
-   logical :: ok
-
-   call samplitude(vecs, scale2, amp, prec, ok)
+   call samplitude(vecs, scale2, amp, prec)
 
    do ic = 1, 2
       ch = channels(ic)
@@ -177,20 +157,66 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
       write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
-   use analytic
+   use eeuu_kinematics, only: es12
+   use eeuu_model, only: mZ, wZ, e, NC, sw, cw, gev, gea, gUv, gUa, gZ
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
 
-   amp = reference_amp(vecs, scale2)
+   double precision, parameter :: Qf  =  2.d0/3.d0
+   double precision, parameter :: Qe  = -1.d0
+   double precision, parameter :: I3f =  0.5d0
+   double precision, parameter :: I3e = -0.5d0
 
-   ! beta0 = (11.0d0 * CA - 4.0d0 * (Nf + 1.0d0) * TR) / 6.0d0
-   !amp(2) = amp(2) + lo_qcd_couplings * beta0 * amp(0)
+   double precision :: cost, Ve, Vf, Ae, Af, Chi1, Chi2, Chi0
+   double precision :: flgAA, flgAZ, flgZZ
+   double precision :: CF, l, pi
+
+   flgAA = 1.d0
+   flgAZ = 1.d0
+   flgZZ = 1.d0
+
+   ! LO results of [1] (see README)
+
+   cost = vecs(3,4) / vecs(3,1)
+
+   if(.false.) then
+      Vf =  (I3f - 2.d0 * Qf * sw**2) * 0.5d0 * gZ
+      Af =  I3f * 0.5d0 * gZ
+      Ve =  (I3e - 2.d0 * Qe * sw**2) * 0.5d0 * gZ
+      Ae =  I3e * 0.5d0 * gZ
+   else
+      Vf = gUv
+      Af = gUa
+      Ve = gev
+      Ae = gea
+   end if
+
+
+   Chi0 = flgAA * 1.d0
+   Chi1 = flgAZ * es12 * (es12 - mZ**2) &
+        &  / ((es12 - mZ**2)**2 + wZ**2 * mZ**2)
+   Chi2 = flgZZ * es12**2 &
+        & / ((es12 - mZ**2)**2 + wZ**2 * mZ**2)
+
+   amp(0) = NC * ( &
+     & (1.d0 + cost**2) * (Qf**2 * Qe**2 * Chi0 &
+     &        + 2.d0 * Qf * Qe * Ve * Vf * Chi1 &
+     & + (Ae**2 + Ve**2) * (Af**2 + Vf**2) * Chi2) &
+     & + 2.d0 * cost * Ae*Af * (2.d0 * Qf * Qe * Chi1 + 4.d0 * Vf * Ve * Chi2))
+
+   pi = 4.0d0 * atan(1.0d0)
+   CF = 0.5d0 * (NC*NC-1.0d0) / NC
+   l = log(scale2/es12)
+
+   amp(1) = CF*(-l**2-3.0d0*l+pi**2-8.0d0) * amp(0)
+   amp(2) = CF * (-3.0d0 - 2.0d0*l) * amp(0)
+   amp(3) = -2.0d0 * CF * amp(0)
 
    do ic = 1, 2
       ch = channels(ic)

@@ -7,7 +7,7 @@ NLO: O(alpha^2 * alpha_s^2)
 Z and photon exchange in the s-channel
 
 The result is compared to an analytic calculation with Form,
-which can be found in the directory nform/.
+which can be found in the directory form/.
 
 References
 ----------

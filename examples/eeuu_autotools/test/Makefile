@@ -1,7 +1,7 @@
 
-FC=$(shell sh ../ngolem/config.sh -fortcom)
-CFLAGS=$(shell sh ../ngolem/config.sh -cflags)
-LDFLAGS=$(shell sh ../ngolem/config.sh -libs)
+FC=$(shell sh ../virtual/config.sh -fortcom)
+CFLAGS=$(shell sh ../virtual/config.sh -cflags)
+LDFLAGS=$(shell sh ../virtual/config.sh -libs)
 
 OBJECTS=test.o
 

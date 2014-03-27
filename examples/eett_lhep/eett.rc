@@ -1,5 +1,5 @@
 process_name=eett
-process_path=ngolem
+process_path=virtual
 
 # PDG codes # Gluon: 21 # Z-Boson: 23
 in=-11,11
@@ -18,6 +18,5 @@ one=mdlEE,mdlGG
 zero=mdlwtop
 
 reference-vectors=3:2,4:2
-debug=all
 
 reduction_programs=golem95

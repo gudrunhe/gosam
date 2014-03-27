@@ -1,10 +1,10 @@
 
-FC=$(shell sh ../ngolem/config.sh -fortcom)
-CFLAGS=$(shell sh ../ngolem/config.sh -cflags)
-LDFLAGS=$(shell sh ../ngolem/config.sh -libs)
-DEPS=$(shell sh ../ngolem/config.sh -deps)
+FC=$(shell sh ../virtual/config.sh -fortcom)
+CFLAGS=$(shell sh ../virtual/config.sh -cflags)
+LDFLAGS=$(shell sh ../virtual/config.sh -libs)
+DEPS=$(shell sh ../virtual/config.sh -deps)
 
-OBJECTS=test.o analytic.o
+OBJECTS=test.o
 
 .PHONY: compile test clean
 
@@ -25,4 +25,3 @@ clean:
 	rm -rf test_program test.o
 	rm -rf test.log bad.points output.dat fort.*
 
-test.o: analytic.o
