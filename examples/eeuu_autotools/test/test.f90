@@ -6,7 +6,7 @@ implicit none
 
 ! unit of the log file
 integer, parameter :: logf = 27
-integer, parameter :: golemlogf = 19
+integer, parameter :: gosamlogf = 19
 
 integer, dimension(2) :: channels
 integer :: ic, ch
@@ -18,7 +18,7 @@ logical :: success
 real(ki), dimension(4, 4) :: vecs
 real(ki) :: scale2
 
-double precision, dimension(0:3) :: golem_amp, ref_amp, diff
+double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
 channels(2) = 6
@@ -27,7 +27,7 @@ open(file="test.log", unit=logf)
 success = .true.
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   open(file="golem.log", unit=golemlogf)
+   open(file="gosam.log", unit=gosamlogf)
 end if
 
 call setup_parameters()
@@ -38,11 +38,11 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 
-call compute_golem_result(vecs, scale2, golem_amp)
+call compute_gosam_result(vecs, scale2, gosam_amp)
 
 call compute_reference_result(vecs, scale2, ref_amp)
 
-diff = abs(rel_diff(golem_amp, ref_amp))
+diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -81,7 +81,7 @@ end if
 close(unit=logf)
 
 if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-   close(unit=golemlogf)
+   close(unit=gosamlogf)
 end if
 
 call exitgolem()
@@ -140,7 +140,7 @@ subroutine     setup_parameters()
    convert_to_cdr = .true.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
+subroutine     compute_gosam_result(vecs, scale2, amp)
    use eeuu_matrix, only: samplitude
    implicit none
 
@@ -158,7 +158,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
       write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
    use eeuu_kinematics, only: es12

@@ -1,6 +1,6 @@
 
-FC=$(shell sh ../ngosam/config.sh -fortcom)
-FCFLAGS=$(shell sh ../ngosam/config.sh -ocflags)
+FC=$(shell sh ../virtual/config.sh -fortcom)
+FCFLAGS=$(shell sh ../virtual/config.sh -ocflags)
 
 .PHONY: all clean
 

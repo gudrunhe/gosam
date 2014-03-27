@@ -1,11 +1,11 @@
 
-FC=$(shell sh ../ngosam/config.sh -fortcom)
-CFLAGS=$(shell sh ../ngosam/config.sh -cflags) -I../nfort/
-LDFLAGS=$(shell sh ../ngosam/config.sh -libs) \
-	../nfort/four_gluon.o
-DEPS=$(shell sh ../ngosam/config.sh -deps)
+FC=$(shell sh ../virtual/config.sh -fortcom)
+CFLAGS=$(shell sh ../virtual/config.sh -cflags)
+LDFLAGS=$(shell sh ../virtual/config.sh -libs)
+DEPS=$(shell sh ../virtual/config.sh -deps)
 
 .PHONY: compile test clean
+
 
 compile: test_program
 

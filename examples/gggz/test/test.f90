@@ -6,7 +6,7 @@ program     test
 
    ! unit of the log file
    integer, parameter :: logf = 27
-   integer, parameter :: golemlogf = 19
+   integer, parameter :: gosamlogf = 19
 
    integer, dimension(2) :: channels
    integer :: ic, ch
@@ -19,7 +19,7 @@ program     test
    real(ki), dimension(4, 4) :: vecs
    real(ki) :: scale2
 
-   double precision, dimension(0:3) :: golem_amp
+   double precision, dimension(0:3) :: gosam_amp
    double precision :: ref_amp, diff
 
    channels(1) = logf
@@ -29,7 +29,7 @@ program     test
    success = .true.
 
    if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-      open(file="gosam.log", unit=golemlogf)
+      open(file="gosam.log", unit=gosamlogf)
    end if
 
    call setup_parameters()
@@ -40,16 +40,16 @@ program     test
    call init_event(vecs)
    call inspect_kinematics(logf)
 
-   call compute_golem_result(vecs, scale2, golem_amp)
+   call compute_gosam_result(vecs, scale2, gosam_amp)
 
    call compute_reference_result(vecs, scale2, ref_amp)
 
-   diff = abs(rel_diff(golem_amp(1), ref_amp))
+   diff = abs(rel_diff(gosam_amp(1), ref_amp))
 
-   if (golem_amp(0) .gt. abs_eps) then
+   if (gosam_amp(0) .gt. abs_eps) then
       write(unit=logf,fmt="(A3,1x,A40)") "==>", &
       & "Comparison of LO failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "VALUE:", golem_amp(0)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "VALUE:", gosam_amp(0)
       success = .false.
    end if
 
@@ -60,17 +60,17 @@ program     test
       success = .false.
    end if
 
-   if (golem_amp(2) .gt. abs_eps) then
+   if (gosam_amp(2) .gt. abs_eps) then
       write(unit=logf,fmt="(A3,1x,A40)") "==>", &
       & "Comparison of NLO/single pole failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", golem_amp(2)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", gosam_amp(2)
       success = .false.
    end if
 
-   if (golem_amp(3) .gt. abs_eps) then
+   if (gosam_amp(3) .gt. abs_eps) then
       write(unit=logf,fmt="(A3,1x,A30)") "==>", &
       & "Comparison of NLO/double pole failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", golem_amp(3)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", gosam_amp(3)
       success = .false.
    end if
 
@@ -83,7 +83,7 @@ program     test
    close(unit=logf)
 
    if (debug_lo_diagrams .or. debug_nlo_diagrams) then
-      close(unit=golemlogf)
+      close(unit=gosamlogf)
    end if
 
    call exitgolem()
@@ -139,7 +139,7 @@ subroutine     setup_parameters()
    convert_to_cdr = .false.
 end subroutine setup_parameters
 
-subroutine     compute_golem_result(vecs, scale2, amp)
+subroutine     compute_gosam_result(vecs, scale2, amp)
    use gggz_matrix, only: samplitude
    implicit none
 
@@ -159,7 +159,7 @@ subroutine     compute_golem_result(vecs, scale2, amp)
       write(ch,*) "GOSAM     AMP(2):", amp(2)
       write(ch,*) "GOSAM     AMP(3):", amp(3)
    end do
-end subroutine compute_golem_result
+end subroutine compute_gosam_result
 
 subroutine     compute_reference_result(vecs, scale2, amp)
    implicit none
