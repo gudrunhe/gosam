@@ -35,6 +35,6 @@ clean:
 
 very-clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C virtual clean
+	$(MAKE) -C test clean
 	rm -f virtual/.golem.dir
 	rm -fr virtual

@@ -24,5 +24,6 @@ test.log: test_program
 clean:
 	rm -rf test_program $(OBJECTS)
 	rm -rf test.log bad.points output.dat fort.*
+	rm -rf *.mod *.o
 
 test.o: analytic.o

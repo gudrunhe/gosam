@@ -1,5 +1,5 @@
 process_name=stop
-process_path=ngolem
+process_path=virtual
 in=u,d~
 out=ne,e+,b,b~
 model=smdiag
@@ -11,4 +11,3 @@ helicities=-+-+-+
 
 qgraf.verbatim=true = iprop[Wp,2,100];true = iprop[T,1,100];true = chord[Wp,0,0];true = bridge[g,0,0];
 
-form.threads=6

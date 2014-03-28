@@ -1,5 +1,5 @@
 process_name=hyy
-process_path=ngolem
+process_path=virtual
 
 in=H
 out=gamma, gamma

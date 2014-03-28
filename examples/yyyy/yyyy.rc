@@ -1,5 +1,5 @@
 process_name=yyyy
-process_path=ngolem
+process_path=virtual
 
 in=gamma, gamma
 out=gamma, gamma

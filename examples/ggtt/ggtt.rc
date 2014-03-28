@@ -1,5 +1,5 @@
 process_name=ggtt
-process_path=ngolem
+process_path=virtual
 
 # PDG codes # Gluon: 21 # Z-Boson: 23
 in=21, 21

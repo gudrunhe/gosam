@@ -1,5 +1,5 @@
 process_name=udene
-process_path=ngolem
+process_path=virtual
 model.options=
 
 # PDG codes

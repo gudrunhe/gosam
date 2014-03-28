@@ -1,5 +1,5 @@
 process_name=tne
-process_path=ngolem
+process_path=virtual
 
 in=g, b
 out=e-, nebar, t
