@@ -5,18 +5,18 @@ GOSAM=gosam.py
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-.PHONY: all golem test comptest clean very-clean
+.PHONY: all gosam test comptest clean very-clean
 
-all: golem test
+all: gosam test
 
 test: comptest
 	@echo Running test programm
 	$(MAKE) -C test test
 
-comptest: golem
+comptest: gosam
 	$(MAKE) -C test compile
 
-golem: $(PROCESS).log
+gosam: $(PROCESS).log
 	$(MAKE) -C virtual compile
 
 $(PROCESS).log: $(PROCESS).in

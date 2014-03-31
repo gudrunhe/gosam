@@ -22,4 +22,4 @@ test.log: test_program
 
 clean:
 	rm -rf test_program test.o
-	rm -rf test.log bad.points output.dat fort.*
+	rm -rf test.log gosam.log bad.points output.dat fort.*
