@@ -141,9 +141,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    ! factor 2 for summing over helicities
    amp = amp * 2.0_ki / (16.0d0 * pi * mH)
    ! we have set e=1 in the calculation.
-   ! furthermore we factored out alpha/2/pi in the amplitude   
-   amp = amp * (alpha / (2.0_ki*pi))**2 * e ** 2
-
+   ! furthermore we factored out alpha/2/pi in the amplitude
+   amp = amp * alpha ** 3 / pi
    ! we also need to correct for the symmetry factor if it's not done already
    if (.not. include_symmetry_factor) amp = 0.5_ki * amp
 

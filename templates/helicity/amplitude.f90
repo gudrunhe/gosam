@@ -175,13 +175,25 @@ contains
       call init_abbrev()[%
    @case diagram %][%
       @for groups var=grp %][%
-         @for diagrams group=grp %]
-      call init_abbrevd[%$_%]()[%
+         @for diagrams group=grp %][%
+            @if use_flags_1 %]
+      if(evaluate_virt_diagram([%$_%])) then[%
+            @end @if %]
+        call init_abbrevd[%$_%]()[%
+            @if use_flags_1 %]
+      endif[%
+         @end @if %][%
          @end @for %][%
       @end @for %][%
    @case group %][%
-      @for groups var=grp %]
-      call init_abbrevg[%grp%]()[%
+      @for groups var=grp %][%
+            @if use_flags_1 %]
+      if(evaluate_virt_group([%grp%])) then[%
+            @end @if %]
+        call init_abbrevg[%grp%]()[%
+            @if use_flags_1 %]
+      endif[%
+         @end @if %][%
       @end @for %][%
    @end @select %][%
 
