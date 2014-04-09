@@ -355,7 +355,7 @@ class Model:
 				**{'if': sym_if}
 			)
 
-                ExpressionParser.simple = ExpressionParser.simple_old
+		ExpressionParser.simple = ExpressionParser.simple_old
 
 		if i_name < 0:
 			raise CalcHEPImportError("In funcs: column 'Name' missing.")
