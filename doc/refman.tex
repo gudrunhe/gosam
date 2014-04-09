@@ -7,6 +7,8 @@
 
 \input lstform
 \input lstolp
+%\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
+%\lstset{basicstyle=\tt,backgroundcolor=\color{lstbg}}
 \newcommand{\gosamversion}{{2{.}0}}
 \newcommand{\gosam}{{\sc GoSam}\xspace}
 \newcommand{\gosamv}[1][\gosamversion]{{\sc GoSam}\xspace}
@@ -25,12 +27,15 @@
 \newcommand{\ninja}{{\sc Ninja}\xspace}
 
 \newcommand{\tHV}{{'t\,Hooft Veltman}}
+\newcommand{\diff}[1][{}]{{\mathrm{d}}^{#1}\!}
 \newcommand{\contl}{{\ensuremath{\hookrightarrow}}}
 \newcommand{\fmslash}[1]{{#1}\!\!\!/}
 \newcommand{\pslash}[1][{}]{\ensuremath{\fmslash{p}_{#1}}}
 \newcommand{\kslash}[1][{}]{\ensuremath{\fmslash{k}_{#1}}}
 \newcommand{\bea}{\begin{eqnarray*}}
 \newcommand{\eea}{\end{eqnarray*}\noindent}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
 \newcommand{\bcen}{\begin{center}}
 \newcommand{\ecen}{\end{center}}
 \newcommand{\nn}{\nonumber}
@@ -66,9 +71,9 @@ The program produces \fortranXC code for a given process
 by generating Feynman diagrams and translating
 the corresponding one-loop expressions into a form where the integrand
 can be reduced and evaluated numerically with either
-\samurai~\cite{Mastrolia:2010nb} or 
-\golemVC~\cite{Golem95:2008,Cullen:2011kv}
-or \ninja~\cite{Mastrolia:2012bu,vanDeurzen:2013saa,Peraro:2014cba}.
+\ninja~\cite{Mastrolia:2012bu,vanDeurzen:2013saa,Peraro:2014cba}
+or \golemVC~\cite{Golem95:2008,Cullen:2011kv,Guillet:2013msa}
+or \samurai~\cite{Mastrolia:2010nb,vanDeurzen:2013pja}.
 %or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
 
 
@@ -1316,8 +1321,8 @@ Furthermore, the following predefined filters exist:
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% BLHA.tex is a separate file, to be used also in the BLHAguide 
-\input{BLHA}
+%% BLHA.tex is a separate file, was used for the version 1.0 manual
+\input{blha-guide}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1328,28 +1333,28 @@ Furthermore, the following predefined filters exist:
 
 \chapter{Conventions of the Amplitude}
 
-\section{Convention of \golemVC}
+\section{Conventions of \golemVC}
 The integral library \golemVC{} computes integrals of the form
-\begin{multline}
-\int\frac{\mu^{2\varepsilon}\mathrm{d^nk}}{i\pi^{n/2}}\frac{k^{\mu_1}\cdots k^{\mu_r}}{%
-((k+r_1)^2-m_1^2)\cdots(k+r_N)^2-m_N^2)}=\\
-r_\Gamma\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
+\begin{eqnarray}
+&&\mu^{2\varepsilon}\int\frac{\mathrm{d^D k}}{i\pi^{D/2}}\frac{k^{\mu_1}\cdots k^{\mu_r}}{%
+((k+r_1)^2-m_1^2)\cdots(k+r_N)^2-m_N^2)}\nn\\
+&=&r_\Gamma\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
 +{\mathcal{O}}(\varepsilon)\right]
-\end{multline}
-where $n=(4-2\varepsilon)$ and
+\end{eqnarray}
+where $D=(4-2\varepsilon)$ and
 \begin{equation}
 r_\Gamma=\frac{\Gamma(1+\varepsilon)\Gamma^2(1-\varepsilon)}{%
    \Gamma(1-2\varepsilon)}.
 \end{equation}
-The integration measure for the internal momentum $k$ is
+The commonly used integration measure for the internal momentum $k$ is
 \begin{equation}
-\frac{\mu^{2\varepsilon}\mathrm{d}^nk}{(2\pi)^n}
-=\mu^{2\varepsilon}\frac{i}{2^n\pi^{n/2}}\cdot\frac{{\mathrm d}^nk}{i\pi^{n/2}}
+\frac{\mu^{2\varepsilon}\diff[D]k}{(2\pi)^D}
+=\mu^{2\varepsilon}\frac{i}{2^D\pi^{D/2}}\cdot\frac{{\mathrm d}^Dk}{i\pi^{D/2}}
 =\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}\cdot%
- \frac{\mu^{2\varepsilon}{\mathrm d}^nk}{i\pi^{n/2}}.
+ \frac{\mu^{2\varepsilon}{\mathrm d}^Dk}{i\pi^{D/2}}.
 \end{equation}
 
-\section{Convention of \gosamv}
+\section{Conventions of \gosamv}
 The factor from above which does not go into the integral definition of
 \golemVC{} can be written as
 \begin{equation}
@@ -1401,23 +1406,25 @@ definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
 %+{\mathcal{O}}(\varepsilon)
 \end{equation}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Explicit Reduction of the $R_2$ Terms}
 The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
 containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
-algebra. For an explicit reduction of these terms, a list of all integrals
-of the form
+algebra in $D=4-2\varepsilon$ dimensions. 
+For an explicit reduction of these terms, we give a list of all relevant integrals of the form
 \begin{align}
-\int\frac{\mu^{2\varepsilon}\mathrm{d}^nk}{i\pi^{n/2}}
-\frac{N(\hat{q})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
+\int\frac{\diff[D] k}{i\pi^{n/2}}
+\frac{N(\hat{k})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
 \end{align}
-where either $\alpha$ or $\beta$ is a positive integer number
-and the denominators are $D_i=(q+r_i)^2-m_i^2+i\delta$.
+where either $\alpha$ or $\beta$ is a positive integer number, 
+$\hat{k}$ denotes 4-dimensional loop momenta, $k^2=\hat{k}^2-\mu^2$, 
+and the denominators are $D_i=(k+r_i)^2-m_i^2+i\delta$.
 Note that integrals where both $\alpha$ and $\beta$ are
-non-zero, will not contribute to the final result.
-We expand the above tensor integral and only consider the term
-of rank $r$, similarly to Eq.~(208) in Ref.~\cite{Reiter:2009kb}:
+non-zero will not contribute to the final result, as they will be of order $\varepsilon$.
+An integral of rank $r$ 
+can be written as~\cite{Binoth:2005ff,Reiter:2009kb}:
 \begin{multline}
-I_N^{n,\alpha,\beta;\mu_1\ldots\mu_r}=
+I_N^{D,\alpha,\beta;\mu_1\ldots\mu_r}=
 (-1)^{r}\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}
 \varepsilon^\beta
 \sum_{l=0}^{\lfloor r/2\rfloor}\left(-\frac12\right)^l
@@ -1426,28 +1433,28 @@ I_N^{n,\alpha,\beta;\mu_1\ldots\mu_r}=
 \left[\hat{g}^{\bullet\bullet}\ldots
 \hat{g}^{\bullet\bullet}r_{j_1}^\bullet
 \cdots r_{j_{r-2l}}^\bullet\right]^{\mu_1\ldots\mu_r}
-I_N^{n+2\alpha+2l}(j_1,\ldots,j_{r-2l}).
+I_N^{D+2\alpha+2l}(j_1,\ldots,j_{r-2l}).
 \end{multline}
 Here, the integral $I_N^d(j_1,j_2,\ldots)$ denotes a Feynman parameter
 integral with the parameters $z_{j_1}, z_{j_2}, \ldots$ in the numerator,
 \begin{multline}
 I_N^d(j_1,\ldots, j_p)=\\
 (-1)^N\Gamma\left(N-\frac{d}2\right)%
-\int\!\!\mathrm{d}^N_\Box\!z\,\delta_z
+\int\!\!\diff[D]_\Box\!z\,\delta_z
 \frac{\prod_{\nu=1}^p z_{j_\nu}}{%
 \left[-\frac12 z^{\mathsf{T}}Sz-i\delta\right]^{N-d/2}},
 \end{multline}
-where $\mathrm{d}^N_\Box\!z=
+where $\diff[D]_\Box\!z=
 \prod_{j=1}^N\mathrm{d}z_j\Theta(z_j)\Theta(1-z_j)$
 and $\delta_z=\delta(1-\sum_i z_i)$.
 The square brackets $[\ldots]^{\mu_1\ldots\mu_p}$ expand to the sum of
 all possible assignments of indices to the $\hat{g}^{\bullet\bullet}$-tensors
-where a (one) arbitrary assignment of indices to the momenta $r_j^\bullet$
-is chosen.
+and momenta $r_j^\bullet$. 
+The kinematic matrix $S$ is given by $S_{ij}=(r_i-r_j)^2-m_i^2-m_j^2$.
 
-We only need to consider integrals containing an UV pole, which leads to
+We only need to consider integrals containing an UV pole, because only the latter lead to
 a rational term when multiplied with $\varepsilon$ stemming either from
-$\varepsilon^\beta$ or from
+$\varepsilon^\beta$ or from the integral prefactor
 \begin{equation}
 \frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}=
 (\alpha-1)!\left[-\varepsilon +{\mathcal O}(\varepsilon^2)\right],
@@ -1455,16 +1462,16 @@ $\varepsilon^\beta$ or from
 \end{equation}
 The UV divergence comes from the Gamma function
 \begin{equation}
-\Gamma\left(N-\frac{n+2\alpha+2l}2\right)=
+\Gamma\left(N-\frac{D+2\alpha+2l}2\right)=
 \Gamma(\varepsilon-(2+\alpha+l-N))\equiv\Gamma(\varepsilon-\eta)
 \end{equation}
-in the Feynman parameter integral~$I_N^{n+2\alpha+2l}$.
+in the Feynman parameter integral~$I_N^{D+2\alpha+2l}$.
 Hence, we examine further the expression
 \begin{multline}
-\varepsilon\cdot I_N^{n+2l+2\alpha}(l_1,\ldots, l_{r-2l})=\\
+\varepsilon\cdot I_N^{D+2l+2\alpha}(l_1,\ldots, l_{r-2l})=\\
 \left\{\begin{array}{lr}
 {\mathcal O}(\varepsilon),&\eta<0\\
-(-1)^N\frac1{2^\eta\eta!}\int\mathrm{d}^N_\Box\!z\delta_z
+(-1)^N\frac1{2^\eta\eta!}\int\diff[D]_\Box\!z\delta_z
 \left[z^{\mathsf{T}}Sz\right]^\eta
 \prod_{i=1}^{r-2l}z_{l_i},&\eta\geq0
 \end{array}\right.
@@ -1473,47 +1480,79 @@ Hence, we examine further the expression
 The remaining integration can be understood as a special case of the
 Feynman parameter identity
 \begin{equation}
-\frac{1}{\prod_{j=1}^N A_j^{\alpha_j}}=\frac{\Gamma(\alpha)}{
-\prod_{j=1}^N \Gamma(\alpha_j)}\int\!\mathrm{d}^N_\Box\!z\,\delta_z
-\frac{\prod_{j=1}^N z_j^{\alpha_j-1}}{\left(
-\sum_{j=1}^N z_j A_j\right)^\alpha}
+\frac{1}{\prod_{j=1}^N A_j^{\nu_j}}=\frac{\Gamma(\nu)}{
+\prod_{j=1}^N \Gamma(\nu_j)}\int\!\diff[D]_\Box\!z\,\delta_z
+\frac{\prod_{j=1}^N z_j^{\nu_j-1}}{\left(
+\sum_{j=1}^N z_j A_j\right)^\nu}\; , \; \nu=\sum_j \nu_j
 \end{equation}
 for $A_j=1$, in which case one finds
 \begin{equation}
-\int\!\mathrm{d}^N_\Box\!z\,\delta_z
-\prod_{j=1}^N z_j^{\alpha_j-1}=\frac{\prod_{j=1}^N \Gamma(\alpha_j)}%
+\int\!\diff[D]_\Box\!z\,\delta_z
+\prod_{j=1}^N z_j^{\nu_j-1}=\frac{\prod_{j=1}^N \Gamma(\nu_j)}%
 {\Gamma(\alpha)}
 \end{equation}
 
-All phenomenologically relevant, non-zero cases for renormalizable
-gauge theories (working in Feynman gauge) are listed below:
+All  non-zero cases for 
+integrals where the rank does not exceed the number of propagators are listed
+ below~\cite{Binoth:2006hk,Reiter:2009kb}
 \begin{align}
-I_1^{n,0,1}&=-\frac12 S_{11}\\
-I_1^{n,0,1;\mu_1}&=\frac12 S_{11} \cdot r_1^{\mu_1}\\
-I_2^{n,1,0}&=-\frac16\left(S_{11}+S_{12}+S_{22}\right)\\
-I_2^{n,0,1}&=1\\
-I_2^{n,0,1;\mu_1}&=-\frac12\left(r_1^{\mu_1}+r_2^{\mu_1}\right)\\
-I_2^{n,0,1;\mu_1\mu_2}&=
+I_1^{D,0,1}&=-\frac12 S_{11}\\
+I_1^{D,0,1;\mu_1}&=\frac12 S_{11} \cdot r_1^{\mu_1}\\
+I_2^{D,1,0}&=-\frac16\left(S_{11}+S_{12}+S_{22}\right)\\
+I_2^{D,0,1}&=1\\
+I_2^{D,0,1;\mu_1}&=-\frac12\left(r_1^{\mu_1}+r_2^{\mu_1}\right)\\
+I_2^{D,0,1;\mu_1\mu_2}&=
 \frac16\left(%
 2r_1^{\mu_1}r_1^{\mu_2}
 +r_1^{\mu_1}r_2^{\mu_2}
 +r_2^{\mu_1}r_1^{\mu_2}
 +2r_2^{\mu_1}r_2^{\mu_2}\right)\nonumber\\
 &-\frac1{12}\hat{g}^{\mu_1\mu_2}\left(S_{11}+S_{12}+S_{22}\right)\\
-I_3^{n,1,0}&=\frac12\\
-I_3^{n,1,0;\mu_1}&=-\frac16\left(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}\right)\\
-I_3^{n,0,1;\mu_1\mu_2}&=\frac14\hat{g}^{\mu_1\mu_2}\\
-I_3^{n,0,1;\mu_1\mu_2\mu_3}&=-\frac{1}{12}
+I_3^{D,1,0}&=\frac12\\
+I_3^{D,1,0;\mu_1}&=-\frac16\left(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}\right)\\
+I_3^{D,0,1;\mu_1\mu_2}&=\frac14\hat{g}^{\mu_1\mu_2}\\
+I_3^{D,0,1;\mu_1\mu_2\mu_3}&=-\frac{1}{12}
 \sum_{l=1}^3\left[\hat{g}^{\bullet\bullet}r^{\bullet}\right]^{\mu_1\mu_2\mu_3}%
 \\
-I_4^{n,1,0;\mu_1\mu_2}&=\frac{1}{12}\hat{g}^{\mu_1\mu_2}\\
-I_4^{n,2,0}&=-\frac16\\
-I_4^{n,0,1;\mu_1\mu_2\mu_3\mu_4}&=\frac1{4!}\left[\hat{g}^{\bullet\bullet}%
+I_4^{D,1,0;\mu_1\mu_2}&=\frac{1}{12}\hat{g}^{\mu_1\mu_2}\\
+I_4^{D,2,0}&=-\frac16\\
+I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4}&=\frac1{4!}\left[\hat{g}^{\bullet\bullet}%
 \hat{g}^{\bullet\bullet}\right]^{\mu_1\mu_2\mu_3\mu_4}
 \end{align}
-All other integrals of that type are identically zero.
+In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of 
+propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving 
+gravitons.  
+More details about higher rank integrals can be found in
+Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}.
+\bea
+&&I_5^{D,3}(S)=
+\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3
+}{%nl
+\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{12}\;,\\
+%
+&&I_5^{D,2;\mu_1 \mu_2}(a_1,a_2; S)=
+\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^2\;
+\hat{q}_{a_1}^{\mu_1}  \hat{q}_{a_2}^{\mu_2}}{%nl
+\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{48}\,\hat{g}^{\mu_1\mu_2}\;,\\
+%
+&&I_5^{D,1;\mu_1\cdots \mu_4}(a_1,\ldots,a_4; S)=
+\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\tilde{k}^2\;
+\hat{q}_{a_1}^{\mu_1} \ldots \hat{q}_{a_4}^{\mu_4}}{%nl
+\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}\nn\\
+&&\qquad =-\frac{1}{96}\,
+\left[\hat{g}^{\mu_1\mu_2}\hat{g}^{\mu_3\mu_4}+ \hat{g}^{\mu_1\mu_3}\hat{g}^{\mu_2\mu_4}
++\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
+\eea
+\be
+\eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 (\Delta^2_{ij}-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
+%+{\cal O}(\eps)\;.
+\ee
 
-
+In the \gosam{} process card, the default is {\tt r2=explicit}, which means that 
+the rational part $R_2$ is calculated algebraically using the formulae above, 
+while the integrand reduction can be done in 4 dimensions.
+Choosing {\tt r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional 
+part during the reduction.
 
 \chapter{The included Model Files}
 \label{chp:model-files}
@@ -1536,7 +1575,7 @@ Thy \python{} file contains the following definitions
      fields; the values are objects of the class \texttt{Particle}.
      The constructor has the arguments
      \begin{verbatim}
-Particle(name, two_spin,mass,color_rep,partner,width='0',charge)
+Particle(name,two_spin,mass,color_rep,partner,width='0',charge)
      \end{verbatim}
 \item[\texttt{mnemonics}] a \python{} \texttt{dict} of
      human-readable particle names. The values are objects of the class
