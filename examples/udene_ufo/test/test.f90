@@ -144,7 +144,7 @@ end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
    use udene_matrix, only: samplitude
-   use udene_model, only: mdlMW, mdlWW, mdlG, mdlee, mdlsw, mdlCKM11
+   use udene_model, only: mdlMW, mdlWW, mdlG, mdlee, mdlsw, mdlCKM1x1
    implicit none
    ! The amplitude should be a homogeneous function
    ! in the energy dimension and scale like
@@ -172,8 +172,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    mdlWW = mdlWW / Q
 
    call samplitude(xvecs, xscale2, amp, prec, ok)
-   amp(0) = amp(0) / mdlee**4 / abs(mdlCKM11)**2
-   amp(1:3) = amp(1:3) / mdlee**4 / mdlG**2 / abs(mdlCKM11)**2
+   amp(0) = amp(0) / mdlee**4 / abs(mdlCKM1x1)**2
+   amp(1:3) = amp(1:3) / mdlee**4 / mdlG**2 / abs(mdlCKM1x1)**2
 
    mdlMW = mdlMW * Q
    mdlWW = mdlWW * Q
@@ -190,7 +190,7 @@ end subroutine compute_gosam_result
 subroutine     compute_reference_result(vecs, scale2, amp)
    use udene_kinematics, only: dotproduct
    use udene_matrix, only: ir_subtraction
-   use udene_model, only: mdlMW, mdlWW, mdlsw, mdlCKM11, NC
+   use udene_model, only: mdlMW, mdlWW, mdlsw, mdlCKM1x1, NC
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs

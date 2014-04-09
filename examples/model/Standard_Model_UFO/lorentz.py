@@ -1,12 +1,11 @@
-# This file was automatically created by FeynRules $Revision: 821 $
-# Mathematica version: 8.0 for Linux x86 (64-bit) (February 23, 2011)
-# Date: Tue 4 Oct 2011 15:54:03
+# This file was automatically created by FeynRules 2.0.23
+# Mathematica version: 9.0 for Linux x86 (64-bit) (February 7, 2013)
+# Date: Mon 7 Apr 2014 16:44:54
 
 
 from object_library import all_lorentz, Lorentz
 
-from function_library import complexconjugate, re, im, csc, sec, acsc, asec
-
+from function_library import complexconjugate, re, im, csc, sec, acsc, asec, cot
 
 
 UUS1 = Lorentz(name = 'UUS1',
@@ -23,19 +22,19 @@ SSS1 = Lorentz(name = 'SSS1',
 
 FFS1 = Lorentz(name = 'FFS1',
                spins = [ 2, 2, 1 ],
-               structure = 'Gamma5(2,1)')
+               structure = 'ProjM(2,1)')
 
 FFS2 = Lorentz(name = 'FFS2',
                spins = [ 2, 2, 1 ],
-               structure = 'Identity(2,1)')
+               structure = 'ProjM(2,1) - ProjP(2,1)')
 
 FFS3 = Lorentz(name = 'FFS3',
                spins = [ 2, 2, 1 ],
-               structure = 'ProjM(2,1)')
+               structure = 'ProjP(2,1)')
 
 FFS4 = Lorentz(name = 'FFS4',
                spins = [ 2, 2, 1 ],
-               structure = 'ProjP(2,1)')
+               structure = 'ProjM(2,1) + ProjP(2,1)')
 
 FFV1 = Lorentz(name = 'FFV1',
                spins = [ 2, 2, 3 ],
