@@ -22,7 +22,7 @@ gosam: $(PROCESS).log virtual/Makefile
 gosam_install: gosam
 	$(MAKE) -C virtual install
 
-virtual/Makefile:
+virtual/Makefile: $(PROCESS).log
 	(cd virtual && sh ./autogen.sh --prefix="$(shell pwd)" --libdir="$(shell pwd)/lib")
 
 $(PROCESS).log: $(PROCESS).in

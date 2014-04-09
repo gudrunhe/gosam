@@ -154,8 +154,11 @@ GENERATED_SRC=[%
    @end @for %][%
 @end @if generate_nlo_virt %]
 
-$(GENERATED_SRC): %:[%
-@if diagsum %]
+$(GENERATED_SRC): %: source
+	
+	
+source:
+[% @if diagsum %]
 	@if grep -q 'Local' ../diagrams-1.hh; \
 	then \
 		mv ../diagrams-1.hh ../diags-1.hh; \
@@ -165,7 +168,7 @@ $(GENERATED_SRC): %:[%
 @end @if %]
 	@if [ -f Makefile.source ]; \
 	then \
-		$(MAKE) -f Makefile.source "$@"; \
+		$(MAKE) -f Makefile.source ; \
 	fi
 
 include Makefile.dep
