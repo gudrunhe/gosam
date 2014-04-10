@@ -1077,8 +1077,9 @@ Examples about how to import model files can be found in the subdirectory
 A model description in the UFO~\cite{Degrande:2011ua} format consists of a \texttt{Python} package
 stored in a directory. In order to import the model into \gosam{} one needs
 to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
-in front of the directory name, where we assume that
-the model description is in the directory \texttt{\$HOME/models/MSSM\_UFO}.
+in front of the directory name.
+For example, if the \texttt{Python} model files for the MSSM are in 
+ the directory \texttt{\$HOME/models/MSSM\_UFO}, the process card must contain the line
 \begin{example}
 model= FeynRules,\$HOME/models/MSSM\_UFO
 \end{example}
@@ -1128,6 +1129,105 @@ have to be taken:
    The function also needs to be declared in \texttt{codegen/functions.out}
    in the subroutine \texttt{init\_functions}
 \end{enumerate}
+
+
+\subsection{Propagators for spin-2 particles}
+
+The propagator for massive spin-2 particles can be split into two parts
+\begin{align}
+	i \Delta_{\mu\nu,\rho\sigma}(k,m_{\vec n}) =  \underbrace{\frac{i}{k^2-m_{\vec n}^2 + i\epsilon}}_{D(k^2,m_{\vec n})} B_{\mu\nu,\rho\sigma}(k,m_{\vec n})\;,
+\end{align}
+where $B_{\mu\nu,\rho\sigma}$ carries the Lorentz structure
+\begin{align}
+	B_{\mu\nu,\rho\sigma}(k,m) =&
+	             \left(\eta_{\mu \rho} - \frac{k_\mu k_\rho}{m^2}\right) 
+		     \left(\eta_{\nu \sigma} - \frac{k_\nu k_\sigma}{m^2}\right)\notag \\
+         &  + \left(\eta_{\mu \sigma} - \frac{k_\mu k_\sigma}{m^2} \right)
+		     \left(\eta_{\nu \rho} - \frac{k_\nu k_\rho}{m^2}\right) \notag \\
+         &  - \frac23  
+	   \left(\eta_{\mu \nu} - \frac{k_\mu k_\nu}{m^2}\right)
+	   \left(\eta_{\rho \sigma} - \frac{k_\rho k_\sigma}{m^2}\right)\;.
+\end{align}
+%and 
+%\be
+%D(s,m_{\vec n}) =  \frac{i}{s-m_{\vec n}^2 + i \epsilon}\;.
+%\ee
+If all particles attached to the propagator are on-shell, 
+the mass dependent terms in $B_{\mu\nu,\rho\sigma}(k,m)$ drop out.
+Further, if the on-shell condition is not always fulfilled, 
+it turned out in phenomenological applications that the impact of the mass dependent terms is numerically 
+negligible\,\cite{Gleisberg:2003ue,Greiner:2013gca}
+and therefore we did not include them in our implementation
+in order to avoid an enormous proliferation of terms.
+In this case the summation over the graviton states  in $D(s,m_{\vec n})$, leading to
+\be
+D(s) = \sum_{\vec n} \frac{i}{s-m_{\vec n}^2 + i \epsilon}\;,
+\ee
+can be performed independently from the  $B_{\mu\nu,\rho\sigma}$ part carrying the Lorentz structure.
+Further, in  models with large extra dimensions (LED),
+ we can use the assumption that the widths of the KK modes are negligible, 
+as the dominant effects come from the almost on-shell production of KK modes, 
+and that the discrete spectrum of the KK  modes can be approximated by an
+integral over a mass density, as the  KK modes are very contiguous.
+%\,\cite{Han:1998sg,Giudice:1998ck}. 
+The density as a function of the mass $m_{\vec n}$ is given by
+\be
+\rho(m_{\vec n})=\frac{R^{\delta}m_{\vec n}^{\delta - 2}}{(4\pi)^{\delta/2}\Gamma(\delta/2)}\;,
+\ee
+where $\delta$ is the number of extra dimensions, leading to \,\cite{Han:1998sg}
+\begin{align}
+	D(s) \to  \int_0^{M_S} d\,m_{\vec n}^2\,
+	\frac{i\,\rho(m_{\vec n})}{s-m_{\vec n}^2+ i \epsilon}
+	= \begin{cases} \frac{ s^{\delta/2-1}}{2M_{s}^{\delta + 2} G_N } \left( \pi + 2 i \, I(\frac{M_S}{\sqrt{s}}) \right) & \text{for\ } s>0 \\
+		\frac{ (-s)^{\delta/2-1}}{2M_{s}^{\delta + 2} G_N} (-2i)\, I_E(\frac{M_S}{\sqrt{-s}}) & \text{for\ } s<0 
+	\end{cases}
+	\label{eq:propagator}
+\end{align}
+with 
+\begin{align}
+	I(x) = \begin{cases} - \sum_{k=1}^{\delta/2-1} \frac1{2k} x^{2k} - \frac12 \log(x^2-1)& \text{if\ } \delta \text{ even} \\
+		- \sum_{k=1}^{(\delta-1)/2 } \frac{1}{2k-1} x^{2k-1} + \frac12 \log\left( \frac{x+1}{x-1} \right) & \text{if\ } \delta \text{ odd}
+	\end{cases}
+\end{align}
+and
+\begin{align}
+	I_E(x) = \begin{cases} (-1)^{\delta/2 + 1} \left( \sum_{k=1}^{\delta/2-1} \frac{(-1)^k}{2k} x^{2k} + \frac12 \log(x^2+1)  \right) 
+		& \text{if } \delta \text{ even} \\
+		(-1)^{(\delta-1)/2} \left(   \sum_{k=1}^{(\delta-1)/2 } \frac{(-1)^k}{2k-1} x^{2k-1} + \frac12 \tan^{-1}(x) \right)   & \text{if } \delta \text{ odd} \,.
+	\end{cases}
+\end{align}
+The UV cutoff $M_S$ is introduced as the effective theory approach loses its validity beyond the scale $M_S$.
+
+
+\gosam{} supports spin-2 propagators with the \texttt{customspin2propagator} extension which
+needs to be enabled in the process card by \\
+{\tt extensions=customspin2propagator}.
+
+The extension works only if the model is imported from an {\tt UFO} file. 
+The latter can  be adjusted to the needs of the particular model the 
+user would like to consider by editing the file {\tt custompropagator.f90}
+in the subdirectory {\tt common}. 
+In order to generate the latter file,
+the spin-2 particle which should get a customized propagator needs to have a
+separate attribute 'CustomSpin2Prop' in the {\tt UFO} file with a non-vanishing
+value:\\
+Excerpt of {\tt LED\_UFO/particle.py} with a customized propagator:
+\begin{verbatim}
+    Gr = Particle(pdg_code = 9000006,
+                  name = 'Gr',
+                  # ...
+                  CustomSpin2Prop = 1
+                 )
+\end{verbatim}
+Then \gosam{} generates a the file {\tt common/custompropagator.f90} where the user needs
+to adapt the {\tt customSpin2Prop} subroutine.
+Beside the squared momentum, the {\tt customSpin2Prop} subroutine also receives the
+mass of the corresponding spin-2 particle as an argument, which
+can be used to distinguish between multiple spin-2 particles if necessary.
+The tensorial part of the spin-2 propagator, $B_{\mu\nu,\rho\sigma}(k,m_{\vec n})$, is treated separately 
+and should not be modified.  If the user would like to modify it, we refer to the  documentation in 
+section 6.3 of {\tt src/form/lorentz.pdf} in the \gosam{} tarball.
+
 
 \section{Handling Big Processes}
 Although the default settings should work for most cases, very big processes
@@ -1544,7 +1644,7 @@ Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}.
 +\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
 \eea
 \be
-\eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 (\Delta^2_{ij}-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
+\eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 ((r_i-r_j)^2-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
 %+{\cal O}(\eps)\;.
 \ee
 
@@ -1866,14 +1966,18 @@ are currently reading.
 \marginlabel{\texttt{models/}} For each implemented model this directory
 contains the \qgraf model file (no extension), a \form interface
 (\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
-only the Standard Model (\texttt{sm}) is distributed with \gosamv.
-A second version of the Standard Model (\texttt{smdiag}) implements
-diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$)
+the Standard Model (\texttt{sm}) is distributed with \gosamv, 
+where several variants are available:\\
+\texttt{smdiag} implements
+diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$),\\
+{\tt smehc} contains effective gluon-Higgs couplings),\\
+\texttt{sm\_complex} and \texttt{smdiag\_complex} support the complex mass scheme. 
 The structure of the model files is discussed in more detail in
 Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
 FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
 can be found in the directory 
-\texttt{examples/model/}.
+\texttt{examples/model/}, as well as {\tt UFO}  files for ADD~\cite{ArkaniHamed:1998rs}
+models with large extra dimensions (LED).
 
 \marginlabel{\texttt{templates/}} Contains templates for the creation
 of the files in the process directory. The contents are transformed
