@@ -405,7 +405,8 @@ def getModel(conf, extra_path=None):
       golem.model.MODEL_OPTIONS["ewchoose"] = False
       golem.model.MODEL_OPTIONS["users_choice"] = '0'
    elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
-      error("ewchoose option in model.options is not supported with the chosen model.")
+      del golem.model.MODEL_OPTIONS["ewchoose"]
+      #error("ewchoose option in model.options is not supported with the chosen model.")
 
    # --] EW scheme management
 
