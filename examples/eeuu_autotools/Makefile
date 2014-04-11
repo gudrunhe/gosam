@@ -41,7 +41,7 @@ clean:
 	rm -f virtual/.golem.dir
 	rm -f virtual/Makefile
 	rm -fr include
-	rm -fr lib
+	rm -fr lib lib64
 
 very-clean:
 	rm -f $(PROCESS).in $(PROCESS).log
@@ -50,5 +50,5 @@ very-clean:
 	$(MAKE) -C virtual clean
 	rm -fr virtual
 	rm -fr include
-	rm -fr lib
+	rm -fr lib lib64
 
