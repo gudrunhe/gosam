@@ -180,22 +180,22 @@ contains
    write(unit,'(A1,1x,A21)') "#", "--- ALL PARAMETERS ---"[$
 @for parameters $][$
    @select type @case R $]
-   write(unit,'(A1,1x,A7,G23.16)') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16)') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case C $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case RP $]
-   write(unit,'(A1,1x,A7,G23.16,"const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16,"const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case CP $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")","const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")","const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @end @select type $][$
 @end @for parameters $]
    if(is_verbose) then
 [$
 @for functions $][$
    @select type @case R $]
-   write(unit,'(A1,1x,A7,G23.16,"calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16,"calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case C $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")"," calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @end @select type $][$
 @end @for functions $]
    end if[$
