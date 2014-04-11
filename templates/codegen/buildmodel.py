@@ -225,22 +225,22 @@ modelfile.write("   if(is_verbose) then\n")
 modelfile.write("   write(unit,'(A1,1x,A21)') \"#\", \"--- ALL PARAMETERS ---\"\n")
 [$@for parameters $][$
    @select type @case R $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16)') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case C $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case RP $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16,\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case CP $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\",\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@end @select type $][$
 @end @for parameters $]
 modelfile.write("   if(is_verbose) then\n")
 [$
 @for functions $][$
    @select type @case R $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16,\"calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case C $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\" calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\",\" calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@end @select type $][$
 @end @for functions $]
 modelfile.write("   end if\n")
