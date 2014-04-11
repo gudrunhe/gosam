@@ -629,7 +629,22 @@ class Template:
                     value=0
          elif opts["convert"] == "float":
             value = float(value)
-
+            # use "%g" instead of "%f" for very small values to avoid truncation to zero
+            if "format" in opts:
+               for m in re.finditer('%([-#0+hl ]*[0-9]*)(\.[0-9]*)?(f)',opts["format"],re.I):
+                  if m and m.group(3)=="f" or m.group(3)=="F":
+                     try:
+                        if m.group(2) and len(m.group(2))>1:
+                           p_d = int(m.group(2)[1:])
+                        else:
+                           p_d=6
+                        if -math.log10(abs(value)) > p_d:
+                           if m.group(3)=="f":
+                              opts["format"]=re.sub("%.*f", "%" + m.group(1) + m.group(2) +"g",opts["format"])
+                           else:
+                              opts["format"]=re.sub("%.*F", "%" + m.group(1) + m.group(2) +"G",opts["format"])
+                     except ValueError:
+                        pass
       if "match" in opts:
          bfl = 0
          if "flags" in opts:
