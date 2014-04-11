@@ -22,7 +22,7 @@ class GolemConfigError(Exception):
       self._value = value
 
    def __str__(self):
-      return "Golem Configuration Error: %s" % self._value
+      return "GoSam Configuration Error: %s" % self._value
 
    def __repr__(self):
       return "%s(%r)" % ( self.__class__, self._value)
