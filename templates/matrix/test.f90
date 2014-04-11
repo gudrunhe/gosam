@@ -87,7 +87,8 @@ subroutine  print_parameters(scale2)
         reduction_interoperation_rescue
    use [% process_name asprefix=\_ %]model
    implicit none
-   real(ki) :: scale2
+   real(ki) :: scale2[%
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]
 
 
    write(*,'(A1,1x,A26)') "#", "--------- SETUP ---------"
@@ -139,6 +140,10 @@ subroutine  print_parameters(scale2)
    write(*,'(A1,1x,A22)') "#", "Renormalisation scale:"
    write(*,'(A1,1x,A5,G23.16)') "#", "mu = ", sqrt(scale2)
    write(*,'(A1,1x,A25)') "#", "-------------------------"
+
+[% @else %]
+   call print_parameter()
+[% @end @select %]
 
 end subroutine print_parameters
 

@@ -24,9 +24,14 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._ones = ones
 
       self._model = golem.util.tools.getModel(conf)
+      self._modeltype =  conf.getProperty("modeltype")
+      if not self._modeltype:
+         self._modeltype = conf.getProperty("model")
+
 
       props = Properties()
       props["order"] = conf[golem.properties.qgraf_power]
+      props.setProperty("modeltype", self._modeltype)
 
       num_in   = len(in_particles)
       num_out  = len(out_particles)
