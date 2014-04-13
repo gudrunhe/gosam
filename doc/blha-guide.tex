@@ -1,0 +1,414 @@
+%\documentclass[a4paper]{refart}
+%\usepackage{listings}
+%\usepackage{color}
+%\usepackage{amsmath}
+%\title{GoSam BLHA Interface How-To}
+%\author{T. Reiter, G.~Luisoni}
+%\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
+%\lstset{basicstyle=\tt,backgroundcolor=\color{lstbg}}
+%\begin{document}
+%\maketitle
+%\tableofcontents
+
+\chapter{The Binoth Les Houches Accord Interface}
+\label{sec:blha}
+
+
+The interface of \gosam{} with a Monte Carlo event generator program 
+is based on the Binoth-Les Houches Accord (BLHA)
+standard interface.
+\gosam{}-2.0 supports both BLHA1~\cite{Binoth:2010xt}
+and BLHA2~\cite{Alioli:2013nda}.
+Certainly, a dedicated interface without using the BLHA is also possible.
+
+%\section{Make sure GoSam and the libraries are set up correctly}
+We assume that \gosam{} has been downloaded and installed using the script
+\texttt{gosam-installer.py} which comes with the distribution. 
+%You should ensure
+%that the file \texttt{gosam.py} is in your \texttt{\$PATH} variable.
+
+
+\section{Preparation of the order file}
+This step should be done by your Monte Carlo (MC) program. 
+We give generic examples of an order file for the process 
+$pp\to (Z\to e^+e^-)+$\,jet in both BLHA1 and BLHA2 standards in the files 
+\texttt{order1.lh} \texttt{order2.lh}  in Fig.~\ref{fig:orderLH}.
+
+\begin{figure}[h]
+\begin{center}
+\framebox(160,190){%
+    \parbox{150\unitlength}{\tt\scriptsize
+\# OLP\_order.lh: order file created by \\
+\# MC Sherpowig version 1.0 for GoSam\\
+\# Process: $p p \to e^+ e^- jet$\\
+Model                    SMdiag\\
+MatrixElementSquareType  CHsummed\\
+CorrectionType           QCD\\
+IRregularisation         DRED\\
+OperationMode            CouplingsStrippedOff\\
+SubdivideSubprocess      no\\
+AlphasPower              2\\
+\# Subprocesses \\
+1 -1 $->$ -11 11 21\\ 
+...\\
+21 3 $->$ -11 3 11 \\
+\# Process specific settings for GoSam\\
+\#@ symmetries family,generation}
+}
+\parbox{5\unitlength}{\ }\framebox(150,300){%
+    \parbox{150\unitlength}{\tt\scriptsize
+\#  OLP\_order.lh: OLP order file created by \\
+\# MC Sherpowig version 2.0 for GoSam\\
+InterfaceVersion         BLHA2\\
+CorrectionType           QCD\\
+IRregularisation         CDR\\
+WidthScheme              ComplexMass\\
+EWScheme                 alphaGF\\
+AccuracyTarget           0.0001\\
+DebugUnstable            True\\
+
+AlphasPower              1\\
+AmplitudeType ccTree\\
+1 -1 $->$ -11 11 21 \\
+...\\
+21 3 $->$ -11 3 11 \\
+
+AmplitudeType scTree\\
+1 -1 $->$ -11 11 21\\ 
+...\\ 
+21 3 $->$ -11 3 11 \\
+
+AmplitudeType Loop\\
+1 -1 $->$ -11 11 21\\ 
+...\\
+21 3 $->$ -11 3 11 \\
+\\
+AlphasPower              2\\
+AmplitudeType Tree\\
+1 1 $->$ -11 1 1 11\\ 
+...\\
+21 21 $->$ -11 -3 3 11 \\}}
+\caption{Examples of order  files for Z+jet, for both BLHA1 and BLHA2 standards.}
+\label{fig:orderLH}
+\end{center}
+\end{figure}  
+
+
+
+\begin{figure}[h]
+\begin{center}
+\framebox(175,170){%
+    \parbox{180\unitlength}{\tt\scriptsize
+\# vim: syntax=olp\\
+\#@OLP GOSAM 2.0\\
+\#@IgnoreUnknown False\\
+\#@IgnoreCase False\\
+\#@SyntaxExtensions \\
+MatrixElementSquareType CHsummed $|$ OK\\
+CorrectionType QCD $|$ OK\\
+IRregularisation CDR $|$ OK\\
+OperationMode  CouplingsStrippedOff $|$ OK\\
+AlphasPower 2 $|$ OK\\
+1 -1 $->$ -11 11 21 $|$ 1 137\\
+...\\
+21 3 $->$ -11 3 11 $|$ 1 63\\}
+}
+\parbox{5\unitlength}{\ }\framebox(180,270){%
+    \parbox{170\unitlength}{\tt\scriptsize
+\# vim: syntax=olp\\
+\#@OLP GOSAM 2.0\\
+\#@IgnoreUnknown False\\
+\#@IgnoreCase False\\
+\#@SyntaxExtensions \\
+InterfaceVersion BLHA2 $|$ OK\\
+CorrectionType QCD $|$ OK\\
+IRregularisation CDR $|$ OK\\
+AlphasPower 1 $|$ OK\\
+AmplitudeType ccTree $|$ OK\\
+1 -1 $->$ -11 11 21 $|$ 1 131\\
+...\\
+21 3 $->$ -11 3 11 $|$ 1 70\\
+AmplitudeType scTree | OK\\
+1 -1 $->$ -11 11 21 $|$ 1 145\\
+...\\
+21 3 $->$ -11 3 11 $|$ 1 71\\
+AmplitudeType Loop $|$ OK\\
+1 -1 $->$ -11 11 21 $|$ 1 137\\
+...\\
+21 3 $->$ -11 3 11 $|$ 1 63\\
+AlphasPower 2 $|$ OK\\
+AmplitudeType Tree $|$ OK\\
+1 1 $->$ -11 1 1 11 $|$ 1 42\\
+...\\
+21 21 $->$ -11 -3 3 11 $|$ 1 106\\}
+}
+\caption{Contract files for Z+jet created by {\sc GoSam} for both BLHA1 and BLHA2.}
+\label{fig:contractLH}
+\end{center}
+\end{figure}  
+
+\paragraph{Remarks.}
+\begin{itemize}
+\item The order file can have any name and any extension.
+      As a convention we typically reserve the extension \texttt{.lh}
+      for order files and \texttt{.olc} for contract files.
+\item The options \texttt{SubdivdeSubprocess} in BLHA1 has the following effect
+      on the code generation with GoSam: if set to 
+      \texttt{no}, \gosam{} generates one label per subprocess, if set to
+      \texttt{yes} it generates one label per helicity subamplitude
+      and therefore \emph{many} labels per subprocess.
+      
+\item The options \texttt{WidthScheme, EWScheme} in the BLHA2  example are optional.
+\item \gosam{} specific settings can be put into commentary lines starting
+      with the letter combination `\texttt{\#@}'. This is not part of the
+      BLHA standard. The line `\texttt{\#@ symmetries}\dots' restricts the
+      helicity subamplitudes being generated to the ones relevant for this
+      particular process. 
+%      The command \texttt{\#@ filter.nlo NOT(SCALELESS)}
+%      excludes scaleless diagrams from the amplitude generation,as they will be zero anyway.
+\end{itemize}
+
+\section{Run GoSam}
+To run \gosam{} within the MC/OLP setup one can use the following command:
+\begin{lstlisting}[language=bash]
+gosam.py --olp --mc=MCname \
+   --config=<your-path-to>/gosam.conf order.lh
+\end{lstlisting}
+
+\paragraph{Remarks.}
+\begin{itemize}
+\item The option \texttt{--olp} is mandatory whenever 
+   a BLHA order file is processed.
+\item The option \texttt{--mc=MCname} is optional. By specifying the
+   name of the Monte Carlo which is the intended partner program,
+   \gosam{} can choose some settings simplifying the communication and linking.
+   You can either specify \texttt{--mc=MCname} or \texttt{--mc=name/version}.
+   Alternatively (and also optional),
+   you can put this information into the order file:
+\begin{lstlisting}
+#@olp.mc.name mypreferredmc
+#@olp.mc.version 1.0.0
+\end{lstlisting}
+   The short option for \texttt{--mc} is \texttt{-M}.
+   The supported MC names so far are {\tt powhegbox, sherpa}.
+\item The option \texttt{--config} points to the configuration file.
+   Leaving out this option is not a good idea unless you have a configuration
+   in one of the following locations, where \gosam{} finds them automatically:
+   \begin{itemize}
+   \item \gosam{} installation directory,
+   \item user's home directory,
+   \item current working directory.
+   \end{itemize}
+   Possible names for default configuration files are \texttt{gosam.in},
+   \texttt{gosam.conf} and \texttt{.gosam}. Therefore you could simply copy
+   \texttt{<your-path-to>/\hspace{0pt}gosam.conf}
+   into the current directory and leave out this option.
+   You can have more than one \texttt{--config} options, where the latter
+   overwrites already present information in the former appearance of this
+   option. The short form is \texttt{-c}.
+\item You might want to specify the option \texttt{--destination=<dir>}
+   to place the generated files in the directory \texttt{<dir>}.
+   The short form is \texttt{-D<dir>}.
+\item You may specify the name of the contract file which should be written
+   using the option \texttt{--output-file=<contractfile>} or simply
+   \texttt{-o<contractfile>}.
+\item The option \texttt{--force} will overwrite an already existing
+   contract file without any warning. It is, however, quite useful during
+   debugging when you regenerate your files a~lot.
+\end{itemize}
+
+\paragraph{The contract file.}
+If the run of \gosam{} was successful can be read from the contract file.
+If everything went smoothly it should look like Listing~\ref{lst:order.olc}.
+All options are either acknowledged by the word \texttt{OK} or, in case
+of a failure, by the word \texttt{error} followed by an error message.
+
+\begin{lstlisting}[%
+  float,%
+  caption={Example of a contract file \texttt{order.olc}},%
+  label=lst:order.olc,%
+  numbers=left%
+]
+#@OLP GOSAM 2.0
+#@IgnoreUnknown False
+#@IgnoreCase False
+#@SyntaxExtensions
+InterfaceVersion         BLHA2 | OK
+Model                    SMdiag | OK
+AmplitudeType            CHsummed | OK
+CorrectionType           QCD | OK
+IRregularisation         DRED | OK
+WidthScheme              ComplexMass | OK
+EWScheme                 alphaGF | OK
+AccuracyTarget           0.0001 | OK
+DebugUnstable            True | OK
+CouplingPower QCD        2 | OK
+CouplingPower QED        2 | OK
+1 -2 -> 21 11 -12 | 1 0
+-2 1 -> 21 11 -12 | 1 1
+21 1 -> 2 11 -12 | 1 2
+1 21 -> 2 11 -12 | 1 3
+21 -2 -> -1 11 -12 | 1 4
+-2 21 -> -1 11 -12 | 1 5
+\end{lstlisting}
+
+The subprocesses receive an assignment to one or more
+labels per subprocess. In the line
+\begin{lstlisting}
+1 -2 -> 21 11 -12 | 1 0
+\end{lstlisting}
+the suffix \texttt{| 1 0}
+states that this subprocess has been assigned to \texttt{1}
+label which has the number \texttt{0}. 
+Had we set \texttt{SubdivideSubprocess} (keyword in BLHA1)
+to \texttt{yes} this line might have looked like
+\begin{lstlisting}
+1 -2 -> 21 11 -12 | 4 0 1 2 3
+\end{lstlisting}
+meaning that the subamplitudes\footnote{GoSam at the moment only splits
+with respect to helicity subamplitudes.} have been assigned to
+\texttt{4} labels (which is the first number after the bar) with
+the numbers \texttt{0} to \texttt{3}. These labels later form the
+first argument of the routine \texttt{olp\_evalsubprocess}.
+In order to retrieve the full amplitude the calling program should sum
+over the contributions from all labels. Alternatively, it is allowed to
+sample the different channels by Monte Carlo techniques.
+
+\section{``Make'' the files}
+The following sequence of commands will generate and compile the matrix
+element files:
+\begin{lstlisting}[language=bash]
+sh ./autogen.sh --prefix=`pwd`
+make install
+\end{lstlisting}
+
+Now you should find a subdirectory \texttt{lib/} containing the files
+\begin{itemize}
+\item \texttt{libgolem\_olp.a} for static linking,
+\item \texttt{libgolem\_olp.so} for dynamic linking,
+\item \texttt{libgolem\_olp.la} for linking with libtool.
+\end{itemize}
+
+You can set up a variable \texttt{LIBGOLEM} by the following command:
+\begin{lstlisting}[language=bash]
+export LIBGOLEM=\
+"-L`pwd`/lib/ -lgolem_olp `sh ./config.sh -olibs`"
+\end{lstlisting}
+A similar construction would also work inside a make-file:
+\begin{lstlisting}[language=Make]
+GOSAM_ME_DIR=<path-to-config.sh>
+LIBGOSAM="-L${GOSAM_ME_DIR}/lib/ -lgolem_olp \
+   `sh ${GOSAM_ME_DIR}/config.sh -olibs`"
+\end{lstlisting}
+
+\section{Call the interface routines}
+There are slight differences in naming (underscoring) and calling
+conventions (call by reference vs. call by value) depending on the
+extensions in use. For \texttt{--mc=powhegbox} the extension \texttt{f77}
+is automatically included and therefore the underscoring works such that
+\texttt{gfortran} used as a Fortran\,77 compiler would not complain.
+For all other Monte Carlo programs we follow the C/C++ conventions
+(see \texttt{olp.h})
+
+\subsection{Initialization}
+\lstset{language=[77]{Fortran}}
+The generated \gosam{} library is initialized with the call
+\begin{lstlisting}
+       call olp_start("path/to/contract.olc",ierr)
+\end{lstlisting}
+The variable \texttt{ierr} should be declared as integer. If the contract
+file is not found, \texttt{ierr} is set to a negative value. A non-negative
+value indicates success.
+
+If the contract file contains the option
+\texttt{ModelFile}, which should point to a SLHA file,
+the matrix element code tries to load the parameters from that file.
+
+\attention Calling \texttt{olp\_start} is mandatory even if the contract
+file is not present or not read.
+
+\subsection{Setting options (optional)}
+Parameters can be passed by calling \texttt{olp\_option}.
+\begin{lstlisting}
+       call olp_option("name=value",ierr)
+\end{lstlisting}
+
+\attention The initialization of derived parameters only works correctly
+if the according input parameters are set with \texttt{olp\_option}
+\emph{before} \texttt{olp\_start} is called.
+
+Example:
+\begin{lstlisting}
+       call olp_option("mZ=91.234",ierr)
+       call olp_option("mW=80.123",ierr)
+c at this point sin(theta_w) is not up to date.
+       call olp_start("path/to/contract.olc",ierr)
+c now sin(theta_w) is set consistently
+\end{lstlisting}
+
+Some options can be changed at any time: please, have a look inside
+\texttt{model.f90} to get a complete understanding about the available
+parameter names and about the impact of their settings.
+
+\subsection{Computing the matrix element}
+The routine which returns a value for the matrix element is
+\texttt{olp\_evalsubprocess}:
+\begin{lstlisting}
+       integer ilab
+       double precision moms(5*nlegs)
+       double precision mu,params(1)
+       double precision res(4)
+c      ...
+       call olp_evalsubprocess(
+      &        ilab,moms,mu,params,res)
+\end{lstlisting}
+
+The first argument, \texttt{ilab} is one of the labels from the
+contract file. The momenta are passed in the argument \texttt{moms},
+which has the format
+\begin{displaymath}
+\mathtt{(/}
+E_1, p^x_1, p^y_1, p^z_1, m_1,
+E_2, p^x_2, p^y_2, p^z_2, m_2, \ldots
+E_N, p^x_N, p^y_N, p^z_N, m_N
+\mathtt{/)}
+\end{displaymath}
+The momenta are expected in physical kinematics: $p_1+p_2=p_3+\ldots+p_N$.
+The components are in units of GeV.
+
+The argument \texttt{mu} is the renormalisation scale $\mu$ (not $\mu^2$!)
+in GeV. The argument params is an array of which the first argument is
+$\alpha_s(\mu)$. Any further array entries are ignored at the moment\footnote{
+Passing more than one parameter is implemented by the \texttt{Parameters}
+option in the order file, which is currently not part of the BLHA standard.}.
+
+The last argument is an array of length four which is filled by the subroutine
+with the result of the evaluation. The entries have as a unit some
+power of GeV ($1\text{GeV}^(4-N)$).
+\begin{align}
+\mathcal{M}_B^\dagger\mathcal{M}_B&=\mathtt{res(4)}\\
+2\mathrm{Re}\left(\mathcal{M}_B^\dagger\mathcal{M}_V\right)&=
+\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}\left(
+\frac{\mathtt{res(1)}}{\varepsilon^2}
++\frac{\mathtt{res(2)}}{\varepsilon}
++\mathtt{res(3)}
+\right)
+\end{align}
+This means that the coefficients \texttt{amp(1:3)} contain
+an explicit factor of $\alpha_s(\mu)/(4\pi)$.
+
+\subsection{Finalize (optional)}
+There is also a routine \texttt{olp\_finalize} which is only needed
+if the client code needs to call \texttt{olp\_start} more than once, e.g.
+\begin{lstlisting}
+       do i=1,max_i
+          write(line,'(A3,F6.3)') "mZ=", mZ(i)
+          call olp_option(line,ierr)
+c Need olp_start to update dependent parameters
+          call olp_start(name,ierr)
+c         ...
+          call olp_finalize()
+       enddo
+\end{lstlisting}
+
+%\end{document}
