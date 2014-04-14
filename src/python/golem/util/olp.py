@@ -470,7 +470,14 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             lconf[golem.properties.zero] = ",".join(zero)
       #---#] Constrain masses:
 
-      model = golem.util.tools.getModel(conf, imodel_path)
+
+      model_conf=conf.copy()
+      # This fills in the defaults where no option is given:
+      for p in golem.properties.properties:
+         if model_conf.getProperty(p):
+            model_conf.setProperty(str(p), model_conf.getProperty(p))
+
+      model = golem.util.tools.getModel(model_conf, imodel_path)
 
       #---#[ Setup excluded and massive particles :
       for lconf in [conf] + subprocesses_conf:
@@ -680,7 +687,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if templates == "":
       templates = golem.util.tools.golem_path("olp", "templates")
 
-	# This fills in the defaults where no option is given:
+   # This fills in the defaults where no option is given:
    for p in golem.properties.properties:
 		if conf.getProperty(p):
 			conf.setProperty(str(p), conf.getProperty(p))

@@ -391,6 +391,9 @@ def getModel(conf, extra_path=None):
    # Adapt EW scheme to order file request:
    if conf["olp.ewscheme"] is not None and ew_supp == True:
          select_olp_EWScheme(conf)
+   elif ew_supp == True and ( ( conf["model.options"] is None) or \
+         "ewchoose" in conf["model.options"] ):
+      golem.model.MODEL_OPTIONS["ewchoose"]=True
    elif conf["olp.ewscheme"] is not None and ew_supp == False:
          error("EWScheme tag in orderfile incompatible with model.")
 
