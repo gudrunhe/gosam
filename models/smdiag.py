@@ -791,6 +791,8 @@ def init():
       if user_choice != 0:
          warn = "EW scheme was set to ewchoose = %s\n" % user_choice
          warn+= "You specified the following EW parameters:\n"
+         if len(param)== 0:
+            param = "None!\n"
          warn+= param
          warn+= "We trust you know what you are doing ;-).\n"
          golem.util.tools.warning(warn)
