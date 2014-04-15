@@ -319,7 +319,8 @@ def prepare_model_files(conf, output_path=None):
          if not os.path.isabs(model_path):
             model_path = os.path.join(rel_path, model_path)
          message("Importing FeynRules model files ...")
-         mdl = golem.model.feynrules.Model(model_path)
+         extract_model_options(conf)
+         mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
          mdl.store(path, MODEL_LOCAL)
          message("Done with model import.")
       else:
@@ -347,6 +348,21 @@ def prepare_model_files(conf, output_path=None):
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
+
+def extract_model_options(conf):
+   for opt in conf.getListProperty(golem.properties.model_options):
+      idx = -1
+      for delim in [" ", ":", "="]:
+         if delim in opt:
+            didx = opt.index(delim)
+            if idx < 0 or didx < idx:
+               idx = didx
+      if idx >= 0:
+         golem.model.MODEL_OPTIONS[opt[:idx].strip()] = \
+               opt[idx+1:].strip()
+      else:
+         golem.model.MODEL_OPTIONS[opt.strip()] = True
+
 def getModel(conf, extra_path=None):
    MODEL_LOCAL = "model"
 
@@ -364,18 +380,7 @@ def getModel(conf, extra_path=None):
 
    model_shortname = conf["model"]
 
-   for opt in conf.getListProperty(golem.properties.model_options):
-      idx = -1
-      for delim in [" ", ":", "="]:
-         if delim in opt:
-            didx = opt.index(delim)
-            if idx < 0 or didx < idx:
-               idx = didx
-      if idx >= 0:
-         golem.model.MODEL_OPTIONS[opt[:idx].strip()] = \
-               opt[idx+1:].strip()
-      else:
-         golem.model.MODEL_OPTIONS[opt.strip()] = True
+   extract_model_options(conf)
 
    # --[ EW scheme management:
    models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']

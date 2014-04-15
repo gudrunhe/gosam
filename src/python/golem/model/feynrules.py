@@ -76,8 +76,10 @@ unprefixed_symbols = [
 	]
 
 class Model:
-	def __init__(self, model_path):
+	def __init__(self, model_path, model_options=None):
 		mfile = None
+		self.model_options = model_options or dict()
+
 		try:
 			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
 			norm_path = os.path.normpath(model_path)
@@ -256,6 +258,20 @@ class Model:
 		functions['Nfrat'] = 'if(Nfgen,Nf/Nfgen,1)'
 		types['Nfrat'] = 'R'
 
+
+		for key, value in self.model_options.items():
+			if key in parameters or self.prefix+key in parameters:
+				if key in parameters:
+					real_key=key
+				else:
+					real_key=self.prefix+key
+				try:
+					sval = str(value)
+					fval = float(sval)
+					parameters[real_key] = sval
+				except ValueError:
+					warning("Model option %s=%r not in allowed range." % (key, value),
+							"Option ignored")
 		specials = {}
 		for expr in shortcut_functions:
 			specials[str(expr)] = expr
