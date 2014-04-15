@@ -50,6 +50,13 @@ udeneg     u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) + g(k5) @ alpha_s^3 alpha^2
 udeneg_dred u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) + g(k5) @ alpha_s^3 alpha^2
            Calculation is done using dim. reduction
 
+uu_graviton_yy
+           u + u~ -> Graviton -> gamma + gamma
+	   Calculation is done in the ADD model (model/LED_UFO) using
+	   dim. reduction. with a custom propagator for the spin-2 particle
+           summing all KK modes.
+
+
 setup.in.template:
    One can specify options (on top of the usual configuration files)
    for all examples by creating a file setup.in.
