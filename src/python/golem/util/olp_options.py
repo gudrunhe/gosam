@@ -179,6 +179,15 @@ def ModelFile(values, conf, ignore_case):
 		return __value_ERR__ + "model file does not exist."
 
 @optional_olp_option
+def ParameterCard(values, conf, ignore_case):
+	file_name = " ".join(values)
+	conf["olp.modelfile"] = file_name
+	if os.path.exists(file_name):
+		return __value_OK__
+	else:
+		return __value_ERR__ + "SLHA file does not exist."
+
+@optional_olp_option
 def SubdivideSubprocess(values, conf, ignore_case):
 	supported_values = ["yes", "no", "true", "false"]
 	return expect_one_keyword(values, conf, ignore_case,
