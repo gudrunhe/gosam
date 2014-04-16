@@ -4,7 +4,7 @@
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
-     & initgolem, ir_subtraction
+     & initgolem, exitgolem, ir_subtraction
    use [% process_name asprefix=\_ %]color, only: numcs, CA
    use [% process_name asprefix=\_ %]rambo, only: ramb
 
@@ -78,6 +78,7 @@
       & 1.0E+03 * (t2 - t1) / real(NEVT)
 
    close(logfile)
+   call exitgolem()
 
  contains
 
