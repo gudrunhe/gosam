@@ -979,7 +979,16 @@ modelfile.write("            case default\n")
 modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set width for PDG code:\", pdg\n")
 modelfile.write("               ierr = 0 !FAIL\n")
 modelfile.write("               return\n")
-modelfile.write("            end select\n")
+modelfile.write("            end select\n")[$
+ @if has_slha_locations $][$
+   @for slha_blocks upper dimension=1 name=blockname $][$
+         @for slha_entries index=idx2 $]
+modelfile.write("     elseif (name .eq. \"[$ blockname  $]&&[$ idx2 $]\") then\n")
+modelfile.write("               must_be_real = .true.\n")
+modelfile.write("               [$ $_ $] = re\n")[$
+         @end @for $][$
+   @end @for $][$
+@end @if $]
 modelfile.write("      elseif (name .eq. \"renormalisation\") then\n")
 modelfile.write("          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
 modelfile.write("             renormalisation = int(re)\n")
