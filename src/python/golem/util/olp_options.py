@@ -186,9 +186,20 @@ def SubdivideSubprocess(values, conf, ignore_case):
 
 @optional_olp_option
 def Model(values, conf, ignore_case):
- 	supported_values = ["SMdiag", "SMnondiag"]
- 	return expect_one_keyword(values, conf, ignore_case,
- 		   "model", supported_values)
+	if len(values)>=1 and values[0][:5].lower()=="ufo:/":
+		file_name = os.path.abspath(" ".join(values)[5:].strip())
+		conf["olp.ufomodel"] = file_name
+		if os.path.exists(file_name) and os.path.isdir(file_name) \
+				and os.path.exists(os.path.join(file_name, "__init__.py")):
+			conf[golem.properties.model] = ["FeynRules", file_name]
+			return __value_OK__
+		else:
+			warning("UFOModel which expands to '%s' does not exist." % file_name)
+			return __value_ERR__ + "UFO model does not exist or is not a valid model."
+
+	supported_values = ["SMdiag", "SMnondiag"]
+	return expect_one_keyword(values, conf, ignore_case,
+			"model", supported_values)
 
 @optional_olp_option
 def CouplingPower(values, conf, ignore_case):
