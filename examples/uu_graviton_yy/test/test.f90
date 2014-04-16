@@ -146,8 +146,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
 
    real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
-   double precision, dimension(0:3), intent(out) :: amp
-   double precision, dimension(2:3) :: irp
+   real(ki), dimension(0:3), intent(out) :: amp
+   real(ki), dimension(2:3) :: irp
    integer :: prec
 
    call samplitude(vecs, scale2, amp, prec)
@@ -174,19 +174,20 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    real(ki), intent(in) :: scale2
    real(ki) :: s,t,u
    double precision, dimension(0:3), intent(out) :: amp
+   real(ki), parameter :: pi = &
+   & 3.1415926535897932384626433832795028841971693993751058209749445920_ki
 
    s= dotproduct(vecs(1,:)+vecs(2,:), vecs(1,:)+vecs(2,:))
    t= dotproduct(vecs(1,:)-vecs(3,:), vecs(1,:)-vecs(3,:))
    u= dotproduct(vecs(1,:)-vecs(4,:), vecs(1,:)-vecs(4,:))
 
-
-   ! The following results are calculated based on the formula
-   ! in arXiv:0908.4894v2
+   ! The following results are calculated based on the formula (9) and (14)
+   ! in arXiv:0908.4894v2. The conversion from CDR to DRED is included.
 
    amp(0) = abs(customSpin2Prop(s,0._ki))**2._ki * mdlkappa**4._ki / 16._ki / 3._ki &
                   &  * (u*t**3._ki + t*u**3._ki) / 4._ki
 
-   amp(1) = 1.1594725347858159_ki * amp(0)
+   amp(1) = 4._ki/3._ki*(-9._ki + pi*pi) * amp(0)
    amp(2) = -4_ki * amp(0)
    amp(3) = -8._ki/3._ki * amp(0)
 
