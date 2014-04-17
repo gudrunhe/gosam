@@ -180,22 +180,22 @@ contains
    write(unit,'(A1,1x,A21)') "#", "--- ALL PARAMETERS ---"[$
 @for parameters $][$
    @select type @case R $]
-   write(unit,'(A1,1x,A7,G23.16)') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16)') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case C $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case RP $]
-   write(unit,'(A1,1x,A7,G23.16,"const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16,"const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case CP $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")","const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")","const.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @end @select type $][$
 @end @for parameters $]
    if(is_verbose) then
 [$
 @for functions $][$
    @select type @case R $]
-   write(unit,'(A1,1x,A7,G23.16,"calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,G23.16,"calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @case C $]
-   write(unit,'(A1,1x,A7,"(",G23.16,G23.16,")"," calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "[$$_ convert=str format=%-5s$]= ", [$$_$][$
    @end @select type $][$
 @end @for functions $]
    end if[$
@@ -922,26 +922,35 @@ $]if (name.eq."VV12") then
                write(*,'(A20,1x,I10)') "Cannot set width for PDG code:", pdg
                ierr = 0 !FAIL
                return
-            end select
-      elseif (name .eq. "renormalisation") then
+            end select[$
+@if has_slha_locations $][$
+   @for slha_blocks upper dimension=1 name=blockname $][$
+         @for slha_entries index=idx2 $]
+     elseif (name .eq. "[$ blockname  $]&&[$ idx2 $]") then
+               must_be_real = .true.
+               [$ $_ $] = re[$
+         @end @for $][$
+   @end @for $][$
+@end @if $]
+     elseif (name .eq. "renormalisation") then
           if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
              renormalisation = int(re)
           else
              ierr=0 !FAIL
           end if
-      elseif (name .eq. "nlo_prefactors") then
+     elseif (name .eq. "nlo_prefactors") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             nlo_prefactors = int(re)
          else
             ierr=0 !FAIL
          end if
-      elseif (name .eq. "deltaOS") then
+     elseif (name .eq. "deltaOS") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             deltaOS = int(re)
          else
             ierr=0 !FAIL
          end if
-      elseif (name .eq. "reduction_interoperation") then
+     elseif (name .eq. "reduction_interoperation") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             reduction_interoperation = int(re)
          else

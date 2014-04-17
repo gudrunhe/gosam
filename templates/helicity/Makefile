@@ -139,25 +139,29 @@ GENERATED_SRC=[%
 	diagramsct.f90 [%
 @end @if %]
 
-.PHONY: compile source clean very-clean doc
+.PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
 .SUFFIXES:
 
-
-source:[%
-@if diagsum %]
+[% @if diagsum 
+%]convert:
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell mv ../diagrams-1.hh ../diags-1.hh)
 	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
 	$(shell rm ../diags-1.hh)
 endif[%
 @end @if %]
+
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) $(S) -f Makefile.source source
+source:[% @if diagsum %] convert [% @end @if 
+	%] $(SOURCE_TREE) $(SOURCE_VIRT)
+else
+source:
 endif
+
 
 [% @for elements topolopy.keep.virt %]
 
-d[%$_%]h[%helicity%]l1: d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90[%
+d[%$_%]h[%helicity%]l1: d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90 globals.o[%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell mv ../diagrams-1.hh ../diags-1.hh)
@@ -209,6 +213,7 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'd*h[%helicity%]l[01]c.f90' \
 		-or -name 'd*h[%helicity%]l[01]d.txt' \
 		-or -name 'd*h[%helicity%]l[01]d.hh' \
+		-or -name 'd*h[%helicity%]l[01].hh' \
 		-or -name 'd*h[%helicity%]l1d.txt' \
 		-or -name 'd*h[%helicity%]l1d.f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \

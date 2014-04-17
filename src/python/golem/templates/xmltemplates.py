@@ -122,7 +122,7 @@ class _TemplateState:
                attrs["golem-version-min"].split("."))
          if compare_version(GOLEM_VERSION, golem_version_min) < 0:
             raise TemplateXMLError(
-                  "Golem too old: template requires version %s or above."
+                  "GoSam too old: template requires version %s or above."
                   % attrs["golem-version-min"])
 
       if "golem-version-max" in attrs:
@@ -130,7 +130,7 @@ class _TemplateState:
                attrs["golem-version-max"].split("."))
          if compare_version(GOLEM_VERSION, golem_version_max) > 0:
             raise TemplateXMLError(
-                  "Golem too recent: template requires version %s or below." \
+                  "GoSam too recent: template requires version %s or below." \
                   % attrs["golem-version-max"])
 
       for entry in self.stack[0]:

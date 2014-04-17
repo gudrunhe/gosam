@@ -240,8 +240,10 @@ contains
       real(kind=c_double), dimension(10), intent(in) :: parameters
       real(kind=c_double), dimension(60), intent(out) :: res
       integer(kind=c_int) :: succ
+      real(kind=c_double) :: alpha_s
+      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
 
-      call OLP_SetParameter("alphaS",parameters(1),0.0d0,succ)
+      alpha_s = parameters(1)
 
       select case(label)[%
       @for subprocesses prefix=sp. %][%
@@ -250,14 +252,19 @@ contains
             @case 1 %]
       case([% cr.channels %])
               call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
-               %]), mu, parameters, res)[%
+               %]), mu, parameters, res, blha1_mode=.true.)[%
             @else %][%
                @for elements cr.channels %]
       case([% $_ %])
               call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
-              %]), mu, parameters, res)[%
+              %]), mu, parameters, res, blha1_mode=.true.)[%
                @end @for %][%
             @end @select %][%
+         @if eval cr.amplitudetype ~ "scTree"
+         %][% @elif eval cr.amplitudetype ~ "ccTree"
+         %][% @else %]
+              res(1:3) = alpha_s * one_over_2pi * res(1:3)[%
+         @end @if%][%
          @end @for %][%
       @end @for %]
       case default
@@ -393,9 +400,9 @@ contains
       @select count elements cr.channels
       @case 1 %][%
       @else %]h, [%
-      @end @select %]momenta, mu, parameters, res, acc)
+      @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki, PSP_chk_th3
+      use [% sp.$_ %]_config, only: ki, PSP_chk_th3, nlo_prefactors
       use [% sp.$_ %]_model, only: parseline
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
@@ -425,8 +432,9 @@ contains
                 eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
       %]) :: amp
       real(kind=c_double), optional :: acc
+      logical, optional :: blha1_mode
       real(kind=ki) :: zero
-      integer :: i, prec
+      integer :: i, prec, orig_nlo_prefactors
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
@@ -435,7 +443,6 @@ contains
       @else %]
       character(len=255) :: buffer
       integer :: ierr
-
 
       !---#[ receive parameters from argument list:[%
          @for elements olp.parameters shift=1 %]
@@ -449,6 +456,13 @@ contains
       !---#] receive parameters from argument list:[%
       @end @select %]
 
+      if(present(blha1_mode)) then
+         if(blha1_mode) then
+            ! save nlo_prefactors and restore later
+            orig_nlo_prefactors=nlo_prefactors
+            nlo_prefactors=0
+         end if
+     end if
 
       vecs(:,1) = real(momenta(1::5),ki)
       vecs(:,2) = real(momenta(2::5),ki)
@@ -490,7 +504,8 @@ contains
             zero = log(1.0_ki)
             amp(2)= 1.0_ki/zero
         end if
-        acc=1E5_ki ! dummy accuracy which is not used
+        ! Cannot be assigned if present(acc)=F --> commented out!
+        ! acc=1E5_ki ! dummy accuracy which is not used
       end if
 
       [% @if eval cr.amplitudetype ~ "scTree"
@@ -507,6 +522,13 @@ contains
       res(3) = real(amp(2), c_double)
       res(4) = real(amp(1), c_double)[%
       @end @if %]
+
+      if(present(blha1_mode)) then
+         if(blha1_mode) then
+            ! restore nlo_prefactors
+            nlo_prefactors = orig_nlo_prefactors
+         end if
+     end if
 
    end subroutine eval[% cr.id %]
    !---#] subroutine eval[% cr.id %] :[%

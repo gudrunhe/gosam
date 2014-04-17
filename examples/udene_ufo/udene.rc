@@ -1,5 +1,5 @@
 process_name=udene
-process_path=ngolem
+process_path=virtual
 
 # PDG codes
 # u: 2, d: 1
@@ -23,6 +23,3 @@ model.options=
 # There's only one non-zero helicity
 helicities=+--+
 
-# Note: we have not implemented fr5 in the UFO model file yet.
-#        Therefore we use dred (default)
-#regularisation_scheme=dred 

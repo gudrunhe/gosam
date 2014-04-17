@@ -1,9 +1,10 @@
 process_name=gggg
-process_path=ngolem
+process_path=virtual
 
 # PDG codes # Gluon: 21
 in=21,21
 out=21,21
+model.options=
 
 order=QCD, 2, 4
 
@@ -20,3 +21,4 @@ model=../model/Standard_Model_LanHep, 4
 
 filter.nlo= lambda d: not d.isScaleless()
 
+regularisation_scheme=cdr

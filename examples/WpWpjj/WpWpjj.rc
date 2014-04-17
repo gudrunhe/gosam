@@ -1,5 +1,5 @@
 process_name=wpwpjj
-process_path=ngolem
+process_path=virtual
 
 in=u, d~
 out=c~, s, e+, ne, mu+, nmu

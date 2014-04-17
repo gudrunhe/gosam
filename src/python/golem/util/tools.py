@@ -319,7 +319,8 @@ def prepare_model_files(conf, output_path=None):
          if not os.path.isabs(model_path):
             model_path = os.path.join(rel_path, model_path)
          message("Importing FeynRules model files ...")
-         mdl = golem.model.feynrules.Model(model_path)
+         extract_model_options(conf)
+         mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
          mdl.store(path, MODEL_LOCAL)
          message("Done with model import.")
       else:
@@ -347,6 +348,21 @@ def prepare_model_files(conf, output_path=None):
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
+
+def extract_model_options(conf):
+   for opt in conf.getListProperty(golem.properties.model_options):
+      idx = -1
+      for delim in [" ", ":", "="]:
+         if delim in opt:
+            didx = opt.index(delim)
+            if idx < 0 or didx < idx:
+               idx = didx
+      if idx >= 0:
+         golem.model.MODEL_OPTIONS[opt[:idx].strip()] = \
+               opt[idx+1:].strip()
+      else:
+         golem.model.MODEL_OPTIONS[opt.strip()] = True
+
 def getModel(conf, extra_path=None):
    MODEL_LOCAL = "model"
 
@@ -364,18 +380,7 @@ def getModel(conf, extra_path=None):
 
    model_shortname = conf["model"]
 
-   for opt in conf.getListProperty(golem.properties.model_options):
-      idx = -1
-      for delim in [" ", ":", "="]:
-         if delim in opt:
-            didx = opt.index(delim)
-            if idx < 0 or didx < idx:
-               idx = didx
-      if idx >= 0:
-         golem.model.MODEL_OPTIONS[opt[:idx].strip()] = \
-               opt[idx+1:].strip()
-      else:
-         golem.model.MODEL_OPTIONS[opt.strip()] = True
+   extract_model_options(conf)
 
    # --[ EW scheme management:
    models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
@@ -391,6 +396,9 @@ def getModel(conf, extra_path=None):
    # Adapt EW scheme to order file request:
    if conf["olp.ewscheme"] is not None and ew_supp == True:
          select_olp_EWScheme(conf)
+   elif ew_supp == True and ( ( conf["model.options"] is None) or \
+         "ewchoose" in conf["model.options"] ):
+      golem.model.MODEL_OPTIONS["ewchoose"]=True
    elif conf["olp.ewscheme"] is not None and ew_supp == False:
          error("EWScheme tag in orderfile incompatible with model.")
 
@@ -405,7 +413,8 @@ def getModel(conf, extra_path=None):
       golem.model.MODEL_OPTIONS["ewchoose"] = False
       golem.model.MODEL_OPTIONS["users_choice"] = '0'
    elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
-      error("ewchoose option in model.options is not supported with the chosen model.")
+      del golem.model.MODEL_OPTIONS["ewchoose"]
+      #error("ewchoose option in model.options is not supported with the chosen model.")
 
    # --] EW scheme management
 
@@ -464,6 +473,8 @@ def expand_parameter_list(prop, conf):
 
    new_values = set([])
    for value in lst:
+      if not value:
+         continue
       if "*" in value:
          pat = value.replace("*", r'(\w*)') + "$"
          cpat = re.compile(pat)

@@ -1,36 +1,43 @@
 
 PROCESS=dgdg
 
-GOLEM=gosam.py
-GOLEM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
+GOSAM=gosam.py
+GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
 
 
-.PHONY: all golem ntest test clean
+.PHONY: all golem test comptest clean very-clean
 
-all: golem ntest
+all: golem test
 
-test: ntest
+test: comptest
 	@echo Running test programm
-	$(MAKE) -C ntest test
+	$(MAKE) -C test test
 
-ntest: golem
-	$(MAKE) -C ntest compile
+comptest: golem
+	$(MAKE) -C test compile
 
 golem: $(PROCESS).log
-	$(MAKE) -C ngolem compile
+	$(MAKE) -C virtual compile
 
 $(PROCESS).log: $(PROCESS).in
-	@echo setting up ngolem ...
-	@if [ ! -d ngolem ]; then mkdir ngolem; fi
-	$(GOLEM) -z $< -l $@
+	@echo setting up virtual ...
+	@if [ ! -d virtual ]; then mkdir virtual; fi
+	$(GOSAM) -z $< -l $@
 
 $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
-	$(GOLEM) $(GOLEM_RC) -t $@
+	$(GOSAM) $(GOSAM_RC) -t $@
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C ngolem clean
-	rm -f ngolem/.golem.dir
-	$(MAKE) -C ntest clean
+	$(MAKE) -C virtual clean
+	rm -f virtual/.golem.dir
+	$(MAKE) -C test clean
+
+very-clean:
+	rm -f $(PROCESS).in $(PROCESS).log
+	$(MAKE) -C test clean
+	rm -f virtual/.golem.dir
+	rm -fr virtual
+

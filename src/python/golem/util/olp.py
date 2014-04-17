@@ -435,7 +435,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    for lineo,_,_,_ in order_file.processes_ordered():
       subconf=orig_conf.copy()
       file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
-         ignore_case, ignore_unknown, lineo)
+         ignore_case, ignore_unknown, lineo, quiet=True)
       subprocesses_conf.append(subconf)
 
    #---#] Read order file:
@@ -470,7 +470,14 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             lconf[golem.properties.zero] = ",".join(zero)
       #---#] Constrain masses:
 
-      model = golem.util.tools.getModel(conf, imodel_path)
+
+      model_conf=conf.copy()
+      # This fills in the defaults where no option is given:
+      for p in golem.properties.properties:
+         if model_conf.getProperty(p):
+            model_conf.setProperty(str(p), model_conf.getProperty(p))
+
+      model = golem.util.tools.getModel(model_conf, imodel_path)
 
       #---#[ Setup excluded and massive particles :
       for lconf in [conf] + subprocesses_conf:
@@ -621,6 +628,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
          try:
             golem.util.main_misc.workflow(subprocess_conf)
+            merge_extensions(subprocess_conf,conf)
+
             golem.util.main_misc.generate_process_files(subprocess_conf,
                   from_scratch)
 
@@ -678,12 +687,18 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if templates == "":
       templates = golem.util.tools.golem_path("olp", "templates")
 
-	# This fills in the defaults where no option is given:
+   ext = golem.properties.getExtensions(conf)
+   if "shared" in ext:
+      conf["shared.fcflags"]="-fPIC"
+      conf["shared.ldflags"]="-fPIC"
+
+   # This fills in the defaults where no option is given:
    for p in golem.properties.properties:
 		if conf.getProperty(p):
 			conf.setProperty(str(p), conf.getProperty(p))
 
    golem.properties.setInternals(conf)
+
 
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(True),
          conf=conf,
@@ -732,4 +747,18 @@ def mc_specials(conf, order_file):
          add_extensions.append(ext)
    if len(add_extensions) > 0:
       conf.setProperty("%s-auto.extensions" % mc_name,
+            ",".join(add_extensions))
+
+def merge_extensions(conf_a,conf_b):
+   """ merge extensions from conf_a into conf_b """
+
+   extensions_a = golem.properties.getExtensions(conf_a)
+   extensions_b = golem.properties.getExtensions(conf_b)
+
+   add_extensions=[]
+   for ext in extensions_a:
+      if ext and ext not in extensions_b and ext not in add_extensions:
+         add_extensions.append(ext)
+   if add_extensions:
+      conf_b.setProperty("merge-auto.extensions",
             ",".join(add_extensions))

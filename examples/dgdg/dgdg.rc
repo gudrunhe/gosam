@@ -1,5 +1,5 @@
 process_name=dgdg
-process_path=ngolem
+process_path=virtual
 
 # PDG codes # Gluon: 21 # Z-Boson: 23
 in=1,21
@@ -15,7 +15,4 @@ one=gs,e
 zero=mU,mD
 
 helicities=++++, +++-, +-++, +-+-
-symmetries=flavour, parity
-reduction_programs=samurai,golem95
 
-regularisation_scheme=cdr

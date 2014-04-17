@@ -183,7 +183,7 @@ contains
       real(ki), dimension([%num_legs%], 4) :: vecsrot
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
-      real(ki), dimension(1:4) :: amprot, ampres, ampresrot
+      real(ki), dimension(1:4) :: ampdef, amprot, ampres, ampresrot
       real(ki) :: rat2, kfac, zero, angle
       real(ki), dimension(2:3) :: irp
       integer, intent(out) :: prec
@@ -191,6 +191,10 @@ contains
       integer, intent(in), optional :: h
       integer spprec1, fpprec1, spprec2, fpprec2
       integer tmp_red_int, icheck, i, irot
+      ampdef=0.0_ki
+      amprot=0.0_ki
+      ampres=0.0_ki
+      ampresrot=0.0_ki
       icheck = 1
       angle = 1.234_ki
       fpprec1 = 18
@@ -198,23 +202,26 @@ contains
       if(reduction_interoperation.eq.reduction_interoperation_rescue) & 
            & PSP_rescue=.false.
       tmp_red_int = reduction_interoperation
-      call samplitudel01(vecs, scale2, amp, rat2, ok, h)
-
+      call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
+      amp = ampdef
+      ! RESCUE SYSTEM
       if(PSP_check) then
          call ir_subtraction(vecs, scale2, irp)
-         if((amp(3)-irp(2)) .ne. 0.0_ki) then
-            spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+         if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
+            spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
          else
             spprec1 = 16
          endif
-         if(amp(1) .ne. 0.0_ki) then
-            kfac = amp(2)/amp(1)
+         if(ampdef(1) .ne. 0.0_ki) then
+            kfac = ampdef(2)/ampdef(1)
          else
             kfac = 0.0_ki
          endif
          if(spprec1.lt.PSP_chk_th1.and.spprec1.gt.PSP_chk_th2) icheck=2 ! ROTATION
-         if(spprec1.lt.PSP_chk_th2) icheck=3                            ! RESCUE
-      
+         if(spprec1.lt.PSP_chk_th2) then
+            icheck=3                                                    ! RESCUE
+            fpprec1=-10        ! Set -10 as finite part precision            
+         endif
          if(icheck.eq.2) then
             do irot = 1,[%num_legs%]
                vecsrot(irot,1) = vecs(irot,1)
@@ -228,8 +235,8 @@ contains
             else
                fpprec1 = 16
             endif
-            if(fpprec1.ge.PSP_chk_th3) icheck=1                          ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th3) icheck=3                          ! RESCUE
+            if(fpprec1.ge.PSP_chk_th3) icheck=1                            ! ACCEPTED
+            if(fpprec1.lt.PSP_chk_th3) icheck=3                            ! RESCUE
          endif
          prec = min(spprec1,fpprec1)
 
@@ -249,7 +256,8 @@ contains
             endif
             if(spprec2.lt.PSP_chk_th1.and.spprec2.gt.PSP_chk_th2) icheck=2 ! ROTATION
             if(spprec2.lt.PSP_chk_th2) icheck=3                            ! DISCARD
-            
+
+            amp=ampres            
             if(icheck.eq.2) then
                do irot = 1,[%num_legs%]
                   vecsrot(irot,1) = vecs(irot,1)
@@ -263,8 +271,8 @@ contains
                else
                   fpprec2 = 16
                endif
-               if(fpprec2.ge.PSP_chk_th3) icheck=1                          ! ACCEPTED
-               if(fpprec2.lt.PSP_chk_th3) icheck=3                          ! DISCARD
+               if(fpprec2.ge.PSP_chk_th3) icheck=1                         ! ACCEPTED
+               if(fpprec2.lt.PSP_chk_th3) icheck=3                         ! DISCARD
             endif
             reduction_interoperation = tmp_red_int
             prec = min(spprec2,fpprec2)
@@ -285,11 +293,13 @@ contains
             write(42,'(4x,A15,I2.1,A6,I2.1,A3)') & 
                  &  "<PSP_prec2 sp='", spprec2, "' fp='", fpprec2, "'/>"
             write(42,'(4x,A10,D23.16,A3)') &
+                 &  "<born LO='", ampdef(1), "'/>"
+            write(42,'(4x,A10,D23.16,A3)') &
                  &  "<rat2 r2='", rat2, "'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
-                 &  "<amp       sp='", amp(3)      ,"' ir='", irp(2),"' fp='", amp(2)   ,"'/>"
+                 &  "<amp       sp='", ampdef(3)   ,"' ir='", irp(2),"' fp='", ampdef(2)   ,"'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
-                 &  "<amprot    sp='", amprot(3)   ,"' ir='", irp(2),"' fp='", amprot(2),"'/>"
+                 &  "<amprot    sp='", amprot(3)   ,"' ir='", irp(2),"' fp='", amprot(2)   ,"'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
                  &  "<ampres    sp='", ampres(3)   ,"' ir='", irp(2),"' fp='", ampres(2)   ,"'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &

@@ -1,10 +1,10 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% process_name asprefix=\_ %]config, only: ki, logfile
+   use [% process_name asprefix=\_ %]config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
    use [% process_name asprefix=\_ %]model, only: parse
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
-     & initgolem, ir_subtraction
+     & initgolem, exitgolem, ir_subtraction
    use [% process_name asprefix=\_ %]color, only: numcs, CA
    use [% process_name asprefix=\_ %]rambo, only: ramb
 
@@ -32,6 +32,9 @@
    call initgolem()
 
    call random_seed
+
+   nlo_prefactors=0  ! Do not include any NLO prefactors in order to recognize
+                     ! rational numbers for the pole coefficients
 
    call cpu_time(t1)
    do ievt = 1, NEVT
@@ -75,6 +78,7 @@
       & 1.0E+03 * (t2 - t1) / real(NEVT)
 
    close(logfile)
+   call exitgolem()
 
  contains
 
@@ -84,7 +88,8 @@ subroutine  print_parameters(scale2)
         reduction_interoperation_rescue
    use [% process_name asprefix=\_ %]model
    implicit none
-   real(ki) :: scale2
+   real(ki) :: scale2[%
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]
 
 
    write(*,'(A1,1x,A26)') "#", "--------- SETUP ---------"
@@ -112,7 +117,7 @@ subroutine  print_parameters(scale2)
       write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
    end if
 
-   write(*,'(A1,1x,A25)') "#", "--- PARAMETERS VALUES ---"
+   write(*,'(A1,1x,A25)') "#", "--- PARAMETER VALUES ---"
    write(*,'(A1,1x,A13)') "#", "Boson masses & widths:"
    write(*,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
    write(*,'(A1,1x,A5,G23.16)') "#", "mW = ", mW
@@ -136,6 +141,10 @@ subroutine  print_parameters(scale2)
    write(*,'(A1,1x,A22)') "#", "Renormalisation scale:"
    write(*,'(A1,1x,A5,G23.16)') "#", "mu = ", sqrt(scale2)
    write(*,'(A1,1x,A25)') "#", "-------------------------"
+
+[% @else %]
+   call print_parameter()
+[% @end @select %]
 
 end subroutine print_parameters
 

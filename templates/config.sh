@@ -1,6 +1,10 @@
 #!/bin/sh
 
-PWD="$(dirname $(realpath "$0"))"
+if command -v realpath >/dev/null 2>&1 ; then
+   PWD="$(dirname $(realpath "$0"))"
+else
+   PWD="$(dirname "$0")"
+fi
 
 [% @if internal OLP_MODE %]
 MAKEFILECONF=$PWD/../Makefile.conf[%

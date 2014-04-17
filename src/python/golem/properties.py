@@ -174,7 +174,7 @@ helicities = Property("helicities",
             # expands to 12 helicities
             # helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\\
             #            -+-++,-+-+-,-+-+0,--+++,--++-,--++0
-    
+
    """,
    list)
 
@@ -208,7 +208,7 @@ qgraf_verbatim = Property("qgraf.verbatim",
       # at least one Higgs:\\n\\
       false=iprop[H, 0, 0];\\n
 
-   
+
    Please, refer to the QGraf documentation for details.
 
    See also: qgraf.options, order
@@ -362,7 +362,7 @@ form_bin = Property("form.bin",
       form.bin=/home/my_user_name/bin/form
    """,
    str,
-   "form")
+   "tform")
 
 form_threads = Property("form.threads",
    """\
@@ -380,7 +380,7 @@ haggies_bin = Property("haggies.bin",
    Haggies is used to transform the expressions of the diagrams
    into optimized Fortran90 programs. It can be obtained from
       http://www.nikhef.nl/~thomasr/download.php
-   
+
    Examples:
       1) haggies.bin=/home/my_user_name/bin/haggies
       2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
@@ -403,7 +403,7 @@ form_tmp = Property("form.tempdir",
 template_path = Property("templates",
    """\
    Path pointing to the directory containing the template
-   files for the process. If not set golem uses the directory
+   files for the process. If not set, golem uses the directory
    <golem_path>/templates.
 
    The directory must contain a file called 'template.xml'
@@ -459,7 +459,7 @@ fc_bin = Property("fc.bin",
 
 python_bin = Property("python.bin",
    """\
-   Denotes the executable file of Python 
+   Denotes the executable file of Python
    """,
    str,
    "python")
@@ -469,7 +469,7 @@ formopt_level = Property("formopt.level",
    There are three levels of Horner Scheme
    offered and the number here will specify
    which one we use. It can only be 1,2 or 3.
-   
+
    Examples:
    formopt.level=3
 
@@ -689,7 +689,7 @@ debug_flags = Property("debug",
 reference_vectors = Property("reference-vectors",
    """\
    A list of reference vectors for massive and higher spin particles.
-   For vectors which are not assigned here, the program picks a 
+   For vectors which are not assigned here, the program picks a
    reference vector automatically.
 
    Each entry of the list has to be of the form <index>:<index>
@@ -743,8 +743,6 @@ r2 = Property("r2",
    implicit    -- mu^2 terms are kept in the numerator and reduced
                   at runtime
    explicit    -- mu^2 terms are reduced analytically
-   only        -- same as 'explicit' but only the R2 term is kept in
-                  the result
    off         -- all mu^2 terms are set to zero
    """,
    str, "explicit",
@@ -770,7 +768,7 @@ crossings = Property("crossings",
 symmetries = Property("symmetries",
    """\
    Specifies the symmetries of the amplitude.
-   
+
    This information is used when the list of helicities is generated.
 
    Possible values are:
@@ -808,7 +806,7 @@ pyxodraw = Property("pyxodraw",
 
 config_renorm_beta = Property("renorm_beta",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables beta function renormalisation
 
@@ -818,7 +816,7 @@ config_renorm_beta = Property("renorm_beta",
 
 config_renorm_logs = Property("renorm_logs",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables the logarithmic finite terms
    of all UV counterterms
@@ -829,7 +827,7 @@ config_renorm_logs = Property("renorm_logs",
 
 config_renorm_mqse = Property("renorm_mqse",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables the UV counterterm coming from the
    massive quark propagators
@@ -840,7 +838,7 @@ config_renorm_mqse = Property("renorm_mqse",
 
 config_renorm_decoupling = Property("renorm_decoupling",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables UV counterterms coming from
    massive quark loops
@@ -851,7 +849,7 @@ config_renorm_decoupling = Property("renorm_decoupling",
 
 config_renorm_mqwf = Property("renorm_mqwf",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables UV countertems coming from
    external massive quarks
@@ -862,7 +860,7 @@ config_renorm_mqwf = Property("renorm_mqwf",
 
 config_renorm_gamma5 = Property("renorm_gamma5",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates finite renormalisation for axial couplings in the
    't Hooft-Veltman scheme
@@ -877,7 +875,7 @@ config_reduction_interoperation = Property("reduction_interoperation",
 
    Possible values are: ninja, samurai, golem95, pjfry (experimental)
 
-   Set the same variable in config.f90. A value of '-1' lets GoSam decide
+   Sets the same variable in config.f90. A value of '-1' lets GoSam decide
    depending on reduction_libraries
 
    See common/config.f90 for details.
@@ -888,7 +886,7 @@ config_reduction_interoperation_rescue = Property("reduction_interoperation_resc
    """
    Rescue reduction program.
 
-   Set the same variable in config.f90. A value of '-1' lets GoSam
+   Sets the same variable in config.f90. A value of '-1' lets GoSam
    decide.
 
    See common/config.f90 for details.
@@ -897,7 +895,7 @@ config_reduction_interoperation_rescue = Property("reduction_interoperation_resc
 
 config_samurai_scalar = Property("samurai_scalar",
    """
-   Set the same variable in config.f90.
+   Sets the same variable in config.f90.
 
    See common/config.f90 for details.
    """,
@@ -905,14 +903,14 @@ config_samurai_scalar = Property("samurai_scalar",
 
 config_nlo_prefactors = Property("nlo_prefactors",
    """
-   Set the same variable in config.f90. The values have the 
+   Sets the same variable in config.f90. The values have the
    following meaning:
 
    0: A factor of alpha_(s)/2/pi is not included in the NLO result
    1: A factor of 1/8/pi^2 is not included in the NLO result
    2: The NLO includes all prefactors
 
-   Note, however, that the factor of 1/Gamma(1-eps) is not 
+   Note, however, that the factor of 1/Gamma(1-eps) is not
    included in any of the cases.
 
    Please note, that nlo_prefactors=0 is enforced temporary in test.f90
@@ -923,7 +921,7 @@ config_nlo_prefactors = Property("nlo_prefactors",
 
 config_PSP_check = Property("PSP_check",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
    !!Works only for QCD and with built-in model files!!
@@ -932,7 +930,7 @@ config_PSP_check = Property("PSP_check",
 
 config_PSP_rescue = Property("PSP_rescue",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates Phase-Space Point rescue based on the estimated
    accuracy on the finite part.
@@ -940,8 +938,8 @@ config_PSP_rescue = Property("PSP_rescue",
    pole accuracy and the cancellation between cut-constructable
    part and R2.
 
-   Note: the usage of this rescue system is most stable if used 
-   with the extension 'derive' which ensures a stabler 
+   Note: the usage of this rescue system is most stable if used
+   with the extension 'derive' which ensures a stabler
    reconstruction of the tensor coefficients.
 
    !!Works only for QCD and with built-in model files!!
@@ -950,7 +948,7 @@ config_PSP_rescue = Property("PSP_rescue",
 
 config_PSP_verbosity = Property("PSP_verbosity",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Sets the verbosity of the PSP_check.
    verbosity = False: no output
@@ -961,10 +959,10 @@ config_PSP_verbosity = Property("PSP_verbosity",
 
 config_PSP_chk_th1 = Property("PSP_chk_th1",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Threshold to activate accept the point without further treatments.
-   The number has to be an integer indicating the wished minimum number 
+   The number has to be an integer indicating the wished minimum number
    of digits accuracy on the pole. For poles more precise than this
    threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
@@ -973,10 +971,10 @@ config_PSP_chk_th1 = Property("PSP_chk_th1",
 
 config_PSP_chk_th2 = Property("PSP_chk_th2",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Threshold to declare a PSP as bad point, based of the precision of the pole.
-   Points with precision less than this threshold are directly reprocessed with 
+   Points with precision less than this threshold are directly reprocessed with
    the rescue system (if available), or declared as unstable. According to the
    verbosity level set, such points are written to a file and not used when
    the code is interfaced to an external Monte Carlo using the new BLHA standards.
@@ -986,12 +984,12 @@ config_PSP_chk_th2 = Property("PSP_chk_th2",
 
 config_PSP_chk_th3 = Property("PSP_chk_th3",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based on the precision of 
+   Threshold to declare a PSP as bad point, based on the precision of
    the finite part estimated with a rotation. According to the
    verbosity level set, such points are written to a file and not
-   used when the code is interfaced to an external Monte Carlo 
+   used when the code is interfaced to an external Monte Carlo
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
@@ -999,11 +997,11 @@ config_PSP_chk_th3 = Property("PSP_chk_th3",
 
 config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
-   Threshold on the k-factor to declare a PSP as bad point. According 
-   to the verbosity level set, such points are written to a file and 
-   not used when the code is interfaced to an external Monte Carlo 
+   Threshold on the k-factor to declare a PSP as bad point. According
+   to the verbosity level set, such points are written to a file and
+   not used when the code is interfaced to an external Monte Carlo
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,

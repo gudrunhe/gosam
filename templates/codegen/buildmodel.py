@@ -48,11 +48,10 @@ modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
-modelfile.write(', ewchoice\n')[$
-@else$]
-modelfile.write("\n")[$@end @if$][$
+modelfile.write(', ewchoice')[$
+@end @if$][$
 @end @select$]
-modelfile.write('   implicit none\n')
+modelfile.write('\n   implicit none\n')
 modelfile.write('\n')
 modelfile.write('   private :: ki\n')[$
 @if extension samurai $]
@@ -225,22 +224,22 @@ modelfile.write("   if(is_verbose) then\n")
 modelfile.write("   write(unit,'(A1,1x,A21)') \"#\", \"--- ALL PARAMETERS ---\"\n")
 [$@for parameters $][$
    @select type @case R $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16)') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16)') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case C $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case RP $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16,\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case CP $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\",\"const.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@end @select type $][$
 @end @for parameters $]
 modelfile.write("   if(is_verbose) then\n")
 [$
 @for functions $][$
    @select type @case R $]
-modelfile.write("   write(unit,'(A1,1x,A7,G23.16,\"calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,G23.16,\"calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@case C $]
-modelfile.write("   write(unit,'(A1,1x,A7,\"(\",G23.16,G23.16,\")\",\" calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
+modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\",\" calc.\")') \"#\", \"[$$_ convert=str format=%-5s$]= \", [$$_$]\n")
 [$@end @select type $][$
 @end @for functions $]
 modelfile.write("   end if\n")
@@ -979,7 +978,16 @@ modelfile.write("            case default\n")
 modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set width for PDG code:\", pdg\n")
 modelfile.write("               ierr = 0 !FAIL\n")
 modelfile.write("               return\n")
-modelfile.write("            end select\n")
+modelfile.write("            end select\n")[$
+ @if has_slha_locations $][$
+   @for slha_blocks upper dimension=1 name=blockname $][$
+         @for slha_entries index=idx2 $]
+modelfile.write("     elseif (name .eq. \"[$ blockname  $]&&[$ idx2 $]\") then\n")
+modelfile.write("               must_be_real = .true.\n")
+modelfile.write("               [$ $_ $] = re\n")[$
+         @end @for $][$
+   @end @for $][$
+@end @if $]
 modelfile.write("      elseif (name .eq. \"renormalisation\") then\n")
 modelfile.write("          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
 modelfile.write("             renormalisation = int(re)\n")
