@@ -15,5 +15,4 @@ model.options=Nfgen:1, masses: mT, widths: none
 one=gs,e
 
 filter.nlo=lambda d: not d.isScaleless()
-
-reduction_program=golem95
+reduction_programs=ninja
