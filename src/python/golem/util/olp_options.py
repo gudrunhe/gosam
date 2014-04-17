@@ -475,7 +475,7 @@ def expect_many_keywords(values, conf, ignore_case, key, supported_values):
 
 	return __value_OK__
 
-def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_lineno=None):
+def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_lineno=None, quiet=False):
 	global __all_olp_options__, __olp_lower_case__, __required_olp_options__
 	global __required_olp_options_default__
 	backup = (__all_olp_options__,__olp_lower_case__, \
@@ -496,6 +496,8 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 		else:
 			contract_file.setPropertyResponseOrdered(name,
 					"Error: Unknown by OLP",lineno)
+			if not quiet:
+				warning("Line %s: Keyword '%s' unknown." % (name, lineno))
 			error_count += 1
 			continue
 
@@ -508,6 +510,8 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 		response = handler(values, conf, ignore_case)
 		contract_file.setPropertyResponseOrdered(name, response,lineno)
 		if not contract_file.isPropertyOk(name):
+			if not quiet:
+				warning("Line %s: Option '%s' failed. %s" % (lineno, name, response))
 			error_count += 1
 	for key in __required_olp_options_default__:
 		handler=__required_olp_options_default__[key]

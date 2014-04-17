@@ -435,7 +435,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    for lineo,_,_,_ in order_file.processes_ordered():
       subconf=orig_conf.copy()
       file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
-         ignore_case, ignore_unknown, lineo)
+         ignore_case, ignore_unknown, lineo, quiet=True)
       subprocesses_conf.append(subconf)
 
    #---#] Read order file:
