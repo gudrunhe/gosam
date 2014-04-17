@@ -169,6 +169,8 @@ contains
       call orig_func(new_vecs, ampcc)
 
       call twist_result_OLP_color_correlated(ampcc)
+      
+      ampcc(:)=ampcc(:)*prefactor()
 
    end subroutine OLP_color_correlated
 
@@ -186,6 +188,8 @@ contains
       call orig_func(new_vecs, ampsc)
 
       call twist_result_OLP_spin_correlated(ampsc)
+      
+      ampsc(:)=ampsc(:)*prefactor()
 
    end subroutine OLP_spin_correlated_lo2
 
