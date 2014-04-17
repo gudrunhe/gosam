@@ -1,0 +1,11 @@
+process_name=graviton
+process_path=virtual
+in=u,u~
+out=A,A
+model=FeynRules,../model/LED_UFO/
+order=QCD,0,2
+zero=mdlMU,mdlMD,mdlMS,mdlMC,mdlMB,mdlWT,mdlWGr
+one=mdlaS
+qgraf.verbatim=true=bridge[part9000006,1,1]; \
+               true=iprop[part1,part3,part4,part5,0,0];
+extensions=customspin2prop

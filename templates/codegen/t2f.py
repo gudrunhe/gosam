@@ -40,6 +40,9 @@ def bmatch(lin):
 				bmatch.insert(ib,[ sort.pop(idx)[0], sort.pop(idx)[0]])
 				if embed:
 					idx -= 1
+					if idx<0:
+						idx=0
+						embed=False
 			else:
 				idx += 1
 				embed = True

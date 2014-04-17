@@ -1,7 +1,8 @@
 # vim: ts=3:sw=3
 
-# module dependencies[%
-@for each o lo obj var=O %][%
+# module dependencies
+OBJEXT ?=o[%
+@for each $(OBJEXT) lo var=O %][%
    @if generate_lo_diagrams %][%
       @if group %][%
       @else %]
@@ -14,8 +15,8 @@ diagramsl0fr5.[%O%]:[%
             @for elements topolopy.keep.tree %] \
 	d[%$_%]h[%helicity%]l0fr5.[%O%][%
             @end @for %][%
+	  @end @if %][%
 	 @end @if %][%
-      @end @if %][%
    @end @if generate_lo_diagrams %][%
    @if generate_nlo_virt %][%
       @select abbrev.level
@@ -42,7 +43,10 @@ d[%$_%]h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
 abbrevd[%$_%]h[%helicity%].[%O%]: globals.[%O%][%
 	         @select r2
    			@case implicit explicit off %]
-d[%$_%]h[%helicity%]l1.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+d[%$_%]h[%helicity%]l1.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][% 
+            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+	           @end @if %][%
 	      	@end @select %][%
          @end @for %][%
       @end @select %][%
@@ -69,14 +73,13 @@ golem95h[%helicity%].[%O%]: [%
       	@if extension ninja %]
 ninjah[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.[%O%][%
-					@if internal GENERATE_NINJA_TRIPLE
-						%] d[%$_%]h[%helicity%]l13.[%O%][%
-					@end @if %][%
-					@if internal GENERATE_NINJA_DOUBLE
-						%] d[%$_%]h[%helicity%]l12.[%O%][%
-					@end @if %][%
+	d[%$_%]h[%helicity%]l1.[%O%] d[%$_%]h[%helicity%]l131.[%O%] d[%$_%]h[%helicity%]l132.[%O%] d[%$_%]h[%helicity%]l121.[%O%][%
 		@end @for %][%
+@for elements topolopy.keep.virt %]
+d[%$_%]h[%helicity%]l131.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%]
+d[%$_%]h[%helicity%]l132.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%]
+d[%$_%]h[%helicity%]l121.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+	@end @for %][%
 	@end @if extension ninja %][%
 	@end @select %][%
    @end @if generate_nlo_virt%][%
@@ -118,4 +121,65 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 			@if generate_uv_counterterms %] \
 			diagramsct.[%O%][%
 			@end @if %][%
+@end @for %][%
+
+@for each $(OBJEXT) var=O %][%
+   @if generate_lo_diagrams %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0.mod: diagramsl0.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod: d[%$_%]h[%helicity%]l0.[%O%][%
+   @end @for %][%
+       @if internal REQUIRE_FR5 %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0fr5.mod: diagramsl0fr5.[%O%][%
+	@end @if %][%
+   @end @if generate_lo_diagrams %][%
+   @if generate_nlo_virt %][%
+      @select abbrev.level
+      @case helicity %]
+[% process_name asprefix=\_ %]abbrevh[%helicity%].mod: abbrevh[%helicity%].[%O%] [%
+      @case group %][%
+         @for groups var=grp %]
+[% process_name asprefix=\_ %]abbrevg[%grp%]h[%helicity%].mod: abbrevg[%grp%]h[%helicity%].[%O%][%
+         @end @for %][%
+      @case diagram %][%
+         @for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod: abbrevd[%$_%]h[%helicity%].[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod: d[%$_%]h[%helicity%]l1.[%O%][% 
+            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1d.mod: d[%$_%]h[%helicity%]l1d.[%O%][%
+	           @end @if %][%
+	      	@end @select %][%
+         @end @for %][%
+      @end @select %][%
+
+	   @select r2
+   	@case implicit explicit off %][%
+      	@if extension samurai %]
+[% process_name asprefix=\_ %]samuraih[%helicity%].mod: samuraih[%helicity%].[%O%][%
+   	   @end @if extension samurai %][%
+
+      	@if extension golem95 %]
+[% process_name asprefix=\_ %]golem95h[%helicity%].mod: golem95h[%helicity%].[%O%][%
+	      @end @if extension golem95 %][%
+
+      	@if extension ninja %]
+[% process_name asprefix=\_ %]ninjah[%helicity%].mod: ninjah[%helicity%].[%O%] [%
+         	@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l131.mod: d[%$_%]h[%helicity%]l131.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l132.mod: d[%$_%]h[%helicity%]l132.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l121.mod: d[%$_%]h[%helicity%]l121.[%O%][%
+		@end @for %][%
+	@end @if extension ninja %][%
+	@end @select %][%
+   @end @if generate_nlo_virt%][%
+	@if generate_uv_counterterms %]
+[% process_name asprefix=\_ %]diagramscth[% helicity %].mod: diagramsct.[%O%][%
+     	@for elements topolopy.keep.ct %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1c.mod: d[%$_%]h[%helicity%]l1c.[%O%][%
+		@end @for %][%
+	@end @if generate_uv_counterterms %]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %].mod: amplitudeh[%helicity%].[%O%]
+[% process_name asprefix=\_ %]globalsh[% helicity %].mod: globals.[%O%][%
 @end @for %]

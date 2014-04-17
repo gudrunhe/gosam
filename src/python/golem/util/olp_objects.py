@@ -152,8 +152,11 @@ class OLPOrderFile:
 			self._backslash_escape = False
 
 		self._options = {}
+		self._options_ordered = []
 		self._opt_res = {}
+		self._opt_res_ordered = []
 		self._processes = []
+		self._processes_opt_until = []
 		self._proc_res = []
 		self._processing_instructions = []
 
@@ -169,12 +172,12 @@ class OLPOrderFile:
 			for line in source:
 				line_number += 1
 				try:
-					parseStatus = self._parseLine(line, parseStatus)
+					parseStatus = self._parseLine(line, line_number, parseStatus)
 				except OLPError as ex:
 					raise OLPError("While parsing line #%d: %s" %
 							(line_number, str(ex)))
 
-	def _parseLine(self, line, parseStatus):
+	def _parseLine(self, line, line_number, parseStatus):
 		if parseStatus is not None:
 			# This is a continuation line:
 			s = line.lstrip(WHITESPACE)
@@ -215,24 +218,25 @@ class OLPOrderFile:
 		if not is_blank:
 			if is_subprocess:
 				if is_contract:
-					self._handle_subprocess(elements[0], elements[1], elements[2])
+					self._handle_subprocess(line_number, elements[0], elements[1], elements[2])
 				else:
-					self._handle_subprocess(elements[0], elements[1])
+					self._handle_subprocess(line_number, elements[0], elements[1])
 			else:
 				if is_contract:
-					self._handle_option(elements[0][0], elements[0][1:],
+					self._handle_option(line_number, elements[0][0], elements[0][1:],
 							elements[2])
 				else:
-					self._handle_option(elements[0][0], elements[0][1:])
+					self._handle_option(line_number, elements[0][0], elements[0][1:])
 		return None
 
-	def _handle_option(self, name, value, response = None):
-		if name in self._options:
-			raise OLPError("Option %r has been specified more than once")
+	def _handle_option(self, line_number, name, value, response = None):
+		#if name in self._options:
+		#	raise OLPError("Option %s has been specified more than once" % name)
 
 		if response is not None:
 			if isinstance(self, OLPContractFile):
 				self._options[name] = value
+				self._options_ordered.append((line_number,name,value))
 
 				if len(response) < 1:
 					raise OLPError("Empty response encountered in contract file")
@@ -245,6 +249,7 @@ class OLPOrderFile:
 					raise OLPError("Invalid response (neither 'OK' nor 'Error:')")
 
 				self._opt_res[name] = response
+				self._opt_res_ordered.append( (line_number,name,value,response) )
 			else:
 				raise OLPError("No response expected in order file")
 		else:
@@ -252,12 +257,15 @@ class OLPOrderFile:
 				raise OLPError("Response expected in contract file")
 			else:
 				self._options[name] = value
+				self._options_ordered.append((line_number,name,value))
+				self._opt_res_ordered.append( (line_number,name, None) )
 
 
-	def _handle_subprocess(self, inp, out, response = None):
+	def _handle_subprocess(self, line_number, inp, out, response = None):
 		if response is not None:
 			if isinstance(self, OLPContractFile):
-				self._processes.append( (inp, out) )
+				self._processes.append( (line_number, inp, out) )
+				self._processes_opt_until.append(len(self._options_ordered))
 
 				if len(response) < 1:
 					raise OLPError("Empty response encountered in contract file")
@@ -283,7 +291,8 @@ class OLPOrderFile:
 			if isinstance(self, OLPContractFile):
 				raise OLPError("Response expected in contract file")
 			else:
-				self._processes.append( (inp, out) )
+				self._processes.append( (line_number, inp, out) )
+				self._processes_opt_until.append(len(self._options_ordered))
 				self._proc_res.append([])
 		pass
 
@@ -413,11 +422,23 @@ class OLPOrderFile:
 		for name, value in self._options.iteritems():
 			yield (name, value)
 
+	def options_ordered(self):
+		for line_number, name, value in self._options_ordered:
+			yield (line_number, name, value)
+
+
 	def processes(self):
 		i = 0
 		for process in self._processes:
-			inp, out = process
+			inp, out = process[1:]
 			yield (i, inp, out)
+			i += 1
+
+	def processes_ordered(self):
+		i = 0
+		for process in self._processes:
+			line_number, inp, out = process
+			yield (line_number, i, inp, out)
 			i += 1
 
 	def processing_instructions(self):
@@ -432,8 +453,11 @@ class OLPContractFile(OLPOrderFile):
 		}):
 		if isinstance(source, OLPOrderFile):
 			self._options = source._options.copy()
+			self._options_ordered = source._options_ordered[:]
 			self._opt_res = source._opt_res.copy()
+			self._opt_res_ordered = source._opt_res_ordered[:]
 			self._processes = source._processes[:]
+			self._processes_opt_until = source._processes_opt_until[:]
 			self._proc_res = source._proc_res[:]
 			self._single_quotes = source._single_quotes
 			self._double_quotes = source._double_quotes
@@ -464,13 +488,44 @@ class OLPContractFile(OLPOrderFile):
 		self._proc_res[idx] = msg
 
 	def setPropertyResponse(self, name, value):
+		i=0
+		for l,n,_ in self.options_ordered():
+			if n==name: break
+			i=i+1
+		if n!=self._options_ordered[i][1]:
+			assert False
+		line_number=self._options_ordered[i][0]
 		if isinstance(value, str):
 			self._opt_res[name] = value.split(" ")
+			self._opt_res_ordered[i] = line_number,name, value.split(" ")
 		else:
 			self._opt_res[name] = value
+			self._opt_res_ordered[i] = line_number,name, value
 
 		assert isinstance(self._opt_res[name], list), \
 				"self._opt_res[%r] == %r" % (name, self._opt_res[name])
+
+	def setPropertyResponseOrdered(self, name, value, line_number):
+		i=0
+		for l,n,_ in self.options_ordered():
+			if line_number==l and n==name:
+				break
+			i=i+1
+		if line_number!=self._options_ordered[i][0] or n!=self._options_ordered[i][1]:
+			assert False
+
+		if isinstance(value, str):
+			self._opt_res[name] = value.split(" ")
+			self._opt_res_ordered[i] = line_number,name, value.split(" ")
+		else:
+			self._opt_res[name] = value
+			self._opt_res_ordered[i] = line_number,name, value
+
+		assert isinstance(self._opt_res[name], list), \
+				"self._opt_res[%r] == %r" % (name, self._opt_res[name])
+
+
+
 
 	def isPropertyOk(self, name):
 		r = self.getPropertyResponse(name).lower()
@@ -531,18 +586,26 @@ class OLPContractFile(OLPOrderFile):
 			return value
 
 	def store(self, f):
-		for name, value in self.options():
-			response = self.getPropertyResponse(name)
-			if response is None:
-				respone = "OK # Option has been ignored."
-			f.write("%s %s | %s\n" % (name,
-				" ".join(map(lambda s: self._escape(s), value)), response))
-
+		start_pos=0
+		end_pos=0
 		for i, inp, out in self.processes():
+			end_pos=self._processes_opt_until[i]
+
+			for j in range(start_pos,end_pos):
+				_,name, value = self._options_ordered[j]
+				# response = self.getPropertyResponse(name)
+				response = self._opt_res_ordered[j] if (len(self._opt_res_ordered)>j) else None
+				if response is None:
+					response = "OK # Option has been ignored."
+				else:
+					response = " ".join(response[2])
+				f.write("%s %s | %s\n" % (name,
+					" ".join(map(lambda s: self._escape(s), value)), response))
+
 			try:
 				response = self.getProcessResponse(i)
 			except IndexError:
-				error("Response Code for process has not been set properly.")
+				golem.util.tools.error("Response Code for process has not been set properly.")
 			if isinstance(response, list):
 				f.write("%s -> %s | %d %s\n" % (" ".join(map(str, inp)), 
 					" ".join(map(str, out)), len(response),
@@ -550,6 +613,7 @@ class OLPContractFile(OLPOrderFile):
 			else:
 				f.write("%s -> %s | %s\n" % (" ".join(map(str, inp)), 
 					" ".join(map(str, out)), response))
+			start_pos=end_pos
 		
 
 

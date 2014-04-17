@@ -3,11 +3,11 @@
 #    | . . |       An Automated One-Loop Matrix Element Generator    #
 #  >-+ ~~~ +-<                      Version 1.0                      #
 #    |     |                                                         #
-#   <__/~\__>             (c) The GoSam Collaboration 2011           #
+#   <__/~\__>             (c) The GoSam Collaboration 2011-2013      #
 #                                                                    #
 #       AUTHORS:                                                     #
-#       * Gavin Cullen         <gavin.cullen@desy.de>             #
-#       * Nicolas Greiner      <greiner@mpp.mpg.de>               #
+#       * Gavin Cullen         <gavin.cullen@desy.de>                #
+#       * Nicolas Greiner      <greiner@mpp.mpg.de>                  #
 #       * Gudrun Heinrich      <gudrun@mpp.mpg.de>                   #
 #       * Gionata Luisoni      <gionata.luisoni@durham.ac.uk>        #
 #       * Pierpaolo Mastrolia  <pierpaolo.mastrolia@cern.ch>         #

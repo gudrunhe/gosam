@@ -487,12 +487,17 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	@staticmethod
 	def ninjaidx_formula(nlegs,rk):
+		#return max( rk - nlegs + 3 - max(3-nlegs,0) , -1)
 		return max( rk - nlegs + 3 - max(3-nlegs,0) , -1)
+
+	@staticmethod
+	def ninjaidxb_formula(nlegs,rk):
+		return max( rk - nlegs + 2 - max(2-nlegs,0) , -1)
 
 	def diagrams(self, *args, **opts):
 		nopts = opts.copy()
 		for kw in ["loopsize", "group", "var", "pinches", "first", "last",
-				"indices", "index", "shift", "rank", "ninjaidx", "idxshift",
+				"indices", "index", "shift", "rank", "ninjaidx", "ninjaidxb", "idxshift",
 				"unpinched", "invert", "nf", "global_index",
 				"mqse"]:
 			if kw in nopts:
@@ -504,6 +509,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		shift_lst = {}
 		rank_lst = {}
 		ninjaidx_lst = {}
+		ninjaidxb_lst = {}
 		nf_lst = set([])
 		top_se = set([])
 
@@ -524,6 +530,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 					rank_lst[idx] = diagrams[idx].rank()
 					ninjaidx_lst[idx] = \
 					    self.ninjaidx_formula(diagrams[idx].loopsize(),rank_lst[idx])
+					ninjaidxb_lst[idx] = \
+					    self.ninjaidxb_formula(diagrams[idx].loopsize(),rank_lst[idx])
 					if diagrams[idx].isNf():
 						nf_lst.add(idx)
 					if diagrams[idx].isMassiveQuarkSE():
@@ -549,6 +557,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		sign_name = self._setup_name("sign", "sign", opts)
 		rank_name = self._setup_name("rank", "rank", opts)
 		ninjaidx_name = self._setup_name("ninjaidx", "ninjaidx", opts)
+		ninjaidxb_name = self._setup_name("ninjaidxb", "ninjaidxb", opts)
 		nf_name = self._setup_name("nf", "is_nf", opts)
 		mqse_name = self._setup_name("mqse", "is_mqse", opts)
 		dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
@@ -621,6 +630,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(sign_name, qsign)
 			props.setProperty(rank_name, rank_lst[diagram_index])
 			props.setProperty(ninjaidx_name, ninjaidx_lst[diagram_index])
+			props.setProperty(ninjaidxb_name, ninjaidxb_lst[diagram_index])
 			props.setProperty(globi_name, orig_index[diagram_index])
 			props.setProperty(nf_name, diagram_index in nf_lst)
 			props.setProperty(mqse_name, diagram_index in top_se)
@@ -632,7 +642,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 	def diagrams_tot(self, *args, **opts):
 		nopts = opts.copy()
 		for kw in ["loopsize", "group", "var", "pinches", "first", "last",
-				"indices", "index", "shift", "rank", "ninjaidx", "idxshift",
+				"indices", "index", "shift", "rank", "ninjaidx", "ninjaidxb", "idxshift",
 				"unpinched", "invert", "nf", "global_index",
 				"mqse"]:
 			if kw in nopts:
@@ -644,6 +654,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		shift_lst = {}
 		rank_lst = {}
 		ninjaidx_lst = {}
+		ninjaidxb_lst = {}
 		nf_lst = set([])
 		top_se = set([])
 
@@ -664,6 +675,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 					rank_lst[idx] = diagrams_tot[idx].rank()
 					ninjaidx_lst[idx] = \
 					    ninjaidx_formula(cls,diagrams[idx].size(),rank_lst[idx])
+					ninjaidxb_lst[idx] = \
+					    ninjaidxb_formula(cls,diagrams[idx].size(),rank_lst[idx])
 					if diagrams_tot[idx].isNf():
 						nf_lst.add(idx)
 					if diagrams_tot[idx].isMassiveQuarkSE():
@@ -689,6 +702,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		sign_name = self._setup_name("sign", "sign", opts)
 		rank_name = self._setup_name("rank", "rank", opts)
 		ninjaidx_name = self._setup_name("ninjaidx", "ninjaidx", opts)
+		ninjaidxb_name = self._setup_name("ninjaidxb", "ninjaidxb", opts)
 		nf_name = self._setup_name("nf", "is_nf", opts)
 		mqse_name = self._setup_name("mqse", "is_mqse", opts)
 		dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
@@ -761,6 +775,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(sign_name, qsign)
 			props.setProperty(rank_name, rank_lst[diagram_index])
 			props.setProperty(ninjaidx_name, ninjaidx_lst[diagram_index])
+			props.setProperty(ninjaidxb_name, ninjaidxb_lst[diagram_index])
 			props.setProperty(globi_name, orig_index[diagram_index])
 			props.setProperty(nf_name, diagram_index in nf_lst)
 			props.setProperty(mqse_name, diagram_index in top_se)

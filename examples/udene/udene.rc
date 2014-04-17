@@ -1,5 +1,5 @@
 process_name=udene
-process_path=ngolem
+process_path=virtual
 
 # PDG codes
 # u: 2, d: 1
@@ -15,7 +15,6 @@ order=QCD, 0, 2
 qgraf.verbatim=\
 true=bridge[Wp,Wm,1,100];
 
-qgraf.options=onshell,notadpole,nosnail
 
 model=sm
 model.options= masses: mW mZ mT
@@ -25,4 +24,6 @@ one=gs,e
 # There's only one non-zero helicity
 helicities=+--+
 
-#process.extensions=fr5
+regularisation_scheme=cdr
+
+polvec=explicit

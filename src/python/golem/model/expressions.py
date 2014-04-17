@@ -56,7 +56,7 @@ class ExpressionParser:
 			ex_sign = 1
 			while tokens.name() == "plus_op":
 				ex_sign *= tokens.pop()
-			o2 = self.simple(tokens)
+			o2 = self.simple_power(tokens)
 			if ex_sign == -1:
 				o2 = UnaryMinusExpression(o2)
 			o1 = PowerExpression(o1, o2)
@@ -66,6 +66,85 @@ class ExpressionParser:
 		return o1
 
 	def simple(self, tokens):
+		name = tokens.name()
+		if name == "symbol":
+			op1 = self.symbol(tokens)
+			name = tokens.name()
+			while name == "dot" or name == "lparen":
+				if name == "dot":
+					tokens.pop()
+					op2 = self.symbol(tokens)
+					op1 = DotExpression(op1, op2)
+				elif name == "lparen":
+					op2 = self.argumentlist(tokens)
+					op1 = FunctionExpression(op1, op2)
+				name = tokens.name()
+			return op1
+		elif name == "float":
+			return FloatExpression(tokens.pop())
+		elif name == "integer":
+			# Change 27.08.13 any integer in an expression
+			# that is not a power is treated as a float
+			return FloatExpression(tokens.pop())
+		elif name == "single_quoted":
+			return StringExpression(tokens.pop())
+		elif name == "lparen":
+			tokens.pop()
+			result = self.expression(tokens)
+			if tokens.name() == "rparen":
+				tokens.pop()
+				return result
+			elif tokens.name() != "":
+				error("')' expected but %s (%r) found in '%s'." %
+						(tokens.name(), tokens.token(), tokens.source()))
+			else:
+				error("Unexpected end of expression: ')' expected in '%s'." %
+						tokens.source())
+		else:
+			error("%s (%r) encountered in %s." %
+					(name, tokens.token(), tokens.source()))
+
+	def simple_power(self, tokens):
+		name = tokens.name()
+		if name == "symbol":
+			op1 = self.symbol(tokens)
+			name = tokens.name()
+			while name == "dot" or name == "lparen":
+				if name == "dot":
+					tokens.pop()
+					op2 = self.symbol(tokens)
+					op1 = DotExpression(op1, op2)
+				elif name == "lparen":
+					op2 = self.argumentlist(tokens)
+					op1 = FunctionExpression(op1, op2)
+				name = tokens.name()
+			return op1
+		elif name == "float":
+			return FloatExpression(tokens.pop())
+		elif name == "integer":
+			return IntegerExpression(tokens.pop())
+		elif name == "single_quoted":
+			return StringExpression(tokens.pop())
+		elif name == "lparen":
+			tokens.pop()
+			result = self.expression(tokens)
+			if tokens.name() == "rparen":
+				tokens.pop()
+				return result
+			elif tokens.name() != "":
+				error("')' expected but %s (%r) found in '%s'." %
+						(tokens.name(), tokens.token(), tokens.source()))
+			else:
+				error("Unexpected end of expression: ')' expected in '%s'." %
+						tokens.source())
+		else:
+			error("%s (%r) encountered in %s." %
+					(name, tokens.token(), tokens.source()))
+
+	def simple_old(self, tokens):
+		"""
+		Still needed in model.feynrules
+		"""
 		name = tokens.name()
 		if name == "symbol":
 			op1 = self.symbol(tokens)
@@ -101,6 +180,8 @@ class ExpressionParser:
 		else:
 			error("%s (%r) encountered in %s." %
 					(name, tokens.token(), tokens.source()))
+
+
 
 	def symbol(self, tokens):
 		name = tokens.name()
@@ -244,6 +325,7 @@ class Expression:
 				self.__class__.__name__)
 
 	def __int__(self):
+		print type(self.__class__.__name__),self.__class__.__name__ 
 		raise NotImplementedError(
 				"Expression.__int__() needs to be overwritten in %s." % \
 				self.__class__.__name__)
@@ -350,6 +432,9 @@ class FloatExpression(ConstantExpression):
 	def write(self, out):
 		out.write(str(self._float))
 
+	def write_fortran(self ):
+		return str(self._float) 
+
 	def replaceFloats(self, prefix, subs, counter=[0]):
 		for name, value in subs.items():
 			if str(value) == str(self._float):
@@ -368,7 +453,7 @@ class FloatExpression(ConstantExpression):
 
 	def __str__(self):
 		return str(self._float)
-		
+
 class IntegerExpression(ConstantExpression):
 	def __init__(self, integer):
 		self._integer = integer
@@ -378,6 +463,9 @@ class IntegerExpression(ConstantExpression):
 
 	def write(self, out):
 		out.write(str(self._integer))
+
+	def write_fortran(self):
+		return str(self._integer)
 
 	def __eq__(self, other):
 		if isinstance(other, IntegerExpression):
@@ -430,6 +518,9 @@ class SymbolExpression(Expression):
 
 	def write(self, out):
 		out.write(self._symbol)
+
+	def write_fortran(self):
+		return self._symbol
 
 	def replaceNegativeIndices(self, lvl, pattern, found):
 		return self
@@ -531,6 +622,28 @@ class FunctionExpression(Expression):
 				out.write(",")
 			arg.write(out)
 		out.write(")")
+
+
+	def write_fortran(self):
+		r_string=''
+		if self._head.getPrecedence() >= self.getPrecedence():
+			r_string += self._head.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._head.write_fortran()
+			r_string += ")"
+
+		r_string += "("
+		first = True
+		for arg in self._arguments:
+			if first:
+				first = False
+			else:
+				r_string += ","
+			r_string += arg.write_fortran()
+		r_string += ")"
+		return r_string
+
 
 	def __str__(self):
 		return "[" + str(self._head) + "](" + \
@@ -708,6 +821,26 @@ class DotExpression(Expression):
 			self._second.write(out)
 			out.write(")")
 
+	def write_fortran(self):
+		r_string = "dotproduct"
+		if self._first.getPrecedence() >= self.getPrecedence():
+			r_string += self._first.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._first.write_fortran()
+			r_string += ")"
+
+		r_string += ","
+
+		if self._second.getPrecedence() >= self.getPrecedence():
+			r_string += self._second.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._second.write_fortran()
+			r_string += ")"
+		return r_string
+
+
 class PowerExpression(Expression):
 	def __init__(self, base, exponent):
 		self._base = base
@@ -808,6 +941,27 @@ class PowerExpression(Expression):
 			out.write("(")
 			self._exponent.write(out)
 			out.write(")")
+
+	def write_fortran(self):
+		r_string = ''
+		if self._base.getPrecedence() >= self.getPrecedence():
+			r_string += self._base.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._base.write_fortran()
+			r_string += ")"
+
+		r_string += "**"
+
+		if self._exponent.getPrecedence() >= self.getPrecedence():
+			r_string += self._exponent.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._exponent.write_fortran()
+			r_string += ")"
+		return r_string
+
+
 
 class ProductExpression(Expression):
 	def __init__(self, factors):
@@ -945,6 +1099,32 @@ class ProductExpression(Expression):
 				out.write("(")
 				term.write(out)
 				out.write(")")
+
+	def write_fortran(self):
+		first_sig, first_term = self._factors[0]
+		follow = self._factors[1:]
+		r_string = ""
+		if first_sig == -1:
+			r_string += "1.0_ki/"
+		if first_term.getPrecedence() >= self.getPrecedence():
+			r_string += first_term.write_fortran()
+		else:
+			r_string += "("
+			r_string += first_term.write_fortran()
+			r_string += ")"
+		
+		for sig, term in follow:
+			if sig == 1:
+				r_string += "*"
+			else:
+				r_string += "/"
+			if term.getPrecedence() > self.getPrecedence():
+				r_string += term.write_fortran()
+			else:
+				r_string += "("
+				r_string += term.write_fortran()
+				r_string += ")"
+		return r_string
 
 	def getPrecedence(self):
 		return 200
@@ -1084,6 +1264,31 @@ class SumExpression(Expression):
 					term.write(out)
 					out.write(")")
 
+
+	def write_fortran(self):
+		r_string = ""
+		first = self._terms[0]
+		follow = self._terms[1:]
+		if first.getPrecedence() >= self.getPrecedence():
+			r_string += first.write_fortran()
+		else:
+			r_string +="("
+			r_string +=first.write_fortran(out)
+			r_string +=")"
+
+		for term in follow:
+			if isinstance(term, UnaryMinusExpression):
+				r_string +=term.write_fortran()
+			else:
+				r_string +="+"
+				if term.getPrecedence() >= self.getPrecedence():
+					r_string +=term.write_fortran()
+				else:
+					r_string +="("
+					r_string +=term.write_fortran()
+					r_string +=")"
+		return r_string
+
 	def getPrecedence(self):
 		return 100
 
@@ -1177,6 +1382,18 @@ class UnaryMinusExpression(Expression):
 			self._term.write(out)
 			out.write(")")
 
+
+	def write_fortran(self):
+		r_string = ""
+		r_string += "-"
+		if self._term.getPrecedence() >= self.getPrecedence():
+			r_string += self._term.write_fortran()
+		else:
+			r_string += "("
+			r_string += self._term.write_fortran()
+			r_string += ")"
+		return r_string
+
 	def getPrecedence(self):
 		return 100
 
@@ -1192,6 +1409,9 @@ class SpecialExpression(ConstantExpression):
 
 	def write(self, out):
 		out.write(self._image)
+
+	def write_fortran(self):
+		return self._image
 
 	def __str__(self):
 		return self._image
@@ -1214,6 +1434,10 @@ class StringExpression(ConstantExpression):
 
 	def write(self, out):
 		out.write("'" + self._image + "'")
+
+	def write_fortran(self):
+		return "'" + self._image + "'"
+
 
 	def __str__(self):
 		return "'" + self._image + "'"

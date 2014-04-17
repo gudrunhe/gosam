@@ -1,5 +1,5 @@
 process_name=ddeeg
-process_path=ngolem
+process_path=virtual
 
 crossings=dgeed: 1 21 > 11 -11 1
 
@@ -20,14 +20,11 @@ model.options= masses: mT, widths: wZ, alpha: 0.007536680237014635, \
 qgraf.verbatim=\
 true=bridge[Z,A,1,100];
 
-qgraf.options=onshell,notadpole,nosnail
 
 one=gs,e
 
 # There are only two non-zero helicities
 helicities=[dD=+-]D[eE=+-]E[g=+-]
-
-#process.extensions=fr5
 
 filter.nlo= madloop_filter
 filter.module=filter.py

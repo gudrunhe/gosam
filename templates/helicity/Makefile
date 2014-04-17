@@ -3,11 +3,23 @@
     <process_dir>/helicity*/
 '%]# vim: ts=3:sw=3
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
+[% @if extension shared %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so
+[% @else %]
+compile: source amplitude[%helicity%].a
+[% @end @if %]
+
+-include Makefile.source
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
 @if diagsum %]
-HAVE_ORIG_DIAGRAM_FILE=$(if $(shell grep 'Local' ../diagrams-1.hh),1,0)[%
+HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && grep 'Local' ../diagrams-1.hh),1,0)[%
 @end @if %]
 
 OBJECTS= \
@@ -59,11 +71,10 @@ OBJECTS= \
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.o[%
 			@end @if %][%
-		   @if internal GENERATE_NINJA_TRIPLE %] \
-	d[%$_%]h[%helicity%]l13.o[%
-			@end @if %][%
-		   @if internal GENERATE_NINJA_DOUBLE %] \
-	d[%$_%]h[%helicity%]l12.o[%
+		   @if extension ninja %] \
+	d[%$_%]h[%helicity%]l131.o \
+	d[%$_%]h[%helicity%]l132.o \
+	d[%$_%]h[%helicity%]l121.o[%
 			@end @if %][%
       @end @for %][%
    @end @select %][%
@@ -113,11 +124,10 @@ GENERATED_SRC=[%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
 			@end @if %][%
-		   @if internal GENERATE_NINJA_TRIPLE %] \
-	d[%$_%]h[%helicity%]l13.f90[%
-			@end @if %][%
-		   @if internal GENERATE_NINJA_DOUBLE %] \
-	d[%$_%]h[%helicity%]l12.f90[%
+		   @if extension ninja %] \
+	d[%$_%]h[%helicity%]l131.f90 \
+	d[%$_%]h[%helicity%]l132.f90 \
+	d[%$_%]h[%helicity%]l121.f90[%
 			@end @if %][%
 	@end @for %][%
 	@end @select %][%
@@ -129,26 +139,29 @@ GENERATED_SRC=[%
 	diagramsct.f90 [%
 @end @if %]
 
-.PHONY: compile source clean very-clean doc
+.PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
 .SUFFIXES:
 
-compile: source amplitude[%helicity%].a
-
-source:[%
-@if diagsum %]
+[% @if diagsum 
+%]convert:
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell mv ../diagrams-1.hh ../diags-1.hh)
 	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
 	$(shell rm ../diags-1.hh)
 endif[%
 @end @if %]
+
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+source:[% @if diagsum %] convert [% @end @if 
+	%] $(SOURCE_TREE) $(SOURCE_VIRT)
+else
+source:
 endif
+
 
 [% @for elements topolopy.keep.virt %]
 
-d[%$_%]h[%helicity%]l1:[%
+d[%$_%]h[%helicity%]l1: d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90 globals.o[%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell mv ../diagrams-1.hh ../diags-1.hh)
@@ -157,46 +170,50 @@ ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 endif[%
 @end @if %]
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.txt
-	$(MAKE) -f Makefile.source d[%$_%]h[%helicity%]l1.f90
-	$(MAKE) -f Makefile.source abbrevd[%$_%]h[%helicity%].f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]h[%helicity%].o -I../common abbrevd[%$_%]h[%helicity%].f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]h[%helicity%]l1.o -I../common d[%$_%]h[%helicity%]l1.f90
+	$(MAKE) $(S) -f Makefile.source d[%$_%]h[%helicity%]l1.txt
+	$(MAKE) $(S) -f Makefile.source d[%$_%]h[%helicity%]l1.f90
+	$(MAKE) $(S) -f Makefile.source abbrevd[%$_%]h[%helicity%].f90
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]h[%helicity%].o -I../common abbrevd[%$_%]h[%helicity%].f90
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]h[%helicity%]l1.o -I../common d[%$_%]h[%helicity%]l1.f90
 endif
 
 [% @end @for %]
 
-$(GENERATED_SRC): %:
-	@if [ -f Makefile.source ]; \
-	then \
-		$(MAKE) -f Makefile.source "$@"; \
-	fi
-
 $(OBJECTS): %.o: %.f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ -I../common $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ -I../common $<
 
+[% @if extension shared %]
+libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%].so: $(OBJECTS)
+	$(vecho) "-> Linking $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -shared -Wl,-rpath="\$ORIGIN/../common" -o $@ $+ 
+[% @else %]
 amplitude[%helicity%].a: $(OBJECTS)
-	ar rs $@ $+
+	$(Q) ar rs $@ $+
+[% @end @if %]
 
 doc:
 
 clean:
-	$(FIND) $(FIND_OPT) . \( -name '*.o' \
-		-or -name '*.mod' \) \
+	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
+		-or -name '*.mod' -or -name '*.a' -or -name '*.so' \) \
 		-exec rm \{} \;
 
 very-clean: clean
-	rm -f filelist-source
+	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(FIND) $(FIND_OPT) . \( \
+	$(Q)$(FIND) $(FIND_OPT) . \( \
 		-name 'd*h[%helicity%]l[01].f90' \
 		-or -name 'd*h[%helicity%]l[01]fr5.f90' \
-		-or -name 'd*h[%helicity%]l[01].txt' \
-		-or -name 'd*h[%helicity%]l1[23d].txt' \
-		-or -name 'd*h[%helicity%]l1[23d].f90' \
+		-or -name 'd*h[%helicity%]l[014]*.txt' \
+		-or -name 'd*h[%helicity%]l1[123dmu]*.txt' \
+		-or -name 'd*h[%helicity%]l1[123dmu]*.f90' \
 		-or -name 'd*h[%helicity%]l[01]c.txt' \
 		-or -name 'd*h[%helicity%]l[01]c.f90' \
 		-or -name 'd*h[%helicity%]l[01]d.txt' \
+		-or -name 'd*h[%helicity%]l[01]d.hh' \
+		-or -name 'd*h[%helicity%]l[01].hh' \
 		-or -name 'd*h[%helicity%]l1d.txt' \
 		-or -name 'd*h[%helicity%]l1d.f90' \
 		-or -name 'd*h[%helicity%]l[01]-fr.txt' \
@@ -208,15 +225,17 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 @if extension formopt %] \
 		-or -name 'abbrevd*h[%helicity%].f90' \
 		-or -name 'd*h[%helicity%]l[01].prc' \
-		-or -name 'borndiag.prc' \ 
-		-or -name 'born.txt' [%
+		-or -name 'borndiag.prc' \
+		-or -name 'born.txt' \
+		-or -name 'born.dat' \
+		-or -name '*-stamp' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \
 		\) -exec rm \{} \;
 endif
 
 filelist-source: source
-	$(FIND) $(FIND_OPT) . \( \
+	$(Q)$(FIND) $(FIND_OPT) . \( \
 		-name '*.f90' \
 		-or -name 'Makefile' \
 		-or -name 'Makefile.dep' \

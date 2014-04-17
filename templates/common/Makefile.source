@@ -1,5 +1,10 @@
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 FORM_OPT=\
 	-t $(TEMP) \
@@ -64,6 +69,4 @@ color.txt: ../codegen/color.frm
 	@echo FORM is optimizing color.txt
 	@$(FORM) $(FORM_OPT) ../codegen/coloropt.frm[%
 @end @if %]
-
-
 

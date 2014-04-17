@@ -135,6 +135,7 @@
    public :: Spaa, Spbb, Spab3, Spba3, dotproduct
    public :: inspect_kinematics, init_event
    public :: adjust_kinematics
+   public :: boost_to_cms
    public :: lambda
    public :: epsi, epso
 
@@ -1048,7 +1049,69 @@ contains
       vecs([%num_legs%],1) = E1
       vecs([%num_legs%],4) = z1
    end subroutine adjust_kinematics
-   !---#] subroutine adjust_kinematics :   
+   !---#] subroutine adjust_kinematics :
+   !---#[ subroutine boost_to_cms :
+   subroutine boost_to_cms(vecs)
+     implicit none
+     real(ki), dimension([%num_legs%],4), intent(inout) :: vecs
+     real(ki), dimension(4) :: p_cms
+     real(ki) :: s_cms, sqrt_s
+     integer :: i
+     ! Incoming vectors should be vecs(1,:) and vecs(2,:)
+
+     p_cms = (vecs(1,:)+vecs(2,:))
+
+     if(p_cms(2).ne.0.0_ki .and. p_cms(3).ne.0.0_ki) then
+        write(*,*) "Error in boost to CMS frame: vecs(1,:) and vecs(2,:) ",&
+             &"are not incoming momenta."
+        return 
+     else if(p_cms(4).lt.1.0E-08_ki) then
+        return
+     else
+        s_cms = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
+        if(s_cms.lt.0.0_ki) then
+           write(*,*) "Error: negative centre-of-mass energy."
+        else
+           sqrt_s = sqrt(s_cms)
+        end if
+        call lorentz_boost(sqrt_s,p_cms,vecs)
+     end if
+     return
+   end subroutine boost_to_cms
+   !---#] subroutine boost_to_cms :
+   !---#[ subroutine lorentz_boost :
+   subroutine lorentz_boost(mass,p,vecs)
+     ! take momenta vecs in frame in which one particle is at rest with mass "mass" 
+     ! and convert to frame in which the one particle has fourvector p
+     implicit none
+     
+     real(ki), dimension(4), intent(in) :: p
+     real(ki), dimension(2:4) :: beta
+     real(ki) :: mass, gamma, bdotp
+     real(ki), dimension([%num_legs%],4), intent(inout) :: vecs
+     real(ki), dimension([%num_legs%],4) :: vecs_in
+     real(ki), parameter :: one = 1.0_ki
+     integer :: i,j,k
+
+     vecs_in = vecs
+     gamma=p(1)/mass
+
+     ! Loop over particles:
+     do i=1,[%num_legs%]
+        bdotp=0.0_ki
+        do j=2,4
+           beta(j)=p(j)/p(1)
+           bdotp=bdotp+vecs_in(i,j)*beta(j)
+        enddo
+        vecs(i,1)=gamma*(vecs_in(i,1)-bdotp)
+        do k=2,4
+           vecs(i,k)=vecs_in(i,k)+gamma*beta(k)*(gamma/(gamma+one)*bdotp-vecs_in(i,1))
+        enddo
+     enddo
+        
+     return
+   end subroutine lorentz_boost
+   !---#] subroutine lorentz_boost :
    !---#[ function epsi0 :
    pure function epsi0(k, q, s) result(eps)
       implicit none

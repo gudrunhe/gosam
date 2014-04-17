@@ -16,7 +16,7 @@
    use [% process_name asprefix=\_ %]golem95h[% helicity %][%
       @end @if %][%
       @if extension ninja %]
-   use ninja_module, only: ki_nin
+   use ninjago_module, only: ki_nin
    use [% process_name asprefix=\_ %]ninjah[% helicity %][%
       @end @if %][%
    @end @select %][%
@@ -175,13 +175,25 @@ contains
       call init_abbrev()[%
    @case diagram %][%
       @for groups var=grp %][%
-         @for diagrams group=grp %]
-      call init_abbrevd[%$_%]()[%
+         @for diagrams group=grp %][%
+            @if use_flags_1 %]
+      if(evaluate_virt_diagram([%$_%])) then[%
+            @end @if %]
+        call init_abbrevd[%$_%]()[%
+            @if use_flags_1 %]
+      endif[%
+         @end @if %][%
          @end @for %][%
       @end @for %][%
    @case group %][%
-      @for groups var=grp %]
-      call init_abbrevg[%grp%]()[%
+      @for groups var=grp %][%
+            @if use_flags_1 %]
+      if(evaluate_virt_group([%grp%])) then[%
+            @end @if %]
+        call init_abbrevg[%grp%]()[%
+            @if use_flags_1 %]
+      endif[%
+         @end @if %][%
       @end @for %][%
    @end @select %][%
 
@@ -329,8 +341,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension samurai %]
    complex(ki_sam), dimension(-2:0) :: tot
    complex(ki_sam) :: totr
-   logical :: samurai_ok[%
-      @end @if %]
+   logical :: samurai_ok[% @else
+     %][% @if extension ninja %]
+   complex(ki_nin), dimension(-2:0) :: tot
+   complex(ki_nin) :: totr[%
+      @end @if %][% @end @if %]
 
    if(debug_nlo_diagrams) then
       write(logfile,*) "<diagram-group index='[% grp %]'>"
@@ -361,8 +376,18 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
          @end @if %]
       ok = .true.[%
+      @end @if %][%      
+      @if extension ninja %]
+   case(2) ! use Ninja only
+      call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
+         @if generate_lo_diagrams %]
+      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
+         @else %]
+      samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
+         @end @if %][%
+      @end @if %][%
          @if extension pjfry %]
-   case(11) ! use PJFry only
+   case(3) ! use PJFry only
       call reconstruct_golem95(coeffs)[%
             @if generate_lo_diagrams %]
       do ep=0,2
@@ -376,21 +401,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       end do[%
             @end @if %]
       ok = .true.[%
-         @end @if %][%
-      @end @if %][%
-      @if extension ninja %]
-   case(21) ! use Ninja only
-      call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
-         @if generate_lo_diagrams %]
-      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-         @else %]
-      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-         @end @if %][% 
       @end @if %][%
       @if extension samurai %][%
          @if extension golem95 %]
    ! Modes which require Golem95 and Samurai
-   case(2) ! Try Samurai first, use Golem95 is samurai fails
+   case(20) ! Try Samurai first, use Golem95 is samurai fails
       call samurai_reduce(real(scale2, ki_sam), tot, totr, samurai_ok)
       if(samurai_ok) then[%
             @if generate_lo_diagrams %]
@@ -414,7 +429,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
             @end @if %]
          ok = .true.
       end if
-   case(3) ! Tensorial Reconstruction + Samurai on numetens
+   case(30) ! Tensorial Reconstruction + Samurai on numetens
       call reconstruct_golem95(coeffs)
       global_coeffs => coeffs
       call reduce_numetens(real(scale2, ki_sam), tot, totr, ok)[%
@@ -424,7 +439,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
             @end @if %]
       nullify(global_coeffs)
-   case(4) ! Tensorial Reconstruction + Samurai on numetens
+   case(40) ! Tensorial Reconstruction + Samurai on numetens
            ! + Golem95 on failure
       call reconstruct_golem95(coeffs)
       global_coeffs => coeffs
@@ -513,6 +528,10 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension samurai %]with[%
       @else %]without[%
       @end @if %] support for Samurai."
+      print*, "* This code was generated [%
+      @if extension ninja %]with[%
+      @else %]without[%
+      @end @if %] support for Ninja."
       print*, "* This code was generated [%
       @if extension golem95 %]with[%
       @else %]without[%
