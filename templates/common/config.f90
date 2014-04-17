@@ -10,6 +10,54 @@
    ! DOUBLE PRECISION (ki=8):
    integer, parameter :: ki = kind(1.0d0)
 
+   ! Options to control the interoperation between different
+   ! Reduction libraries:
+   integer, parameter :: SAMURAI = 0
+   integer, parameter :: GOLEM95 = 1
+   integer, parameter :: NINJA   = 2
+   integer, parameter :: PJFRY   = 3 ! experimental
+   ! Reduction methods
+   integer :: reduction_interoperation = [%
+   @select reduction_interoperation default="-1"
+   @case -1 %][%
+      @if extension ninja %]NINJA[%
+      @else %][%
+         @if extension samurai %]SAMURAI[%
+         @else %][%
+            @if extension golem95 %]GOLEM95[%
+             @else%][%@if extension pjfry  %]PJFRY[%
+              @else%]-1[%@end @if%][%
+            @end @if %][%
+         @end @if %][%
+      @end @if %][%
+   @else %]-1[%
+   @end @select %]
+   ! Rescue reduction method. The rescue system is disabled
+   ! if it is equal to reduction_interoperation
+   integer :: reduction_interoperation_rescue = [%
+   @select reduction_interoperation_rescue default="-1"
+   @case -1 %][%
+      @if extension golem95 %]GOLEM95[%
+      @else %][%
+           @select reduction_interoperation default="-1"
+           @case -1 %][%
+              @if extension ninja %]NINJA[%
+              @else %][%
+                 @if extension samurai %]SAMURAI[%
+                 @else %][%
+                    @if extension golem95 %]GOLEM95[%
+                     @else%][%@if extension pjfry  %]PJFRY[%
+                         @else %]-1[%@end @if%][%
+                    @end @if %][%
+                 @end @if %][%
+              @end @if %][%
+           @else %]-1[%
+           @end @select %][%
+      @end @if %][%
+   @else %]-1[%
+   @end @select %]
+
+   ! Debugging settings
    logical :: debug_lo_diagrams  = [%
       @if anymember lo all debug ignore_case=true %].true.[%
       @else %].false.[%
@@ -38,11 +86,12 @@
    logical :: include_eps_terms = [%
       @if extension dred %].false.[% @else %].true.[% @end @if %]
 
-   logical, parameter :: include_color_avg_factor = .[%
+   logical :: include_color_avg_factor = .[%
         olp.include_color_average default=true %].
-   logical, parameter :: include_helicity_avg_factor = .[%
+   logical :: include_helicity_avg_factor = .[%
         olp.include_helicity_average default=true %].
-   logical, parameter :: include_symmetry_factor = .false.
+   logical :: include_symmetry_factor = .[%
+        olp.include_symmetry_factor default=true %].
 
    [% @if extension samurai %]
    ! Parameters for the initialization of samurai
@@ -59,30 +108,8 @@
 
    [% @if extension ninja %]
    integer :: ninja_test = 0
-   integer :: ninja_istop = 0
-   ! Ninja should not use the grouping by default (still experimental)
-   logical :: ninja_group_numerators = .false.[%
+   integer :: ninja_istop = 0[%
       @end @if extension ninja %]
-
-   ! Options to control the interoperation between different
-   ! reduction methods
-   integer :: reduction_interoperation = [%
-   @select reduction_interoperation default="-1"
-   @case -1 %][%
-      @if extension samurai %][%
-        @if extension golem95 %]2[%
-        @else %]0[%
-        @end @if %][%
-      @else %]1[%
-      @end @if %][%
-   @else %][% reduction_interoperation %][%
-   @end @select %]
-   ! 0: use samurai only
-   ! 1: golem95 only
-   ! 2: try samurai first, use golem95 if samurai fails
-   ! 3: tens. reconstruction with golem95, reduction with samurai
-   ! 4: tens. reconstruction with golem95, reduction with samurai,
-   !    use golem95 if samurai fails
 
    ! Parameter: Use stable accumulation of diagrams or builtin sum
    !            Stable accumulation is implemented in accu.f90
@@ -182,16 +209,19 @@
              convert=bool
              true=.true.
              false=.false. %]
-   integer :: PSP_verbosity = [% PSP_verbosity %]
-   integer :: PSP_chk_threshold1 = [% PSP_chk_threshold1 %]
+   logical :: PSP_verbosity = [% PSP_verbosity
+             convert=bool
+             true=.true.
+             false=.false. %]
    logical :: PSP_rescue = [% PSP_rescue
              convert=bool
              true=.true.
              false=.false. %]
-   integer :: PSP_chk_threshold2 = [% PSP_chk_threshold2 %]
-   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[%
-@select model @case sm smdiag %][% 
-@select model.options @case ewchoose %]
+   integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
+   integer :: PSP_chk_th2 = [% PSP_chk_th2 %]
+   integer :: PSP_chk_th3 = [% PSP_chk_th3 %]
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[% 
+@if ewchoose %]
    !
    ! The integer ewchoice allows the user to change the 
    ! ew parameter input scheme at runtime (between 1 and 8)
@@ -202,37 +232,23 @@
    !  2        :   alpha, mW, mZ    : e,sw
    !  3        :   alpha, sw, mZ    : e, mW
    !  4        :   alpha, sw, GF    : e, mW
-   !  5        :   e, mW, mZ        : em sw, mZ
-   !  6        :   e, sw, mZ        : mW
-   !  7        :   e, sw, GF        : mW, mZ
-   !  8        :   alpha, GF, mZ    : e, mW, sw
+   !  5        :   alpha, GF, mZ    : e, mW, sw[% 
+@if e_not_one %]
+   !  6        :   e, mW, mZ        : sw
+   !  7        :   e, sw, mZ        : mW
+   !  8        :   e, sw, GF        : mW, mZ[%
+@else %]
    !
-   !  If one is using the ewchoice, the user should provide the correct input
-   !  parameters, otherwise default values are used
+   !  WARNING:
+   !  Since 'e' was set to ONE algebraically, it cannot
+   !  be used as an input parameter, and will also not
+   !  be computed from the other parameters.[%
+@end @if %]
    !
-   integer :: ewchoice = 2 [%
-@end @select%][%@end @select%][%
-@select model @case sm smdiag %][% 
-@select model.options @case ewchoose %]
+   !  If one is using the ewchoice, the user should provide the 
+   !  correct input parameters, otherwise default values are used.
    !
-   ! The integer ewchoice allows the user to change the 
-   ! ew parameter input scheme at runtime (between 1 and 8)
-   ! The choices are as follows:
-   !  ewchoice :   Input            :  Output
-   !  #---------------------------------------# 
-   !  1        :   GF,mW,mZ         : e,sw
-   !  2        :   alpha, mW, mZ    : e,sw
-   !  3        :   alpha, sw, mZ    : e, mW
-   !  4        :   alpha, sw, GF    : e, mW
-   !  5        :   e, mW, mZ        : em sw, mZ
-   !  6        :   e, sw, mZ        : mW
-   !  7        :   e, sw, GF        : mW, mZ
-   !  8        :   alpha, GF, mZ    : e, mW, sw
-   !
-   !  If one is using the ewchoice, the user should provide the correct input
-   !  parameters, otherwise default values are used
-   !
-   integer :: ewchoice = 2 [%
-@end @select%][%@end @select%]
+   integer :: ewchoice = [% starting_choice %][%
+   @end @if %]
 end module [% process_name asprefix=\_ %]config
 

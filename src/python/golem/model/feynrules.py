@@ -22,6 +22,8 @@ LINE_STYLES = {
 		'scurly' : 'majorana'
 }
 
+
+
 sym_cmath = ex.SymbolExpression("cmath")
 sym_exp   = ex.SymbolExpression("exp")
 sym_log   = ex.SymbolExpression("log")
@@ -74,8 +76,10 @@ unprefixed_symbols = [
 	]
 
 class Model:
-	def __init__(self, model_path):
+	def __init__(self, model_path, model_options=None):
 		mfile = None
+		self.model_options = model_options or dict()
+
 		try:
 			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
 			norm_path = os.path.normpath(model_path)
@@ -89,7 +93,6 @@ class Model:
 					(mname, search_path[0]))
 			mfile, mpath, mdesc = imp.find_module(mname, search_path)
 			mod = imp.load_module(mname, mfile, mpath, mdesc)
-			print mname,mfile,mpath,mdesc
 		except ImportError as exc:
 			error("Problem importing model file: %s" % exc)
 		finally:
@@ -106,10 +109,11 @@ class Model:
 		self.floats = []
 
 		parser = ex.ExpressionParser()
+		ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
 		for l in self.all_lorentz:
 			name = l.name
 			structure = parser.compile(l.structure)
-			l.rank = get_rank(structure)
+			l.rank = get_rank(structure)	
 
 	def write_python_file(self, f):
 		# Edit : GC- 16.11.12 now have the dictionaries
@@ -174,9 +178,9 @@ class Model:
 			else:
 				width = self.prefix + pwidth
 
-			f.write("\t%r: Particle(%r, %d, %r, %d, %r, %r, %d)" %
+			f.write("\t%r: Particle(%r, %d, %r, %d, %r, %r, %d, %r)" %
 					(canonical_name, canonical_name, spin, mass,
-						p.color, canonical_anti, width, pdg_code))
+						p.color, canonical_anti, width, pdg_code, p.charge))
 
 		f.write("\n}\n\n")
 
@@ -254,6 +258,20 @@ class Model:
 		functions['Nfrat'] = 'if(Nfgen,Nf/Nfgen,1)'
 		types['Nfrat'] = 'R'
 
+
+		for key, value in self.model_options.items():
+			if key in parameters or self.prefix+key in parameters:
+				if key in parameters:
+					real_key=key
+				else:
+					real_key=self.prefix+key
+				try:
+					sval = str(value)
+					fval = float(sval)
+					parameters[real_key] = sval
+				except ValueError:
+					warning("Model option %s=%r not in allowed range." % (key, value),
+							"Option ignored")
 		specials = {}
 		for expr in shortcut_functions:
 			specials[str(expr)] = expr
@@ -590,9 +608,7 @@ class Model:
 				structure = structure.algsubs(
 					ex.FloatExpression("%d." % i),
 					ex.IntegerExpression("%d" % i))
-
 			lorex[name] = transform_lorentz(structure, l.spins)
-
 		lwf = LimitedWidthOutputStream(f, 70, 6)
 		f.write("* vim: syntax=form:ts=3:sw=3\n\n")
 		f.write("* This file has been generated from the FeynRule model files\n")
@@ -905,7 +921,7 @@ class Model:
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
 		self.write_python_file(f)
-		print f
+		#print f
 		f.close()
 
 		message("  Writing QGraf file ...")
@@ -1024,7 +1040,6 @@ def transform_lorentz(expr, spins):
 				index = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
 			else:
 				index = args[0]
-
 			mom = ex.SymbolExpression("vec%d" % int(args[1]))
 			# UFO files have all momenta outgoing:
 			return -mom(index)

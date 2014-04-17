@@ -684,3 +684,70 @@ def find_symmetry_group(helicity_list, conf,
       else:
          result.append( mapping )
    return result
+
+
+def filter_helicities(conf, in_particles, out_particles):
+   key = []
+   for i in range(len(in_particles)):
+      key.append(in_particles[i].getPDGCode())
+   for i in range(len(out_particles)):
+      key.append(out_particles[i].getPDGCode())
+
+   smmodels = ['sm','smdiag','smehc']
+   applyfilter = False
+   # Check if model is some form of SM:
+   if conf["modeltype"] is not None:
+      if any(item.startswith(conf["modeltype"]) for item in smmodels):
+         applyfilter = True
+   if conf["model"] is not None:
+      if any(item.startswith(conf["model"]) for item in smmodels):
+         applyfilter = True
+
+   if applyfilter == True:
+      if conf["symmetries"] is None:
+         conf["symmetries"] = " "
+      # check D,Dbar
+      if key.count(1)*10+key.count(-1) == 1 and 'mD' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-1=+"
+      elif key.count(1)*10+key.count(-1) == 10  and 'mD' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+1=-"
+      # check U,Ubar
+      if key.count(2)*10+key.count(-2) == 1  and 'mU' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-2=+"
+      elif key.count(2)*10+key.count(-2) == 10  and 'mU' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+2=-"
+      # check S,Sbar
+      if key.count(3)*10+key.count(-3) == 1 and 'mS' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-3=+"
+      elif key.count(3)*10+key.count(-3) == 10  and 'mS' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+3=-"
+      # check C,Cbar
+      if key.count(4)*10+key.count(-4) == 1  and 'mC' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-4=+"
+      elif key.count(4)*10+key.count(-4) == 10  and 'mC' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+4=-"
+      # check B,Bbar
+      if key.count(5)*10+key.count(-5) == 1 and 'mB' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-5=+"
+      elif key.count(5)*10+key.count(-5) == 10  and 'mB' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+5=-"
+      # check T,Tbar
+      if key.count(6)*10+key.count(-6) == 1  and 'mT' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %-6=+"
+      elif key.count(6)*10+key.count(-6) == 10  and 'mT' in conf[golem.properties.zero]:
+         conf["symmetries"] += ", %+6=-"
+      # neutrinos:
+      if key.count(12) != 0:
+         conf["symmetries"] += ", %+12=-"
+      if key.count(14) != 0:
+         conf["symmetries"] += ", %+14=-"
+      if key.count(16) != 0:
+         conf["symmetries"] += ", %+16=-"
+      if key.count(-12) != 0:
+         conf["symmetries"] += ", %-12=+"
+      if key.count(-14) != 0:
+         conf["symmetries"] += ", %-14=+"
+      if key.count(-16) != 0:
+         conf["symmetries"] += ", %-16=+"
+
+   return conf

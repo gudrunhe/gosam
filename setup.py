@@ -205,9 +205,7 @@ if __name__ == "__main__":
 			'golem': 'src/python/golem'
 		},
 		scripts=[
-			'src/python/golem/golem-config.py',
-			'src/python/golem/golem-init.py',
-			'src/python/golem/golem-main.py',
+			'src/python/golem/gosam-config.py',
 			'src/python/golem/gosam.py'
 		],
 		cmdclass={'build_py': build_py,

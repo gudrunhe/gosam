@@ -76,8 +76,9 @@ def main(argv=sys.argv):
    """
    This is the main program of GoSam.
 
-   Usage: golem-main.py {options} [--template] {file or directory}
+   Usage: gosam.py {options} [--template] {file or directory}
    -h, --help           -- prints this help screen
+   --olp                -- switch to OLP mode. Use --olp --help to get more options.
    -d, --debug          -- prints out debug messages
    -p, --profile        -- generates profiling information
    -v, --verbose        -- prints out status messages
@@ -96,6 +97,8 @@ def main(argv=sys.argv):
    -i, --interactive    -- start an interactive interface
    -y, --no-pyxodraw    -- do not attempt to draw diagrams.
 
+   --version            -- output current GoSam version
+
    -------------------------------------------------------------------
    Static variables:
 
@@ -106,6 +109,7 @@ def main(argv=sys.argv):
 
    args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
          argv=argv)
+         
 
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
       golem.installation.GOLEM_VERSION))

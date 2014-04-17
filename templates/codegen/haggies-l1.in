@@ -66,20 +66,7 @@
 @if internal GENERATE_DERIVATIVES %]
 	iv... : integer;
 	SUBSCRIPT : cvector, integer -> complex = "%2$s(%3$s)";[%
-@end @if %][%
-@if internal GENERATE_NINJA_TRIPLE %]
-	vecA, vecB, vecC : cvector;[%
-   @if internal GENERATE_NINJA_DOUBLE %]
-	beta : complex;[%
-   @end @if %][%
-@else %][%
-   @if internal GENERATE_NINJA_DOUBLE %]
-	vecA : cvector;
-	beta : complex;[%
-   @end @if %][%
 @end @if %]
-
-
 
 @polynomial TR, Qt2, i_, deltaOS;
 [% include codegen/model-poly.inc class=Model %]

@@ -9,6 +9,7 @@ import golem.app.main as main
 import golem.app.olp as olp
 import traceback
 import golem.util.tools
+import golem.properties
 import golem.installation
 
 def report_crash(exc, stack, fname="gosam.crashed"):
@@ -55,6 +56,9 @@ def report_crash(exc, stack, fname="gosam.crashed"):
       f.write("---#[ CONFIG:\n")
       POSTMORTEM_CFG.list(f)
       f.write("---#] CONFIG:\n")
+      f.write("---#[ ENABLED EXTENSIONS:\n")
+      golem.properties.getExtensions(POSTMORTEM_CFG)
+      f.write("---#] ENABLED EXTENSIONS:\n")
 
    emit("Platform",
          platform_short=sys.platform,

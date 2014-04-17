@@ -2,14 +2,14 @@
 <!-- vim: ts=3:sw=3
   -->
 <template name="GoSam default template" version="1.0"
-	description="This template is used by golem-main.py"
-	author="Thomas Reiter"
-	author-email="thomasr@nikhef.nl">
+	description="This template is used by gosam.py"
+	author="The GoSam Collaboration"
+	author-email="gosam@projects.hepforge.org">
 
 	<file src="configure.ac" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
-	<file src="autogen.sh" class="Verbatim">
+	<file src="autogen.sh" class="Verbatim" executable="yes">
 		<only if-extension="autotools" />
 	</file>
 	<file src="Makefile.am" class="Kinematics">
@@ -21,8 +21,9 @@
 	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
+		<except if-internal="OLP_MODE" />
 	</file>
-	<file src="config.sh" class="Kinematics">
+	<file src="config.sh" class="Kinematics" executable="yes">
 		<except if-extension="autotools" />
 	</file>
 	<file src="config.sh.in" class="Kinematics">
@@ -64,12 +65,6 @@
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
 		</file>
-		<file src="haggies-l13.out" class="Kinematics">
-			<only if-internal="GENERATE_NINJA_TRIPLE"/>
-		</file>
-		<file src="haggies-l12.out" class="Kinematics">
-			<only if-internal="GENERATE_NINJA_DOUBLE"/>
-		</file>
 		<file src="haggies-l1c.in" class="Multi">
 			<except if-option="genUV" value="false" />
 		</file>
@@ -104,17 +99,24 @@
 		<file src="finaloptimization.frm" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
+		<file src="ninjafinalopt.frm" class="Kinematics">
+			<only if-extension="ninja" />
+		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
 		<file src="buildfortran_d.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
-		<file src="buildfortran_n3.py" class="Kinematics">
+		<file src="buildfortran_tn2.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
 		</file>
-		<file src="buildfortran_n2.py" class="Kinematics">
+		<file src="buildfortran_tn3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+		</file>
+		<file src="buildfortran_tmu.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
 		</file>

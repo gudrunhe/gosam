@@ -12,9 +12,13 @@ class OLPTemplate(golem.util.parser.Template):
 		self._contract_file = contract_file
 		self._subprocesses = None
 		self._pstack = []
+		self._listed_flags=set()
+		self._listed_flags_length=0
 
-	def init_channels(self, subprocesses):
+
+	def init_channels(self, subprocesses, subprocesses_conf):
 		self._subprocesses = subprocesses
+		self._subprocesses_conf = subprocesses_conf
 
 	def subprocesses(self, *args, **opts):
 		if "prefix" in opts:
@@ -31,13 +35,15 @@ class OLPTemplate(golem.util.parser.Template):
 		numhelis_name = self._setup_name("num_helicities",
 				prefix + "num_helicities", opts)
 
+
+
 		last = len(self._subprocesses) - 1
 		for index, subprocess in enumerate(self._subprocesses):
 			props = Properties()
 			props[first_name] = (index == 0)
 			props[last_name] = (index == last)
 
-			props[index_name] = index 
+			props[index_name] = index
 			props[id_name] = int(subprocess)
 			props[name_name] = str(subprocess)
 			props[path_name] = subprocess.process_path
@@ -94,6 +100,11 @@ class OLPTemplate(golem.util.parser.Template):
 		index_name = self._setup_name("index", prefix + "index",	opts)
 		name_name = self._setup_name("var", prefix + "$_", opts)
 		channels_name = self._setup_name("channels", prefix + "channels", opts)
+		amplitudetype = self._setup_name("amplitudetype",
+				prefix + "amplitudetype", opts)
+		notreelevel = self._setup_name("notreelevel",
+				prefix + "notreelevel", opts)
+
 
 		include_self = "include-self" in args
 
@@ -116,7 +127,35 @@ class OLPTemplate(golem.util.parser.Template):
 
 			props[id_name] = id
 			props[name_name] = subprocess.ids[id]
-			props[channels_name] = subprocess.channels[id]
+			if id in subprocess.channels:
+				props[channels_name] = subprocess.channels[id]
+			else:
+				# should happen only if there occured an error before
+				props[channels_name]=[]
+			props[amplitudetype] = subprocess.getIDConf(id)["olp.amplitudetype"]
+			props[notreelevel] = subprocess.getIDConf(id)["olp.notreelevel"]
+
 
 			yield props
 
+	def flags_filter(self, *args, **opts):
+		assert args == ("$_",)
+		flags=self._stack[-1]["$_"]
+		ret=""
+		for f in flags.split():
+			if f not in self._listed_flags:
+				self._listed_flags_length += len(f)
+				if self._listed_flags_length > 80:
+					self._listed_flags_length=0
+					ret = ret + "\\\n "
+					self._listed_flags_length += len(f)
+				ret = ret + f + " "
+				self._listed_flags.add(f)
+		if self._stack[-1]["is_last"]=="True":
+			ret=ret.rstrip()
+		return ret
+
+	def reset_flags_filter(self, *args, **opts):
+		self._listed_flags=set()
+		self._listed_flags_length=0
+		return ""

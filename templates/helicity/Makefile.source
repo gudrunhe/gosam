@@ -2,7 +2,12 @@
 	 This template defines the Makefile.source that go under
     <process_dir>/helicity*/
 '%]# vim: ts=3:sw=3
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 [% @for helicities var=test
 	symbol_plus2=+2
@@ -32,7 +37,7 @@ FORM_OPT=[%
 	[%@end @for%] -D PROCESSPATH=.. \
 	-D PWD=. \
 	-p ..:../codegen \
-	-w$(FORM_THREADS) -M -q
+	-M -q
 
 DIAGRAMS_TREE=[%
 @if group %][%
@@ -88,11 +93,10 @@ DIAGRAMS_VIRT=[%
 	   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
       @end @if %][%
-	   @if internal GENERATE_NINJA_TRIPLE %] \
-	d[%$_%]h[%helicity%]l13.f90[%
-      @end @if %][%
-	   @if internal GENERATE_NINJA_DOUBLE %] \
-	d[%$_%]h[%helicity%]l12.f90[%
+   @if extension ninja %] \
+    d[%$_%]h[%helicity%]l131.f90 \
+    d[%$_%]h[%helicity%]l132.f90 \
+    d[%$_%]h[%helicity%]l121.f90[%
       @end @if %][%
    @end @for %][%
 @end @select %]
@@ -137,11 +141,12 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 
 [% 
 @if extension formopt %]
-source: $(SOURCE_TREE) $(SOURCE_VIRT)
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
 born.txt: ../diagrams-0.hh[%
 @for elements topolopy.keep.tree %]
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \[% 
@@ -157,13 +162,15 @@ born.txt: ../diagrams-0.hh[%
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm[%
 @end @for %]
-diagramsl0.f90: born.txt
+	@touch born-stamp
+born-stamp: born.txt
+diagramsl0.f90: born.txt born-stamp
 	@echo Python is processing tree diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortranborn.py \
 		-i $< \
 		--HELICITY=[%helicity%][% 
 @else %]
-source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @select abbrev.level @case helicity %]
 abbrevh[%helicity%].f90: $(TXT_VIRT)
 	@echo Haggies is generating abbreviations for virtual part @ Helicity [%helicity%]
@@ -179,6 +186,7 @@ abbrevh[%helicity%].f90: $(TXT_VIRT)
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
@@ -237,9 +245,10 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
+d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT)[%
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
@@ -259,12 +268,6 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
 			@end @if %][%
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %][%
-			@if internal GENERATE_NINJA_TRIPLE %] \
-		-D GENERATENINJATRIPLE=1[%
-			@end @if %][%
-			@if internal GENERATE_NINJA_DOUBLE %] \
-		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
 		../codegen/golem.frm
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
@@ -277,7 +280,9 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
 			@end @if %] \
 		../codegen/finaloptimization.frm[%
 	   @select abbrev.level @case diagram %]
-d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.txt
+	@touch d[%$_%]h[%helicity%]l1-stamp
+d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt
+d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
 	@echo Python is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran.py \
 		-i $< \
@@ -285,11 +290,13 @@ d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l
 		--GROUP=[%grp%]  \
 		--HELICITY=[%helicity%] \
 		--QSIGN=[% sign %] \
-		--QSHIFT=[%shift%][%
+		--QSHIFT=[%shift%]
+abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
 @if internal GENERATE_DERIVATIVES %] 
-d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt 
+d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
 	@echo Form is optimizing loop diagram derivatives [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
@@ -306,7 +313,9 @@ d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt
 		-D GENERATEDERIVATIVES=1 \
 		../codegen/finaloptimization.frm[%
 	@end @for%]
-d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt
+	@touch d[%$_%]h[%helicity %]l1d-stamp
+d[%$_%]h[%helicity %]l1d-stamp: d[%$_%]h[%helicity%]l1d.txt
+d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_d.py \
 		-i $< \
@@ -318,8 +327,8 @@ d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-@if internal GENERATE_NINJA_TRIPLE %] 
-d[%$_%]h[%helicity %]l12.txt d[%$_%]h[%helicity %]l13.txt : d[%$_%]h[%helicity %]l1.txt 
+@if extension ninja %] 
+d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
@@ -328,9 +337,11 @@ d[%$_%]h[%helicity %]l12.txt d[%$_%]h[%helicity %]l13.txt : d[%$_%]h[%helicity %
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		../codegen/ninja.frm[%
-   @for repeat ninjaidx inclusive=true var=lauridx %]
-	@echo Form is optimizing loop diagram [%$_%] laurent index [%lauridx%] @ Helicity [%helicity%]
+		../codegen/ninja.frm
+	: > d[%$_%]h[%helicity%]l13.txt # makes sure the file is always created
+	: > d[%$_%]h[%helicity%]l12.txt # makes sure the file is always created
+	: > d[%$_%]h[%helicity%]l1mu2.txt # makes sure the file is always created
+	@echo Form is optimizing loop diagram [%$_%] laurent index 31 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
@@ -338,11 +349,10 @@ d[%$_%]h[%helicity %]l12.txt d[%$_%]h[%helicity %]l13.txt : d[%$_%]h[%helicity %
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		-D GENERATENINJATRIPLE=1 \
-		-D LAURIDX=[%lauridx%] \
-		../codegen/finaloptimization.frm[%
-	@end @for%]
-	@echo Form is optimizing loop diagram [%$_%] mu expansion @ Helicity [%helicity%]
+		-D EXPANSIONCUT=3 \
+		-D EXPANSIONID=31 \
+		../codegen/ninjafinalopt.frm
+	@echo Form is optimizing loop diagram [%$_%] laurent index 32 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
@@ -350,12 +360,49 @@ d[%$_%]h[%helicity %]l12.txt d[%$_%]h[%helicity %]l13.txt : d[%$_%]h[%helicity %
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		-D GENERATENINJADOUBLE=1 \
-		-D LAURIDX=0 \
-		../codegen/finaloptimization.frm
-d[%$_%]h[%helicity%]l13.f90 : d[%$_%]h[%helicity%]l13.txt
-	@echo Python is processing ninja t expansion [%$_%] @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_n3.py \
+		-D EXPANSIONCUT=3 \
+		-D EXPANSIONID=32 \
+		../codegen/ninjafinalopt.frm
+	@echo Form is optimizing loop diagram [%$_%] laurent index 21 for bubbles @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D EXPANSIONCUT=2 \
+		-D EXPANSIONID=21 \
+		../codegen/ninjafinalopt.frm
+	@echo Form is optimizing loop diagram [%$_%] laurent index 22 for bubbles @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D EXPANSIONCUT=2 \
+		-D EXPANSIONID=22 \
+		../codegen/ninjafinalopt.frm
+	@echo Form is optimizing loop diagram [%$_%] mu expansion for boxes @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D EXPANSIONCUT=4 \
+		-D EXPANSIONID=Mu2 \
+		../codegen/ninjafinalopt.frm
+		@touch d[%$_%]h[%helicity%]l13-stamp d[%$_%]h[%helicity%]l12-stamp  d[%$_%]h[%helicity%]l14-stamp
+
+d[%$_%]h[%helicity %]l13.txt d[%$_%]h[%helicity %]l12.txt : d[%$_%]h[%helicity%]l14-stamp
+d[%$_%]h[%helicity%]l13-stamp d[%$_%]h[%helicity%]l12-stamp  d[%$_%]h[%helicity%]l14-stamp: d[%$_%]h[%helicity %]l14.txt
+d[%$_%]h[%helicity%]l131.f90 : d[%$_%]h[%helicity%]l13.txt d[%$_%]h[%helicity%]l13-stamp
+	@echo Python is processing ninja triangles expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_tn3.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -364,9 +411,20 @@ d[%$_%]h[%helicity%]l13.f90 : d[%$_%]h[%helicity%]l13.txt
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]h[%helicity%]l12.f90 : d[%$_%]h[%helicity%]l12.txt
+d[%$_%]h[%helicity%]l132.f90 : d[%$_%]h[%helicity%]l12.txt d[%$_%]h[%helicity%]l12-stamp
+	@echo Python is processing ninja bubbles expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_tn2.py \
+		-i $< \
+		--DIAGRAM=[%$_%] \
+		--GROUP=[%grp%]  \
+		--HELICITY=[%helicity%] \
+		--QSIGN=[%sign%] \
+		--QSHIFT=[%shift%] \
+		--RANK=[%rank%] \
+		--LOOPSIZE=[% loopsize diagram=$_ %]
+d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l14-stamp
 	@echo Python is processing ninja mu expansion [%$_%] @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_n2.py \
+	@$(PYTHON) ../codegen/buildfortran_tmu.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -385,15 +443,10 @@ d[%$_%]h[%helicity%]l12.f90 : d[%$_%]h[%helicity%]l12.txt
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
-d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
-@if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity %]l1d.txt[%
-@end @if %][%
-@if internal GENERATE_NINJA_TRIPLE %] d[%$_%]h[%helicity %]l13.txt[%
-@end @if %][%
-@if internal GENERATE_NINJA_DOUBLE %] d[%$_%]h[%helicity %]l12.txt[%
-@end @if %]: ../diagrams-1.hh
+d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT)[%
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
@@ -413,12 +466,6 @@ d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity %]l1.abb[%
 			@end @if %][%
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %][%
-			@if internal GENERATE_NINJA_TRIPLE %] \
-		-D GENERATENINJATRIPLE=1[%
-			@end @if %][%
-			@if internal GENERATE_NINJA_DOUBLE %] \
-		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
 		../codegen/golem.frm
 d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt
@@ -444,28 +491,6 @@ d[%$_%]h[%helicity%]l1d.f90: d[%$_%]h[%helicity%]l1d.txt
 		$(addprefix -p,$(shell grep extrasymbols \
 			d[%$_%]h[%helicity%]l1.dat \
 			| sed 's/extrasymbols=//')) \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-		@end @if %][%
-		@if internal GENERATE_NINJA_TRIPLE %]
-d[%$_%]h[%helicity%]l13.f90: d[%$_%]h[%helicity%]l13.txt
-	@echo Haggies is processing numerator_t [%$_%] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l13.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-		@end @if %][%
-		@if internal GENERATE_NINJA_DOUBLE %]
-d[%$_%]h[%helicity%]l12.f90: d[%$_%]h[%helicity%]l12.txt
-	@echo Haggies is processing numerator_d [%$_%] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l12.out \
 		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
 		@end @if %][%
 	   @select abbrev.level @case diagram %]
@@ -499,6 +524,7 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 d[%$_%]h[%helicity%]l1c.txt: ../diagrams-ct.hh
 	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=ct	\
 		-D LOOPSIZE=1 \

@@ -10,6 +10,7 @@ import re
 import golem.model
 import golem.properties
 import golem.algorithms.helicity
+import golem.installation
 
 from golem.util.path import golem_path
 from golem.util.config import GolemConfigError
@@ -31,6 +32,8 @@ DEFAULT_CMD_LINE_ARGS = [
       ('l', "log-file=",
          "writes a log file with the current level of verbosity"),
       ('r', "report", "generate post-mortem debug file"),
+      ('', "olp", "switch to OLP mode. Use --olp --help for more options."),
+      ('', "version", "prints the current version of GoSam")
    ]
 
 POSTMORTEM_LOG = []
@@ -222,6 +225,7 @@ def enumerate_helicities(conf):
 
 def enumerate_and_reduce_helicities(conf):
    in_particles, out_particles = generate_particle_lists(conf)
+   conf = golem.algorithms.helicity.filter_helicities(conf, in_particles, out_particles)
    helicities = [h for h in enumerate_helicities(conf)]
    group = golem.algorithms.helicity.find_symmetry_group(helicities,
          conf, in_particles, out_particles, error)
@@ -277,7 +281,16 @@ def prepare_model_files(conf, output_path=None):
       path = output_path
 
    model_lst = conf.getProperty(golem.properties.model)
-   # new: if we generate UV counterterms we need extra files
+
+   # For BLHA2 standards: conversion to GoSam internal keywords of SM:
+   if len(model_lst) == 1 and str(model_lst[0]).lower() == 'smdiag':
+      model_lst[0] = 'smdiag'
+      conf.setProperty("model","smdiag")
+   if len(model_lst) == 1 and str(model_lst[0]).lower() == 'smnondiag':
+      model_lst[0] = 'sm'
+      conf.setProperty("model","sm")
+   
+  # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
 
    if "setup-file" in conf:
@@ -286,6 +299,7 @@ def prepare_model_files(conf, output_path=None):
       rel_path = os.getcwd()
    if len(model_lst) == 0:
       model_lst = ['sm']
+      conf.setProperty("model","sm")
    if len(model_lst) == 1:
       model = model_lst[0]
       src_path = golem_path("models")
@@ -305,7 +319,8 @@ def prepare_model_files(conf, output_path=None):
          if not os.path.isabs(model_path):
             model_path = os.path.join(rel_path, model_path)
          message("Importing FeynRules model files ...")
-         mdl = golem.model.feynrules.Model(model_path)
+         extract_model_options(conf)
+         mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
          mdl.store(path, MODEL_LOCAL)
          message("Done with model import.")
       else:
@@ -333,20 +348,8 @@ def prepare_model_files(conf, output_path=None):
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
-def getModel(conf, extra_path=None):
-   MODEL_LOCAL = "model"
 
-   if "model" in conf.cache:
-         return conf.cache["model"]
-
-   if extra_path is not None:
-      path = extra_path
-   else:
-      path = process_path(conf)
-
-
-   golem.model.MODEL_OPTIONS = {}
-
+def extract_model_options(conf):
    for opt in conf.getListProperty(golem.properties.model_options):
       idx = -1
       for delim in [" ", ":", "="]:
@@ -360,12 +363,106 @@ def getModel(conf, extra_path=None):
       else:
          golem.model.MODEL_OPTIONS[opt.strip()] = True
 
+def getModel(conf, extra_path=None):
+   MODEL_LOCAL = "model"
+
+   if "model" in conf.cache:
+         return conf.cache["model"]
+
+   if extra_path is not None:
+      path = extra_path
+   else:
+      path = process_path(conf)
+
+
+   golem.model.MODEL_OPTIONS = {}
+   golem.model.MODEL_ONES = conf.getListProperty(golem.properties.one)
+
+   model_shortname = conf["model"]
+
+   extract_model_options(conf)
+
+   # --[ EW scheme management:
+   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
+   ew_supp = False
+   
+   if conf["modeltype"] is not None:
+      if any(item.startswith(conf["modeltype"]) for item in models_ewsupp):
+         ew_supp = True
+   if conf["model"] is not None:
+      if any(item.startswith(conf["model"]) for item in models_ewsupp):
+         ew_supp = True
+
+   # Adapt EW scheme to order file request:
+   if conf["olp.ewscheme"] is not None and ew_supp == True:
+         select_olp_EWScheme(conf)
+   elif ew_supp == True and ( ( conf["model.options"] is None) or \
+         "ewchoose" in conf["model.options"] ):
+      golem.model.MODEL_OPTIONS["ewchoose"]=True
+   elif conf["olp.ewscheme"] is not None and ew_supp == False:
+         error("EWScheme tag in orderfile incompatible with model.")
+
+   # Modify EW setting for model file:
+   if ew_supp == True and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+      if golem.model.MODEL_OPTIONS["ewchoose"] == True:
+         golem.model.MODEL_OPTIONS["users_choice"] = '0'
+      else:
+         golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
+         golem.model.MODEL_OPTIONS["ewchoose"] = True
+   elif ew_supp == True and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
+      golem.model.MODEL_OPTIONS["ewchoose"] = False
+      golem.model.MODEL_OPTIONS["users_choice"] = '0'
+   elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+      del golem.model.MODEL_OPTIONS["ewchoose"]
+      #error("ewchoose option in model.options is not supported with the chosen model.")
+
+   # --] EW scheme management
+
    fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
    debug("Loading model file %r" % fname)
    mod = imp.load_source("model", fname)
 
    conf.cache["model"] = mod
    return mod
+
+def select_olp_EWScheme(conf):
+   ewparameters = ['mW','mZ','alpha','GF','sw','e','vev','ewchoose']
+   ewscheme = conf["olp.ewscheme"]
+   raisewarn = False
+   for key, value in golem.model.MODEL_OPTIONS.items():
+      if any(item.startswith(str(key)) for item in ewparameters):
+         raisewarn = True
+#  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
+   if ewscheme == "alphaGF":
+      golem.model.MODEL_OPTIONS["ewchoose"]='1'
+      print "OLP EWScheme --> alphaGF (Gmu scheme)"
+
+   if ewscheme == "alpha0":
+      golem.model.MODEL_OPTIONS["ewchoose"]='2'
+      golem.model.MODEL_OPTIONS["alpha"]='0.007297352536480967'
+      print "OLP EWScheme --> alpha0"
+
+   if ewscheme == "alphaMZ":
+      golem.model.MODEL_OPTIONS["ewchoose"]='2'
+      # Value of alpha(Mz)^-1=128.944 from Nucl.Phys.Proc.Suppl. 225-227 (2012) 282-287
+      golem.model.MODEL_OPTIONS["alpha"]='0.007755305'
+      print "OLP EWScheme --> alphaMZ"
+
+   if ewscheme == "alphaRUN":
+      print "OLP EWScheme --> alphaRUN"
+      print "EW not supported yet!"
+   if ewscheme == "alphaMSbar":
+      print "OLP EWScheme --> alphaMSbar"
+      print "EW not supported yet!"
+   if ewscheme == "OLPDefined":
+      print "OLP EWScheme --> OLPDefined: GoSam default taken"
+      golem.model.MODEL_OPTIONS["ewchoose"]=2
+      
+   if raisewarn == True:
+      warning("Warning: EWScheme setting from orderfile will override the model.options\n" + \
+                 " setting from input card if incompatible!")
+   # print golem.model.MODEL_OPTIONS
+   return
 
 
 def expand_parameter_list(prop, conf):
@@ -376,6 +473,8 @@ def expand_parameter_list(prop, conf):
 
    new_values = set([])
    for value in lst:
+      if not value:
+         continue
       if "*" in value:
          pat = value.replace("*", r'(\w*)') + "$"
          cpat = re.compile(pat)
@@ -552,6 +651,7 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
             long_width = len(long_arg) + i
 
    help_fmt = "-%s, --%-" + str(long_width) + "s -- %s"
+   help_fmt_only_long = "--%-" + str(long_width+4) + "s -- %s"
    help_msgs = [
          "Usage: %s {options} %s" % (argv[0], extra_msg)
       ]
@@ -561,7 +661,10 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          arg_opt = "<ARG>"
       else:
          arg_opt = ""
-      help_msgs.append(help_fmt % (short_arg, long_arg + arg_opt, help_text))
+      if short_arg:
+         help_msgs.append(help_fmt % (short_arg, long_arg + arg_opt, help_text))
+      else:
+         help_msgs.append(help_fmt_only_long % (long_arg + arg_opt, help_text))
 
    default_logger = add_logger_with_level(WARNING)
 
@@ -590,6 +693,12 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          sys.exit()
       elif o in ("-r", "--report"):
          POSTMORTEM_DO = True
+      elif o in ("--version"):
+         print("GoSam %s (rev %s)" % (".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION))
+         print("Copyright (C) 2011-2014  The GoSam Collaboration")
+         print("This is free software; see the source for copying conditions.  There is NO\n" +
+               "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
+         sys.exit()
       else:
          if handler is None:
             error("Unhandled command line option: %s" % o)
@@ -617,11 +726,11 @@ def check_script_name(name):
    pname, sname = os.path.split(name)
    sbase, sext  = os.path.splitext(sname)
    flag = False
-   if sbase.lower() == "golem-main":
+   if sbase.lower() == "gosam-main":
       flag = True
       chunk1 = ""
       chunk2 = "It"
-   elif sbase.lower() == "golem-init":
+   elif sbase.lower() == "gosam-init":
       flag = True
       chunk1 = "with the option --olp "
       chunk2 = "Apart from that, it"

@@ -114,7 +114,7 @@ def main(argv=sys.argv):
 	This is the golem OLP client of GoSam for the initialization phase
 	of the Binoth Accord.
 
-	Usage: golem-init.py {options} {file or directory} {name=value}
+	Usage: gosam-init.py {options} {file or directory} {name=value}
 	-h, --help           -- prints this help screen
 	-d, --debug          -- prints out debug messages
 	-v, --verbose        -- prints out status messages
@@ -177,8 +177,18 @@ def main(argv=sys.argv):
 		defaults.append(cmd_defaults)
 
 	default_conf = golem.util.config.Properties()
+	props = golem.util.config.Properties()
+
+	## This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		props.setProperty(str(p), default_conf.getProperty(p))
+
+	default_conf.setProperty("__OLP_MODE__","True")
 	for c in defaults:
 		default_conf += c
+
+	if not default_conf["extensions"]:
+		default_conf["extensions"]=props["extensions"]
 
 	skipped = 0
 	for arg in args:

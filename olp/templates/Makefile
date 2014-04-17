@@ -2,10 +2,15 @@
 SUBDIRS=[% @for subprocesses %] \
 	[% path %][% @end @for %]
 
-FC=$(shell sh config.sh -fortcom)
+include Makefile.conf
+
 FCFLAGS=$(shell sh config.sh -fcflags)
-CFLAGS=$(shell sh config.sh -cflags)
-LDFLAGS=$(shell sh config.sh -libs)
+CFLAGS=$(shell sh config.sh -cflags)[%
+@if extension shared %]
+LDFLAGS=$(shell sh config.sh -intern -libs)[%
+@else %]
+LDFLAGS=$(shell sh config.sh -libs)[%
+@end @if %]
 
 # EXTRA_FCFLAGS=
 # EXTRA_CFLAGS=
@@ -40,7 +45,11 @@ DISTFILES= \
 
 .PHONY: compile_subprocesses compile source doc clean very-clean
 
+[% @if extension shared %]
+compile: olp_module.o compile_subprocesses libgosam_process.so
+[% @else %]
 compile: olp_module.o compile_subprocesses
+[% @end @if %]
 
 compile_subprocesses:
 	for dir in $(SUBDIRS); \
@@ -108,4 +117,11 @@ $(C_OBJECTS): %.o: %.c
 
 $(F_OBJECTS): %.o: %.f90 compile_subprocesses
 	$(FC) $(FCFLAGS) $(EXTRA_FCFLAGS) -o $@ -c $<
+
+[% @if extension shared %]
+# olp_module.o is in LDFLAGS
+libgosam_process.so: olp_module.o
+	$(vecho) "-> Linking $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -Wl,-rpath="$$ORIGIN" -shared -o $@
+[%@end @if%]
 

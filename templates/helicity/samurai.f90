@@ -286,8 +286,8 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    if(samurai_group_numerators) then
       !------#[ reduce numerator numeval_group[% grp %]:
       if(samurai_verbosity > 0) then
-         write(samurai_out,*) "[golem-2.0] numeval_group[% grp %]"
-         write(samurai_out,*) "[golem-2.0] epspow=", epspow
+         write(samurai_out,*) "[GoSam] numeval_group[% grp %]"
+         write(samurai_out,*) "[GoSam] epspow=", epspow
       end if[%
    @if version_newer samurai.version 2.1 %]
       !-----------#[ initialize invariants:
@@ -325,8 +325,8 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
             write(logfile,*) "<diagram index='[% DIAG %]'>"
          end if
          if(samurai_verbosity > 0) then
-            write(samurai_out,*) "[golem-2.0] numerator_diagram[% DIAG %]"
-            write(samurai_out,*) "[golem-2.0] epspow=", epspow
+            write(samurai_out,*) "[GoSam] numerator_diagram[% DIAG %]"
+            write(samurai_out,*) "[GoSam] epspow=", epspow
          end if[%
    @if version_newer samurai.version 2.1 %]
          !-----------#[ initialize invariants:

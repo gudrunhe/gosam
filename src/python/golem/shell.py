@@ -645,7 +645,7 @@ class GENERATE(Command):
             [
                "Generates the files for the current process.",
                "",
-               "This is equivalent to running golem-main.py on",
+               "This is equivalent to running gosam.py on",
                "the respective process card.",
                "",
                "If an argument is specified it must refer to the file name",
@@ -696,9 +696,7 @@ class GENERATE(Command):
 
          extensions = [e.lower() for e in golem.properties.getExtensions(conf)]
          if generate_nlo:
-            if not ("samurai" in extensions
-                  or "golem95" in extensions
-                  or "pjfry" in extensions):
+            if not any([e in extensions for e in REDUCTION_EXTENSIONS]):
                shell.recommendations["+add.extensions"] = "samurai"
                flag=True
                

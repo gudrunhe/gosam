@@ -1,7 +1,12 @@
 # vim: ts=3:sw=3
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 
 OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
@@ -17,34 +22,50 @@ OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
 
+[% @if extension shared %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_common.so
+[% @else %]
 compile: source common.a
+[% @end @if %]
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 doc:
 
-common.a: $(OBJECTS)
-	ar rs $@ $+
+[% @if extension shared %]
+libgosam_process[% process_name assuffix=\_ %]_common.so: $(OBJECTS)
+	$(vecho) "-> Linking $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) $(LDFLAGS) -shared -o $@ $+
 
 clean:
-	rm -f *.o *.mod
+	$(Q)rm -f *.o *.mod libgosam_process[% process_name assuffix=\_ %]_common.so
+[% @else %]
+common.a: $(OBJECTS)
+	$(Q) ar rs $@ $+
+
+clean:
+	$(Q)rm -f *.o *.mod common.a
+[% @end @if %]
+
 
 very-clean: clean
-	rm -f filelist-source
+	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(FIND) $(FIND_OPT) . \( \
 		-name 'color.f90' \
 		-or -name 'model.f90' \
+		-or -name 'version.f90' \
 		\) -exec rm \{} \;
 endif
 
 $(OBJECTS):%.o:%.f90
-	$(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
+	$(vecho) "-> Compiling $@ .."
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
 
-color.f90 model.f90: source
+version.f90 color.f90 model.f90: source
 
 filelist-source: source
 	echo Makefile > $@

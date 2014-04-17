@@ -39,6 +39,9 @@ def gosam_contrib_path(*dir):
 				if os.path.exists(guess_path):
 					path=os.path.abspath(guess_path)
 					break
+
+		if not os.path.exists(path):
+			return ""
 		return os.path.join(path, *dir)
 	except ImportError:
 		# This means we work with the sources rather than
