@@ -27,18 +27,18 @@ particles = {
    'Wm':      Particle('Wm',       2,   'mW',  1, 'Wp',   'wW',      -24,    -3.0),
    'Wp':      Particle('Wp',       2,   'mW',  1, 'Wm',   'wW',       24,     3.0),
 
-   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11,    -1.0),
-   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11,    -1.0),
+   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11,    -3.0),
+   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11,    -3.0),
    'ne':      Particle('ne',       1,      0,  1, 'nebar', '0',       12,     0.0),
    'nebar':   Particle('nebar',   -1,      0,  1, 'ne',    '0',      -12,     0.0),
 
-   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13,    -1.0),
-   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13,    -1.0),
+   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13,    -3.0),
+   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13,    -3.0),
    'nmu':     Particle('nmu',      1,      0,  1, 'nmubar', '0',      14,     0.0),
    'nmubar':  Particle('nmubar',  -1,      0,  1, 'nmu',   '0',      -14,     0.0),
 
-   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15,    -1.0),
-   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15,    -1.0),
+   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15,    -3.0),
+   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15,    -3.0),
    'ntau':    Particle('ntau',     1,      0,  1, 'ntaubar', '0',     16,     0.0),
    'ntaubar': Particle('ntaubar', -1,      0,  1, 'ntau',   '0',     -16,     0.0),
 
