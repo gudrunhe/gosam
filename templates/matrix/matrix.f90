@@ -424,7 +424,7 @@ contains
                @for effective_higgs %][%
                @if is_ehc%]
                ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
-               amp(2) = amp(2) + 11.0_ki * amp(1)[%
+               amp(2) = amp(2) + (11.0_ki -2.0_ki/3.0_ki*log(scale2/mH**2)) * amp(1)[%
                @end @if %][%
                @end @for %][%
                @for quark_loop_masses %][%
