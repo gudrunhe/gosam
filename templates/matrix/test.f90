@@ -117,7 +117,7 @@ subroutine  print_parameters(scale2)
       write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
    end if
 
-   write(*,'(A1,1x,A25)') "#", "--- PARAMETERS VALUES ---"
+   write(*,'(A1,1x,A25)') "#", "--- PARAMETER VALUES ---"
    write(*,'(A1,1x,A13)') "#", "Boson masses & widths:"
    write(*,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
    write(*,'(A1,1x,A5,G23.16)') "#", "mW = ", mW
