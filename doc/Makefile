@@ -7,7 +7,7 @@ BIBTEX_OPT=
 
 GOLEM=gosam.py
 
-.PHONY: all
+.PHONY: all clean
 
 all: refman.pdf devel.pdf
 
@@ -24,3 +24,8 @@ template.tex:
 	${GOLEM} --no-defaults --format=LaTeX --template $@
 
 refman.pdf: template.tex refman.bib
+
+clean:
+	rm -f devel.aux devel.bbl devel.blg devel.do devel.log devel.out \
+	  devel.pdf devel.toc refman.aux refman.bbl refman.blg refman.do \
+	  refman.log refman.out refman.toc
