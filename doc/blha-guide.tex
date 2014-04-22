@@ -205,19 +205,17 @@ To run \gosam{} within the MC/OLP setup one can use the following command:\\
    \gosam{} can choose some settings simplifying the communication and linking.
    One can either specify \texttt{--mc=MCname} or \texttt{--mc=name/version}.
    Alternatively (and also optional),
-   one can put this information into the order file:
+   one can put this information into the order file:\\
 %\begin{lstlisting}
 {\tt \#@olp.mc.name mypreferredmc}\\
-{\tt \#@olp.mc.version 1.0.0}
+{\tt \#@olp.mc.version 1.0.0}\\
 %\end{lstlisting}
    The short option for \texttt{--mc} is \texttt{-M}.
 %   The supported MC names so far are {\tt powhegbox, sherpa}.
 %   The interface with Herwig++/Matchbox does not need any extra settings when using BLHA2.
-\item The option \texttt{--config} points to the configuration file.
-   The latter contains \gosam{} specific settings, such as paths to the 
-   libraries, diagram filters, etc.
-   
-   \attention {\it Is this still necessary with the new installation script?}
+\item The option \texttt{--config} points to a \gosam{} configuration file.
+   The latter can be used to define \gosam{} specific settings, such as  
+   diagram filters, treatment of the rational parts, etc.
    
    If  this option is left out \gosam{} searches for a configuration
    in one of the following locations:
@@ -456,3 +454,31 @@ The default settings for the prefactor can be changed using the option {\tt nlo\
 see section \ref{chp:setup-of-a-process}.
 
 For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
+
+
+\subsubsection{Production of colour-/spin correlated trees}
+
+\gosam{} can also generate  tree level amplitudes in a spin- and colour-correlated form.
+Colour correlated matrix elements are defined as
+\begin{equation}
+ C_{ij}=\bra{{\cal M}}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M}}\;,
+\end{equation}
+spin-correlated matrix elements can be defined as
+\begin{equation}
+ S_{ij}=\bra{{\cal M},-}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M},+}\;.
+\end{equation}
+The spin-correlated matrix element above (as well as the colour correlated matrix element) contains implicitly
+the sum over all other helicities, only the helicities with the indices $i$ and $j$ are fixed, i.e.
+ \begin{eqnarray}
+&&\langle {\cal M}_{i,-} |{\mathbf T}_i\cdot {\mathbf T}_j |{\cal M}_{i,+}\rangle =\\
+&&\sum_{\lambda_1,...,\lambda_{i-1},\lambda_{i+1},...,\lambda_n}
+\langle {\cal M}_{\lambda_1,...,\lambda_{i-1},-,\lambda_{i+1},...,\lambda_n} |
+{\mathbf T}_i\cdot {\mathbf T}_j | 
+{\cal M}_{\lambda_1,...,\lambda_{i-1},+,\lambda_{i+1},...,\lambda_n}\rangle \;. \nonumber
+\end{eqnarray}
+These matrix elements are particularly useful in combination with Monte Carlo programs 
+which use these trees to build the dipole subtraction terms for the infrared divergent 
+real radiation part. With these modified tree level matrix elements \gosam{} is able to generate
+all necessary building blocks for a complete NLO calculation.\\
+Such a setup has been used successfully in combination with the framework of 
+{\sc Herwig++/Matchbox}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc}.
