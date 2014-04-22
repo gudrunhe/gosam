@@ -36,8 +36,8 @@ $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
 	$(MAKE) -C test clean
-	$(MAKE) -C virtual uninstall
-	$(MAKE) -C virtual clean
+	-$(MAKE) -C virtual uninstall
+	-$(MAKE) -C virtual clean
 	rm -f virtual/.golem.dir
 	rm -f virtual/Makefile
 	rm -fr include
@@ -46,8 +46,8 @@ clean:
 very-clean:
 	rm -f $(PROCESS).in $(PROCESS).log
 	$(MAKE) -C test clean
-	$(MAKE) -C virtual uninstall
-	$(MAKE) -C virtual clean
+	-$(MAKE) -C virtual uninstall
+	-$(MAKE) -C virtual clean
 	rm -fr virtual
 	rm -fr include
 	rm -fr lib lib64
