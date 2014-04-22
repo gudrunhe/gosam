@@ -5,6 +5,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage[pdftex]{hyperref}
 \usepackage{subcaption}
+\usepackage{graphicx}
 \input lstform
 \input lstolp
 %\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
@@ -26,6 +27,12 @@
 \newcommand{\samurai}{{\sc Samurai}\xspace}
 \newcommand{\ninja}{{\sc Ninja}\xspace}
 
+\def\ket#1{|{#1}\rangle}
+\def\bra#1{\langle{#1}|}
+\def\N{\mathcal{N}}
+\def\S{\mathcal{S}}
+\def\A{\mathcal{A}}
+\newcommand{\mrm}[1]{\mathrm{#1}}
 \newcommand{\tHV}{{'t\,Hooft Veltman}}
 \newcommand{\diff}[1][{}]{{\mathrm{d}}^{#1}\!}
 \newcommand{\contl}{{\ensuremath{\hookrightarrow}}}
@@ -64,9 +71,10 @@
 
 
 \chapter{Introduction}
-\section{Synopsis}
-\gosamv is a program package for the automated generation and evaluation of one-loop amplitudes.
-It can also produce spin-and colour correlated tree amplitudes.
+%\section{Synopsis}
+\gosamv is a program package for the automated generation and evaluation of one-loop amplitudes, 
+within and beyond the Standard Model.
+It can also produce spin- and colour correlated tree amplitudes.
 The program produces \fortranXC code for a given process
 by generating Feynman diagrams and translating
 the corresponding one-loop expressions into a form where the integrand
@@ -75,10 +83,12 @@ can be reduced and evaluated numerically with either
 or \golemVC~\cite{Golem95:2008,Cullen:2011kv,Guillet:2013msa}
 or \samurai~\cite{Mastrolia:2010nb,vanDeurzen:2013pja}.
 %or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
+A file containing the pictorial represenation of the diagrams along with other information 
+about the process is also produced. 
 
+\vspace*{3mm}
 
-
-\section{Conventions}
+%\section{Conventions}
 In this manual, shell commands 
 (for the {\tt bash} shell) are indicated
 by lines starting with a dollar sign {\tt \$}.
@@ -89,7 +99,7 @@ continue the previous line(s) start with a \contl.
 prompts, with 
 `\texttt{...}' for continuation lines.
 
-\chapter{Download and Installation}
+\chapter{Download and installation}
 \section{Prerequisites}
 
 The distribution of \gosam-\gosamversion{}, together with the install script, 
@@ -341,7 +351,7 @@ above mentioned software packages.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Setup of a Process}
+\chapter{Setup of a process}
 %\section{Introduction}
 \label{chp:setup-of-a-process}
 
@@ -448,7 +458,7 @@ The output directory is assumed to be in the relative path
 34 reduction_interoperation_rescue=-1
 35 samurai_scalar=2
 36 nlo_prefactors=0
-37 PSP_check=False
+37 PSP_check=True
 38 PSP_rescue=True
 39 PSP_verbosity=False
 40 PSP_chk_th1=8
@@ -549,34 +559,34 @@ dimensional reduction, which is the default.
 \item[11] \texttt{helicites}:  a comma separated list of helicities to be calculated. 
 An empty list means that all possible helicities should be generated.         
 The characters correspond to particles 1, 2, ... from left to right.   \\
- Examples:                                                       
- $e^+, e^- \to \gamma, \gamma$:    \\                               
+ Example:                                                       
+ $e^+ e^- \to \gamma \gamma$:    \\                               
  Only three helicities are required; the other ones are         
   either zero or can be obtained by symmetry                 
   transformations. This corresponds to\\                                       
       {\tt  helicities=+-++,+-+-,+---}  \\
  Multiple helicities can be encoded in patterns, which are expanded
-    at the time of code generation. For more details we refer to the manual.      
-%    Patterns can have one of the following forms:  
-%       [+-], [+-0], [+0] etc. : the bracket expands to one of the symbols
-%             in the bracket at a time.                              
-%       EXAMPLE                                                      
-%             helicities=[+-]+[+-0]                                  
-%              expands to 6 different helicities:                   
-%              helicities=+++, ++-, ++0, -++, -+-, -+0              
-%       [a=+-], etc. : as above, but the helicity is also assigned to the
-%             symbol and can be reused.                              
-%       EXAMPLE                                                      
-%             helicities=[i=+-]+i+                                   
-%              expands to two helicities                            
-%              helicities=++++, -+-+                                
-%       [ab=+-0], etc. : as above, the first symbol is assigned the helicity,
-%             the second is minus the helicity                       
-%       EXAMPLE                                                      
-%             helicities=[qQ=+-][pP=+-]PQ[+-0]                       
-%              expands to 12 helicities                             
-%              helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\     
-%                         -+-++,-+-+-,-+-+0,--+++,--++-,--++0       
+    at the time of code generation.     
+    Patterns can have one of the following forms:  
+       {\tt [+-], [+-0], [+0] } etc. : the bracket expands to one of the symbols
+             in the bracket at a time.     \\                         
+       example: \\                                                    
+             {\tt helicities=[+-]+[+-0]   }                               
+              expands to 6 different helicities:    \\               
+              {\tt helicities=+++, ++-, ++0, -++, -+-, -+0  }\,. \\           
+       {\tt [a=+-]}, etc. : as above, but the helicity is also assigned to the
+             symbol and can be reused.    \\                          
+       example:        \\                                              
+             {\tt helicities=[i=+-]+i+  }                                 
+              expands to two helicities,   \\                          
+              {\tt helicities=++++, -+-+  } \,.     \\                        
+       {\tt [ab=+-0]}, etc. : as above, the first symbol is assigned the helicity,
+             the second is minus the helicity        \\               
+       example:     \\                                                 
+            {\tt helicities=[qQ=+-][pP=+-]PQ[+-0] }                      
+              expands to 12 helicities,           \\                   
+             {\tt  helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\\     
+                         -+-++,-+-+-,-+-+0,--+++,--++-,--++0   }    
 \item[12]  \texttt{qgraf.options=onshell,notadpole,nosnail}: 
 a list of options which is passed to \qgraf{} via the 'options' line.
 Possible values (as of qgraf.3.1.1) are the following keywords:
@@ -602,8 +612,7 @@ documentation of the corresponding model file.
 numerical polarisation vectors are used for the massless gauge bosons, 
 rather than producing separate code for each helicity
 (see section \ref{sec:numpolvec}). 
-To switch off the use of numerical polarisation vectors, use {\tt polvec=explicit}.\\
-{\it comment: this is not yet in the template}
+To switch off the use of numerical polarisation vectors, use {\tt polvec=explicit}.
 \item[18] \texttt{diagsum}:  if {\tt True}, one-loop diagrams sharing some propagators
 are combined before  the algebraic reduction.
 The default is {\tt diagsum = True}. 
@@ -628,7 +637,7 @@ a check of gauge invariance for processes involving
 gluons or photons. 
 %(introduces gauge*z variables)
 \item {\tt customspin2prop} allows to replace the propagator of spin-2 particles  
-with a custom function (we refer to the manual for details).
+with a custom function (we refer to subsection \ref{sec:spin2} for details).
 \end{itemize}
 In our example {\tt shared} tells the program to 
 build dynamic rather than static libraries.
@@ -647,7 +656,7 @@ Example:  \\
 {\tt  d.vertices(Z, U, Ubar) == 0 } filters out
 diagrams containing exactly one $Z$ propagator and no $Zu\bar{u}$ couplings. 
 \item[25] \texttt{filter.nlo}:  analogous to \texttt{filter.lo},  for the one-loop diagrams.
-For details we refer to the manual.
+For details we refer to subsection \ref{sec:filter}.
 \item[26] \texttt{filter.module}: a python file of predefined functions which can be used as filters.   
 \item[27] \texttt{renorm\_beta}: activates or disables beta function renormalisation. The default is  {\tt True}. 
 \item[28] \texttt{renorm\_mqwf}:  activates or disables UV countertems coming from
@@ -673,7 +682,7 @@ chooses for the basis integrals. 1: {\sc QCDLoop}, 2: {\sc OneLOop}. The default
     \begin{enumerate}                                          
     \item[0]: a factor of $\alpha_{(s)}/(2\pi)$ is not included in the NLO result
     \item[1]: a factor of $1/(8\pi^2)$ is not included in the NLO result       
-    \item[2]: the NLO result includes all prefactors   (see also manual).
+    \item[2]: the NLO result includes all prefactors   (see also section \ref{conventions}).
     \end{enumerate}                           
     Note, however, that the factor of $1/\Gamma(1-\epsilon)$ is not         
     included in any of the cases.                                   
@@ -683,15 +692,17 @@ chooses for the basis integrals. 1: {\sc QCDLoop}, 2: {\sc OneLOop}. The default
     {\tt nlo\_prefactors=2}.                                 
 \item[37] \texttt{PSP\_check}: allows to switch the stability test of the full amplitude for 
 each phase space point on or off.
-Details about the stability tests are given in section \ref{sec:rescue}.
+If \texttt{PSP\_check} is set to {\tt False}, the following flags concerning 
+\texttt{PSP\_rescue} and the various thresholds for the rescue system have no effect.
+Details about the stability tests are given in the \gosam-2.0 paper.
 Please note that this test only works for QCD  with the built-in model files.
-The default is \texttt{PSP\_check= False}. 
+The default is \texttt{PSP\_check= True}. 
 \item[38] \texttt{PSP\_rescue}:  
     activates the phase space point rescue system based on the estimated       
     accuracy of the finite part.                                    
     The accuracy is estimated using information on the single       
     pole accuracy and the cancellation between the cut-constructible    
-    part and R2.                                                    
+    part and $R_2$.                                                    
 %Please note that this only works for QCD  with the built-in model files.
 The default is \texttt{PSP\_rescue= True}. 
 \item[39] \texttt{PSP\_verbosity}:     sets the verbosity of the {\tt PSP\_check}. 
@@ -822,7 +833,7 @@ one invokes
 \$ gosam.py eett.in
 \end{example}
 
-\section{Process Directory Structure}
+\section{Process directory structure}
 
 
 
@@ -897,7 +908,7 @@ targets of \texttt{make} are available for direct use:
       \texttt{source} before \texttt{make doc}.
 \end{description}
 
-\section{Code Generation and Compilation}
+\section{Code generation and compilation}
 The \fortranXC code is generated by the command
 \begin{example}
 \$ make source
@@ -921,6 +932,152 @@ In order to compile and run it, type
 The program will generate a file \texttt{\_debug.xml},
 which, depending on the settings, contains the values of individual  helicity amplitudes
 and diagrams for the set of phase space points used in {\tt test.f90}.
+
+%\subsection{Computation of Abbreviations}
+
+\subsection{Producing optimised code  with {\tt FORM} version 4}
+
+The constant, i.e. $q$- and $\mu^2$-independent parts of the numerators
+of the one-loop diagrams are factored out from the numerators and computed
+as abbreviations. 
+
+While in version 1.0 of \gosam{} the {\tt Fortran} code for the
+amplitudes was written using \haggies~\cite{Reiter:2009ts}, we now
+largely use the features provided by \form{} version
+4.x~\cite{Kuipers:2012rf} to produce optimized code. This lead to more
+compact code and a speed-up in amplitude evaluation of about a factor
+of ten.  The option to use \haggies{} is still available by setting
+the extension {\tt noformopt}.
+
+In the case where \haggies{} instead of \form version 4 is used to produce abbreviations, 
+i.e. if {\tt noformopt=True} is used, please note the  following:
+If the list of abbreviations causes \haggies{}
+to crash, one needs to increase the amount of memory reserved for Java.
+This can be done by adding the \texttt{-Xmx} option to the call of Java.
+A typical setting of the variable \texttt{haggies.bin} would be
+\begin{example}
+haggies.bin=java -Xmx3g -jar \\
+\contl\ \$\{GOSAMPATH\}/haggies/haggies.jar
+\end{example}
+which assigns 3\,GB of memory to Java.
+
+In some cases the list of abbreviations is too big to
+be compiled into one subroutine. One can restrict the number of instructions for \haggies{}
+that go into a single subroutine by setting \texttt{abbrev.limit} to a positive
+number in the setup file. 
+%The variable \texttt{abbrev.level}, which by default is set to 
+%\texttt{diagrams}, can be set to \texttt{groups} or \texttt{helicities}.
+
+
+\subsection{Grouping/summing of diagrams which share common subdiagrams}
+\label{sec:grouping_summing}
+Already in the first release of \gosam{}, the diagrams were analyzed
+according to their kinematic matrix $S_{ij}$ and grouped together
+before reduction. These lead to an important gain in efficiency, both
+when reducing using an integrand reduction method, as well as with
+classical tensor reduction techniques. Details about the way diagrams
+are grouped can be found in~\cite{Cullen:2011ac}. This feature is
+still present when \samurai{} or \golemVC{} are used for computing the
+amplitudes.
+%, whereas it is not implemented for the new integrand
+%reduction method based on the Laurent expansion\cite{Mastrolia:2012bu}
+%and explained in Section~\ref{sec:ninja}.
+
+In the new release an option called {\tt diagsum} combines diagrams
+which differ only by a subdiagram into one ``meta-diagram'' to be
+processed as an entity. This allows to further reduce the number of
+calls to the reduction program and therefore to increase the
+computational speed. 
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{diagsum1.pdf}
+\caption{Example of diagrams sharing a common tree part, which are 
+summed when the {\tt diagsum} option is set to {\tt diagsum=true}.}
+\label{fig:diagsum_tree}
+\end{figure} 
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1.0\textwidth]{diagsum2.pdf}
+\caption{Example of diagrams sharing a common loop propagator, 
+but with different particle content in the loop, which are summed when
+the {\tt diagsum} option is set to {\tt diagsum=true}.}
+\label{fig:diagsum_particle}
+\end{figure} 
+
+
+When the option {\tt diagsum} is active, diagrams which differ only by
+a propagator external to the loop, as is the case e.g. for the
+$Z/\gamma^\star$ propagator in QCD corrections to the production of
+$Z+$jets, are summed together before being processed
+by \form{}. Similarly, diagrams which differ only by an external tree
+part, but which share exactly the same set of loop propagators are
+summed together prior the algebraic manipulation. An example is shown
+Figure~\ref{fig:diagsum_tree}. Finally, diagrams which share the same
+set of propagators, but have different particles circulating in the
+loop as shown in Figure~\ref{fig:diagsum_particle} are also summed
+into one ``meta-diagram''. The default setting for this option is {\tt
+diagsum=true}.
+
+
+\paragraph{Grouping of Tree Level Diagrams}
+By default the expressions of all tree-level diagrams are grouped into one
+file. This has the advantage that subexpressions which appear in several
+tree-level diagrams can be reused across the amplitude. In some cases
+it can happen that the sum of all terms of the tree-level diagrams is too big
+to be compiled in one subroutine. In this case it is recommended to set
+the option \texttt{group} to \texttt{false}. 
+However, the latter can only be used in combination with the extension {\tt noformopt}.
+
+\subsection{Numerical polarisation vectors}
+\label{sec:numpolvec}
+The use of numerical polarisation vectors for massless gauge bosons
+(gluons, photons) is activated by default.  This means that the
+various helicity configurations for the massless bosons will be
+evaluated numerically, based on the same code, rather than producing
+separate code for each helicity configuration.  In order to switch off
+this default setting,
+for example if the user would like to 
+optimize the choice of reference vectors for each helicity configuration,
+the option {\tt polvec=explicit} should be given in the input file 
+{\tt process.in}.
+
+\subsection{The extension {\tt derive}}
+
+The {\tt derive} feature generates code to access the tensor coefficients
+of each diagram or group of diagrams individually.
+While it has been among the possible keywords for the 
+{\tt extension} options in \gosam-1.0 already, it now has been promoted to 
+be used by default in the context of  tensorial reconstruction~\cite{Heinrich:2010ax}.
+It improves both the speed and the
+precision of tensorial reconstruction and makes connection to other reduction methods.
+
+The idea behind it is to compute the numerator $\mathcal{N}(\hat{q})$ 
+%--- we suppress the discussion of the second argument $\mu^2$ ---
+from a Taylor series
+\begin{equation}
+\mathcal{N}(\hat{q})=\mathcal{N}(0)
++ \hat{q}^\mu
+  \frac{\partial}{\partial\hat{q}_\mu}\mathcal{N}(\hat{q})\vert_{q=0}
++ \frac1{2!}\hat{q}^\mu\hat{q}^\nu
+  \frac{\partial}{\partial\hat{q}_\mu}
+  \frac{\partial}{\partial\hat{q}_\nu}
+  \mathcal{N}(\hat{q})\vert_{q=0} + \ldots
+\end{equation}
+In this form one can read off a one-to-one correspondence between derivatives at
+$\hat{q}=0$ and the coefficients of the tensor integrals.
+
+%\paragraph{Implementation.}
+At a technical level, 
+the files \texttt{helicity*/d*h*l1*d.f90} contain the routines
+\texttt{derivative($\mu^2$, [$i_1$], [$i_2$],\dots)} and
+\texttt{reconstruct\_d*(coeffs)}, where the latter is only generated in
+conjunction with the extension \texttt{golem95}, and \texttt{coeffs} is
+a type which comprises all coefficients of a diagram of a certain rank.
+The number of optional indices $i_1$, $i_2$, \dots presented to the routine
+determine which derivative should be returned. The subroutine
+\texttt{reconstruct\_d*} takes into account the proper symmetrisation.
 
 \subsection{Customization}
 \paragraph{Runtime Parameters.}
@@ -980,7 +1137,7 @@ In addition there are some model independent parameters which can be found in th
 %   This allows for a quick check of gauge invariance.
 %\end{tabular}
 
-\paragraph{Compile Time Parameters.}
+\paragraph{Compile time parameters.}
 Other configuration options can be found in the file \texttt{common/config.f90}.
 %but require the recompilation of the source code
 %(\texttt{make clean; make compile}).
@@ -988,7 +1145,7 @@ Other configuration options can be found in the file \texttt{common/config.f90}.
 Examples of options contained in \texttt{config.f90} are
 \begin{maxipage}
 \begin{tabular}{lp{0.6\textwidth}}
-\texttt{ki} & the floating point kind used throughout the calculation.\\
+\texttt{ki} & the floating point kind used throughout the calculation, the default is double precision.\\
 \texttt{debug\_lo\_diagrams} & controls if information about the
     tree level diagrams is written to the output file.\\
 \texttt{debug\_nlo\_diagrams} & controls if information about the
@@ -1008,11 +1165,12 @@ Examples of options contained in \texttt{config.f90} are
     is multiplied to the final result. \\
 \texttt{use\_sorted\_sum} & controls if the diagrams are summed using
     the algorithm Malcolm~\cite{Malcolm:1970}, which reduces the error
-    accumulated in presence of large cancellations.
+    accumulated in presence of large cancellations.\\
+\texttt{tens\_rec\_by\_derivatives} & controls whether the tensorial reconstruction method is used.
 \end{tabular}
 \end{maxipage}
 
-\section{Drawing the Feynman Diagrams}
+\section{Drawing the Feynman diagrams}
 In order to print out the diagrams the makefile contains the target
 \texttt{doc} which produces the file \texttt{process.ps}.
 We use \LaTeX{} plus the package \textsf{axodraw}~\cite{Vermaseren:1994je}
@@ -1067,8 +1225,20 @@ propagators connecting vertices $i$ and $j$; similarly, $\lambda_{ik}$
 is the spring constant of the leg $k$ if it is connected to vertex $i$
 and zero otherwise.
 
-\section{Import of Model Files}
+\section{Import of model files}
 \label{sec:model}
+
+The \gosam{}-2.0 package comes with the built-in model files 
+{\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, 
+{\tt sm\_complex}, {\tt smdiag\_complex}, 
+where the latter two are needed in the case of complex masses and couplings, 
+see section \ref{sec:complexmasses}. 
+The model files{\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
+the model files {\tt smehc}  contain the effective Higgs-gluon couplings.
+
+Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua} format.
+The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
+mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
 
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
@@ -1132,6 +1302,7 @@ have to be taken:
 
 
 \subsection{Propagators for spin-2 particles}
+\label{sec:spin2}
 
 The propagator for massive spin-2 particles can be split into two parts
 \begin{align}
@@ -1229,64 +1400,164 @@ and should not be modified.  If the user would like to modify it, we refer to th
 section 6.3 of {\tt src/form/lorentz.pdf} in the \gosam{} tarball.
 
 
-\section{Handling Big Processes}
-Although the default settings should work for most cases, very big processes
-in terms of the number of diagrams and the size of the expressions can cause
-the compiler to become very slow or even to crash. In this section we discuss
-solutions which can help to reduce the load for the compiler and to speed-up
-the code generation. It should be mentioned that some of these measures can
-have a negative impact on the runtime efficiency of the generated code.
 
-\subsection{Grouping of Tree Level Diagrams}
-By default the expressions of all tree-level diagrams are grouped into one
-file. This has the advantage that subexpressions which appear in several
-tree-level diagrams can be reused across the amplitude. In some cases
-it can happen that the sum of all terms of the tree-level diagrams is too big
-to be compiled in one subroutine. In this case it is recommended to set
-the option \texttt{group} to \texttt{false}. 
-However, the latter can only be used in combination with the extension {\tt noformopt}.
+%\section{Handling big processes}
+%Although the default settings should work for most cases, very big processes
+%in terms of the number of diagrams and the size of the expressions can cause
+%the compiler to become very slow or even to crash. In this section we discuss
+%solutions which can help to reduce the load for the compiler and to speed-up
+%the code generation. It should be mentioned that some of these measures can
+%have a negative impact on the runtime efficiency of the generated code.
 
-\subsection{Computation of Abbreviations}
-The constant, i.e. $q$- and $\mu^2$ independent parts of the numerators
-of the one-loop diagrams are factored out from the numerators and computed
-as abbreviations. In some cases the list of abbreviations is too big to
-be compiled into one subroutine. One can restrict the number of instructions
-that go into a single subroutine by setting \texttt{abbrev.limit} to a positive
-number in the setup file. 
-The variable \texttt{abbrev.level}, which by default is set to 
-\texttt{helicities}, can be set to \texttt{groups} or 
-\texttt{diagrams} if the list of abbreviations common to a helicity configuration 
-is too large.
 
-If the list of abbreviations causes \haggies{}
-to crash, one needs to increase the amount of memory reserved for Java.
-This can be done by adding the \texttt{-Xmx} option to the call of Java.
-A typical setting of the variable \texttt{haggies.bin} would be
-\begin{example}
-haggies.bin=java -Xmx3g -jar \\
-\contl\ \$\{GOSAMPATH\}/haggies/haggies.jar
-\end{example}
-which assigns 3\,GB of memory to Java.
 
-\subsection{Splitting the Process}
-If a process becomes too big in order to be linked\footnote{
-Currently, most systems support programs to a size up to 4\,GB.
-Although 64\,bit systems can handle a much bigger address space,
-the current limitation comes from some legacy code in the GNU linker.}
-there are some possibilities to split the process into independent
-programs:
-\begin{itemize}
-\item the generation of a subset of the helicity configurations, 
-e.g. one helicity configuration
-      per process directory.
-\item the generation of a subset of diagrams. If the diagrams are not
-      split according to gauge invariant subsets the user should ensure
-      that all subsets are called with the same set of phase space points.
-      An easy way of splitting the diagrams into subsets is by using
-      the option \texttt{select.nlo=\textit{$\langle$first$\rangle$}:\textit{%
-       $\langle$last$\rangle$}}, where \texttt{first} and \texttt{last} refer to the 
-       diagram numbers in {\em process.ps}.
-\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Stability tests and rescue system}
+\label{sec:rescue}
+
+Within the context of numerical and semi-numerical techniques, we should be able to assess in real time, for each phase space point, the level of precision of the corresponding one-loop matrix element. Whenever a phase space point is found in which the quality of the result falls below a certain threshold, either the point is discarded or the evaluation of the amplitude is repeated by means of a safer, albeit less efficient procedure. This procedure is traditionally called ``rescue system''.
+
+Apart from improvements in the stability of the reduction itself, which are provided by the new versions of \samurai{} and \golemVC, and in particular by the new reduction algorithm \ninja,  the new version of \gosam{} also has a more refined rescue system as compared to version 1.0. 
+
+Various techniques for detecting points with low precision have been implemented within the different automated tools for the evaluation of one-loop virtual corrections.
+
+A first commonly used approach relies on the comparison between the numerical values of the pole coefficients computed by the automated tool with their known analytic results dictated by the universal behaviour of the infrared singularities~\cite{Catani:2000ef}. We refer to this as the {\it pole test}. 
+
+The main advantages of this method are its broad applicability to all amplitudes and the fact that it requires a negligible additional computation time. However, since not all integrals which appear in the reconstruction of the amplitude give a contribution to the double and single poles, this method often provides an overestimate of the precision, which might result in keeping  phase space points whose finite part is less precise than what is predicted by the poles.
+
+Different techniques have been proposed that target directly the precision of the finite part. Using the symmetry properties of scattering amplitudes under scaling of all physical scales, or alternatively the invariance under rotation of the momenta, we can build pairs of points that should provide identical results, both for the finite parts and for the poles, and use the difference between them as an estimator of the precision. 
+
+The {\it scaling test}~\cite{Badger:2010nx}, is based on the properties of scaling of scattering amplitudes when all physical scales (momenta, renormalization scale, masses) are rescaled by a common multiplicative factor $x$. As shown in~\cite{Badger:2010nx}, this method provides a very good correlation between the estimated precision and the actual precision of the finite parts.
+
+The {\it rotation test}~\cite{vanDeurzen:2013saa} exploits the invariance of the scattering amplitudes under an azimuthal rotation about the beam axis, namely the direction of the initial colliding particles. Whenever the initial particles are not directed along the beam axis, one can perform a rotation of all particles by an arbitrary angle in the space of momenta. A validation of this technique, and the corresponding correlation plots, has been presented in~\cite{vanDeurzen:2013saa}.
+
+While  the {\it scaling} and the {\it rotation test} provide a more reliable estimate of the precision of the finite parts that enter in the phase space integration, their downside is that they require two evaluations of the same matrix element, therefore leading to a doubling in the computational time.
+
+Additional methods have been proposed, within the context of integrand-reduction approaches, which target the relations between the coefficients before integration, namely the reconstructed algebraic expressions for the numerator function before integration, known as  $\N=\N$ tests~\cite{Ossola:2007ax, Mastrolia:2010nb}.
+This kind of tests can be applied to the full amplitude (global   $\N=\N$ test) or individually within each residue of individual cuts (local $\N=\N$ test). The drawback of this technique comes from the fact that the test is applied at the level of individual diagrams, rather than on the final result summed over all diagrams, making the construction of a rescue system quite cumbersome. 
+
+For the precision analysis contained in \gosamv, and to set the trigger for the rescue system, we decided to employ  a hybrid method, that takes advantage of the computational speed of the {\it pole test}, combined with the higher reliability of the {\it rotation test}.  This hybrid method requires setting three different thresholds.
+After computing the matrix elements, \gosamv{} checks the precision  $ \delta_{pole}$ of the single pole with the {\it pole test}. Comparing the single pole 
+$\S_{IR}$ that can be obtained from the general structure of infrared singularities and the one provided by  \gosamv, which we label $\S$, we define  
+\be \label{eq:exd}
+\delta_{pole} = \left | \frac{ \S_{IR} - \S{} }{ \S_{IR}} \right |\, .
+\ee
+The corresponding estimate of the number of correct digits in the result is provided by  $P_{pole}= - \log_{10} (\delta_{pole})$. This step does not require any increase in computational time. The value of $ P_{pole}$ is then compared with two thresholds $ P_{high}$ and $ P_{low}$. 
+
+If $P_{pole} >  P_{high}$ the point is automatically accepted. Given the high quality of the computed pole, the finite part is very unlikely to be so poor that the point should be discarded.
+
+If $P_{pole} <  P_{low}$ the point is automatically discarded, or sent to the rescue system. If already the pole has a low precision, we can expect the finite part to be of the same level or worse.
+ 
+In the intermediate region where $ P_{high} < P_{pole} <  P_{low}$, it is more difficult to ``make a call'' solely based on the poles. Only in this case the point is recalculated using the {\it rotation test}, which requires additional computational time. 
+
+If we call the finite part of the amplitudes evaluated before and after the rotation $\A$ and  $\A_{rot}$ respectively,  we can define the error $ \delta_{rot}$ estimated with the rotation  as  
+\be  \label{eq:errd} \delta_{rot} =  2 \left  |\frac{ A_{rot} - A }{ A_{rot} + A} \right  |\, . \ee
+and the corresponding estimate on the number of correct digits as $P_{rot} = - \log_{10} (\delta_{rot})$.
+$P_{rot}$ provides a reliable estimate of the precision of the finite part~\cite{vanDeurzen:2013saa}, and can be compared with a threshold $P_{set}$ to decide whether the point should be accepted or discarded. 
+
+The values of the three thresholds $ P_{high} $,  $P_{low}$ and $P_{set}$ can be chosen by the user, to adjust the selection mechanism to the fluctuations in precision which occur between different processes. In the input card, $ P_{high} $,  $P_{low}$ and $P_{set}$ correspond to 
+\texttt{PSP\_chk\_th1}, \texttt{PSP\_chk\_th2} and \texttt{PSP\_chk\_th3}, 
+respectively, see section \ref{chp:setup-of-a-process}.
+It is worth to notice that the {\it rotation test} can be bypassed simply by setting the initial thresholds $P_{high}= P_{low}$. In this case the selection is performed solely on the basis of the {\it pole test}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Electroweak corrections}
+
+
+\section{Electroweak scheme choice}
+\label{sec:ewchoose}
+When computing amplitudes within the Standard Model, there are different
+possibilities how to choose which electroweak parameters are
+considered as input parameters, and which are instead derived
+ones. Within \gosam{} different schemes can be chosen in several
+different ways, depending on whether the scheme might be changed after
+the generation of the code or not, by setting appropriately the flag
+{\tt model.options}.
+
+By default, when the flag is not set in the input card, \gosam{}
+generates a code which uses $\mrm{m_W}$, $\mrm{m_Z}$ and
+$\mrm{\alpha}$ as input parameters, allowing however to change this in
+the generated code, by setting the variable {\tt ewchoice} in the
+configuration file {\tt config.f90} to the desired value. The user can
+choose among 8 different possibilities, which are listed in
+Table~\ref{tab:ewchoose}.  When the electric charge $\mrm{e}$ is set
+algebraically to one, the schemes $6-8$ cannot be used.
+
+\begin{table*}
+\begin{center}
+\small
+\begin{tabular}{|c|l|l|}
+\hline
+ewchoice & input parameters                        & derived parameters                  \\
+\hline
+1        & $\mrm{G_F}$, $\mrm{m_W}$, $\mrm{m_Z}$    & $\mrm{e}$, $\mrm{sw}$              \\
+2        & $\mrm{\alpha}$, $\mrm{m_W}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{sw}$              \\
+3        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{m_Z}$  & $\mrm{e}$, $\mrm{m_W}$             \\
+4        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{G_F}$  & $\mrm{e}$, $\mrm{m_W}$             \\
+5        & $\mrm{\alpha}$, $\mrm{G_F}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{m_W}$, $\mrm{sw}$ \\
+6        & $\mrm{e}$, $\mrm{m_W}$, $\mrm{m_Z}$      & $\mrm{sw}$                         \\
+7        & $\mrm{e}$, $\mrm{sw}$, $\mrm{m_Z}$       & $\mrm{m_W}$                        \\
+8        & $\mrm{e}$, $\mrm{sw}$, $\mrm{G_F}$       & $\mrm{m_W}$, $\mrm{m_Z}$           \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Possible choices to select the electroweak scheme.
+To simplify the notation we write the sine of the Weinberg angle as
+$\mrm{sw}$. The lists of derived parameters contain only the
+parameters which are computed and used in the expressions for the
+amplitudes.}\label{tab:ewchoose}
+\end{table*}
+
+
+The flag {\tt model.options} in the input card allows also to directly
+set the values of the different parameters appearing in the model. If
+the values of exactly three electroweak parameters are
+specified, \gosam{} automatically takes them as input parameters. In
+that case, in order to be able to switch among different schemes after
+code generation, the variable {\tt ewchoose} also must be added to the
+{\tt model.options} flag.
+
+
+
+\section{Support of complex masses}
+\label{sec:complexmasses}
+The integral libraries contained in the \gosam{} package as well as the \gosam{} 
+code itself fully support complex masses. This refers to the introduction of fermion widthes
+but in particular also for $W$- and $Z$-bosons. A fully consistent treatment of complex
+$W$- and $Z$-boson masses requires the use of the complex mass scheme~\cite{Denner:2005fg}.
+The boson masses are promoted to complex masses by
+\begin{equation}
+ m_{V}^2 \to \mu_{V}^2 = m_{V}^2 -i m_{V} \Gamma_{V},\quad V=W,Z\;.
+\end{equation}
+In order to maintain gauge invariance this affects the definition of the Weinberg angle:
+\begin{equation}
+ \cos\theta_W^2 = \frac{\mu_W^2}{\mu_Z^2}\;.
+\end{equation}
+ To make use of the complex mass scheme, we introduce two new model files, \texttt{sm\_complex}
+ and \texttt{smdiag\_complex}, which contain the Standard Model with complex mass scheme, the first
+ with a full CKM matrix, the latter with a diagonal unit matrix for the CKM matrix.
+ An example dealing with a complex top quark mass is given in section \ref{sec:examples}.
+
+%\subsection{Splitting the Process}
+%If a process becomes too big in order to be linked\footnote{
+%Currently, most systems support programs to a size up to 4\,GB.
+%Although 64\,bit systems can handle a much bigger address space,
+%the current limitation comes from some legacy code in the GNU linker.}
+%there are some possibilities to split the process into independent
+%programs:
+%\begin{itemize}
+%\item the generation of a subset of the helicity configurations, 
+%e.g. one helicity configuration      per process directory.
+%\item the generation of a subset of diagrams. If the diagrams are not
+%      split according to gauge invariant subsets the user should ensure
+%      that all subsets are called with the same set of phase space points.
+%      An easy way of splitting the diagrams into subsets is by using
+%      the option \texttt{select.nlo=\textit{$\langle$first$\rangle$}:\textit{%
+%       $\langle$last$\rangle$}}, where \texttt{first} and \texttt{last} refer to the 
+%       diagram numbers in {\em process.ps}.
+%\end{itemize}
 
 %\section{Advanced Usage}
 %The call to the executable \texttt{gosam.py} can be simulated
@@ -1307,7 +1578,7 @@ e.g. one helicity configuration
 %>>> generate_process_files(props)
 %\end{lstlisting}
 
-\section{Advanced Diagram Selection}
+\chapter{Advanced diagram selection}
 \gosamv implements several ways of selecting subsets of diagrams:
 \begin{itemize}
 \item by restricting QGraf,
@@ -1315,7 +1586,7 @@ e.g. one helicity configuration
 \item by defining filters using \python.
 \end{itemize}
 
-\subsection{Restricting the Generation with QGraf}
+\subsection{Restricting the generation with QGraf}
 The options for restricting the set of diagrams at the level
 of the diagram generation is the most efficient way since this
 happens already at the earliest possible stage.
@@ -1327,7 +1598,7 @@ too limited in order to express more advanced criteria.
 \texttt{qgraf.verbatim.lo} and \texttt{qgraf.verbatim.nlo}.
 For the exact syntax the user is refered to the QGraf documentation.
 
-\subsection{Selecting Diagrams by their Number}
+\subsection{Selecting diagrams by their number}
 An a posteriori selection 'by eye' can be achieved after all (also unwanted)
 diagrams of a process have been generated and inspected in
 \texttt{doc/process.ps}. The user can then modify the options
@@ -1335,7 +1606,8 @@ diagrams of a process have been generated and inspected in
 
 %This option is mainly intended for debugging purposes in large processes.
 
-\subsection{Filtering Diagrams in \python{}}
+\subsection{Filtering diagrams in \python{}}
+\label{sec:filter}
 The user can write short \python{} functions in order to decide whether
 a specific diagram is to be taken or not. This function should return
 \texttt{True} for all diagrams which are kept, and \texttt{False} for
@@ -1431,7 +1703,8 @@ Furthermore, the following predefined filters exist:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
-\chapter{Conventions of the Amplitude}
+\chapter{Conventions}
+\label{sec:conventions}
 
 \section{Conventions of \golemVC}
 The integral library \golemVC{} computes integrals of the form
@@ -1507,7 +1780,7 @@ definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Explicit Reduction of the $R_2$ Terms}
+\chapter{Explicit reduction of the $R_2$ terms}
 The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
 containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
 algebra in $D=4-2\varepsilon$ dimensions. 
@@ -1654,10 +1927,12 @@ while the integrand reduction can be done in 4 dimensions.
 Choosing {\tt r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional 
 part during the reduction.
 
-\chapter{The included Model Files}
+\chapter{The included model files}
 \label{chp:model-files}
 
-\section{Format of the Model Files}\label{sec:modelfiles}
+
+
+\section{Format of the model files}\label{sec:modelfiles}
 \gosamv{} expects three files for a proper model definition:
 \begin{description}
 \item[$\langle model\rangle$\texttt{.hh}] \form{} file containing the Feynman rules
@@ -1665,7 +1940,7 @@ part during the reduction.
 \item[$\langle model\rangle$] (no extension) \qgraf{} model file
 \end{description}
 
-\subsection{The \python{} File}
+\subsection{The \python{} file}
 Thy \python{} file contains the following definitions
 \begin{description}
 \item[\texttt{model\_name}] a variable of string type containing a human-readable
@@ -1694,7 +1969,7 @@ Particle(name,two_spin,mass,color_rep,partner,width='0',charge)
      \texttt{gluon}, \texttt{fermion}.
 \end{description}
 
-\subsection{The \qgraf{} File}
+\subsection{The \qgraf{} file}
 The propagators in the \qgraf{} file must contain the following functions:
 \begin{description}
 \item[\texttt{TWOSPIN}] twice the spin of the particle.
@@ -1710,7 +1985,7 @@ The propagators in the \qgraf{} file must contain the following functions:
 The vertices must provide all fields that should be accessible in \texttt{VSUM} statements
 and therefore also the ones that \gosamv{} uses in the \texttt{order} option.
 
-\subsection{The \form{} File}
+\subsection{The \form{} file}
 There are two possible ways of specifying the Feynman rules in the \form{} file.
 If a model contains only Standard Model like interactions one can make use of
 the file \texttt{src/form/vertices.hh} in the \gosamv{} directory and just define
@@ -1819,7 +2094,7 @@ it might be necessary to use the \texttt{d\_} tensor to file the color flow thro
 way in the files \texttt{src/form/propagators.hh} and \texttt{src/form/legs.hh}. Please,
 refrain from modifying these files directly but make all changes to \texttt{src/form/lorentz.nw}.
 
-In theories with Maiorana fermions the model file should include the following
+In theories with Majorana fermions the model file should include the following
 line:
 \begin{lstlisting}[language=form]
 #Define DISPOSEQGRAFSIGN "1"
@@ -1832,7 +2107,7 @@ The model `\texttt{sm}' contains the Feynman rules for the
 Standard Model in Feynman gauge as described
 in~\cite[Appendix~A]{Boehm:2001}.
 
-\subsection{Particle Content}
+\subsection{Particle content}
 \marginlabel{Leptons}
 \begin{tabular}{|l|l|l|p{2cm}|}
 \hline
@@ -1955,7 +2230,7 @@ Name & Symbol & Description\\
 \hline
 \end{tabular}
 
-\section{\gosam{} Directory Structure}
+\section{\gosam{} directory structure}
 The \gosamv{} source directory has the structure as described below:
 
 \marginlabel{\texttt{doc/}} This directory contains the documentation
@@ -2021,7 +2296,7 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 
 
 
-\chapter*{Conditions of Use}
+\chapter*{Conditions of use}
     GoSam-1.0 -- An automated One-Loop matrix element generator.\\
     Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
     {\bf GoSam-2.0}  \\
