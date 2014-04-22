@@ -924,23 +924,20 @@ config_PSP_check = Property("PSP_check",
    Sets the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
+
    !!Works only for QCD and with built-in model files!!
    """,
-   bool, False)
+   bool, True)
 
 config_PSP_rescue = Property("PSP_rescue",
    """\
    Sets the same variable in config.f90
 
    Activates Phase-Space Point rescue based on the estimated
-   accuracy on the finite part.
+   accuracy on the finite part. It needs PSP_check=True.
    The accuracy is estimated using information on the single
    pole accuracy and the cancellation between cut-constructable
    part and R2.
-
-   Note: the usage of this rescue system is most stable if used
-   with the extension 'derive' which ensures a stabler
-   reconstruction of the tensor coefficients.
 
    !!Works only for QCD and with built-in model files!!
    """,

@@ -99,6 +99,9 @@ contains
    @end @if %]
       ! call our banner
       call banner()
+      if(.not. corrections_are_qcd) then
+         PSP_check = .false.
+      end if
       if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
          inquire(file=dir_name, exist=dir_exists)
          if(.not. dir_exists) then
