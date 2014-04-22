@@ -85,7 +85,7 @@
 subroutine  print_parameters(scale2)
    use [% process_name asprefix=\_ %]config, only: renormalisation, & 
         convert_to_cdr, reduction_interoperation, & 
-        reduction_interoperation_rescue
+        reduction_interoperation_rescue, PSP_check, PSP_rescue
    use [% process_name asprefix=\_ %]model
    implicit none
    real(ki) :: scale2[%
@@ -109,12 +109,15 @@ subroutine  print_parameters(scale2)
       write(*,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
    end if
 
-   if(reduction_interoperation_rescue.eq.0) then
-      write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "SAMURAI"
-   else if(reduction_interoperation_rescue.eq.1) then
-      write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "GOLEM95"
-   else if(reduction_interoperation_rescue.eq.2) then
-      write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
+   if (reduction_interoperation_rescue.ne.reduction_interoperation.and.&
+    & PSP_check.and.PSP_rescue) then
+      if(reduction_interoperation_rescue.eq.0) then
+         write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "SAMURAI"
+      else if(reduction_interoperation_rescue.eq.1) then
+         write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "GOLEM95"
+      else if(reduction_interoperation_rescue.eq.2) then
+         write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
+      end if
    end if
 
    write(*,'(A1,1x,A25)') "#", "--- PARAMETER VALUES ---"
