@@ -8,7 +8,7 @@ from golem.util.config import Configurator, OPTIONAL, REQUIRED
 
 if __name__ == "__main__":
    components = {
-         "LoopTools": OPTIONAL,
+#         "LoopTools": OPTIONAL,
          "AVH_OneLoop": OPTIONAL,
          "QCDLoop": OPTIONAL,
          "Ninja": OPTIONAL,
