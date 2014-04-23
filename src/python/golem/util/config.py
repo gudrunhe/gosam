@@ -765,8 +765,8 @@ class Ninja(Library):
    def examine(self, hints):
       Library.examine(self, hints)
       if len(self.locations) > 0:
-         self.incdirs = self.findIncludeDir("ninja", "ninjago_module", hints,
-               ".mod") or self.findIncludeDir("gosam-contrib", "ninjago_module", hints,
+         self.incdirs = self.findIncludeDir("gosam-contrib", "ninjago_module", hints,
+               ".mod") or self.findIncludeDir("ninja-contrib", "ninjago_module", hints,
                ".mod")
          if len(self.incdirs) == 0:
             self.locations = []
@@ -796,8 +796,8 @@ class Samurai(Library):
    def examine(self, hints):
       Library.examine(self, hints)
       if len(self.locations) > 0:
-         self.incdirs = self.findIncludeDir("samurai", "msamurai", hints,
-               ".mod") or self.findIncludeDir("gosam-contrib", "msamurai", hints,
+         self.incdirs = self.findIncludeDir("gosam-contrib", "msamurai", hints,
+               ".mod") or self.findIncludeDir("samurai", "msamurai", hints,
                ".mod")
          if len(self.incdirs) == 0:
             self.locations = []
@@ -843,8 +843,8 @@ class Golem95(Library):
    def examine(self, hints):
       Library.examine(self, hints)
       if len(self.locations) > 0:
-         self.incdirs = self.findIncludeDir("golem95", "parametre", hints,
-               ".mod") or self.findIncludeDir("gosam-contrib", "parametre", hints,
+         self.incdirs = self.findIncludeDir("gosam-contrib", "parametre", hints,
+               ".mod") or self.findIncludeDir("golem95", "parametre", hints,
                ".mod")
          if len(self.incdirs) == 0:
             self.locations = []
@@ -924,6 +924,26 @@ class Fortran(Program):
 
    def examine(self, hints):
       fc = os.getenv("FC")
+      files=["gosam.conf"]
+      directories = [gpath.golem_path(), gpath.gosam_contrib_path()]
+      for dir in directories:
+         for file in files:
+            full_name = os.path.join(dir, file)
+            if os.path.exists(full_name):
+               for l in open(full_name):
+                  m=re.match("^\s*fc.bin=\s*([^#]+)\s*(#.*)?$",l.strip())
+                  if m:
+                     path, prog = os.path.split(m.group(1))
+                     path=path.strip()
+                     prog=prog.strip()
+                     if len(prog) > 0:
+                        self.prognames = [prog] + self.prognames
+                     if len(path) > 0 and self.name not in hints:
+                        hints = hints.copy()
+                        hints[self.name] = path
+                     if len(prog)  > 0 and len(path) > 0 and os.path.exists(m.group(1)):
+                        self.locations.append(m.group(1))
+
       if fc is not None:
          path, prog = os.path.split(fc)
          if len(prog) > 0:
