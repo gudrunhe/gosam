@@ -29,7 +29,7 @@ Certainly, a dedicated interface without using the BLHA is also possible.
 
 \section{Preparation of the order file}
 This step should be done by the Monte Carlo (MC) program. 
-We give a generic example of an order file for the process 
+We give a generic example of an order file for the process \\
 $pp\to (Z\to e^+e^-)+$\,jet in both BLHA1 and BLHA2 standards 
 in Figs.~\ref{fig:BLHA1} and \ref{fig:BLHA2}.
 %in the files \texttt{order1.lh} \texttt{order2.lh}  
@@ -63,7 +63,7 @@ SubdivideSubprocess      no\\
 \begin{subfigure}[]{0.49\textwidth}
 %\framebox(178,210){%
 \fbox{
-    \parbox[t]{160\unitlength}{\tt\scriptsize
+    \parbox[t]{165\unitlength}{\tt\scriptsize
 \# vim: syntax=olp\\
 \#@OLP GOSAM 2.0\\
 \#@IgnoreUnknown False\\
@@ -74,7 +74,8 @@ IRregularisation DRED $|$ OK\\
 AlphasPower 2 $|$ OK\\
 AlphaPower  1   $|$ OK\\           1\\
 MatrixElementSquareType CHsummed $|$ OK\\
-OperationMode  CouplingsStrippedOff $|$ OK\\
+OperationMode CouplingsStrippedOff $|$ OK\\
+SubdivideSubprocess  no $|$ OK\\
 1 -1 $->$ 11 -11 21 $|$ 1 1\\
 1 21 $->$ 11 -11 1  $|$ 1 2\\
 2 -2 $->$ 11 -11 21 $|$ 1 3\\
@@ -172,7 +173,7 @@ AmplitudeType Tree $|$ OK\\
       We use  the extension \texttt{.lh}
       for order files and \texttt{.olc} for contract files.
 \item The options \texttt{WidthScheme, EWScheme} in the BLHA2  example are optional.
-\item The options \texttt{SubdivdeSubprocess}  has the following effect
+\item The option \texttt{SubdivdeSubprocess}  has the following effect
       on the code generation with \gosam{}: if set to 
       \texttt{no}, \gosam{} generates one label per subprocess, if set to
       \texttt{yes} it generates one label per helicity subamplitude
@@ -180,9 +181,10 @@ AmplitudeType Tree $|$ OK\\
       
 \item \gosam{} specific settings can be put into commentary lines starting
       with the letter combination `\texttt{\#@}'. This is not part of the
-      BLHA standard. The line `\texttt{\#@ symmetries}\dots' restricts the
+      BLHA standard. The line `\texttt{\#@ symmetries} \dots' restricts the
       helicity subamplitudes being generated to the ones relevant for this
-      particular process. 
+      particular process, using the information that flavour changings only occur within 
+      the same quark families resp. lepton generations.
 %      The command \texttt{\#@ filter.nlo NOT(SCALELESS)}
 %      excludes scaleless diagrams from the amplitude generation,as they will be zero anyway.
 \end{itemize}
@@ -193,14 +195,14 @@ AmplitudeType Tree $|$ OK\\
 To run \gosam{} within the MC/OLP setup one can use the following command:\\
 %\begin{lstlisting}[language=bash]
 {\tt gosam.py --olp --mc=MCname }\\
-{\tt    --config=<your-path-to>/gosam.conf order.lh}
+\contl{\tt    --config=<your-path-to>/gosam.conf order.lh}
 %\end{lstlisting}
 
 \paragraph{Remarks}
 \begin{itemize}
-\item The option \texttt{--olp} is mandatory whenever 
+\item The extension \texttt{--olp} is mandatory whenever 
    a BLHA order file is processed.
-\item The option \texttt{--mc=MCname} is optional. By specifying the
+\item The extension \texttt{--mc=MCname} is optional. By specifying the
    name of the Monte Carlo which is the intended partner program,
    \gosam{} can choose some settings simplifying the communication and linking.
    One can either specify \texttt{--mc=MCname} or \texttt{--mc=name/version}.
@@ -213,7 +215,7 @@ To run \gosam{} within the MC/OLP setup one can use the following command:\\
    The short option for \texttt{--mc} is \texttt{-M}.
 %   The supported MC names so far are {\tt powhegbox, sherpa}.
 %   The interface with Herwig++/Matchbox does not need any extra settings when using BLHA2.
-\item The option \texttt{--config} points to a \gosam{} configuration file.
+\item The extension \texttt{--config} is optional and points to a \gosam{} configuration file.
    The latter can be used to define \gosam{} specific settings, such as  
    diagram filters, treatment of the rational parts, etc.
    
@@ -225,12 +227,15 @@ To run \gosam{} within the MC/OLP setup one can use the following command:\\
    \item current working directory.
    \end{itemize}
    Possible names for default configuration files are \texttt{gosam.in},
-   \texttt{gosam.conf} and \texttt{.gosam}. Therefore the easiest way is to simply copy
-   \texttt{<your-path-to>/\hspace{0pt}gosam.conf}
-   into the current directory and leave out this option.
-   It is possible to specify more than one \texttt{--config} option, where the latter
-   overwrites already present information from previous use of this
-   option. The short form is \texttt{-c}.
+   \texttt{gosam.conf} and \texttt{.gosam}. 
+   If such a file is not found, \gosam{} takes the default values for 
+   all unspecified settings.
+%   Therefore the easiest way is to simply copy
+%   \texttt{<your-path-to>/\hspace{0pt}gosam.conf}
+%   into the current directory and leave out this option.
+% It is possible to specify more than one \texttt{--config} option, where the latter
+% overwrites already present information from previous use of this option. 
+   The short form is \texttt{-c}.
 \item  The option \texttt{--destination=<dir>} allows 
    to place the generated files into the directory \texttt{<dir>}.
    The short form is \texttt{-D<dir>}.
@@ -243,7 +248,7 @@ To run \gosam{} within the MC/OLP setup one can use the following command:\\
 \end{itemize}
 
 \paragraph{The contract file}
-From the contract file one can see whether the run of \gosam{} was successful.
+From the contract file one can see whether the order file has been processed successfully.
 If everything went smoothly it should look like the one in Fig.~\ref{fig:BLHA1}
 resp. Fig.~\ref{fig:BLHA2}.
 All settings are either acknowledged by the word \texttt{OK} or, in case
@@ -420,16 +425,108 @@ c         ...
 
 \subsection{BLHA2}
 
-{\it still to be completed/improved ...}
-%\end{document}
+%{\it still to be completed/improved ...}
+
 \subsubsection{Initialization}
+The keyword	{\tt InterfaceVersion}, which can take the values
+{\tt BLHA1} or {\tt BLHA2}, should be placed on top of the order file. 
+This way, if the OLP does not support one or the other, it can issue an error message and stop 
+without proceeding further.
+
+
+To start the run-time phase, the function\\
+ {\tt OLP\_Start(char* fname, int* ierr)} is the same  as in {\tt BLHA1}.
+A new function\\
+{\tt \small OLP\_Info(char olp\_name[15],char olp\_version[15],char message[255])} 
+has been introduced
+which serves to keep track of the type and version of the OLP which has been used,
+and to encourage proper citation. 
+The arguments are the name of the OLP, the version, and a string which  
+contains information about
+the relevant publications, for example the bibtex identifier.
 
 \subsubsection{Importing external model files}
 
-\subsubsection{Setting options (optional)}
-Parameters are now passed by the subroutine \\
-{\tt OLP\_SetParameter(char* para, double* re, double* im, int* ierr)}
+The BLHA2 offers two alternative ways of model definition, denoted by 
+``keyword model" respectively ``{\tt UFO} model" in the following.
 
+Model definitions offer the possibility to define some global settings 
+in the order file, which are intrinsic to the model (e.g. SM, MSSM), which 
+is used.
+This is done using the required keyword {\tt Model}.
+For example, {\tt Model: SMdiag}  should set the CKM matrix to unity globally. 
+
+In the ``keyword model" setup, 
+the parameters that need to be set within a certain model 
+are passed via PDG codes~\cite{Beringer:1900zz} and keywords 
+with naming
+conventions as specified in Fig.~\ref{tab:keywords:static} for the Standard
+Model. The numbers in parenthesis after {\tt mass} and {\tt width}  denote
+the particle's PDG code.
+
+\begin{figure}[htb]
+\begin{tabular}{|l|l|}
+\hline
+keyword & parameter\\
+\hline
+{\tt mass(5)} & b quark mass \\
+{\tt mass(6)} & top quark mass \\
+{\tt width(6)} & top quark width\\
+{\tt sw2}& $\sin^2\theta_w$\\
+{\tt vev}& SM vacuum expectation value\\
+{\tt Gf} & $G_{\rm{Fermi}}$\\
+{\tt VV12}& $V_{ud}$\\
+$\vdots$ & \\
+\hline
+\end{tabular}
+\caption{List of keywords to define parameters to be passed by the function {\tt
+OLP\_SetParameter}.}
+\label{tab:keywords:static}
+\end{figure}
+
+In the ``{\tt UFO} model" setup, the parameters are defined in {\tt UFO} (Universal Feynrules
+Output)~\cite{Degrande:2011ua} format, which is particularly useful for
+calculations beyond the Standard Model.
+The import of the {\tt UFO} model file should be specified in the {\tt order file} 
+by \\{\tt Model ufo:/path\_to\_ufo\_model-directory/}.
+
+The {\tt UFO}  format also provides human readable name attributes for the 
+model parameters, as well as the 
+SLHA identifiers~\cite{Skands:2003cj}. 
+OLPs which support the import of {\tt UFO} model files typically also support 
+the name attributes. 
+The {\tt UFO} model setup entails the use of a SLHA parameter card to initialize the runtime phase.
+This requires an additional keyword {\tt ParameterCard}, followed by the path to the SLHA parameter card,
+to be placed into the order file when using the {\tt UFO} model setup. 
+The parameters which are set by reading in the SLHA parameter card do not need to be set 
+again by {\tt OLP\_SetParameter}. However, {\tt OLP\_SetParameter} needs to be used at 
+runtime for the dynamic parameters. 
+In this case the SLHA block name should appear as a prefix prepended to the parameter name, 
+in the form  
+{\tt <BlockName>\&\&<ParamName>}.
+To avoid confusion, this requires that the characters `{\tt \&\&}' should never appear in 
+any block or parameter name.
+
+\subsubsection{Setting parameters}
+Parameters are now passed by the subroutine \\
+{\tt OLP\_SetParameter(char* para,double* re,double* im,int* ierr)},\\
+
+where the first argument is a (pointer to a) string serving as a keyword 
+for the parameter to be set, followed by two double precision numbers
+so that complex parameters can also be passed (in case of real parameters, 
+the second double is zero). The integer in the fourth argument 
+is set by the OLP to tell the MC whether the setting of the parameter 
+was successful.\\
+{\tt ierr=1} means the parameter has been set successfully, \\
+{\tt ierr=0} means failure: issue an error message, \\
+{\tt ierr=2} means that the parameter is unknown 
+or the setting is ignored (for example because it is irrelevant 
+for the considered case), but the MC program should proceed.
+
+
+The function {\tt OLP\_SetParameter} can be called at runtime, 
+for every phase space point, 
+if used to define a dynamic parameter. 
 
 \subsubsection{Computing the matrix element}
 
@@ -456,7 +553,7 @@ see section \ref{chp:setup-of-a-process}.
 For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
 
 
-\subsubsection{Production of colour-/spin correlated trees}
+\subsection{Production of colour-/spin correlated trees}
 
 \gosam{} can also generate  tree level amplitudes in a spin- and colour-correlated form.
 Colour correlated matrix elements are defined as
