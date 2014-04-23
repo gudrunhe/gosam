@@ -8,6 +8,7 @@
    !                in order to avoid problems with some older versions of
    !                gfortran.
    !              + passing of invariants has been added.
+   ! 2.1.1 -> 2.9.0: the generic samurai function is now used again.
    use precision, only: ki_sam => ki
    use [% process_name asprefix=\_ %]config, only: ki
    use [% process_name asprefix=\_ %]scalar_cache
@@ -156,13 +157,15 @@ end function numeval_group[% grp %]
    @for groups var=grp %]
 !-----#[ subroutine reduce_group[% grp %]:
 subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
-   use msamurai, only: samurai[%
-   @if version_newer samurai.version 2.1 %], samurai_rm, samurai_cm[%
-   @end @if %]
+   use msamurai, only: samurai[% @if version_newer samurai.version 2.8 %][%
+   @else %][% @if version_newer samurai.version 2.1 %], samurai_rm, samurai_cm[%
+   @end @if %][% @end @if %]
    use options, only: samurai_out => iout[%
+   @if version_newer samurai.version 2.8 %]
+   use mgetkin, only: s_mat[% @else %][%
    @if version_newer samurai.version 2.1 %]
    use madds, only: s_mat[%
-   @end @if %]
+   @end @if %][% @end @if %]
    use [% process_name asprefix=\_ %]config, only: samurai_group_numerators, &
       & samurai_verbosity, samurai_istop, samurai_test, &
       & debug_nlo_diagrams, logfile
@@ -295,11 +298,14 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
       s_mat(:,:) = g_mat(:,:)
       !-----------#] initialize invariants:[%
    @end @if %]
-      call samurai[%
+      call samurai[% @if version_newer samurai.version 2.8 %][% @else %][%
    @if version_newer samurai.version 2.1 %][%
       @if complex_mass_needed group=grp %]_cm[% @else %]_rm[%
-      @end @if %][%
-   @end @if %](numeval_group[% grp %], tot, totr, Vi, msq, [%
+      @end @if %][% @end @if%][%
+   @end @if %](numeval_group[% grp %], tot, totr, Vi, [%
+   @if version_newer samurai.version 2.8 %][% @if complex_mass_needed group=grp %]msq, [% @else
+   %]cmplx(msq,0._ki_sam,ki_sam), [% @end @if %][% @else
+   %]msq, [% @end @if %][%
          loopsize group=grp %], &
          & effective_group_rank, [%
    @if iterator_empty propagators group=grp massive %]istop0[%
@@ -335,12 +341,15 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
          s_mat(:,:) = g_mat( (/[%indices%]/), (/[%indices%]/) )
          !-----------#] initialize invariants:[%
    @end @if %]
-         call samurai[%
+         call samurai[% @if version_newer samurai.version 2.8 %][% @else %][%
    @if version_newer samurai.version 2.1 %][%
       @if complex_mass_needed group=grp %]_cm[% @else %]_rm[%
-      @end @if %][%
+      @end @if %][% @end @if%][%
    @end @if %](numerator_diagram[% DIAG %], acc, accr, &
-            & Vi((/[% indices %]/),:), msq((/[% indices %]/)), [%
+            & Vi((/[% indices %]/),:), [%
+   @if version_newer samurai.version 2.8 %][% @if complex_mass_needed group=grp %]msq((/[% indices %]/)), [% @else
+   %]cmplx(real(msq((/[% indices %]/)),ki_sam),0._ki_sam,ki_sam), [% @end @if %][% @else
+   %]msq((/[% indices %]/)), [% @end @if %][%
          loopsize diagram=DIAG %], &
             & [% rank %], [%
    @if iterator_empty propagators group=grp
