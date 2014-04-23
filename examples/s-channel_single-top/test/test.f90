@@ -41,6 +41,9 @@ call inspect_kinematics(logf)
 call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
+write(*,*) "gosam_amp=", gosam_amp
+write(*,*) "ref_amp  =", ref_amp
+
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
@@ -149,6 +152,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(2:3) :: irp
    integer :: prec
+   real(ki), parameter :: pi = 3.14159265358979323846264&
+     &3383279502884197169399375105820974944592307816406286209_ki
 
    call samplitude(vecs, scale2, amp, prec)
    call ir_subtraction(vecs, scale2, irp)
@@ -156,11 +161,9 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    do ic = 1, 2
       ch = channels(ic)
       write(ch,*) "GOSAM     AMP(0):       ", amp(0)
-      write(ch,*) "GOSAM     AMP(1)/AMP(0):", amp(1)/amp(0)
-      write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
-      write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
-      write(ch,*) "GOSAM      IR(2)/AMP(0):", irp(2)/amp(0)
-      write(ch,*) "GOSAM      IR(3)/AMP(0):", irp(3)/amp(0)
+      write(ch,*) "GOSAM     AMP(1)/AMP(0):", amp(1)/amp(0)*8.0_ki*pi*pi
+      write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)*8.0_ki*pi*pi
+      write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)*8.0_ki*pi*pi
    end do
 end subroutine compute_gosam_result
 
@@ -171,16 +174,22 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    real(ki), dimension(6, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
-   
+   real(ki), parameter :: pi = 3.14159265358979323846264&
+     &3383279502884197169399375105820974944592307816406286209_ki
+
    amp(0) =   6.77798888087183290E-013_ki
    amp(1) =   7.63811712242806362E-014_ki 
    amp(2) =  -4.21705705448444705E-014_ki 
    amp(3) =  -4.57835904083023497E-014_ki
 
-   write(logf,*) "REFERENCE AMP(0):       ", amp(0)
-   write(logf,*) "REFERENCE AMP(1)/AMP(0):", amp(1)/amp(0)
-   write(logf,*) "REFERENCE AMP(2)/AMP(0):", amp(2)/amp(0)
-   write(logf,*) "REFERENCE AMP(3)/AMP(0):", amp(3)/amp(0)
+   do ic = 1, 2
+      ch = channels(ic)
+      write(ch,*) "REFERENCE AMP(0):       ", amp(0)
+      write(ch,*) "REFERENCE AMP(1)/AMP(0):", amp(1)/amp(0)*8.0_ki*pi*pi
+      write(ch,*) "REFERENCE AMP(2)/AMP(0):", amp(2)/amp(0)*8.0_ki*pi*pi
+      write(ch,*) "REFERENCE AMP(3)/AMP(0):", amp(3)/amp(0)*8.0_ki*pi*pi
+   end do
+
 end subroutine compute_reference_result
 
 pure elemental function rel_diff(a, b)

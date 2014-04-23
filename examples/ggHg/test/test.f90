@@ -18,7 +18,7 @@ double precision, parameter :: eps = 1.0d-4
 
 logical :: success
 
-real(ki), dimension(5, 4) :: vecs
+real(ki), dimension(4, 4) :: vecs
 real(ki) :: scale2
 
 double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
@@ -97,15 +97,15 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
 
-   start_vecs(1 ,:)=(/   298.17848024073913_ki,  -0.0000000000000000_ki, &
-        &  -0.0000000000000000_ki,   298.17848024073913_ki /)
-   start_vecs(2 ,:)=(/   298.17848024073913_ki,  -0.0000000000000000_ki, &
-        &  -0.0000000000000000_ki,  -298.17848024073913_ki /)
-   start_vecs(3 ,:)=(/   166.34601212495804_ki,  -160.07861409570359_ki, &
+   start_vecs(1,:)=(/   298.17848024073913_ki,   0.0000000000000000_ki, &
+        &   0.0000000000000000_ki,   298.17848024073913_ki /)
+   start_vecs(2,:)=(/   298.17848024073913_ki,   0.0000000000000000_ki, &
+        &   0.0000000000000000_ki,  -298.17848024073913_ki /)
+   start_vecs(3,:)=(/   166.34601212495804_ki,  -160.07861409570359_ki, &
         &  -6.8750671787421194_ki,  -44.705329775801431_ki /)
-   start_vecs(4 ,:)=(/   144.93284342404036_ki,  -122.48970917623723_ki, &
+   start_vecs(4,:)=(/   144.93284342404036_ki,  -122.48970917623723_ki, &
         &  -13.908717839073878_ki,   76.212517455935341_ki /)
-   start_vecs(5 ,:)=(/   285.07810493247985_ki,   282.56832327194081_ki, &
+   start_vecs(5,:)=(/   285.07810493247985_ki,   282.56832327194081_ki, &
         &   20.783785017815998_ki,  -31.507187680133825_ki /)
 
    vecs(1,:) = start_vecs(1,:)
@@ -128,14 +128,6 @@ subroutine     setup_parameters()
         &3383279502884197169399375105820974944592307816406286209_ki
    renormalisation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 1
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
-
    mH = 125.0_ki
    mW = 80.419_ki
    mZ = 91.1876_ki
@@ -154,9 +146,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    use ggHg_model, only: GF, gH, sqrt2
    implicit none
 
-   real(ki), dimension(5, 4), intent(in) :: vecs
+   real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
-   real(ki) :: alpha_s
    double precision, dimension(0:3), intent(out) :: amp
    double precision, dimension(0:3) :: gauge_amp, diff
    integer :: prec
@@ -164,9 +155,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    logical :: ok, gok
 
    real(ki), parameter :: pi = 3.14159265358979323846264&
-        &3383279502884197169399375105820974944592307816406286209_ki
-
-   alpha_s=0.12380606648525325_ki
+        &3383279502884197169399375105820974944592307816406286209_ki 
 
    gH = 1.0_ki/(24.0_ki*pi*pi*sqrt(sqrt2/8.0_ki/GF))
 
@@ -174,8 +163,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
 
    do ic = 1, 2
       ch = channels(ic)
-      write(ch,*) "GOSAM     AMP(0):       ", amp(0)*(4.0_ki*pi*alpha_s)**3
-!*(4.0_ki*pi*alpha)
+      write(ch,*) "GOSAM     AMP(0):       ", amp(0)
       write(ch,*) "GOSAM     AMP(1)/AMP(0):", amp(1)/amp(0)
       write(ch,*) "GOSAM     AMP(2)/AMP(0):", amp(2)/amp(0)
       write(ch,*) "GOSAM     AMP(3)/AMP(0):", amp(3)/amp(0)
@@ -187,23 +175,28 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    use ggHg_matrix, only: ir_subtraction
    implicit none
 
-   real(ki), dimension(5, 4), intent(in) :: vecs
+   real(ki), dimension(4, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
+   real(ki) :: alpha_s
    double precision, dimension(0:3), intent(out) :: amp
-   
-   amp(0) = 0.00072745638706144032_ki
+   real(ki), parameter :: pi = 3.14159265358979323846264&
+        &3383279502884197169399375105820974944592307816406286209_ki
+
+   alpha_s=0.12380606648525325_ki
+
+   amp(0) = 0.00072745638706144032_ki/(4.0_ki*pi*alpha_s)**3
 
    ! This is the result from MCFM:
-   amp(1) =  13.195495732443119_ki
-   amp(2) =  12.160134391476900_ki
-   amp(3) = -9.0000000000000000_ki
+   amp(1) =  13.195495732443119_ki*amp(0)
+   amp(2) =  12.160134391476900_ki*amp(0)
+   amp(3) = -9.0000000000000000_ki*amp(0)
 
    do ic = 1, 2
       ch = channels(ic)
       write(ch,*) "REFERENCE AMP(0):       ", amp(0)
-      write(ch,*) "REFERENCE AMP(1)/AMP(0):", amp(1)
-      write(ch,*) "REFERENCE AMP(2)/AMP(0):", amp(2)
-      write(ch,*) "REFERENCE AMP(3)/AMP(0):", amp(3)
+      write(ch,*) "REFERENCE AMP(1)/AMP(0):", amp(1)/amp(0)
+      write(ch,*) "REFERENCE AMP(2)/AMP(0):", amp(2)/amp(0)
+      write(ch,*) "REFERENCE AMP(3)/AMP(0):", amp(3)/amp(0)
    end do
 end subroutine compute_reference_result
 
