@@ -1093,6 +1093,8 @@ def getExtensions(conf):
    for key in conf:
       parts = key.split(".")
       if parts[-1].lower().strip() == ext_name:
+         if len(parts)>=2 and "installed" in parts[0].lower():
+            continue
          prefix = ".".join(parts[:-1])
          lst = []
          ext_sets[prefix] = lst
