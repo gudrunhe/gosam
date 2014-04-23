@@ -167,8 +167,8 @@ class install(_install):
 			py_path=self.install_lib
 		replace_text="\n".join([
 			"## added by setup.py:",
-			"import site",
-			"site.addsitedir("+repr(py_path)+")",
+			"import sys",
+			"sys.path=sys.path[:1] + " + repr([py_path]) + " + sys.path[1:]",
 			"## end of 'added by setup.py'",""])
 		logs=[]
 		for line in fileinput.input(installed_scripts,inplace=1):
