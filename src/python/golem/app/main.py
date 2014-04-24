@@ -184,26 +184,18 @@ def main(argv=sys.argv):
          temp_file_path=None
 
          try:
-            #detect if the input file was not made via template
-            if not f.readline().startswith("#!") and use_default_files:
-                 # create and fill a temporary template file
-                 # including non-easily overwritable default options
+            # detect if the input file could be a double-escaped (*.rc) file
+            if not f.readline().startswith("#!") and in_file.endswith(".rc"):
+                 # merge into temporary template file
                  osfh, temp_file_path = tempfile.mkstemp(".gosam.in")
                  os.close(osfh)
                  f.seek(0)
                  c.load(f)
-                 if not "form.bin" in c and not "form.extensions" in c:
-                    # gosam-config.py not used
-                    # find form and check if it supports topolynomial option
-                    form_config=Form()
-                    form_config.examine([])
-                    form_config.store(c)
                  write_template_file(temp_file_path, c, template_format)
                  f.close()
                  # use the temporary file as new input file
                  f = open(temp_file_path,'r')
             f.seek(0)
-
             c.load(f)
             f.close()
          finally:
