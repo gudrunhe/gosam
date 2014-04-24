@@ -182,7 +182,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    u= dotproduct(vecs(1,:)-vecs(4,:), vecs(1,:)-vecs(4,:))
 
    ! The following results are calculated based on the formula (9) and (14)
-   ! in arXiv:0908.4894v2. The conversion from CDR to DRED is included.
+   ! in arXiv:0902.4894v2. The conversion from CDR to DRED is included.
 
    amp(0) = abs(customSpin2Prop(s,0._ki))**2._ki * mdlkappa**4._ki / 16._ki / 3._ki &
                   &  * (u*t**3._ki + t*u**3._ki) / 4._ki
