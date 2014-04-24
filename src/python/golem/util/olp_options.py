@@ -392,15 +392,17 @@ def Parameters(values, conf, ignore_case):
 	NOT YET PART OF THE STANDARD
 	"""
 	#conf["olp.parameters"] = values
-	if values[0] == "alpha_s":
-		values.remove("alpha_s")		
-		conf["olp.alphas"] = 1
-		conf["olp.parameters"] = values
-	else:
-		conf["olp.alphas"] = 0
-		conf["olp.parameters"] = values
-		warning("WARNING: by convention the first parameter should be 'alpha_s.'")
-		return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
+        parameters = list(values)
+        if len(values) > 0:
+                if parameters[0] == "alpha_s":
+                        #parameters.remove("alpha_s")		
+                        conf["olp.alphas"] = 1
+                        conf["olp.parameters"] = parameters
+                else:
+                        conf["olp.alphas"] = 0
+                        conf["olp.parameters"] = parameters
+                        warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+                        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
 	
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
