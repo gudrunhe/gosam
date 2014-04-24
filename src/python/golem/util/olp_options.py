@@ -324,6 +324,20 @@ def Precision(values, conf, ignore_case):
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
 
 @optional_olp_option
+def AccuracyTarget(values, conf, ignore_case):
+	if len(values) > 1:
+		return __value_ERR__ + "requires one value."
+	if (len(values)==1):
+		try:
+			prec=-math.log10(float(values[0]))
+		except ValueError:
+			return __value_ERR__ + "not positive float value encountered."
+		conf["PSP_chk_threshold1"]=str(int(prec))
+		conf["PSP_check"]=True
+		return __value_OK__
+	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
+
+@optional_olp_option
 def ExcludedParticles(values, conf, ignore_case):
 	excl=[]
 	for p in values:
