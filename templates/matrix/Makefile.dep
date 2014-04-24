@@ -11,5 +11,8 @@ test.[%O%]: matrix.[%O%][%
 @for each $(OBJEXT) var=O %]
 [% process_name asprefix=\_ %]test.mod: test.[%O%]
 [% process_name asprefix=\_ %]matrix.mod: matrix.[%O%][%
+	@for crossings %]
+[% $_ asprefix=\_ %]matrix.mod: [% $_ asprefix=\_ %]matrix.[%O%][%
+	@end @for %][%
 @end @for %]
 ../matrix/libgolem_process_[% process_name asprefix=\_ %]matrix.la: libgolem_process_[% process_name asprefix=\_ %]matrix.la
