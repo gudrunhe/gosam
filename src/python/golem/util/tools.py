@@ -206,6 +206,8 @@ def enumerate_helicities(conf):
          
       helicity_comb = [h for h in combinations(helic)]
       user_helis = conf.getProperty(golem.properties.helicities)
+      user_helis = [i for i in user_helis if i]
+
       if len(user_helis) > 0:
          ex_user_helis = expand_helicities(user_helis)
 

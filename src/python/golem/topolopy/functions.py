@@ -13,6 +13,8 @@ from golem.util.tools import error, warning, debug
 def setup_list(prop, conf):
    result = []
    for r in conf.getListProperty(prop):
+      if r=='':
+         continue
       if ":" in r:
          boundaries = r.split(":")
          if len(boundaries) == 1:

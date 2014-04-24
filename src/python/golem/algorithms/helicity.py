@@ -48,6 +48,8 @@ def reference_vectors(conf, in_particles, out_particles):
    """
    zeroes = golem.util.tools.getZeroes(conf)
    suggstr = conf.getProperty(golem.properties.reference_vectors)
+   if suggstr==[""]:
+      suggstr=[]
    suggestions = dict(map(lambda s: map(int, s.split(":")), suggstr))
    num_legs = len(in_particles) + len(out_particles)
    assert num_legs > 1, "Seriously, you need at least two particles!"
