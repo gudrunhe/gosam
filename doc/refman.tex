@@ -147,24 +147,23 @@ one can unpack it using the command
 \subsection*{Subversion}
 One can check-out a working copy of the repository with the command
 \begin{example}
-\$ svn co http://svn.hepforge.org/gosam/trunk/gosam-\gosamversion{}
+\$ svn co http://svn.hepforge.org/gosam/branches/\\
+   \contl{}gosam-\gosamversion{}
 \end{example}
 This will create a folder \texttt{gosam-\gosamversion} in your current directory.
 Authenticated users can use 
 \begin{example}
 \$ svn co svn+ssh://svn.hepforge.org/hepforge/svn/\\
-   \contl{}gosam/trunk/gosam-\gosamversion{}
+   \contl{}gosam/branches/gosam-\gosamversion{}
 \end{example}
 to gain read and write access to the project files.
-
 
 \section{Installation}
 
 The installation of \gosam-\gosamversion{} is very simple when using the installation script.
 The latter can be downloaded by\\
 %\bcen
-\$   {\tt wget  http://gosam.hepforge.org/gosam-installer/}\\
-\contl{}{\tt gosam\_installer.py}
+{\tt \$  wget  http://gosam.hepforge.org/gosam\_installer.py}\\
 %\ecen
 By default \gosam{} and the external programs it uses  will be 
 installed into a subfolder {\tt ./local}
@@ -408,8 +407,8 @@ which also can be changed either in the individual process cards,
 or in a global configuration file\footnote{
 For the latter, the script will search (in this order) in the \gosamv{} directory,
 in the user's home directory and in the current working directory for a file
-named `\texttt{.gosam}' or `\texttt{gosam.in}'. Such a file can be generated
-with the command
+named `\texttt{.gosam}' or `\texttt{gosam.in}'. If one needs to adapt paths by
+hand, such a file can be generated with the command
 {\tt \$ gosam-config.py > gosam.in}}.
 
 In the following  example it is assumed that the process
@@ -437,7 +436,7 @@ The output directory is assumed to be in the relative path
 10 regularisation_scheme=dred
 11 helicities=
 12 qgraf.options=onshell,notadpole,nosnail
-13 qgraf.verbatim= True=iprop[Z, 0, 0];\n\
+13 qgraf.verbatim= true=iprop[Z, 0, 0];\n\
 14                 true=iprop[H, 0, 0];
 15 qgraf.verbatim.lo=
 16 qgraf.verbatim.nlo=
@@ -594,10 +593,11 @@ The characters correspond to particles 1, 2, ... from left to right.   \\
                          -+-++,-+-+-,-+-+0,--+++,--++-,--++0   }   \,. 
 \item[12]  \texttt{qgraf.options=onshell,notadpole,nosnail}: 
 a list of options which is passed to \qgraf{} via the 'options' line.
-Possible values (as of qgraf.3.1.1) are the following keywords:
- onepi, onshell, nosigma, nosnail, notadpole, floop, topol.        
+Possible values (as of QGraf 3.1.4) are the following keywords:
+ {\tt onepi, onshell, nosigma, nosnail, notadpole, floop, topol}.
 In our example, it means that external lines are on-shell, i.e. 
-do not contain selfenergy corrections, and that tadpole and snail diagrams are discarded.    
+do not contain selfenergy corrections, and that tadpole and snail diagrams are discarded.
+This is also the default if \texttt{qgraf.options} is not specified.
 We refer to the \qgraf{} documentation for more details.
 \item[13-16] 
  The value of the option \texttt{qgraf.verbatim} is
@@ -923,7 +923,8 @@ and can be compiled using
 \$ make compile
 \end{example}
 Please note that the \texttt{compile} target invokes
-the \texttt{source} target if necessary.
+the \texttt{source} target if necessary. By using the make command line option
+\texttt{-j \it JOBS} one can parallelize this.
 
 A simple test program,
 which gives the value of the amplitude at a randomly generated phase space point,
@@ -1243,7 +1244,7 @@ The \gosam{}-2.0 package comes with the built-in model files
 {\tt sm\_complex}, {\tt smdiag\_complex}, 
 where the latter two are needed in the case of complex masses and couplings, 
 see section \ref{sec:complexmasses}. 
-The model files{\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
+The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
 the model files {\tt smehc}  contain the effective Higgs-gluon couplings.
 
 Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua} format.
