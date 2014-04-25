@@ -218,7 +218,7 @@ the binary (tab-completion can be used).
 
 If they are found, their version is checked, 
 and if needed the installation
-of a version which has been tested to run with \gosam is suggested.
+of a version which has been tested to run with \gosam{} is suggested.
 
 All files are downloaded to the {\tt GoSam} subfolder and extracted.
 The build files remain on the system; they can be removed manually.
@@ -624,7 +624,7 @@ The default is {\tt diagsum = True}.
 \item[19] The option \texttt{reduction\_programs} 
 allows to choose the amplitude reduction method. If several choices are given, 
 the code is produced such that the reduction methods can be switched at runtime.
-The default is {\tt ninja}.
+The default is {\tt ninja,golem95}.
 \item[20] {\tt extensions}: 
 this option  contains a list of useful extensions
 to the core of the program, which operate at the code generation stage. 
@@ -850,8 +850,10 @@ relevant for code ge\-ne\-ration. These files will therefore not be included
 in a tar-ball created with \texttt{make dist}.
 
 \marginlabel{\tt common/} Contains {\tt Fortran} files which are common to all helicity
-amplitudes and to the constructed matrix element code. This directory
-is always compiled first.
+amplitudes and to the constructed matrix element code. 
+The file {\tt config.f90} contains some global  settings, the file {\tt model.f90}
+contains the definitions and settings for the model parameters.
+This directory is always compiled first.
 
 \marginlabel{\tt doc/} Contains all files (apart from
 \texttt{pyxotree.tex} and \texttt{pyxovirt.tex}) which are
@@ -861,9 +863,46 @@ together with colour and helicity information.
 
 \marginlabel{\tt helicity[i]} These directories contain all files for a specific
 helicity amplitude (labelled by {\tt i}). The labeling of the helicities can be found in
-\texttt{doc/process.ps}. 
+\texttt{doc/process.pdf}. 
 Note that the code will automatically map equivalent helicity 
 configurations onto one single helicity and perform the corresponding book-keeping.
+
+Before invoking \texttt{make source}, 
+this directory only contains the makefiles. After the full code
+generation, for each diagram three classes of files are created: The
+basic algebraic expressions for the individual one-loop diagrams are
+contained in the files {\tt d*h*l1.txt} in an optimized format. The
+files {\tt d*h*l1.prc} contain the expressions of the numerators as 
+polynomials in the loop momentum. The corresponding {\tt Fortran} files
+are {\tt d*h*l1.f90} and {\tt abbrevd*h*.f90}, where the latter
+contains the abbreviations. 
+
+Files generated with the {\tt derive} option  are
+named {\tt d*h*l1d.*}, while the input files
+for \ninja{}  are named {\tt d*h*l1*.*}. 
+In more detail, the three categories of files are named as follows:\\
+{\tt
+\# Diagrams:\\
+ d*h*l1.prc\\
+ d*h*l1.txt\\
+ d*h*l1.f90\\
+ abbrevd*h*.f90
+
+\# Derive:\\
+ d*h*l1d.hh\\
+ d*h*l1d.txt\\
+ d*h*l1d.f90
+
+\# Ninja:\\
+ d*h*l1.hh\\
+ d*h*l12.txt\\
+ d*h*l13.txt\\
+ d*h*l14.txt\\
+ d*h*l1mu2.txt\\
+ d*h*l121.f90\\
+ d*h*l131.f90\\
+ d*h*l132.f90
+}
 
 \marginlabel{\tt matrix} This folder contains the code to combine
 the helicity amplitudes into a matrix element. Here one also finds
@@ -1081,14 +1120,14 @@ $\hat{q}=0$ and the coefficients of the tensor integrals.
 
 %\paragraph{Implementation.}
 At a technical level, 
-the files \texttt{helicity*/d*h*l1*d.f90} contain the routines
+the files \texttt{helicity*/d*h*l1d.f90} contain the routines
 \texttt{derivative($\mu^2$, [$i_1$], [$i_2$],\dots)} and\\
 \texttt{reconstruct\_d*(coeffs)}, where the latter is only generated in
 conjunction with the extension \texttt{golem95}, and \texttt{coeffs} is
 a type which comprises all coefficients of a diagram of a certain rank.
 The number of optional indices $i_1$, $i_2$, \dots 
 determine which derivative should be returned. The subroutine
-\texttt{reconstruct\_d*} takes into account the proper symmetrisation.
+\texttt{reconstruct\_d*} also takes into account the proper symmetrisation.
 
 \subsection{Customization}
 \paragraph{Runtime parameters.}
@@ -2102,7 +2141,7 @@ from the \qgraf{} field name as \texttt{[field.$\langle name\rangle$]}.
 \end{description}
 
 All symbols defined in \texttt{src/form/symbols.hh} are also accessible in this \form{} file.
-\attention Note: until recently the definition of \texttt{Sqrt2} and \texttt{sqrt2} were part
+\attention Note: until recently the definitions of \texttt{Sqrt2} and \texttt{sqrt2} were part
 of the model file. Now these symbols are part of \texttt{src/form/symbols.hh} and must not be
 redefined.
 
@@ -2325,6 +2364,7 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 \chapter*{Conditions of use}
     GoSam-1.0 -- An automated One-Loop matrix element generator.\\
     Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
+    Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].\\
     
     {\bf GoSam-2.0}  \\
     Copyright (C) 2014  The GoSam Collaboration
@@ -2338,6 +2378,7 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 		\item Edoardo Mirabella
                 \item Giovanni Ossola
 		\item Tiziano Peraro
+		\item Joscha Reichel
 		\item Johannes Schlenk
 		\item Johann Felix von Soden-Fraunhofen
                 \item Francesco Tramontano
