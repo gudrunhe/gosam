@@ -112,7 +112,7 @@ The program \gosam is designed to run in any modern Unix-like environment (Linux
 The system requirements are
 \python~($\geq2.6$), 
 a {\tt fortran} compiler (gfortran or ifort), 
-a C/C++ compiler (gcc/icc). 
+a C/C++ compiler (gcc/icc), and (GNU) {\tt make}.
 By default, \gosam uses the gfortran/gcc  compilers from the GNU Compiler Suite.
 To use an Intel compiler  (ifort/icc), the {\tt --intel} option can be used.
 Specific paths to the compilers can be provided using the {\tt --fc, --cc, --cxx}  options.
@@ -652,8 +652,9 @@ It sets the level of information printed to the file {\tt matrix/debug.xml} when
 It can contain a list of integer numbers, indicating leading order diagrams to be
 selected. If no list is given, all diagrams are selected.       
 Otherwise, all diagrams whose numbers are not in the list will be discarded.          
-The list may also contain ranges, e.g.                                    
-{\tt select.lo=1,2,5:10:3, 50:53} is equivalent to {\tt select.lo=1,2,5,8,50,51,52,53}.      
+The list may also contain ranges, with increments different from one, e.g.                                    
+{\tt select.lo=1,2,5:10:3, 50:53} is equivalent to {\tt select.lo=1,2,5,8,50,51,52,53}, 
+i.e. the 3 in    {\tt 5:10:3} is the increment.
 \item[23] \texttt{select.nlo}: analogous to \texttt{select.lo},  for the one-loop diagrams.
 \item[24] \texttt{filter.lo}:  a python function which provides a filter for tree diagrams.    
 Example:  \\  
@@ -680,8 +681,8 @@ Implemented for QCD only, works only with the built-in model files.    The defau
   A value of -1 lets \gosam{} decide.
   See {\tt common/config.f90} for details.                              
 \item[34] \texttt{reduction\_interoperation\_rescue}: specifies the reduction library to be used to rescue `unstable points'. A value of -1 lets \gosam{} decide.
-\item[35] \texttt{samurai\_scalar}: integrer which specifies the library \samurai{} 
-chooses for the basis integrals. 1: {\sc QCDLoop}, 2: {\sc OneLOop}. The default is 2. 
+\item[35] \texttt{samurai\_scalar}: integer which specifies the library \samurai{} 
+chooses for the basis integrals. 1: {\sc QCDLoop}, 2: {\sc OneLOop}, 3: \golemVC. The default is 2. 
 \item[36] \texttt{nlo\_prefactors}:  can take the integer values 0,1,2, which have the        
     following meaning:    
     \begin{enumerate}                                          
@@ -1511,7 +1512,7 @@ If $P_{pole} >  P_{high}$ the point is automatically accepted. Given the high qu
 
 If $P_{pole} <  P_{low}$ the point is automatically discarded, or sent to the rescue system. If already the pole has a low precision, we can expect the finite part to be of the same level or worse.
  
-In the intermediate region where $ P_{high} < P_{pole} <  P_{low}$, it is more difficult to ``make a call'' solely based on the poles. Only in this case the point is recalculated using the {\it rotation test}, which requires additional computational time. 
+In the intermediate region where $ P_{high} > P_{pole} >  P_{low}$, it is more difficult to determine the quality of the result solely based on the pole coefficients. Only in this case the point is recalculated using the {\it rotation test}, which requires additional computational time. 
 
 If we call the finite part of the amplitudes evaluated before and after the rotation $\A$ and  $\A_{rot}$ respectively,  we can define the error $ \delta_{rot}$ estimated with the rotation  as  
 \be  \label{eq:errd} \delta_{rot} =  2 \left  |\frac{ A_{rot} - A }{ A_{rot} + A} \right  |\, . \ee
