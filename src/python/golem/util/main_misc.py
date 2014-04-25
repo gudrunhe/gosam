@@ -4,6 +4,7 @@ import os
 import os.path
 import imp
 import StringIO
+import hashlib
 
 from time import gmtime, strftime
 
@@ -30,7 +31,7 @@ from golem.util.config import GolemConfigError
 # The following files contain routines which originally were
 # part of golem-main itself:
 from golem.util.main_qgraf import *
-from golem.installation import GOLEM_VERSION
+from golem.installation import GOLEM_VERSION, GOLEM_REVISION
 
 def create_ff_files(conf, in_particles, out_particles):
 	legs = len(in_particles) + len(out_particles)
@@ -333,6 +334,15 @@ def read_golem_dir_file(path):
 		f.close()
 
 		ver = map(int,result["golem-version"].split("."))
+
+		# be compatible between internal 1.99 releases and 2.0.*
+		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
+			return result
+
+		# be compatible to older 2.0.* releases
+		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:2]+[0]*5)[:3]:
+			return result
+
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
 			if gv > v:
 				raise GolemConfigError(
@@ -362,7 +372,10 @@ def write_golem_dir_file(path, fname, conf):
 	"""
 	dir_info = golem.util.config.Properties()
 	dir_info["setup-file"] = os.path.abspath(fname)
+	if os.path.exists(os.path.abspath(fname)):
+		dir_info["setup-file-sha1"] = hashlib.sha1(open(os.path.abspath(fname)).read()).hexdigest()
 	dir_info["golem-version"] = ".".join(map(str, GOLEM_VERSION))
+	dir_info["golem-revision"] =  str(GOLEM_REVISION)
 	dir_info["process-name"] = conf.getProperty(golem.properties.process_name)
 	dir_info["time-stamp"] = \
 			strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
