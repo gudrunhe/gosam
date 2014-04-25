@@ -338,6 +338,19 @@ def AccuracyTarget(values, conf, ignore_case):
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
 
 @optional_olp_option
+def DebugUnstable(values, conf, ignore_case):
+	supported_values = ["yes", "no", "true", "false"]
+	ret=expect_one_keyword(values, conf, True,
+		"PSP_verbosity", supported_values)
+	if ret==__value_OK__:
+		if conf["PSP_verbosity"].lower() in ["yes","true"]:
+			conf["PSP_verbosity"]="True"
+		else:
+			conf["PSP_verbosity"]="False"
+	return ret
+
+
+@optional_olp_option
 def ExcludedParticles(values, conf, ignore_case):
 	excl=[]
 	for p in values:
@@ -535,6 +548,8 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 
 	if len(missing) > 0:
 		error_count += 1
+		if not quiet:
+			warning("Missing required options: %s" % ", ".join(missing))
 		raise OLPError("Missing required options: %s" % ", ".join(missing))
 
 	( __all_olp_options__,__olp_lower_case__,
