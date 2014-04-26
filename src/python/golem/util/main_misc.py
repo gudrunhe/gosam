@@ -522,6 +522,10 @@ def workflow(conf):
 			if red in ext:
 				red_flag = True
 				break
+		if "pjfry" in ext and not "golem95" in ext:
+			golem.util.tools.warning("The PJFRY interface needs Golem95 routines.",
+					"Golem95 is automatically added to reduction_programs.")
+			conf["gosam-auto-reduction.extensions"] = "golem95"
 		if not red_flag:
 			golem.util.tools.warning(
 					"Generating code for the virtual part without specifying",
