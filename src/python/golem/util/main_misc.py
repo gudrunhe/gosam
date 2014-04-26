@@ -533,6 +533,13 @@ def workflow(conf):
 	if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
 			conf["gosam-auto-reduction.extensions"]=""
 
+	if not conf["reduction_interoperation"]:
+		conf["reduction_interoperation"]=-1
+
+	if not conf["reduction_interoperation_rescue"]:
+		conf["reduction_interoperation_rescue"]=-1
+
+
 	if len(ini) > 2:
 		warning("You specified a process with %d incoming particles." %
 					len(ini),
