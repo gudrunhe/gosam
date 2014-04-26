@@ -30,7 +30,7 @@
             @end @if %][%
          @end @if %][%
       @end @if %][%
-   @else %]-1[%
+   @else %][% reduction_interoperation %][%
    @end @select %]
    ! Rescue reduction method. The rescue system is disabled
    ! if it is equal to reduction_interoperation
@@ -54,7 +54,7 @@
            @else %]-1[%
            @end @select %][%
       @end @if %][%
-   @else %]-1[%
+   @else %][% reduction_interoperation_rescue %][%
    @end @select %]
 
    ! Debugging settings
