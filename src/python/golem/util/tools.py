@@ -761,6 +761,7 @@ def process_path(conf):
 
 def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
    authors = golem.util.constants.AUTHORS
+   former_authors = golem.util.constants.FORMER_AUTHORS
    asciiart = golem.util.constants.ASCIIART
    asciiwidth = max(map(len, asciiart))
    clines = golem.util.constants.CLINES
@@ -780,6 +781,17 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
          email = ""
          
       llines.append((author_format % author) + email)
+
+   llines.append("")
+   llines.append("FORMER AUTHORS:")
+   for author in sorted(former_authors.keys(), key=lambda n: n.rsplit(" ", 1)[-1]):
+      values = former_authors[author]
+      if len(values) >= 1 and len(values[0]) > 0:
+         email = " <" + values[0] + ">"
+      else:
+         email = ""
+
+      llines.append((author_format % author) + email)
    maxauthorlen = max(map(len,llines))
 
    cl = WIDTH - len(PREFIX) - len(SUFFIX) - 1 - asciiwidth
@@ -795,7 +807,7 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
       else:
             yield PREFIX + " " + outl
 
-   asciiline = " " * max(0, WIDTH - maxauthorlen - 4)
+   asciiline = " " * max(0, WIDTH - maxauthorlen - 7)
 
    for lnr, line in enumerate(llines):
       outl = asciiline + line

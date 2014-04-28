@@ -1,14 +1,23 @@
     GoSam -- An automated One-Loop matrix element generator.
     Copyright (C) 2011, 2012, 2013, 2014  The GoSam Collaboration
-               
-                Gavin Cullen
-                Nicolas Greiner
-                Gudrun Heinrich
-                Gionata Luisoni
-                Pierpaolo Mastrolia
-                Giovanni Ossola
-                Thomas Reiter
-                Francesco Tramontano
+
+    AUTHORS:
+    * Gavin Cullen                      <gavin.cullen@desy.de>
+    * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>
+    * Nicolas Greiner                   <greiner@mpp.mpg.de>
+    * Gudrun Heinrich                   <gudrun@mpp.mpg.de>
+    * Gionata Luisoni                   <luisonig@mpp.mpg.de>
+    * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>
+    * Edoardo Mirabella                 <mirabell@mpp.mpg.de>
+    * Giovanni Ossola                   <gossola@citytech.cuny.edu>
+    * Tiziano Peraro                    <peraro@mpp.mpg.de>
+    * Johannes Schlenk                  <jschlenk@mpp.mpg.de>
+    * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>
+    * Francesco Tramontano              <Francesco.Tramontano@cern.ch>
+
+    FORMER AUTHORS:
+    * Joscha Reichel                    <joscha@mpp.mpg.de>
+    * Thomas Reiter                     <reiterth@mpp.mpg.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,12 +33,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     Scientific publications prepared using the present version of
-    GoSam or any modified version of it or any code linking to
-    GoSam or parts of it should make a clear reference to the publication:
+    GoSam or any modified version of it or any code linking to GoSam
+    or parts of it should make a clear reference to the publication:
 
         G. Cullen et al.,
-        ``Automated One-Loop Calculations with GoSam,''
-        arXiv:1111.2034 [hep-ph]
+        ``GoSam-2.0: a tool for automated one-loop calculations
+                          within the Standard Model and Beyond'',
+        arXiv:1404.6xxx [hep-ph]
 
 -------------------------------------------------------------------------------
 
