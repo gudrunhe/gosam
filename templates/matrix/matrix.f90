@@ -51,15 +51,15 @@ contains
    subroutine     banner()
       implicit none
 
-      character(len=72) :: frame = "+" // repeat("-", 70) // "+"
+      character(len=74) :: frame = "+" // repeat("-", 72) // "+"
 
       if (banner_ch .le. 0) return
 
-      write(banner_ch,'(A72)') frame[%
-   @for banner prefix=| suffix=| width=72 %]
-      write(banner_ch,'(A72)') "[% $_ %]"[%
+      write(banner_ch,'(A74)') frame[%
+   @for banner prefix=| suffix=| width=74 %]
+      write(banner_ch,'(A74)') "[% $_ %]"[%
    @end @for %]
-      write(banner_ch,'(A72)') frame
+      write(banner_ch,'(A74)') frame
 
       banner_ch = 0
    end subroutine banner
