@@ -15,7 +15,7 @@ import os
 import fnmatch
 import fileinput
 
-VERSION = "1.0"
+VERSION = "2.0.0"
 SVN_REVISION = "$Rev$"
 TAR_VERSION = "%s-%d" % (
 		VERSION,
@@ -49,7 +49,7 @@ INFO = {
 			"Natural Language :: English",
 			"Operating System :: POSIX",
 			"Programming Language :: Fortran",
-			"Programming Language :: Python 2.5",
+			"Programming Language :: Python 2.6",
 			"Topic :: Scientific/Engineering :: Physics"
 		],
 		'provides': ["gosam (%s)" % VERSION]
