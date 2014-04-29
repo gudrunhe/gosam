@@ -165,7 +165,8 @@ contains
    write(rev,'(I6)')  gosamrevision
 
    msg = new_line('C')//'Please cite the following references when using this program:'//&
-        &new_line('C')//'Mastrolia:2010nb, Binoth:2008uq, Cullen:2011kv, Cullen:2011ac'
+        &new_line('C')//'Peraro:2014cba, Mastrolia:2012bu, '//&
+        &'Mastrolia:2010nb, Guillet:2013msa, Cullen:2011kv, Cullen:2014yla'
 
    call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
         len(c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR,kind=c_size_t))

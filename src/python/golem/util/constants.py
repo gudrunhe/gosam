@@ -55,7 +55,7 @@ LICENSE = [
 "      G. Cullen et al.,",
 "      ``GoSam-2.0: a tool for automated one-loop calculations",
 "                        within the Standard Model and Beyond'',",
-"      arXiv:1404.6xxx [hep-ph]"
+"      arXiv:1404.7096 [hep-ph]"
 ]
 
 SCATTER_ASCIIART = [
