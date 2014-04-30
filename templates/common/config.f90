@@ -103,7 +103,7 @@
    ! calls. Unless you really know what you do, you should stick to the
    ! default value.
    integer :: samurai_istop = 0
-   logical :: samurai_group_numerators = .false.[%
+   logical :: samurai_group_numerators = .true.[%
       @end @if extension samurai %]
 
    [% @if extension ninja %]
