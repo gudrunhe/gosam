@@ -338,9 +338,9 @@ d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
 		../codegen/ninja.frm
-	: > d[%$_%]h[%helicity%]l13.txt # makes sure the file is always created
-	: > d[%$_%]h[%helicity%]l12.txt # makes sure the file is always created
-	: > d[%$_%]h[%helicity%]l1mu2.txt # makes sure the file is always created
+	@: > d[%$_%]h[%helicity%]l13.txt # makes sure the file is always created
+	@: > d[%$_%]h[%helicity%]l12.txt # makes sure the file is always created
+	@: > d[%$_%]h[%helicity%]l1mu2.txt # makes sure the file is always created
 	@echo Form is optimizing loop diagram [%$_%] laurent index 31 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
