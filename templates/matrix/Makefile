@@ -62,7 +62,7 @@ ph_test.o:%.o:%.f
 
 [% @if extension shared %]
 clean:
-	$(Q)rm -f *.o *.mod libgosam_process[% process_name assuffix=\_ %]_matrix.so:
+	$(Q)rm -f *.o *.mod libgosam_process[% process_name assuffix=\_ %]_matrix.so
 [% @else %]
 clean:
 	$(Q)rm -f *.o *.mod matrix.a
