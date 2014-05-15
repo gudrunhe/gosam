@@ -1224,6 +1224,8 @@ class Template:
          lst = golem.properties.getExtensions(conf)
          if lst is not None:
             ext.extend(map(lambda x: x.lower(), lst))
+         if ext and hasattr(conf,"final_extensions"):
+               break
 
       presence = []
       for arg in args:
