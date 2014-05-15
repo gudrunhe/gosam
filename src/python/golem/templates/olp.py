@@ -39,7 +39,7 @@ class OLPTemplate(golem.util.parser.Template):
 
 		last = len(self._subprocesses) - 1
 		for index, subprocess in enumerate(self._subprocesses):
-			props = Properties()
+			props = self._subprocesses_conf[index]
 			props[first_name] = (index == 0)
 			props[last_name] = (index == last)
 
@@ -51,6 +51,7 @@ class OLPTemplate(golem.util.parser.Template):
 			props[numhelis_name] = subprocess.num_helicities
 
 			self._pstack.append(subprocess)
+			props.final_extensions=True
 			yield props
 			self._pstack.pop()
 
