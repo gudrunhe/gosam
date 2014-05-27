@@ -209,7 +209,7 @@ contains
       amp = ampdef
       ! RESCUE SYSTEM
       if(PSP_check) then
-         call ir_subtraction(vecs, scale2, irp)
+         call ir_subtraction(vecs, scale2, irp, h)
          if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
          else
