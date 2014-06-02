@@ -170,7 +170,7 @@ contains
    @if extension golem95 %]
          call tear_down_golem95()[%
    @end @if %]
-         if(PSP_check.and.PSP_rescue) then
+         if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
             write(42,'(A6)')  "</run>"
             close(unit=42)
          endif
