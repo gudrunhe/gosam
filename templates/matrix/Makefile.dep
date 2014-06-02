@@ -1,18 +1,24 @@
 [% ' vim: ts=3:sw=3:syntax=golem
 	' %]
 OBJEXT ?=o
+OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 # Module Dependencies:[%
-@for each $(OBJEXT) lo var=O %]
-test.[%O%]: matrix.[%O%][%
+@for each $(OBJEXTG) var=O %][%
 	@for crossings %]
 [% $_ asprefix=\_ %]matrix.[%O%]: matrix.[%O%][%
 	@end @for %][%
 @end @for %][%
-@for each $(OBJEXT) var=O %]
+@for each $(OBJEXTG) var=O %]
 [% process_name asprefix=\_ %]test.mod: test.[%O%]
 [% process_name asprefix=\_ %]matrix.mod: matrix.[%O%][%
 	@for crossings %]
 [% $_ asprefix=\_ %]matrix.mod: [% $_ asprefix=\_ %]matrix.[%O%][%
 	@end @for %][%
-@end @for %]
-../matrix/libgolem_process_[% process_name asprefix=\_ %]matrix.la: libgolem_process_[% process_name asprefix=\_ %]matrix.la
+@end @for %][%
+@if extension autotools%]
+test.$(OBJEXT): matrix.$(OBJEXT)
+matrix.$(OBJEXT): matrix.$(OBJEXTG)
+../matrix/libgolem_process_[% process_name asprefix=\_ %]matrix.la: libgolem_process_[% process_name asprefix=\_ %]matrix.la[%
+@else %]
+test.$(OBJEXT): matrix.$(OBJEXT)[%
+@end @if%]
