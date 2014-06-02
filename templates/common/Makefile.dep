@@ -1,8 +1,9 @@
 [% ' vim: ts=3:sw=3:syntax=golem
 	' %]
 OBJEXT ?=o
+OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 # Module Dependencies:[%
-@for each $(OBJEXT) lo var=O %][%
+@for each $(OBJEXTG) var=O %][%
    @if extension pjfry %]
 pjfry95pg.[%O%]: precision_pjfry.[%O%]
 pjfry_comb.[%O%]: pjfry95pg.[%O%] precision_pjfry.[%O%][%
@@ -26,7 +27,7 @@ groups.[%O%]: config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
 custompropagator.[%O%]: config.[%O%] model.[%O%][%
    @end @if %][%
 @end @for %][%
-@for each $(OBJEXT) lo var=O %][%
+@for each $(OBJEXTG) var=O %][%
    @if extension pjfry %]
 [% process_name asprefix=\_ %]pjfry95pg.mod: precision_pjfry.[%O%] pjfry95pg.[%O%]
 [% process_name asprefix=\_ %]pjfry_comb: pjfry_comb.[%O%] pjfry95pg.[%O%] precision_pjfry.[%O%][%
