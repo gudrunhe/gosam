@@ -756,6 +756,8 @@ def merge_extensions(conf_a,conf_b):
    extensions_b = golem.properties.getExtensions(conf_b)
 
    add_extensions=[]
+   if conf_b.getProperty("merge-auto.extensions"):
+      add_extensions=conf_b.getProperty("merge-auto.extensions").split(",")
    for ext in extensions_a:
       if ext and ext not in extensions_b and ext not in add_extensions:
          add_extensions.append(ext)
