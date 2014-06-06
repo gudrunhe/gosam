@@ -48,4 +48,7 @@ ACLOCAL_AMFLAGS=-I m4[%
 olp_lexer.c: olp_parser.h[%
 @end @if %]
 
-olp_module.mod: olp_module.$(OBJEXT)
+OBJEXT ?=o
+OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
+
+olp_module.mod: olp_module.$(OBJEXTG)
