@@ -1234,7 +1234,7 @@ e_not_one $]
         e = sqrt(4.0_ki*pi*alpha)
       ! sw, mZ --> mW
         mW = mZ*sqrt(1.0_ki-sw*sw)
-        case (4)
+        case(4)
       ! alpha --> e
         e = sqrt(4.0_ki*pi*alpha)
       ! GF, sw, alpha --> mW
@@ -1286,10 +1286,16 @@ e_not_one $]
         mZ = mW / sqrt(1.0_ki-sw*sw)
         case(5)
       ! GF, mZ, alpha --> mW
-      mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
+        mW = sqrt(mZ*mZ/2.0_ki+sqrt(mZ*mZ*mZ*mZ/4.0_ki-pi*alpha*mZ*mZ/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case(6)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-mW*mW/mZ/mZ)
+        case(7)
+      ! mZ, sw --> mW
+        mW = mZ*sqrt(1-sw*sw)
   end select
   end subroutine[$
 @end @if$][$
@@ -1329,24 +1335,24 @@ e_not_one $]
       ! mW, sw --> mZ
         mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
         case (5)
+      ! alpha --> e
+        e = sqrt(4.0_ki*pi*alpha)
+      ! GF, mZ, alpha --> mW
+        mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
+     & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
         sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
-        case (6)
+        case(6)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case(7)
       ! mZ, sw --> mW
         mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)
-        case(7)
+        case(8)
       ! e, sw, GF --> mW
         mW = e/2.0_ki/sw/sqrt(sqrt(2.0_ki)*GF)
       ! mW, sw --> mZ
         mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
-        case(8)
-      ! alpha --> e
-        e = sqrt(4.0_ki*pi*alpha)
-      ! GF, mZ, alpha --> mW
-      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
-     & sqrt(2.0_ki)/GF))
-      ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
 !        case default
   end select
   end subroutine[$
@@ -1375,10 +1381,16 @@ e_not_one $]
         mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)
         case(5)
       ! GF, mZ, alpha --> mW
-      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
+        mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&
      & sqrt(2.0_ki)/GF))
       ! mW, mZ --> sw
-      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case(6)
+      ! mW, mZ --> sw
+        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))
+        case(7)
+      ! mZ, sw --> mW
+        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)
   end select
   end subroutine[$
 @end @if$][$
