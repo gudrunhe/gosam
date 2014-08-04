@@ -1,5 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 import golem.util.tools
+from golem.util.config import GolemConfigError
 
 def colorbasis(quarks, aquarks, gluons):
    """
@@ -22,37 +23,41 @@ def colorbasis(quarks, aquarks, gluons):
    rhs = gluons + quarks
    nglue = len(gluons)
 
-   for l in permutations(lhs):
-      lines = []
-      traces = []
-      iglue = set(range(nglue))
-      for a in aquarks:
-         line = [a]
-         r = rhs[l.index(a)]
-         while r in [gluons[i] for i in iglue]:
-            ir = gluons.index(r)
+   try:
+      for l in permutations(lhs):
+         lines = []
+         traces = []
+         iglue = set(range(nglue))
+         for a in aquarks:
+            line = [a]
+            r = rhs[l.index(a)]
+            while r in [gluons[i] for i in iglue]:
+               ir = gluons.index(r)
+               line.append(r)
+               iglue.remove(ir)
+               r = rhs[l.index(r)]
             line.append(r)
-            iglue.remove(ir)
-            r = rhs[l.index(r)]
-         line.append(r)
-         lines.append(line)
-      while len(iglue) > 0:
-         line = []
-         ig = iglue.pop()
-         g = gluons[ig]
-         r = rhs[l.index(g)]
-         while r in [gluons[i] for i in iglue]:
-            ir = gluons.index(r)
+            lines.append(line)
+         while len(iglue) > 0:
+            line = []
+            ig = iglue.pop()
+            g = gluons[ig]
+            r = rhs[l.index(g)]
+            while r in [gluons[i] for i in iglue]:
+               ir = gluons.index(r)
+               line.append(r)
+               iglue.remove(ir)
+               r = rhs[l.index(r)]
             line.append(r)
-            iglue.remove(ir)
-            r = rhs[l.index(r)]
-         line.append(r)
-         traces.append(line)
-      # check for tadpoles
-      if len(traces) > 0:
-         if min(map(len, traces)) <= 1:
-            continue
-      yield lines, traces
+            traces.append(line)
+         # check for tadpoles
+         if len(traces) > 0:
+            if min(map(len, traces)) <= 1:
+               continue
+         yield lines, traces
+   except IndexError:
+      raise GolemConfigError("It seems that the color charge is not conserved in the process you want to generate.\n\
+Perhaps you need to change a particle to its anti-particle in the initial or final state.")
 
 def get_color_basis(in_particles, out_particles):
    """

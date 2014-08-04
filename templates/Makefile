@@ -8,7 +8,11 @@ SUBDIRS=doc common[%
 @for helicities generated %] helicity[% helicity %][%
 @end @for helicities %] matrix
 
-include Makefile.conf
+[% @if internal OLP_MODE %]
+include ../Makefile.conf[%
+@else %]
+include Makefile.conf[%
+@end @if %]
 
 # Stream editor.
 #
@@ -42,26 +46,26 @@ dist: [% process_name asprefix=\_ %]matrix.tar.gz
 compile:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 doc:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 clean:
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
 very-clean:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	@for dir in $(SUBDIRS); \
 	do \
-		$(MAKE) -C $${dir} $@; \
+		$(MAKE) $(S) -C $${dir} $@; \
 	done
 else
 	@echo =====  This would delete most of the Fortran90 sources. =====
@@ -73,7 +77,7 @@ endif
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source source
 endif
 
 
@@ -82,10 +86,12 @@ filelist-source: source
 	@echo Makefile.conf >> $@
 	@echo config.sh >> $@[% 
 @if generate_lo_diagrams %]
-	@echo diagrams-0.log >> $@[%
+	@echo diagrams-0.log >> $@
+	@echo diagrams-0.hh >> $@[%
 @end @if %][% 
 @if generate_nlo_virt %]
-	@echo diagrams-1.log >> $@[%
+	@echo diagrams-1.log >> $@
+	@echo diagrams-1.hh >> $@[%
 @end @if %]
 	@for dir in $(SUBDIRS); \
 	do \

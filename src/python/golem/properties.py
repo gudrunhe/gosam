@@ -19,7 +19,7 @@ process_path = Property("process_path",
    """\
    The path to which all Form output is written.
    If no absolute path is given, the path is interpreted relative
-   to the working directory from which golem-main.py is run.
+   to the working directory from which gosam.py is run.
 
    Example:
    process_path=/scratch/golem_processes/process1
@@ -77,15 +77,17 @@ model = Property("model",
    interface in the directory specified by <path>.
    (Not fully implemented yet)
    """,
-   list)
+   list,"smdiag")
 
 model_options = Property("model.options",
    """\
    If the model in use supports options they can be passed via this
    property.
 
+   For builtin models, the option "ewchoose"
+   selects automatically the EW scheme based.
    """,
-   list)
+   list,"ewchoose")
 
 qgraf_power = Property("order",
    """\
@@ -172,7 +174,7 @@ helicities = Property("helicities",
             # expands to 12 helicities
             # helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\\
             #            -+-++,-+-+-,-+-+0,--+++,--++-,--++0
-    
+
    """,
    list)
 
@@ -185,7 +187,7 @@ qgraf_options = Property("qgraf.options",
 
    Please, refer to the QGraf documentation for details.
    """,
-   list,
+   list,"onshell,notadpole,nosnail",
    options=["onepi", "onshell", "nosigma", "nosnail", "notadpole",
       "floop", "topol"])
 
@@ -206,7 +208,7 @@ qgraf_verbatim = Property("qgraf.verbatim",
       # at least one Higgs:\\n\\
       false=iprop[H, 0, 0];\\n
 
-   
+
    Please, refer to the QGraf documentation for details.
 
    See also: qgraf.options, order
@@ -223,7 +225,7 @@ qgraf_verbatim_lo = Property("qgraf.verbatim.lo",
 
 qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
    """\
-   Same as qgraf.verbatim but only applied to LO diagrams.
+   Same as qgraf.verbatim but only applied to NLO diagrams.
 
    See also: qgraf.verbatim, qgraf.verbatim.nlo
    """,
@@ -238,7 +240,7 @@ ldflags_golem95 = Property("golem95.ldflags",
 
    """,
    str,
-   "`pkg-config --libs golem`")
+   "")
 
 fcflags_golem95 = Property("golem95.fcflags",
    """\
@@ -249,7 +251,7 @@ fcflags_golem95 = Property("golem95.fcflags",
 
    """,
    str,
-   "`pkg-config --cflags golem`")
+   "")
 
 ldflags_samurai = Property("samurai.ldflags",
    """\
@@ -278,18 +280,18 @@ version_samurai = Property("samurai.version",
    The version of the samurai library in use.
 
    Example:
-   samurai.version=2.1.0
+   samurai.version=2.1.1
 
    """,
    str,
-   "2.1.1")
+   "2.1.1", hidden=True)
 
 ldflags_ninja = Property("ninja.ldflags",
    """\
    LDFLAGS required to link ninja.
 
    Example:
-   ninja.ldflags=-L/usr/local/lib/ -lninja-gfortran-double
+   ninja.ldflags=-L/usr/local/lib/ -lninja
 
    """,
    str,
@@ -360,7 +362,7 @@ form_bin = Property("form.bin",
       form.bin=/home/my_user_name/bin/form
    """,
    str,
-   "form")
+   "tform")
 
 form_threads = Property("form.threads",
    """\
@@ -378,7 +380,7 @@ haggies_bin = Property("haggies.bin",
    Haggies is used to transform the expressions of the diagrams
    into optimized Fortran90 programs. It can be obtained from
       http://www.nikhef.nl/~thomasr/download.php
-   
+
    Examples:
       1) haggies.bin=/home/my_user_name/bin/haggies
       2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
@@ -401,7 +403,7 @@ form_tmp = Property("form.tempdir",
 template_path = Property("templates",
    """\
    Path pointing to the directory containing the template
-   files for the process. If not set golem uses the directory
+   files for the process. If not set, golem uses the directory
    <golem_path>/templates.
 
    The directory must contain a file called 'template.xml'
@@ -419,11 +421,11 @@ group_diagrams = Property("group",
 
 sum_diagrams = Property("diagsum",
    """\
-   Flag whether or not 1-loop diagrams with the same propagators 
+   Flag whether or not 1-loop diagrams with the same propagators
    should be summed before the algebraic reduction.
    """,
    bool,
-   False)
+   True)
 
 renorm = Property("renorm",
    """\
@@ -457,7 +459,7 @@ fc_bin = Property("fc.bin",
 
 python_bin = Property("python.bin",
    """\
-   Denotes the executable file of Python 
+   Denotes the executable file of Python
    """,
    str,
    "python")
@@ -467,7 +469,7 @@ formopt_level = Property("formopt.level",
    There are three levels of Horner Scheme
    offered and the number here will specify
    which one we use. It can only be 1,2 or 3.
-   
+
    Examples:
    formopt.level=3
 
@@ -476,50 +478,91 @@ formopt_level = Property("formopt.level",
    "2",
    experimental=True)
 
+regularisation_scheme = Property("regularisation_scheme",
+      """\
+         Sets the used regularisation scheme.
+         Possible values: dred (recommended), cdr
+      """,
+      str,
+      "dred"
+   )
+
+reduction_programs = Property("reduction_programs",
+      """\
+        Specifies the reduction libraries which should be supported.
+
+        Possible values: ninja, samurai, golem95, pjfry (experimental)
+
+        See also reduction_interoperation, reduction_interoperation_rescue.
+      """,
+      list,
+      "ninja,golem95",
+      options=["ninja","samurai","golem95","pjfry"]
+   )
+
+polvec_method = Property("polvec",
+      """\
+          Evaluate the polarisation vector
+          'numerical' or 'explicit'.
+     """,
+     str,
+     "numerical",
+     options=["numerical","explicit"]
+)
+
+DEFAULT_EXTENSIONS="".split(",")
+
 extensions = Property("extensions",
    """\
    A list of extension names which should be activated for the
-   code generation. These names are not standardised at the moment.
+   code generation.
 
-   One option which is affected by this is LDFLAGS. In the following
-   example only ldflags.looptools is added to the LDFLAGS variable
-   in the makefiles whereas the variable ldflags.qcdloop is ignored.
+   Build system related extensions:
 
-   extensions=golem95,samurai
-
-   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
-
-   NOTE: Make sure you activate at least one of 'samurai' and 'golem95'.
-
-   Currently active extensions:
-
-   samurai      --- use Samurai for the reduction
-   golem95      --- use Golem95 for the reduction
-   pjfry        --- use PJFry for the reduction (experimental)
-   dred         --- use four dimensional algebra (dim. reduction)
-   autotools    --- use Makefiles generated by autotools
-   qshift       --- apply the shift of Q already at the FORM level
-   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command
-   gaugecheck   --- modify gauge boson wave functions to allow for
-                    a limited gauge check (introduces gauge*z variables)
-   olp_daemon   --- (OLP interface only): generates a C-program providing
-                    network access to the amplitude
-   olp_badpts   --- (OLP interface only): allows to stear the numbering
-                    of the files containing bad points from the MC
-   no-fr5       --- do not generate finite gamma5 renormalisation
-   numpolvec    --- evaluate polarisation vectors numerically
+   autotools    --- use autotools to generate Makefiles
+   shared       --- create shared libraries (=dynamically linkable code),
+                    enabled by default with autotools extension
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
-   formopt      --- diagram optimization using FORM (works only with
-                    abbrev.level=diagram and r2=implicit/explicit).
-   extraopt     --- optimization using FORM for color and model files.
-   """,
-   list,
+
+   Other extensions:
+   noformopt    --- disable diagram optimization using FORM
+   gaugecheck   --- modify gauge boson wave functions to allow for
+                    a limited gauge check (introduces gauge*z variables)
+   customspin2prop --- replace the propagator of spin-2 particles
+                       with a custom function (read the manual for this).
+   """
+#   olp_badpts   --- (OLP interface only): allows to stear the numbering
+#                    of the files containing bad points from the MC
+#
+#   olp_daemon   --- (OLP interface only): generates a C-program providing
+#   samurai      --- enable Samurai for the reduction
+#   ninja        --- enable Ninja for the reduction
+#   golem95      --- enable Golem95 for the reduction
+#   pjfry        --- enable PJFry for the reduction (experimental)
+#   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
+#                    not compatible with the formopt option.
+#   qshift       --- apply the shift of Q already at the FORM level
+#   numpolvec    --- evaluate polarisation vectors numerically
+#   extraopt     --- optimization using FORM for color and model files.
+#                     (experimental)
+#   One option which is affected by this is LDFLAGS. In the following
+#   example only ldflags.looptools is added to the LDFLAGS variable
+#   in the makefiles whereas the variable ldflags.qcdloop is ignored.
+#
+#   extensions=golem95,samurai
+#
+#   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
+#   formopt      --- diagram optimization using FORM (works only with
+#                    abbrev.level=diagram and r2=implicit/explicit).
+
+   ,
+   list,",".join(DEFAULT_EXTENSIONS),
    options=["samurai", "golem95", "pjfry", "dred",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon","olp_badpts", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop"])
+      "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr","noderive","noformopt"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -537,7 +580,7 @@ select_lo_diagrams = Property("select.lo",
 
    See also: select.nlo, filter.lo, filter.nlo
    """,
-   list,",")
+   list,sep=",")
 
 select_nlo_diagrams = Property("select.nlo",
    """\
@@ -555,7 +598,7 @@ select_nlo_diagrams = Property("select.nlo",
 
    See also: select.lo, filter.lo, filter.nlo
    """,
-   list,",")
+   list,sep=",")
 
 filter_lo_diagrams = Property("filter.lo",
    """\
@@ -646,7 +689,7 @@ debug_flags = Property("debug",
 reference_vectors = Property("reference-vectors",
    """\
    A list of reference vectors for massive and higher spin particles.
-   For vectors which are not assigned here, the program picks a 
+   For vectors which are not assigned here, the program picks a
    reference vector automatically.
 
    Each entry of the list has to be of the form <index>:<index>
@@ -685,13 +728,13 @@ abbrev_limit = Property("abbrev.limit",
 abbrev_level = Property("abbrev.level",
    """\
    The level at which abbreviations are generated. The value should be
-   one of:
+   one of (with the default formopt extension, only diagram is supported):
       helicity       generates files helicity<X>/abbrevh<X>.f90
       group          generates files helicity<X>/abbrevg<G>h<X>.f90
       diagram        generates files helicity<X>/abbrevd<D>h<X>.f90
    """,
-   str, "helicity",
-   options=["helicity", "group", "diagram"])
+   str, "diagram",
+   options=["helicity", "group", "diagram"], hidden=True)
 
 r2 = Property("r2",
    """\
@@ -700,8 +743,6 @@ r2 = Property("r2",
    implicit    -- mu^2 terms are kept in the numerator and reduced
                   at runtime
    explicit    -- mu^2 terms are reduced analytically
-   only        -- same as 'explicit' but only the R2 term is kept in
-                  the result
    off         -- all mu^2 terms are set to zero
    """,
    str, "explicit",
@@ -727,7 +768,7 @@ crossings = Property("crossings",
 symmetries = Property("symmetries",
    """\
    Specifies the symmetries of the amplitude.
-   
+
    This information is used when the list of helicities is generated.
 
    Possible values are:
@@ -761,11 +802,11 @@ pyxodraw = Property("pyxodraw",
    """\
    Specifies whether to draw any diagrams or not.
    """,
-   bool, True)
+   bool, True, hidden=True)
 
 config_renorm_beta = Property("renorm_beta",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables beta function renormalisation
 
@@ -775,7 +816,7 @@ config_renorm_beta = Property("renorm_beta",
 
 config_renorm_logs = Property("renorm_logs",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables the logarithmic finite terms
    of all UV counterterms
@@ -786,7 +827,7 @@ config_renorm_logs = Property("renorm_logs",
 
 config_renorm_mqse = Property("renorm_mqse",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables the UV counterterm coming from the
    massive quark propagators
@@ -797,7 +838,7 @@ config_renorm_mqse = Property("renorm_mqse",
 
 config_renorm_decoupling = Property("renorm_decoupling",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables UV counterterms coming from
    massive quark loops
@@ -808,7 +849,7 @@ config_renorm_decoupling = Property("renorm_decoupling",
 
 config_renorm_mqwf = Property("renorm_mqwf",
    """\
-   Set the name of the same variable in config.f90
+   Sets the name of the same variable in config.f90
 
    Activates or disables UV countertems coming from
    external massive quarks
@@ -819,7 +860,7 @@ config_renorm_mqwf = Property("renorm_mqwf",
 
 config_renorm_gamma5 = Property("renorm_gamma5",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates finite renormalisation for axial couplings in the
    't Hooft-Veltman scheme
@@ -830,16 +871,31 @@ config_renorm_gamma5 = Property("renorm_gamma5",
 
 config_reduction_interoperation = Property("reduction_interoperation",
    """
-   Set the same variable in config.f90. A value of '-1' lets gosam
-   decide depending on the specified extensions.
+   Default reduction library.
+
+   Possible values are: ninja, samurai, golem95, pjfry (experimental)
+
+   Sets the same variable in config.f90. A value of '-1' lets GoSam decide
+   depending on reduction_libraries
 
    See common/config.f90 for details.
    """,
-   int, -1)
+   str, -1)
+
+config_reduction_interoperation_rescue = Property("reduction_interoperation_rescue",
+   """
+   Rescue reduction program.
+
+   Sets the same variable in config.f90. A value of '-1' lets GoSam
+   decide.
+
+   See common/config.f90 for details.
+   """,
+   str, -1)
 
 config_samurai_scalar = Property("samurai_scalar",
    """
-   Set the same variable in config.f90.
+   Sets the same variable in config.f90.
 
    See common/config.f90 for details.
    """,
@@ -847,40 +903,41 @@ config_samurai_scalar = Property("samurai_scalar",
 
 config_nlo_prefactors = Property("nlo_prefactors",
    """
-   Set the same variable in config.f90. The values have the 
+   Sets the same variable in config.f90. The values have the
    following meaning:
 
    0: A factor of alpha_(s)/2/pi is not included in the NLO result
    1: A factor of 1/8/pi^2 is not included in the NLO result
    2: The NLO includes all prefactors
 
-   Note, however, that the factor of 1/Gamma(1-eps) is not 
+   Note, however, that the factor of 1/Gamma(1-eps) is not
    included in any of the cases.
+
+   Please note, that nlo_prefactors=0 is enforced temporary in test.f90
+   for better testing. In OLP interface mode (BLHA/BLHA2), the default is
+   nlo_prefactors=2.
    """,
    int, 0, options=["0","1","2"])
 
 config_PSP_check = Property("PSP_check",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
+
    !!Works only for QCD and with built-in model files!!
    """,
-   bool, False)
+   bool, True)
 
 config_PSP_rescue = Property("PSP_rescue",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Activates Phase-Space Point rescue based on the estimated
-   accuracy on the finite part.
+   accuracy on the finite part. It needs PSP_check=True.
    The accuracy is estimated using information on the single
    pole accuracy and the cancellation between cut-constructable
    part and R2.
-
-   Note: the usage of this rescue system is most stable if used 
-   with the extension 'derive' which ensures a stabler 
-   reconstruction of the tensor coefficients.
 
    !!Works only for QCD and with built-in model files!!
    """,
@@ -888,48 +945,60 @@ config_PSP_rescue = Property("PSP_rescue",
 
 config_PSP_verbosity = Property("PSP_verbosity",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
    Sets the verbosity of the PSP_check.
-   verbosity = 0 : no output
-   verbosity = 1 : bad point are written in a file gs_badpts.log
-   verbosity = 2 : output whenever the rescue system is used
-                   with comment about the success of the rescue
+   verbosity = False: no output
+   verbosity = True : bad point are written in a file gs_badpts.log
    !!Works only for QCD and with built-in model files!!
    """,
-   int, 2, options=["0","1","2","3"])
+   bool, False)
 
-config_PSP_chk_threshold1 = Property("PSP_chk_threshold1",
+config_PSP_chk_th1 = Property("PSP_chk_th1",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
-   Threshold to activate the recalculation of the full
-   amplitude using golem95. The number has to be an integer
-   indicating the wished minimum number of digits accuracy
-   on the finite part.
+   Threshold to activate accept the point without further treatments.
+   The number has to be an integer indicating the wished minimum number
+   of digits accuracy on the pole. For poles more precise than this
+   threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
    """,
-   int, 4)
+   int, 8)
 
-config_PSP_chk_threshold2 = Property("PSP_chk_threshold2",
+config_PSP_chk_th2 = Property("PSP_chk_th2",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point. According to the
-   verbosity level set, such points are written to a file and not
-   used when the code is interfaced to an external Monte Carlo 
-   using the new BLHA standards.
+   Threshold to declare a PSP as bad point, based of the precision of the pole.
+   Points with precision less than this threshold are directly reprocessed with
+   the rescue system (if available), or declared as unstable. According to the
+   verbosity level set, such points are written to a file and not used when
+   the code is interfaced to an external Monte Carlo using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 3)
 
+config_PSP_chk_th3 = Property("PSP_chk_th3",
+   """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a PSP as bad point, based on the precision of
+   the finite part estimated with a rotation. According to the
+   verbosity level set, such points are written to a file and not
+   used when the code is interfaced to an external Monte Carlo
+   using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 5)
+
 config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
-   Set the same variable in config.f90
+   Sets the same variable in config.f90
 
-   Threshold on the k-factor to declare a PSP as bad point. According 
-   to the verbosity level set, such points are written to a file and 
-   not used when the code is interfaced to an external Monte Carlo 
+   Threshold on the k-factor to declare a PSP as bad point. According
+   to the verbosity level set, such points are written to a file and
+   not used when the code is interfaced to an external Monte Carlo
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
@@ -946,33 +1015,19 @@ properties = [
    zero,
    one,
    renorm,
+   regularisation_scheme,
    genUV,
    helicities,
    qgraf_options,
    qgraf_verbatim,
    qgraf_verbatim_lo,
    qgraf_verbatim_nlo,
-   qgraf_bin,
-   form_bin,
-   form_threads,
-   form_tmp,
-   haggies_bin,
-   fc_bin,
-   python_bin,
-   formopt_level,
    group_diagrams,
    sum_diagrams,
+   reduction_programs,
+   polvec_method,
    extensions,
-   template_path,
    debug_flags,
-
-   fcflags_golem95,
-   ldflags_golem95,
-   fcflags_samurai,
-   ldflags_samurai,
-   version_samurai,
-   fcflags_ninja,
-   ldflags_ninja,
 
    select_lo_diagrams,
    select_nlo_diagrams,
@@ -987,26 +1042,47 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_reduction_interoperation,
+   config_reduction_interoperation_rescue,
    config_samurai_scalar,
    config_nlo_prefactors,
    config_PSP_check,
-   config_PSP_verbosity,
-   config_PSP_chk_threshold1,
    config_PSP_rescue,
-   config_PSP_chk_threshold2,
+   config_PSP_verbosity,
+   config_PSP_chk_th1,
+   config_PSP_chk_th2,
+   config_PSP_chk_th3,
    config_PSP_chk_kfactor,
 
    reference_vectors,
    abbrev_limit,
    abbrev_level,
 
+   template_path,
+
+   qgraf_bin,
+   form_bin,
+   form_threads,
+   form_tmp,
+   haggies_bin,
+   fc_bin,
+   python_bin,
+
+   fcflags_ninja,
+   ldflags_ninja,
+   fcflags_samurai,
+   ldflags_samurai,
+   version_samurai,
+   fcflags_golem95,
+   ldflags_golem95,
+
    r2,
    symmetries,
    crossings,
+   formopt_level,
    pyxodraw
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "pjfry"]
+REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
 
 def getExtensions(conf):
    ext_name = str(extensions)
@@ -1017,10 +1093,12 @@ def getExtensions(conf):
    for key in conf:
       parts = key.split(".")
       if parts[-1].lower().strip() == ext_name:
+         if len(parts)>=2 and "installed" in parts[0].lower():
+            continue
          prefix = ".".join(parts[:-1])
          lst = []
          ext_sets[prefix] = lst
-         for s in conf.getListProperty(key, ","):
+         for s in conf.getListProperty(key, delimiter=","):
             lst.append(s.lower())
          lst.sort()
    keys = sorted(ext_sets.keys())
@@ -1049,10 +1127,14 @@ def setInternals(conf):
          "__OLP_CALL_BY_VALUE__",
          "__OLP_TO_LOWER__",
          "__OLP_BADPTSFILE_NUMBERING__",
+         "__OLP_MODE__",
+         "__OLP_BLHA1__",
+         "__OLP_BLHA2__",
          "__FORMOPT__",
          "__GENERATE_NINJA_TRIPLE__",
          "__GENERATE_NINJA_DOUBLE__",
-         "__CUSTOM_SPIN2_PROP__"]
+         "__CUSTOM_SPIN2_PROP__",
+         "__EWCHOOSE__"]
 
    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
@@ -1066,7 +1148,7 @@ def setInternals(conf):
    conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-   conf["__REGULARIZATION_HV__"] = not conf["__REGULARIZATION_DRED__"]
+   conf["__REGULARIZATION_HV__"] = not "dred" in extensions
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
@@ -1076,7 +1158,11 @@ def setInternals(conf):
    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
    conf["__OLP_TO_LOWER__"] = "f77" in extensions
    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
+   conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
+   conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
+   if not "__OLP_MODE__" in conf:
+      conf["__OLP_MODE__"] =  False
 
-   conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-       and "no-fr5" not in extensions
-
+   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
+   #    and "no-fr5" not in extensions
+   conf["__REQUIRE_FR5__"]  = False

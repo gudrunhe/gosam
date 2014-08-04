@@ -2,11 +2,16 @@
 	Template file for the Makefile in process_dir/doc
 ' %]# vim: ts=3:sw=3
 
-include ../Makefile.conf
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
 
 # latex and dvips
 #
-# - Required to create process.ps (make doc)
+# - Required to create process.ps and process.pdf (make doc)
 LATEX=latex
 LATEX_OPT=
 
@@ -17,11 +22,13 @@ DVIPS_MINUS_O=-o
 MKINDEX=mkindex
 MKINDEX_OPT=-s gind.ist
 
+PSTOPDF=ps2pdf
+
 # TARGETS:
 .PHONY: compile source clean very-clean doc
 .SUFFIXES:
 
-doc: process.dvi process.ps
+doc: process.dvi process.ps process.pdf
 
 compile:
 source:
@@ -36,13 +43,16 @@ source:
 process.ps: process.dvi
 	$(DVIPS) $(DVIPS_OPT) $< $(DVIPS_MINUS_O) $@
 
-clean: 
+process.pdf: process.ps
+	${PSTOPDF} $< $@
+
+clean:
 	rm -f process.aux process.log process.toc
 	rm -f process.ind process.idx process.ilg
 
 very-clean: clean
 	rm -f filelist-source
-	rm -f process.dvi process.ps
+	rm -f process.dvi process.ps process.pdf
 
 filelist-source:
 	echo Makefile > $@

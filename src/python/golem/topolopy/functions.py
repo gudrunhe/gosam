@@ -13,6 +13,8 @@ from golem.util.tools import error, warning, debug
 def setup_list(prop, conf):
    result = []
    for r in conf.getListProperty(prop):
+      if r=='':
+         continue
       if ":" in r:
          boundaries = r.split(":")
          if len(boundaries) == 1:
@@ -158,8 +160,8 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             for cqm in diagram.ComplexQuarkBubbleMasses():
                if cqm not in complex_masses:
                   complex_masses.append(cqm)
-               if cqm=='0' and complex_masses[len(complex_masses)-1]!='0':
-		 complex_masses.append(cqm)
+               if cqm=='0' and complex_masses[len(complex_masses)-1]!='0' and (len(complex_masses) % 2)==1:
+                  complex_masses.append(cqm)
 
          if diagram.onshell() > 0:
             lose.append(idx)

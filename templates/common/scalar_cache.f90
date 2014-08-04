@@ -2,8 +2,10 @@
 
 '%]module     [% process_name asprefix=\_ %]scalar_cache[%
 @if extension samurai %]
-   use precision, only: ki_sam => ki
-   use madds[%
+   use precision, only: ki_sam => ki[%
+   @if version_newer samurai.version 2.8 %]
+   use constants[% @else %]
+   use madds[% @end @if %][%
 @end @if %]
    implicit none
    save

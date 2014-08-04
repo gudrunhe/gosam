@@ -76,8 +76,9 @@ def main(argv=sys.argv):
    """
    This is the main program of GoSam.
 
-   Usage: golem-main.py {options} [--template] {file or directory}
+   Usage: gosam.py {options} [--template] {file or directory}
    -h, --help           -- prints this help screen
+   --olp                -- switch to OLP mode. Use --olp --help to get more options.
    -d, --debug          -- prints out debug messages
    -p, --profile        -- generates profiling information
    -v, --verbose        -- prints out status messages
@@ -96,6 +97,8 @@ def main(argv=sys.argv):
    -i, --interactive    -- start an interactive interface
    -y, --no-pyxodraw    -- do not attempt to draw diagrams.
 
+   --version            -- output current GoSam version
+
    -------------------------------------------------------------------
    Static variables:
 
@@ -106,6 +109,7 @@ def main(argv=sys.argv):
 
    args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
          argv=argv)
+         
 
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
       golem.installation.GOLEM_VERSION))
@@ -180,26 +184,18 @@ def main(argv=sys.argv):
          temp_file_path=None
 
          try:
-            #detect if the input file was not made via template
-            if not f.readline().startswith("#!") and use_default_files:
-                 # create and fill a temporary template file
-                 # including non-easily overwritable default options
+            # detect if the input file could be a double-escaped (*.rc) file
+            if not f.readline().startswith("#!") and in_file.endswith(".rc"):
+                 # merge into temporary template file
                  osfh, temp_file_path = tempfile.mkstemp(".gosam.in")
                  os.close(osfh)
                  f.seek(0)
                  c.load(f)
-                 if not "form.bin" in c and not "form.extensions" in c:
-                    # gosam-config.py not used
-                    # find form and check if it supports topolynomial option
-                    form_config=Form()
-                    form_config.examine([])
-                    form_config.store(c)
                  write_template_file(temp_file_path, c, template_format)
                  f.close()
                  # use the temporary file as new input file
                  f = open(temp_file_path,'r')
             f.seek(0)
-
             c.load(f)
             f.close()
          finally:

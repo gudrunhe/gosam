@@ -1,20 +1,26 @@
 #!/bin/sh
 
-PWD=`dirname $0`
+PWD="$(dirname $(realpath "$0"))"
+
+USE_INTERNAL=
 
 FCFLAGS="[%
 @for subprocesses %] \
-	`sh ${PWD}/[%path%]/config.sh -[%
+ `sh ${PWD}/[%path%]/config.sh -[%
    @if is_first %][% @else %]p[% @end @if %]cflags`[%
 @end @for %]"
 CFLAGS="-I${PWD}"
 LDFLAGS="${PWD}/olp_module.o[%
 @for subprocesses %] \
-	`sh ${PWD}/[%path%]/config.sh -[%
+ `sh ${PWD}/[%path%]/config.sh -[%
    @if is_first %][% @else %]p[% @end @if %]libs`[%
 @end @for %]"[%
 @for subprocesses %][%
    @if is_first %]
+
+[% @if extension shared %]
+LDFLAGS_ALL="-Wl,-rpath=${PWD} -L${PWD} -lgosam_process"
+[% @end @if %]
 
 FC=`sh ${PWD}/[% path %]/config.sh -fortcom`
 OLIBS=`sh ${PWD}/[% path %]/config.sh -olibs`
@@ -25,7 +31,15 @@ OCFLAGS=`sh ${PWD}/[% path %]/config.sh -ocflags`[%
 while [ $# -gt 0 ]; do
    case "$1" in
       -libs)
+[% @if extension shared %]
+        if [ -n "$USE_INTERNAL" ] ; then
               echo -n " $LDFLAGS"
+        else
+              echo -n " $LDFLAGS_ALL"
+        fi
+[% @else %]
+              echo -n " $LDFLAGS"
+[% @end @if %]
    ;;
       -olibs)
               echo -n " $OLIBS"
@@ -42,7 +56,7 @@ while [ $# -gt 0 ]; do
       -fortcom)
               echo -n " $FC"
    ;;
-      -help)
+      -help|--help)
               echo
               echo This script helps constructing the command line
               echo for linking the matrix element with an existing
@@ -58,9 +72,18 @@ while [ $# -gt 0 ]; do
               echo "            with fortran"
               echo "   -cflags  prints the flags needed to compile this code"
               echo "            with C/C++"
-              echo "   -fortcom the name of the fortran compiler in use"
+              echo "   -fortcom the name of the fortran compiler in use"[%
+@if extension shared %]
+              echo "   -intern  return flags for linking with all sub-libraries instead of the"
+              echo "            libgosam_process.so, need to be the first paramter."[%
+@end @if %]
               echo "   -help    prints this screen"
+   ;;[%
+@if extension shared %]
+      -intern)
+              USE_INTERNAL=1
    ;;
+[% @end @if %]
       *)
               echo -n " $1"
    ;;

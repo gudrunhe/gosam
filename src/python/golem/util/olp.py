@@ -11,25 +11,29 @@ class OLPSubprocess:
          process_name,
          process_path,
          p_ini, p_fin,
-         key):
+         key, conf):
       self.id = id
       self.process_name = process_name
       self.process_path = process_path
       self.p_ini = p_ini
       self.p_fin = p_fin
       self.crossings = {}
+      self.crossings_conf = {}
       self.ids = {id: process_name}
       self.channels = {}
       self.key = key
+      self.conf = conf
+      self.crossings_conf[id]=conf
 
       self.num_legs = len(p_ini) + len(p_fin)
       self.num_helicities = -1
       self.generated_helicities = []
 
-   def addCrossing(self, id, process_name, p_ini, p_fin):
+   def addCrossing(self, id, process_name, p_ini, p_fin, conf):
       self.crossings[process_name] = "%s > %s" \
             % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))
       self.ids[id] = process_name
+      self.crossings_conf[id] = conf
 
    def assignChannels(self, id, channels):
       self.channels[id] = channels
@@ -44,6 +48,9 @@ class OLPSubprocess:
    def getIDs(self):
       return list(self.ids.keys())
 
+   def getIDConf(self,id):
+      return self.crossings_conf[id]
+
    def __str__(self):
       return self.process_name
 
@@ -56,9 +63,12 @@ class OLPSubprocess:
       else:
          return os.path.join(path, self.process_path)
 
-   def getConf(self, conf, path):
+   def getConf(self, conf, path, base=None):
 
-      subproc_conf = conf.copy(True)
+      if base:
+         subproc_conf = base.copy(True)
+      else:
+         subproc_conf = conf.copy(True)
 
       subproc_conf.cache["model"] = conf.cache["model"]
       subproc_conf[golem.properties.process_name] = self.process_name
@@ -73,7 +83,7 @@ class OLPSubprocess:
       return subproc_conf
 
 
-def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings):
+def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf):
 
    def getparticle(name):
       return golem.util.tools.interpret_particle_name(name, model)
@@ -99,17 +109,61 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    else:
       key = tuple(s_ini + [p.getPartner() for p in p_fin])
 
-   if key in subprocesses:
-      sp = subprocesses[key]
-      sp.addCrossing(id, process_name, p_ini, p_fin)
-      is_new = False
 
+   if use_crossings:
+      # look for existing compatible subprocesses
+      for skey in subprocesses:
+       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf):
+         key = skey
+         break
+
+   if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
+      sp = subprocesses[key]
+      sp.addCrossing(id, process_name, p_ini, p_fin, conf)
+      is_new = False
+      adapt_config(subprocesses[key].conf,conf)
    else:
-      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey)
+      i=0
+      # append digit to distinguish it from other subprocesses
+      while key in subprocesses:
+         key=key+(i,) if i==0 else key[:-1]+(i,)
+         i = i + 1
+      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
       subprocesses[key] = sp
       is_new = True
 
    return sp, is_new
+
+def is_config_compatible(conf1, conf2):
+   """ Checks if a subprocess with conf2 can be a crossing of conf1 """
+   special = {
+         "olp.amplitudetype" : (lambda a,b: True), # => ignored
+         "olp.no_loop_level" : (lambda a,b: True), # => ignored
+         "order" : (lambda a,b: a.startswith(b) or b.startswith(a))
+         }
+   for i in conf1:
+      if not i in conf2 or conf1[i]!=conf2[i]:
+         bval = conf2[i] if i in conf2 else ""
+         if i in special:
+            if special[i](conf1[i], bval):
+               continue
+         return False
+   for i in conf2:
+      if not i in conf1:
+         if i in special:
+            if special[i]("",conf2[i]):
+               continue
+         return False
+   return True
+
+def adapt_config(conf1,conf2):
+   """ Adapt the configuration conf1 of a subprocess
+       that a subprocess with conf2 can be a crossing of it."""
+   conf1["olp.no_tree_level"] = conf1["olp.no_tree_level"] and conf2["olp.no_tree_level"]
+   conf1["olp.no_loop_level"] = conf1["olp.no_loop_level"] and conf2["olp.no_loop_level"]
+   conf1["order"] = max(conf1["order"],conf2["order"]) # take longest
+   return True
+
 
 def derive_output_name(input_name, pattern, dest_dir=None):
    path, file = os.path.split(input_name)
@@ -200,6 +254,7 @@ def get_qgraf_power(conf):
    alphas_power = conf.getProperty("olp.alphaspower", default=None)
    correction_type = conf.getProperty("olp.correctiontype", default=None)
    notreelevel = conf.getBooleanProperty("olp.no_tree_level", default=False)
+   nolooplevel = conf.getBooleanProperty("olp.no_loop_level", default=False)
 
    qcd_name = "QCD"
    qed_name = "QED"
@@ -220,10 +275,12 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD":
+         if correction_type == "QCD" and not nolooplevel:
             return [qcd_name, treepower, ipower + 2]
-         elif correction_type == "EW":
+         elif correction_type == "EW" and not nolooplevel:
             return [qcd_name, treepower, ipower]
+         elif nolooplevel:
+            return [qcd_name, treepower]
    else:
       if alphas_power is None:
          # Only alpha_power present:
@@ -237,10 +294,12 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD":
+         if correction_type == "QCD" and not nolooplevel:
             return [qed_name, treepower, ipower]
-         elif correction_type == "EW":
+         elif correction_type == "EW" and not nolooplevel:
             return [qed_name, treepower, ipower + 2]
+         elif nolooplevel:
+            return [qcd_name, treepower]
       else:
          try:
             iepower = int(alpha_power)
@@ -253,13 +312,20 @@ def get_qgraf_power(conf):
                treepower = "NONE"
             else:
                treepower = icpower
-            return [qcd_name, treepower, icpower + 2]
+            if not nolooplevel:
+               return [qcd_name, treepower, icpower + 2]
+            else:
+               return [qcd_name, treepower]
          elif correction_type == "EW" or correction_type == "QED":
             if notreelevel:
                treepower = "NONE"
             else:
                treepower = iepower
-            return [qed_name, treepower, iepower + 2]
+            if not notreelevel:
+               return [qed_name, treepower, iepower + 2]
+            else:
+               return [qed_name, treepower]
+
    return []
 
 def derive_zero_masses(model_path, slha_file, conf):
@@ -333,6 +399,14 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if len(mc_name_parts) > 1:
       conf["olp.mc.version"] = mc_name_parts[1].lower()
 
+   # Set default options
+   conf["olp.include_color_average"] = True
+   conf["olp.include_helicity_average"] = True
+   conf["olp.include_symmetry_factor"] = True
+   conf["olp.no_tree_level"] = False
+   conf["olp.amplitudetype"] = "loop"
+   conf["nlo_prefactors"] = 2
+
 
    #---#[ Read order file:
    try:
@@ -346,13 +420,24 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
+   tmp_contract_file = golem.util.olp_objects.OLPContractFile(order_file)
+   subprocesses_conf=[]
+
    conf.setProperty("setup-file", order_file_name)
-   
+   orig_conf=conf.copy()
+
    file_ok = golem.util.olp_options.process_olp_options(contract_file, conf,
          ignore_case, ignore_unknown)
    if not file_ok:
       golem.util.tools.warning(
-            "Please, check configuration files for errors!")
+            "Please, check configuration and contract files for errors!")
+
+   for lineo,_,_,_ in order_file.processes_ordered():
+      subconf=orig_conf.copy()
+      file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
+         ignore_case, ignore_unknown, lineo, quiet=True)
+      subprocesses_conf.append(subconf)
+
    #---#] Read order file:
    if file_ok:
       if not os.path.exists(path):
@@ -364,12 +449,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       if not os.path.exists(imodel_path):
          golem.util.tools.message("Creating directory %r" % imodel_path)
          os.mkdir(imodel_path)
-      golem.util.tools.prepare_model_files(conf, imodel_path)
-      
-      conf["modeltype"] = conf["model"]
+      for lconf in [conf] + subprocesses_conf:
+         golem.util.tools.prepare_model_files(lconf, imodel_path)
 
-      conf["model"] = os.path.join(imodel_path,
-            golem.util.constants.MODEL_LOCAL)
+         lconf["modeltype"] = lconf["model"]
+
+         lconf["model"] = os.path.join(imodel_path,
+               golem.util.constants.MODEL_LOCAL)
       #---#] Import model file once for all subprocesses:
       #---#[ Constrain masses:
       model_file = conf["olp.modelfile"]
@@ -380,58 +466,119 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             if m not in zero:
                zero.append(m)
                golem.util.tools.message("Identified %s==0 (from SLHA file)" % m)
-         conf[golem.properties.zero] = ",".join(zero)
+         for lconf in [conf] + subprocesses_conf:
+            lconf[golem.properties.zero] = ",".join(zero)
       #---#] Constrain masses:
 
-      model = golem.util.tools.getModel(conf, imodel_path)
+
+      model_conf=conf.copy()
+      # This fills in the defaults where no option is given:
+      for p in golem.properties.properties:
+         if model_conf.getProperty(p):
+            model_conf.setProperty(str(p), model_conf.getProperty(p))
+
+      model = golem.util.tools.getModel(model_conf, imodel_path)
+
+      #---#[ Setup excluded and massive particles :
+      for lconf in [conf] + subprocesses_conf:
+         list_exclude=[]
+         for i in [int(p) for p in lconf["__excludedParticles__"].split()] if lconf["__excludedParticles__"] \
+               else []:
+            for n in model.particles:
+               particle=model.particles[n]
+               if particle.getPDGCode() == i:
+                  list_exclude.append(str(particle))
+         if list_exclude:
+            if not lconf["qgraf.verbatim"]:
+               lconf["qgraf.verbatim"]="true=iprop[%s,0,0];" % (",".join(list_exclude))
+            else:
+               lconf["qgraf.verbatim"]=lconf["qgraf.verbatim"] + \
+                  "\ntrue=iprop[%s,0,0];" % (",".join(list_exclude))
+
+         lconf["__excludedParticles__"]=None
+
+         # TODO: check if massless list is complete
+         possible_massless_particles = set( range(1,6) + [11,13])
+         set_massiveParticles=set()
+         list_zero_values=[];
+         if lconf["__OLP_BLHA2__"]=="True": # only supported in BLHA2
+            for i in [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] \
+                  else []:
+               for n in model.particles:
+                  particle=model.particles[n]
+                  if particle.getPDGCode() == i:
+                     set_massiveParticles.add(particle.getPDGCode())
+                     set_massiveParticles.add(-particle.getPDGCode())
+
+            for n in model.particles:
+                  particle=model.particles[n]
+                  if not particle.getPDGCode() in set_massiveParticles \
+                        and abs(particle.getPDGCode()) in possible_massless_particles:
+                     mass=particle.getMass()
+                     if mass !="0" and mass not in list_zero_values:
+                        list_zero_values.append(mass)
+                     width=particle.getWidth()
+                     if width !="0" and width not in list_zero_values:
+                        list_zero_values.append(width)
+         if list_zero_values:
+            if lconf["zero"]:
+               lconf["zero"]= lconf["zero"] + "," + ",".join(list_zero_values)
+            else:
+               lconf["zero"] = ",".join(list_zero_values)
+
+         lconf["__massiveParticles__"]=None
+
+      #---#] Setup excluded and massive particles :
+
 
       #---#[ Setup couplings :
 
-      qcd_name, qed_name, all_couplings = derive_coupling_names(imodel_path,
-            conf)
-      qgraf_power = get_qgraf_power(conf)
+      for lconf in [conf] + subprocesses_conf:
+         qcd_name, qed_name, all_couplings = derive_coupling_names(imodel_path,
+               lconf)
+         qgraf_power = get_qgraf_power(lconf)
 
-      if len(qgraf_power) == 0:
-         contract_file.setPropertyResponse("CorrectionType",
-               ["Error:", "Wrong or missing entries in",
-                  "CorrectionType, AlphaPower or AlphasPower"])
-         file_ok = False
-      else:
-         conf[golem.properties.qgraf_power] = ",".join(map(str,qgraf_power))
+         if len(qgraf_power) == 0:
+            contract_file.setPropertyResponse("CorrectionType",
+                  ["Error:", "Wrong or missing entries in",
+                     "CorrectionType, AlphaPower or AlphasPower"])
+            file_ok = False
+         else:
+            lconf[golem.properties.qgraf_power] = ",".join(map(str,qgraf_power))
 
-      if "olp.operationmode" in conf:
-         strip_couplings = "CouplingsStrippedOff" in \
-               conf.getListProperty("olp.operationmode")
-      else:
-         strip_couplings = False
+         if "olp.operationmode" in lconf:
+            strip_couplings = "CouplingsStrippedOff" in \
+                  lconf.getListProperty("olp.operationmode")
+         else:
+            strip_couplings = False
 
-      if strip_couplings:
-         ones = conf.getListProperty(golem.properties.one)
-         for coupling in all_couplings:
-            if coupling not in ones:
-               ones.append(coupling)
-         conf[golem.properties.one] = ",".join(ones)
+         if strip_couplings:
+            ones = lconf.getListProperty(golem.properties.one)
+            for coupling in all_couplings:
+               if coupling not in ones:
+                  ones.append(coupling)
+            lconf[golem.properties.one] = ",".join(ones)
+            conf["nlo_prefactors"] = 0
       #---#] Setup couplings :
       #---#[ Select regularisation scheme:
-      ir_scheme = conf["olp.irregularisation"]
-      ext = conf.getListProperty(golem.properties.extensions)
-      uext = map(lambda s: s.upper(), ext)
-      if ir_scheme == "DRED":
-         if "DRED" not in uext:
-            ext.append("DRED")
-            conf[golem.properties.extensions] = ",".join(ext)
-      if ir_scheme == "CDR":
-         if "DRED" not in uext:
-            ext.append("DRED")
-            conf[golem.properties.extensions] = ",".join(ext)
-      else:
-         if "DRED" in uext:
-            i = uext.index("DRED")
-            golem.util.tools.warning(
-                  ("'%s' removed from extensions. " % ext[i]) +
-                  "Inconsistent with order file")
-            del ext[i]
-            conf[golem.properties.extensions] = ",".join(ext)
+      for lconf in [conf] + subprocesses_conf:
+         ir_scheme = lconf["olp.irregularisation"]
+         ext = lconf.getListProperty(golem.properties.extensions)
+         uext = map(lambda s: s.upper(), ext)
+         if ir_scheme == "DRED":
+            if "DRED" not in uext:
+               lconf["olp."+str(golem.properties.extensions)] = "DRED"
+         if ir_scheme == "CDR":
+            if "DRED" not in uext:
+               lconf["olp."+str(golem.properties.extensions)] = "DRED"
+         else:
+            if "DRED" in uext:
+               i = uext.index("DRED")
+               golem.util.tools.warning(
+                     ("'%s' removed from extensions. " % ext[i]) +
+                     "Inconsistent with order file")
+               del ext[i]
+               lconf[golem.properties.extensions] = ",".join(ext)
       #---#] Select regularisation scheme:
    if "olp.massiveparticlescheme" in conf:
       golem.util.tools.warning("UV-counterterms for massive particles are not "
@@ -445,11 +592,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    subprocesses = {}
    subprocesses_flav = {}
 
+   subprocesses_conf_short = []
+
    if file_ok:
-      for id, inp, outp in contract_file.processes():
+      for lineno,id, inp, outp in contract_file.processes_ordered():
          subprocess, is_new = getSubprocess(
                olp_process_name, id, inp, outp, subprocesses, subprocesses_flav, model,
-               use_crossings)
+               use_crossings, subprocesses_conf[id])
          if is_new:
             subdir = str(subprocess)
             process_path = os.path.join(path, subdir)
@@ -458,7 +607,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                try:
                   os.mkdir(process_path)
                except IOError as err:
-                  error(str(err))
+                  golem.util.tools.error(str(err))
 
       # Now we run the loop again since all required crossings are added
 
@@ -467,56 +616,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
       for subprocess in subprocesses.values():
          process_path = subprocess.getPath(path)
-## -- gio start
-         key = subprocess.getkey()
-         conf["symmetries"] = start_symmetries
-         if conf["modeltype"] == 'sm' or conf["modeltype"] == 'smdiag' or conf["modeltype"] == 'smehc':
-            # check D,Dbar
-            if key.count('D')*10+key.count('Dbar') == 1 and 'mD' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-1=+"
-            elif key.count('D')*10+key.count('Dbar') == 10  and 'mD' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %1=-"
-            # check U,Ubar
-            if key.count('U')*10+key.count('Ubar') == 1  and 'mU' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-2=+"
-            elif key.count('U')*10+key.count('Ubar') == 10  and 'mU' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %2=-"
-            # check S,Sbar
-            if key.count('S')*10+key.count('Sbar') == 1 and 'mS' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-3=+"
-            elif key.count('S')*10+key.count('Sbar') == 10  and 'mS' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %3=-"
-            # check C,Cbar
-            if key.count('C')*10+key.count('Cbar') == 1  and 'mC' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-4=+"
-            elif key.count('C')*10+key.count('Cbar') == 10  and 'mC' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %4=-"
-            # check B,Bbar
-            if key.count('B')*10+key.count('Bbar') == 1 and 'mB' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-5=+"
-            elif key.count('B')*10+key.count('Bbar') == 10  and 'mB' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %5=-"
-            # check T,Tbar
-            if key.count('T')*10+key.count('Tbar') == 1  and 'mT' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %-6=+"
-            elif key.count('T')*10+key.count('Tbar') == 10  and 'mT' in conf[golem.properties.zero]:
-               conf["symmetries"] += ", %6=-"
-            # neutrinos:
-            if key.count('ne') != 0: 
-               conf["symmetries"] += ", %12=-"
-            if key.count('nmu') != 0: 
-               conf["symmetries"] += ", %14=-"
-            if key.count('ntau') != 0: 
-               conf["symmetries"] += ", %16=-"
-            if key.count('nebar') != 0: 
-               conf["symmetries"] += ", %-12=+"
-            if key.count('nmubar') != 0: 
-               conf["symmetries"] += ", %-14=+"
-            if key.count('ntaubar') != 0: 
-               conf["symmetries"] += ", %-16=+"                  
-## -- gio end
-
-         subprocess_conf = subprocess.getConf(conf, path)
+         subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
          subprocess_conf["golem.name"] = "GoSam"
          subprocess_conf["golem.version"] = ".".join(map(str,
             golem.installation.GOLEM_VERSION))
@@ -528,6 +628,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
          try:
             golem.util.main_misc.workflow(subprocess_conf)
+            merge_extensions(subprocess_conf,conf)
+
             golem.util.main_misc.generate_process_files(subprocess_conf,
                   from_scratch)
 
@@ -560,10 +662,12 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             result = 1
             for id in subprocess.getIDs():
                contract_file.setProcessError(id, "Error: %s" % err)
+
+         subprocesses_conf_short.append(subprocess_conf)
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")
-   f_contract.write("#@OLP GOLEM %s\n" % ".".join(map(str,
+   f_contract.write("#@OLP GoSam %s\n" % ".".join(map(str,
       golem.installation.GOLEM_VERSION)))
    f_contract.write("#@IgnoreUnknown %s\n" % ignore_unknown)
    f_contract.write("#@IgnoreCase %s\n" % ignore_case)
@@ -583,13 +687,26 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if templates == "":
       templates = golem.util.tools.golem_path("olp", "templates")
 
+   ext = golem.properties.getExtensions(conf)
+   if "shared" in ext:
+      conf["shared.fcflags"]="-fPIC"
+      conf["shared.ldflags"]="-fPIC"
+
+   # This fills in the defaults where no option is given:
+   for p in golem.properties.properties:
+		if conf.getProperty(p):
+			conf.setProperty(str(p), conf.getProperty(p))
+
    golem.properties.setInternals(conf)
+
 
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(True),
          conf=conf,
          subprocesses=list(subprocesses.values()),
+         subprocesses_conf=subprocesses_conf_short,
          contract=contract_file,
          user="olp")
+
    #---#] Process global templates:
    return result
 
@@ -611,13 +728,16 @@ def mc_specials(conf, order_file):
       pass
 
    required_extensions = []
-      
+
    if mc_name.startswith("powheg"):
       required_extensions.extend(["f77"])
       required_extensions.extend(["olp_badpts"])
    elif mc_name.startswith("sherpa"):
       required_extensions.extend(["autotools"])
    elif mc_name.startswith("whizard"):
+      required_extensions.extend(["autotools"])
+   elif mc_name.startswith("amcatnlo"):
+      required_extensions.extend(["f77"])
       required_extensions.extend(["autotools"])
 
    extensions = golem.properties.getExtensions(conf)
@@ -627,4 +747,20 @@ def mc_specials(conf, order_file):
          add_extensions.append(ext)
    if len(add_extensions) > 0:
       conf.setProperty("%s-auto.extensions" % mc_name,
+            ",".join(add_extensions))
+
+def merge_extensions(conf_a,conf_b):
+   """ merge extensions from conf_a into conf_b """
+
+   extensions_a = golem.properties.getExtensions(conf_a)
+   extensions_b = golem.properties.getExtensions(conf_b)
+
+   add_extensions=[]
+   if conf_b.getProperty("merge-auto.extensions"):
+      add_extensions=conf_b.getProperty("merge-auto.extensions").split(",")
+   for ext in extensions_a:
+      if ext and ext not in extensions_b and ext not in add_extensions:
+         add_extensions.append(ext)
+   if add_extensions:
+      conf_b.setProperty("merge-auto.extensions",
             ",".join(add_extensions))

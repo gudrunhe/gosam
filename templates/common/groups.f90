@@ -158,6 +158,9 @@
    public :: update_flags
    private :: update_virt_flags[%
    @end @if %][%
+@end @if %][%
+@if extension ninja %]
+   public :: ninja_exit[%
 @end @if %]
 contains[%
 
@@ -763,12 +766,15 @@ end function numetens_group[% grp %]
 !-----#[ subroutine reduce_numetens_group[% grp %]:
 subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    use msamurai, only: [%
-   @if version_newer samurai.version 2.0 %]samurai_rm, samurai_cm[%
-   @else %]samurai[%
-   @end @if %][%
-   @if version_newer samurai.version 2.1 %]
+   @if version_newer samurai.version 2.8 %]samurai
+   use mgetkin, only: s_mat[%
+   @else %][%
+    @if version_newer samurai.version 2.0 %]samurai_rm, samurai_cm[%
+    @else %]samurai[%
+    @end @if %][%
+    @if version_newer samurai.version 2.1 %]
    use madds, only: s_mat[%
-   @end @if %]
+   @end @if %][% @end @if %]
    use options, only: samurai_out => iout
    use [% process_name asprefix=\_ %]config, only: samurai_group_numerators, &
       samurai_istop, samurai_verbosity
@@ -863,14 +869,17 @@ subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    @end @if %]
 
    if(samurai_verbosity > 0) then
-      write(samurai_out,*) "[golem-2.0] numetens_group[% grp %]"
-      write(samurai_out,*) "[golem-2.0] epspow=", epspow
+      write(samurai_out,*) "[GoSam] numetens_group[% grp %]"
+      write(samurai_out,*) "[GoSam] epspow=", epspow
    end if
-   call samurai[%
+   call samurai[% @if version_newer samurai.version 2.8 %][% @else %][%
    @if version_newer samurai.version 2.1 %][%
       @if complex_mass_needed group=grp %]_cm[% @else %]_rm[%
-      @end @if %][%
-   @end @if %](numetens_group[% grp %], tot, totr, Vi, msq, [%
+      @end @if %][% @end @if%][%
+   @end @if %](numetens_group[% grp %], tot, totr, Vi, [%
+   @if version_newer samurai.version 2.8 %][% @if complex_mass_needed group=grp %]msq, [% @else
+   %]cmplx(msq,0._ki_sam,ki_sam), [% @end @if %][% @else
+   %]msq, [% @end @if %][%
       loopsize group=grp %], &
       & effective_group_rank, samurai_istop, scale2, ok)[%
    @if version_newer samurai.version 2.1 %]
@@ -901,18 +910,18 @@ subroutine     tear_down_golem95()
    end if
 end subroutine tear_down_golem95
 !---#] subroutine tear_down_golem95:[%
+@end @if extension golem95 %][%
    @if extension ninja %]
 !---#[ subroutine ninja_exit:
 subroutine ninja_exit()
-  use ninja_module, only: ninja_clear_cache
+  use ninjago_module, only: ninja_clear_integral_cache
   implicit none
-  !------#[ call ninja_clear_cache():
-  call ninja_clear_cache()
-  !------#] call ninja_clear_cache():
+  !------#[ call ninja_clear_integral_cache():
+  call ninja_clear_integral_cache()
+  !------#] call ninja_clear_integral_cache():
 end subroutine ninja_exit
 !---#] subroutine ninja_exit:[%
    @end @if extension ninja %][%
-@end @if extension golem95 %][%
 @if extension pjfry %]
 function pga10(b_set, ep)
    use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf

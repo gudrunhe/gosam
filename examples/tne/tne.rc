@@ -1,5 +1,5 @@
 process_name=tne
-process_path=ngolem
+process_path=virtual
 
 in=g, b
 out=e-, nebar, t
@@ -17,4 +17,4 @@ qgraf.verbatim=\\\n\
      true = iprop[phim,phip,chi,H,0,0];\\n\\\n\
      true = iprop[Wp,1,1];
 
-#process.extensions= fr5
+regularisation_scheme=cdr

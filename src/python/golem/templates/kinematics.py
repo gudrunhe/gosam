@@ -6,6 +6,7 @@ import golem.util.tools
 
 from golem.util.config import Properties
 import golem.util.parser
+from golem.model import MODEL_OPTIONS
 
 class KinematicsTemplate(golem.util.parser.Template):
    """
@@ -23,9 +24,14 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._ones = ones
 
       self._model = golem.util.tools.getModel(conf)
+      self._modeltype =  conf.getProperty("modeltype")
+      if not self._modeltype:
+         self._modeltype = conf.getProperty("model")
+
 
       props = Properties()
       props["order"] = conf[golem.properties.qgraf_power]
+      props.setProperty("modeltype", self._modeltype)
 
       num_in   = len(in_particles)
       num_out  = len(out_particles)
@@ -60,14 +66,36 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._tree_signs = tree_signs
       # self._tree_flows = tree_flows
       self._crossings = []
+      self._charge = []
 
       self._msubs_stack = []
+      
+
+      self._listed_flags=set()
+      self._listed_flags_length=0
 
       for i, crossing in enumerate(
             conf.getProperty(golem.properties.crossings)):
          if ":" in crossing:
             pos = crossing.index(":")
             self._crossings.append(crossing[:pos].strip())
+            
+      def get_qed_sign(pdg,sign):
+	if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
+	  qed_sign=1
+	elif (pdg>0 and pdg<20 and sign <0) or (pdg<0 and pdg>-20 and sign>0):
+	  qed_sign=-1
+	elif pdg==24:
+	  qed_sign=-1
+	elif pdg==-24:
+	  qed_sign=1
+	else:
+	  qed_sign=0
+	
+	return qed_sign
+	  
+	
+	
 
       def examine_particle(p, sign):
          mass    = p.getMass(zeroes)
@@ -75,9 +103,33 @@ class KinematicsTemplate(golem.util.parser.Template):
          color   = sign * p.getColor()
          acolor  = p.getColor()
          latex   = p.getLaTeXName()
-
+         charge  = p.getCharge()
+        
          self._masses.append(mass)
          self._latex.append(latex)
+         
+         qed_sign=get_qed_sign(p.getPDGCode(),sign)
+         self._charge.append(qed_sign*charge)
+         #if p.getPDGCode() > 0:
+	   #if p.getField().lower()=='u' or p.getField().lower()=='c' or p.getField().lower()=='t':
+             #self._charge.append(-charge*sign)
+           #elif p.getField().lower()=='d' or p.getField().lower()=='s' or p.getField().lower()=='b':
+	     #self._charge.append(charge*sign)
+	   #elif p.getPDGCode()==24:
+	     #self._charge.append(-charge*sign)
+	   #else:
+	     #self._charge.append(charge*sign)	     
+         #else:
+	   #if p.getField().lower()=='ubar' or p.getField().lower()=='cbar' or p.getField().lower()=='tbar':
+             #self._charge.append(charge*sign)
+           #elif p.getField().lower()=='dbar' or p.getField().lower()=='sbar' or p.getField().lower()=='bbar':
+	     #self._charge.append(-charge*sign)
+	   #elif p.getPDGCode()==-24:
+	     #self._charge.append(-charge*sign)
+	   #else:
+	     #self._charge.append(-charge*sign)	 
+	   
+
 
          self._lightlike.append(not p.isMassive(zeroes))
 
@@ -118,6 +170,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       props.setProperty("in_helicities",
             golem.util.tools.product(map(len,self._helicities[:num_in])))
       props.setProperty("symmetry_factor", symmetry_factor)
+      props.setProperty("charge", self._charge)
 
       # predict the number of colors:
       F = 0
@@ -529,14 +582,20 @@ class KinematicsTemplate(golem.util.parser.Template):
       color_name = self._setup_name("color", prefix + "color", opts)
       latex_name = self._setup_name("latex", prefix + "latex", opts)
       reference_name = self._setup_name("reference", prefix + "reference", opts)
+      n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
+      n_sc1=self._setup_name("n_sc1", prefix + "n_sc1", opts) 
+      charge_name =self._setup_name("charge", prefix + "charge", opts)
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
 
       is_first = True
       base = 1
+      nsc=-1
+      
 
       color_filter = []
       spin_filter = []
+      charge_filter = []
 
       if "white" in args:
          color_filter.extend([1, -1])
@@ -569,6 +628,8 @@ class KinematicsTemplate(golem.util.parser.Template):
          spin_filter.extend([-4,-2,0,2,4])
       if "fermion" in args:
          spin_filter.extend([-3,-1,3,1])
+      if "charged" in args:
+	 charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
 
       if len(spin_filter) == 0:
          spin_filter = [-4,-3,-2,-1,0,1,2,3,4]
@@ -601,6 +662,10 @@ class KinematicsTemplate(golem.util.parser.Template):
          tspin = self._twospin[index]
          if tspin not in spin_filter:
             continue
+	  
+	 charge = self._charge[index]
+	 #if charge not in charge_filter:
+	   #continue
 
          props.setProperty(first_name, is_first)
          is_first = False
@@ -612,6 +677,7 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(lightlike_name, self._lightlike[index])
          props.setProperty(massive_name, not self._lightlike[index])
          props.setProperty(ini_name, index < self._num_in)
+         props.setProperty(charge_name, charge)
          if index >= self._num_in:
             props.setProperty(out_index_name, index + base - self._num_in)
          else:
@@ -640,6 +706,10 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          props.setProperty(fin_name, index >= self._num_in)
          props.setProperty(color_name, color)
+         nsc+=2
+         nsc1=nsc+1
+         props.setProperty(n_sc, nsc)
+         props.setProperty(n_sc1, nsc1)         
          yield props
 
    def pairs(self, *args, **opts):
@@ -687,10 +757,17 @@ class KinematicsTemplate(golem.util.parser.Template):
             prefix + "reference2", opts)
       latex2_name = self._setup_name("latex2",
             prefix + "latex2", opts)
+      n_color_corr=self._setup_name("n_color_corr", prefix + "n_color_corr", opts)
+      n_sc=self._setup_name("n_sc", prefix + "n_sc", opts)
+      charge1_name = self._setup_name("charge1", prefix + "charge1",opts)
+      charge2_name = self._setup_name("charge2", prefix + "charge2",opts)
+      photon1_name = self._setup_name("photon1", prefix + "photon1",opts)
 
       first_name = self._setup_name("first", prefix + "is_first", opts)
       is_first = True
       base = 1
+      nres=0
+      nsc=-3
 
       color1_filter = []
       if "white1" in args:
@@ -726,6 +803,19 @@ class KinematicsTemplate(golem.util.parser.Template):
       if len(color2_filter) == 0:
          color2_filter = [1, -1, 3, -3, 8, -8]
 
+      charge1_filter = []
+      if "charged1" in args:
+	charge1_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+		     
+      charge2_filter = []
+      if "charged2" in args:
+	charge2_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])	
+	
+      photon1_filter = []
+      if "photon1" in args:
+	photon1_filter.extend(["A"])
+
+
       props = Properties()
 
       if "initial1" in inout1_filter:
@@ -759,6 +849,14 @@ class KinematicsTemplate(golem.util.parser.Template):
          color1 = self._color[index1]
          if color1 not in color1_filter:
             continue
+	  
+         charge1= self._charge[index1]
+         #if charge1 not in charge1_filter:
+	   #continue
+	 
+	 photon1= self._field_info[index1][0]	  
+	 #if photon1 not in photon1_filter:
+	   #continue
 
          props.setProperty(index1_name, index1 + base)
          props.setProperty(mass1_name, self._masses[index1])
@@ -770,6 +868,8 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(fin1_name, index1 >= self._num_in)
          props.setProperty(color1_name, color1)
          props.setProperty(latex1_name, self._latex[index1])
+         props.setProperty(charge1_name,charge1)
+         props.setProperty(photon1_name,photon1)
          if index1 >= self._num_in:
             props.setProperty(out_index1_name, index1 + base - self._num_in)
          else:
@@ -814,6 +914,10 @@ class KinematicsTemplate(golem.util.parser.Template):
             color2 = self._color[index2]
             if color2 not in color2_filter:
                continue
+	     
+            charge2= self._charge[index2]
+            #if charge2 not in charge2_filter:
+	      #continue
 
             if index2 >= self._num_in:
                props.setProperty(out_index2_name,
@@ -851,6 +955,13 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty(color2_name, color2)
             props.setProperty(first_name, is_first)
             props.setProperty(latex2_name, self._latex[index2])
+            props.setProperty(charge2_name,charge2)
+#            props.setProperty(n_color_corr, index2+1+(self._num_legs)*(index1)-index1*(index1-1)/2-index1)
+            if index1 != index2:
+              nsc+=4
+              nres+=1                          
+            props.setProperty(n_color_corr, nres)              
+            props.setProperty(n_sc, nsc)
             is_first = False
             yield props
 
@@ -1928,3 +2039,128 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          yield props
          prev = idx
+
+   def olp_spin_correlated_twist(self, *args, **opts):
+       index_name = self._setup_name("index", "index", opts)
+       var_name = self._setup_name("var", "$_", opts)
+       sign_name = self._setup_name("sign", "sign", opts)
+       crossed_particles = [prop.getIntegerProperty("$_") for prop in self.crossing()]
+       orig_particles = [prop.getIntegerProperty("index") for prop in self.crossing()]
+       gluons = [prop.getIntegerProperty("index") for prop in self.particles("gluons")]
+       colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
+       
+       for i in range(len(crossed_particles)):
+          if not crossed_particles[i] in gluons:
+	     continue
+          orig_pos_ii = orig_particles[i]-1
+          cros_pos_ii = crossed_particles[i]-1
+          for j in range(len(crossed_particles)):
+             if not crossed_particles[j] in colored:
+                continue
+             if i == j:
+                continue
+             orig_pos_jj = orig_particles[j]-1
+             cros_pos_jj =crossed_particles[j]-1
+             sign_temp='+'
+             if (orig_pos_ii>1 and cros_pos_ii<=1) or (orig_pos_ii<=1 and cros_pos_ii>1):
+                sign_temp='-'
+             props = Properties()
+             props.setProperty(var_name, str(2*(orig_pos_ii + orig_pos_jj*self._num_legs)+1))
+             props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+1))
+             props.setProperty(sign_name,'+' )
+             yield props
+             props.setProperty(var_name, str(2*(orig_pos_ii+ orig_pos_jj*self._num_legs )+2))
+             props.setProperty(index_name, str(2*(cros_pos_ii + cros_pos_jj*self._num_legs)+2))
+             props.setProperty(sign_name,sign_temp )
+             yield props
+
+   def olp_color_correlated_twist(self, *args, **opts):
+      def calcpos(ix,jx):
+         if ix<jx:
+           ##return ix-1+(jx-1)*(jx-2)//2 +1
+           return ix+jx*(jx-1)//2
+         else:
+           ##return jx-1+(ix-1)*(ix-2)//2 +1
+           return jx+ix*(ix-1)//2
+
+
+             
+
+      index_name = self._setup_name("index", "index", opts)
+      var_name = self._setup_name("var", "$_", opts)
+      crossed_particles = [prop.getIntegerProperty("$_") for prop in self.crossing()]
+      orig_particles = [prop.getIntegerProperty("index") for prop in self.crossing()]
+      colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
+      #crossed_colored = list(crossed_particles)
+      #for i in crossed_particles:
+	#if i not in colored:
+	 # del crossed_colored[crossed_colored.index(i)]
+     
+      #for i in range(len(colored)-1):
+	#for j in range(i+1,len(colored)):
+	 # if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
+	  #  props=Properties()
+	   # props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
+	    #props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
+	    #yield props
+
+      for i in range(len(crossed_particles)):
+          if not crossed_particles[i] in colored:
+             continue
+          orig_pos_ii = orig_particles[i]-1
+          for j in range(len(crossed_particles)):
+             if not crossed_particles[j] in colored:
+                continue
+             if i >= j:
+                   continue
+             orig_pos_jj = orig_particles[j]-1
+             props = Properties()
+             props.setProperty(index_name, str(calcpos(crossed_particles[i]-1,crossed_particles[j]-1)+1))
+             props.setProperty(var_name, str(calcpos(orig_pos_ii,orig_pos_jj)+1))
+             yield props
+      
+
+   def ewchoose(self, *args, ** opts):
+      return golem.model.MODEL_OPTIONS["ewchoose"]
+
+   def starting_choice(self, *args, ** opts):
+      if self.e_not_one(args,opts):
+         if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+            return '2'
+         else:
+            return golem.model.MODEL_OPTIONS["users_choice"]
+      else:
+         if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+            return '2'
+         else:
+            return golem.model.MODEL_OPTIONS["users_choice"]
+
+   def e_not_one(self, *args, ** opts):
+      ones = golem.model.MODEL_ONES
+      if "e" in ones:
+         e_not_one = False
+      else:
+         e_not_one = True
+      return e_not_one
+
+   def flags_filter(self, *args, **opts):
+      assert args == ("$_",)
+      flags=self._stack[-1]["$_"]
+      ret=""
+      for f in flags.split():
+         if f not in self._listed_flags:
+            self._listed_flags_length += len(f)
+            if self._listed_flags_length > 80:
+               self._listed_flags_length=0
+               ret = ret + "\\\n "
+               self._listed_flags_length += len(f)
+            ret = ret + f + " "
+            self._listed_flags.add(f)
+      if self._stack[-1]["is_last"]=="True":
+         ret=ret.rstrip()
+      return ret
+
+   def reset_flags_filter(self, *args, **opts):
+      self._listed_flags=set()
+      self._listed_flags_length=0
+      return ""

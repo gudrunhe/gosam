@@ -4,6 +4,7 @@ import os
 import os.path
 import imp
 import StringIO
+import hashlib
 
 from time import gmtime, strftime
 
@@ -30,7 +31,7 @@ from golem.util.config import GolemConfigError
 # The following files contain routines which originally were
 # part of golem-main itself:
 from golem.util.main_qgraf import *
-from golem.installation import GOLEM_VERSION
+from golem.installation import GOLEM_VERSION, GOLEM_REVISION
 
 def create_ff_files(conf, in_particles, out_particles):
 	legs = len(in_particles) + len(out_particles)
@@ -62,6 +63,13 @@ def generate_process_files(conf, from_scratch=False):
 	This routine is a wrapper around anything that needs to be done
 	for creating a new process.
 	"""
+	# properties will be filled later:
+	props = golem.util.config.Properties()
+
+	# This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		props.setProperty(str(p), conf.getProperty(p))
+
 	golem.properties.setInternals(conf)
 
 	path = golem.util.tools.process_path(conf)
@@ -71,15 +79,6 @@ def generate_process_files(conf, from_scratch=False):
 
 	if templates is None or len(templates) == 0:
 		templates = golem_path("templates")
-
-	extensions = golem.properties.getExtensions(conf)
-
-	# properties will be filled later:
-	props = golem.util.config.Properties()
-
-	# This fills in the defaults where no option is given:
-	for p in golem.properties.properties:
-		props.setProperty(str(p), conf.getProperty(p))
 
 	for name in conf:
 		props[name] = conf[name]
@@ -239,6 +238,9 @@ def write_template_file(fname, defaults, format=None):
 	for prop in golem.properties.properties:
 		if prop.isExperimental():
 			continue
+		if prop.isHidden():
+			continue
+
 
 		if prop.getType() == str:
 			stype = "text"
@@ -332,19 +334,28 @@ def read_golem_dir_file(path):
 		f.close()
 
 		ver = map(int,result["golem-version"].split("."))
+
+		# be compatible between internal 1.99 releases and 2.0.*
+		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
+			return result
+
+		# be compatible to older 2.0.* releases
+		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:2]+[0]*5)[:3]:
+			return result
+
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
 			if gv > v:
 				raise GolemConfigError(
 						"This directory has been generated with an older version "+
-						"of golem (%s).\n" % result["golem-version"]+
+						"of GoSam (%s).\n" % result["golem-version"]+
 						"Please, remove all files, including '.golem.dir' "+
-						"and rerun golem-main.py.")
+						"and rerun gosam.py.")
 			elif gv < v:
 				raise GolemConfigError(
 						"This directory has been generated with a newer version "+
-						"of golem (%s).\n" % result["golem-version"]+
+						"of GoSam (%s).\n" % result["golem-version"]+
 						"Please, remove all files, including '.golem.dir' "+
-						"and rerun golem-main.py.")
+						"and rerun gosam.py.")
 
 	return result
 
@@ -361,7 +372,10 @@ def write_golem_dir_file(path, fname, conf):
 	"""
 	dir_info = golem.util.config.Properties()
 	dir_info["setup-file"] = os.path.abspath(fname)
+	if os.path.exists(os.path.abspath(fname)):
+		dir_info["setup-file-sha1"] = hashlib.sha1(open(os.path.abspath(fname)).read()).hexdigest()
 	dir_info["golem-version"] = ".".join(map(str, GOLEM_VERSION))
+	dir_info["golem-revision"] =  str(GOLEM_REVISION)
 	dir_info["process-name"] = conf.getProperty(golem.properties.process_name)
 	dir_info["time-stamp"] = \
 			strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
@@ -432,8 +446,38 @@ def workflow(conf):
 	conf.setProperty("user.setup", buf.getvalue())
 	buf.close()
 
+	# properties will be filled later:
+	props = golem.util.config.Properties()
 
-	# Check if path exists. If it doesn't, raise an exception
+	experimentals = map(str,
+			filter(lambda p: p.isExperimental(), golem.properties.properties))
+	for name in conf:
+		if name in experimentals:
+			warning(
+				("Your configuration sets the property %r " % name) +
+				"which is an undocumented and only partially tested feature.",
+				"Please, feel free to test this feature but be aware that",
+				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
+
+
+	# This fills in the defaults where no option is given:
+	for p in golem.properties.properties:
+		if conf.getProperty(p):
+			conf.setProperty(str(p), conf.getProperty(p))
+
+	if not conf["extensions"] and props["extensions"]:
+		conf["extensions"]=props["extensions"]
+
+	tmp_ext = golem.properties.getExtensions(conf)
+
+	for p in conf["reduction_programs"].split(","):
+		if not p in tmp_ext:
+			if conf["gosam-auto-reduction.extensions"]:
+				conf["gosam-auto-reduction.extensions"] = p + "," + conf["gosam-auto-reduction.extensions"]
+			else:
+				conf["gosam-auto-reduction.extensions"]  = p
+
+	# Check if path exists. If it doesn't, try to create it
 	if not os.path.exists(path):
 		try:
 			rp=os.path.relpath(path)
@@ -478,6 +522,10 @@ def workflow(conf):
 			if red in ext:
 				red_flag = True
 				break
+		if "pjfry" in ext and not "golem95" in ext:
+			golem.util.tools.warning("The PJFRY interface needs Golem95 routines.",
+					"Golem95 is automatically added to reduction_programs.")
+			conf["gosam-auto-reduction.extensions"] = "golem95"
 		if not red_flag:
 			golem.util.tools.warning(
 					"Generating code for the virtual part without specifying",
@@ -485,7 +533,16 @@ def workflow(conf):
 					"Please, make sure that at least one of the following",
 					"is added to 'extensions':",
 					", ".join(golem.properties.REDUCTION_EXTENSIONS),)
-			conf["gosam-auto.extensions"] = "samurai"
+			conf["gosam-auto-reduction.extensions"] = "ninja,golem95"
+	if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
+			conf["gosam-auto-reduction.extensions"]=""
+
+	if not conf["reduction_interoperation"]:
+		conf["reduction_interoperation"]=-1
+
+	if not conf["reduction_interoperation_rescue"]:
+		conf["reduction_interoperation_rescue"]=-1
+
 
 	if len(ini) > 2:
 		warning("You specified a process with %d incoming particles." %
@@ -496,34 +553,55 @@ def workflow(conf):
 				"",
 				"====== BUT WE DON'T GUARANTEE FOR ANYTHING! =====")
 
-	experimentals = map(str,
-			filter(lambda p: p.isExperimental(), golem.properties.properties))
-	for name in conf:
-		if name in experimentals:
-			warning(
-				("Your configuration sets the property %r " % name) +
-				"which is an undocumented and only partially tested feature.",
-				"Please, feel free to test this feature but be aware that",
-				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
-
-	# We need to put out an error if we specify formopt and some other extensions
+	# retrive final extensions from other options
 	ext = golem.properties.getExtensions(conf)
 
+	if "noformopt" not in ext:
+		ext.append("formopt")
+	if "noderive" not in ext:
+		ext.append("derive")
+
+	if "cdr" in ext and "dred" in ext:
+		warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
+
+	if "no-fr5" in ext:
+		warning("no-fr5 is not supported anymore.")
+
+	if not "dred" in ext:
+		ext.append("dred")
+	if conf["regularisation_scheme"]=="cdr" or "cdr" in ext:
+		conf["olp.irregularisation"]="CDR"
+
+
+
+	# We need to put out an error if we specify formopt and some other extensions
 	if 'formopt' in ext:
-		warning("You are Optimizing with Form. This is under development. \n"
-				"Please use Form version >= 4.0. \n ")
 		if 'topolynomial' in ext:
 			raise GolemConfigError(
-						"Your configuaration has select the extension 'topolynomial' \n" 
+						"Your configuaration has select the extension 'topolynomial' \n"
 						"and optimization by FORM 'formopt'. " +
 						"The two options are not compatible. \nPlease change your input " +
-						"card and re-run.")
+						"card (remove topolynomial or add noformopt) and re-run.")
 		if 'r2_only' in ext:
 			raise GolemConfigError(
-						"r2 only not supported with extension formopt\n")
-		if conf["abbrev.level"] != "diagram":	
+						"r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
+		if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
 			raise GolemConfigError(
-						"extension formopt only supported with abbrev.level=diagram\n")
+						"formopt only supported with abbrev.level=diagram\n")
+	if ('ninja' in ext) and ('formopt' not in ext):
+		raise GolemConfigError(
+			"The ninja reduction method is only supported with formopt.\n" +
+			"Please either remove noformopt or ninja in the input card\n")
+
+	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
+	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
+
+	if "shared" in ext:
+		conf["shared.fcflags"]="-fPIC"
+		conf["shared.ldflags"]="-fPIC"
+
+	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
+		ext.append("numpolvec")
 
 
 	for prop in golem.properties.properties:
@@ -531,6 +609,7 @@ def workflow(conf):
 		if len(lines) > 0:
 			warning(*lines)
 
+	conf["extensions"] = ext
 
 	# the following commands will need to import 'model.py'
 	# here we create it:

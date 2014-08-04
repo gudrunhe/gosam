@@ -1,45 +1,54 @@
 
 PROCESS=eeuu
 
-GOLEM=gosam.py
-GOLEM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
+GOSAM=gosam.py
+GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-.PHONY: all golem ntest test clean golem_install
+.PHONY: all gosam test comptest clean gosam_install
 
-all: golem ntest
+all: gosam test
 
-test: ntest
+test: comptest
 	@echo Running test programm
-	$(MAKE) -C ntest test
+	$(MAKE) -C test test
 
-ntest: golem_install
-	$(MAKE) -C ntest compile
+comptest: gosam_install
+	$(MAKE) -C test compile
 
-golem: $(PROCESS).log ngolem/Makefile
-	$(MAKE) -C ngolem
+gosam: $(PROCESS).log virtual/Makefile
+	$(MAKE) -C virtual
 
-golem_install: golem
-	$(MAKE) -C ngolem install
+gosam_install: gosam
+	$(MAKE) -C virtual install
 
-ngolem/Makefile:
-	(cd ngolem && sh ./autogen.sh --prefix="$(shell pwd)")
+virtual/Makefile: $(PROCESS).log
+	(cd virtual && sh ./autogen.sh --prefix="$(shell pwd)" --libdir="$(shell pwd)/lib")
 
 $(PROCESS).log: $(PROCESS).in
-	@echo setting up ngolem ...
-	@if [ ! -d ngolem ]; then mkdir ngolem; fi
-	$(GOLEM) -z $< -l $@
+	@echo setting up virtual ...
+	@if [ ! -d virtual ]; then mkdir virtual; fi
+	$(GOSAM) -z $< -l $@
 
 $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
-	$(GOLEM) $(GOLEM_RC) -t $@
+	$(GOSAM) $(GOSAM_RC) -t $@
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C ntest clean
-	$(MAKE) -C ngolem uninstall
-	$(MAKE) -C ngolem clean
-	rm -f ngolem/.golem.dir
-	rm -f ngolem/Makefile
+	$(MAKE) -C test clean
+	-$(MAKE) -C virtual uninstall
+	-$(MAKE) -C virtual clean
+	rm -f virtual/.golem.dir
+	rm -f virtual/Makefile
 	rm -fr include
-	rm -fr lib
+	rm -fr lib lib64
+
+very-clean:
+	rm -f $(PROCESS).in $(PROCESS).log
+	$(MAKE) -C test clean
+	-$(MAKE) -C virtual uninstall
+	-$(MAKE) -C virtual clean
+	rm -fr virtual
+	rm -fr include
+	rm -fr lib lib64
 

@@ -17,13 +17,13 @@ contains
   !---#[ function customSpin2Prop :
    function customSpin2Prop(s, m) result(ret)
       implicit none
-      real(ki), intent(in) :: s
-      real(ki), intent(in) :: m
+      real(ki), intent(in) :: s ! four-momentum squared
+      real(ki), intent(in) :: m ! mass
       complex(ki) :: ret
 
       ! write here your custom code and delete the next three lines
       ret = 0
-      write (*, *) "customSpin2Prop in kinematics.f90 need to be changed."
+      write (*, *) "customSpin2Prop in custompropagator.f90 need to be changed."
       stop
 
    end function customSpin2Prop

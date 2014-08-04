@@ -1,7 +1,7 @@
 recursive-include templates/     *
 recursive-include models/        *
 recursive-include olp/           *
-recursive-include olp/contrib    *.py *.java *.c *.cpp *.h *.hpp
+recursive-include olp/contrib    *.py *.java *.cpp *.hpp
 include doc/Makefile
 include doc/refman.bib
 include doc/refman.tex
@@ -11,38 +11,44 @@ include doc/lstolp.tex
 include doc/devel.tex
 include doc/lstgosam.tex
 include doc/lsttemplates.tex
-include doc/template.tex
+include doc/blha-guide.tex
+include doc/diagsum1.pdf
+include doc/diagsum2.pdf
+include doc/OLD_BLHA1.tex
 include README
 include COPYING
 include MANIFEST.in
+include PKG-INFO
 include haggies/haggies.jar
-recursive-include examples      README Makefile *.rc ntest/test.f90
-recursive-include examples      ntest/analytic.f90
+recursive-include examples      README Makefile *.rc test/test.f90
+recursive-include examples      test/analytic.f90
 include examples/README
 include examples/setup.in.template
 include examples/summarize.sh
 include examples/runtests.sh
-include examples/gggg/nform/color.frm
-include examples/gggg/nform/square.frm
-include examples/gggg/nform/square.out
-include examples/gggg/nfort/four_gluon.f90
-include examples/gggg_dred/nfort/four_gluon.f90
-include examples/gggg_lhep/nfort/four_gluon.f90
-include examples/WpWpjj/nform/refres.frm
-include examples/eett/nform/square.frm
-include examples/eett/nform/analytic.in
-include examples/eett/nform/analytic.out
-include examples/eett/nform/analytic.f90
-include examples/eett_lhep/nform/square.frm
-include examples/eett_lhep/nform/analytic.in
-include examples/eett_lhep/nform/analytic.out
-include examples/eett_lhep/nform/analytic.f90
+include examples/gggg/form/color.frm
+include examples/gggg/form/square.frm
+include examples/gggg/form/square.out
+include examples/gggg/fort/four_gluon.f90
+include examples/gggg_lhep/fort/four_gluon.f90
+include examples/WpWpjj/form/refres.frm
+include examples/eett/form/square.frm
+include examples/eett/form/analytic.in
+include examples/eett/form/analytic.out
+include examples/eett/form/analytic.f90
+include examples/eett_lhep/form/square.frm
+include examples/eett_lhep/form/analytic.in
+include examples/eett_lhep/form/analytic.out
+include examples/eett_lhep/form/analytic.f90
+include examples/ddeeg/filter.py
+include examples/uu_graviton_yy/custompropagator.f90
 recursive-include examples/model/MSSM_UFO *.py *.log
 recursive-include examples/model/Standard_Model_UFO *.py *.log
 recursive-include examples/model/Standard_Model_LanHep Makefile *.mdl
+recursive-include examples/model/LED_UFO  *.py *.log
 recursive-include src/form  *.hh *.frm *.sty *.nw
 recursive-exclude src       *.pyc *.pyo *~ *.swp .svn
 recursive-exclude olp       *.pyc *.pyo *~ *.swp .svn
 recursive-exclude templates *.pyc *.pyo *~ *.swp .svn
-recursive-exclude models/   *~ *.swp .svn
-recursive-exclude examples/*/ngolem/ *
+recursive-exclude models/   *~ *.swp .svn *.pyc
+recursive-exclude examples/*/virtual *

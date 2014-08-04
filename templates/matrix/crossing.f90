@@ -5,6 +5,7 @@ module [% name asprefix=\_ %]matrix
 
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1, ir_subtraction
+   public :: OLP_spin_correlated_lo2, OLP_color_correlated
    ! TODO:
    ! public :: color_correlated_lo2, spin_correlated_lo2
 
@@ -73,12 +74,13 @@ contains
       endif
    end subroutine exitgolem
 
-   subroutine     samplitude(vecs, scale2, amp, ok, h)
+   subroutine     samplitude(vecs, scale2, amp, prec, ok, h)
       use [% process_name asprefix=\_ %]matrix, only: orig_sub => samplitude
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(4), intent(out) :: amp
+      integer, intent(out) :: prec
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
 
@@ -88,12 +90,12 @@ contains
 
       if (present(ok)) then
          if (present(h)) then
-            call orig_sub(new_vecs, scale2, amp, ok, h)
+            call orig_sub(new_vecs, scale2, amp, prec, ok, h)
          else
-            call orig_sub(new_vecs, scale2, amp, ok)
+            call orig_sub(new_vecs, scale2, amp, prec, ok)
          end if
       else
-         call orig_sub(new_vecs, scale2, amp, ok)
+         call orig_sub(new_vecs, scale2, amp, prec, ok)
       end if
 
       amp = amp * prefactor()
@@ -154,6 +156,44 @@ contains
       amp = amp * prefactor()
    end subroutine ir_subtraction
 
+   subroutine OLP_color_correlated(vecs,ampcc)
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => OLP_color_correlated
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%eval ( num_legs * ( num_legs - 1 ) ) // 2 %]), intent(out) :: ampcc
+
+      real(ki), dimension([%num_legs%], 4) :: new_vecs
+
+      call twist_momenta(vecs, new_vecs)
+
+      call orig_func(new_vecs, ampcc)
+
+      call twist_result_OLP_color_correlated(ampcc)
+      
+      ampcc(:)=ampcc(:)*prefactor()
+
+   end subroutine OLP_color_correlated
+
+
+   subroutine OLP_spin_correlated_lo2(vecs, ampsc)
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => OLP_spin_correlated_lo2
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([% eval 2 * num_legs * num_legs%]) :: ampsc
+
+      real(ki), dimension([%num_legs%], 4) :: new_vecs
+
+      call twist_momenta(vecs, new_vecs)
+
+      call orig_func(new_vecs, ampsc)
+
+      call twist_result_OLP_spin_correlated(ampsc)
+      
+      ampsc(:)=ampsc(:)*prefactor()
+
+   end subroutine OLP_spin_correlated_lo2
+
+
    pure subroutine twist_momenta(vecs, new_vecs)
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -162,5 +202,26 @@ contains
       new_vecs([% $_ %],:) = [%sign%] vecs([% index %],:)[%
 @end @for %]
    end  subroutine twist_momenta
+
+   pure subroutine twist_result_OLP_spin_correlated(ampsc)
+      implicit none
+      real(ki), dimension([% eval 2 * num_legs * num_legs %]), intent(inout) :: ampsc
+      real(ki), dimension([% eval 2 * num_legs * num_legs %]) :: temp
+      temp = ampsc[%
+      @for olp_spin_correlated_twist %]
+      ampsc([% $_ %]) =  [% sign %] temp([% index %])[%
+      @end @for %]
+   end subroutine twist_result_OLP_spin_correlated
+
+   pure subroutine twist_result_OLP_color_correlated(ampcc)
+      implicit none
+      real(ki), dimension([%eval ( num_legs * ( num_legs - 1 ) ) // 2 %]), intent(inout) :: ampcc
+      real(ki), dimension([%eval ( num_legs * ( num_legs - 1 ) ) // 2 %]) :: temp
+      temp = ampcc[%
+      @for olp_color_correlated_twist %]
+      ampcc([% $_ %]) = temp([% index %])[%
+      @end @for %]
+   end subroutine twist_result_OLP_color_correlated
+
 
 end module [% name asprefix=\_ %]matrix

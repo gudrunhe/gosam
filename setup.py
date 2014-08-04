@@ -15,7 +15,7 @@ import os
 import fnmatch
 import fileinput
 
-VERSION = "1.0"
+VERSION = "2.0.0"
 SVN_REVISION = "$Rev$"
 TAR_VERSION = "%s-%d" % (
 		VERSION,
@@ -49,7 +49,7 @@ INFO = {
 			"Natural Language :: English",
 			"Operating System :: POSIX",
 			"Programming Language :: Fortran",
-			"Programming Language :: Python 2.5",
+			"Programming Language :: Python 2.6",
 			"Topic :: Scientific/Engineering :: Physics"
 		],
 		'provides': ["gosam (%s)" % VERSION]
@@ -167,8 +167,8 @@ class install(_install):
 			py_path=self.install_lib
 		replace_text="\n".join([
 			"## added by setup.py:",
-			"import site",
-			"site.addsitedir("+repr(py_path)+")",
+			"import sys",
+			"sys.path=sys.path[:1] + " + repr([py_path]) + " + sys.path[1:]",
 			"## end of 'added by setup.py'",""])
 		logs=[]
 		for line in fileinput.input(installed_scripts,inplace=1):
@@ -205,9 +205,7 @@ if __name__ == "__main__":
 			'golem': 'src/python/golem'
 		},
 		scripts=[
-			'src/python/golem/golem-config.py',
-			'src/python/golem/golem-init.py',
-			'src/python/golem/golem-main.py',
+			'src/python/golem/gosam-config.py',
 			'src/python/golem/gosam.py'
 		],
 		cmdclass={'build_py': build_py,
