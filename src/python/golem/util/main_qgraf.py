@@ -121,13 +121,20 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	# write line: out = ... ;
 	f.write("out = ")
 	comma = False
+	length = 6
 	for p in out_particles:
 		if comma:
 			f.write(", ")
+			length += 2
 		else:
 			comma = True
 		ki += 1
-		f.write("%s[k%d]" % (str(p), ki))
+		s = "%s[k%d]" % (str(p), ki)
+		f.write(s)
+		length += len(s)
+		if length >= 70:
+			f.write("\n")
+			length=0
 
 	# add r-particle if present
 #	if len(r_particles) == 1:
