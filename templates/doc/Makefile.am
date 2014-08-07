@@ -11,16 +11,16 @@ dvi: process.dvi
 if CONFIG_MAKEINDEX
 process.dvi: process.tex gind.ist axodraw.sty
 	@set -e ;\
-	${LATEX} process.tex; while [ `cat process.log \
-		| grep -c Rerun` -gt 0 ]; do ${LATEX} process.tex; done; \
+	${LATEX} process.tex; while grep -q "Rerun to" process.log ; do \
+		${LATEX} process.tex; done; \
 	${MAKEINDEX} process -s gind.ist; \
-	${LATEX} process.tex; while [ `cat process.log \
-		| grep -c Rerun` -gt 0 ]; do ${LATEX} process.tex; done
+	${LATEX} process.tex; while grep -q "Rerun to" process.log ; do \
+		${LATEX} process.tex; done
 else
 process.dvi: process.tex axodraw.sty
 	@set -e ;\
-	${LATEX} process.tex; while [ `cat process.log \
-		| grep -c Rerun` -gt 0 ]; do ${LATEX} process.tex; done
+	${LATEX} process.tex; while grep -q "Rerun to" process.log ; do \
+		${LATEX} process.tex; done
 endif
 
 ########## CONFIG_PS
