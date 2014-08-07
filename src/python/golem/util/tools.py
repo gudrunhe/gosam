@@ -305,6 +305,10 @@ def prepare_model_files(conf, output_path=None):
    if len(model_lst) == 1:
       model = model_lst[0]
       src_path = golem_path("models")
+      # check for local file
+      if os.path.sep in model and all([os.path.exists(os.path.join(rel_path,model + ext)) \
+         for ext in ["", ".py", ".hh"]]):
+         src_path=rel_path
       for ext in ["", ".py", ".hh"]:
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
@@ -387,7 +391,10 @@ def getModel(conf, extra_path=None):
    # --[ EW scheme management:
    models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
    ew_supp = False
-   
+
+   if conf["modeltype"]:
+      conf["modeltype"] = os.path.basename(conf["modeltype"])
+
    if conf["modeltype"] is not None:
       if any(item.startswith(conf["modeltype"]) for item in models_ewsupp):
          ew_supp = True

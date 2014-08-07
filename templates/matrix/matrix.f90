@@ -170,7 +170,7 @@ contains
    @if extension golem95 %]
          call tear_down_golem95()[%
    @end @if %]
-         if(PSP_check.and.PSP_rescue) then
+         if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
             write(42,'(A6)')  "</run>"
             close(unit=42)
          endif
@@ -209,7 +209,7 @@ contains
       amp = ampdef
       ! RESCUE SYSTEM
       if(PSP_check) then
-         call ir_subtraction(vecs, scale2, irp)
+         call ir_subtraction(vecs, scale2, irp, h)
          if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
          else

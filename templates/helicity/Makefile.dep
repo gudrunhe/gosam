@@ -1,8 +1,9 @@
 # vim: ts=3:sw=3
 
-# module dependencies
-OBJEXT ?=o[%
-@for each $(OBJEXT) lo var=O %][%
+OBJEXT ?=o
+OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
+# Module Dependencies:[%
+@for each $(OBJEXTG) var=O %][%
    @if generate_lo_diagrams %][%
       @if group %][%
       @else %]
@@ -123,7 +124,7 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 			@end @if %][%
 @end @for %][%
 
-@for each $(OBJEXT) var=O %][%
+@for each $(OBJEXTG) var=O %][%
    @if generate_lo_diagrams %]
 [% process_name asprefix=\_ %]diagramsh[% helicity %]l0.mod: diagramsl0.[%O%][%
    @for elements topolopy.keep.tree %]
@@ -133,6 +134,25 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 [% process_name asprefix=\_ %]diagramsh[% helicity %]l0fr5.mod: diagramsl0fr5.[%O%][%
 	@end @if %][%
    @end @if generate_lo_diagrams %][%
+	@select r2
+		@case implicit explicit off %][%
+			@if extension samurai %]
+[% process_name asprefix=\_ %]samuraih[%helicity%].mod: samuraih[%helicity%].[%O%][%
+			@end @if extension samurai %][%
+
+		@if extension golem95 %]
+[% process_name asprefix=\_ %]golem95h[%helicity%].mod: golem95h[%helicity%].[%O%][%
+			@end @if extension golem95 %][%
+
+		@if extension ninja %]
+[% process_name asprefix=\_ %]ninjah[%helicity%].mod: ninjah[%helicity%].[%O%] [%
+			@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l131.mod: d[%$_%]h[%helicity%]l131.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l132.mod: d[%$_%]h[%helicity%]l132.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l121.mod: d[%$_%]h[%helicity%]l121.[%O%][%
+			@end @for %][%
+		@end @if extension ninja %][%
+	@end @select %][%
    @if generate_nlo_virt %][%
       @select abbrev.level
       @case helicity %]
@@ -154,25 +174,6 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
          @end @for %][%
       @end @select %][%
 
-	   @select r2
-   	@case implicit explicit off %][%
-      	@if extension samurai %]
-[% process_name asprefix=\_ %]samuraih[%helicity%].mod: samuraih[%helicity%].[%O%][%
-   	   @end @if extension samurai %][%
-
-      	@if extension golem95 %]
-[% process_name asprefix=\_ %]golem95h[%helicity%].mod: golem95h[%helicity%].[%O%][%
-	      @end @if extension golem95 %][%
-
-      	@if extension ninja %]
-[% process_name asprefix=\_ %]ninjah[%helicity%].mod: ninjah[%helicity%].[%O%] [%
-         	@for elements topolopy.keep.virt %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l131.mod: d[%$_%]h[%helicity%]l131.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l132.mod: d[%$_%]h[%helicity%]l132.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l121.mod: d[%$_%]h[%helicity%]l121.[%O%][%
-		@end @for %][%
-	@end @if extension ninja %][%
-	@end @select %][%
    @end @if generate_nlo_virt%][%
 	@if generate_uv_counterterms %]
 [% process_name asprefix=\_ %]diagramscth[% helicity %].mod: diagramsct.[%O%][%
