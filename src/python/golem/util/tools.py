@@ -389,17 +389,17 @@ def getModel(conf, extra_path=None):
    extract_model_options(conf)
 
    # --[ EW scheme management:
-   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
+   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc','smdiagehc']
    ew_supp = False
 
    if conf["modeltype"]:
       conf["modeltype"] = os.path.basename(conf["modeltype"])
 
    if conf["modeltype"] is not None:
-      if any(item.startswith(conf["modeltype"]) for item in models_ewsupp):
+      if any(conf["modeltype"].startswith(item) for item in models_ewsupp):
          ew_supp = True
    if conf["model"] is not None:
-      if any(item.startswith(conf["model"]) for item in models_ewsupp):
+      if any(conf["model"].startswith(item) for item in models_ewsupp):
          ew_supp = True
 
    # Adapt EW scheme to order file request:
