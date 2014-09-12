@@ -48,7 +48,7 @@ contains
       character(len=128) :: line_buf
       character(len=9) :: kw[%
       @if extension golem95 %]
-      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_kfactor
+      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
 
