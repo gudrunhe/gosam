@@ -404,7 +404,8 @@ contains
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
       use [% sp.$_ %]_config, only: ki, PSP_chk_th3, nlo_prefactors
-      use [% sp.$_ %]_model, only: parseline
+      use [% sp.$_ %]_model, only: parseline[% 
+            @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
       @if extension golem95 %]
@@ -434,7 +435,11 @@ contains
       %]) :: amp
       real(kind=c_double), optional :: acc
       logical, optional :: blha1_mode
-      real(kind=ki) :: zero
+      real(kind=ki) :: zero[% 
+      @if eval olp.mc.name ~ "amcatnlo" %]
+      real(kind=ki), parameter :: pi = 3.14159265358979323846264&
+           &3383279502884197169399375105820974944592307816406286209_ki[% 
+      @end @if %]
       integer :: i, prec, orig_nlo_prefactors
       logical :: ok[%
       @select olp.parameters default=NONE
@@ -461,7 +466,11 @@ contains
          if(blha1_mode) then
             ! save nlo_prefactors and restore later
             orig_nlo_prefactors=nlo_prefactors
-            nlo_prefactors=0
+            nlo_prefactors=0[% 
+            @if eval olp.mc.name ~ "amcatnlo" %]
+            ! compute g_s from alpha_s for aMC@NLO
+            gs = 2.0_ki*sqrt(pi)*sqrt(parameters(1))[%
+            @end @if %]
          end if
      end if
 
@@ -503,7 +512,11 @@ contains
          if(prec.lt.PSP_chk_th3) then
             ! Give back a Nan so that point is discarded
             zero = log(1.0_ki)
-            amp(2)= 1.0_ki/zero
+            amp(2)= 1.0_ki/zero[% 
+            @if eval olp.mc.name ~ "amcatnlo" %]
+            ! aMC@NLO cannot handle Nan's
+            amp(2)= 0.0_ki[%
+            @end @if %]
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
