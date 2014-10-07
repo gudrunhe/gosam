@@ -1065,7 +1065,7 @@ contains
         write(*,*) "Error in boost to CMS frame: vecs(1,:) and vecs(2,:) ",&
              &"are not incoming momenta."
         return 
-     else if(p_cms(4).lt.1.0E-08_ki) then
+     else if(abs(p_cms(4)).lt.1.0E-08_ki) then
         return
      else
         s_cms = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
