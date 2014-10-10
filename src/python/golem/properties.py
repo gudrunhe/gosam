@@ -936,8 +936,8 @@ config_PSP_rescue = Property("PSP_rescue",
    Activates Phase-Space Point rescue based on the estimated
    accuracy on the finite part. It needs PSP_check=True.
    The accuracy is estimated using information on the single
-   pole accuracy and the cancellation between cut-constructable
-   part and R2.
+   pole accuracy and on the stability of the finite parte 
+   under rotation of the phase space point.
 
    !!Works only for QCD and with built-in model files!!
    """,
@@ -996,13 +996,10 @@ config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
    Sets the same variable in config.f90
 
-   Threshold on the k-factor to declare a PSP as bad point. According
-   to the verbosity level set, such points are written to a file and
-   not used when the code is interfaced to an external Monte Carlo
-   using the new BLHA standards.
+   Threshold on the k-factor to perform a rotation check on the PSP. 
    !!Works only for QCD and with built-in model files!!
    """,
-   str, 10000)
+   str, 1000)
 
 properties = [
    process_name,
