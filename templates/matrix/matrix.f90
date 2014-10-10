@@ -15,7 +15,7 @@
      & samurai_verbosity, samurai_test, samurai_scalar[%
 @end @if %]
    use [% process_name asprefix=\_ %]kinematics, only: &
-       in_helicities, symmetry_factor, num_legs, adjust_kinematics &
+       in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
    use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -274,7 +274,7 @@ contains
                   vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
                   vecsrot(irot,4) = vecs(irot,4)
                enddo
-               call adjust_kinematics(vecsrot)
+               ! call adjust_kinematics(vecsrot)
                call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
                if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
                   fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
