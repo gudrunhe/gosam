@@ -262,7 +262,7 @@ contains
             ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
             !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
             ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
-            if(spprec2.lt.PSP_chk_th2 &
+            if(spprec2.lt.PSP_chk_th3 &
                  .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then ! DISCARD
                icheck=3
                fpprec2=-10        ! Set -10 as finite part precision
