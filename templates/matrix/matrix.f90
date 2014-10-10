@@ -15,7 +15,7 @@
      & samurai_verbosity, samurai_test, samurai_scalar[%
 @end @if %]
    use [% process_name asprefix=\_ %]kinematics, only: &
-       in_helicities, symmetry_factor, num_legs, &
+       in_helicities, symmetry_factor, num_legs, adjust_kinematics &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
    use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -202,7 +202,7 @@ contains
       angle = 1.234_ki
       fpprec1 = 18
       fpprec2 = 18
-      if(reduction_interoperation.eq.reduction_interoperation_rescue) & 
+      if(reduction_interoperation.eq.reduction_interoperation_rescue) &
            & PSP_rescue=.false.
       tmp_red_int = reduction_interoperation
       call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
@@ -216,19 +216,20 @@ contains
             spprec1 = 16
          endif
          if(ampdef(1) .ne. 0.0_ki) then
-            kfac = ampdef(2)/ampdef(1)
+            kfac = abs(ampdef(2)/ampdef(1))
          else
             kfac = 0.0_ki
          endif
-         if(spprec1.lt.PSP_chk_th1.and.spprec1.gt.PSP_chk_th2) icheck=2 ! ROTATION
-         if(spprec1.lt.PSP_chk_th2) then
-            icheck=3                                                    ! RESCUE
-            fpprec1=-10        ! Set -10 as finite part precision            
+         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
+              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
+         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+            icheck=3
+            fpprec1=-10        ! Set -10 as finite part precision
          endif
          if(icheck.eq.2) then
             do irot = 1,[%num_legs%]
                vecsrot(irot,1) = vecs(irot,1)
-               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle) 
+               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
                vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
                vecsrot(irot,4) = vecs(irot,4)
             enddo
@@ -247,27 +248,33 @@ contains
             icheck=1
             reduction_interoperation = reduction_interoperation_rescue
             call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
+            amp=ampres
             if((ampres(3)-irp(2)) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
             else
                spprec2 = 16
             endif
             if(ampres(1) .ne. 0.0_ki) then
-               kfac = ampres(2)/ampres(1)
+               kfac = abs(ampres(2)/ampres(1))
             else
                kfac = 0.0_ki
             endif
-            if(spprec2.lt.PSP_chk_th1.and.spprec2.gt.PSP_chk_th2) icheck=2 ! ROTATION
-            if(spprec2.lt.PSP_chk_th2) icheck=3                            ! DISCARD
-
-            amp=ampres            
+            ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
+            !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
+            ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
+            if(spprec2.lt.PSP_chk_th2 &
+                 .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then ! DISCARD
+               icheck=3
+               fpprec2=-10        ! Set -10 as finite part precision
+            endif
             if(icheck.eq.2) then
                do irot = 1,[%num_legs%]
                   vecsrot(irot,1) = vecs(irot,1)
-                  vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle) 
+                  vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
                   vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
                   vecsrot(irot,4) = vecs(irot,4)
                enddo
+               call adjust_kinematics(vecsrot)
                call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
                if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
                   fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
@@ -279,7 +286,7 @@ contains
             endif
             reduction_interoperation = tmp_red_int
             prec = min(spprec2,fpprec2)
-         endif         
+         endif
 
          if(icheck.eq.3.and.PSP_verbosity) then
             write(42,'(2x,A7)')"<event>"
@@ -291,9 +298,9 @@ contains
                  &                "' th3='", PSP_chk_th3,"'/>"
             write(42,'(4x,A16,D23.16,A3)') &
                  &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
-            write(42,'(4x,A15,I2.1,A6,I2.1,A3)') & 
+            write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec1 sp='", spprec1, "' fp='", fpprec1, "'/>"
-            write(42,'(4x,A15,I2.1,A6,I2.1,A3)') & 
+            write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec2 sp='", spprec2, "' fp='", fpprec2, "'/>"
             write(42,'(4x,A10,D23.16,A3)') &
                  &  "<born LO='", ampdef(1), "'/>"
@@ -318,7 +325,7 @@ contains
             write(42,'(2x,A8)')"</event>"
          endif
       else
-         prec = 16 ! If PSP_check is off, we assume point has double precision
+         prec = 20 ! If PSP_check is off, precision is set to unrealistic value = 20.
       end if
  end subroutine samplitude
    !---#] subroutine samplitude :
