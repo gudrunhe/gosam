@@ -8,9 +8,11 @@
 
 	<file src="configure.ac" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="autogen.sh" class="Verbatim" executable="yes">
 		<only if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="Makefile.am" class="Kinematics">
 		<only if-extension="autotools" />
@@ -25,9 +27,11 @@
 	</file>
 	<file src="config.sh" class="Kinematics" executable="yes">
 		<except if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
 	</file>
 
 	<directory src="codegen">
