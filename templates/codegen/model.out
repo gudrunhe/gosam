@@ -8,7 +8,7 @@ $]module     [$ process_name asprefix=\_ $]model
 @end @if $], &
    & renormalisation, reduction_interoperation, deltaOS, &
    & nlo_prefactors, convert_to_cdr[$
-@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $], ewchoice[$
 @end @if$][$@end @select$]
    implicit none
@@ -132,7 +132,7 @@ contains
 @if ewchoose $]
     write(unit,'(A1,1x,A11,I2)') "#", "ewchoice = ", ewchoice[$
 @end @if$][$
-@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc smdiagehc $]
    write(unit,'(A1,1x,A27)') "#", "--- PARAMETERS Overview ---"
    write(unit,'(A1,1x,A22)') "#", "Boson masses & widths:"
    write(unit,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
@@ -197,7 +197,7 @@ contains
    @end @select type $][$
 @end @for functions $]
    end if[$
-@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc smdiagehc $]
    end if[$
 @end @select$]
    write(unit,'(A1,1x,A25)') "#", "-------------------------"
@@ -819,7 +819,7 @@ contains
       must_be_real = .false.
       ierr = 1 ! OK
 [$
-@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $][$
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc smdiagehc $][$
 @if gs_not_one $]
       if (name.eq."aS" .or. name.eq."alphaS" .or. name.eq."alphas") then
          gs = 2.0_ki*sqrt(pi)*sqrt(re)
@@ -1143,7 +1143,7 @@ $]if (name.eq."VV12") then
 @for symbols match="\\$(.*)" format="reg%s" %]
       [% type.repr %] :: [% $_ %][%
 @end @for symbols %][$
-@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $]
       call ewschemechoice(ewchoice)[$
 @end @if $][$
@@ -1208,7 +1208,7 @@ $]if (name.eq."VV12") then
    end  function sort4
 !---#] utility functions for model initialization:
 [$
-@select modeltype @case sm smdiag smehc $]
+@select modeltype @case sm smdiag smehc smdiagehc $]
 !---#[ EW scheme choice:[$
 @if ewchoose $][$ @if
 e_not_one $]
