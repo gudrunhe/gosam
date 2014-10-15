@@ -356,7 +356,7 @@ class Properties:
       if properties is not None:
          for propty in properties:
             key = str(propty)
-            if propty.isHidden():
+            if propty.isHidden() and not (self[key] is propty.getDefault()):
                continue
             format_comment(propty)
 
