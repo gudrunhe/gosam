@@ -183,6 +183,12 @@ def main(argv=sys.argv):
 	for p in golem.properties.properties:
 		props.setProperty(str(p), default_conf.getProperty(p))
 
+	# set default options (BLHA specific)
+	default_conf["olp.include_color_average"] = True
+	default_conf["olp.include_helicity_average"] = True
+	default_conf["olp.include_symmetry_factor"] = True
+	default_conf["nlo_prefactors"] = 2
+
 	default_conf.setProperty("__OLP_MODE__","True")
 	for c in defaults:
 		default_conf += c
