@@ -412,13 +412,13 @@ def getModel(conf, extra_path=None):
          error("EWScheme tag in orderfile incompatible with model.")
 
    # Modify EW setting for model file:
-   if ew_supp == True and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+   if ew_supp and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
       if golem.model.MODEL_OPTIONS["ewchoose"] == True:
          golem.model.MODEL_OPTIONS["users_choice"] = '0'
       else:
          golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
          golem.model.MODEL_OPTIONS["ewchoose"] = True
-   elif ew_supp == True and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
+   elif ew_supp and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
       golem.model.MODEL_OPTIONS["ewchoose"] = False
       golem.model.MODEL_OPTIONS["users_choice"] = '0'
    elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
