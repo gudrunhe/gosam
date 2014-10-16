@@ -374,6 +374,18 @@ form_threads = Property("form.threads",
    """,
    int,2)
 
+form_workspace = Property("form.workspace",
+   """\
+   Size of the heap (in megabytes) used by FORM.
+
+   Example (for machines with <= 2GB RAM):
+   form.workspace=100
+   set WorkSpace to 100M in FORM via form.set file.
+   """,
+   int,
+   1000)
+
+
 haggies_bin = Property("haggies.bin",
    """\
    Points to the Haggies executable.
@@ -1060,6 +1072,7 @@ properties = [
    form_bin,
    form_threads,
    form_tmp,
+   form_workspace,
    haggies_bin,
    fc_bin,
    python_bin,

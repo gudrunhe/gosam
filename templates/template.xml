@@ -254,7 +254,7 @@
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
-			<file src="form.set" class="Verbatim"/>
+			<file src="form.set" class="Kinematics"/>
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
