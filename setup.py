@@ -15,7 +15,7 @@ import os
 import fnmatch
 import fileinput
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 SVN_REVISION = "$Rev$"
 TAR_VERSION = "%s-%d" % (
 		VERSION,
