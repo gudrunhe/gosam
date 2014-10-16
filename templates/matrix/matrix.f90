@@ -208,7 +208,8 @@ contains
       call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
       amp = ampdef
       ! RESCUE SYSTEM
-      if(PSP_check) then
+      if(PSP_check) then[%
+              @if generate_lo_diagrams %]
          call ir_subtraction(vecs, scale2, irp, h)
          if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
@@ -219,7 +220,16 @@ contains
             kfac = abs(ampdef(2)/ampdef(1))
          else
             kfac = 0.0_ki
+         endif[%
+         @else %]
+         ! poles should be zero for loop-induced processes
+         if(ampdef(2) .ne. 0.0_ki) then
+            spprec1 = -int(log10(abs((ampdef(3)/ampdef(2)))))
+         else
+            spprec1 = 16
          endif
+         kfac = 0.0_ki[%
+         @end @if %]
          if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
               .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
          if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
@@ -248,7 +258,8 @@ contains
             icheck=1
             reduction_interoperation = reduction_interoperation_rescue
             call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
-            amp=ampres
+            amp=ampres[%
+            @if generate_lo_diagrams %]
             if((ampres(3)-irp(2)) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
             else
@@ -258,7 +269,16 @@ contains
                kfac = abs(ampres(2)/ampres(1))
             else
                kfac = 0.0_ki
+            endif[%
+            @else %]
+            ! poles should be zero for loop-induced processes
+            if(ampdef(2) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs(ampdef(3)/ampdef(2))))
+            else
+               spprec2 = 16
             endif
+            kfac = 0.0_ki[%
+            @end @if %]
             ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
             !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
             ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
