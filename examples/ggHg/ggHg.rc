@@ -22,7 +22,7 @@ symmetries=family
 
 # No other particles than gluons, Higgs and 
 # one quark flavour [d] running in the loops:
-qgraf.verbatim=true=iprop[A,Z,U,C,S,B,T,H,0,0];
+qgraf.verbatim=true=iprop[A,Z,U,C,S,B,H,0,0];
 
 # Remove scaleless diagrams:
 filter.nlo= lambda d: not d.isScaleless()

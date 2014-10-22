@@ -376,6 +376,10 @@ def MassiveParticles(values, conf, ignore_case):
 	return __value_OK__
 
 @optional_olp_option
+def LightMassiveParticles(values, conf, ignore_case):
+	return __value_ERR__ + " LightMassiveParticles not supported."
+
+@optional_olp_option
 def Extra(values, conf, ignore_case):
 	if len(values)>1 and values[0] in __all_olp_options__:
 		return __all_olp_options__[values[0]](values[1:], conf, ignore_case)

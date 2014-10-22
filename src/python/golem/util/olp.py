@@ -399,13 +399,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    if len(mc_name_parts) > 1:
       conf["olp.mc.version"] = mc_name_parts[1].lower()
 
-   # Set default options
-   conf["olp.include_color_average"] = True
-   conf["olp.include_helicity_average"] = True
-   conf["olp.include_symmetry_factor"] = True
+   # Set options
    conf["olp.no_tree_level"] = False
    conf["olp.amplitudetype"] = "loop"
-   conf["nlo_prefactors"] = 2
 
 
    #---#[ Read order file:

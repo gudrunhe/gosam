@@ -127,9 +127,7 @@ contains
    else if(reduction_interoperation.eq.1) then
       write(unit,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
-      write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "SAMURAI+GOLEM95"
-   else if(reduction_interoperation.eq.31) then
-      write(unit,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
+      write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "NINJA"
    end if[$
 @if ewchoose $]
     write(unit,'(A1,1x,A11,I2)') "#", "ewchoice = ", ewchoice[$
