@@ -32,7 +32,7 @@ class diagram:
 		width  = opts['width']
 
 		L = self.find_loops()
-		assert len(L) <= 1
+		assert len(L) <= 2
 		props = set(self.propagators.keys())
 		chords = set()
 		bridges = set(props)
@@ -144,6 +144,130 @@ class diagram:
 			else:
 				p1.bend = 1
 				p2.bend = 1
+
+
+
+
+	def layout_2loop(self, *args, **opts):
+		height = opts['height']
+		width  = opts['width']
+
+		L = self.find_loops()
+		assert len(L) <= 2
+		props = set(self.propagators.keys())
+		chords = set()
+		bridges = set(props)
+
+		loop_vertices = []
+	
+		if len(L) == 2:
+			loop = L.copy().pop()
+			chords.update(loop.keys())
+
+		print len(chords)
+		if len(chords) == 0:
+			loop_vertices = [1]
+		elif len(chords) == 1:
+			loop_vertex = self.propagators[list(chords)[0]].vertex1
+			loop_vertices = [loop_vertex]
+
+		elif len(chords) == 2:
+			loop_vertices = [
+					self.propagators[list(chords)[0]].vertex1,
+					self.propagators[list(chords)[0]].vertex2
+				]
+		else:
+			loop_vertices = []
+			while len(loop_vertices) < len(loop):
+				for i, s in loop.items():
+					if len(loop_vertices) >= len(loop):
+						break
+
+					if s == 1:
+						p = [self.propagators[i].vertex1,
+							self.propagators[i].vertex2]
+					else:
+						p = [self.propagators[i].vertex2,
+							self.propagators[i].vertex1]
+
+					if loop_vertices == []:
+						loop_vertices = p
+					elif loop_vertices[-1] == p[0]:
+						loop_vertices.append(p[1])
+
+		bridges.difference_update(chords)
+		bridges = list(bridges)
+
+		if len(chords) <= 2:
+			df = 0.3
+		elif len(chords) == 3:
+			df = 0.5
+		elif len(chords) == 4:
+			df = 0.7
+		else:
+			df = 1.0
+
+		for idx in chords:
+			prop = self.propagators[idx]
+			prop.setForce(prop.force() * df)
+
+		leg_order = []
+		for vertex in loop_vertices:
+			leg_order.extend(self.visit_legs(vertex, bridges))
+
+		# Place legs along an ellipse that fits in the diagram boundaries;
+		# all angles in degrees
+		phi = 45.0
+		if len(loop_vertices) == 1:
+			delta_phi = (360.0 - 45.0) / len(leg_order)
+		else:
+			delta_phi = 360.0 / len(leg_order)
+
+		for lg in leg_order:
+			x = width / 2.0 + width / 2.0 * math.sin(math.radians(phi))
+			y = height / 2.0 + height / 2.0 * math.cos(math.radians(phi))
+			lg.set_coord(x, y)
+			phi += delta_phi
+
+		if len(loop_vertices) == 1:
+			# in the case of a tadpole diagram pull the tadpole towards 0 degree
+			x = width / 2.0 + width / 2.0 * math.sin(0.0)
+			y = height / 2.0 + height / 2.0 * math.cos(0.0)
+			fld = field("null", "ZERO", 1, 0, 1)
+			lg = leg(fld, 0, loop_vertices[0])
+			lg.set_coord(x, y)
+			lg.setInvisible()
+			self.ref_point = (x, y)
+			self.fin[-1] = lg
+		else:
+			self.ref_point = (width/2.0, height/2.0)
+		for p in self.propagators.values():
+				if p.field1.name == 'RENO':
+					p.setInvisible()
+				#print p.field1.linestyle()
+	
+		eqs = self.setup_equations()
+		eqs.solve()
+
+		for i, v in self.vertices.items():
+			x, y = eqs.rhs[i - 1]
+			v.set_coord(x, y)
+
+		chords = list(chords)
+		if len(chords) == 1:
+			self.propagators[chords[0]].bend = 2
+		elif len(chords) == 2:
+			r = L.pop()
+			p1 = self.propagators[chords[0]]
+			p2 = self.propagators[chords[1]]
+			if p1.vertex1 == p2.vertex1:
+				p1.bend = 1
+				p2.bend = -1
+			else:
+				p1.bend = 1
+				p2.bend = 1
+
+
 
 
 	def setup_equations(self, **opts):

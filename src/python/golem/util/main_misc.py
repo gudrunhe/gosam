@@ -109,7 +109,7 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
+	keep_tree, keep_virt, keep_vtot, keep_nnlo_virt, keep_nnlo_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
 			run_analyzer(path, conf, in_particles, out_particles)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
 #			run_analyzer(path, conf, in_particles, out_particles)
@@ -117,10 +117,13 @@ def generate_process_files(conf, from_scratch=False):
 	props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
 	props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
 	props.setProperty("topolopy.keep.vtot", ",".join(map(str, keep_vtot)))
+	props.setProperty("topolopy.keep.nnlo_virt",",".join(map(str, keep_nnlo_virt)))
 	props.setProperty("topolopy.keep.ct", ",".join(map(str, keep_ct)))
 	props.setProperty("topolopy.count.tree", len(keep_tree))
 	props.setProperty("topolopy.count.virt", len(keep_virt))
+	props.setProperty("topolopy.count.nnlo_virt", len(keep_nnlo_virt))
 	props.setProperty("topolopy.count.docu", len(keep_vtot))
+	props.setProperty("topolopy.count.nnlo_docu", len(keep_nnlo_vtot))
 	props.setProperty("topolopy.count.ct", len(keep_ct))
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
@@ -129,6 +132,8 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 	conf["__info.count.docu__"] = len(keep_vtot)
+	conf["__info.count.nnlo_virt__"] = len(keep_nnlo_virt)
+	conf["__info.count.nnlo_docu__"] = len(keep_nnlo_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
 
 	for key, value in golem.util.tools.derive_coupling_names(conf).items():
@@ -161,7 +166,7 @@ def cleanup(path):
 	cleanup_files = []
 
 	for ext in [".tex", ".log", ".py", ".pyc", ".pyo"]:
-		for stub in ["pyxotree", "pyxovirt", "topotree", "topovirt", "pyxoct", "topoct"]:
+		for stub in ["pyxotree", "pyxovirt", "pyxo2virt", "topotree", "topovirt", "pyxoct", "topoct"]:
 			cleanup_files.append(stub + ext)
 
 	if True:
@@ -482,16 +487,28 @@ def workflow(conf):
 	if len(powers) == 2:
 		generate_lo_diagrams = True
 		generate_nlo_virt = False
+		generate_nnlo_virt = False
 	elif len(powers) == 3:
 		generate_lo_diagrams = powers[1].strip().lower() != "none"
-		generate_nlo_virt = True
+		generate_nlo_virt = powers[2].strip().lower() != "none"
+		generate_nnlo_virt = False
+	elif len(powers) == 4:
+		generate_lo_diagrams = powers[1].strip().lower() != "none"
+		generate_nlo_virt = powers[2].strip().lower() != "none"
+		generate_nnlo_virt = True
 	else:
-		raise GolemConfigError("The property %s must have 2 or 3 arguments." % \
+		raise GolemConfigError("The property %s must have 2, 3 or 4 arguments." % \
 				golem.properties.qgraf_power)
 
+        #if loops==2:
+	  #generate_nnlo_virt = True
+	#else:
+	  #generate_nnlo_virt = False
+	  
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV')
+	conf["generate_nnlo_virt"] = generate_nnlo_virt
 	#generate_uv_counterterms
 	#False
 
@@ -600,6 +617,7 @@ def workflow(conf):
 def run_analyzer(path, conf, in_particles, out_particles):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
+	generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
 
 	model = golem.util.tools.getModel(conf)
@@ -654,6 +672,32 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		eprops    = {}
 		loopcache     = golem.topolopy.objects.LoopCache()
 		loopcache_tot = golem.topolopy.objects.LoopCache()
+		
+		
+	if generate_nnlo_virt:
+		zero = golem.util.tools.getZeroes(conf)
+		onshell = {}
+		i=1
+		for p in in_particles:
+			m = p.getMass(zero)
+			key = "es%d" % i
+			if str(m) == "0":
+				onshell[key] = "0"
+			else:
+				onshell[key] = "%s**2" % m
+
+		modname = consts.PATTERN_TOPOLOPY_NNLO_VIRT
+		fname = os.path.join(path, "%s.py" % modname)
+		debug("Loading two-loop diagram file %r" % fname)
+		mod_diag_nnlo_virt = imp.load_source(modname, fname)
+		
+		keep_nnlo_virt, keep_nnlo_vtot = golem.topolopy.functions.analyze_2loop_diagrams(
+			mod_diag_nnlo_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
+			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+	else:
+		keep_nnlo_virt = []
+		keep_nnlo_vtot = []
+
 	
 	if generate_ct:
 		modname = consts.PATTERN_TOPOLOPY_CT
@@ -684,7 +728,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
+	return keep_tree, keep_virt, keep_vtot, keep_nnlo_virt, keep_nnlo_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
 
 
 

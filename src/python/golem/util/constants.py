@@ -4,14 +4,17 @@ import golem.installation
 PATTERN_DIAGRAMS_LO = "diagrams-0"
 PATTERN_DIAGRAMS_CT = "diagrams-ct"
 PATTERN_DIAGRAMS_NLO_VIRT = "diagrams-1"
+PATTERN_DIAGRAMS_NNLO_VIRT = "diagrams-2"
 
 PATTERN_PYXO_LO = "pyxotree"
 PATTERN_PYXO_CT = "pyxoct"
 PATTERN_PYXO_NLO_VIRT = "pyxovirt"
+PATTERN_PYXO_NNLO_VIRT = "pyxo2virt"
 
 PATTERN_TOPOLOPY_LO = "topotree"
 PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
+PATTERN_TOPOLOPY_NNLO_VIRT = "topo2virt"
 
 AUTHORS = {
       "Thomas Reiter": ["reiterth@mpp.mpg.de"],

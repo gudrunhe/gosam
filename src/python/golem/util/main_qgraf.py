@@ -90,7 +90,7 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	Writes to the file qgraf.dat in the directory specified by 'path'. Creates it
 	if necessary.
 	"""
-	assert (len(r_particles) == 0) or (len(r_particles) == 1 and loops == 1)
+	assert (len(r_particles) == 0) or (len(r_particles) == 1 and loops == 1) 
 
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")
 	output_name = os.path.join(path, output_short_name)
@@ -206,10 +206,13 @@ def run_qgraf(conf, in_particles, out_particles):
 			golem.properties.qgraf_verbatim_lo)
 	verbatim_nlo = format_qgraf_verbatim(conf,
 			golem.properties.qgraf_verbatim_nlo)
+	verbatim_nnlo = format_qgraf_verbatim(conf,
+			golem.properties.qgraf_verbatim_nnlo)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 
 	flag_generate_nlo_virt = conf.getBooleanProperty("generate_nlo_virt")
+	flag_generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	flag_generate_lo_diagrams = conf.getBooleanProperty("generate_lo_diagrams")
 	flag_generate_uv_counterterms = \
 			conf.getBooleanProperty("generate_uv_counterterms")
@@ -217,7 +220,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_topolopy = True
 
 	if not (flag_generate_nlo_virt or
-			flag_generate_lo_diagrams or flag_generate_uv_counterterms):
+			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
 		# Should never happen but is not considered an error either.
 		# nothing to do
 		return
@@ -303,6 +306,43 @@ def run_qgraf(conf, in_particles, out_particles):
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 1)
 			run_qgraf_dat(conf, output_name, log_name)
+			
+			
+			
+	# -------------------- NNLO virt -------------------------------------
+	if flag_generate_nnlo_virt:
+	      output_name = consts.PATTERN_DIAGRAMS_NNLO_VIRT + form_ext
+	      log_name = consts.PATTERN_DIAGRAMS_NNLO_VIRT + log_ext
+	      
+	      if powers is not None:
+		new_verbatim = verbatim + "\n" + verbatim_nnlo + "\n" + \
+				"true=vsum[%s,%s,%s];\n" % (powers[0], powers[3], powers[3])
+	      else:		      
+		new_verbatim = verbatim + "\n" + verbatim_nnlo
+		
+	      write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
+		       options, new_verbatim, in_particles, out_particles, [], 2)
+	      run_qgraf_dat(conf, output_name, log_name)
+	      
+	      if flag_draw_diagrams:
+		output_name = consts.PATTERN_PYXO_NNLO_VIRT + python_ext
+		log_name = consts.PATTERN_PYXO_NNLO_VIRT + log_ext
+		write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 2)
+		run_qgraf_dat(conf, output_name, log_name)
+		golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
+				conf=conf)
+		for ext in [python_ext, pyo_ext, pyc_ext]:
+			cleanup_files.append(consts.PATTERN_PYXO_NNLO_VIRT + ext)
+
+		if flag_topolopy:
+			output_name = consts.PATTERN_TOPOLOPY_NNLO_VIRT + python_ext
+			log_name    = consts.PATTERN_TOPOLOPY_NNLO_VIRT + log_ext
+			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 2)
+			run_qgraf_dat(conf, output_name, log_name)
+			
+		
 
 	# ----------------- UV COUNTERTERMS -----------------------------------
 	# This doesn't work...at some point it would be better to add the RENO
