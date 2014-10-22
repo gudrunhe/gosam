@@ -37,10 +37,14 @@
  @case 1 %]one LO diagram[%
  @else %][% topolopy.count.tree %] tree-level diagrams[%
  @end @select %] and [% @select topolopy.count.docu
- @case 0 %]no NLO diagrams[%
- @case 1 %]one NLO diagram[%
- @else %][% topolopy.count.docu %] NLO diagrams[%
- @end @select %]. GoSam has identified [% @select count groups
+ @case 0 %]no NLO diagrams.[%
+ @case 1 %]one NLO diagram.[%
+ @else %][% topolopy.count.docu %] NLO diagrams.[%
+ @end @select %] [% @if generate_nnlo_virt %] and [% @select topolopy.count.nnlo_docu 
+ @case 0 %] no NNLO diagrams. [%
+ @case 1 %] one NNLO diagram. [%
+ @else %] [% topolopy.count.nnlo_docu %] NNLO diagrams. [%
+ @end @select %] [% @end @if %] GoSam has identified [% @select count groups
     @case 0%]no different groups[%
     @case 1%]only one group[%
     @else %][% count groups %] groups [%
@@ -546,6 +550,41 @@ $S^\prime=S[%
    @end @with%][%
 @end @if pyxodraw %][%
 @end @if generate_uv_counterterms %]
+
+
+[% @if generate_nnlo_virt %]
+\section{Two-Loop Diagrams}
+\subsection*{General Information}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-2.log}
+[% @if pyxodraw %]
+[% @with modules pyxo2virt.tex path=process %]
+[%  @for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %]
+[%    @if is_first%]\begin{longtable}{cc}
+%\endfirsthead
+%\endhead[% @end @if %]
+%---#[ 2loop diagram[% DIAG %]:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[%diagram suffix=DIAG%]\\
+{\sl [%
+         @select DIAG
+         @case -1 %]-[%
+         @end @select %]Diagram~[%DIAG%]}
+\end{center}
+\end{minipage}}
+%---#] 2loop diagram[% DIAG %]:[%
+         @if is_last %]
+\end{longtable}
+[%       @else %]
+[%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+         @end @if %][% 
+      @end @for %][%
+   @end @with%][% 
+@end @if pyxodraw %][%
+@end @if generate_nnlo_virt %]
+
+
 \printindex
 
 \section{Related Work}

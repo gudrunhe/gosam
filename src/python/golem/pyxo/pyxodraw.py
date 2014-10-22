@@ -82,8 +82,12 @@ def pyxodraw(*args, **opts):
 		for idx, diag in diagrams.items():
 			f.write("--%s name=diagram%d\n" % (BOUNDARY, idx))
 			f.write("%% Diagram %d:\n" % idx)
-
-			diag.layout(**opts)
+			loops=diag.find_loops()
+			if len(loops)<2:
+			  diag.layout(**opts)
+			else:
+			  diag.layout_2loop(**opts)
+			diag.layout(**opts)  
 			diag.draw(f, lookup = model_mod.line_styles,
 					latex = latex_names, **opts)
 		f.write("--%s--\n" % BOUNDARY)
