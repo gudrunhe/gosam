@@ -386,8 +386,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    conf = golem.util.config.Properties()
    conf += default_conf
-   print 'defaults'
-   print conf
 
    if "olp_process_name" in opts:
       olp_process_name = opts["olp_process_name"].strip().lower()
