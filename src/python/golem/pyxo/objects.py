@@ -43,6 +43,10 @@ class diagram:
 			loop = L.copy().pop()
 			chords.update(loop.keys())
 
+		#print len (L),len(chords)
+		#print loop
+		#print L
+
 		if len(chords) == 0:
 			loop_vertices = [1]
 		elif len(chords) == 1:
@@ -155,16 +159,19 @@ class diagram:
 		L = self.find_loops()
 		assert len(L) <= 2
 		props = set(self.propagators.keys())
-		chords = set()
+		#chords = set()
+		chords2loop=[]
 		bridges = set(props)
 
 		loop_vertices = []
 	
-		if len(L) == 2:
-			loop = L.copy().pop()
-			chords.update(loop.keys())
+		#if len(L) == 2:
+			#loop = L.copy().pop()
+			#chords.update(loop.keys())
+		for loop in L:
+			chords2loop.append(set(loop.keys()))
 
-		print len(chords)
+		chords=chords2loop[0]
 		if len(chords) == 0:
 			loop_vertices = [1]
 		elif len(chords) == 1:
@@ -266,7 +273,7 @@ class diagram:
 			else:
 				p1.bend = 1
 				p2.bend = 1
-
+		sys.exit()
 
 
 

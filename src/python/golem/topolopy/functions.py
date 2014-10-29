@@ -227,8 +227,8 @@ def analyze_2loop_diagrams(diagrams, model, conf, onshell,
   # TODO: Modify this subroutine according to the needs of 2loop. Simply copy of NLO 
   # at the moment
    zero = golem.util.tools.getZeroes(conf)
-   lst = setup_list(golem.properties.select_nlo_diagrams, conf)
-   fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
+   lst = setup_list(golem.properties.select_nnlo_diagrams, conf)
+   fltr = setup_filter(golem.properties.filter_nnlo_diagrams, conf, model)
    keep = []
    keep_tot = []
    lose = []
@@ -243,11 +243,12 @@ def analyze_2loop_diagrams(diagrams, model, conf, onshell,
          if idx not in lst:
             lose.append(idx)
             continue
-      keep.append(idx)
-      #if analyze_diagram(diagram, zero, fltr):
-         ## check for massive quarks first. Even though the
-         ## diagram might fail the next test it contributes
-         ## to the renormalization of the gluon wave function.
+      #keep.append(idx)
+      if analyze_diagram(diagram, zero, fltr):
+
+         # check for massive quarks first. Even though the
+         # diagram might fail the next test it contributes
+         # to the renormalization of the gluon wave function.
          #if quark_masses is not None:
             #for qm in diagram.QuarkBubbleMasses():
                #if qm not in quark_masses:
@@ -259,27 +260,27 @@ def analyze_2loop_diagrams(diagrams, model, conf, onshell,
                #if cqm=='0' and complex_masses[len(complex_masses)-1]!='0' and (len(complex_masses) % 2)==1:
                   #complex_masses.append(cqm)
 
-         #if diagram.onshell() > 0:
-            #lose.append(idx)
-         #else:
-            #keep.append(idx)
-            #keep_tot.append(idx)
-            #loopcache_tot.add(diagram, idx)
+         if diagram.onshell() > 0:
+            lose.append(idx)
+         else:
+            keep.append(idx)
+            keep_tot.append(idx)
+#            loopcache_tot.add(diagram, idx)
 
-            #diagram.isMassiveBubble(idx, massive_bubbles)
+            ##diagram.isMassiveBubble(idx, massive_bubbles)
 
-            #if filter_flags is not None:
-               #for flag in diagram.filter_flags:
-                  #if flag not in filter_flags:
-                     #filter_flags[flag] = [idx]
-                  #else:
-                     #filter_flags[flag].append(idx)
-            #rk = diagram.rank()
-            #if rk > max_rank:
-               #max_rank = rk
-      #else:
-         #lose.append(idx)
-   keep_tot = keep
+            if filter_flags is not None:
+               for flag in diagram.filter_flags:
+                  if flag not in filter_flags:
+                     filter_flags[flag] = [idx]
+                  else:
+                     filter_flags[flag].append(idx)
+            rk = diagram.rank()
+            if rk > max_rank:
+               max_rank = rk
+      else:
+         lose.append(idx)
+   #keep_tot = keep
    debug("After analyzing 2loop diagrams: keeping %d, purging %d" % 
             (len(keep_tot), len(lose)))
 

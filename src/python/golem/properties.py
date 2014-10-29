@@ -618,6 +618,25 @@ select_nlo_diagrams = Property("select.nlo",
    """,
    list,sep=",")
 
+select_nnlo_diagrams = Property("select.nnlo",
+   """\
+   A list of integer numbers, indicating two-loop diagrams to be selected.
+   If no list is given, all diagrams are selected.
+   Otherwise, all diagrams   not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.nnlo=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.nnlo=1,2,5,8,50,51,52,53
+
+   See also: select.lo, filter.lo, filter.nlo
+   """,
+   list,sep=",")
+
+
 filter_lo_diagrams = Property("filter.lo",
    """\
    A python function which provides a filter for tree diagrams.
@@ -654,6 +673,14 @@ filter_lo_diagrams = Property("filter.lo",
    str,"")
 
 filter_nlo_diagrams = Property("filter.nlo",
+   """\
+   A python function which provides a filter for loop diagrams.
+
+   See filter.lo for more explanation.
+   """,
+   str,"")
+
+filter_nnlo_diagrams = Property("filter.nnlo",
    """\
    A python function which provides a filter for loop diagrams.
 
