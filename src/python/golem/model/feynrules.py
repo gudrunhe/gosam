@@ -536,6 +536,12 @@ class Model:
 				afields.append(cn[1])
 				spins.append(p.spin - 1)
 
+			deg = len(fields)
+			if deg >= 7:
+			   warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+			   continue
+			   assert False
+
 			flip = spins[0] == 1 and spins[2] == 1
 
 			vrank = 0
