@@ -2121,7 +2121,10 @@ class KinematicsTemplate(golem.util.parser.Template):
       
 
    def ewchoose(self, *args, ** opts):
-      return golem.model.MODEL_OPTIONS["ewchoose"]
+      if "ewchoose" in golem.model.MODEL_OPTIONS:
+         return golem.model.MODEL_OPTIONS["ewchoose"]
+      else:
+         return False
 
    def starting_choice(self, *args, ** opts):
       if self.e_not_one(args,opts):

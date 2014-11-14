@@ -305,6 +305,10 @@ def prepare_model_files(conf, output_path=None):
    if len(model_lst) == 1:
       model = model_lst[0]
       src_path = golem_path("models")
+      # check for local file
+      if os.path.sep in model and all([os.path.exists(os.path.join(rel_path,model + ext)) \
+         for ext in ["", ".py", ".hh"]]):
+         src_path=rel_path
       for ext in ["", ".py", ".hh"]:
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
@@ -385,14 +389,17 @@ def getModel(conf, extra_path=None):
    extract_model_options(conf)
 
    # --[ EW scheme management:
-   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc']
+   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc','smdiagehc']
    ew_supp = False
-   
+
+   if conf["modeltype"]:
+      conf["modeltype"] = os.path.basename(conf["modeltype"])
+
    if conf["modeltype"] is not None:
-      if any(item.startswith(conf["modeltype"]) for item in models_ewsupp):
+      if any(conf["modeltype"].startswith(item) for item in models_ewsupp):
          ew_supp = True
    if conf["model"] is not None:
-      if any(item.startswith(conf["model"]) for item in models_ewsupp):
+      if any(conf["model"].startswith(item) for item in models_ewsupp):
          ew_supp = True
 
    # Adapt EW scheme to order file request:
@@ -405,13 +412,13 @@ def getModel(conf, extra_path=None):
          error("EWScheme tag in orderfile incompatible with model.")
 
    # Modify EW setting for model file:
-   if ew_supp == True and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+   if ew_supp and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
       if golem.model.MODEL_OPTIONS["ewchoose"] == True:
          golem.model.MODEL_OPTIONS["users_choice"] = '0'
       else:
          golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
          golem.model.MODEL_OPTIONS["ewchoose"] = True
-   elif ew_supp == True and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
+   elif ew_supp and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
       golem.model.MODEL_OPTIONS["ewchoose"] = False
       golem.model.MODEL_OPTIONS["users_choice"] = '0'
    elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():

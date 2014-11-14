@@ -1,1 +1,1 @@
-WorkSpace 1000M
+WorkSpace [% form.workspace %]M

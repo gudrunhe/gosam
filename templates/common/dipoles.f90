@@ -185,13 +185,12 @@ contains
   @for particles initial colored index=index_a color=color_a %][%
      @if is_massive %]
       PRINT*, "! WARNING: massive initial state partons are not"
-      PRINT*, "!          considered in this framework. Please,"
+      PRINT*, "!          considered in this dipole framework. Please,"
       PRINT*, "!          provide yourself, whatever you find"
       PRINT*, "!          an appropriate piece of code."
       PRINT*, "!"
       PRINT*, "!          YOU HAVE BEEN WARNED!"
-      PRINT*, "!"
-      STOP[%
+      PRINT*, "!"[%
      @else%][%
         @for particles final colored index=index_j color=color_j mass=mass_j 
              massive=is_massive_j %]
@@ -452,13 +451,12 @@ contains
   @for particles initial charged index=index_a charge=charge_a %][%
      @if is_massive %]
       PRINT*, "! WARNING: massive initial state partons are not"
-      PRINT*, "!          considered in this framework. Please,"
+      PRINT*, "!          considered in this dipole framework. Please,"
       PRINT*, "!          provide yourself, whatever you find"
       PRINT*, "!          an appropriate piece of code."
       PRINT*, "!"
       PRINT*, "!          YOU HAVE BEEN WARNED!"
-      PRINT*, "!"
-      STOP[%
+      PRINT*, "!" [%
      @else%][%
         @for particles final charged index=index_j charge=charge_j mass=mass_j 
              massive=is_massive_j %]

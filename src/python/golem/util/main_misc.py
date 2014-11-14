@@ -236,11 +236,11 @@ def write_template_file(fname, defaults, format=None):
 				value=defaults[prop]
 				f.write("%s=%s\n" % (prop, value))
 	for prop in golem.properties.properties:
-		if prop.isExperimental():
+		changed = str(prop) in defaults.propertyNames()
+		if prop.isExperimental() and not changed:
 			continue
-		if prop.isHidden():
+		if prop.isHidden() and not changed:
 			continue
-
 
 		if prop.getType() == str:
 			stype = "text"
