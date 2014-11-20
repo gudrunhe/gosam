@@ -1060,7 +1060,12 @@ modelfile.write("re\n")
 modelfile.write("            must_be_real=.true.\n")
 [$@end @select$]
 [$@end @for$]
-modelfile.write("         end select\n")
+modelfile.write("         end select\n")[$
+@for parameter_alias real=re $]
+modelfile.write("      elseif (name .eq. \"[$ alias $]\") then\n")
+modelfile.write("            [$ $_ $] = [$ expr $]\n")
+modelfile.write("            must_be_real=.true.\n")[$
+@end @for $]
 modelfile.write("     else\n")
 modelfile.write("         if (name(1:3) /= \"mdl\") then\n")
 modelfile.write("            call set_parameter(\"mdl\" // name(4:),re,im,ierr)\n")
