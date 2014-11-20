@@ -547,7 +547,7 @@ contains
             select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = parsereal(value, ierr, lnr)[$
@@ -881,7 +881,7 @@ $]if (name.eq."VV12") then
          select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = re[$

@@ -597,7 +597,7 @@ modelfile.write("            ! set mass according to PDG code\n")
 modelfile.write("            select case(pdg)\n")[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = parsereal(value, ierr, lnr)\n")[$
@@ -939,7 +939,7 @@ modelfile.write("         must_be_real = .true.\n")
 modelfile.write("         select case(pdg)\n")
 [$@if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = re\n")[$
