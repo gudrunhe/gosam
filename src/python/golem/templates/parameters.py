@@ -611,7 +611,7 @@ class ModelTemplate(Template):
 
 		props = Properties()
 		for k in params.keys():
-			if k in self._parameters:
+			if k in self._parameters and not "P" in self._parameters[k][1]:
 				for (alias, expr_unf) in params[k]:
 					expr = expr_unf.format(re=re,im=im)
 					props.setProperty(name_name, k)
