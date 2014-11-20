@@ -499,6 +499,8 @@ class Model:
 
 			if p.selfconjugate:
 				conj = "('+')"
+			elif p.pdg_code in [24,-24]:
+				conj = "('+','+')"
 			else:
 				conj = "('+','-')"
 
@@ -728,7 +730,7 @@ class Model:
 				anti = fields[i]
 				color = abs(p.color)
 				spin = abs(p.spin) - 1
-				if field.startswith("anti"):
+				if field.startswith("anti") and not p.pdg_code in [24,-24]:
 					spin = - spin
 					color = - color
 				colors.append(color)
