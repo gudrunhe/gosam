@@ -16,6 +16,9 @@ PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
 PATTERN_TOPOLOPY_NNLO_VIRT = "topo2virt"
 
+PATTERN_DOTSTY_NNLO_VIRT = "dot2virt"
+PATTERN_REDUZE_NNLO_VIRT = "reduze2loop"
+
 AUTHORS = {
       "Gavin Cullen": ["gavin.cullen@desy.de"],
       "Hans van Deurzen": ["hdeurzen@mpp.mpg.de"],

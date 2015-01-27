@@ -6,6 +6,8 @@
 \usepackage{amsmath}
 \usepackage{makeidx}
 \usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{graphicx}
 
 \newcommand{\bra}[1]{\langle #1 \vert}
 \newcommand{\brb}[1]{[ #1 \vert}
@@ -40,7 +42,7 @@
  @case 0 %]no NLO diagrams.[%
  @case 1 %]one NLO diagram.[%
  @else %][% topolopy.count.docu %] NLO diagrams.[%
- @end @select %] [% @if generate_nnlo_virt %] and [% @select topolopy.count.nnlo_docu 
+ @end @select %] [% @if generate_nnlo_virt %] There are [% @select topolopy.count.nnlo_docu 
  @case 0 %] no NNLO diagrams. [%
  @case 1 %] one NNLO diagram. [%
  @else %] [% topolopy.count.nnlo_docu %] NNLO diagrams. [%
@@ -556,32 +558,31 @@ $S^\prime=S[%
 \section{Two-Loop Diagrams}
 \subsection*{General Information}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-2.log}
-[% @if pyxodraw %]
-[% @with modules pyxo2virt.tex path=process %]
-[%  @for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %]
-[%    @if is_first%]\begin{longtable}{cc}
-%\endfirsthead
-%\endhead[% @end @if %]
-%---#[ 2loop diagram[% DIAG %]:
-\hbox{
-\begin{minipage}{0.45\textwidth}
-\begin{center}
-[%diagram suffix=DIAG%]\\
-{\sl [%
-         @select DIAG
-         @case -1 %]-[%
-         @end @select %]Diagram~[%DIAG%]}
+\clearpage[%
+@for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %][% 
+@if is_first%]
+\begin{figure}
+\begin{center}[%
+@end @if %]
+\begin{subfigure}{0.25\textwidth}
+\includegraphics[height=1\textwidth,width=1\textwidth,keepaspectratio]{dot2virt.[% DIAG %].eps}
+\end{subfigure} \quad[%
+@if eval ( DIAGINDEX + 1 ) .mod. 3 .eq. 0 %]
 \end{center}
-\end{minipage}}
-%---#] 2loop diagram[% DIAG %]:[%
-         @if is_last %]
-\end{longtable}
-[%       @else %]
-[%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
-         @end @if %][% 
-      @end @for %][%
-   @end @with%][% 
-@end @if pyxodraw %][%
+\end{figure}[%
+@end @if %][%
+@if eval ( DIAGINDEX + 1 ) .mod. ( 9 + 3 ) .eq. 0 %]
+\clearpage [%
+@end @if %][%
+@if eval ( DIAGINDEX + 1 ) .mod. 3 .eq. 0 %]
+\begin{figure}
+\begin{center}[% 
+@end @if %][%
+@if is_last%]
+\end{center}
+\end{figure}[%
+@end @if %][%
+@end @for %][% 
 @end @if generate_nnlo_virt %]
 
 

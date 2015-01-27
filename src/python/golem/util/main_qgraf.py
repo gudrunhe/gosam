@@ -7,6 +7,7 @@ and is only used in gosam.py
 import subprocess
 import os.path
 import os
+import sys
 
 import golem.properties
 import golem.pyxo.pyxodraw
@@ -236,12 +237,15 @@ def run_qgraf(conf, in_particles, out_particles):
 	pyxo_sty    = "pyxo.sty"
 	form_sty    = "form.sty"
 	topo_sty    = "topolopy.sty"
+	dot_sty     = "dot.sty"
+	reduze_sty  = "reduze.sty"
 
 	form_ext    = ".hh"
 	python_ext  = ".py"
 	pyo_ext     = ".pyo"
 	pyc_ext     = ".pyc"
 	log_ext     = ".log"
+	yaml_ext    = ".yaml"
 
 	cleanup_files = [ "qgraf.dat", form_sty, pyxo_sty, topo_sty]
 
@@ -329,16 +333,35 @@ def run_qgraf(conf, in_particles, out_particles):
 		
 	      write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 		       options, new_verbatim, in_particles, out_particles, [], 2)
+
 	      run_qgraf_dat(conf, output_name, log_name)
 	      
 	      if flag_draw_diagrams:
-		output_name = consts.PATTERN_PYXO_NNLO_VIRT + python_ext
-		log_name = consts.PATTERN_PYXO_NNLO_VIRT + log_ext
-		write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 2)
+		#leaving the old diagram generation in in case it might be useful.
+		#output_name = consts.PATTERN_PYXO_NNLO_VIRT + python_ext
+		#log_name = consts.PATTERN_PYXO_NNLO_VIRT + log_ext
+		#write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
+		#		options, new_verbatim, in_particles, out_particles, [], 2)
+		#run_qgraf_dat(conf, output_name, log_name)
+		#sys.exit()
+		
+		#new diagram generation
+		output_name = consts.PATTERN_DOTSTY_NNLO_VIRT
+		log_name = consts.PATTERN_DOTSTY_NNLO_VIRT + log_ext
+		write_qgraf_dat(path, dot_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [] ,2)
 		run_qgraf_dat(conf, output_name, log_name)
-		golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
-				conf=conf)
+		run_neato(path,output_name)
+		
+		output_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + yaml_ext
+		log_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + log_ext
+		write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
+				options, new_verbatim, in_particles, out_particles, [] ,2)
+		run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
+
+		
+		#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
+		#		conf=conf)
 		for ext in [python_ext, pyo_ext, pyc_ext]:
 			cleanup_files.append(consts.PATTERN_PYXO_NNLO_VIRT + ext)
 
@@ -403,3 +426,18 @@ def run_qgraf(conf, in_particles, out_particles):
 			  (" instead of 'order=%s'\n" % (",".join(map(str,powers)))) +
 			  "in order to compute the |virtual|^2.")
 
+def run_neato(path,output_name):
+  try:
+    subprocess.call('neato -Gstart=2 -Gepsilon=0.000001 -Teps '+output_name+' -O',cwd=path,shell=True)
+  except:
+    raise GolemConfigError("Could not run graphviz/neato")
+  try:
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.eps '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.eps')
+    os.system('mkdir '+path+'/doc')
+    os.system('mv '+path+'/*.eps '+path+'/doc')
+    #subprocess.call('mv *.eps doc/', cwd=path, shell=True)
+  except:
+    raise GolemConfigError("Error in generation of two-loop eps files")
+  
+  
+  

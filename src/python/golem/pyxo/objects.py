@@ -273,7 +273,7 @@ class diagram:
 			else:
 				p1.bend = 1
 				p2.bend = 1
-		sys.exit()
+		#sys.exit()
 
 
 
