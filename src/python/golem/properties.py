@@ -948,7 +948,7 @@ config_PSP_rescue = Property("PSP_rescue",
    Activates Phase-Space Point rescue based on the estimated
    accuracy on the finite part. It needs PSP_check=True.
    The accuracy is estimated using information on the single
-   pole accuracy and on the stability of the finite parte 
+   pole accuracy and on the stability of the finite part
    under rotation of the phase space point.
 
    !!Works only for QCD and with built-in model files!!
@@ -961,7 +961,7 @@ config_PSP_verbosity = Property("PSP_verbosity",
 
    Sets the verbosity of the PSP_check.
    verbosity = False: no output
-   verbosity = True : bad point are written in a file gs_badpts.log
+   verbosity = True : bad point are written into gs_badpts.log
    !!Works only for QCD and with built-in model files!!
    """,
    bool, False)
@@ -970,10 +970,10 @@ config_PSP_chk_th1 = Property("PSP_chk_th1",
    """\
    Sets the same variable in config.f90
 
-   Threshold to activate accept the point without further treatments.
-   The number has to be an integer indicating the wished minimum number
-   of digits accuracy on the pole. For poles more precise than this
-   threshold the finite part is not checked.
+   Threshold to activate accept the point without further
+   treatments. The number has to be an integer indicating the
+   wished minimum number of digits accuracy on the pole. For poles
+   more precise than this threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 8)
@@ -982,11 +982,13 @@ config_PSP_chk_th2 = Property("PSP_chk_th2",
    """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based of the precision of the pole.
-   Points with precision less than this threshold are directly reprocessed with
-   the rescue system (if available), or declared as unstable. According to the
-   verbosity level set, such points are written to a file and not used when
-   the code is interfaced to an external Monte Carlo using the new BLHA standards.
+   Threshold to declare a PSP as bad point, based of the precision
+   of the pole.  Points with precision less than this threshold are
+   directly reprocessed with the rescue system (if available), or
+   declared as unstable. According to the verbosity level set, such
+   points are written to a file and not used when the code is
+   interfaced to an external Monte Carlo using the new BLHA
+   standards.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 3)
@@ -995,14 +997,85 @@ config_PSP_chk_th3 = Property("PSP_chk_th3",
    """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based on the precision of
-   the finite part estimated with a rotation. According to the
+   Threshold to declare a PSP as bad point, based on the precision
+   of the finite part estimated with a rotation. According to the
    verbosity level set, such points are written to a file and not
    used when the code is interfaced to an external Monte Carlo
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 5)
+
+
+config_PSP_chk_li1 = Property("PSP_chk_li1",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th1.
+
+   It is precision of the pole part (which should be zero) in
+   comparison to the finite part. If the pole part is at least
+   PSP_chk_li1 orders smaller than the finite part, the point is
+   accepted without any other check.
+
+   If Samurai is used as default reduction program, this needs to
+   be reduced to 8.
+
+   The number has to be an integer.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 16)
+
+config_PSP_chk_li2 = Property("PSP_chk_li2",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th2.
+
+   Threshold to declare a PSP as bad point, based of the precision
+   of the pole in comparison to the finite part. Points with
+   precision less than this threshold are directly reprocessed with
+   the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written to
+   a file and not used when the code is interfaced to an external
+   Monte Carlo using the new BLHA standards.
+
+   If Samurai is used as default reduction program, this needs to
+   be reduced to 6.
+
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 7)
+
+config_PSP_chk_li3 = Property("PSP_chk_li3",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th3.
+
+   Threshold to declare a PSP as bad point, based on the precision
+   of the finite part estimated with a rotation. Points with
+   precision less than this threshold are reprocessed with the
+   rescue system (if available) or declared as unstable.  According
+   to the verbosity level set, such points are written to a file
+   and not used when the code is interfaced to an external Monte
+   Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 6)
+
+config_PSP_chk_li4 = Property("PSP_chk_li4",
+   """\
+   Sets the same variable in config.f90. Similar to PSP_chk_li2,
+   but for the rescue system (by default Golem95).
+
+   Threshold to declare a PSP as bad point in the rescue system,
+   based on the precision of the pole part in comparison to the
+   finite part. According to the verbosity level set, such points
+   are written to a file and not used when the code is interfaced
+   to an external Monte Carlo using the new BLHA standards.
+
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 19)
+
 
 config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
@@ -1061,6 +1134,10 @@ properties = [
    config_PSP_chk_th2,
    config_PSP_chk_th3,
    config_PSP_chk_kfactor,
+   config_PSP_chk_li1,
+   config_PSP_chk_li2,
+   config_PSP_chk_li3,
+   config_PSP_chk_li4,
 
    reference_vectors,
    abbrev_limit,

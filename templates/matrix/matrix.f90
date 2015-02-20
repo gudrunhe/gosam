@@ -10,6 +10,7 @@
      & include_symmetry_factor, &
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor, reduction_interoperation, &
+     & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
      & reduction_interoperation_rescue, convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
@@ -220,6 +221,12 @@ contains
             kfac = abs(ampdef(2)/ampdef(1))
          else
             kfac = 0.0_ki
+         endif
+         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
+              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
+         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+            icheck=3
+            fpprec1=-10        ! Set -10 as finite part precision
          endif[%
          @else %]
          ! poles should be zero for loop-induced processes
@@ -228,14 +235,15 @@ contains
          else
             spprec1 = 16
          endif
-         kfac = 0.0_ki[%
-         @end @if %]
-         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
-              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
-         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+         kfac = 0.0_ki
+         if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
+            icheck=2 ! ROTATION
+         end if
+         if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
             icheck=3
             fpprec1=-10        ! Set -10 as finite part precision
-         endif
+         end if[%
+         @end @if %]
          if(icheck.eq.2) then
             do irot = 1,[%num_legs%]
                vecsrot(irot,1) = vecs(irot,1)
@@ -269,16 +277,7 @@ contains
                kfac = abs(ampres(2)/ampres(1))
             else
                kfac = 0.0_ki
-            endif[%
-            @else %]
-            ! poles should be zero for loop-induced processes
-            if(ampdef(2) .ne. 0.0_ki) then
-               spprec2 = -int(log10(abs(ampdef(3)/ampdef(2))))
-            else
-               spprec2 = 16
             endif
-            kfac = 0.0_ki[%
-            @end @if %]
             ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
             !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
             ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
@@ -286,7 +285,20 @@ contains
                  .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then ! DISCARD
                icheck=3
                fpprec2=-10        ! Set -10 as finite part precision
+            endif[%
+            @else %]
+            ! poles should be zero for loop-induced processes
+            if(ampres(2) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs(ampres(3)/ampres(2))))
+            else
+               spprec2 = 16
             endif
+            kfac = 0.0_ki
+            if(spprec2.lt.PSP_chk_li4) then ! DISCARD
+               icheck=3
+               fpprec2=-10        ! Set -10 as finite part precision
+            endif[%
+            @end @if %]
             if(icheck.eq.2) then
                do irot = 1,[%num_legs%]
                   vecsrot(irot,1) = vecs(irot,1)
@@ -311,11 +323,18 @@ contains
          if(icheck.eq.3.and.PSP_verbosity) then
             write(42,'(2x,A7)')"<event>"
             write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') & 
-                 &  "<process name='","[% process_name %]","'/>"
+                 &  "<process name='","[% process_name %]","'/>"[%
+           @if generate_lo_diagrams %]
             write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds th1='", PSP_chk_th1, &
                  &                "' th2='", PSP_chk_th2, &
-                 &                "' th3='", PSP_chk_th3,"'/>"
+                 &                "' th3='", PSP_chk_th3,"'/>"[%
+           @else %]
+            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
+                 &  "<PSP_thresholds li1='", PSP_chk_li1, &
+                 &                "' li2='", PSP_chk_li2, &
+                 &                "' li3='", PSP_chk_li3, &
+                 &                "' li4='", PSP_chk_li4,"'/>"[% @end @if %]
             write(42,'(4x,A16,D23.16,A3)') &
                  &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
