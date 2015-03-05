@@ -28,7 +28,6 @@ class KinematicsTemplate(golem.util.parser.Template):
       if not self._modeltype:
          self._modeltype = conf.getProperty("model")
 
-
       props = Properties()
       props["order"] = conf[golem.properties.qgraf_power]
       props.setProperty("modeltype", self._modeltype)
@@ -79,6 +78,11 @@ class KinematicsTemplate(golem.util.parser.Template):
          if ":" in crossing:
             pos = crossing.index(":")
             self._crossings.append(crossing[:pos].strip())
+            
+      
+      self._proj=conf.getProperty("projectors")
+      props["projectors"]=self._proj
+      	
             
       def get_qed_sign(pdg,sign):
 	if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
@@ -559,6 +563,13 @@ class KinematicsTemplate(golem.util.parser.Template):
             return False 
          else:
             return int(order[1]) >= int(order[2])
+
+   #def projectors(self, *args, **opts):
+     #projectors=self._proj
+     #projectors="test"
+     #props=Properties()
+     #props.setProperty("projectors",projectors)
+     #print projectors
 
    def particles(self, *args, **opts):
       inout_filter = self._setup_filter(["initial", "final"], args)

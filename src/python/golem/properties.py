@@ -723,6 +723,8 @@ filter_module = Property("filter.module",
    """,
    str,"")
 
+projectors = Property("projectors","""\
+   A list of comma separated projectors""",list,sep=",")
 debug_flags = Property("debug",
    """\
    A list of debug flags.
@@ -1073,8 +1075,10 @@ properties = [
 
    select_lo_diagrams,
    select_nlo_diagrams,
+   select_nnlo_diagrams,
    filter_lo_diagrams,
    filter_nlo_diagrams,
+   filter_nnlo_diagrams,
    filter_module,
 
    config_renorm_beta,
