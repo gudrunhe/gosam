@@ -546,14 +546,16 @@ def generate_particle_lists(conf):
    mod = getModel(conf)
 
    in_particles = []
-   for p in ini:
-      particle = interpret_particle_name(p, mod)
-      in_particles.append(particle)
+   if any(ini):
+     for p in ini:
+        particle = interpret_particle_name(p, mod)
+        in_particles.append(particle)
 
    out_particles = []
-   for p in fin:
-      particle = interpret_particle_name(p, mod)
-      out_particles.append(particle)
+   if any(fin):
+     for p in fin:
+        particle = interpret_particle_name(p, mod)
+        out_particles.append(particle)
 
    conf.cache["particle_lists"] = (in_particles, out_particles)
 

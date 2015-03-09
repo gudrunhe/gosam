@@ -300,6 +300,7 @@ AutoDeclare CFunctions Lor;
 *------#[ procedure conservation:
 #Procedure conservation
    Id k[% num_legs %] =[%
+@if eval num_legs .gt. num_in %][%
 @for particles initial %][%
    @if eval index .lt. num_legs %] + k[%index%][%
    @end @if %][%
@@ -307,7 +308,17 @@ AutoDeclare CFunctions Lor;
 @for particles final %][%
    @if eval index .lt. num_legs %] - k[%index%][%
    @end @if %][%
-@end @for %];
+@end @for %];[%
+@else %] -([%
+@for particles initial %][%
+   @if eval index .lt. num_legs %] + k[%index%][%
+   @end @if %][%
+@end @for %][%
+@for particles final %][%
+   @if eval index .lt. num_legs %] - k[%index%][%
+   @end @if %][%
+@end @for %]);[%
+@end @if %]
 #EndProcedure
 *------#] procedure conservation:
 *------#[ procedure rewritelegs:
