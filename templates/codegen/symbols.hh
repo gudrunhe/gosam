@@ -34,10 +34,14 @@ Symbol deltaaxial, deltaOS, deltaHV;
 
 Vector ZERO, vDUMMYA;
 
-#If `LOOPS' == 1
+#If `LOOPS' >= 1
    CFunction j;
    CTensor ptens;
-   Vector Q, p1;
+   Vector Q
+   #Do i = 1, `LOOPS'
+        ,p`i'
+   #EndDo
+   ;
    Vector qshift;
    CFunction fshift;
 #EndIf
