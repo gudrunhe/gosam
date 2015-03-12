@@ -19,7 +19,7 @@ compile: source amplitude[%helicity%].a
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
 @if diagsum %]
-HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && grep 'Local' ../diagrams-1.hh),1,0)[%
+HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && head -n 100 ../diagrams-1.hh | grep 'Local'),1,0)[%
 @end @if %]
 
 OBJECTS= \
@@ -142,12 +142,13 @@ GENERATED_SRC=[%
 .PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
 .SUFFIXES:
 
+TEMPFILE:=$(shell mktemp -u)
+
 [% @if diagsum 
 %]convert:
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
-	$(shell mv ../diagrams-1.hh ../diags-1.hh)
-	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
-	$(shell rm ../diags-1.hh)
+	$(shell sed -e "s/Local diagram/Id diag/g" ../diagrams-1.hh > $(TEMPFILE))
+	$(shell mv $(TEMPFILE) ../diagrams-1.hh)
 endif[%
 @end @if %]
 
@@ -164,9 +165,8 @@ endif
 d[%$_%]h[%helicity%]l1: d[%$_%]h[%helicity%]l1.f90 abbrevd[%$_%]h[%helicity%].f90 globals.o[%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
-	$(shell mv ../diagrams-1.hh ../diags-1.hh)
-	$(shell sed -e "s/Local diagram/Id diag/g" ../diags-1.hh >> ../diagrams-1.hh)
-	$(shell rm ../diags-1.hh)
+	$(shell sed -e "s/Local diagram/Id diag/g" ../diagrams-1.hh > $(TEMPFILE))
+	$(shell mv $(TEMPFILE) ../diagrams-1.hh)
 endif[%
 @end @if %]
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
