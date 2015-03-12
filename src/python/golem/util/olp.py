@@ -428,8 +428,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       golem.util.tools.warning(
             "Please, check configuration and contract files for errors!")
 
-   for lineo,_,_,_ in order_file.processes_ordered():
+   for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
       subconf=orig_conf.copy()
+      subconf.activate_subconfig(subprocess_number)
       file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
          ignore_case, ignore_unknown, lineo, quiet=True)
       subprocesses_conf.append(subconf)

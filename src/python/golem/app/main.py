@@ -202,6 +202,7 @@ def main(argv=sys.argv):
             if temp_file_path:
                os.unlink(temp_file_path)
 
+         c.activate_subconfig(0)
          c["setup-file"] = os.path.abspath(in_file)
          c["golem.name"] = "GoSam"
          c["golem.version"] = ".".join(map(str, 

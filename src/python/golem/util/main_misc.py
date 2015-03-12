@@ -237,6 +237,13 @@ def write_template_file(fname, defaults, format=None):
 				f.write("%s=%s\n" % (prop, value))
 	for prop in golem.properties.properties:
 		changed = str(prop) in defaults.propertyNames()
+		subprocess_specific_settings = False
+		for k in defaults:
+			if k.startswith(str(prop)+"["):
+				subprocess_specific_settings=True
+				changed=True
+				break
+
 		if prop.isExperimental() and not changed:
 			continue
 		if prop.isHidden() and not changed:
@@ -301,6 +308,10 @@ def write_template_file(fname, defaults, format=None):
 				f.write("# %s=\n" % prop)
 			else:
 				f.write("# %s=%s\n" % (prop, prop.getDefault()))
+			if subprocess_specific_settings:
+				for k in defaults:
+					if k.startswith(str(prop)+"["):
+						f.write("%s=%s\n" % (k, defaults.getProperty(k)))
 			f.write("\n")
 		elif format == "LaTeX":
 			if prop.getDefault() is not None:

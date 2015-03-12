@@ -405,15 +405,23 @@ class Properties:
          # one of '=', ':', ' ', '\t', '\f'
          preceeding_backslash = False
          separator_index = -1
+         in_brackets = False
          for i in range(len(buf)):
-            if (not preceeding_backslash) and \
+            if (not preceeding_backslash and not in_brackets) and \
                   (buf[i] in ['=', ':', ' ', '\f', '\t']):
                separator_index = i
                break
-            if buf[i] == '\\':
+            if buf[i] == "[":
+               in_brackets = True
+            elif buf[i] == "]":
+               in_brackets = False
+            elif buf[i] == '\\':
                preceeding_backslash = not preceeding_backslash
             else:
                preceeding_backslash = False
+
+         if in_brackets:
+            raise GolemConfigError("Invalid range specification in '%s'. Missing ']'?" % buf)
 
          if separator_index < 0:
             key = buf.strip()
@@ -459,6 +467,18 @@ class Properties:
    def _del(self, name):
       del self._map[name]
 
+   def activate_subconfig(self, no):
+      changed={}
+      for key in self:
+        if "[" not in key:
+           continue
+        pos=key.index("[")
+        if no in extractRange(key[pos+1:-1]):
+           if key[:pos] in changed.keys() and changed[key[:pos]]!=self[key]:
+              raise GolemConfigError("multiple values for option '%s' in subprocess %s: '%s' or '%s'?" \
+                    % (key[:pos],no, changed[key[:pos]],self[key]))
+           self[key[:pos]]=self[key]
+           changed[key[:pos]]=self[key]
 
 def unescape(s):
    buf = [s[i] for i in range(len(s))]
@@ -1149,3 +1169,51 @@ def testCompilerLibCompatibility (compiler,lib,flags):
       except OSError, e:
          if e.errno != 2: # no such file or directory
             raise
+
+def extractRange(s,minval=0,maxval=999):
+   """ extract ranges from a string and returns a set
+       Examples:
+
+      >>> sorted(extractRange("2-3,5-8"))
+      [2, 3, 5, 6, 7, 8]
+      >>> sorted(extractRange("2-8,!4,!10"))
+      [2, 3, 5, 6, 7, 8]
+      >>> sorted(extractRange("2-8, !4-6"))
+      [2, 3, 7, 8]
+      >>> sorted(extractRange("1-10", maxval=5))
+      [1, 2, 3, 4, 5]
+      >>> sorted(extractRange("2-", 3, 5))
+      [3, 4, 5]
+      >>> sorted(extractRange("-2"))
+      [0, 1, 2]
+      >>> extractRange("!4")
+      set([])
+      >>> sorted(extractRange("-")) == range(0,1000)
+      True
+
+   """
+   s=s.replace(" ",",")
+   ranges = [x.split("-") for x in s.split(",")]
+   res=set()
+   for r in ranges:
+      if r==['']:
+         continue
+      elif len(r)==1:
+         if r[0][0] in "^!":
+            res.discard(int(r[0][1:]))
+         else:
+            res.add(int(r[0]))
+      elif len(r)==2:
+         remove = r[0] and (r[0][0] in "^!")
+         if remove:
+            r[0]=r[0][1:]
+         start = minval if r[0]=='' else int(r[0])
+         end = maxval if r[1]=='' else int(r[1])
+         if remove:
+            res=set(filter(lambda x: x<start or x>end ,res))
+         else:
+            res.update(range(start,end+1))
+      else: # len(r)>2
+         raise ValueError("Invalid range: %s in '%s'" % (r,s))
+   res=set(filter(lambda x: x>=minval and x<=maxval,res))
+   return res
