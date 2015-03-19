@@ -195,6 +195,11 @@
    ! 1: A factor of 1/8/pi^2 is not included in the NLO result
    ! 2: The NLO includes all prefactors
    !
+   ! For loop-induced processes:
+   ! 0: A factor of (alpha_(s)/2/pi)**2 is not included in the virtual result
+   ! 1: A factor of (1/8/pi^2)**2 is not included in the virtual result
+   ! 2: The result includes all prefactors (= (alpha_(s)/2/pi)**2)
+   !
    ! Note, however, that the factor of 1/Gamma(1-eps) is not included
    ! in any of the cases.
    integer :: nlo_prefactors = [% nlo_prefactors %]

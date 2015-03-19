@@ -587,11 +587,20 @@ contains
       end if
       select case(nlo_prefactors)
       case(0)
-         ! The result is already in its desired form
+         ! The result is already in its desired form[%
+      @if generate_lo_diagrams %]
       case(1)
          amp(2:4) = amp(2:4) * nlo_coupling
       case(2)
-         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi
+         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
+      @else %]
+      case(1)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * (nlo_coupling / 8.0_ki / pi / pi)**2[%
+      @end @if %]
       end select
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
