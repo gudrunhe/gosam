@@ -222,21 +222,22 @@
              convert=bool
              true=.true.
              false=.false. %][% @if generate_lo_diagrams %][% @else %]
-   ! not used:[% @end @if %]
+   ! not used (tree-level not available):[% @end @if %]
    integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
    integer :: PSP_chk_th2 = [% PSP_chk_th2 %]
-   integer :: PSP_chk_th3 = [% PSP_chk_th3 %][%
-   @if generate_lo_diagrams %]
-   ! not used in this process:
-   [% @else %]
-   ! used (process is loop-induced):
-   [% @end @if %]
+   integer :: PSP_chk_th3 = [% PSP_chk_th3 %]
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
+   [% @if generate_lo_diagrams %]
+   ! not used in this process (process is not loop-induced):[%
+   @else %]
+   ! used instead:[%
+   @end @if %]
    integer :: PSP_chk_li1 = [% PSP_chk_li1 %]
    integer :: PSP_chk_li2 = [% PSP_chk_li2 %]
    integer :: PSP_chk_li3 = [% PSP_chk_li3 %]
    integer :: PSP_chk_li4 = [% PSP_chk_li4 %]
 
-   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[% 
+[%
 @if ewchoose %]
    !
    ! The integer ewchoice allows the user to change the 
