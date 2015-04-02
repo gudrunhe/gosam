@@ -1,15 +1,6 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
-*
-* This version of golem.frm generates expressions for the numerator
-* only.
-*
 #-
-*on shortstatistics;
-off statistics;
-*on statistics;
-
-* sj - special header for using reduze
-#include- reduze.hh
+Format 255; * Number of characters per line
 
 #If `LOOPS' >= 1
    #Define abb`DIAG' "0"
@@ -18,43 +9,48 @@ off statistics;
    #Include- optimizeborn.hh
 #EndIf
 
-#include- spinney.hh
+#Include- reduze.hh
+#Include- spinney.hh
 #redefine SPCANCEL "0"
 
-#include- symbols.hh
+#Include- symbols.hh
 
 #ifndef `USEVERTEXPROC'
-   #include- vertices.hh
+   #Include- vertices.hh
 #endif
 
 CFunctions Spab3, Spba3;
 CFunction epspow;
 AutoDeclare Vectors spva;
 
-#include- color.hh
+#Include- color.hh
 .global
 
-#include- diagrams-`LOOPS'.hh #global
-#include- model.hh
+#Include- diagrams-`LOOPS'.hh #global
+#Include- model.hh
 #If `LOOPS' == 0
-#include- diagrams-`LOOPS'.hh #diagram`DIAG'
+   #Include- diagrams-`LOOPS'.hh #diagram`DIAG'
 #Else
-F diag1,...,diag`DIAGRAMCOUNT';
-#include- diagrams-`LOOPS'.hh #diagram`DIAG'
+   F diag1,...,diag`DIAGRAMCOUNT';
+   #Include- diagrams-`LOOPS'.hh #diagram`DIAG'
 #EndIf
 
 #ifdef `ISDUMMY'
    Multiply 0;
 #endif
 
-Id QGRAFSIGN(sDUMMY1?) = 1;
+Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
 
 #call zeroes
+#call ScreenExternalReduze
 
-* sj - tag diagrams with DiaMatch
+#Include- reduzeprojectors.hh
+
+#Call enforceconservation
 #Call DiaMatchTagReduze
-* sj - shift momenta onto reduze topologies
 #Call ShiftReduze
+#Call CrossReduze
+#Call CrossMomentaReduze
 
 * models that implement their own vertex replacements
 * must define the preprocessor variable USEVERTEXPROC
@@ -77,19 +73,24 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
    proplorentz(sDUMMY1, vDUMMY1, 0, 0, ?tail);
 
-#include- propagators.hh
+#Include- propagators.hh
 
 .sort:part 0.9.0;
 *---#] Process Propagators:
 
 #call coloralgebra(0)
 
+* sj - collect colour structures, can anything else appear? HOW TO GET ALL COLOUR STRUCTURES HERE
+AB TR,NC,NA,c1;
+.sort:abcolor1;
+
+Collect COLORFACTOR;
+Normalize COLORFACTOR;
+.sort:abcolor2;
+
 *---#[ Process Legs:
 
-* sj - screen all external spinors/vectors(polarisations)/tensors
-#call ScreenExternalReduze
-
-#include- legs.hh
+#Include- legs.hh
 
 #IfNDef `USEVERTEXPROC'
    Repeat;
@@ -112,12 +113,11 @@ EndArgument;
 
 .sort:subst. vertices and fermion legs;
 
-repeat id d(iv1L?, iv2L?) * d(iv2L?, iv3L?) = d(iv1L, iv3L);
+Id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
 
-* sj - use ProjMinus + ProjPlus = 1
-* useful for double Higgs (eliminates explicit Gamma5)
-id NCContainer(ProjMinus,?tail) = NCContainer(1,?tail) - NCContainer(ProjPlus,?tail); 
-*.sort
+* use ProjMinus + ProjPlus = 1
+Id NCContainer(ProjMinus,?tail) = NCContainer(1,?tail) - NCContainer(ProjPlus,?tail);
+.sort
 
 #Call RemoveNCContainer
 
@@ -131,64 +131,39 @@ id NCContainer(ProjMinus,?tail) = NCContainer(1,?tail) - NCContainer(ProjPlus,?t
 #EndDo
 .sort:process fermions;
 
-* sj - compute trace
+Id Projector(sDUMMY1?) = sDUMMY1;
+
 #Call TraceReduze
-
-* sj - include projectors
-*#include- reduzeprojectors.hh
-*Multiply d_(iv2r3L2,iv3r3L2);
-id SCREEN(inplorentz(2,iDUMMY1?,k1,0))*
-   SCREEN(inplorentz(2,iDUMMY2?,k2,0))=
-   SCREEN(inplorentz(2,iDUMMY1,k1,0))*
-   SCREEN(inplorentz(2,iDUMMY2,k2,0))*
-   d_(iDUMMY1,iDUMMY2);
-
-id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
-
-* sj - insert kinematics
 #Call kinematics
-
-*B inp,SCREEN,c1,PREFACTOR,Sector,inv,Tag,gHHH,gHT,e,i_;
-*print+s;
-*.end
-
-*sj - eliminate k4
-Argument inv;
-   #Call conservation()
-EndArgument;
-   #Call conservation()
-
-*sj - apply crossing symmetries
-#Call CrossingReduze
-
-* sj - map scalar products to propagators
 #Call SPToPropReduze
-
-* sj - map propagators onto reduze ordered propagators
 #Call MapReduze
 
-* sj - BOF copied from above, process 1PR propagators
+* process 1PR propagators
 Id inv(k1?, m?, sDUMMY1?) = inv(k1.k1 - m^2 + i_ * m * sDUMMY1);
 Id inv(k1?, m?) = inv(k1.k1 - m^2);
 Id inv(0, m?) = - inv(m^2);
 Id inv(0, m?, sDUMMY1?) = + inv(-m^2 + i_ * m * sDUMMY1);
 
-Argument inv;
+* sj - added - MAY WANT TO CALL THIS FUNCTION DEN!
+Denominators Den;
+Id inv(?tail) = Den(?tail);
+Id ProjDen(?tail) = Den(?tail);
+Argument Den;
    Id ZERO = 0;
    #call kinematics
 EndArgument;
-Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
-* sj - EOF copied from above
+.sort
 
 #Call ToIntReduze
+#Call CrossInvariantsReduze
 
 Id inp(?all) = 1;
 Id out(?all) = 1;
-
 Id ZERO = 0;
 
 #call zeroes
 Id csqrt(0) = 0;
+
 *---#] Process Legs:
 
 Multiply replace_(Sqrt2, sqrt2);
@@ -199,42 +174,41 @@ Multiply replace_(Sqrt3, sqrt3);
 Id sqrt3^2  = 3;
 Id sqrt3^-2 = 1/3;
 
-* sj - WARNING, WE MUST BE CAREFUL WHAT WE MEAN WITH THIS
-#if `LOOPS' == 1
-* Discrepancy between loop-integral libraries' convention 1/(i\pi^(n/2))
-* and 1/(2\pi)^n leaving out the pre-factors as described
-* in the manual.
-   Multiply PREFACTOR(i_/2);
-#endif
+Id csqrt(sDUMMY1?^2) = sDUMMY1;
 
-Repeat Id PREFACTOR(sDUMMY1?) * PREFACTOR(sDUMMY2?) =
-   PREFACTOR(sDUMMY1 * sDUMMY2);
+* prevent some prefactors entering prf
+Id i_ = PREFACTOR(i_);
+Id dimS = PREFACTOR(dimS);
+Id dimD = PREFACTOR(dimD);
 
-Id PREFACTOR(sDUMMY1?) = sDUMMY1;
+* post processing
+Id sDUMMY1?^(-1) = Den(sDUMMY1);
+Denominators Den;
+FactArg Den;
+ChainOut Den;
+.sort
+Id Den(sDUMMY1?number_) = 1/sDUMMY1;
+Id sDUMMY1?*Den(sDUMMY1?) = 1;
+.sort:post;
 
-Id Sector(?head)*ReduzeInt(?tail)=ReduzeInt(?head,?tail);
+Multiply prf(1,1);
+Repeat Id Den(sDUMMY1?)*prf(sDUMMY2?,sDUMMY3?) = prf(sDUMMY2,sDUMMY1*sDUMMY3);
+Repeat Id sDUMMY1?*prf(sDUMMY2?,sDUMMY3?) = prf(sDUMMY1*sDUMMY2,sDUMMY3);
+.sort:feed prf;
+PolyRatFun prf;
+.sort:prf;
 
+*
+* Write amplitude
+*
 #Create <`OUTFILE'.txt>
-#Create <`OUTFILE'Ints.txt>
 .sort
 
 * sj - useful for double Higgs (pulls out overall factors)
-Bracket inp,SCREEN,c1,PREFACTOR,Sector,inv,Tag,gHHH,gHT,e,i_,CrossingInvariants,Crossing;
+Bracket inp,SCREEN,c1,PREFACTOR,Sector,inv,Tag,gHHH,gHT,e,i_,CrossingInvariants,Crossing,COLORFACTOR;
 print+s;
 .sort
 
 Keep Brackets;
-#write <`OUTFILE'.txt> "%e", diagram`DIAG'
-.sort
-
-B ReduzeInt;
-.sort
-
-Collect fDUMMY1;
-Id fDUMMY1(?head)=1;
-DropCoefficient;
-.sort
-
-#write <`OUTFILE'Ints.txt> "%e", diagram`DIAG'
-print+s;
+#write <`OUTFILE'.txt> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
 .end

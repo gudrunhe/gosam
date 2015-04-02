@@ -5,14 +5,25 @@ Dimension dimS; * space-time dimension (normally d)
 
 AutoDeclare Symbols ReduzeT; * topologies/integral families
 AutoDeclare Symbols ReduzeN; * propagators
+AutoDeclare Symbols Proj; * projector labels
+CFunction prf; * for PolyRatFun
 CFunction Sector;
 CFunction Tag; * container for momentum/mass of ReduzeN
 CFunction Shift; * container for momentum shifts
 CFunction DiaMatch; * container for diagram number
 CFunction Crossing, CrossingShift, CrossingInvariants; * functions to store crossings
 CFunctions num; * inverse propagator num=inv^(-1)
-CFunctions ReduzeInt; * Reduze integral function (stores the inverse powers of the propagators)
-Symbols [];
+CFunctions INT; * Reduze integral function (stores the inverse powers of the propagators)
+CFunction ProjDen; * function for storing projector denominators ProjDen(x)=1/x;
+CFunction DenDim; * function for storing dimension denominators DenDim(dimS+n) = 1/(dimS+n);
+CFunction Den;
+CFunctions Projector;
+Symbols sDUMMY5,[];
+
+* dimS = 4 - 2* epsS
+* lower limit from IR divergence of loop integral (true for linear propagators?)
+* upper limit from needing O(epS^2) terms for IR terms at 2-loop, WARNING - THIS MUST BE MADE MORE GENERAL
+Symbols epsS(:2); * WARNING - THIS 2 IS A BAD IDEA !!!!!!
 
 * disable spinor flipping rules in spinney.hh (RemoveNCContainer)
 * does not implement arXiv:1008.0803v1 Eq(21), discussion at the end of section 3.5.2
@@ -20,20 +31,17 @@ Symbols [];
 
 * tag each diagram with DiaMatch(qgraf_digram_index)
 #Procedure DiaMatchTagReduze()
-Multiply DiaMatch(`DIAG'); * sj - probably want this when diasum is turned off
-*Id DIAGRAM(sDUMMY1?) = DiaMatch(sDUMMY1); * sj - works for now
+   Multiply DiaMatch(`DIAG');
 #EndProcedure
 
 * screen inplorentz, outlorentz
 #Procedure ScreenExternalReduze()
-   Id fDUMMY1?{inplorentz,outlorentz}(?tail) =
-      SCREEN(fDUMMY1(?tail));
+   Id fDUMMY1?{inplorentz,outlorentz}(?tail) = SCREEN(fDUMMY1(?tail));
 #EndProcedure
 
 * compute trace in d dimensions
 * input: trL*Sm(a)*Sm(b)*...*Sm(c)*trR (= Tr[\gamma^a \gamma^b ... \gamma^c])
-* WARNING - NOT SURE THIS HANDLES MULTIPLE CLOSED SPIN LINES CORRECTLY
-*         - NOT SURE THIS HANDLES OPEN SPIN LINES CORRECTLY
+* WARNING - NOT SURE THIS HANDLES OPEN SPIN LINES CORRECTLY
 #Procedure TraceReduze()
   ChainIn Sm;
 * loop over closed spin lines computing traces
@@ -41,44 +49,46 @@ Multiply DiaMatch(`DIAG'); * sj - probably want this when diasum is turned off
       Id Once Sm(?tail) = g_(1,?tail);
       Tracen 1;
       if ( Count(Sm,1) > 0 ) Redefine i "0";
-      .Sort
+      .Sort:red-trace;
    #EndDo
    Id trL*trR=1;
 #EndProcedure
 
 * shift momenta to Reduze momenta
-* WARNING - does shift always have (pair,[],pair,[],...,[])?
 #Procedure ShiftReduze()
    #include- reduzeshifts-`LOOPS'.hh
    Repeat Id Shift(?head,[],?tail) = Shift(?head,?tail);
    Id Once Shift(?tail) = replace_(?tail);
-   .Sort
+   .Sort:red-shifting;
+#EndProcedure
+                  
+#Procedure CrossReduze()
+   #include- reduzecrossing-`LOOPS'.hh
 #EndProcedure
 
 * map crossed integral families to uncrossed
-* WARNING - Not sure this is done consistently, do we need to eliminate k4 first? Have we done this correctly?
-*         - this routine needs carefully checking
-#Procedure CrossingReduze()
-   #include- reduzecrossing-`LOOPS'.hh
+#Procedure CrossMomentaReduze()
    Repeat Id CrossingShift(?head,[],?tail) = CrossingShift(?head,?tail);
    Id Once CrossingShift(?tail) = replace_(?tail);
-   .Sort
-*   Repeat Id CrossingInvariants(?head,[],?tail) = CrossingInvariants(?head,?tail);
-*   Id Once CrossingInvariants(?tail) = CrossingInvariants(reverse_(?tail))*replace_(?tail);
-*   .Sort
+   .Sort:red-crossing;
 #EndProcedure
 
+* assumes that CrossingInvariants() already exists in the expression
+#Procedure CrossInvariantsReduze()
+   Repeat Id CrossingInvariants(?head,[],?tail) = CrossingInvariants(?head,?tail);
+   Id Once CrossingInvariants(?tail) = replace_(?tail);
+   .Sort:red-crossinginvar;
+#EndProcedure
+                  
 * map scalar products to (inverse) propagators
 #Procedure SPToPropReduze()
    #include- reduzesptop-`LOOPS'.hh
+   .Sort:SPToPropReduze;
 #EndProcedure
                    
 * map propagators to Reduze ordered propagators
 #Procedure MapReduze()
    #include- reduzemap-`LOOPS'.hh
-   Bracket Tag,inv,num;
-   .Sort
-   Keep Brackets;
 * try to map propagators with inv/num(+...) and inv/num(-...)
    #Do i = 0,1
 * map propagators
@@ -90,24 +100,51 @@ Multiply DiaMatch(`DIAG'); * sj - probably want this when diasum is turned off
    Id inv(vDUMMY1?,?tail)=inv(-vDUMMY1,?tail);
    Id num(vDUMMY1?,?tail)=num(-vDUMMY1,?tail);
    #EndDo
-   .Sort
+*   Id Tag(?tail) = 1;
+*   .Sort:red-map;
 #EndProcedure
 
-* map Reduze ordered propagators to integral
-* WARNING - LOOPS passed as FORM argument, LEGS set in symbols.hh
+* map Reduze ordered propagators to integral (LOOPS passed as FORM argument, LEGS set in symbols.hh)
 #Procedure ToIntReduze()
-* store an ordered list of (inverse) powers of each propagator in ReduzeInt
-   Multiply ReduzeInt();
-   Bracket ReduzeInt,
-   #Do i = 0, {`LOOPS'*(`LOOPS'+1)/2 +`LOOPS'*(`LEGS'-1) - 1}
-   ReduzeN`i'
-   #EndDo
-   ;
-  .Sort
-  Keep Brackets;
+* store an ordered list of (inverse) powers of each propagator in INT
+   Multiply INT(0,0,0,0,[]); * Note: INT(t,ID,r,s,[],...indices...)
 * (maximal) number of independent scalar products is LOOPS*(LOOPS+1)/2 + LOOPS*(LEGS-1), provided momentum is conserved and LEGS-1<dimS
    #Do i = 0, {`LOOPS'*(`LOOPS'+1)/2 +`LOOPS'*(`LEGS'-1) - 1}
-      Id ReduzeN`i'^sDUMMY1? * ReduzeInt(?head) = ReduzeInt(?head,-sDUMMY1);
+      Id ReduzeN`i'^sDUMMY1?pos0_ * INT(sDUMMY2?,sDUMMY3?,sDUMMY4?,sDUMMY5?,[],?head) =
+         INT(sDUMMY2,sDUMMY3,sDUMMY4,sDUMMY5+sDUMMY1,[],?head,-sDUMMY1); * numerator/zeros
+      Id ReduzeN`i'^sDUMMY1?neg_ * INT(sDUMMY2?,sDUMMY3?,sDUMMY4?,sDUMMY5?,[],?head) =
+         INT(sDUMMY2+1,sDUMMY3+2^`i',sDUMMY4-sDUMMY1,sDUMMY5,[],?head,-sDUMMY1); * denominator
    #EndDo
-   .Sort
+   .Sort:red-toint1;
+   Id Sector(sDUMMY1?,?head)*INT(?tail)=Sector(sDUMMY1,?head)*INT(sDUMMY1,?tail);
+   Id Crossing(sDUMMY1?)*INT(sDUMMY2?,?tail)=INT(sDUMMY1,?tail);
+   .Sort:red-toint2;
+#EndProcedure
+
+* Series expand
+* dimS = 4 - 2 * epsS
+#Procedure ExpandDim()
+    Id PREFACTOR(dimS) = dimS;
+    Id DenDim(?tail) = Den(?tail);
+    .sort
+    FactArg Den;
+    .sort
+    ChainOut Den;
+    Multiply replace_(dimS,4-2*epsS);
+    .sort
+    SplitArg Den;
+    .sort
+* Extract poles
+    Id Den(-2*epsS) = 1/(-2*epsS);
+* Bring denominator into correct order
+    Id Den(sDUMMY1?,-2*epsS) = Den(-2*epsS,sDUMMY1);
+    .sort
+             
+* Taylor expand each factor of Den(d+a) about epsS = 0
+* 1/(-2*x+n) = \sum_a=0^\infty ( x^a 2^a n^(-1-a) )
+    Repeat Id Once Den(-2*epsS,sDUMMY1?)*epsS^sDUMMY2? =
+    epsS^sDUMMY2*sum_(sDUMMY3,0,2-sDUMMY2,epsS^sDUMMY3*2^sDUMMY3*sDUMMY1^(-1-sDUMMY3));  * WARNING - THIS 2 IS A BAD IDEA !!!!!!
+
+    Repeat Id Den(sDUMMY1?,sDUMMY2?,?tail) = Den(sDUMMY1+sDUMMY2,?tail);
+    .sort
 #EndProcedure
