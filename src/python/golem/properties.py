@@ -724,7 +724,7 @@ filter_module = Property("filter.module",
    str,"")
 
 projectors = Property("projectors","""\
-   A list of comma separated projectors""",list,sep=",")
+   path to the form file containing projectors """,str,"projectors.hh")
 debug_flags = Property("debug",
    """\
    A list of debug flags.
@@ -1113,6 +1113,7 @@ properties = [
    haggies_bin,
    fc_bin,
    python_bin,
+   projectors,
 
    fcflags_ninja,
    ldflags_ninja,
@@ -1129,7 +1130,7 @@ properties = [
    pyxodraw
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
+REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry", "reduze"]
 
 def getExtensions(conf):
    ext_name = str(extensions)
@@ -1191,6 +1192,8 @@ def setInternals(conf):
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
+   
+   conf["__REDUZE__"] = "reduze" in extensions
 
    conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
