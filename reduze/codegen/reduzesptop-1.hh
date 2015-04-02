@@ -1,0 +1,12 @@
+If ( Match(Sector( ReduzeT1L1,?tail)) );
+id k3.p1 = ( -1/2*num(k2+k3-p1+k1,mT)+1/2*mH^2+1/2*num(k2-p1+k1,mT)-1/2*es12 );
+id p1.k1 = ( -1/2*num(p1-k1,mT)+1/2*num(p1,mT) );
+id p1.p1 = ( mT^2+num(p1,mT) );
+id k2.p1 = ( 1/2*num(p1-k1,mT)-1/2*num(k2-p1+k1,mT)+1/2*es12 );
+EndIf;
+If ( Match(Sector( ReduzeT2L1,?tail)) );
+id k2.p1 = ( 1/2*es23+1/2*num(-p1+k3+k1,mT)-1/2*mH^2-1/2*num(k2-p1+k3+k1,mT)+1/2*es12 );
+id p1.p1 = ( mT^2+num(p1,mT) );
+id p1.k3 = ( -1/2*es23+1/2*num(p1-k1,mT)-1/2*num(-p1+k3+k1,mT)+mH^2-1/2*es12 );
+id p1.k1 = ( -1/2*num(p1-k1,mT)+1/2*num(p1,mT) );
+EndIf;
