@@ -1024,6 +1024,29 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          yield props
 
+# bof - sj
+#   def masses(self, *args, **opts):
+#      """
+#      Provides an iterator to the set of masses of the external particles
+#      """
+#      if "prefix" in opts:
+#         prefix = opts["prefix"]
+#      else:
+#         prefix = ""
+#
+#      var_name = self._setup_name("var", prefix + "$_", opts)
+#      mass_name = self._setup_name("mass", prefix + "mass", opts)
+#
+#      props = Properties()
+#
+#      mass_set = set(self._masses)
+#      mass_set.discard("0")
+#
+#      for mass in mass_set:
+#         props.setProperty(mass_name, mass)
+#         yield props
+# eof - sj
+
    def mandelstam(self, *args, **opts):
       zero_filter = self._setup_filter(["zero", "non-zero"], args)
       zero_name = self._setup_name("zero", "is_zero", opts)

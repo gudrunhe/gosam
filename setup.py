@@ -62,6 +62,8 @@ DATA_DIRS = [
 			"templates/doc",
 			"templates/helicity",
 			"templates/matrix",
+			"templates/codegen/reduze",
+			"templates/codegen/reduze/config",
 			"olp/templates",
 			"models",
 			"src/form",
@@ -73,6 +75,7 @@ DATA_EXCLUDE = [
 	".svn*",
 	"*.pyc",
 	"*.pyo",
+	".DS_Store",
 ]
 
 def getDataFiles(data_dir):

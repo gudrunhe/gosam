@@ -1,0 +1,2 @@
+1) Lines "os.system" in main_qgraf.py should be replaced by "subprocess.call"
+2) Need to be careful with loops=2, some files seem to expect these to be uv counterterms

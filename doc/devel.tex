@@ -1761,7 +1761,7 @@ The iterator defines the following names:
 
    Please, note that all names can be prefixed by setting the argument
    \texttt{prefix}.
-\item[\texttt{quark\_loop\_masses}] This iteratr enumerates all
+\item[\texttt{quark\_loop\_masses}] This iterator enumerates all
    quark masses present in closed quark loops. The arguments
    \texttt{prefix}, \texttt{var}, \texttt{first} and \texttt{last}
    are used with their usual meaning.
@@ -1969,6 +1969,13 @@ additional information about each loop diagram.
 \subsection{Iterators}
 %---------------------------------------------------------------------
 \begin{description}
+
+\item[\texttt{all_masses}
+      {[\texttt{prefix=}\synt{prefix}]}] 
+      This iterator enumerates the set of all external particle and 
+      propagator masses present in all diagrams. 
+      The argument \synt{prefix} (default: \lit{}) is prepended to 
+      the names of the masses.
 \item[\texttt{diagrams}
       {[\texttt{group=}\synt{group}]}
       {[\texttt{loopsize=}\synt{loopsize}]}

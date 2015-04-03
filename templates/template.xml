@@ -166,6 +166,19 @@
 		<file src="dot.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="reduze.sty" class="Verbatim" usedby="qgraf"/>
 	</directory>
+    
+    <!-- todo - add usedby="reduze" tag /-->
+ 	<directory src="codegen">
+		<file src="reduze.hh" class="Verbatim"/>
+		<file src="golemreduze.frm" class="Verbatim"/>
+		<file src="golemreduzesum.frm" class="Verbatim"/>
+	</directory>
+    
+    <directory src="codegen/reduze"/>
+    
+    <directory src="codegen/reduze/config">
+		<file src="kinematics.yaml" class="Integrals"/>
+	</directory>
 
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">

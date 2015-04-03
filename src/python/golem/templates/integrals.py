@@ -108,6 +108,63 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 		return any([str(root.width(i)) != "0" for i in range(1, size+1)])
 
+# bof - sj
+#	def propagator_masses(self, *args, **opts):
+#      """
+#      Provides an iterator to the set of masses of the propagators
+#      """
+#		if "prefix" in opts:
+#			prefix = opts["prefix"]
+#		else:
+#			prefix = ""
+#
+#		var_name = self._setup_name("var", prefix + "$_", opts)
+#		mass_name = self._setup_name("mass", prefix + "mass", opts)
+#
+#		props = Properties()
+#
+#		mass_set = set()
+#
+#		for g in range(0,len(self._roots)):
+#			root = self._roots[g]
+#			for i in range(0,root.size()):
+#				mass_set.add(root.mass(i))
+#
+#		mass_set.discard("0")
+#
+#		for mass in mass_set:
+#			props.setProperty(mass_name, mass)
+#			yield props
+
+	def all_masses(self, *args, **opts):
+		"""
+		Provides an iterator to the set of masses of the external particles
+		and propagators
+		"""
+		if "prefix" in opts:
+			prefix = opts["prefix"]
+		else:
+			prefix = ""
+        
+		var_name = self._setup_name("var", prefix + "$_", opts)
+		mass_name = self._setup_name("mass", prefix + "mass", opts)
+        
+		props = Properties()
+        
+		mass_set = set(self._masses)
+        
+		for g in range(0,len(self._roots)):
+			root = self._roots[g]
+			for i in range(0,root.size()):
+				mass_set.add(root.mass(i))
+        
+		mass_set.discard("0")
+        
+		for mass in mass_set:
+			props.setProperty(mass_name, mass)
+			yield props
+# eof - sj
+
 	def propagators(self, *args, **opts):
 		nopts = opts.copy()
 		for kw in ["group", "first", "last", "index", "shift",
