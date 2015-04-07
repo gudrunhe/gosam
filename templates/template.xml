@@ -176,15 +176,15 @@
         </file>
 	</directory>
     
+    <!--
     <directory src="codegen/reduze">
         <only if-extension="reduze" />
     </directory>
+     /-->
     
     <directory src="codegen/reduze/config">
         <only if-extension="reduze" />
-		<file src="kinematics.yaml" class="Integrals">
-            <only if-extension="reduze" />
-        </file>
+		<file src="kinematics.yaml" class="Integrals"/>
 	</directory>
 
 	<directory src="common">
@@ -267,6 +267,7 @@
 
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
+            <except if-extension="reduze" />
 			<file src="Makefile" class="Integrals">
 				<except if-extension="autotools" />
 			</file>
@@ -308,4 +309,10 @@
 			</file>
 		</directory>
 	</foreach>
+    
+    <directory src="helicity" dest="helicity">
+        <only if-extension="reduze" />
+        <!-- todo /-->
+    </directory>
+    
 </template>
