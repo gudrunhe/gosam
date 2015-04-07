@@ -158,6 +158,8 @@
 			<except if-option="genUV" value="false"/>
 		</file>
 		<!-- <file src="projectors.hh" class="Kinematics"/> /-->
+		<file src="translate_reduze.py"  class="Verbatim"/>
+			<only if-extension="reduze" />
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">
@@ -165,16 +167,21 @@
 		<file src="topolopy.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="dot.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="reduze.sty" class="Verbatim" usedby="qgraf"/>
+			<only if-extension="reduze" />
 	</directory>
     
     <!-- todo - add usedby="reduze" tag /-->
  	<directory src="codegen">
 		<file src="reduze.hh" class="Verbatim"/>
+			<only if-extension="reduze" />
 		<file src="golemreduze.frm" class="Verbatim"/>
+			<only if-extension="reduze" />
 		<file src="golemreduzesum.frm" class="Verbatim"/>
+			  <only if-extension="reduze" />
 	</directory>
     
     <directory src="codegen/reduze"/>
+	  <only if-extension="reduze" />
     
     <directory src="codegen/reduze/config">
 		<file src="kinematics.yaml" class="Integrals"/>

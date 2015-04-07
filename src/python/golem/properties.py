@@ -418,6 +418,10 @@ form_tmp = Property("form.tempdir",
    str,
    "/tmp")
 
+reduze_bin = Property("reduze.bin",
+   """\
+   Points to reduze executable""",str,"reduze")
+
 template_path = Property("templates",
    """\
    Path pointing to the directory containing the template
@@ -580,7 +584,8 @@ extensions = Property("extensions",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr","noderive","noformopt"])
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr",
+      "noderive","noformopt","reduze"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -723,8 +728,12 @@ filter_module = Property("filter.module",
    """,
    str,"")
 
-projectors = Property("projectors","""\
+projectors = Property("projectors",
+   """\
    path to the form file containing projectors """,str,"projectors.hh")
+integral_families = Property("integral_families",
+  """\
+  path to the yaml file containing the integral families """,str,"integral_families.yaml")
 debug_flags = Property("debug",
    """\
    A list of debug flags.
@@ -1114,6 +1123,8 @@ properties = [
    fc_bin,
    python_bin,
    projectors,
+   integral_families,
+   reduze_bin,
 
    fcflags_ninja,
    ldflags_ninja,

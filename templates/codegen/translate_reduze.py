@@ -192,10 +192,11 @@ def write_reduze_crossing(top,crossfile):
 
 
 if __name__=='__main__':
-  infile=file('setup_sector_mappings.log')
-  spfile=open('reduzesptop.hh','w')
-  mapfile=open('reduzemap.hh','w')
-  crossfile=open('reduzecrossing.hh','w')
+  path = sys.argv[1]
+  infile=file(path+'setup_sector_mappings.log')
+  spfile=open(path+'reduzesptop.hh','w')
+  mapfile=open(path+'reduzemap.hh','w')
+  crossfile=open(path+'reduzecrossing.hh','w')
 
   topologies=gettopologies(infile)
   
