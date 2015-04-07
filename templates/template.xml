@@ -157,7 +157,7 @@
             <only if-extension="reduze" />
         </file>
         <file src="reduze.hh" class="Verbatim">
-			<only if-extension="reduzelol" />
+			<only if-extension="reduze" />
         </file>
 		<file src="golemreduze.frm" class="Verbatim">
             <only if-extension="reduze" />
@@ -180,14 +180,12 @@
         <only if-extension="reduze" />
     </directory>
     
-    <!--
     <directory src="codegen/reduze/config">
         <only if-extension="reduze" />
 		<file src="kinematics.yaml" class="Integrals">
             <only if-extension="reduze" />
         </file>
 	</directory>
-     /-->
 
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">
