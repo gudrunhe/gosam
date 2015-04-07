@@ -1,0 +1,91 @@
+[%' vim: syntax=golem
+	 This template defines the Makefile.source that go under
+    <process_dir>/helicity*/
+'%]# vim: ts=3:sw=3
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
+FORM_OPT= -D PROCESSPATH=.. \
+	-D PWD=. \
+	-p ..:../codegen \
+	-M -q
+
+DIAGRAMS_TREE=[%
+@if group %][%
+@else %][% 
+	@for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0.log[%
+	@end @for %][%
+@end @if %]
+
+TXT_TREE=[%
+@if group %][%
+   @for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .log,.txt,$(DIAGRAMS_TREE))[%
+@end @if %]
+
+[% @if generate_lo_diagrams %]
+SOURCE_TREE= $(DIAGRAMS_TREE)
+[% @else %]
+SOURCE_TREE=
+[% @end @if %]
+
+[% @if generate_nlo_virt %]
+DIAGRAMS_VIRT=[%
+@select r2
+@case implicit explicit off %][%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.log[%
+   @end @for %][%
+@end @select %]
+
+TXT_VIRT=[%
+@select r2
+@case implicit explicit off %]$(subst .log,.txt,$(DIAGRAMS_VIRT))[%
+@end @select %]
+
+SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
+[% @else %]
+DIAGRAMS_VIRT=
+TXT_VIRT=
+SOURCE_VIRT=
+[% @end @if generate_nlo_virt %]
+
+# TODO - INCLUDE generate_nnlo_virt
+
+.PHONY: source
+.SUFFIXES:
+
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
+
+[% @for elements topolopy.keep.tree %]
+d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+[% @end @for %]
+
+[% @for elements topolopy.keep.virt %]
+d[%$_%]h[%helicity%]l1.log: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)\
+		-D LOOPS=1 \
+		-D DIAG=[%$_%] \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		../codegen/golemreduze.frm
+#TODO Reduze -> Python -> Form (diag) -> Form (sum) -> Reduze -> Form (write code)
+[% @end @for %]
+
+# TODO - SAME FOR NNLO
