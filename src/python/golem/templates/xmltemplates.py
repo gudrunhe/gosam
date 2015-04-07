@@ -67,7 +67,9 @@ class _TemplateState:
 
       self.cbuffer = None
       self.factory = golem.templates.factory.TemplateFactory()
-   
+            
+      self.queue = {}
+
    def setMode(self, mode):
       self._mode = mode
 
@@ -87,6 +89,53 @@ class _TemplateState:
             tmp.update(attrs2)
             product.append(tmp)
       self.stack.append(product)
+            
+   def queue_create_directory(self, dest):
+      if dest not in self.queue:
+         self.queue[dest] = []
+
+   def queue_transform_template_file(self, env):
+      if "current output directory" in env:
+         out_dir = env["current output directory"]
+      else:
+         out_dir = self.output_dir
+      out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
+      if out_dir in self.queue:
+         if self.queue[out_dir] is not None:
+            self.queue[out_dir].append(env)
+      else:
+         self.queue[out_dir] = [env]
+
+   def empty_queue(self):
+      for dest, envs in self.queue.iteritems():
+         self.create_directory(dest)
+         for env in envs:
+           if "current output directory" in env:
+              out_dir = env["current output directory"]
+           else:
+              out_dir = self.output_dir
+                  
+           if "current template directory" in env:
+              tpl_dir = env["current template directory"]
+           else:
+              tpl_dir = self.template_dir
+                     
+           in_file = os.path.join(tpl_dir, env["template file name"].encode(sys.getfilesystemencoding()))
+           out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
+           class_name = env["class name"]
+           filter = env.get("filter", None)
+           executable = env.get("executable", False)
+                     
+           extra_props = golem.util.config.Properties()
+           for name in env:
+              extra_props.setProperty(name, env[name])
+                  
+           self.props.append(extra_props)
+                  
+           message("Generating file %s" % env["output file name"])
+
+           self.transform_template_file(in_file, out_file, class_name, filter, executable)
+           self.props.pop()
 
    def create_directory(self, dest):
       if os.path.exists(dest):
@@ -95,7 +144,7 @@ class _TemplateState:
                   "because it exists and is not a directory.")
       else:
          message("Creating directory %r ..." % dest)
-         os.mkdir(dest)
+         os.makedirs(dest) # previously mkdir
 
    def transform_template_file(self, in_file, out_file, class_name, filter, executable):
       if out_file in self.produced_files:
@@ -138,7 +187,7 @@ class _TemplateState:
          entry["output-directory"] = self.output_dir
 
    def end_template(self):
-      pass
+      self.empty_queue()
 
    def expand_file(self, env, attrs):
       if "usedby" in attrs:
@@ -205,32 +254,9 @@ class _TemplateState:
 
    def end_file(self):
       envs = self.stack.pop()
+      
       for env in envs:
-         if "current output directory" in env:
-            out_dir = env["current output directory"]
-         else:
-            out_dir = self.output_dir
-
-         if "current template directory" in env:
-            tpl_dir = env["current template directory"]
-         else:
-            tpl_dir = self.template_dir
-
-         in_file = os.path.join(tpl_dir, env["template file name"].encode(sys.getfilesystemencoding()))
-         out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
-         class_name = env["class name"]
-         filter = env.get("filter", None)
-         executable = env.get("executable", False)
-
-         extra_props = golem.util.config.Properties()
-         for name in env:
-            extra_props.setProperty(name, env[name])
-
-         self.props.append(extra_props)
-
-         message("Generating file %s" % env["output file name"])
-         self.transform_template_file(in_file, out_file, class_name, filter, executable)
-         self.props.pop()
+         self.queue_transform_template_file(env)
 
    def expand_directory(self, env, attrs):
       if "usedby" in attrs:
@@ -296,11 +322,12 @@ class _TemplateState:
          tmp = self.expand_directory(env, attrs)
          if tmp is not None:
             new_top.append(tmp)
-            self.create_directory(tmp["current output directory"])
       self.stack.append(new_top)
 
    def end_directory(self):
-      self.stack.pop()
+      envs = self.stack.pop()
+      for env in envs:
+         self.queue_create_directory(env["current output directory"])
 
    def evaluate_conditions(self, env, attrs):
       """
