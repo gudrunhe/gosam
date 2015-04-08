@@ -5,6 +5,7 @@ import os.path
 import imp
 import StringIO
 import hashlib
+import shutil
 
 from time import gmtime, strftime
 
@@ -160,6 +161,18 @@ def generate_process_files(conf, from_scratch=False):
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
+		
+	if conf["__REDUZE__"]:
+	  try:
+	    shutil.copy(conf.getProperty("projectors"), os.path.join(conf.getProperty("process_path"),'codegen'))
+	  except IOError:
+	    raise GolemConfigError("%s not found!", conf.getProperty("projectors"))
+	  try:
+	    shutil.copy(conf.getProperty("integral_families"), os.path.join(conf.getProperty("process_path"),'codegen/reduze/config'))
+	  except IOError:
+	    raise GolemConfigError("%s not found!", conf.getProperty("integral_families"))
+	  
+
 
 	cleanup(path)
 
