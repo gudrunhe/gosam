@@ -343,7 +343,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
             for q, a in zip(qi, p):
                qpdg, qm, qg = leptons[q]
                apdg, am, ag = anti_leptons[a]
-               if (flavour and qpdg != apdg) or (family and qg != ag):
+               if (lepton and qpdg != apdg) or (generation and qg != ag):
                   valid = False
                   break
                if not (am or qm):
