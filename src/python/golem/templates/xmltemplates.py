@@ -69,7 +69,6 @@ class _TemplateState:
       self.factory = golem.templates.factory.TemplateFactory()
             
       self.queue = []
-      self.parent = 0
       self.current = 0
 
    def setMode(self, mode):
