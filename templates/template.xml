@@ -176,15 +176,13 @@
         </file>
 	</directory>
     
-    <!--
-    <directory src="codegen/reduze">
+    <directory src="codegen">
+        <directory src="reduze">
+            <directory src="config">
+                <file src="kinematics.yaml" class="Integrals"/>
+            </directory>
+        </directory>
         <only if-extension="reduze" />
-    </directory>
-     /-->
-    
-    <directory src="codegen/reduze/config">
-        <only if-extension="reduze" />
-		<file src="kinematics.yaml" class="Integrals"/>
 	</directory>
 
 	<directory src="common">
