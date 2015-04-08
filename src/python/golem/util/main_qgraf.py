@@ -226,6 +226,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			conf.getBooleanProperty("generate_uv_counterterms")
 	flag_draw_diagrams = conf.getProperty(golem.properties.pyxodraw)
 	flag_topolopy = True
+	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):

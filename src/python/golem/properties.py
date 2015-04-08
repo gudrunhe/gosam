@@ -519,7 +519,7 @@ reduction_programs = Property("reduction_programs",
       """,
       list,
       "ninja,golem95",
-      options=["ninja","samurai","golem95","pjfry"]
+      options=["ninja","samurai","golem95","pjfry","reduze"]
    )
 
 polvec_method = Property("polvec",
