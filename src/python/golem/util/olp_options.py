@@ -303,7 +303,9 @@ def AmplitudeType(values, conf, ignore_case):
 		conf["olp.no_loop_level"] = True
 	if ret.startswith(__value_OK__) and 'loopinduced' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = True
-	if ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_loop_level"] = False
+	elif ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
 	return ret
 
