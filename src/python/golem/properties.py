@@ -734,7 +734,7 @@ projectors = Property("projectors",
 integral_families_1loop = Property("integral_families_1loop",
   """\
   path to the yaml file containing the integral families """,str,"integral_families_1loop.yaml")
-integral_families_2loop = Property("integral_families_1loop",
+integral_families_2loop = Property("integral_families_2loop",
   """\
   path to the yaml file containing the integral families """,str,"integral_families_2loop.yaml")
 debug_flags = Property("debug",
@@ -1127,7 +1127,7 @@ properties = [
    python_bin,
    projectors,
    integral_families_1loop,
-   integral_families_2loop
+   integral_families_2loop,
    reduze_bin,
 
    fcflags_ninja,
