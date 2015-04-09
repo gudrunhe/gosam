@@ -5,7 +5,6 @@ import os.path
 import imp
 import StringIO
 import hashlib
-import shutil
 
 from time import gmtime, strftime
 
@@ -166,11 +165,11 @@ def generate_process_files(conf, from_scratch=False):
 	  try:
 	    copy_file(conf.getProperty("projectors"), os.path.join(conf.getProperty("process_path"),'codegen'))
 	  except IOError:
-	    raise GolemConfigError("%s not found!", conf.getProperty("projectors"))
+	    raise GolemConfigError("%s not found!" % conf.getProperty("projectors"))
 	  try:
 	    copy_file(conf.getProperty("integral_families"), os.path.join(conf.getProperty("process_path"),'codegen','reduze','config'))
 	  except IOError:
-	    raise GolemConfigError("%s not found!", conf.getProperty("integral_families"))
+	    raise GolemConfigError("%s not found!" % conf.getProperty("integral_families"))
 	  
 
 
