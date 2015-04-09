@@ -180,12 +180,12 @@
         <directory src="reduze">
             <directory src="1loop">
                 <directory src="config">
-                    <file src="kinematics.yaml" dest="1loop/config/kinematics.yaml" class="Integrals"/>
+                    <file src="kinematics.yaml" class="Integrals"/>
                 </directory>
             </directory>
             <directory src="2loop">
                 <directory src="config">
-                    <file src="kinematics.yaml" dest="2loop/config/kinematics.yaml" class="Integrals"/>
+                    <file src="kinematics.yaml" class="Integrals"/>
                 </directory>
             </directory>
         </directory>
