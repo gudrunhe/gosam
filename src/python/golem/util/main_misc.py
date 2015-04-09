@@ -160,8 +160,9 @@ def generate_process_files(conf, from_scratch=False):
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
-	
-	if conf["__REDUZE__"] == True:   
+		
+	flag_reduze=conf["__REDUZE__"]
+	if flag_reduze:   
 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml'))
