@@ -163,7 +163,9 @@ def generate_process_files(conf, from_scratch=False):
 	
 	if conf["__REDUZE__"]==True:   
 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','config','integral_families.yaml'))
+	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
+	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml'))
+# todo - add properties integral_families_1loop and integral_families_2loop
 
 	cleanup(path)
 
