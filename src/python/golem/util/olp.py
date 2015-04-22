@@ -614,7 +614,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       # handle case that first subprocess does not initalize samurai (LO process)
       for subprocess in subprocesses.values():
          sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
-         if "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
+         if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
             # add samurai to first subprocess, which is called by "initgolem(true)"
             first_subprocess = int(subprocesses.values()[0])
             subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
