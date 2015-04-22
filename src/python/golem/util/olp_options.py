@@ -216,7 +216,7 @@ def CouplingPower(values, conf, ignore_case):
 		return __value_ERR__ + "too many values."
 
 	elif len(values) == 2:
-		
+
 		if values[0].lower() == 'qcd':
 			try:
 				power = int(values[1])
@@ -224,7 +224,6 @@ def CouplingPower(values, conf, ignore_case):
 				return __value_OK__
 			except ValueError:
 				return __value_ERR__ + "non-integer value encountered."
-			
 		elif values[0].lower() == 'qed':
 			try:
 				power = int(values[1])
@@ -232,8 +231,8 @@ def CouplingPower(values, conf, ignore_case):
 				return __value_OK__
 			except ValueError:
 				return __value_ERR__ + "non-integer value encountered."
-			else:
-				return __value_ERR__ + "unrecognized type of CouplingPower."
+		else:
+			return __value_ERR__ + "unrecognized type of CouplingPower."
 	else:
 		return __value_ERR__ + "too few arguments in CouplingPower."
 
@@ -271,7 +270,6 @@ def AlphaPower(values, conf, ignore_case):
 def EWScheme(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	
 	supported_values = ["alphaGF","alpha0","alphaMZ","alphaRUN","alphaMSbar","OLPDefined"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.ewscheme", supported_values)
@@ -282,7 +280,6 @@ def EWScheme(values, conf, ignore_case):
 def WidthScheme(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	
 	supported_values = ["ComplexMass","FixedWidth"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.widthscheme", supported_values)
@@ -426,7 +423,7 @@ def Parameters(values, conf, ignore_case):
         parameters = list(values)
         if len(values) > 0:
                 if parameters[0] == "alpha_s":
-                        #parameters.remove("alpha_s")		
+                        #parameters.remove("alpha_s")
                         conf["olp.alphas"] = 1
                         conf["olp.parameters"] = parameters
                 else:
@@ -435,7 +432,7 @@ def Parameters(values, conf, ignore_case):
                         warning("WARNING: by convention the first parameter should be 'alpha_s.'")
                         return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
-	
+
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
 	err_flag = False
 
