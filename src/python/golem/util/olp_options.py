@@ -290,17 +290,27 @@ def WidthScheme(values, conf, ignore_case):
 
 @optional_olp_option
 def AmplitudeType(values, conf, ignore_case):
+	# Amplitudetype LoopInterference is an extension to BLHA2
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced"]
+	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced","LoopInterference"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.amplitudetype", supported_values)
+	if hasattr(conf,"psp_chk_method_last"):
+		# reset PSP_chk_method if necessary
+		conf["PSP_chk_method"]=conf.psp_chk_method_last if conf.psp_chk_method_last else "Automatic"
 	if ret.startswith(__value_OK__) and 'tree' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = True
 	if ret.startswith(__value_OK__) and 'loopinduced' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = True
 		conf["olp.no_loop_level"] = False
+	elif ret.startswith(__value_OK__) and 'loopinterference' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_tree_level"] = False
+		conf["olp.no_loop_level"] = False
+		if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic","polerotation"]:
+			conf.psp_chk_method_last=conf["PSP_chk_method"]
+			conf["PSP_chk_method"]="LoopInduced"
 	elif ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
@@ -353,7 +363,7 @@ def PrecisionCheck(values, conf, ignore_case):
                   "PSP_chk_method", supported_values)
    if ret==__value_OK__:
       if conf["PSP_chk_method"].lower() in ["disabled","off"]:
-         conf["PSP_chk_method"]="automatic"
+         conf["PSP_chk_method"]="Automatic"
          conf["PSP_check"]="False"
    return ret
 
