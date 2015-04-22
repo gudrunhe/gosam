@@ -589,7 +589,7 @@ def workflow(conf):
 	if 'formopt' in ext:
 		if 'topolynomial' in ext:
 			raise GolemConfigError(
-						"Your configuaration has select the extension 'topolynomial' \n"
+						"Your configuration has select the extension 'topolynomial' \n"
 						"and optimization by FORM 'formopt'. " +
 						"The two options are not compatible. \nPlease change your input " +
 						"card (remove topolynomial or add noformopt) and re-run.")
