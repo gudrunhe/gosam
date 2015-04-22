@@ -519,6 +519,8 @@ def workflow(conf):
 	#generate_uv_counterterms
 	#False
 
+	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
+		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
 
 	#if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
 	#	qgraf_options.append("onshell")

@@ -346,6 +346,16 @@ def DebugUnstable(values, conf, ignore_case):
 			conf["PSP_verbosity"]="False"
 	return ret
 
+@optional_olp_option
+def PrecisionCheck(values, conf, ignore_case):
+   supported_values = ["disabled","off"] + golem.properties.config_PSP_chk_method._options
+   ret=expect_one_keyword(values, conf, True,
+                  "PSP_chk_method", supported_values)
+   if ret==__value_OK__:
+      if conf["PSP_chk_method"].lower() in ["disabled","off"]:
+         conf["PSP_chk_method"]="automatic"
+         conf["PSP_check"]="False"
+   return ret
 
 @optional_olp_option
 def ExcludedParticles(values, conf, ignore_case):

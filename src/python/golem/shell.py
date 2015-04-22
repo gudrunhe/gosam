@@ -699,7 +699,10 @@ class GENERATE(Command):
             if not any([e in extensions for e in REDUCTION_EXTENSIONS]):
                shell.recommendations["+add.extensions"] = "samurai"
                flag=True
-               
+
+         if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
+              conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
+
          if len(process_path) == 0:
             if len(process_name) == 0:
                rec = "."

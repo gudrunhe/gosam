@@ -1086,6 +1086,24 @@ config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """,
    str, 1000)
 
+config_PSP_chk_method = Property("PSP_chk_method",
+   """\
+   This option can be used to overwrite the automatic phase-space point
+   test method enabled with PSP_check=True.
+   Except in some BSM scenarios, the user does not need to change this.
+
+   Possible options:
+   Automatic    - chooses automatically a suitable phase-space point test
+                  method (default).
+   PoleRotation - check first the pole and then rotate if necessary.
+   Rotation     - force a rotation check on every phase space point.
+   LoopInduced  - check that the pole part is zero and rotate if necessary.
+                  Needed e.g. for interferience between BSM Born and
+                  SM loop-induced virtual.
+   """,
+   str, "Automatic",options=["automatic","polerotation","rotation","loopinduced"])
+
+
 properties = [
    process_name,
    process_path,
@@ -1138,6 +1156,7 @@ properties = [
    config_PSP_chk_li2,
    config_PSP_chk_li3,
    config_PSP_chk_li4,
+   config_PSP_chk_method,
 
    reference_vectors,
    abbrev_limit,

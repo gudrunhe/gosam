@@ -210,7 +210,7 @@ contains
       amp = ampdef
       ! RESCUE SYSTEM
       if(PSP_check) then[%
-              @if generate_lo_diagrams %]
+              @if anymember PoleRotation PSP_chk_method ignore_case=true %]
          call ir_subtraction(vecs, scale2, irp, h)
          if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
@@ -228,6 +228,9 @@ contains
             icheck=3
             fpprec1=-10        ! Set -10 as finite part precision
          endif[%
+         @elif anymember Rotation PSP_chk_method ignore_case=true %]
+         icheck=2 ! do rotation in all cases (PSP_chk_method=Rotation)
+         [%
          @else %]
          ! poles should be zero for loop-induced processes
          if(ampdef(2) .ne. 0.0_ki) then
@@ -267,7 +270,7 @@ contains
             reduction_interoperation = reduction_interoperation_rescue
             call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
             amp=ampres[%
-            @if generate_lo_diagrams %]
+            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
             if((ampres(3)-irp(2)) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
             else
@@ -324,7 +327,7 @@ contains
             write(42,'(2x,A7)')"<event>"
             write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') & 
                  &  "<process name='","[% process_name %]","'/>"[%
-           @if generate_lo_diagrams %]
+           @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
             write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds th1='", PSP_chk_th1, &
                  &                "' th2='", PSP_chk_th2, &
