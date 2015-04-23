@@ -139,6 +139,29 @@ def generate_process_files(conf, from_scratch=False):
 
 	for key, value in golem.util.tools.derive_coupling_names(conf).items():
 		props.setProperty("%s_COUPLING_NAME" % key, value)
+		
+
+	golem.templates.xmltemplates.transform_templates(templates, path, props,
+			conf = conf,
+			in_particles = in_particles,
+			out_particles = out_particles,
+			user = "reduze",
+			from_scratch=from_scratch,
+			loopcache=loopcache,
+			loopcache_tot=loopcache_tot,
+			tree_signs=tree_signs,
+			# tree_flows=tree_flows,
+			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
+				conf.getListProperty("__heavy_quarks__")),
+			lo_flags = flags[0],
+			nlo_flags = flags[1],
+			massive_bubbles = massive_bubbles,
+			diagram_sum = eprops)
+
+	#if conf["__REDUZE__"]=='True':  
+	    #copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
+	    #copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
+	    #copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml'))
 
 	# Create and populate subdirectories
 	golem.templates.xmltemplates.transform_templates(templates, path, props,
@@ -161,10 +184,36 @@ def generate_process_files(conf, from_scratch=False):
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
 		
-	if conf["__REDUZE__"]=='True':  
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml'))
+
+	if conf["__REDUZE__"]=='True':
+          copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(path,"projectors.hh"))
+	  copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(path,"integral_families_1loop.yaml"))
+	  if conf.getBooleanProperty("generate_nnlo_virt"):
+	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(path,"integral_families_2loop.yaml"))
+	  copy_file(os.path.join(templates,"template.xml"),os.path.join(path,"template.xml"))
+
+	golem.templates.xmltemplates.transform_templates(path, path, props,
+			conf = conf,
+			in_particles = in_particles,
+			out_particles = out_particles,
+			user = "reduze",
+			from_scratch=from_scratch,
+			loopcache=loopcache,
+			loopcache_tot=loopcache_tot,
+			tree_signs=tree_signs,
+			# tree_flows=tree_flows,
+			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
+				conf.getListProperty("__heavy_quarks__")),
+			lo_flags = flags[0],
+			nlo_flags = flags[1],
+			massive_bubbles = massive_bubbles,
+			diagram_sum = eprops)
+
+
+
+	run_reduze(conf)
+
+
 
 
 	cleanup(path)

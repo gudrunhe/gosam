@@ -441,4 +441,6 @@ def run_neato(path,output_name):
     raise GolemConfigError("Error in generation of two-loop eps files")
   
   
+def run_reduze(conf):
+  pass  
   
