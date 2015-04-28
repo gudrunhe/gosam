@@ -290,10 +290,10 @@ def WidthScheme(values, conf, ignore_case):
 
 @optional_olp_option
 def AmplitudeType(values, conf, ignore_case):
-	# Amplitudetype LoopInterference is an extension to BLHA2
+	# Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced","LoopInterference"]
+	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced","LoopInterference","LIEffInterference"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.amplitudetype", supported_values)
 	if hasattr(conf,"psp_chk_method_last"):
@@ -305,7 +305,7 @@ def AmplitudeType(values, conf, ignore_case):
 	if ret.startswith(__value_OK__) and 'loopinduced' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = True
 		conf["olp.no_loop_level"] = False
-	elif ret.startswith(__value_OK__) and 'loopinterference' in conf["olp.amplitudetype"].lower():
+	elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in ["loopinterference","lieffinterference"]:
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
 		if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic","polerotation"]:
