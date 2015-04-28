@@ -1024,38 +1024,20 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          yield props
 
-# bof - sj
-#   def masses(self, *args, **opts):
-#      """
-#      Provides an iterator to the set of masses of the external particles
-#      """
-#      if "prefix" in opts:
-#         prefix = opts["prefix"]
-#      else:
-#         prefix = ""
-#
-#      var_name = self._setup_name("var", prefix + "$_", opts)
-#      mass_name = self._setup_name("mass", prefix + "mass", opts)
-#
-#      props = Properties()
-#
-#      mass_set = set(self._masses)
-#      mass_set.discard("0")
-#
-#      for mass in mass_set:
-#         props.setProperty(mass_name, mass)
-#         yield props
-# eof - sj
-
    def mandelstam(self, *args, **opts):
       zero_filter = self._setup_filter(["zero", "non-zero"], args)
+      mass_filter = self._setup_filter(["mass", "non-mass"], args)
       zero_name = self._setup_name("zero", "is_zero", opts)
       nzero_name = self._setup_name("non-zero", "is_non-zero", opts)
+      mass_name = self._setup_name("mass", "is_mass", opts)
+      nmass_name = self._setup_name("mass", "is_non-mass", opts)
       symbol_name = \
          self._setup_name("symbol", "symbol", opts)
       first_name = self._setup_name("first", "is_first", opts)
+      #last_name = self._setup_name("last", "is_last", opts)
       index_name = self._setup_name("index", "index", opts)
       gindex_name = self._setup_name("global_index", "global_index", opts)
+
 
       sym_prefix = self._setup_name("sym_prefix", "es", opts)
       sym_suffix = self._setup_name("sym_suffix", "", opts)
@@ -1066,16 +1048,28 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       idx = 0
       gidx = 0
+      
+      #last_gidx = len(self._mandel_parts) # warning, this gets the global length! (before filtering)
+      
       for parts, vecs in self._mandel_parts.items():
          gidx += 1
          default_name = "s" + "".join(parts.split())
          name = sym_prefix + sym_infix.join(parts.split()) + sym_suffix
 
          is_massive = True
+         is_mass = False
          if len(vecs) == 1:
             mass = self._masses[vecs[0] - 1]
             is_massive = (mass != "0")
+            is_mass = True
 
+         if is_mass:
+             if "non-mass" in mass_filter:
+                 continue
+         else:
+             if "mass" in mass_filter:
+                 continue
+         
          if is_massive:
             if "non-zero" not in zero_filter:
                continue
@@ -1084,11 +1078,14 @@ class KinematicsTemplate(golem.util.parser.Template):
                continue
 
          idx += 1
-
+         
          props.setProperty(symbol_name, name)
          props.setProperty(zero_name, not is_massive)
          props.setProperty(nzero_name, is_massive)
+         props.setProperty(mass_name, is_mass)
+         props.setProperty(nmass_name, not is_mass)
          props.setProperty(first_name, is_first)
+         #props.setProperty(last_name, gidx == last_gidx)
          props.setProperty(index_name, idx)
          props.setProperty(gindex_name, gidx)
 

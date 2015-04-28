@@ -148,11 +148,12 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         
 		var_name = self._setup_name("var", prefix + "$_", opts)
 		mass_name = self._setup_name("mass", prefix + "mass", opts)
-        
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+
 		props = Properties()
-        
 		mass_set = set(self._masses)
-        
+
 		for g in range(0,len(self._roots)):
 			root = self._roots[g]
 			for i in range(0,root.size()):
@@ -160,8 +161,15 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         
 		mass_set.discard("0")
         
+		idx = 0
+		is_first = True
+		last_idx = len(mass_set)
 		for mass in mass_set:
+			idx += 1
 			props.setProperty(mass_name, mass)
+			props.setProperty(first_name, is_first)
+			props.setProperty(last_name, idx == last_idx)
+			is_first = False
 			yield props
 # eof - sj
 

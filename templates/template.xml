@@ -31,6 +31,14 @@
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
+    
+    <directory src="amplitude" dest="amplitude">
+        <only if-extension="reduze" />
+        <foreach iterator="loops">
+            <file src="secdec.m" dest="secdec-%dloop.m" arguments="loop" class="Integrals"/>
+        </foreach>
+        <!-- todo /-->
+    </directory>
 
 	<directory src="codegen">
 		<file src="abbrev.in" class="Multi"/>
@@ -82,7 +90,9 @@
 			<only if-extension="ninja" />
 		</file>
 		<file src="info.frm" class="Kinematics" />
-		<file src="golem.frm" class="Kinematics" />
+		<file src="golem.frm" class="Kinematics" >
+            <except if-extension="reduze" />
+        </file>
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
 			<only if-extension="extraopt" />
@@ -178,20 +188,17 @@
     
     <directory src="codegen">
         <directory src="reduze">
-            <directory src="1loop">
-                <directory src="config">
-                    <file src="kinematics.yaml" class="Integrals"/>
+            <foreach iterator="loops">
+                <directory src="loop" dest="%dloop" arguments="loop">
+                    <directory src="config">
+                        <file src="kinematics.yaml" class="Integrals"/>
+                    </directory>
                 </directory>
-            </directory>
-            <directory src="2loop">
-                <directory src="config">
-                    <file src="kinematics.yaml" class="Integrals"/>
-                </directory>
-            </directory>
+            </foreach>
         </directory>
         <only if-extension="reduze" />
-	</directory>
-
+    </directory>
+    
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
@@ -315,9 +322,8 @@
 		</directory>
 	</foreach>
     
-    <directory src="helicity" dest="helicity">
-        <only if-extension="reduze" />
-        <!-- todo /-->
-    </directory>
+    <!-- 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
+	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
+	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml')) /-->
     
 </template>

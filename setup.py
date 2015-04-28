@@ -57,14 +57,15 @@ INFO = {
 
 DATA_DIRS = [
 			"templates",
+            "templates/amplitude",
 			"templates/codegen",
 			"templates/common",
 			"templates/doc",
 			"templates/helicity",
 			"templates/matrix",
 			"templates/codegen/reduze",
-			"templates/codegen/reduze/1loop/config",
-			"templates/codegen/reduze/2loop/config",
+			"templates/codegen/reduze/loop",
+            "templates/codegen/reduze/loop/config",
 			"olp/templates",
 			"models",
 			"src/form",

@@ -189,6 +189,14 @@ def combinations(map):
    for c in rec_combinations(list(map.keys()), map):
       yield c
 
+def enumerate_qgraf_powers(conf):
+      """
+      """
+      powers = conf.getProperty(golem.properties.qgraf_power) # example: ['QCD','none','2','4']
+      del powers[0]
+      for loop, power in enumerate(powers):
+         if power != "none":
+            yield loop, power
 
 def enumerate_helicities(conf):
       """
@@ -233,7 +241,6 @@ def enumerate_and_reduce_helicities(conf):
          conf, in_particles, out_particles, error)
    for g in group:
       yield g
-
 
 def expand_helicities(patterns):
    anti = {"+": "-", "0": "0", "-": "+", "m": "k", "k": "m"}

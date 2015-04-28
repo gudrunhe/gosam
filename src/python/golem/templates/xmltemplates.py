@@ -13,7 +13,7 @@ import golem.templates.factory
 
 from golem.util.tools import debug, message, warning, error, \
       enumerate_helicities, encode_helicity, \
-      enumerate_and_reduce_helicities
+      enumerate_and_reduce_helicities, enumerate_qgraf_powers
 
 def compare_version(version1, version2):
    """
@@ -88,17 +88,19 @@ class _TemplateState:
          for attrs2 in lst:
             tmp = attrs1.copy()
             tmp.update(attrs2)
+            #print "tmp " + str(tmp)
             product.append(tmp)
       self.stack.append(product)
             
    def queue_create_directory(self, envs):
       for env in envs:
          self.queue.append({"key" : env["current"], "files": [], "directory": env["current output directory"], "create": env["create"], "parent": env["parent"]})
-
+         #print "queing " + str(env["current output directory"]) + " with key " + str(env["current"])
+   
    def queue_transform_template_file(self, envs):
       for env in envs:
          for denv in self.queue:
-            if denv["key"] is self.current:
+            if denv["directory"] is env["current output directory"]:
                denv["files"].append(env)
 
    def empty_queue(self):
@@ -106,6 +108,7 @@ class _TemplateState:
          return item["parent"]
       self.queue = sorted(self.queue, key=queue_ordering)
       nocreate = []
+      # Create Directories
       for denv in self.queue:
          #print "create is " + `denv["create"]` + " for key " + `denv["key"]` + " parent " + `denv["parent"]` + " directory " + denv["directory"]
          if denv["create"] is False:
@@ -115,10 +118,13 @@ class _TemplateState:
          else:
             self.create_directory(denv["directory"])
             #print "key = " + `denv["key"]` + " creating " + denv["directory"]
+      # Create Files
+      for denv in self.queue:
+         if denv["key"] not in nocreate:
             for env in denv["files"]:
                if env["create"] is True:
                   self.create_file(env)
-         #print nocreate
+      #print nocreate
       self.queue = {}
 
    def create_directory(self, dest):
@@ -149,7 +155,7 @@ class _TemplateState:
          extra_props.setProperty(name, env[name])
       self.props.append(extra_props)
       message("Generating file %s" % env["output file name"])
-      #print "creating " + env["output file name"]
+      #print "creating " + env["output file name"] + " in dir " + out_dir
       self.transform_template_file(in_file, out_file, class_name, filter, executable)
       self.props.pop()
 
@@ -580,7 +586,6 @@ class _TemplateState:
                   if i == gi:
                      values.append({"helicity": i,
                         "helicitysymbol": encode_helicity(heli)})
-
             self.shuffle_push(values)
          elif itername == "crossings":
             values = []
@@ -597,6 +602,12 @@ class _TemplateState:
                            x.split()), process.split(">", 1))
                         values.append({"index": i, "name": name,
                            "initial": ini, "final": fin})
+            self.shuffle_push(values)
+         elif itername == "loops":
+            values = []
+            if "conf" in self.opts:
+               for loop, power in enumerate_qgraf_powers(self.opts["conf"]):
+                  values.append({"loop": loop, "power": power})
             self.shuffle_push(values)
          else:
             raise TemplateXMLError(

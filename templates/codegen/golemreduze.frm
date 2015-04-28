@@ -201,7 +201,7 @@ PolyRatFun prf;
 *
 * Write amplitude
 *
-#Create <`OUTFILE'.txt>
+#Create <`OUTFILE'.log>
 .sort
 
 * sj - useful for double Higgs (pulls out overall factors)
@@ -210,5 +210,5 @@ print+s;
 .sort
 
 Keep Brackets;
-#write <`OUTFILE'.txt> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
+#write <`OUTFILE'.log> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
 .end

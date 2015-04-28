@@ -139,7 +139,7 @@ All other tags must be nested elements of this tag.
    written to a subdirectory. This tag can have nested
    \texttt{<directory>}, \texttt{<file>} or \texttt{<foreach>} tags.
 \item \texttt{<foreach iterator="name">} tags, where \texttt{name} is
-   either \texttt{helicity} or \texttt{crossing}. This tag can have nested
+   either \texttt{helicity}, \texttt{crossings} or \texttt{loops}. This tag can have nested
    \texttt{<directory>}, \texttt{<file>} or \texttt{<foreach>} tags.
    The current value of the iterator inside the \texttt{<foreach>} block
    can be accessed through the \texttt{arguments} attribute.
@@ -197,7 +197,7 @@ value \texttt{"."}, which refers to the current directory.
 \paragraph{Attributes}
 \begin{description}
 \item[\texttt{iterator}] The name of an iterator used in this loop.
-Currently, only \texttt{helicities} and \texttt{crossings} are defined.
+Currently, only \texttt{helicities}, \texttt{crossings} and \texttt{loops} are defined.
 \end{description}
 
 \paragraph{Nested Tags}
@@ -1766,7 +1766,7 @@ The iterator defines the following names:
    \texttt{prefix}, \texttt{var}, \texttt{first} and \texttt{last}
    are used with their usual meaning.
 \item[\texttt{mandelstam}
-   {[\texttt{zero|non-zero}]}]
+   {[\texttt{zero|non-zero}][\texttt{mass|non-mass}]}]
    This iterator runs over all independent Mandelstam variables defined
    for this process.
 
@@ -1784,6 +1784,10 @@ The iterator defines the following names:
       indicating if this Mandelstam variable is zero.\\
    \texttt{non-zero} & \lit{is\_non-zero} & name of a symbol 
       indicating if this Mandelstam variable is non-zero.\\
+   \texttt{mass} & \lit{is\_mass} & name of a symbol 
+      indicating if this Mandelstam variable is a mass, i.e. the square of an external momentum.\\
+   \texttt{non-mass} & \lit{is\_non-mass} & name of a symbol 
+      indicating if this Mandelstam variable is not a mass\\
    \texttt{symbol} & \lit{symbol} & name of a symbol
       holding the name of the Mandelstam variable derived
       from the indices of the vectors and the format
@@ -1976,6 +1980,11 @@ additional information about each loop diagram.
       propagator masses present in all diagrams. 
       The argument \synt{prefix} (default: \lit{}) is prepended to 
       the names of the masses.
+      The following symbols are defined inside the loop:
+   \begin{description}\footnotesize
+   \item[\texttt{is\_first}] Flag indicating if this is the first iteration of this loop.
+   \item[\texttt{is\_last}] Flag indicating if this is the last iteration of this loop.
+   \end{description}
 \item[\texttt{diagrams}
       {[\texttt{group=}\synt{group}]}
       {[\texttt{loopsize=}\synt{loopsize}]}

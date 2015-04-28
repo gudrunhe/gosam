@@ -39,7 +39,7 @@ Drop integralfamilies;
 * Process sum
 * Load GoSam result
 #Do i = `FIRST', `LAST'
-#include- d`i'h0l`LOOPS'.txt;
+#include- d`i'h0l`LOOPS'.log;
 #EndDo
 
 Id Sector(?tail) = 1;
@@ -80,8 +80,8 @@ Collect SCREEN;
    Id SCREEN(?head)=1;
    .sort:drop screen2;
    DropCoefficient;
-   #Create <`OUTFILE'integrals.txt>
-   #Write <`OUTFILE'integrals.txt> "%e", sum
+   #Create <`OUTFILE'integrals.log>
+   #Write <`OUTFILE'integrals.log> "%e", sum
    print+s;
    .end
 #endif
