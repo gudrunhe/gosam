@@ -209,12 +209,6 @@ def generate_process_files(conf, from_scratch=False):
 			diagram_sum = eprops)
 
 
-
-	run_reduze(conf)
-
-
-
-
 	cleanup(path)
 
 def cleanup(path):
