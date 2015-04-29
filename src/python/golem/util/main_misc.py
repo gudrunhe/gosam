@@ -97,7 +97,7 @@ def generate_process_files(conf, from_scratch=False):
 			generate_particle_lists(conf)
 
 	# Obtain the files required by QGraf from the template file.
-	golem.templates.xmltemplates.transform_templates(templates, path, props,
+	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
 			out_particles = out_particles,
@@ -141,7 +141,7 @@ def generate_process_files(conf, from_scratch=False):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 		
 
-	golem.templates.xmltemplates.transform_templates(templates, path, props,
+	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
 			out_particles = out_particles,
@@ -164,7 +164,7 @@ def generate_process_files(conf, from_scratch=False):
 	    #copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml'))
 
 	# Create and populate subdirectories
-	golem.templates.xmltemplates.transform_templates(templates, path, props,
+	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
 			out_particles = out_particles,
@@ -190,9 +190,8 @@ def generate_process_files(conf, from_scratch=False):
 	  copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(path,"integral_families_1loop.yaml"))
 	  if conf.getBooleanProperty("generate_nnlo_virt"):
 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(path,"integral_families_2loop.yaml"))
-	  copy_file(os.path.join(templates,"template.xml"),os.path.join(path,"template.xml"))
 
-	golem.templates.xmltemplates.transform_templates(path, path, props,
+	golem.templates.xmltemplates.transform_templates(templates, path, path, props,
 			conf = conf,
 			in_particles = in_particles,
 			out_particles = out_particles,

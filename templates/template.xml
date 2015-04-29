@@ -5,6 +5,8 @@
 	description="This template is used by gosam.py"
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
+    
+    <file src="integral_families.yaml" class="Verbatim"/>
 
 	<file src="configure.ac" class="Kinematics">
 		<only if-extension="autotools" />
@@ -31,6 +33,7 @@
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
+    
     
     <directory src="amplitude" dest="amplitude">
         <only if-extension="reduze" />
@@ -190,6 +193,7 @@
         <directory src="reduze">
             <foreach iterator="loops">
                 <directory src="loop" dest="%dloop" arguments="loop">
+                    <file src="reduze_setup.yaml" class="Integrals"/>
                     <directory src="config">
                         <file src="kinematics.yaml" class="Integrals"/>
                     </directory>

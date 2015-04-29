@@ -1,0 +1,7 @@
+jobs:
+  - setup_sector_mappings:
+      construct_minimal_graphs: true
+  - find_diagram_shifts:
+      qgraf_file: "../../../reduze[% loop %]loop.yaml"
+      output_file: "reduze_match.yaml"
+      info_file_form: "../../reduzeshifts-[% loop %].hh"

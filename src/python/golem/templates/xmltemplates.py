@@ -155,7 +155,7 @@ class _TemplateState:
          extra_props.setProperty(name, env[name])
       self.props.append(extra_props)
       message("Generating file %s" % env["output file name"])
-      #print "creating " + env["output file name"] + " in dir " + out_dir
+      print "creating " + env["output file name"] + " in dir " + out_dir
       self.transform_template_file(in_file, out_file, class_name, filter, executable)
       self.props.pop()
 
@@ -696,9 +696,12 @@ def create_parser(template_dir, output_dir, *props, **opts):
 
    return xmlp
 
-def transform_templates(file_name, output_path, *props, **opts):
+def transform_templates(file_name, input_path, output_path, *props, **opts):
    abs_filename = os.path.abspath(file_name)
+   abs_input_path = os.path.abspath(input_path)
    abs_outputpath = os.path.abspath(output_path)
+   
+   print input_path
 
    if os.path.isdir(abs_filename):
       toks = [abs_filename, "template.xml"]
@@ -706,7 +709,7 @@ def transform_templates(file_name, output_path, *props, **opts):
       toks = os.path.split(abs_filename)
 
    try:
-      xmlp = create_parser(toks[0], abs_outputpath, *props, **opts)
+      xmlp = create_parser(abs_input_path, abs_outputpath, *props, **opts)
       xmlf = open(os.path.join(*toks), 'r')
       xmlp.Parse(xmlf.read())
       message("All templates processed.")
