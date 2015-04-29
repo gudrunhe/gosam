@@ -141,22 +141,22 @@ def generate_process_files(conf, from_scratch=False):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 		
 
-	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
-			conf = conf,
-			in_particles = in_particles,
-			out_particles = out_particles,
-			user = "reduze",
-			from_scratch=from_scratch,
-			loopcache=loopcache,
-			loopcache_tot=loopcache_tot,
-			tree_signs=tree_signs,
-			# tree_flows=tree_flows,
-			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
-				conf.getListProperty("__heavy_quarks__")),
-			lo_flags = flags[0],
-			nlo_flags = flags[1],
-			massive_bubbles = massive_bubbles,
-			diagram_sum = eprops)
+#	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
+#			conf = conf,
+#			in_particles = in_particles,
+#			out_particles = out_particles,
+#			user = "reduze",
+#			from_scratch=from_scratch,
+#			loopcache=loopcache,
+#			loopcache_tot=loopcache_tot,
+#			tree_signs=tree_signs,
+#			# tree_flows=tree_flows,
+#			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
+#				conf.getListProperty("__heavy_quarks__")),
+#			lo_flags = flags[0],
+#			nlo_flags = flags[1],
+#			massive_bubbles = massive_bubbles,
+#			diagram_sum = eprops)
 
 	#if conf["__REDUZE__"]=='True':  
 	    #copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))

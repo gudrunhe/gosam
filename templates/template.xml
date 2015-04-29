@@ -6,34 +6,33 @@
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
     
-    <file src="integral_families.yaml" class="Verbatim"/>
-
-	<file src="configure.ac" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="autogen.sh" class="Verbatim" executable="yes">
-		<only if-extension="autotools" />
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="Makefile.am" class="Kinematics">
-		<only if-extension="autotools" />
-	</file>
-	<file src="Makefile" class="Kinematics" >
-		<except if-extension="autotools" />
-	</file>
-	<file src="Makefile.source" class="Kinematics" />
-	<file src="Makefile.conf" class="Kinematics">
-		<except if-file="exists" in-mode="normal" />
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="config.sh" class="Kinematics" executable="yes">
-		<except if-extension="autotools" />
-	</file>
-	<file src="config.sh.in" class="Kinematics">
-		<only if-extension="autotools" />
-	</file>
-    
+    <directory src=".">
+        <file src="configure.ac" class="Kinematics">
+            <only if-extension="autotools" />
+            <except if-internal="OLP_MODE" />
+        </file>
+        <file src="autogen.sh" class="Verbatim" executable="yes">
+            <only if-extension="autotools" />
+            <except if-internal="OLP_MODE" />
+        </file>
+        <file src="Makefile.am" class="Kinematics">
+            <only if-extension="autotools" />
+        </file>
+        <file src="Makefile" class="Kinematics" >
+            <except if-extension="autotools" />
+        </file>
+        <file src="Makefile.source" class="Kinematics" />
+        <file src="Makefile.conf" class="Kinematics">
+            <except if-file="exists" in-mode="normal" />
+            <except if-internal="OLP_MODE" />
+        </file>
+        <file src="config.sh" class="Kinematics" executable="yes">
+            <except if-extension="autotools" />
+        </file>
+        <file src="config.sh.in" class="Kinematics">
+            <only if-extension="autotools" />
+        </file>
+    </directory>
     
     <directory src="amplitude" dest="amplitude">
         <only if-extension="reduze" />
@@ -203,6 +202,12 @@
         <only if-extension="reduze" />
     </directory>
     
+    <directory src="." usedby="reduze">
+        <foreach iterator="loops">
+            <file src="integral_families_%dloop.yaml" dest="codegen/reduze/%dloop/config/integral_families.yaml" arguments="loop" usedby="reduze"/>
+        </foreach>
+    </directory>
+    
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
@@ -325,9 +330,5 @@
 			</file>
 		</directory>
 	</foreach>
-    
-    <!-- 	    copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(conf.getProperty("process_path"),'codegen','projectors.hh'))
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','1loop','config','integral_families.yaml'))
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(conf.getProperty("process_path"),'codegen','reduze','2loop','config','integral_families.yaml')) /-->
-    
+
 </template>

@@ -100,6 +100,7 @@ class _TemplateState:
    def queue_transform_template_file(self, envs):
       for env in envs:
          for denv in self.queue:
+            print "appending create file " + env["output file name"] + " from " + env["template file name"] + " to directory " + denv["directory"]
             if denv["directory"] is env["current output directory"]:
                denv["files"].append(env)
 
@@ -236,11 +237,19 @@ class _TemplateState:
                raise TemplateXMLError(
                   "Undefined name in 'arguments': %r" % key)
 
-         try:
-            dest = dest % tuple(values)
-         except TypeError:
-            raise TemplateXMLError(
-               "In <file> attribute 'arguments' does not match 'dest'")
+         if "%" in dest:
+            try:
+               dest = dest % tuple(values)
+            except TypeError:
+               raise TemplateXMLError(
+                  "In <file> attribute 'arguments' does not match 'dest'")
+
+         if "%" in src:
+            try:
+               src = src % tuple(values)
+            except TypeError:
+               raise TemplateXMLError(
+                  "In <file> attribute 'arguments' does not match 'src'")
       
       result = env.copy()
 
