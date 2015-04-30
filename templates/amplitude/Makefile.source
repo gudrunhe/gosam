@@ -1,0 +1,44 @@
+[%' vim: syntax=golem
+	 This template defines the Makefile.source that go under
+    <process_dir>/amplitude*/
+'%]# vim: ts=3:sw=3
+[% @if internal OLP_MODE %]
+include ../../Makefile.conf[%
+@else %]
+include ../Makefile.conf[%
+@end @if %]
+
+# @date: [% time_stamp format=%x~%X %]
+
+FORM_OPT=
+	-D PROCESSPATH=.. \
+	-D PWD=. \
+	-p ..:../codegen \
+	-M -q
+
+[% @if generate_lo_diagrams %]
+DIAGRAMS_TREE=[% @for elements topolopy.keep.tree %] \
+		d[%$_%]l0.log[%
+	@end @for %]
+
+TXT_TREE= $(subst .cc,.log,$(DIAGRAMS_TREE))
+
+SOURCE_TREE=
+[% @end @if generate_lo_diagrams %]
+
+[% @if generate_nlo_virt %]
+DIAGRAMS_VIRT=[% @for elements topolopy.keep.virt %] \
+	d[%$_%]l1.log[%
+   @end @for %]
+
+TXT_VIRT= $(subst .cc,.log,$(DIAGRAMS_VIRT))
+
+SOURCE_VIRT=
+[% @end @if generate_nlo_virt %]
+
+# TODO NVIRT
+
+.PHONY: source
+.SUFFIXES:
+
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT) # TODO - add NVIRT
