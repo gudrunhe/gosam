@@ -100,7 +100,7 @@ class _TemplateState:
    def queue_transform_template_file(self, envs):
       for env in envs:
          for denv in self.queue:
-            print "appending create file " + env["output file name"] + " from " + env["template file name"] + " to directory " + denv["directory"]
+#            print "appending create file " + env["output file name"] + " from " + env["template file name"] + " to directory " + denv["directory"]
             if denv["directory"] is env["current output directory"]:
                denv["files"].append(env)
 
@@ -156,7 +156,7 @@ class _TemplateState:
          extra_props.setProperty(name, env[name])
       self.props.append(extra_props)
       message("Generating file %s" % env["output file name"])
-      print "creating " + env["output file name"] + " in dir " + out_dir
+#      print "creating " + env["output file name"] + " in dir " + out_dir
       self.transform_template_file(in_file, out_file, class_name, filter, executable)
       self.props.pop()
 
@@ -710,7 +710,7 @@ def transform_templates(file_name, input_path, output_path, *props, **opts):
    abs_input_path = os.path.abspath(input_path)
    abs_outputpath = os.path.abspath(output_path)
    
-   print input_path
+#   print input_path
 
    if os.path.isdir(abs_filename):
       toks = [abs_filename, "template.xml"]
