@@ -195,7 +195,7 @@ def enumerate_qgraf_powers(conf):
       powers = conf.getProperty(golem.properties.qgraf_power) # example: ['QCD','none','2','4']
       del powers[0]
       for loop, power in enumerate(powers):
-         if power != "none":
+         if power.lower() != "none":
             yield loop, power
 
 def enumerate_helicities(conf):
