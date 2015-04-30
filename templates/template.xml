@@ -36,14 +36,14 @@
     
     <directory src="amplitude" dest="amplitude">
         <only if-extension="reduze" />
-        <file src="Makefile" class="Integrals">
+<!--        <file src="Makefile" class="Integrals">
             <except if-extension="autotools" />
         </file>
         <file src="Makefile.am" class="Integrals">
             <only if-extension="autotools" />
         </file>
         <file src="Makefile.dep" class="Integrals"/>
-        <file src="Makefile.source" class="Integrals"/>
+        <file src="Makefile.source" class="Integrals"/> /-->
         <foreach iterator="loops">
             <file src="secdec.m" dest="secdec-%dloop.m" arguments="loop" class="Integrals"/>
         </foreach>
