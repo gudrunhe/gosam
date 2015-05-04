@@ -23,22 +23,66 @@ DIAGRAMS_TREE=[% @for elements topolopy.keep.tree %] \
 
 TXT_TREE= $(subst .cc,.log,$(DIAGRAMS_TREE))
 
-SOURCE_TREE=
+SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
 
+REDUZE=[% reduze.bin %]
+TRANSLATE_REDUZE=../codegen/translate_reduze.py
+
 [% @if generate_nlo_virt %]
-DIAGRAMS_VIRT=[% @for elements topolopy.keep.virt %] \
+DIAGRAMS_1LOOP_VIRT=[% @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.log[%
    @end @for %]
 
-TXT_VIRT= $(subst .cc,.log,$(DIAGRAMS_VIRT))
+TXT_1LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_1LOOP_VIRT))
 
-SOURCE_VIRT=
 [% @end @if generate_nlo_virt %]
 
-# TODO NVIRT
+[% @if generate_nnlo_virt %]
+DIAGRAMS_2LOOP_VIRT=[% @for elements topolopy.keep.nnlo_virt %] \
+	d[%$_%]l2.log[%
+   @end @for %]
+
+TXT_2LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_2LOOP_VIRT))
+
+[% @end @if generate_nnlo_virt %]
+
+SOURCE_VIRT = [% @if generate_nlo_virt %] $(DIAGRAMS_1LOOP_VIRT) [% @end @if generate_nlo_virt %] [% 
+@if generate_nnlo_virt %] $(DIAGRAMS_2LOOP_VIRT) [% @end @if generate_nnlo_virt %]
+
+[% @if generate_nlo_virt %]
+$(REDUZE) ../codegen/reduze/1loop/reduze_setup.yaml
+$(TRANSLATE_REDUZE) ../codegen/reduze/1loop/
+[% @for elements topolopy.keep.virt %]
+d[%$_%]l1.log: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%]
+	@$(FORM) $(FORM_OPT) \
+	    -w$(FORM_THREADS) \
+	    -D LOOPS=1 \
+	    -D DIAG=[%$_%] \
+	    -D OUTFILE=d[%$_%]l1 \
+	    ../codegen/golemreduze.frm
+[% @end @for %]
+[% @end @if %]
+
+[% @if generate_nnlo_virt %]
+$(REDUZE) ../codegen/reduze/2loop/reduze_setup.yaml
+$(TRANSLATE_REDUZE) ../codegen/reduze/2loop/
+[% @for elements topolopy.keep.nnlo_virt %]
+d[%$_%]l2.log: ../diagrams-2.hh
+	@echo Form is processing loop diagram [%$_%]
+	@$(FORM) $(FORM_OPT) \
+	    -w$(FORM_THREADS) \
+	    -D LOOPS=2 \
+	    -D DIAG=[%$_%] \
+	    -D OUTFILE=d[%$_%]l2 \
+	    ../codegen/golemreduze.frm
+[% @end @for %]
+[% @end @if %]
+
+
 
 .PHONY: source
 .SUFFIXES:
 
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT) # TODO - add NVIRT
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT) 
