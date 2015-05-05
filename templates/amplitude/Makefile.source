@@ -10,7 +10,7 @@ include ../Makefile.conf[%
 
 # @date: [% time_stamp format=%x~%X %]
 
-FORM_OPT=
+FORM_OPT= \
 	-D PROCESSPATH=.. \
 	-D PWD=. \
 	-p ..:../codegen \
