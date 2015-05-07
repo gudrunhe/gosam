@@ -214,6 +214,7 @@
         <foreach iterator="loops">
             <file src="integral_families_%dloop.yaml" dest="codegen/reduze/%dloop/config/integral_families.yaml" arguments="loop" usedby="reduze"/>
         </foreach>
+        <file src="projectors.hh" dest="codegen/projectors.hh" usedby="reduze"/>
         <only if-extension="reduze" />
     </directory>
     
