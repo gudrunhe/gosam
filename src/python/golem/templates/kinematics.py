@@ -1078,9 +1078,6 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          idx += 1
          
-         print mass_filter
-         print name
-         
          props.setProperty(symbol_name, name)
          props.setProperty(zero_name, not is_massive)
          props.setProperty(nzero_name, is_massive)
