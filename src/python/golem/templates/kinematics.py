@@ -1031,8 +1031,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       nzero_name = self._setup_name("non-zero", "is_non-zero", opts)
       mass_name = self._setup_name("mass", "is_mass", opts)
       nmass_name = self._setup_name("mass", "is_non-mass", opts)
-      symbol_name = \
-         self._setup_name("symbol", "symbol", opts)
+      symbol_name = self._setup_name("symbol", "symbol", opts)
       first_name = self._setup_name("first", "is_first", opts)
       #last_name = self._setup_name("last", "is_last", opts)
       index_name = self._setup_name("index", "index", opts)
@@ -1064,11 +1063,11 @@ class KinematicsTemplate(golem.util.parser.Template):
             is_mass = True
 
          if is_mass:
-             if "non-mass" in mass_filter:
-                 continue
+            if "mass" not in mass_filter:
+               continue
          else:
-             if "mass" in mass_filter:
-                 continue
+            if "non-mass" not in mass_filter:
+               continue
          
          if is_massive:
             if "non-zero" not in zero_filter:
@@ -1078,6 +1077,9 @@ class KinematicsTemplate(golem.util.parser.Template):
                continue
 
          idx += 1
+         
+         print mass_filter
+         print name
          
          props.setProperty(symbol_name, name)
          props.setProperty(zero_name, not is_massive)

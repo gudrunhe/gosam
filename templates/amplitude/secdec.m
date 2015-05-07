@@ -6,7 +6,7 @@ GosamIncoming = {[% @for particles initial %]k[%index%][% @if eval index .lt. nu
 GosamOutgoing = {[% @for particles final %]k[%index%][% @if eval index .lt. num_out %], [% @end @if %][%@end @for %]};
 
 ExternalMomenta=Join[GosamIncoming,GosamOutgoing];
-KinematicInvariants={[% @for mandelstam non-zero non-mass %][% @if eval .not. is_first %],[% @end @if %][% symbol %][% @end @for %]};
+KinematicInvariants={[% @for mandelstam sym_prefix=es non-zero non-mass %][% @if eval .not. is_first %],[% @end @if %][% symbol %][% @end @for %]};
 Masses={[% @for all_masses %][% @if eval .not. is_first %],[% @end @if %][% mass %][% @end @for %]};
 ScalarProductRules = {[%@for mandelstam_subs diagonal upper %]
   SP[k[% index1 %],k[% index2 %]]->0[%
