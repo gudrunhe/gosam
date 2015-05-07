@@ -733,10 +733,10 @@ projectors = Property("projectors",
    path to the form file containing projectors """,str,"projectors.hh")
 integral_families_1loop = Property("integral_families_1loop",
   """\
-  path to the yaml file containing the integral families """,str,"integral_families_1loop.yaml")
+  path to the yaml file containing the integral families """,str,"integralfamilies-1loop.yaml")
 integral_families_2loop = Property("integral_families_2loop",
   """\
-  path to the yaml file containing the integral families """,str,"integral_families_2loop.yaml")
+  path to the yaml file containing the integral families """,str,"integralfamilies-2loop.yaml")
 debug_flags = Property("debug",
    """\
    A list of debug flags.

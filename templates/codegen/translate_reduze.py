@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import sys
+import os
+import os.path
 
 class crossing:
   def __init__(self):
@@ -193,10 +195,11 @@ def write_reduze_crossing(top,crossfile):
 
 if __name__=='__main__':
   path = sys.argv[1]
-  infile=file(path+'setup_sector_mappings.log')
-  spfile=open(path+'reduzesptop.hh','w')
-  mapfile=open(path+'reduzemap.hh','w')
-  crossfile=open(path+'reduzecrossing.hh','w')
+  loop = sys.argv[2]
+  infile=file(os.path.join(path,'log','setup_sector_mappings.log'))
+  spfile=open(path+'../../reduzesptop-'+loop+'.hh','w')
+  mapfile=open(path+'../../reduzemap-'+loop+'.hh','w')
+  crossfile=open(path+'../../reduzecrossing-'+loop+'.hh','w')
 
   topologies=gettopologies(infile)
   

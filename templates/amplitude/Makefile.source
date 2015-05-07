@@ -27,10 +27,11 @@ SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
 
 REDUZE=[% reduze.bin %]
-TRANSLATE_REDUZE=../codegen/translate_reduze.py
+TRANSLATE_REDUZE=python ../codegen/translate_reduze.py
 
 [% @if generate_nlo_virt %]
-DIAGRAMS_1LOOP_VIRT=[% @for elements topolopy.keep.virt %] \
+DIAGRAMS_1LOOP_VIRT=reduze_1loop \
+	translate_1loop [% @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.log[%
    @end @for %]
 
@@ -39,7 +40,8 @@ TXT_1LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_1LOOP_VIRT))
 [% @end @if generate_nlo_virt %]
 
 [% @if generate_nnlo_virt %]
-DIAGRAMS_2LOOP_VIRT=[% @for elements topolopy.keep.nnlo_virt %] \
+DIAGRAMS_2LOOP_VIRT= reduze_2loop \
+	translate_2loop [% @for elements topolopy.keep.nnlo_virt %] \
 	d[%$_%]l2.log[%
    @end @for %]
 
@@ -51,8 +53,10 @@ SOURCE_VIRT = [% @if generate_nlo_virt %] $(DIAGRAMS_1LOOP_VIRT) [% @end @if gen
 @if generate_nnlo_virt %] $(DIAGRAMS_2LOOP_VIRT) [% @end @if generate_nnlo_virt %]
 
 [% @if generate_nlo_virt %]
-$(REDUZE) ../codegen/reduze/1loop/reduze_setup.yaml
-$(TRANSLATE_REDUZE) ../codegen/reduze/1loop/
+reduze_1loop:
+	cd ../codegen/reduze/1loop; $(REDUZE) reduze_setup.yaml; cd -;
+translate_1loop:
+	$(TRANSLATE_REDUZE) ../codegen/reduze/1loop/ 1
 [% @for elements topolopy.keep.virt %]
 d[%$_%]l1.log: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%]
@@ -66,8 +70,10 @@ d[%$_%]l1.log: ../diagrams-1.hh
 [% @end @if %]
 
 [% @if generate_nnlo_virt %]
-$(REDUZE) ../codegen/reduze/2loop/reduze_setup.yaml
-$(TRANSLATE_REDUZE) ../codegen/reduze/2loop/
+reduze_2loop:
+	cd ../codegen/reduze/2loop; $(REDUZE) reduze_setup.yaml; cd -;
+translate_2loop:
+	$(TRANSLATE_REDUZE) ../codegen/reduze/2loop/ 2
 [% @for elements topolopy.keep.nnlo_virt %]
 d[%$_%]l2.log: ../diagrams-2.hh
 	@echo Form is processing loop diagram [%$_%]
@@ -82,7 +88,6 @@ d[%$_%]l2.log: ../diagrams-2.hh
 
 
 
-.PHONY: source
 .SUFFIXES:
 
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT) 

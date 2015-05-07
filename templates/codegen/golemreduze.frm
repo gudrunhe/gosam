@@ -44,7 +44,7 @@ Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
 #call zeroes
 #call ScreenExternalReduze
 
-#Include- reduzeprojectors.hh
+#Include- projectors.hh
 
 #Call enforceconservation
 #Call DiaMatchTagReduze

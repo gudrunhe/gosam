@@ -8,5 +8,5 @@ HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
-	$(MAKE) $(S) -f Makefile.source source
+	$(MAKE) $(S) -f Makefile.source all_source
 endif

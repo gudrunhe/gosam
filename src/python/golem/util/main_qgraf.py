@@ -284,7 +284,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			log_name    = consts.PATTERN_TOPOLOPY_LO + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
-			run_qgraf_dat(conf, output_name, log_name)
+			run_qgraf_dat(conf, output_name, log_name)                
 
 	# ----------------- VIRTUAL PART --------------------------------------
 	if flag_generate_nlo_virt:
@@ -318,6 +318,12 @@ def run_qgraf(conf, in_particles, out_particles):
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 1)
 			run_qgraf_dat(conf, output_name, log_name)
+                if flag_reduze:
+	          output_name_reduze = consts.PATTERN_REDUZE_NLO_VIRT + yaml_ext
+	          log_name_reduze = consts.PATTERN_REDUZE_NLO_VIRT + log_ext
+	          write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
+			    options, new_verbatim, in_particles, out_particles, [] ,1)
+	          run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
 			
 			
 			
@@ -354,12 +360,6 @@ def run_qgraf(conf, in_particles, out_particles):
 		run_qgraf_dat(conf, output_name, log_name)
 		run_neato(path,output_name)
 		
-		output_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + yaml_ext
-		log_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + log_ext
-		write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
-				options, new_verbatim, in_particles, out_particles, [] ,2)
-		run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
-
 		
 		#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 		#		conf=conf)
@@ -372,6 +372,13 @@ def run_qgraf(conf, in_particles, out_particles):
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 2)
 			run_qgraf_dat(conf, output_name, log_name)
+
+              if flag_reduze:
+	        output_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + yaml_ext
+	        log_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + log_ext
+	        write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
+		  	  options, new_verbatim, in_particles, out_particles, [] ,2)
+	        run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
 			
 		
 
