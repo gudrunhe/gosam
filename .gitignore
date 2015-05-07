@@ -1,1 +1,10 @@
 Makefile
+*.aux
+*.bbl
+*.blg
+*.do
+*.out
+*.toc
+*.pdf
+*.log
+build/
