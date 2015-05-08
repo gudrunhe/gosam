@@ -1,6 +1,7 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 #-
-Format 255; * Number of characters per line
+off statistics;
+*Format 255; * Number of characters per line
 
 #If `LOOPS' >= 1
    #Define abb`DIAG' "0"

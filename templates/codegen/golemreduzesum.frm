@@ -1,4 +1,7 @@
-Format 255; * Number of characters per line
+* vim: syntax=form:ts=3:sw=3:expandtab
+#-
+off statistics;
+*Format 255; * Number of characters per line
 
 #include- reduze.hh
 #include- secdec.hh

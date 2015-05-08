@@ -301,7 +301,7 @@ AutoDeclare CFunctions Lor;
 @end @if %]
 #EndProcedure
 *------#] procedure spsymbols:
- *------#[ procedure enforceconservation:
+*------#[ procedure enforceconservation:
 #Procedure enforceconservation
     Multiply replace_(k[% num_legs %],[%
 @if eval num_legs .gt. num_in %][%
