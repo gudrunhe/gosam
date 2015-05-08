@@ -16,14 +16,10 @@ CFunctions num; * inverse propagator num=inv^(-1)
 CFunctions INT; * Reduze integral function (stores the inverse powers of the propagators)
 CFunction ProjDen; * function for storing projector denominators ProjDen(x)=1/x;
 CFunction DenDim; * function for storing dimension denominators DenDim(dimS+n) = 1/(dimS+n);
+CFunction Dim; * function for storing dimension numerators Dim(dimS) = dimS;
 CFunction Den;
-CFunctions Projector;
+CFunctions Projector, ProjLabel; * functions for storing the projector and its label
 Symbols sDUMMY5,[];
-
-* dimS = 4 - 2* epsS
-* lower limit from IR divergence of loop integral (true for linear propagators?)
-* upper limit from needing O(epS^2) terms for IR terms at 2-loop, WARNING - THIS MUST BE MADE MORE GENERAL
-Symbols epsS(:2); * WARNING - THIS 2 IS A BAD IDEA !!!!!!
 
 * disable spinor flipping rules in spinney.hh (RemoveNCContainer)
 * does not implement arXiv:1008.0803v1 Eq(21), discussion at the end of section 3.5.2
@@ -85,10 +81,14 @@ Symbols epsS(:2); * WARNING - THIS 2 IS A BAD IDEA !!!!!!
    #include- reduzesptop-`LOOPS'.hh
    .Sort:SPToPropReduze;
 #EndProcedure
+                     
+#Procedure TagReduze()
+   #include- reduzemap-`LOOPS'.hh
+#EndProcedure
                    
 * map propagators to Reduze ordered propagators
 #Procedure MapReduze()
-   #include- reduzemap-`LOOPS'.hh
+   #Call TagReduze
 * try to map propagators with inv/num(+...) and inv/num(-...)
    #Do i = 0,1
 * map propagators
@@ -100,8 +100,8 @@ Symbols epsS(:2); * WARNING - THIS 2 IS A BAD IDEA !!!!!!
    Id inv(vDUMMY1?,?tail)=inv(-vDUMMY1,?tail);
    Id num(vDUMMY1?,?tail)=num(-vDUMMY1,?tail);
    #EndDo
-*   Id Tag(?tail) = 1;
-*   .Sort:red-map;
+   Id Tag(?tail) = 1;
+*  .Sort:red-map;
 #EndProcedure
 
 * map Reduze ordered propagators to integral (LOOPS passed as FORM argument, LEGS set in symbols.hh)
@@ -116,35 +116,18 @@ Symbols epsS(:2); * WARNING - THIS 2 IS A BAD IDEA !!!!!!
          INT(sDUMMY2+1,sDUMMY3+2^`i',sDUMMY4-sDUMMY1,sDUMMY5,[],?head,-sDUMMY1); * denominator
    #EndDo
    .Sort:red-toint1;
-   Id Sector(sDUMMY1?,?head)*INT(?tail)=Sector(sDUMMY1,?head)*INT(sDUMMY1,?tail);
+   Id Sector(sDUMMY1?,?head)*INT(?tail)=INT(sDUMMY1,?tail);
    Id Crossing(sDUMMY1?)*INT(sDUMMY2?,?tail)=INT(sDUMMY1,?tail);
    .Sort:red-toint2;
 #EndProcedure
-
-* Series expand
-* dimS = 4 - 2 * epsS
-#Procedure ExpandDim()
-    Id PREFACTOR(dimS) = dimS;
-    Id DenDim(?tail) = Den(?tail);
-    .sort
-    FactArg Den;
-    .sort
-    ChainOut Den;
-    Multiply replace_(dimS,4-2*epsS);
-    .sort
-    SplitArg Den;
-    .sort
-* Extract poles
-    Id Den(-2*epsS) = 1/(-2*epsS);
-* Bring denominator into correct order
-    Id Den(sDUMMY1?,-2*epsS) = Den(-2*epsS,sDUMMY1);
-    .sort
              
-* Taylor expand each factor of Den(d+a) about epsS = 0
-* 1/(-2*x+n) = \sum_a=0^\infty ( x^a 2^a n^(-1-a) )
-    Repeat Id Once Den(-2*epsS,sDUMMY1?)*epsS^sDUMMY2? =
-    epsS^sDUMMY2*sum_(sDUMMY3,0,2-sDUMMY2,epsS^sDUMMY3*2^sDUMMY3*sDUMMY1^(-1-sDUMMY3));  * WARNING - THIS 2 IS A BAD IDEA !!!!!!
-
-    Repeat Id Den(sDUMMY1?,sDUMMY2?,?tail) = Den(sDUMMY1+sDUMMY2,?tail);
-    .sort
+* tag each integral with its propagators
+#Procedure TagIntReduze()
+   Id INT(sDUMMY1?,?tail) = Sector(sDUMMY1)*INT(sDUMMY1,?tail);
+   #Call CrossReduze
+   #Call TagReduze
+   #Call CrossMomentaReduze
+   Id Crossing(?tail)=1;
+   Id CrossingInvariants(?tail) = 1;
+   Id Sector(?tail)=1;
 #EndProcedure

@@ -178,10 +178,11 @@ Id csqrt(sDUMMY1?^2) = sDUMMY1;
 
 * prevent some prefactors entering prf
 Id i_ = PREFACTOR(i_);
-Id dimS = PREFACTOR(dimS);
+Id dimS = Dim(dimS);
 Id dimD = PREFACTOR(dimD);
 
 * post processing
+Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
 Id sDUMMY1?^(-1) = Den(sDUMMY1);
 Denominators Den;
 FactArg Den;
@@ -201,14 +202,8 @@ PolyRatFun prf;
 *
 * Write amplitude
 *
-#Create <`OUTFILE'.log>
-.sort
-
-* sj - useful for double Higgs (pulls out overall factors)
-Bracket inp,SCREEN,c1,PREFACTOR,Sector,inv,Tag,gHHH,gHT,e,i_,CrossingInvariants,Crossing,COLORFACTOR;
+Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 print+s;
 .sort
-
-Keep Brackets;
-#write <`OUTFILE'.log> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
+#Write <`OUTFILE'.log> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
 .end

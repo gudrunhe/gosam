@@ -1,5 +1,5 @@
 Dim=4-2*eps;
-prefactor=Gamma[1+eps]^2;
+prefactor=1;
 
 momlist=ToExpression[Table[StringJoin["p", ToString[i]], {i, 1, [% loop %]}]];
 GosamIncoming = {[% @for particles initial %]k[%index%][% @if eval index .lt. num_in %], [% @end @if %][%@end @for %]};

@@ -44,8 +44,11 @@
         </file>
         <file src="Makefile.dep" class="Integrals"/>
         <file src="Makefile.source" class="Integrals"/>
+        <file src="toreduze.py" class="Verbatim"/>
+        <file src="tosecdec.py" class="Verbatim"/>
         <foreach iterator="loops">
             <file src="secdec.m" dest="secdec-%dloop.m" arguments="loop" class="Integrals"/>
+            <file src="secdec.input" dest="secdec-%dloop.input" arguments="loop" class="Integrals"/>
         </foreach>
         <!-- todo /-->
     </directory>
@@ -179,10 +182,16 @@
         <file src="reduze.hh" class="Verbatim">
 			<only if-extension="reduze" />
         </file>
+        <file src="secdec.hh" class="Verbatim">
+            <only if-extension="reduze" />
+        </file>
 		<file src="golemreduze.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>
 		<file src="golemreduzesum.frm" class="Verbatim">
+            <only if-extension="reduze" />
+        </file>
+        <file src="golemreduzesecdec.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>
 	</directory>
