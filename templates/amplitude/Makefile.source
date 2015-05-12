@@ -32,8 +32,10 @@ TRANSLATE_REDUZE=python ../codegen/translate_reduze.py
 [% @if generate_nlo_virt %]
 DIAGRAMS_1LOOP_VIRT=reduze_1loop \
 	translate_1loop [% @for elements topolopy.keep.virt %] \
-	d[%$_%]l1.log[%
-   @end @for %]
+	d[%$_%]l1.log[% @end @for %] \
+	l1.log \
+	toreduze_1loop \
+	l1.cc
 
 TXT_1LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_1LOOP_VIRT))
 
@@ -42,8 +44,10 @@ TXT_1LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_1LOOP_VIRT))
 [% @if generate_nnlo_virt %]
 DIAGRAMS_2LOOP_VIRT= reduze_2loop \
 	translate_2loop [% @for elements topolopy.keep.nnlo_virt %] \
-	d[%$_%]l2.log[%
-   @end @for %]
+	d[%$_%]l2.log[% @end @for %] \
+	l2.log \
+	toreduze_2loop \
+	l2.cc
 
 TXT_2LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_2LOOP_VIRT))
 
@@ -67,6 +71,34 @@ d[%$_%]l1.log: ../diagrams-1.hh
 	    -D OUTFILE=d[%$_%]l1 \
 	    ../codegen/golemreduze.frm
 [% @end @for %]
+
+l1.log: ../diagrams-1.hh
+	@echo Form is summing 1 loop diagrams
+	@$(FORM) $(FORM_OPT) \
+	    -w$(FORM_THREADS) \
+	    -D LOOPS=1 \
+	    -D OUTFILE=l1 \
+	    ../codegen/golemreduzesum.frm
+
+toreduze_1loop:
+	python toreduze.py -i l1integrals.txt -o l1toreduze.txt  # python hack
+
+#prompt user to create codegen/reduzereduction-1.hh file containing reduction
+
+#
+# STAGE 2
+#
+l1.cc: ../diagrams-1.hh
+	@echo Form is reducing 1 loop diagrams
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D LOOPS=1 \
+		-D ORD=2 \
+		-D OUTFILE=l1 \
+		../codegen/golemreduzesecdec.frm
+
+tosecdec_1loop:
+	python tosecdec.py -i l2secdec.txt -m secdec-1loop.m -p secdec-1loop.input # python hack
 [% @end @if %]
 
 [% @if generate_nnlo_virt %]
@@ -84,6 +116,36 @@ d[%$_%]l2.log: ../diagrams-2.hh
 	    -D OUTFILE=d[%$_%]l2 \
 	    ../codegen/golemreduze.frm
 [% @end @for %]
+
+l2.log: ../diagrams-2.hh
+	@echo Form is summing 2 loop diagrams
+	@$(FORM) $(FORM_OPT) \
+	    -w$(FORM_THREADS) \
+		-D LOOPS=2 \
+		-D OUTFILE=l2 \
+		../codegen/golemreduzesum.frm
+
+toreduze_2loop:
+	python toreduze.py -i l2integrals.txt -o l2toreduze.txt  # python hack
+
+#prompt user to create codegen/reduzereduction-2.hh file containing reduction for all integrals in l2toreduze.txt
+
+#
+# STAGE 2
+#
+l2.cc: ../diagrams-2.hh
+	@echo Form is reducing 2 loop diagrams
+    @$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D LOOPS=2 \
+		-D ORD=0 \
+		-D OUTFILE=l2 \
+		../codegen/golemreduzesecdec.frm
+
+tosecdec_2loop:
+	python tosecdec.py -i l2secdec.txt -m secdec-2loop.m -p secdec-2loop.input # python hack
+
+
 [% @end @if %]
 
 

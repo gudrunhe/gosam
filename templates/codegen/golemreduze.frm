@@ -206,5 +206,5 @@ PolyRatFun prf;
 Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 print+s;
 .sort
-#Write <`OUTFILE'.log> "L d`DIAG'h0l`LOOPS' = %e", diagram`DIAG'
+#Write <`OUTFILE'.log> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
 .end

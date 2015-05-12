@@ -11,17 +11,34 @@ off statistics;
 
 * Process sum
 * Load GoSam result
-#Do i = `FIRST', `LAST'
-#include- d`i'h0l`LOOPS'.log;
+#IF (`LOOPS' == 1)
+#Do i = {[%@for elements topolopy.keep.virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
+#include- d`i'l`LOOPS'.log;
 #EndDo
 
 .sort:prefactors;
 
 G sum =
-#Do i = `FIRST', `LAST'
-   + d`i'h0l`LOOPS'
+#Do i = {[%@for elements topolopy.keep.virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
+   + d`i'l`LOOPS'
 #EndDo
 ;
+#EndIf
+
+#IF (`LOOPS' == 2)
+#Do i = {[%@for elements topolopy.keep.nnlo_virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
+#include- d`i'l`LOOPS'.log;
+#EndDo
+
+.sort:prefactors;
+
+G sum =
+#Do i = {[%@for elements topolopy.keep.nnlo_virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
+   + d`i'l`LOOPS'
+#EndDo
+;
+#EndIf
+
 .sort:sum;
 
 Drop;

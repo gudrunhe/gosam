@@ -188,7 +188,7 @@
 		<file src="golemreduze.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>
-		<file src="golemreduzesum.frm" class="Verbatim">
+		<file src="golemreduzesum.frm" class="Integrals">
             <only if-extension="reduze" />
         </file>
         <file src="golemreduzesecdec.frm" class="Verbatim">
