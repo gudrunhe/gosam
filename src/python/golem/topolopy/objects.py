@@ -783,15 +783,15 @@ class Diagram:
          if len(masses) > 0:
             return masslist
       return []
-      
+
    def EHCfound(self):
      vertex_indices=list(self._vertices.keys())
      found=False
+     fields=[['g','part21'],['g','part21'],['H','part25']]
      for idx in vertex_indices:
-       fields=['g','g','H']
        if self._vertices[idx].match(fields):
-	 found=True
-     return found      
+          found=True
+     return found
 
 class DiagramComponent:
 
