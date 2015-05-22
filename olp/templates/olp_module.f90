@@ -403,7 +403,7 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki, PSP_chk_th3, nlo_prefactors
+      use [% sp.$_ %]_config, only: ki, PSP_chk_th3, nlo_prefactors, PSP_check
       use [% sp.$_ %]_model, only: parseline[% 
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
@@ -509,7 +509,7 @@ contains
       if(present(acc)) then
          acc=10.0_ki**(-prec) ! point accuracy
       else
-         if(prec.lt.PSP_chk_th3) then
+         if(prec.lt.PSP_chk_th3 .and. PSP_check) then
             ! Give back a Nan so that point is discarded
             zero = log(1.0_ki)
             amp(2)= 1.0_ki/zero[% 
