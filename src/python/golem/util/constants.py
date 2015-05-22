@@ -14,13 +14,11 @@ PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
 
 AUTHORS = {
-      "Gavin Cullen": ["gavin.cullen@desy.de"],
       "Hans van Deurzen": ["hdeurzen@mpp.mpg.de"],
       "Nicolas Greiner": ["greiner@mpp.mpg.de"],
       "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
       "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
       "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
-      "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
       "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
       "Tiziano Peraro": ["peraro@mpp.mpg.de"],
       "Johannes Schlenk": ["jschlenk@mpp.mpg.de"],
@@ -29,8 +27,10 @@ AUTHORS = {
 }
 
 FORMER_AUTHORS = {
-      "Thomas Reiter": ["reiterth@mpp.mpg.de"],
-      "Joscha Reichel": ["joscha@mpp.mpg.de"]
+      "Gavin Cullen": ["gavin.cullen@desy.de"],
+      "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
+      "Joscha Reichel": ["joscha@mpp.mpg.de"],
+      "Thomas Reiter": ["reiterth@mpp.mpg.de"]
 }
 
 

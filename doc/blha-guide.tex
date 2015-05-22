@@ -185,6 +185,8 @@ AmplitudeType Tree $|$ OK\\
       helicity subamplitudes being generated to the ones relevant for this
       particular process, using the information that flavour changings only occur within 
       the same quark families resp. lepton generations.
+
+      Additionally, the \texttt{Extra} keyword of BLHA2 for OLP-specific settings is also supported.
 %      The command \texttt{\#@ filter.nlo NOT(SCALELESS)}
 %      excludes scaleless diagrams from the amplitude generation,as they will be zero anyway.
 \end{itemize}
@@ -441,7 +443,7 @@ if the client code needs to call \texttt{OLP\_Start} more than once, e.g.
 
 \subsection{BLHA2}
 
-\attention{Please note that with BLHA2 all light-quark masses
+\attention{Please note that with BLHA2 all light quark masses (u,d,s,c,b)
 	are set to zero by default. To have massive light quarks,
 	one needs to use the {\tt MassiveParticles} parameter in the order file.}
 
@@ -569,6 +571,84 @@ see section \ref{chp:setup-of-a-process}.
 
 For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
 
+\subsubsection{Loop-induced processes}
+
+Loop-induced processes are supported by the setting \\
+\texttt{AmplitudeType} \texttt{LoopInduced}.
+
+In \gosam, they are not handled like Born processes, but like virtual corrections to non-existing born processes
+and therefore returned in the virtual field $A_0$ (\texttt{PoleCoeff0}) of \texttt{OLP\_EvalSubprocess}
+and \texttt{OLP\_EvalSubprocess2}. The returned value corresponds to
+the  squared amplitude.
+
+\attention{Please note that in the order file, 
+\texttt{CouplingPower} or \texttt{AlphasPower} and \texttt{AlphaPower}  usually refer to 
+the coupling powers if the corresponding Born amplitude, 
+and the type of the correction is specified as \texttt{CorrectionType}. 
+As in the case of loop-induced processes the Born amplitude does not exist, 
+the correct counting of the coupling powers needs to be assured by setting \texttt{CouplingPower} 
+(or \texttt{AlphasPower} and \texttt{AlphaPower}) 
+equal to the order of a corresponding fictitious Born process, i.e. reduce the 
+coupling powers of the loop induced process correspondingly.}
+%(Note that this is ambiguous in the case of mixed QCD-QED couplings, 
+%but it has no effect.)
+
+\subsubsection{BSM-SM-interference processes}
+\gosam{} can calculate interference effects between e.g. BSM-Born and
+SM processes
+(where the BSM Born for example comes from additional interactions in an effective field theory).
+These processes are handled as corrections being next-to-leading order
+in the SM coupling. \\
+In the case where the SM process is loop-induced, 
+the standard  pole check would fail
+due to the non-matching Born. In this case, the user should set \texttt{PSP\_chk\_method=LoopInduced}
+or \texttt{PSP\_chk\_method=Rotation} in the \gosam{} input card,
+or use the \gosam-extension \texttt{AmplitudeType LoopInterference} in the BLHA2 order file,
+which automatically enables \texttt{PSP\_chk\_method=LoopInduced}.
+
+Please note that such a setup may require
+to define some filters in the input card to select the correct diagrams.
+
+\subsubsection{Precision checks}
+
+The \gosam{} input card variable \texttt{PSP\_chk\_method}, which
+controls the behaviour how \gosam{} checks the result for each phase-space point,
+can also be set by \texttt{Extra PrecisionCheck}.
+Possible values are:
+
+\begin{itemize}
+	\item \texttt{Extra PrecisionCheck Automatic} \textit{(default)} -- chooses automatically between \texttt{PoleRotation} and \texttt{LoopInduced}
+	\item \texttt{Extra PrecisionCheck PoleRotation} -- checks the precision of the pole first and rotates if necessary
+	\item \texttt{Extra PrecisionCheck Rotation} -- estimates the precision of each phase space point by rotating and re-evaluating (slow)
+	\item \texttt{Extra PrecisionCheck LoopInduced} -- checks that the poles are zero (i.e. very small compared to the finite part) and rotates if necessary
+	\item \texttt{Extra PrecisionCheck Disabled}  -- this sets \texttt{PSP\_check=False} which switches off all phase space point precision checks.
+\end{itemize}
+
+
+\subsubsection{Subprocess-specific settings in the \gosam{} input card}
+Settings in the \gosam{} input card can be subprocess-specific.
+This is helpful if various subprocesses, each having different settings, should be calculated at once.
+
+For this purpose, the subprocesses are enumerated as in the BLHA order file, starting at zero (to match to the
+correspondig \texttt{p*} subdirectories created by \gosam{}).\\
+\attention{This counting does not necessarily match  the labels
+returned in the BLHA contract file.}
+
+The syntax is \texttt{\textit{option}[\textit{list-of-subprocesses}]=\textit{value}}.
+For example, to disable the precision check 
+for the second and third processes in the order file,
+one can set \texttt{PSP\_check[1,2]=True} in the input card.
+
+Ranges and exclusion of ranges with \texttt{!} (or \texttt{\^}) are supported.
+Examples for valid lists:
+\begin{align*}
+    \text{\texttt{0-2}         }     &= \{0,1,2\} \\
+    \text{\texttt{-6,!3-4}         }  &   = \{0,1,2,5,6\} \\
+    \text{\texttt{ 1-4,!3,9}       }   &   = \{1,2,4,9\}
+\end{align*}
+
+Subprocess-specific settings need to be unambiguous, and they overwrite 
+the corresponding globally set values.
 
 \subsection{Production of colour-/spin correlated trees}
 
