@@ -37,7 +37,7 @@ program test
    channels(1) = logf
    channels(2) = 6
 
-   me = 0.0_ki
+   !me = 0.0_ki
 
    call initgolem()
 

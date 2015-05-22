@@ -315,6 +315,8 @@ zero = Property("zero",
    A list of symbols that should be treated as identically
    zero throughout the whole calculation. All of these
    symbols must be defined by the model file.
+   If you do not use built-in models, you probably
+   need to overwrite the default value.
 
    Examples:
    1) # Light masses are set to zero here:
@@ -328,7 +330,8 @@ zero = Property("zero",
 
    See also: model, one
    """,
-   list)
+   list,
+   "mU,mD,mS,mC,mB,me,mmu")
 
 one = Property("one",
    """\
