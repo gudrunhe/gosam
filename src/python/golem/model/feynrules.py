@@ -83,8 +83,10 @@ class Model:
 		try:
 			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
 			norm_path = os.path.normpath(model_path)
-			assert norm_path.startswith(parent_path), "Don't know what to do!"
-			mname = norm_path[len(parent_path):].replace(os.sep, "")
+			if norm_path.startswith(parent_path):
+				mname = norm_path[len(parent_path):].replace(os.sep, "")
+			else:
+				mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else '')))
 			if os.altsep is not None:
 				mname = mname.replace(os.altsep, "")
 			search_path = [ parent_path ]
