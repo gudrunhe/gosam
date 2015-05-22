@@ -783,15 +783,15 @@ class Diagram:
          if len(masses) > 0:
             return masslist
       return []
-      
+
    def EHCfound(self):
      vertex_indices=list(self._vertices.keys())
      found=False
+     fields=[['g','part21'],['g','part21'],['H','part25']]
      for idx in vertex_indices:
-       fields=['g','g','H']
        if self._vertices[idx].match(fields):
-	 found=True
-     return found      
+          found=True
+     return found
 
 class DiagramComponent:
 
@@ -805,14 +805,16 @@ class DiagramComponent:
       if len(rays) == 0 and len(query) == 0:
          return True
       r1 = rays[0]
+      r1_unquoted = r1
       rem = rays[1:]
       if r1[0:4] == 'part':
+         r1_unquoted = str(r1)
          r1='\'%s\'' % r1
       for i, q in enumerate(query):
          if q is None:
             if self.match_fields(rem, query[:i] + query[i+1:]):
                return True
-         elif r1 in q:
+         elif (r1 in q) or (r1_unquoted in q):
             if self.match_fields(rem, query[:i] + query[i+1:]):
                return True
       return False

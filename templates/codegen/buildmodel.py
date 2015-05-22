@@ -597,7 +597,7 @@ modelfile.write("            ! set mass according to PDG code\n")
 modelfile.write("            select case(pdg)\n")[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = parsereal(value, ierr, lnr)\n")[$
@@ -939,7 +939,7 @@ modelfile.write("         must_be_real = .true.\n")
 modelfile.write("         select case(pdg)\n")
 [$@if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
 modelfile.write("            case([$index$])\n")
 modelfile.write("               [$ $_ $] = re\n")[$
@@ -1060,7 +1060,12 @@ modelfile.write("re\n")
 modelfile.write("            must_be_real=.true.\n")
 [$@end @select$]
 [$@end @for$]
-modelfile.write("         end select\n")
+modelfile.write("         end select\n")[$
+@for parameter_alias real=re $]
+modelfile.write("      elseif (name .eq. \"[$ alias $]\") then\n")
+modelfile.write("            [$ $_ $] = [$ expr $]\n")
+modelfile.write("            must_be_real=.true.\n")[$
+@end @for $]
 modelfile.write("     else\n")
 modelfile.write("         if (name(1:3) /= \"mdl\") then\n")
 modelfile.write("            call set_parameter(\"mdl\" // name(4:),re,im,ierr)\n")

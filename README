@@ -1,20 +1,43 @@
-######################################################################
-#    /==#==\                           GoSam                         #
-#    | . . |       An Automated One-Loop Matrix Element Generator    #
-#  >-+ ~~~ +-<                      Version 1.0                      #
-#    |     |                                                         #
-#   <__/~\__>             (c) The GoSam Collaboration 2011-2013      #
-#                                                                    #
-#       AUTHORS:                                                     #
-#       * Gavin Cullen         <gavin.cullen@desy.de>                #
-#       * Nicolas Greiner      <greiner@mpp.mpg.de>                  #
-#       * Gudrun Heinrich      <gudrun@mpp.mpg.de>                   #
-#       * Gionata Luisoni      <gionata.luisoni@durham.ac.uk>        #
-#       * Pierpaolo Mastrolia  <pierpaolo.mastrolia@cern.ch>         #
-#       * Giovanni Ossola      <giovanni.ossola@physics.nyu.edu>     #
-#       * Thomas Reiter        <reiterth@mpp.mpg.de>                 #
-#       * Francesco Tramontano <francesco.tramontano@cern.ch>        #
-######################################################################
+################################################################################
+#   __   __   ___   __   __  __                      GoSam                     #
+#  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop             #
+# ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
+#  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 2.x.x                     #
+#                                                                              #
+#                                    (c) The GoSam Collaboration 2011-2015     #
+#                                                                              #
+#        AUTHORS:                                                              #
+#        * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>             #
+#        * Nicolas Greiner                   <greiner@mpp.mpg.de>              #
+#        * Gudrun Heinrich                   <gudrun@mpp.mpg.de>               #
+#        * Gionata Luisoni                   <luisonig@mpp.mpg.de>             #
+#        * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>     #
+#        * Giovanni Ossola                   <gossola@citytech.cuny.edu>       #
+#        * Tiziano Peraro                    <peraro@mpp.mpg.de>               #
+#        * Johannes Schlenk                  <jschlenk@mpp.mpg.de>             #
+#        * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>              #
+#        * Francesco Tramontano              <Francesco.Tramontano@cern.ch>    #
+#                                                                              #
+#        FORMER AUTHORS:                                                       #
+#        * Gavin Cullen                      <gavin.cullen@desy.de>            #
+#        * Edoardo Mirabella                 <mirabell@mpp.mpg.de>             #
+#        * Joscha Reichel                    <joscha@mpp.mpg.de>               #
+#        * Thomas Reiter                     <reiterth@mpp.mpg.de>             #
+#                                                                              #
+#  This program is free software: you can redistribute it and/or modify        #
+#  it under the terms of the GNU General Public License either                 #
+#  version 3, or (at your option) any later version.                           #
+#                                                                              #
+#  Scientific publications prepared using the present version of               #
+#  GoSam or any modified version of it or any code linking to GoSam            #
+#  or parts of it should make a clear reference to the publication:            #
+#                                                                              #
+#      G. Cullen et al.,                                                       #
+#      ``GoSam-2.0: a tool for automated one-loop calculations                 #
+#                        within the Standard Model and Beyond'',               #
+#      Eur. Phys. J. C 74 (2014) 8,  3001                                      #
+#      [arXiv:1404.7096 [hep-ph]].                                             #
+################################################################################
 
 
 Synopsis

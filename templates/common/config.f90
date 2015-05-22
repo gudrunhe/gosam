@@ -195,6 +195,11 @@
    ! 1: A factor of 1/8/pi^2 is not included in the NLO result
    ! 2: The NLO includes all prefactors
    !
+   ! For loop-induced processes:
+   ! 0: A factor of (alpha_(s)/2/pi)**2 is not included in the virtual result
+   ! 1: A factor of (1/8/pi^2)**2 is not included in the virtual result
+   ! 2: The result includes all prefactors (= (alpha_(s)/2/pi)**2)
+   !
    ! Note, however, that the factor of 1/Gamma(1-eps) is not included
    ! in any of the cases.
    integer :: nlo_prefactors = [% nlo_prefactors %]
@@ -216,11 +221,23 @@
    logical :: PSP_rescue = [% PSP_rescue
              convert=bool
              true=.true.
-             false=.false. %]
+             false=.false. %][% @if generate_lo_diagrams %][% @else %]
+   ! not used (tree-level not available):[% @end @if %]
    integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
    integer :: PSP_chk_th2 = [% PSP_chk_th2 %]
    integer :: PSP_chk_th3 = [% PSP_chk_th3 %]
-   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki[% 
+   real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
+   [% @if generate_lo_diagrams %]
+   ! not used in this process (process is not loop-induced):[%
+   @else %]
+   ! used instead:[%
+   @end @if %]
+   integer :: PSP_chk_li1 = [% PSP_chk_li1 %]
+   integer :: PSP_chk_li2 = [% PSP_chk_li2 %]
+   integer :: PSP_chk_li3 = [% PSP_chk_li3 %]
+   integer :: PSP_chk_li4 = [% PSP_chk_li4 %]
+
+[%
 @if ewchoose %]
    !
    ! The integer ewchoice allows the user to change the 

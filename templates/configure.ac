@@ -43,6 +43,7 @@ AC_PROG_FC
 AC_FC_LIBRARY_LDFLAGS
 AC_FC_SRCEXT([f90])
 AC_FC_FREEFORM
+AC_FC_LINE_LENGTH([unlimited],[],[AC_MSG_WARN([Fortran compiler does not accept long source lines], 77)])
 
 LT_INIT
 

@@ -32,7 +32,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
       ('m', "merge=",
          "merge file into template"),
       ('i', "interactive",
-         "run an interactive session")
+         "run an interactive session (not supported anymore)")
    ]
 
 generate_templates = False
@@ -69,6 +69,7 @@ def arg_handler(name, value=None):
       else:
          return False
    if name == "interactive":
+      golem.util.tools.warning("Interactive mode is not supported anymore. GoSam will probably crash.")
       interactive_session = golem.shell.GolemShell()
       return True
 
@@ -202,6 +203,7 @@ def main(argv=sys.argv):
             if temp_file_path:
                os.unlink(temp_file_path)
 
+         c.activate_subconfig(0)
          c["setup-file"] = os.path.abspath(in_file)
          c["golem.name"] = "GoSam"
          c["golem.version"] = ".".join(map(str, 

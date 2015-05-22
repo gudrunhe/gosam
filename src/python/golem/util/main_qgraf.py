@@ -7,6 +7,7 @@ and is only used in gosam.py
 import subprocess
 import os.path
 import os
+import itertools
 
 import golem.properties
 import golem.pyxo.pyxodraw
@@ -15,7 +16,7 @@ import golem.model.calchep
 from golem.util.tools import copy_file, \
 		debug, message, warning
 from golem.util.path import golem_path
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, split_qgrafPower
 import golem.util.tools
 import golem.util.constants as consts
 
@@ -205,7 +206,7 @@ def format_qgraf_verbatim(conf, prop):
 def run_qgraf(conf, in_particles, out_particles):
 	path = golem.util.tools.process_path(conf)
 
-	powers = conf.getProperty(golem.properties.qgraf_power)
+	powers = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
 	options = conf.getProperty(golem.properties.qgraf_options)
 	verbatim =     format_qgraf_verbatim(conf,
 			golem.properties.qgraf_verbatim)
@@ -249,10 +250,10 @@ def run_qgraf(conf, in_particles, out_particles):
 	if flag_generate_lo_diagrams:
 		output_name = consts.PATTERN_DIAGRAMS_LO + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO + log_ext
-		
-		if powers is not None:
+
+		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
-					"true=vsum[%s,%s,%s];\n" % (powers[0], powers[1], powers[1])
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers])
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo
 
@@ -282,10 +283,10 @@ def run_qgraf(conf, in_particles, out_particles):
 	if flag_generate_nlo_virt:
 		output_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_NLO_VIRT + log_ext
-		
-		if powers is not None:
+
+		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
-					"true=vsum[%s,%s,%s];\n" % (powers[0], powers[2], powers[2])
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
@@ -318,10 +319,11 @@ def run_qgraf(conf, in_particles, out_particles):
 	if flag_generate_uv_counterterms:
 		output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
-		
-		if powers is not None:
+
+		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + \
-					"true=vsum[%s,%s,%s];\n" % (powers[0], str(int(powers[2])-6), str(int(powers[2])-6))
+					"true=vsum[%s,%s,%s];\n" % (powers[0][0], str(int(powers[0][2])-6), str(int(powers[0][2])-6)) \
+					+ "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers[2:]])
 		else:
 			new_verbatim = verbatim
 
@@ -359,7 +361,7 @@ def run_qgraf(conf, in_particles, out_particles):
 				and flag_generate_nlo_virt:
 		warning("There are no tree-level diagrams for your setup.\n" +
 				"!!! YOU WILL ALWAYS GET ZERO !!!\n" +
-			  ("You probably wanted 'order=%s,NONE,%s'" % (powers[0], powers[2])) +
-			  (" instead of 'order=%s'\n" % (",".join(map(str,powers)))) +
+			  ("You probably wanted 'order=%s,NONE,%s'" % (powers[0][0], powers[0][2])) +
+			  (" instead of 'order=%s'\n" % (",".join(map(str,list(itertools.chain(*powers)))))) +
 			  "in order to compute the |virtual|^2.")
 

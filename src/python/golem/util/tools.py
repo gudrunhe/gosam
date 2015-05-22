@@ -498,9 +498,17 @@ def expand_parameter_list(prop, conf):
       elif value in params:
          new_values.add(value)
       else:
-         warning("Property '%s' contains an unknown parameter name (%s)."
-               % (prop, value),
-               "The errorneous symbol has been removed from the list.")
+         if str(prop)=="zero" and value=="mU":
+            warning("Property '%s' contains an unknown parameter name (%s)."
+                 % (prop, value),
+                 "You are probably using a different model than the built-in models",
+                 "and therefore cannot use the default value list of the 'zero' input parameter.",
+                 "To remove this warning add at least 'zero=' (or whatever is appropriate) to your input card.",
+                 "The symbol has been removed from the list.")
+         else:
+            warning("Property '%s' contains an unknown parameter name (%s)."
+                 % (prop, value),
+                 "The symbol has been removed from the list.")
    conf.setProperty(prop, list(new_values))
 
 def generate_parameter_list(conf):

@@ -26,7 +26,7 @@ from golem.util.tools import copy_file, \
 		debug, message, warning, \
 		generate_particle_lists
 
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, split_qgrafPower
 
 # The following files contain routines which originally were
 # part of golem-main itself:
@@ -237,6 +237,13 @@ def write_template_file(fname, defaults, format=None):
 				f.write("%s=%s\n" % (prop, value))
 	for prop in golem.properties.properties:
 		changed = str(prop) in defaults.propertyNames()
+		subprocess_specific_settings = False
+		for k in defaults:
+			if k.startswith(str(prop)+"["):
+				subprocess_specific_settings=True
+				changed=True
+				break
+
 		if prop.isExperimental() and not changed:
 			continue
 		if prop.isHidden() and not changed:
@@ -301,6 +308,10 @@ def write_template_file(fname, defaults, format=None):
 				f.write("# %s=\n" % prop)
 			else:
 				f.write("# %s=%s\n" % (prop, prop.getDefault()))
+			if subprocess_specific_settings:
+				for k in defaults:
+					if k.startswith(str(prop)+"["):
+						f.write("%s=%s\n" % (k, defaults.getProperty(k)))
 			f.write("\n")
 		elif format == "LaTeX":
 			if prop.getDefault() is not None:
@@ -337,10 +348,19 @@ def read_golem_dir_file(path):
 
 		# be compatible between internal 1.99 releases and 2.0.*
 		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
+			warning("This directory has been generated with an older version "+
+				"of GoSam (%s)." % result["golem-version"],
+				"If you get compiler errors, you might need to remove all files",
+				"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		# be compatible to older 2.0.* releases
-		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:2]+[0]*5)[:3]:
+		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+			if ver[:3]!=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+				warning("This directory has been generated with an older version "+
+					"of GoSam (%s)." % result["golem-version"],
+					"If you get compiler errors, you might need to remove all files",
+					"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
@@ -491,12 +511,14 @@ def workflow(conf):
 		raise GolemConfigError("The process path does not exist: %r" % path)
 
 	check_dont_overwrite(conf)
+	orders = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+	powers = orders[0] if orders else []
 
 	if len(powers) == 2:
 		generate_lo_diagrams = True
 		generate_nlo_virt = False
 	elif len(powers) == 3:
-		generate_lo_diagrams = powers[1].strip().lower() != "none"
+		generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
 		generate_nlo_virt = True
 	else:
 		raise GolemConfigError("The property %s must have 2 or 3 arguments." % \
@@ -508,6 +530,8 @@ def workflow(conf):
 	#generate_uv_counterterms
 	#False
 
+	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
+		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
 
 	#if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
 	#	qgraf_options.append("onshell")
@@ -578,7 +602,7 @@ def workflow(conf):
 	if 'formopt' in ext:
 		if 'topolynomial' in ext:
 			raise GolemConfigError(
-						"Your configuaration has select the extension 'topolynomial' \n"
+						"Your configuration has select the extension 'topolynomial' \n"
 						"and optimization by FORM 'formopt'. " +
 						"The two options are not compatible. \nPlease change your input " +
 						"card (remove topolynomial or add noformopt) and re-run.")
