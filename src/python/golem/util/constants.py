@@ -55,7 +55,9 @@ LICENSE = [
 "      G. Cullen et al.,",
 "      ``GoSam-2.0: a tool for automated one-loop calculations",
 "                        within the Standard Model and Beyond'',",
-"      arXiv:1404.7096 [hep-ph]"
+"      Eur. Phys. J. C 74 (2014) 8,  3001",
+"      [arXiv:1404.7096 [hep-ph]]."
+
 ]
 
 SCATTER_ASCIIART = [
@@ -70,9 +72,9 @@ SCATTER_ASCIIART = [
    r'             . .     \           ',
    r'          . . .       \          ',
    r'       . . . .         \         ']
-      
+
 GOLEM_ASCIIART = [
-            r'   /==#==\   ', 
+            r'   /==#==\   ',
             r'   | . . |   ',
             r' >-+ ~~~ +-< ',
             r'   |     |   ',
@@ -98,7 +100,7 @@ CLINES = [
               ( ".".join(map(str,golem.installation.GOLEM_VERSION)),
                 golem.installation.GOLEM_REVISION),
             '',
-            '(c) The GoSam Collaboration 2011-2014',
+            '(c) The GoSam Collaboration 2011-2015',
             ''
       ]
 
