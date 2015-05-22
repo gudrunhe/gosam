@@ -26,7 +26,7 @@ from golem.util.tools import copy_file, \
 		debug, message, warning, \
 		generate_particle_lists
 
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, split_qgrafPower
 
 # The following files contain routines which originally were
 # part of golem-main itself:
@@ -502,12 +502,14 @@ def workflow(conf):
 		raise GolemConfigError("The process path does not exist: %r" % path)
 
 	check_dont_overwrite(conf)
+	orders = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+	powers = orders[0] if orders else []
 
 	if len(powers) == 2:
 		generate_lo_diagrams = True
 		generate_nlo_virt = False
 	elif len(powers) == 3:
-		generate_lo_diagrams = powers[1].strip().lower() != "none"
+		generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
 		generate_nlo_virt = True
 	else:
 		raise GolemConfigError("The property %s must have 2 or 3 arguments." % \

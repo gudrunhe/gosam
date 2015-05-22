@@ -1217,3 +1217,56 @@ def extractRange(s,minval=0,maxval=999):
          raise ValueError("Invalid range: %s in '%s'" % (r,s))
    res=set(filter(lambda x: x>=minval and x<=maxval,res))
    return res
+
+def split_qgrafPower(power):
+   """
+   >>> split_qgrafPower('QCD,2,0,QED,3,3')
+   [['QCD', 2, 0], ['QED', 3, 3]]
+   >>> split_qgrafPower('QCD,2,QED,3')
+   [['QCD', 2], ['QED', 3]]
+   >>> split_qgrafPower('QCD,2,3,QED,3')
+   [['QCD', 2, 3], ['QED', 3, 3]]
+   >>> split_qgrafPower('QCD,2')
+   [['QCD', 2]]
+   >>> split_qgrafPower('QED,3,4')
+   [['QED', 3, 4]]
+   >>> split_qgrafPower('QCD,2,3,4,QED,3,NP,1')
+   [['QCD', 2, 3, 4], ['QED', 3, 3, 3], ['NP', 1, 1, 1]]
+   >>> split_qgrafPower('QED,3,4,QED,3,4')
+   Traceback (most recent call last):
+    ...
+   ConfigurationException: Coupling 'QED' repeated
+   """
+   if type(power)==list:
+      return power
+   assert(type(power)==str)
+   min_length=0
+   orders=[]
+   couplings=set()
+   l=re.split(',|;',power)
+   current_coupling=[]
+   for i in l + [""]:
+      if str(i).isdigit() or str(i).lower()=="none":
+         assert(current_coupling)
+         current_coupling.append(i)
+      else:
+         current_len=len(current_coupling)-1
+         if current_len<0:
+            current_len=0
+         if current_len<min_length and current_coupling:
+            if current_len>0:
+                current_coupling.extend([current_coupling[-1]]*(min_length-current_len))
+            else:
+                current_coupling.extend([0]*(min_length-current_len))
+         if current_len and current_coupling:
+             orders.append(current_coupling)
+         if min_length==0:
+            min_length=current_len
+         if i:
+             current_coupling=[i]
+             if i in couplings:
+                 raise ConfigurationException("Coupling '%s' repeated" % i)
+             couplings.add(i)
+         else:
+             current_coupling=[]
+   return orders

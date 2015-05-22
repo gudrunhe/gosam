@@ -114,6 +114,8 @@ qgraf_power = Property("order",
    via the qgraph.verbatim option, might be needed
    to select the correct set of diagrams.
 
+   The user can also use QCD instead of gs and QED instead of gw.
+
    If the last number is omitted no virtual corrections are
    calculated.
 

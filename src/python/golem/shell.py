@@ -13,6 +13,7 @@ import golem
 import golem.util.ishell
 import golem.properties
 import golem.util.constants
+import golem.util.config
 
 from golem.util.main_misc import find_config_files, write_template_file, \
       workflow, generate_process_files
@@ -682,7 +683,8 @@ class GENERATE(Command):
          process_name = conf.getProperty(golem.properties.process_name, "") \
                .strip()
 
-         order = conf.getListProperty(golem.properties.qgraf_power)
+         orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+         order = orders[0] if orders else []
          generate_lo = True
          generate_nlo = True
          if len(order) == 0:
@@ -760,7 +762,9 @@ class GENERATE(Command):
          f.close()
          conf["setup-file"] = os.path.abspath(in_file)
 
-         order = conf.getListProperty(golem.properties.qgraf_power)
+         orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+         order = orders[0] if orders else []
+
          generate_lo = True
          generate_nlo = True
          if len(order) == 0:
