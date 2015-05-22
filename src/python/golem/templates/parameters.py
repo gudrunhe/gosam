@@ -593,6 +593,29 @@ class ModelTemplate(Template):
 			yield props
 
 
+	def parameter_alias(self, *args, **opts):
+		alias_name = self._setup_name("alias", "alias", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expr_name  = self._setup_name("expr", "expr", opts)
+		#only real variables implemented yet
+		#type_name  = self._setup_name("type", "type", opts)
 
+		re = str(opts.get("real","re"))
+		im = str(opts.get("imag","im"))
+		params = {}
 
+		# params["model_param"]  = [ (alias_name , conversion_expression ) , ... ]
+		params["mdlaEWM1"]= [("alpha",  "1._ki/{re}"),("alphaEW","1._ki/{re}")]
+		params["mdlaS"] = [( "alphaS", "{re}"),("alphas", "{re}") ]
+		params["mdlGf"] = [( "GF", "{re}")]
 
+		props = Properties()
+		for k in params.keys():
+			if k in self._parameters and not "P" in self._parameters[k][1]:
+				for (alias, expr_unf) in params[k]:
+					expr = expr_unf.format(re=re,im=im)
+					props.setProperty(name_name, k)
+					props.setProperty(alias_name, alias)
+					#props.setProperty(type_name, self._parameters[k][1])
+					props.setProperty(expr_name, expr)
+					yield props

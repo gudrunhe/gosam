@@ -147,7 +147,7 @@ contains
                k3 = vecs(i,2)*vecs(i,2) + vecs(i,3)*vecs(i,3) &
                 & + vecs(i,4)*vecs(i,4)
 
-               S1 = S1 + k3
+               S1 = S1 + sqrt(k3)
                S2 = S2 + k3 / k0
                P1 = P1 * sqrt(k3) / k0
             end do

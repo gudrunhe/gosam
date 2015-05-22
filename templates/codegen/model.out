@@ -547,7 +547,7 @@ contains
             select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = parsereal(value, ierr, lnr)[$
@@ -881,7 +881,7 @@ $]if (name.eq."VV12") then
          select case(pdg)[$
 @if has_slha_locations $][$
    @for slha_blocks lower $][$
-      @select $_ @case masses $][$
+      @select $_ @case mass $][$
          @for slha_entries $]
             case([$index$])
                [$ $_ $] = re[$
@@ -1000,7 +1000,12 @@ $]if (name.eq."VV12") then
          @end @select $][$@select type @case R$]
             must_be_real=.true.[$@end @select$][$
          @end @for $]
-         end select
+         end select[$
+@for parameter_alias real=re $]
+      elseif (name .eq. "[$ alias $]") then
+            [$ $_ $] = [$ expr $]
+            must_be_real=.true.[$
+@end @for $]
      else
          if (name(1:3) /= "mdl") then
             call set_parameter("mdl" // name(4:),re,im,ierr)

@@ -313,18 +313,18 @@ def get_qgraf_power(conf):
             else:
                treepower = icpower
             if not nolooplevel:
-               return [qcd_name, treepower, icpower + 2]
+               return [qcd_name, treepower, icpower + 2, qed_name, iepower, iepower]
             else:
-               return [qcd_name, treepower]
+               return [qcd_name, treepower, qed_name, alpha_power]
          elif correction_type == "EW" or correction_type == "QED":
             if notreelevel:
                treepower = "NONE"
             else:
                treepower = iepower
             if not notreelevel:
-               return [qed_name, treepower, iepower + 2]
+               return [qed_name, treepower, iepower + 2, qcd_name, icpower, icpower]
             else:
-               return [qed_name, treepower]
+               return [qed_name, treepowerm, qcd_name, icpower]
 
    return []
 
@@ -428,8 +428,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       golem.util.tools.warning(
             "Please, check configuration and contract files for errors!")
 
-   for lineo,_,_,_ in order_file.processes_ordered():
+   for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
       subconf=orig_conf.copy()
+      subconf.activate_subconfig(subprocess_number)
       file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
          ignore_case, ignore_unknown, lineo, quiet=True)
       subprocesses_conf.append(subconf)
@@ -609,6 +610,15 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
       # store initial symmetries infos
       start_symmetries = conf["symmetries"]
+
+      # handle case that first subprocess does not initalize samurai (LO process)
+      for subprocess in subprocesses.values():
+         sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+         if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
+            # add samurai to first subprocess, which is called by "initgolem(true)"
+            first_subprocess = int(subprocesses.values()[0])
+            subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
+            break
 
       for subprocess in subprocesses.values():
          process_path = subprocess.getPath(path)

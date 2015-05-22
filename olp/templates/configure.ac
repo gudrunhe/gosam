@@ -44,6 +44,9 @@ AC_FC_LIBRARY_LDFLAGS
 AC_FC_SRCEXT([f90])
 AC_FC_FREEFORM
 
+dnl Enable long line support if available
+AC_FC_LINE_LENGTH([unlimited],[],[AC_MSG_WARN([Fortran compiler does not accept long source lines], 77)])
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LEX

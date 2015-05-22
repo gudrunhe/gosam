@@ -155,15 +155,15 @@ GENERATED_SRC=[%
 @end @if generate_nlo_virt %]
 
 $(GENERATED_SRC): %: source
-	
-	
+
+TEMPFILE:=$(shell mktemp -u)
+
 source:
 [% @if diagsum %]
-	@if grep -q 'Local' ../diagrams-1.hh; \
+	@if [ -e ../diagrams-1.hh ] && head -n 100 ../diagrams-1.hh | grep -q 'Local' ; \
 	then \
-		mv ../diagrams-1.hh ../diags-1.hh; \
-		sed -e "s/Local diagram/Id diag/g" ../diags-1.hh > ../diagrams-1.hh; \
-		rm ../diags-1.hh; \
+		sed -e "s/Local diagram/Id diag/g" ../diagrams-1.hh > $(TEMPFILE); \
+		mv $(TEMPFILE) ../diagrams-1.hh ; \
 	fi[%
 @end @if %]
 	@if [ -f Makefile.source ]; \

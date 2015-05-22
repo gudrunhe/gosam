@@ -83,8 +83,10 @@ class Model:
 		try:
 			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
 			norm_path = os.path.normpath(model_path)
-			assert norm_path.startswith(parent_path), "Don't know what to do!"
-			mname = norm_path[len(parent_path):].replace(os.sep, "")
+			if norm_path.startswith(parent_path):
+				mname = norm_path[len(parent_path):].replace(os.sep, "")
+			else:
+				mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else '')))
 			if os.altsep is not None:
 				mname = mname.replace(os.altsep, "")
 			search_path = [ parent_path ]
@@ -499,6 +501,8 @@ class Model:
 
 			if p.selfconjugate:
 				conj = "('+')"
+			elif p.pdg_code in [24,-24]:
+				conj = "('+','+')"
 			else:
 				conj = "('+','-')"
 
@@ -535,6 +539,12 @@ class Model:
 				fields.append(cn[0])
 				afields.append(cn[1])
 				spins.append(p.spin - 1)
+
+			deg = len(fields)
+			if deg >= 7:
+			   warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+			   continue
+			   assert False
 
 			flip = spins[0] == 1 and spins[2] == 1
 
@@ -722,7 +732,7 @@ class Model:
 				anti = fields[i]
 				color = abs(p.color)
 				spin = abs(p.spin) - 1
-				if field.startswith("anti"):
+				if field.startswith("anti") and not p.pdg_code in [24,-24]:
 					spin = - spin
 					color = - color
 				colors.append(color)
@@ -821,7 +831,7 @@ class Model:
 					"ModelDummyIndex", lsubs, lcounter)
 			structure = structure.replaceNegativeIndices(0, "MDLIndex%d",
 					dummy_found)
-			for i in [2]:
+			for i in range(2,33):
 				structure = structure.algsubs(
 					ex.FloatExpression("%d." % i),
 					ex.IntegerExpression("%d" % i))
@@ -959,6 +969,7 @@ def canonical_field_names(p):
 
 lor_P = ex.SymbolExpression("P")
 lor_Metric = ex.SymbolExpression("Metric")
+lor_Epsilon = ex.SymbolExpression("Epsilon")
 lor_Identity = ex.SymbolExpression("Identity")
 lor_Gamma = ex.SymbolExpression("Gamma")
 lor_ProjP = ex.SymbolExpression("ProjP")
@@ -971,6 +982,7 @@ lor_d = ex.SymbolExpression("d")
 lor_d1 = ex.SymbolExpression("d_")
 lor_NCContainer = ex.SymbolExpression("NCContainer")
 lor_Gamma5 = ex.SymbolExpression("Gamma5")
+lor_e = ex.SymbolExpression("e_")
 
 def get_rank(expr):
 	if isinstance(expr, ex.SumExpression):
@@ -981,6 +993,7 @@ def get_rank(expr):
 		else:
 			return max(lst)
 
+
 	elif isinstance(expr, ex.ProductExpression):
 		n = len(expr)
 		result = 0
@@ -989,6 +1002,10 @@ def get_rank(expr):
 			sign, factor = expr[i]
 			result += get_rank(factor)
 		return result
+
+	elif isinstance(expr, ex.PowerExpression):
+		assert isinstance(expr.getExponent(), ex.IntegerExpression)
+		return get_rank(expr.getBase())*(int(expr.getExponent()))
 
 	elif isinstance(expr, ex.UnaryMinusExpression):
 		return get_rank(expr.getTerm())
@@ -1016,7 +1033,11 @@ def transform_lorentz(expr, spins):
 			sign, factor = expr[i]
 			new_factors.append( (sign, transform_lorentz(factor, spins)) )
 		return ex.ProductExpression(new_factors)
-
+	elif isinstance(expr, ex.PowerExpression):
+		return ex.PowerExpression(
+				transform_lorentz(expr.getBase(),spins),
+				transform_lorentz(expr.getExponent(),spins)
+				)
 	elif isinstance(expr, ex.UnaryMinusExpression):
 		return ex.UnaryMinusExpression(
 				transform_lorentz(expr.getTerm(), spins)
@@ -1187,6 +1208,25 @@ def transform_lorentz(expr, spins):
 			else:
 				index2 = args[1]
 			return lor_NCContainer(lor_ProjPlus, index1, index2)
+		elif head == lor_Epsilon:
+			arg_list=[]
+			for ind in range(len(args)):
+				if isinstance(args[ind], ex.IntegerExpression):
+					i = int(args[ind])
+					i_particle = i % 1000
+					i_index = i // 1000
+					s = spins[i_particle-1] - 1
+					if i_index == 1:
+						suffix = "a"
+					elif i_index == 2:
+						suffix = "b"
+					else:
+						suffix = ""
+					index1 = ex.SymbolExpression("idx%dL%d%s" % (i_particle, s, suffix))
+				else:
+					index1 = args[ind]
+				arg_list.append(index1)
+			return lor_e(*arg_list)
 		else:
 			return expr
 	else:
