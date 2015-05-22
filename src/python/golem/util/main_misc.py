@@ -348,10 +348,19 @@ def read_golem_dir_file(path):
 
 		# be compatible between internal 1.99 releases and 2.0.*
 		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
+			warning("This directory has been generated with an older version "+
+				"of GoSam (%s)." % result["golem-version"],
+				"If you get compiler errors, you might need to remove all files",
+				"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		# be compatible to older 2.0.* releases
-		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:2]+[0]*5)[:3]:
+		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+			if ver[:3]!=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+				warning("This directory has been generated with an older version "+
+					"of GoSam (%s)." % result["golem-version"],
+					"If you get compiler errors, you might need to remove all files",
+					"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
