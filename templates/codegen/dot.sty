@@ -12,14 +12,18 @@ node [[shape=point]];
 {node [[shape=plaintext]] <in_loop>Vi<in_index> <end><back>}
 {node [[shape=plaintext]] <out_loop>Vo<out_index> <end><back>}
 label="Diagram <diagram_index>";
-<in_loop>Vi<in_index> -- V<vertex_index>
-<back> [[style=solid, color=black]];
+<in_loop>
+Vi<in_index> [[label="<field>(<momentum>)"]];
+Vi<in_index> -- V<vertex_index>
+<back> [[style="<field>"]];
 <end><back>
-<out_loop>Vo<out_index> -- V<vertex_index>
-<back> [[style=solid, color=black]];
+<out_loop>
+Vo<out_index> [[label="<field>(<momentum>)"]];
+Vo<out_index> -- V<vertex_index>
+<back> [[style="<field>"]];
 <end><back>
 <propagator_loop>V<dual-vertex_index> -- V<vertex_index>
-<back> [[style=solid, color=black]];
+<back> [[style="<field>", label="<field>"]];
 <end>}
 
 /*--------------------------------------------------*/

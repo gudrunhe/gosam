@@ -8,6 +8,14 @@
 \usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{graphicx}
+[% @if extension dot2tex %]
+\usepackage[x11names, rgb]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing,decorations.markings,arrows,shapes}
+\usetikzlibrary{arrows.meta}
+[% @end @if %]
+
 
 \newcommand{\bra}[1]{\langle #1 \vert}
 \newcommand{\brb}[1]{[ #1 \vert}
@@ -32,6 +40,66 @@
 
 \makeindex
 \begin{document}
+[% @if extension dot2tex %]
+% Line decoration for smdiag
+
+% quarks
+\tikzstyle{U}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Ubar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{D}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Dbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{C}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Cbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{S}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Sbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{T}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Tbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{B}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{Bbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+
+% gluon and its ghost
+\tikzstyle{gh}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ghbar}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{g}=[decorate, decoration={coil, amplitude=4pt, segment length=6pt, aspect=0.95}]
+
+% V: EWSM gauge bosons
+\tikzstyle{A}=[decorate,decoration={snake}]
+\tikzstyle{Wm}=[decorate,decoration={snake}]
+\tikzstyle{Wp}=[decorate,decoration={snake}]
+\tikzstyle{Z}=[decorate,decoration={snake}]
+
+% leptons
+\tikzstyle{em}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ep}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{ne}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{nebar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{mum}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{mup}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{nmu}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{nmubar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{taum}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{taup}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{ntau}=[decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ntaubar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+
+% G: Faddeev-Popov Ghosts
+\tikzstyle{ghA}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ghAbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{ghZ}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ghZbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{ghWm}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ghWmbar}=[decoration={markings,mark=at position 0.5 with \arrow{<}},postaction=decorate]
+\tikzstyle{ghWp}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+\tikzstyle{ghWpbar}=[dotted, decoration={markings,mark=at position 0.5 with \arrow{>}},postaction=decorate]
+
+% S: scalars
+\tikzstyle{chi}=[dashed]
+\tikzstyle{phim}=[dashed]
+\tikzstyle{phip}=[dashed]
+\tikzstyle{H}=[dashed]
+[% @end @if %]
+
+
 \maketitle
 \begin{abstract}
 \noindent This process consists of [% @select topolopy.count.tree
@@ -559,7 +627,11 @@ $S^\prime=S[%
 \subsection*{General Information}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-2.log}
 \clearpage[%
-@for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %][% 
+@for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %]
+[% @if extension dot2tex %]
+\resizebox{0.4\textwidth}{!}{
+\input{dot2virt.[% DIAG %].xdot.tikz}}[%
+@else %][% 
 @if is_first%]
 \begin{figure}
 \begin{center}[%
@@ -581,6 +653,7 @@ $S^\prime=S[%
 @if is_last%]
 \end{center}
 \end{figure}[%
+@end @if %][%
 @end @if %][%
 @end @for %][% 
 @end @if generate_nnlo_virt %]

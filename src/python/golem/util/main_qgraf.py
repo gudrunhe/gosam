@@ -194,6 +194,7 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 def format_qgraf_verbatim(conf, prop):
 	result = []
 	verbatim = conf.getProperty(prop)
+
 	lines = verbatim.splitlines()
 	for line in lines:
 		lhs, sep, rhs = line.partition(";")
@@ -219,6 +220,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 
+
 	flag_generate_nlo_virt = conf.getBooleanProperty("generate_nlo_virt")
 	flag_generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	flag_generate_lo_diagrams = conf.getBooleanProperty("generate_lo_diagrams")
@@ -227,6 +229,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_draw_diagrams = conf.getProperty(golem.properties.pyxodraw)
 	flag_topolopy = True
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
+	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
@@ -358,7 +361,10 @@ def run_qgraf(conf, in_particles, out_particles):
 		write_qgraf_dat(path, dot_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [] ,2)
 		run_qgraf_dat(conf, output_name, log_name)
-		run_neato(path,output_name)
+		if flag_dot2tex:
+		  run_dot2tex(path,output_name)
+		else:
+		  run_neato(path,output_name)
 		
 		
 		#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
@@ -447,4 +453,18 @@ def run_neato(path,output_name):
   except:
     raise GolemConfigError("Error in generation of two-loop eps files")
   
-    
+  
+def run_dot2tex(path,output_name):
+  try:
+    subprocess.call('neato -Txdot -Gstart=2 -Gepsilon=0.00001 '+output_name+' -O',cwd=path,shell=True)
+    subprocess.call('for f in *.xdot;do dot2tex -ftikz --usepdflatex --figonly $f > $f.tikz; done;',cwd=path,shell=True)
+  except:
+    raise GolemConfigError("Could not run dot2tex")
+  try:
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.xdot '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.xdot')    
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.xdot.tikz '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.xdot.tikz')        
+    os.system('mkdir '+path+'/doc')
+    os.system('mv '+path+'/*.xdot* '+path+'/doc')
+  except:
+    raise GolemConfigError("Error in generation of two-loop eps files")
+  

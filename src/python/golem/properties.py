@@ -585,7 +585,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr",
-      "noderive","noformopt","reduze"])
+      "noderive","noformopt","reduze","dot2tex"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -1209,6 +1209,7 @@ def setInternals(conf):
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
    
    conf["__REDUZE__"] = "reduze" in extensions
+   conf["__dot2tex__"] = "dot2tex" in extensions
 
    conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
