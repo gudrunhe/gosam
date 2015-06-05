@@ -5,6 +5,9 @@
 #Write <`OUTPUT'> "   ! The version of Form used for code generation"
 #Write <`OUTPUT'> "   integer, parameter, dimension(2) :: formversion %"
 #Write <`OUTPUT'> "= (/`VERSION_', `SUBVERSION_'/)"
+[$ @if extension extraopt$]
+* if extraopt is active, Haggies is not used
+[$ @else $]
 #Write <`OUTPUT'> "   ! The version of haggies used for code generation"
 #Write <`OUTPUT'> "   integer, parameter, dimension(2) :: haggiesversion %"
 #Write <`OUTPUT'> "= (/[%%"
@@ -12,6 +15,7 @@
 #Write <`OUTPUT'> "format=\"%%s\" %%], [%%"
 #Write <`OUTPUT'> "     program.version match=\"[0-9]*\.([0-9])\" %"
 #Write <`OUTPUT'> "format=\"%%s\" %%]/)"
+[$ @end @if $]
 #Write <`OUTPUT'> "   ! The version of [$ golem.name
                          $] used for code generation"
 #Write <`OUTPUT'> "   integer, parameter, dimension(2) :: gosamversion %"

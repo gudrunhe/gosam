@@ -41,15 +41,19 @@
 		<file src="functions.out" class="Kinematics"/>
 		<file src="model.out" class="Model"/>
 
-		<file src="haggies-l0.in" class="Multi"/>
+		<file src="haggies-l0.in" class="Multi">
+			<except if-extension="extraopt" />
+		</file>
 
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
 				class="Integrals">
 			<only if-option="group" value="true"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l0-nogroup.out" dest="haggies-l0.out"
 				class="Kinematics">
 			<only if-option="group" value="false"/>
+			<except if-extension="formopt" />
 		</file>
 
 		<file src="haggies-l1.in" class="Multi">
@@ -66,12 +70,15 @@
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.in" class="Multi">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.out" class="Kinematics">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 
 		<file src="filter.py" class="Verbatim">
