@@ -21,6 +21,8 @@ import golem.util.constants as consts
 
 import golem.templates.xmltemplates
 
+from golem.util.find_libpaths import find_libraries
+
 from golem.util.path import golem_path, gosam_contrib_path
 from golem.util.tools import copy_file, \
 		debug, message, warning, \
@@ -179,6 +181,8 @@ def find_config_files():
 	Searches for configuration files in the default locations.
 	These are used to fill the fields of newly created input
 	files by preferred defaults.
+	Use "golem.util.find_libpaths.find_libraries()"
+	to find	external library paths.
 
 	The procedure looks in the following locations:
 		<golem path>
@@ -207,6 +211,12 @@ def find_config_files():
 				f = open(full_name, 'r')
 				props.load(f)
 				f.close()
+	libpaths = find_libraries()
+	for flag in libpaths:
+		if flag.startswith("+"):
+			props.setProperty(flag[1:], libpaths[flag])
+		else:
+			props.setProperty(flag, libpaths[flag])
 	return props
 
 def write_template_file(fname, defaults, format=None):
