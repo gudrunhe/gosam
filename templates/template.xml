@@ -183,6 +183,7 @@
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
+ 	   <file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
@@ -259,7 +260,7 @@
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
-			<file src="form.set" class="Kinematics"/>
+			<file src="../form.set" dest="form.set" class="Kinematics"/>
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
