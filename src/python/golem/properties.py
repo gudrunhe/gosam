@@ -237,6 +237,9 @@ ldflags_golem95 = Property("golem95.ldflags",
    """\
    LDFLAGS required to link golem95.
 
+   GoSam will try to determine the requred
+   flags automatically if not provided.
+
    Example:
    golem95.ldflags=-L/usr/local/lib/ -lgolem-gfortran-double
 
@@ -247,6 +250,9 @@ ldflags_golem95 = Property("golem95.ldflags",
 fcflags_golem95 = Property("golem95.fcflags",
    """\
    FCFLAGS required to compile with golem95.
+
+   GoSam will try to determine the requred
+   flags automatically if not provided.
 
    Example:
    golem95.fcflags=-I/usr/local/include/golem95
@@ -259,6 +265,9 @@ ldflags_samurai = Property("samurai.ldflags",
    """\
    LDFLAGS required to link samurai.
 
+   GoSam will try to determine the requred
+   flags automatically if not provided.
+
    Example:
    samurai.ldflags=-L/usr/local/lib/ -lsamurai-gfortran-double
 
@@ -269,6 +278,9 @@ ldflags_samurai = Property("samurai.ldflags",
 fcflags_samurai = Property("samurai.fcflags",
    """\
    FCFLAGS required to compile with samurai.
+
+   GoSam will try to determine the requred
+   flags automatically if not provided.
 
    Example:
    samurai.fcflags=-I/usr/local/include/samurai
@@ -292,6 +304,9 @@ ldflags_ninja = Property("ninja.ldflags",
    """\
    LDFLAGS required to link ninja.
 
+   GoSam will try to determine the requred
+   flags automatically if not provided.
+
    Example:
    ninja.ldflags=-L/usr/local/lib/ -lninja
 
@@ -302,6 +317,9 @@ ldflags_ninja = Property("ninja.ldflags",
 fcflags_ninja = Property("ninja.fcflags",
    """\
    FCFLAGS required to compile with ninja.
+
+   GoSam will try to determine the requred
+   flags automatically if not provided.
 
    Example:
    ninja.fcflags=-I/usr/local/include/ninja
