@@ -279,17 +279,16 @@ class Properties:
       for key in keys:
          self.setProperty(key, other.getProperty(key))
 
-   def copy(self, strip_plusses=False):
+   def copy(self):
       result = Properties()
       for key in self.propertyNames():
-         if key.startswith("+"):
-            result.setProperty(key[1:], self.getProperty(key))
-         else:
-            result.setProperty(key, self.getProperty(key))
+         result.setProperty(key, self.getProperty(key))
       return result
 
    def setProperty(self, key, value):
       name = str(key)
+      if name.startswith("+"):
+         self.setProperty(name[1:], value)
       if value.__class__ == list:
          self._map[name] = ",".join(map(str, value))
       else:
@@ -438,7 +437,7 @@ class Properties:
          if key.startswith("$"):
             dollar_variables.append( (key[1:], value) )
          else:
-            self._map[unescape(key)] = unescape(value)
+            self.setProperty(unescape(key), unescape(value))
          buf = ""
 
    def __getitem__(self, key):
@@ -466,6 +465,14 @@ class Properties:
 
    def _del(self, name):
       del self._map[name]
+      # keep plussed and unplussed entries consistent
+      if name.startwith("+"):
+         del self._map[name[1:]]
+      else:
+         try:
+            del self._map["+" + name]
+         except KeyError:
+            pass
 
    def activate_subconfig(self, no):
       changed={}

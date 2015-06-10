@@ -213,10 +213,7 @@ def find_config_files():
 				f.close()
 	libpaths = find_libraries()
 	for flag in libpaths:
-		if flag.startswith("+"):
-			props.setProperty(flag[1:], libpaths[flag])
-		else:
-			props.setProperty(flag, libpaths[flag])
+		props.setProperty(flag, libpaths[flag])
 	return props
 
 def write_template_file(fname, defaults, format=None):
@@ -331,11 +328,7 @@ def write_template_file(fname, defaults, format=None):
 
 	if format is None:
 		for prop in defaults:
-			if prop.startswith("+"):
-				value=defaults[prop]
-				newkey=prop[1:]
-				f.write("%s=%s\n" % (newkey, value))
-			elif prop.endswith(".extensions"):
+			if prop.startswith("+") or prop.endswith(".extensions"):
 				value=defaults[prop]
 				f.write("%s=%s\n" % (prop, value))
 	elif format == "LaTeX":
