@@ -29,8 +29,6 @@ if not options.input:
 
 modelfile = open('model.f90', 'w')
 
-abb_max=getdata('model.dat')['number_abbs']
-
 #print "--------------------"
 
 outdict=translatefile(options.input,config)
@@ -1222,9 +1220,7 @@ modelfile.write("   subroutine     init_functions()\n")
 modelfile.write("      implicit none\n")
 modelfile.write("      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
 modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
-modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
-if abb_max != '0':
-   modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$
+modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
