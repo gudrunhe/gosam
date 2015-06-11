@@ -15,12 +15,12 @@ FORM_OPT=\
 	-D OUTFILE=color \
 	-D CREATETT=1
 
-source: color.f90 color.dat model.f90 version.f90
+source: color.f90 model.f90 version.f90
 
 
 [% 
 @if extension extraopt%]
-color.f90 color.dat: color.txt
+color.f90: color.txt
 	@echo Python is generating color.f90 
 	@$(PYTHON) ../codegen/buildcolor.py -i color.txt
 [%@else %]
