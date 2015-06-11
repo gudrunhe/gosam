@@ -44,7 +44,8 @@ modelfile.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
 modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 @end @if $]
 modelfile.write(', &\n')
-modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
+modelfile.write('   & renormalisation, reduction_interoperation, &\n')
+modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
@@ -58,8 +59,9 @@ modelfile.write('   private :: ki\n')[$
 modelfile.write('   private :: samurai_scalar, samurai_verbosity, samurai_test\n')
 modelfile.write('   private :: samurai_group_numerators, samurai_istop\n')[$
 @end @if $]
-modelfile.write('   private :: renormalisation, reduction_interoperation, deltaOS\n')
-modelfile.write('   private :: nlo_prefactors\n')
+modelfile.write('   private :: renormalisation, reduction_interoperation\n')
+modelfile.write('   private :: reduction_interoperation_rescue\n')
+modelfile.write('   private :: deltaOS, nlo_prefactors\n')
 modelfile.write('\n')
 modelfile.write('   real(ki), parameter :: sqrt2 = &\n')
 modelfile.write('      &1.414213562373095048801688724209698078&\n')
@@ -171,9 +173,20 @@ modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", 
 modelfile.write("   else if(reduction_interoperation.eq.1) then\n")
 modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"GOLEM95\"\n")
 modelfile.write("   else if(reduction_interoperation.eq.2) then\n")
-modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"SAMURAI+GOLEM95\"\n")
-modelfile.write("   else if(reduction_interoperation.eq.31) then\n")
-modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"NINJA\"\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"NINJA\"\n")
+modelfile.write("   else if(reduction_interoperation.eq.3) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"PJFRY\"\n")
+modelfile.write("   end if\n")
+modelfile.write("   if(reduction_interoperation_rescue.ne.reduction_interoperation) then\n")
+modelfile.write("      if(reduction_interoperation_rescue.eq.0) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"SAMURAI\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.1) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"GOLEM95\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.2) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A15)') \"#\", \"    --> rescue \", \"NINJA\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.3) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A5)') \"#\", \"    --> rescue \", \"PJFRY\"\n")
+modelfile.write("      end if\n")
 modelfile.write("   end if\n")
 [$ @if ewchoose $]
 modelfile.write("    write(unit,'(A1,1x,A11,I2)') \"#\", \"ewchoice = \", ewchoice\n")[$

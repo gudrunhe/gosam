@@ -6,7 +6,8 @@ $]module     [$ process_name asprefix=\_ $]model
    & samurai_scalar, samurai_verbosity, samurai_test, &
    & samurai_group_numerators, samurai_istop[$
 @end @if $], &
-   & renormalisation, reduction_interoperation, deltaOS, &
+   & renormalisation, reduction_interoperation, &
+   & reduction_interoperation_rescue, deltaOS, &
    & nlo_prefactors, convert_to_cdr[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $], ewchoice[$
@@ -18,8 +19,9 @@ $]module     [$ process_name asprefix=\_ $]model
    private :: samurai_scalar, samurai_verbosity, samurai_test
    private :: samurai_group_numerators, samurai_istop[$
 @end @if $]
-   private :: renormalisation, reduction_interoperation, deltaOS
-   private :: nlo_prefactors
+   private :: renormalisation, reduction_interoperation
+   private :: reduction_interoperation_rescue
+   private :: deltaOS, nlo_prefactors
 
    real(ki), parameter :: sqrt2 = &
       &1.414213562373095048801688724209698078&
@@ -128,6 +130,19 @@ contains
       write(unit,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
       write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "NINJA"
+   else if(reduction_interoperation.eq.3) then
+      write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "PJFRY"
+   end if
+   if(reduction_interoperation_rescue.ne.reduction_interoperation) then
+      if(reduction_interoperation_rescue.eq.0) then
+         write(unit,'(A1,1x,A15,A7)') "#", "    --> rescue ", "SAMURAI"
+      else if(reduction_interoperation_rescue.eq.1) then
+         write(unit,'(A1,1x,A15,A7)') "#", "    --> rescue ", "GOLEM95"
+      else if(reduction_interoperation_rescue.eq.2) then
+         write(unit,'(A1,1x,A15,A15)') "#", "    --> rescue ", "NINJA"
+      else if(reduction_interoperation_rescue.eq.3) then
+         write(unit,'(A1,1x,A15,A15)') "#", "    --> rescue ", "PJFRY"
+      end if
    end if[$
 @if ewchoose $]
     write(unit,'(A1,1x,A11,I2)') "#", "ewchoice = ", ewchoice[$
