@@ -466,7 +466,7 @@ class Properties:
    def _del(self, name):
       del self._map[name]
       # keep plussed and unplussed entries consistent
-      if name.startwith("+"):
+      if name.startswith("+"):
          del self._map[name[1:]]
       else:
          try:
