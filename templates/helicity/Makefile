@@ -142,7 +142,7 @@ GENERATED_SRC=[%
 .PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
 .SUFFIXES:
 
-TEMPFILE:=$(shell mktemp -u -t gosam.tempfile.XXXXXX)
+TEMPFILE:=$(shell mktemp -u -t gosam.tempfile.XXXXXX || echo gosam.tempfile.tmp)
 
 [% @if diagsum 
 %]convert:
