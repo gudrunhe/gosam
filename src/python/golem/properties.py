@@ -501,17 +501,19 @@ python_bin = Property("python.bin",
 
 formopt_level = Property("formopt.level",
    """\
-   There are three levels of Horner Scheme
-   offered and the number here will specify
-   which one we use. It can only be 1,2 or 3.
+   Form offers three levels of Horner Scheme
+   and the number here will specify which one
+   we use. Possible values are 1,2 or 3.
+
+   When the code generation seems to hang in
+   an optimization, try the formopt.level=1.
 
    Examples:
    formopt.level=3
 
    """,
    str,
-   "2",
-   experimental=True)
+   "2")
 
 regularisation_scheme = Property("regularisation_scheme",
       """\
@@ -763,13 +765,16 @@ abbrev_limit = Property("abbrev.limit",
 abbrev_level = Property("abbrev.level",
    """\
    The level at which abbreviations are generated. The value should be
-   one of (with the default formopt extension, only diagram is supported):
+   one of:
       helicity       generates files helicity<X>/abbrevh<X>.f90
       group          generates files helicity<X>/abbrevg<G>h<X>.f90
       diagram        generates files helicity<X>/abbrevd<D>h<X>.f90
+
+   With the default formopt extension, diagram is fully supported
+   while helicity is experimental.
    """,
    str, "diagram",
-   options=["helicity", "group", "diagram"], hidden=True)
+   options=["helicity", "group", "diagram"], experimental=True)
 
 r2 = Property("r2",
    """\

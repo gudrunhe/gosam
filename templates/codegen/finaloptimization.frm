@@ -45,8 +45,12 @@ CF Wrapper;[%
   Vector Q, p1;                                                                                                                                              
   Vector qshift;                                                                                                                                             
   CFunction fshift;
-[%@end @if %]
-CF abb`DIAG';
+[%@end @if %][%
+@select abbrev.level @case diagram %]
+CF abb`DIAG';[%
+@case helicity %]
+CF abb;[%
+@end @select %]
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%

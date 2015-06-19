@@ -109,6 +109,18 @@ TXT_VIRT=[%
 	d[%$_%]h[%helicity%]l1.abb[%
    @end @for %][%
 @end @select %]
+
+# Files with unoptimized, EXPanded 1Loop diagram expressions
+EXP_VIRT=[%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.exp[%
+   @end @for %]
+
+PRC_VIRT=[%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.prc[%
+   @end @for %]
+
 ABB_VIRT=[%
    @select abbrev.level
    @case helicity %]abbrevh[%helicity%].f90[%
@@ -241,11 +253,22 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 @end @if %]
 
 [% @if extension formopt %][% 
-@if generate_nlo_virt %][%
+@if generate_nlo_virt %][% @select abbrev.level @case helicity %]
+abbrevh[%helicity%].txt $(PRC_VIRT): $(EXP_VIRT)
+	@echo Form is optimizing loop diagrams @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		../codegen/loopdiagramopt.frm
+abbrevh[%helicity%].f90: abbrevh[%helicity%].txt
+	@echo Python is processing loop diagram abbreviations @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran.py \
+		-i $< \
+		--NODIAG \
+		--HELICITY=[%helicity%][%
+@end @select %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
+d[%$_%]h[%helicity%]l1.txt[% @select abbrev.level @case helicity %] d[%$_%]h[%helicity%]l1.exp[% @end @select %]: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)[%
@@ -269,7 +292,10 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
 			@end @if %] \
-		../codegen/golem.frm
+		../codegen/golem.frm[% 
+	@select abbrev.level @case helicity %]
+d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.prc[%
+	@end @select %]
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
@@ -278,8 +304,7 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 			@if internal DERIVATIVES_AT_ZERO %] \
 		-D DERIVATIVESATZERO=1[%
 			@end @if %] \
-		../codegen/finaloptimization.frm[%
-	   @select abbrev.level @case diagram %]
+		../codegen/finaloptimization.frm
 	@touch d[%$_%]h[%helicity%]l1-stamp
 d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt
 d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
@@ -290,7 +315,10 @@ d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-st
 		--GROUP=[%grp%]  \
 		--HELICITY=[%helicity%] \
 		--QSIGN=[% sign %] \
-		--QSHIFT=[%shift%]
+		--QSHIFT=[%shift%][%
+			@select abbrev.level @case helicity %] \
+		--NOABB[%
+			@end @select %]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
 @if internal GENERATE_DERIVATIVES %] 
 d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
@@ -434,7 +462,6 @@ d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %]

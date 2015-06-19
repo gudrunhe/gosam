@@ -56,7 +56,9 @@ AutoDeclare Symbols abb`DIAG'n;
 
 
 [% 
-@if extension formopt %]
+@if extension formopt %][%
+@select abbrev.level
+@case diagram %]
 #Procedure OptimizeCode(R2PREFACTOR)
 
 Local tot`DIAG'=CC*diagram`DIAG'+R2*d`DIAG'R2;
@@ -130,6 +132,37 @@ L redR2`DIAG' = tot`DIAG'*replace_(CC,0,R2,1);
 #EndIf
 .sort
 Format Normal;
-#write <`OUTFILE'.prc> "L diagram`DIAG'  = %e",redCC`DIAG';
+#write <`OUTFILE'.prc> "L diagram`DIAG'  = %e",redCC`DIAG';[%
+@case helicity %]
+
+#Procedure WriteUnoptimized(R2PREFACTOR)
+
+Id Q.Q = QspQ;[%
+@for particles %]
+Id Q.k[%index%] = Qspk[%index%];[%
+@if is_massive %]
+Id Q.l[%index%] = Qspl[%index%];[%
+@end @if %][%
+@end @for %][%
+@if internal NUMPOLVEC %][%
+@for particles lightlike vector %]
+Id Q.e[%index%] = Qspe[%index%];[%
+@end @for %][%
+@end @if %]
+.sort
+Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
+.sort
+
+#If "`R2PREFACTOR'" != "1"
+#Write <`OUTFILE'.exp> "L R2d`DIAG' = `R2PREFACTOR' *(%E);", d`DIAG'R2
+#write <`OUTFILE'.exp> ""
+#Else
+#Write <`OUTFILE'.exp> "L R2d`DIAG' = %E;", d`DIAG'R2
+#write <`OUTFILE'.exp> ""
+#EndIf
+
+#write <`OUTFILE'.exp> "L diagram`DIAG'  = %e",diagram`DIAG';[%
+@end @select %]
+
 #EndProcedure[%
 @end @if %]
