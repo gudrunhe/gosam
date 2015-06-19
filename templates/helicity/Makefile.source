@@ -254,7 +254,7 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 
 [% @if extension formopt %][% 
 @if generate_nlo_virt %][% @select abbrev.level @case helicity %]
-abbrevh[%helicity%].txt $(PRC_VIRT): $(EXP_VIRT)
+abbrevh[%helicity%].txt: $(EXP_VIRT)
 	@echo Form is optimizing loop diagrams @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		../codegen/loopdiagramopt.frm
@@ -264,11 +264,14 @@ abbrevh[%helicity%].f90: abbrevh[%helicity%].txt
 		-i $< \
 		--NODIAG \
 		--HELICITY=[%helicity%][%
+   @for elements topolopy.keep.virt %]
+d[%$_%]h[%helicity %]l1.txt: abbrevh[%helicity%].txt[%
+   @end @for %][%
 @end @select %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]h[%helicity%]l1.txt[% @select abbrev.level @case helicity %] d[%$_%]h[%helicity%]l1.exp[% @end @select %]: ../diagrams-1.hh
+[% @select abbrev.level @case helicity %] d[%$_%]h[%helicity%]l1.exp[% @case diagram %]d[%$_%]h[%helicity%]l1.txt[% @end @select %]: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)[%
@@ -294,7 +297,7 @@ d[%$_%]h[%helicity%]l1.txt[% @select abbrev.level @case helicity %] d[%$_%]h[%he
 			@end @if %] \
 		../codegen/golem.frm[% 
 	@select abbrev.level @case helicity %]
-d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.prc[%
+d[%$_%]h[%helicity%]l1-stamp: abbrevh[%helicity%].txt[%
 	@end @select %]
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \

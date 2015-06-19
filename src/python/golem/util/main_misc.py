@@ -619,11 +619,11 @@ def workflow(conf):
 		raise GolemConfigError(
 			"The ninja reduction method is only supported with formopt.\n" +
 			"Please either remove noformopt or ninja in the input card\n")
-		if conf['abbrev.level'] == 'helicity':
-			raise GolemConfigError(
-				"The ninja reduction method is only supported with\n" +
-				"abbrev.level=diagram. Please either remove ninja \n" +
-            "or set abbrev.level=diagram in the input card\n")
+	if 'ninja' in ext and conf['abbrev.level'] == 'helicity':
+		raise GolemConfigError(
+			"The ninja reduction method is only supported with\n" +
+			"abbrev.level=diagram. Please either remove ninja \n" +
+         "or set abbrev.level=diagram in the input card\n")
 
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()

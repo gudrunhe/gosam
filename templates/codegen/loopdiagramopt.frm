@@ -15,7 +15,7 @@ off statistics;
 S Nfrat; 
 
 * scalar products with loop momentum Q
-Autodeclare Symbol Q;
+Autodeclare Symbol Q, sp;
 
 .sort
 
