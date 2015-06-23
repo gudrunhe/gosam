@@ -268,10 +268,6 @@
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
-			<file src="diagramsl0fr5.f90" class="Multi">
-				<only if-internal="REQUIRE_FR5"/>
-				<only if-option="group" value="false"/>
-			</file>
 			<file src="diagramsl1.hh" class="Integrals">
 				<only if-option="abbrev.level" value="helicity" />
 			</file>

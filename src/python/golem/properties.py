@@ -898,17 +898,6 @@ config_renorm_mqwf = Property("renorm_mqwf",
    """,
    bool, True)
 
-config_renorm_gamma5 = Property("renorm_gamma5",
-   """\
-   Sets the same variable in config.f90
-
-   Activates finite renormalisation for axial couplings in the
-   't Hooft-Veltman scheme
-
-   QCD only, works only with built-in model files.
-   """,
-   bool, True)
-
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
@@ -1168,7 +1157,6 @@ properties = [
    config_renorm_decoupling,
    config_renorm_mqse,
    config_renorm_logs,
-   config_renorm_gamma5,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,
@@ -1252,7 +1240,6 @@ def setInternals(conf):
          "__DERIVATIVES_AT_ZERO__",
          "__REGULARIZATION_DRED__",
          "__REGULARIZATION_HV__",
-         "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
@@ -1296,7 +1283,3 @@ def setInternals(conf):
    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
    if not "__OLP_MODE__" in conf:
       conf["__OLP_MODE__"] =  False
-
-   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-   #    and "no-fr5" not in extensions
-   conf["__REQUIRE_FR5__"]  = False

@@ -29,9 +29,6 @@ off statistics;
 @end @for %][%
 @if extension dred %]
 #Define DRED "defined"[%
-@end @if %][%
-@if internal REQUIRE_FR5 %]
-#Define FR5 "defined"[%
 @end @if %]
 
 #Define EXTRAPAT "EXSYM"[%

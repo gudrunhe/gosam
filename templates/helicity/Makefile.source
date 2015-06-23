@@ -47,15 +47,6 @@ DIAGRAMS_TREE=[%
 	@end @for %][%
 @end @if %]
 
-DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
-@if group %][%
-@else %][% 
-	@for elements topolopy.keep.tree %] \
-		d[%$_%]h[%helicity%]l0fr5.f90[%
-	@end @for %][%
-@end @if %][%
-@end @if %]
-
 TXT_TREE=[%
 @if group %][%
    @for elements topolopy.keep.tree %] \
@@ -65,22 +56,9 @@ TXT_TREE=[%
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %]
 
-TXT_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
-@if group %][%
-   @for elements topolopy.keep.tree %] \
-		d[%$_%]h[%helicity%]l0-fr.txt[%
-   @end @for %][%
-@else %] \
-   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
-@end @if %][%
-@end @if %]
-
 [% @if generate_lo_diagrams %]
 SOURCE_TREE= \
-	diagramsl0.f90 $(DIAGRAMS_TREE)[%
-   @if internal REQUIRE_FR5 %] \
-	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
-   @end @if %]
+	diagramsl0.f90 $(DIAGRAMS_TREE)
 [% @else %]
 SOURCE_TREE=
 [% @end @if %]
@@ -204,9 +182,6 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D DIAG=[%$_%] \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm[%
-   @if internal REQUIRE_FR5 %]
-d[%$_%]h[%helicity%]l0-fr.txt: d[%$_%]h[%helicity%]l0.txt[%
-	@end @if %][%
 	@if group %][%
 	@else %]
 d[%$_%]h[%helicity%]l0.f90: d[%$_%]h[%helicity%]l0.txt
@@ -218,17 +193,6 @@ d[%$_%]h[%helicity%]l0.f90: d[%$_%]h[%helicity%]l0.txt
 			d[%$_%]h[%helicity%]l0.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ $<[%
-      @if internal REQUIRE_FR5 %]
-d[%$_%]h[%helicity%]l0fr5.f90: d[%$_%]h[%helicity%]l0-fr.txt
-	@echo Haggies is processing tree diagram [%$_%] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/haggies-l0.in \
-		-t ../codegen/haggies-l0.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]h[%helicity%]l0.dat \
-			| sed 's/extraysymbols=//')) \
-		-o $@ $<[%
-      @end @if internal REQUIRE_FR5 %][%
    @end @if %][%
 @end @for %][%
 	
@@ -240,15 +204,6 @@ diagramsl0.f90: $(TXT_TREE)
 		-t ../codegen/haggies-l0.out \
 		-D helicity=[%helicity%] -D "modsuffix=" \
 		-o $@ $+[%
-   @if internal REQUIRE_FR5 %]
-diagramsl0fr5.f90: $(TXT_TREE_FR5)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-l0.in \
-		-t ../codegen/haggies-l0.out \
-		-D helicity=[%helicity%] -D modsuffix=fr5 \
-		-o $@ $+[%
-   @end @if %][%
 @end @if %][%
 @end @if %]
 
