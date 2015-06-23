@@ -417,9 +417,8 @@ contains
       @end @select %]
       end if
 
-      call init_event(vecs)
-
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
+         call init_event(vecs)
          write(logfile,'(A7)') "<event>"
          call inspect_kinematics(logfile)
       end if
@@ -858,8 +857,6 @@ contains
       else
          eval_heli(:) = .true.
       end if
-
-      call init_event(vecs)
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
