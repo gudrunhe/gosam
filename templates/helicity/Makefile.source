@@ -208,7 +208,10 @@ diagramsl0.f90: $(TXT_TREE)
 @end @if %]
 
 [% @if extension formopt %][% 
-@if generate_nlo_virt %][% @select abbrev.level @case helicity %]
+@if generate_nlo_virt %][%
+@for elements topolopy.keep.virt %][%
+   @select abbrev.level @case helicity %][%
+      @if is_first %]
 abbrevh[%helicity%].txt: $(EXP_VIRT)
 	@echo Form is optimizing loop diagrams @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -219,10 +222,10 @@ abbrevh[%helicity%].f90: abbrevh[%helicity%].txt
 		-i $< \
 		--NODIAG \
 		--HELICITY=[%helicity%][%
-   @for elements topolopy.keep.virt %]
+      @end @if %]
 d[%$_%]h[%helicity %]l1.txt: abbrevh[%helicity%].txt[%
-   @end @for %][%
-@end @select %][%
+   @end @select %][%
+@end @for %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
