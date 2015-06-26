@@ -35,12 +35,8 @@ S sDUMMY1;[%
   Vector Q, p1;                                                                                                                                              
   Vector qshift;                                                                                                                                             
   CFunction fshift;
-[%@end @if %][%
-@select abbrev.level @case diagram %]
-CF abb`DIAG';[%
-@case helicity %]
-CF abb;[%
-@end @select %];
+[%@end @if %]
+CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%
@@ -149,12 +145,8 @@ Id d(iDUMMY1?) = 0;
 #IfDef `DERIVATIVESATZERO'
    Id Q = 0;
 #EndIf
-Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);[%
-@select abbrev.level @case diagram %]
-Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);[%
-@case helicity %]
-Id abb(sDUMMY1?) = Wrapper(abb,sDUMMY1);[%
-@end @select %];
+Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);
+Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
 Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
 Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
 .sort

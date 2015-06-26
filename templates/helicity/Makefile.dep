@@ -20,10 +20,7 @@ abbrevh[%helicity%].[%O%]: globals.[%O%][%
 	      @select r2
 			@case implicit explicit off %][%
             @for elements topolopy.keep.virt %]
-d[%$_%]h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][% 
-	      		@if internal GENERATE_DERIVATIVES %]
-d[%$_%]h[%helicity%]l1d.[%O%]: abbrevh[%helicity%].[%O%][%
-		         @end @if %][%
+d[%$_%]h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][%
             @end @for %][%
 			@end @select %][%
       @case group %][%

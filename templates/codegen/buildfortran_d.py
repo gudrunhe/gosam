@@ -100,14 +100,6 @@ for irank in range(0,rank+1):
 		acdmax = 1
 	acd_maxl.append(acdmax)
 
-# Q independent abbreviations are written in:
-noQabbrev_modulename = [%
-	@select abbrev.level
-		@case diagram
-	%]'abbrevd'+diag+'h'+heli[%
-		@case helicity
-	%]'abbrevh'+heli[%
-	@end @select %]
 
 # Write abbreviation file
 
@@ -141,7 +133,7 @@ for irank in range(1,rank+2):
 	f90file.write('      use [% process_name asprefix=\_ %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]'+noQabbrev_modulename+'\n')
+	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
 	f90file.write('      implicit none \n')
 	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -169,7 +161,7 @@ dstring=dstring.rstrip(',') + ')' + ' result(numerator)\n'
 f90file.write(dstring)
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]'+noQabbrev_modulename+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
 f90file.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]

@@ -619,17 +619,12 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @if extension formopt %][%
 @select r2 
 @case explicit %]
-#If `LOOPS' == 1[%
-   @select abbrev.level
-     @case diagram %]
-   #Create <`OUTFILE'.dat>
+#If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
    #Call  OptimizeCode(`R2PREFACTOR')
    #Close <`OUTFILE'.txt>
-   #Close <`OUTFILE'.dat>[%
-     @case helicity %]
-   #Call WriteUnoptimized(`R2PREFACTOR')[%
-   @end @select %]
+   #Close <`OUTFILE'.dat>
 #Else
    #If `BORNFLG' == 1
 	#Create <borndiag.prc>
@@ -653,17 +648,12 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #EndIf
 .end[%
 @case implicit %]
-#If `LOOPS' == 1[%
-   @select abbrev.level
-     @case diagram %]
-   #Create <`OUTFILE'.dat>
+#If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
+   #Create <`OUTFILE'.dat>
    #Call  OptimizeCode(0)
    #Close <`OUTFILE'.txt>
-   #Close <`OUTFILE'.dat>[%
-     @case helicity %]
-   #Call WriteUnoptimized(0)[%
-   @end @select %]
+   #Close <`OUTFILE'.dat>
 #Else
    #If `BORNFLG' == 1
 	#Create <borndiag.prc>

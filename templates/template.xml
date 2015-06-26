@@ -108,10 +108,6 @@
 		<file src="finaloptimization.frm" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
-		<file src="loopdiagramopt.frm" class="Kinematics">
-			<only if-extension="formopt" />
-			<only if-option="abbrev.level" value="helicity" />
-		</file>
 		<file src="ninjafinalopt.frm" class="Kinematics">
 			<only if-extension="ninja" />
 		</file>
@@ -267,9 +263,6 @@
 			<file src="../form.set" dest="form.set" class="Kinematics"/>
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
-			</file>
-			<file src="diagramsl1.hh" class="Integrals">
-				<only if-option="abbrev.level" value="helicity" />
 			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"
 				class="Integrals">

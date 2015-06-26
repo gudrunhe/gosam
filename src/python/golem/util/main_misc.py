@@ -612,18 +612,13 @@ def workflow(conf):
 		if 'r2_only' in ext:
 			raise GolemConfigError(
 						"r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
-		if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] != "helicity":
+		if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
 			raise GolemConfigError(
-						"formopt only supported with abbrev.level=diagram or (experimental!) abbrev.level=helicity\n")
+						"formopt only supported with abbrev.level=diagram\n")
 	if ('ninja' in ext) and ('formopt' not in ext):
 		raise GolemConfigError(
 			"The ninja reduction method is only supported with formopt.\n" +
 			"Please either remove noformopt or ninja in the input card\n")
-	if 'ninja' in ext and conf['abbrev.level'] == 'helicity':
-		raise GolemConfigError(
-			"The ninja reduction method is only supported with\n" +
-			"abbrev.level=diagram. Please either remove ninja \n" +
-         "or set abbrev.level=diagram in the input card\n")
 
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
