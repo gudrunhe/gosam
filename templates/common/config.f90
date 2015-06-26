@@ -163,12 +163,6 @@
              true=.true.
              false=.false. %]
 
-   ! include finite renormalisation of gamma_5
-   logical :: renorm_gamma5 = [% renorm_gamma5
-             convert=bool
-             true=.true.
-             false=.false. %]
-
    ! Switch mass counter terms for massive quarks on or off
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off

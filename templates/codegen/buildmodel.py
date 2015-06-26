@@ -29,8 +29,6 @@ if not options.input:
 
 modelfile = open('model.f90', 'w')
 
-abb_max=getdata('model.dat')['number_abbs']
-
 #print "--------------------"
 
 outdict=translatefile(options.input,config)
@@ -44,7 +42,8 @@ modelfile.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
 modelfile.write('   & samurai_group_numerators, samurai_istop')[$
 @end @if $]
 modelfile.write(', &\n')
-modelfile.write('   & renormalisation, reduction_interoperation, deltaOS, &\n')
+modelfile.write('   & renormalisation, reduction_interoperation, &\n')
+modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
@@ -58,8 +57,9 @@ modelfile.write('   private :: ki\n')[$
 modelfile.write('   private :: samurai_scalar, samurai_verbosity, samurai_test\n')
 modelfile.write('   private :: samurai_group_numerators, samurai_istop\n')[$
 @end @if $]
-modelfile.write('   private :: renormalisation, reduction_interoperation, deltaOS\n')
-modelfile.write('   private :: nlo_prefactors\n')
+modelfile.write('   private :: renormalisation, reduction_interoperation\n')
+modelfile.write('   private :: reduction_interoperation_rescue\n')
+modelfile.write('   private :: deltaOS, nlo_prefactors\n')
 modelfile.write('\n')
 modelfile.write('   real(ki), parameter :: sqrt2 = &\n')
 modelfile.write('      &1.414213562373095048801688724209698078&\n')
@@ -171,9 +171,20 @@ modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", 
 modelfile.write("   else if(reduction_interoperation.eq.1) then\n")
 modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"GOLEM95\"\n")
 modelfile.write("   else if(reduction_interoperation.eq.2) then\n")
-modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"SAMURAI+GOLEM95\"\n")
-modelfile.write("   else if(reduction_interoperation.eq.31) then\n")
-modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"NINJA\"\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"NINJA\"\n")
+modelfile.write("   else if(reduction_interoperation.eq.3) then\n")
+modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"PJFRY\"\n")
+modelfile.write("   end if\n")
+modelfile.write("   if(reduction_interoperation_rescue.ne.reduction_interoperation) then\n")
+modelfile.write("      if(reduction_interoperation_rescue.eq.0) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"SAMURAI\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.1) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"GOLEM95\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.2) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A15)') \"#\", \"    --> rescue \", \"NINJA\"\n")
+modelfile.write("      else if(reduction_interoperation_rescue.eq.3) then\n")
+modelfile.write("         write(unit,'(A1,1x,A15,A5)') \"#\", \"    --> rescue \", \"PJFRY\"\n")
+modelfile.write("      end if\n")
 modelfile.write("   end if\n")
 [$ @if ewchoose $]
 modelfile.write("    write(unit,'(A1,1x,A11,I2)') \"#\", \"ewchoice = \", ewchoice\n")[$
@@ -1209,9 +1220,7 @@ modelfile.write("   subroutine     init_functions()\n")
 modelfile.write("      implicit none\n")
 modelfile.write("      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
 modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
-modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")
-if abb_max != '0':
-   modelfile.write('      real(ki), dimension(%s) :: mabb\n' % abb_max)[$
+modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
 @if ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
@@ -1435,11 +1444,17 @@ modelfile.write("      ! mW, sw --> mZ\n")
 modelfile.write("        mZ = sqrt(mW*mW-i_*mW*wW) / sqrt(1.0_ki-sw*sw)\n")
 modelfile.write("        case(5)\n")
 modelfile.write("      ! GF, mZ, alpha --> mW\n")
-modelfile.write("      mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&\n")
+modelfile.write("        mW = sqrt((mZ*mZ-i_*mZ*wZ)/2.0_ki+sqrt((mZ*mZ-i_*mZ*wZ)**2/4.0_ki-pi*alpha*(mZ*mZ-i_*mZ*wZ)/&\n")
 modelfile.write("     & sqrt(2.0_ki)/GF))\n")
 modelfile.write("      ! mW, mZ --> sw\n")
-modelfile.write("      sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
-modelfile.write("  end select\n")
+modelfile.write("        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
+modelfile.write("        case(6)\n")
+modelfile.write("      ! mW, mZ --> sw\n")
+modelfile.write("        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
+modelfile.write("        case(7)\n")
+modelfile.write("      ! mZ, sw --> mW\n")
+modelfile.write("        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)\n")
+modelfile.write("  end select\n")\n")
 modelfile.write("  end subroutine\n")[$
 @end @if$]
 modelfile.write("!---#] EW scheme choice:\n")[$

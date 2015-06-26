@@ -41,15 +41,19 @@
 		<file src="functions.out" class="Kinematics"/>
 		<file src="model.out" class="Model"/>
 
-		<file src="haggies-l0.in" class="Multi"/>
+		<file src="haggies-l0.in" class="Multi">
+			<except if-extension="extraopt" />
+		</file>
 
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
 				class="Integrals">
 			<only if-option="group" value="true"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l0-nogroup.out" dest="haggies-l0.out"
 				class="Kinematics">
 			<only if-option="group" value="false"/>
+			<except if-extension="formopt" />
 		</file>
 
 		<file src="haggies-l1.in" class="Multi">
@@ -66,12 +70,15 @@
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.in" class="Multi">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.out" class="Kinematics">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 
 		<file src="filter.py" class="Verbatim">
@@ -176,6 +183,7 @@
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
+ 	   <file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
@@ -252,12 +260,8 @@
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
-			<file src="form.set" class="Kinematics"/>
+			<file src="../form.set" dest="form.set" class="Kinematics"/>
 			<file src="diagramsl0.f90" class="Multi">
-				<only if-option="group" value="false"/>
-			</file>
-			<file src="diagramsl0fr5.f90" class="Multi">
-				<only if-internal="REQUIRE_FR5"/>
 				<only if-option="group" value="false"/>
 			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"

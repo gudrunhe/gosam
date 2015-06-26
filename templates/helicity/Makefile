@@ -41,15 +41,6 @@ OBJECTS= \
 	d[%$_%]h[%helicity%]l0.o[%
       @end @for %][%
    @end @if %][%
-   @if internal REQUIRE_FR5 %] \
-	   diagramsl0fr5.o[%
-      @if group %][%
-		@else %][%
-         @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.o[%
-         @end @for %][%
-      @end @if %][%
-   @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
@@ -93,15 +84,6 @@ GENERATED_SRC=[%
       @for elements topolopy.keep.tree %] \
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
-   @end @if %][%
-   @if internal REQUIRE_FR5 %][%
-      @if group %] \
-	   diagramsl0fr5.f90[%
-      @else %][% 
-         @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.f90[%
-         @end @for %][%
-      @end @if %][%
    @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%

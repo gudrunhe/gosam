@@ -25,8 +25,8 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
          "writes configuration templates instead of processing them"),
       ('p', "profile",
          "generates profiling information in the process directory's 'pstats'"),
-      ('N', "no-defaults",
-         "do not try to find configuration files in the default locations"),
+      ('D', "defaults",
+         "include system specific paths when creating a new template"),
       ('f', "format=",
          "use specified format for template file"),
       ('m', "merge=",
@@ -36,7 +36,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
    ]
 
 generate_templates = False
-use_default_files = True
+use_default_files = False
 template_format = None
 generate_profile = False
 from_scratch = False
@@ -59,8 +59,8 @@ def arg_handler(name, value=None):
    if name == "profile":
       generate_profile = True
       return True
-   if name == "no-defaults":
-      use_default_files = False
+   if name == "defaults":
+      use_default_files = True
       return True
    if name == "format":
       if value in ["LaTeX"]:
@@ -91,8 +91,8 @@ def main(argv=sys.argv):
                            instead of processing them
    -m, --merge=<ARG>    -- when producing template files, merges the contents
                            of that file into the template
-   -N, --no-defaults    -- do not use a default configuration file
-                           when creating a new template
+   -D, --defaults       -- include your system's library paths when creating
+                           a new template
    -f, --format=<ARG>   -- use specified format when writing template files
    -z, --scratch        -- overwrite all files
    -i, --interactive    -- start an interactive interface
@@ -156,10 +156,9 @@ def main(argv=sys.argv):
       if merge_files:
          golem.util.tools.warning("Merge option only with --template usable.")
       for arg in args:
-         if use_default_files:
-            c = find_config_files()
-         else:
-            c = golem.util.config.Properties()
+         # need the full system configuration
+         # settings can be overridden in the input file
+         c = find_config_files()
 
          if os.path.exists(arg):
             if not os.path.isfile(arg):

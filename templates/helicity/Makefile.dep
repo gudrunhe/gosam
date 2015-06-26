@@ -11,12 +11,6 @@ diagramsl0.[%O%]:[%
          @for elements topolopy.keep.tree %] \
 	d[%$_%]h[%helicity%]l0.[%O%][%
          @end @for %][%
-         @if internal REQUIRE_FR5 %]
-diagramsl0fr5.[%O%]:[%
-            @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.[%O%][%
-            @end @for %][%
-	  @end @if %][%
 	 @end @if %][%
    @end @if generate_lo_diagrams %][%
    @if generate_nlo_virt %][%
@@ -102,8 +96,6 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
 		@end @select %][%
 	   @if generate_lo_diagrams %] \
 			diagramsl0.[%O%][%
-		   @if internal REQUIRE_FR5 %] diagramsl0fr5.[%O%][%
-			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
          @select abbrev.level
@@ -130,9 +122,6 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][%
    @for elements topolopy.keep.tree %]
 [% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod: d[%$_%]h[%helicity%]l0.[%O%][%
    @end @for %][%
-       @if internal REQUIRE_FR5 %]
-[% process_name asprefix=\_ %]diagramsh[% helicity %]l0fr5.mod: diagramsl0fr5.[%O%][%
-	@end @if %][%
    @end @if generate_lo_diagrams %][%
 	@select r2
 		@case implicit explicit off %][%
