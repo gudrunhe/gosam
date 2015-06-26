@@ -119,9 +119,74 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 
 [% 
 @if extension formopt %]
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
-born.txt: ../diagrams-0.hh[%
-@for elements topolopy.keep.tree %]
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[% 
+@if extension parallelborn %][%
+@for elements topolopy.keep.tree %][%
+@if is_first %][% @if is_last %]
+d[%$_%]h[%helicity%]l0.txt:
+	   @echo "* dummy file" > $@
+born.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=2 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch born-stamp[%
+@else %]
+d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt
+[%@end @if%][%
+@else %][%
+@if is_last %]
+d[%$_%]h[%helicity%]l0.txt:
+	@echo "* dummy file" > $@
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt
+born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
+	@cat $(TXT_TREE) > borndiag.prc
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=-1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch born-stamp[%
+@else %]
+d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=0 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
+@end @if %][% @end @if %][%
+@end @for %][%
+@else %][%
+@for elements topolopy.keep.tree %][%
+@if is_first %]
+born.txt: ../diagrams-0.hh[% @end @if %]
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
@@ -140,13 +205,16 @@ born.txt: ../diagrams-0.hh[%
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm[%
 @end @for %]
-	@touch born-stamp
+	@touch born-stamp[%
+@end @if%][%
+@for elements topolopy.keep.tree %][% @if is_last %]
 born-stamp: born.txt
 diagramsl0.f90: born.txt born-stamp
 	@echo Python is processing tree diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortranborn.py \
 		-i $< \
 		--HELICITY=[%helicity%][% 
+@end @if %][% @end @for %][%
 @else %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @select abbrev.level @case helicity %]

@@ -596,7 +596,8 @@ extensions = Property("extensions",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr","noderive","noformopt"])
+      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr","noderive","noformopt",
+      "parallelborn"])
 
 select_lo_diagrams = Property("select.lo",
    """\

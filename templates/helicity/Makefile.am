@@ -129,7 +129,7 @@ GENERATED_SRC=[%
 
 $(GENERATED_SRC): %: source
 
-TEMPFILE:=$(shell mktemp -u)
+TEMPFILE:=$(shell mktemp -u -t gosam.tempfile.XXXXXX || echo gosam.tempfile.tmp)
 
 source:
 [% @if diagsum %]
