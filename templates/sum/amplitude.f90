@@ -1,28 +1,25 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %]
+ %]module    [% process_name asprefix=\_ %]amplitude
    use [% process_name asprefix=\_ %]config, only: ki, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color, only: numcs[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
    @select r2
    @case implicit explicit off %]
    use [% process_name asprefix=\_ %]groups[%
       @if extension samurai %]
    use precision, only: ki_sam => ki
-   use [% process_name asprefix=\_ %]samuraih[% helicity %][%
+   use [% process_name asprefix=\_ %]samurai[%
       @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]golem95h[% helicity %][%
+   use [% process_name asprefix=\_ %]golem95[%
       @end @if %][%
       @if extension ninja %]
    use ninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]ninjah[% helicity %][%
+   use [% process_name asprefix=\_ %]ninja[%
       @end @if %][%
    @end @select %][%
-@end @if %][%
 @end @if %]
    [% @if internal CUSTOM_SPIN2_PROP
    %]use [% process_name asprefix=\_ %]custompropagator[% @end @if %]
@@ -44,11 +41,9 @@ contains
 @if generate_lo_diagrams %] amp0,[%
 @else %] col0,[%
 @end @if %]perm, use_perm, epspow
-      use [% process_name asprefix=\_ %]globalsh[%helicity%], &
+      use [% process_name asprefix=\_ %]globals, &
      & only: init_lo, rat2[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
    @select abbrev.level
    @case helicity %]
       use [% process_name asprefix=\_
@@ -57,20 +52,21 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%]h[%helicity%], only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%], only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%
       @for groups var=grp %]
       use [% process_name asprefix=\_
-      %]abbrevg[%grp%]h[%helicity%], only: init_abbrevg[%grp%] => init_abbrev[%
+      %]abbrevg[%grp%], only: init_abbrevg[%grp%] => init_abbrev[%
       @end @for %][%
    @end @select %][%
 @end @if %][%
-@end @if %][%
-@if generate_lo_diagrams %]
+@if generate_lo_diagrams %][%
+   @for helicities generated %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0, only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0, only: amplitudeh[%helicity%]l0 => amplitude[%
+   @end @for %][%
 @end @if %][%
 @select r2 @case only %][%
 @else %]
@@ -78,14 +74,14 @@ contains
 @end @select %][%
       @if generate_uv_counterterms %]
       use [% process_name asprefix=\_
-      %]diagramscth[%helicity%], only: samplitudect => samplitudect[%
+      %]diagramsct, only: samplitudect => samplitudect[%
       @end @if %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
       real(ki), intent(out) :: rational2[%
 @if generate_lo_diagrams %]
-      complex(ki), dimension(numcs), intent(in), optional :: opt_amp0[%
+      complex(ki), dimension(numcs,0:[%@for helicities generated%][%@if is_last%][%helicity%][%@end @if%][%@end @for%]), intent(in), optional :: opt_amp0[%
 @else %]
       integer, intent(in) :: the_col0[%
 @end @if %]
@@ -109,9 +105,11 @@ contains
       samplitude(:) = 0.0_ki[%
 @if generate_lo_diagrams %]
       if (present(opt_amp0)) then
-         amp0[% @if helsum %](:,[%helicity%])[%@end @if%] = opt_amp0
-      else
-         amp0[% @if helsum %](:,[%helicity%])[%@end @if%] = amplitudel0()
+         amp0 = opt_amp0
+      else[%
+         @for helicities generated %]
+         amp0(:,[%helicity%]) = amplitudeh[%helicity%]l0()[%
+         @end @for %]
       end if[%
 @else %]
       col0 = the_col0[%
@@ -126,8 +124,6 @@ contains
       rat2 = (0.0_ki, 0.0_ki)
       call init_lo()[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
 
    @select abbrev.level
    @case helicity %]
@@ -245,15 +241,12 @@ contains
    @end @if %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
-@end @if helsum %][%
 @end @if generate_nlo_virt %]
    end function samplitude
    !---#] function samplitude:[%
 @select r2
 @case implicit explicit off %][%
-   @for groups var=grp %][%
-@if helsum %][%
-@else %][% 'evaluate group only for sum' %]
+   @for groups var=grp %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]config, only: &
@@ -262,8 +255,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    use parametre, only: mu2_scale_par
    use form_factor_type, only: form_factor
-   use [% process_name asprefix=\_ %]golem95h[% helicity
-       %], only: reconstruct_golem95 => reconstruct_group
+   use [% process_name asprefix=\_ %]golem95, only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
          @if extension pjfry %], contract_pjfry[%
          @end @if %][%
@@ -276,13 +268,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @end @if %][%
       @end @if %][%
       @if extension samurai %]
-   use [% process_name asprefix=\_ %]samuraih[% helicity
-      %], only: samurai_reduce => reduce_group[% grp %]
+   use [% process_name asprefix=\_ %]samurai, only: samurai_reduce => reduce_group[% grp %]
    use options, only: samurai_out => iout[%
       @end @if %][%
       @if extension ninja %]
-   use [% process_name asprefix=\_ %]ninjah[% helicity
-      %], only: ninja_reduce => ninja_reduce_group[% grp %][%
+   use [% process_name asprefix=\_ %]ninja, only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
    real(ki), intent(in) :: scale2
@@ -538,7 +528,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    end if
 end subroutine evaluate_group[% grp %]
 !---#] subroutine evaluate_group[% grp %]:[%
-@end @if %][%
    @end @for groups %][%
 @end @select %]
-end module [% process_name asprefix=\_ %]amplitudeh[% helicity %]
+end module [% process_name asprefix=\_ %]amplitude

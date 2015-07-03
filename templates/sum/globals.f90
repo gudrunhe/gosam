@@ -1,5 +1,5 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module     [% process_name asprefix=\_ %]globalsh[% helicity %]
+ %]module     [% process_name asprefix=\_ %]globals
    use [% process_name asprefix=\_ %]config, only: ki[%
    @for repeat num_colors shift=1 %][%
       @if is_first %]
@@ -11,9 +11,10 @@
 
    implicit none
    private[%
-
-   @for repeat num_colors shift=1 %]
-   complex(ki), public :: c[% $_ %][%
+   @for repeat num_colors shift=1 %][%
+   @for helicities generated %]
+   complex(ki), public :: c[% $_ %]h[%helicity%][%
+   @end @for %][%
    @end @for %]
 
    public :: init_lo
@@ -27,13 +28,14 @@ subroutine     init_lo()
 @else %]col0[%
 @end @if %]
    implicit none[%
-
-@for repeat num_colors shift=1 %]
-   c[% $_ %] = [%
-   @if generate_lo_diagrams %]ccontract(c[% $_ %]v, amp0[% @if helsum %](:,[%helicity%])[%@end @if%])[%
+@for repeat num_colors shift=1 %][%
+ @for helicities generated %]
+   c[% $_ %]h[%helicity%] = [%
+   @if generate_lo_diagrams %]ccontract(c[% $_ %]v, amp0(:,[%helicity%]))[%
    @else %]c[% $_ %]v(col0)[%
    @end @if %][%
+ @end @for %][%
 @end @for %]
 end subroutine init_lo
 
-end module [% process_name asprefix=\_ %]globalsh[% helicity %]
+end module [% process_name asprefix=\_ %]globals

@@ -4,7 +4,7 @@
 	in the main directory.
 ' %]# vim: ts=3:sw=3
 
-SUBDIRS=doc common[%
+SUBDIRS=doc common[% @if helsum %] sum[% @end @if %][%
 @for helicities generated %] helicity[% helicity %][%
 @end @for helicities %] matrix
 

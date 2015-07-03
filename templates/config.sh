@@ -39,17 +39,22 @@ PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
 	@for helicities generated %] \
 -L$PWD/helicity[%helicity%] -Wl,-rpath=$PWD/helicity[%helicity%] [%
 	@end @for helicities %] \
+-L$PWD/sum -Wl,-rpath=$PWD/sum \
 -L$PWD/common -Wl,-rpath=$PWD/common \
 -lgosam_process[% process_name assuffix=\_ %]_matrix[%
 	@for helicities generated %] \
 -lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][%
 	@end @for helicities %] \
+-lgosam_process[% process_name assuffix=\_ %]_amplitude \
 -lgosam_process[% process_name assuffix=\_ %]_common"
 [% @else %]
 PROCESS_LDFLAGS="$PWD/matrix/matrix.a[%
 	@for helicities generated %] \
 $PWD/helicity[%helicity%]/amplitude[%helicity%].a[%
-	@end @for helicities %] \
+	@end @for helicities %][%
+@if helsum %] \
+$PWD/sum/amplitude.a[%
+@end @if %] \
 $PWD/common/common.a"
 [% @end @if %]
 

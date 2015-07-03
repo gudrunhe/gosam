@@ -62,6 +62,9 @@
 		<file src="haggies-l1.out" class="Kinematics">
 			<except if-extension="formopt" />
 		</file>
+		<file src="helsum.frm" class="Kinematics" >
+         <only if-option="helsum" value="true" />
+		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
 		</file>
@@ -110,6 +113,10 @@
 		</file>
 		<file src="ninjafinalopt.frm" class="Kinematics">
 			<only if-extension="ninja" />
+		</file>
+		<file src="replace.hh" class="Kinematics">
+			<only if-extension="formopt" />
+         <only if-option="helsum" value="true" />
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
@@ -289,4 +296,24 @@
 			</file>
 		</directory>
 	</foreach>
+
+	<directory src="sum">
+      <only if-option="helsum" value="true" />
+		<file src="Makefile.source" class="Integrals"/>
+		<file src="Makefile.dep" class="Integrals"/>
+		<file src="Makefile" class="Integrals"/>
+		<file src="globals.f90" class="Kinematics"/>
+      <file src="../form.set" dest="form.set" class="Kinematics"/>
+      <file src="amplitude.f90" class="Integrals" />
+      <file src="samurai.f90"	class="Integrals" >
+            <only if-extension="samurai" />
+            <except if-option="r2" value="only" />
+            <filter name="Fortran90" width="80"/>
+      </file>
+		<file src="golem95.f90"	class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+		</file>
+		<file src="diagramsl0.f90" class="Integrals" />
+	</directory>
 </template>

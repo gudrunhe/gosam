@@ -1,6 +1,6 @@
 #-
-* This file takes the input numerator from d*h*l1.txt as a 
-* function of abb(:) 
+* This file takes the input numerator from d*h*l1.dat as a 
+* function of abb(:) or, in case of helsum=true, unabbreviated.
 * and outputs the file d*h*l1d.hh which has the 
 * expansion of the numerator d`p'diagram
 
@@ -25,7 +25,28 @@ CTensor SUBSCRIPT;
 AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
-CF Wrapper;
+CF Wrapper;[%
+@if helsum %]
+#define LOOPS "1"
+
+
+#include- model.hh
+off statistics;
+
+  CFunction j;
+  CTensor ptens;
+  Vector Q, p1;
+  Vector qshift;
+  CFunction fshift;
+#include ../codegen/symbols.hh
+CF abb1;
+AutoDeclare Symbol x;
+Symbol Qt2,QspQ,Qspk1,Qspk2,Qspk3,Qspl3,Qspk4,Qspl4,Qspvak1k2,Qspvak1l3,Qspvak1l4,Qspvak2k1,Qspvak2l3,Qspvak2l4,Qspval3k1,Qspval3k2,Qspval3l4,Qspval4k1,Qspval4k2,Qspval4l3;
+AutoDeclare Symbol c;
+AutoDeclare Vector spva;
+S Nfrat;[%
+@end @if %]
+
 S sDUMMY1;[%
 @end @if %][%
 @if extension qshift%][%
@@ -63,8 +84,7 @@ Symbol Qt2,QspQ[%
    @end @for %][%
 @end @if %];
 
-
-#Create<`OUTFILE'd.hh>
+#Create<`OUTFILE'd.`OUTSUFFIX'>
 #append <`OUTFILE'.dat>
 
 #Include `OUTFILE'.prc
@@ -151,10 +171,10 @@ Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
 Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
 .sort
 #Do p=0,`RANK'
-   #write <`OUTFILE'd.hh> "*--#[ d`p'diagram:"
-   #write <`OUTFILE'd.hh> "L d`p'diagram = %e",d`p'diagram;
-   #write <`OUTFILE'd.hh> "*--#] d`p'diagram:"
+   #write <`OUTFILE'd.`OUTSUFFIX'> "*--#[ d`p'diagram:"
+   #write <`OUTFILE'd.`OUTSUFFIX'> "L d`p'diagram = %e",d`p'diagram;
+   #write <`OUTFILE'd.`OUTSUFFIX'> "*--#] d`p'diagram:"
 #EndDo
-#Close <`OUTFILE'd.hh>
+#Close <`OUTFILE'd.`OUTSUFFIX'>
 #Close <`OUTFILE'.dat>
 .end

@@ -462,6 +462,14 @@ sum_diagrams = Property("diagsum",
    bool,
    True)
 
+sum_helicities = Property("helsum",
+   """\
+   Flag whether or not 1-loop diagrams should be analytically
+   summed over all helicities 
+   """,
+   bool,
+   False, experimental=True)
+
 renorm = Property("renorm",
    """\
    Indicates if the UV counterterms should be generated.
@@ -1127,6 +1135,7 @@ properties = [
    zero,
    one,
    renorm,
+   sum_helicities,
    regularisation_scheme,
    genUV,
    helicities,

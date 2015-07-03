@@ -57,9 +57,12 @@ parser.add_option("-L", "--LOOPSIZE", dest="loopsize",
 if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
-diag_name= options.input.split('.')[0]
-diag=diag_name.split('d')[1].split('h')[0]
-heli=diag_name.split('h')[1].split('l')[0]
+diag_name= options.input.split('.')[0][%
+@if helsum %]
+diag_name = diag_name.split('h')[0][%
+@end @if %]
+diag=str(options.diagram)
+heli=str(options.helicity)
 qsign=options.qsign
 qshift=options.qshift
 rank=options.rank
@@ -69,7 +72,7 @@ loopsize=options.loopsize
 # print '----------------------------------'
 # print 'Input file is:      %s' % diag_name+'.txt'
 # print 'Diagram written in: %s' % diag_name+'.f90'
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90'
+# print 'Abbrev. written in: %s' % 'abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'.f90'
 # print 'Diagram information:'
 # print 'diag:  %s' % options.diagram
 # print 'group: %s' % options.group
@@ -133,7 +136,7 @@ for irank in range(1,rank+2):
 	f90file.write('      use [% process_name asprefix=\_ %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 	f90file.write('      implicit none \n')
 	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -161,7 +164,7 @@ dstring=dstring.rstrip(',') + ')' + ' result(numerator)\n'
 f90file.write(dstring)
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]
