@@ -44,10 +44,7 @@ parser.add_option("-Q", "--QSHIFT", dest="qshift",
 if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
-diag_name= options.input.split('.')[0][%
-@if helsum %]
-diag_name = diag_name.split('h')[0][%
-@end @if %]
+diag_name= options.input.split('.')[0]
 diag=str(options.diagram)
 heli=str(options.helicity)
 qsign=options.qsign

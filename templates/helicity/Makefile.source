@@ -100,11 +100,6 @@ PRC_LIST=[%
 	   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.prc[%
       @end @if %][%
-   @if extension ninja %] \
-    d[%$_%]h[%helicity%]l131.prc \
-    d[%$_%]h[%helicity%]l132.prc \
-    d[%$_%]h[%helicity%]l121.prc[%
-      @end @if %][%
    @end @for %][%
 @else %][%
 @select r2
@@ -337,15 +332,15 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
 			@end @if %][%
-                @if helsum %][%
+                @if helsum %] \
+		../codegen/golem.frm[%
+                @else %][%
 			@if internal GENERATE_NINJA_TRIPLE %] \
 		-D GENERATENINJATRIPLE=1[%
 			@end @if %][%
 			@if internal GENERATE_NINJA_DOUBLE %] \
 		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
-		../codegen/golem.frm[%
-                @else %] \
 		../codegen/golem.frm
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -413,7 +408,9 @@ d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-@if extension ninja %] 
+@if extension ninja %][%
+@if helsum %][%
+@else %]
 d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -520,6 +517,7 @@ d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
+                @end @if helsum %][%
 		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%

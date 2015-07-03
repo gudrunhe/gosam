@@ -253,6 +253,8 @@ d[%$_%]l14.txt : d[%$_%]l1.txt
 		-D EXPANSIONID=Mu2 \
 		../codegen/ninjafinalopt.frm
 
+d[%$_%]l13.txt d[%$_%]l12.txt : d[%$_%]l14-stamp
+d[%$_%]l13-stamp d[%$_%]l12-stamp  d[%$_%]l14-stamp: d[%$_%]l14.txt
 d[%$_%]l131.f90 : d[%$_%]l13.txt
 	@echo Python is processing ninja triangles expansion [%$_%] @ Helicity sum
 	@$(PYTHON) ../codegen/buildfortran_tn3.py \
@@ -264,6 +266,7 @@ d[%$_%]l131.f90 : d[%$_%]l13.txt
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
+
 d[%$_%]l132.f90 : d[%$_%]l12.txt
 	@echo Python is processing ninja bubbles expansion [%$_%] @ Helicity sum
 	@$(PYTHON) ../codegen/buildfortran_tn2.py \

@@ -287,6 +287,7 @@
 				class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
 			</file>
 			<file src="amplitude.f90" dest="amplitudeh%d.f90"
 				arguments="helicity" class="Integrals" />
@@ -313,6 +314,12 @@
 		<file src="golem95.f90"	class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja.f90" class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
 		</file>
 		<file src="diagramsl0.f90" class="Integrals" />
 	</directory>

@@ -39,11 +39,6 @@ Symbol Qt2,QspQ[%
    @end @for %][%
 @end @if %];
 
-[% @if internal GENERATE_NINJA_TRIPLE %]
-Vectors vecA, vecB, vecC;
-Symbol LaurentT, LaurentTi;
-[%@end @if%]
-
 AutoDeclare Symbol c;
 AutoDeclare Vector spva;
 S Nfrat;
@@ -80,18 +75,6 @@ CF dotproduct(symmetric);
 CF Wrapper;
 
 [%@end @if%]
-[%@if internal GENERATE_NINJA_TRIPLE %]
-#If `LOOPSIZE' > 3
-   #Define MINLaurentTn3 "{`LOOPSIZE'-3}"
-#Else
-   #Define MINLaurentTn3 "0"
-#Endif
-#Define MAXLaurentTn3 "`RANK'"
-[%@end @if%]
-[%@if internal GENERATE_NINJA_DOUBLE %]
-#Define MINLaurentTn2 "`LOOPSIZE'"
-#Define  MAXLaurentTn2 "`LOOPSIZE'"
-[%@end @if%]
 
 #define HELS "[% @for helicities generated %][%helicity%][%@if is_last %][%@else%],[%@end @if%][%
 @end @for%]"
@@ -123,28 +106,7 @@ Local d`irank'h`i'd`DIAG' = d`irank'diagram;
 #EndDo
 #EndDo
 [%@end @if %]
-[%@if internal GENERATE_NINJA_TRIPLE %]
-#do i={`HELS'}
-#Include ../helicity`i'/d`DIAG'h`i'l13.hh
-Id c1 = c1h`i';
-.sort
-#Do pow=`MAXLaurentTn3',`MINLaurentTn3',-1
-Local dh`i'd`DIAG'nint{`MAXLaurentTn3'-`pow'} = nint{`MAXLaurentTn3'-`pow'};
-.sort
-#EndDo
-#EndDo
-[%@end @if %]
-[%@if internal GENERATE_NINJA_DOUBLE %]
-#do i={`HELS'}
-#Include ../helicity`i'/d`DIAG'h`i'l12.hh
-Id c1 = c1h`i';
-.sort
-#Do pow=`MAXLaurentTn2',`MINLaurentTn2',-1
-Local dh`i'd`DIAG'nind{`MAXLaurentTn2'-`pow'} = nind{`MAXLaurentTn2'-`pow'};
-.sort
-#EndDo
-#EndDo
-[%@end @if %]
+
 .sort
 
 Local diagram`DIAG' = 
