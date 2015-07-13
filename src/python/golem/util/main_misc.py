@@ -627,9 +627,17 @@ def workflow(conf):
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
 
-	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
-		ext.append("numpolvec")
-
+	if conf["helsum"]:
+		if "generate-all-helicities" not in ext:
+			ext.append("generate-all-helicities")
+		if conf.getProperty("polvec")=="numerical" or "numpolvec" in ext:
+			raise GolemConfigError(
+				'The "helsum" feature is only implemented for explicit\n' +
+				'polarization vectors. Please either set "helsum=false"\n' +
+				'or "polvec=explicit" in the input card."\n')
+	else:
+		if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
+			ext.append("numpolvec")
 
 	for prop in golem.properties.properties:
 		lines = prop.check(conf)
