@@ -81,7 +81,7 @@ contains
       logical, intent(out) :: ok
       real(ki), intent(out) :: rational2[%
 @if generate_lo_diagrams %]
-      complex(ki), dimension(numcs,0:[%@for helicities generated%][%@if is_last%][%helicity%][%@end @if%][%@end @for%]), intent(in), optional :: opt_amp0[%
+      complex(ki), dimension(numcs,0:max(0,[%@for helicities generated%][%@if is_first%][%@else%],[%@end @if%][%helicity%][%@end @for%])), intent(in), optional :: opt_amp0[%
 @else %]
       integer, intent(in) :: the_col0[%
 @end @if %]

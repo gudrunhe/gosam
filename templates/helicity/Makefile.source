@@ -394,8 +394,8 @@ d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-st
 		--QSHIFT=[%shift%]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
 @end @if %]
-	@touch d[%$_%]h[%helicity %]l1d-stamp
 d[%$_%]h[%helicity %]l1d-stamp: d[%$_%]h[%helicity%]l1d.txt
+	@touch d[%$_%]h[%helicity %]l1d-stamp
 d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_d.py \

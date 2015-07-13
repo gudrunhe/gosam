@@ -76,7 +76,9 @@ CF Wrapper;
 
 [%@end @if%]
 
-#define HELS "[% @for helicities generated %][%helicity%][%@if is_last %][%@else%],[%@end @if%][%
+#define HELS "[% @for helicities generated %][%helicity%],[%
+@end @for%]"
+#define COLORS "[% @for repeat num_colors shift=1 %][% $_ %],[%
 @end @for%]"
 
 .sort
@@ -84,40 +86,63 @@ CF Wrapper;
 #Include ../codegen/replace.hh
 
 #do i={`HELS'}
+* `i' must not be the empty string
+#if x`i' != x
 #Include ../helicity`i'/d`DIAG'h`i'l1.prc
-Id c1 = c1h`i';
+.sort
+#Do c={`COLORS'}
+* `c' must not be the empty string
+#If `c' != ""
+Id c`c' = c`c'h`i';
+#EndIf
+#EndDo
 .sort
 Local dh`i'd`DIAG' = diagram`DIAG';[%
 @select r2 @case explicit %]
 Local R2dh`i'd`DIAG' = R2d`DIAG';[%
 @end @select%]
 .sort
-*drop diagram`DIAG';
+#EndIf
 #EndDo
 .sort
 [%@if internal GENERATE_DERIVATIVES %]
 #do i={`HELS'}
+* `i' must not be the empty string
+#if x`i' != x
 #Include ../helicity`i'/d`DIAG'h`i'l1d.prc
-Id c1 = c1h`i';
+.sort
+#Do c={`COLORS'}
+* `c' must not be the empty string
+#If `c' != ""
+Id c`c' = c`c'h`i';
+#EndIf
+#EndDo
 .sort
 #do irank=0,`RANK'
 Local d`irank'h`i'd`DIAG' = d`irank'diagram;
 .sort
 #EndDo
-#EndDo
-[%@end @if %]
+#EndIf
+#EndDo[%
+@end @if %]
 
 .sort
 
 Local diagram`DIAG' = 
 #do i={`HELS'}
+* `i' must not be the empty string
+#if x`i' != x
 + dh`i'd`DIAG'
+#EndIf
 #EndDo
 ;[%
 @select r2 @case explicit %]
 Local d`DIAG'R2 =
 #Do i={`HELS'}
+* `i' must not be the empty string
+#if x`i' != x
 + R2dh`i'd`DIAG'*R2
+#EndIf
 #EndDo
 ;[%
 @end @select%]
