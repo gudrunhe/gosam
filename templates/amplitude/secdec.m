@@ -1,7 +1,7 @@
 Dim=4-2*eps;
 prefactor=1;
 
-momlist=ToExpression[Table[StringJoin["p", ToString[i]], {i, 1, [% loop %]}]];
+momlist=ToExpression["p" <> ToString[#]] & /@ Range[[% loop %]];
 GosamIncoming = {[% @for particles initial %]k[%index%][% @if eval index .lt. num_in %], [% @end @if %][%@end @for %]};
 GosamOutgoing = {[% @for particles final %]k[%index%][% @if eval index .lt. num_out %], [% @end @if %][%@end @for %]};
 
