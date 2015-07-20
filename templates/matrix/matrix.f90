@@ -21,6 +21,16 @@
    use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
      & incolors, init_color[%
+@if helsum %][%
+   @for helicities generated %][%
+      @if generate_lo_diagrams %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+      @end @if %][%
+   @end @for %]
+   use [% process_name asprefix=\_ 
+      %]amplitude, only: samplitudel1summed => samplitude[%
+@else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
@@ -31,7 +41,8 @@
         %]amplitudeh[%helicity%], [% ' '
         %]only: samplitudeh[%helicity%]l1 => samplitude[%
       @end @if %][%
-   @end @for %]
+   @end @for %][%
+@end @if %]
    use [% process_name asprefix=\_
       %]dipoles, only: insertion_operator, insertion_operator_qed
 
@@ -453,8 +464,13 @@ contains
          stop
       end select
 
-      if (present(h)) then
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling
+      if (present(h)) then[%
+         @if helsum %]
+         print *, 'ERROR: Cannot select helicity when code was generated'
+         print *, 'with "helsum=1".'[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         @end @if %]
       else
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
       end if[%
@@ -676,7 +692,7 @@ contains
    end function samplitudel0
    !---#] function samplitudel0 :
    !---#[ function samplitudel1 :
-   function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
+   function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
       use [% process_name asprefix=\_ %]config, only: &
          & debug_nlo_diagrams, logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
@@ -684,9 +700,12 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
       real(ki), intent(in) :: scale2
-      real(ki), intent(out) :: rat2
+      real(ki), intent(out) :: rat2[%
+      @if helsum %][%
+      @else %]
       integer, optional, intent(in) :: h
-      real(ki), dimension([%num_legs%], 4) :: pvecs
+      real(ki), dimension([%num_legs%], 4) :: pvecs[%
+      @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
       @else %]
@@ -697,6 +716,45 @@ contains
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki) :: rational2
 
+      amp(:) = 0.0_ki
+      rat2 = 0.0_ki
+      ok = .true.[%
+   @if generate_nlo_virt%][%
+   @if helsum %]
+      if(debug_nlo_diagrams) then
+         write(logfile,*) "<helicity index='sum'>"
+      end if
+      call init_event(vecs)[%
+      @if generate_lo_diagrams %]
+         heli_amp = samplitudel1summed(real(scale2,ki),my_ok,rational2)[%
+      @else %]
+         do c=1,numcs
+            colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square(colorvec(:, 0))
+         heli_amp(-1) = square(colorvec(:,-1))
+         heli_amp(-2) = square(colorvec(:,-2))[%
+      @end @if %]
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if[%
+   @else %][% 'if not helsum' %]
+
       if (present(h)) then
          eval_heli(:) = .false.
          eval_heli(h) = .true.
@@ -704,10 +762,7 @@ contains
          eval_heli(:) = .true.
       end if
 
-      amp(:) = 0.0_ki
-      rat2 = 0.0_ki
-      ok = .true.[%
-   @if generate_nlo_virt%][%
+[%
    @for helicities%]
       if (eval_heli([%helicity%])) then
          if(debug_nlo_diagrams) then
@@ -788,7 +843,8 @@ contains
          end if
       end if[%
    @end @for helicities%][%
-   @end @if %]
+   @end @if %][%
+   @end @if helsum %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if

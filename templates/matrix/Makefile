@@ -9,6 +9,9 @@ include ../Makefile.conf[%
 
 
 PROCESS_CFLAGS=[%
+    @if helsum %] \
+		-I../sum[%
+    @end @if %][%
 	@for helicities generated %] \
 		-I../helicity[%helicity%][%
 	@end @for helicities %] \

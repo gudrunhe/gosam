@@ -55,8 +55,8 @@ if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
 diag_name= options.input.split('.')[0]
-diag=diag_name.split('d')[1].split('h')[0]
-heli=diag_name.split('h')[1].split('l')[0]
+diag=str(options.diagram)
+heli=str(options.helicity)
 qsign=options.qsign
 qshift=options.qshift
 rank=options.rank
@@ -66,7 +66,7 @@ loopsize=options.loopsize
 # print '----------------------------------'
 # print 'Input file is:      %s' % diag_name+'.txt'
 # print 'Diagram written in: %s' % diag_name+'.f90'
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90'
+# print 'Abbrev. written in: %s' % 'abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'.f90'
 # print 'Diagram information:'
 # print 'diag:  %s' % options.diagram
 # print 'group: %s' % options.group
@@ -132,7 +132,7 @@ for lidx in expids:
 	f90file.write('      use [% process_name asprefix=\_ %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 	f90file.write('      implicit none \n')
 	f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninjaE4\n')
 #	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
@@ -148,13 +148,17 @@ for lidx in expids:
 	f90file.write('!---#] subroutine brack_%s: \n' % lidx)
 
 f90file.write('!---#[ subroutine numerator_t2:\n')
-f90file.write('   subroutine numerator_t2(ncut, a0, a1, b, c, param, deg, coeffs) &\n' )
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t2")\n'.format(diag,heli) )
+f90file.write('   subroutine numerator_t2(ncut, a0, a1, b, c, param, deg, coeffs) &\n' )[%
+@if helsum %]
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_t2")\n'.format(diag) )[%
+@else %]
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t2")\n'.format(diag,heli) )[%
+@end @if %]
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki => ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')
 f90file.write('      integer(c_int), intent(in) :: ncut, deg\n')
 f90file.write('      complex(ki), dimension(0:3), intent(in) :: a0, a1, b, c\n')

@@ -6,7 +6,7 @@ HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
 SUBDIRS=doc common[%
 @for helicities generated %] helicity[% helicity %][%
-@end @for helicities %] matrix
+@end @for helicities %][%@if helsum%] sum[%@end @if%] matrix
 
 [% @if internal OLP_MODE %]
 include ../Makefile.conf[%

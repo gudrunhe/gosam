@@ -75,6 +75,8 @@ SOURCE_TREE=
 [% @end @if %]
 [% @if generate_nlo_virt %]
 DIAGRAMS_VIRT=[%
+@if helsum %][%
+@else %][%
 @select r2
 @case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
@@ -88,7 +90,26 @@ DIAGRAMS_VIRT=[%
     d[%$_%]h[%helicity%]l121.f90[%
       @end @if %][%
    @end @for %][%
-@end @select %]
+@end @select %][%
+@end @if %]
+
+PRC_LIST=[%
+@if helsum %][%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.prc[%
+	   @if internal GENERATE_DERIVATIVES %] \
+	d[%$_%]h[%helicity%]l1d.prc[%
+      @end @if %][%
+   @end @for %][%
+@else %][%
+@select r2
+@case implicit explicit off %]$(subst .f90,.prc,$(DIAGRAMS_VIRT))[%
+@case only %][%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.abb[%
+   @end @for %][%
+@end @select %][%
+@end @if %]
 
 TXT_VIRT=[%
 @select r2
@@ -98,7 +119,10 @@ TXT_VIRT=[%
 	d[%$_%]h[%helicity%]l1.abb[%
    @end @for %][%
 @end @select %]
+
 ABB_VIRT=[%
+@if helsum %][%
+@else %][%
    @select abbrev.level
    @case helicity %]abbrevh[%helicity%].f90[%
    @case group %][%
@@ -109,7 +133,8 @@ ABB_VIRT=[%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%]h[%helicity%].f90[%
       @end @for %][%
-   @end @select %]
+   @end @select %][%
+@end @if helsum %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 [% @else %]
 DIAGRAMS_VIRT=
@@ -130,7 +155,10 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 
 [% 
 @if extension formopt %]
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[% 
+all_source: $(SOURCE_TREE) [% @if helsum %]$(PRC_LIST)[% @else %]$(SOURCE_VIRT)[% @end @if %][%
+@if helsum %]
+prc: $(PRC_LIST)[%
+@end @if %][% 
 @if extension parallelborn %][%
 @for elements topolopy.keep.tree %][%
 @if is_first %][% @if is_last %]
@@ -279,6 +307,7 @@ diagramsl0.f90: $(TXT_TREE)
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
+d[%$_%]h[%helicity%]l1.prc : d[%$_%]h[%helicity%]l1.txt
 d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -302,6 +331,15 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 			@end @if %][%
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
+			@end @if %][%
+                @if helsum %] \
+		../codegen/golem.frm[%
+                @else %][%
+			@if internal GENERATE_NINJA_TRIPLE %] \
+		-D GENERATENINJATRIPLE=1[%
+			@end @if %][%
+			@if internal GENERATE_NINJA_DOUBLE %] \
+		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
 		../codegen/golem.frm
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
@@ -313,9 +351,38 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D DERIVATIVESATZERO=1[%
 			@end @if %] \
 		../codegen/finaloptimization.frm[%
+                @end @if helsum %][%
 	   @select abbrev.level @case diagram %]
 	@touch d[%$_%]h[%helicity%]l1-stamp
-d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt
+d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt[%
+@if internal GENERATE_DERIVATIVES %]
+d[%$_%]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %] : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
+	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D RANK=[% rank %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %][%
+                        @if helsum %] \
+                -D OUTSUFFIX=prc[%
+                        @else %] \
+                -D OUTSUFFIX=hh[%
+                        @end @if %]\
+		../codegen/derive.frm[%
+@if helsum %][%
+@else %][%
+   @for repeat rank inclusive=true var=rk %]
+	@echo Form is optimizing loop diagram [%$_%] rank [%rk%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
+		-D DIAG=[%$_%] \
+		-D RANK=[% rk %] \
+		-D GENERATEDERIVATIVES=1 \
+		../codegen/finaloptimization.frm[%
+	@end @for%]
 d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
 	@echo Python is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran.py \
@@ -326,29 +393,9 @@ d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-st
 		--QSIGN=[% sign %] \
 		--QSHIFT=[%shift%]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
-@if internal GENERATE_DERIVATIVES %] 
-d[%$_%]h[%helicity %]l1d.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
-	@echo Form is optimizing loop diagram derivatives [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
-		../codegen/derive.frm[%
-   @for repeat rank inclusive=true var=rk %]
-	@echo Form is optimizing loop diagram [%$_%] rank [%rk%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D RANK=[% rk %] \
-		-D GENERATEDERIVATIVES=1 \
-		../codegen/finaloptimization.frm[%
-	@end @for%]
-	@touch d[%$_%]h[%helicity %]l1d-stamp
+@end @if %]
 d[%$_%]h[%helicity %]l1d-stamp: d[%$_%]h[%helicity%]l1d.txt
+	@touch d[%$_%]h[%helicity %]l1d-stamp
 d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_d.py \
@@ -361,7 +408,9 @@ d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-@if extension ninja %] 
+@if extension ninja %][%
+@if helsum %][%
+@else %]
 d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -468,6 +517,7 @@ d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
+                @end @if helsum %][%
 		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%

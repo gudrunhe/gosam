@@ -62,6 +62,7 @@ DATA_DIRS = [
 			"templates/doc",
 			"templates/helicity",
 			"templates/matrix",
+			"templates/sum",
 			"olp/templates",
 			"models",
 			"src/form",
