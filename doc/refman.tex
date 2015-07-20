@@ -631,12 +631,15 @@ rather than producing separate code for each helicity
 To switch off the use of numerical polarisation vectors, use {\tt polvec=explicit}.
 \item[18] \texttt{diagsum}:  if {\tt True}, one-loop diagrams sharing some propagators
 are combined before  the algebraic reduction.
-The default is {\tt diagsum = True}. 
-\item[19] The option \texttt{reduction\_programs} 
+The default is {\tt diagsum = True}.
+\item[19] \texttt{helsum}:  if {\tt True}, one-loop diagrams from all helicities are
+analytically summed. This produces larger but faster code.
+The default is {\tt helsum = False}. 
+\item[20] The option \texttt{reduction\_programs} 
 allows to choose the amplitude reduction method. If several choices are given, 
 the code is produced such that the reduction methods can be switched at runtime.
 The default is {\tt ninja,golem95}.
-\item[20] {\tt extensions}: 
+\item[21] {\tt extensions}: 
 this option  contains a list of useful extensions
 to the core of the program, which operate at the code generation stage. 
 The currently available extensions are 
@@ -657,32 +660,32 @@ with a custom function (we refer to subsection \ref{sec:spin2} for details).
 \end{itemize}
 In our example {\tt shared} tells the program to 
 build dynamic rather than static libraries.
-\item[21] \texttt{debug}: can take the values  {\tt lo}, {\tt nlo}, {\tt all}.
+\item[22] \texttt{debug}: can take the values  {\tt lo}, {\tt nlo}, {\tt all}.
 It sets the level of information printed to the file {\tt matrix/debug.xml} when running the test program.
-\item[22] \texttt{select.lo}: can be used to select/discard diagrams by their diagram numbers.
+\item[23] \texttt{select.lo}: can be used to select/discard diagrams by their diagram numbers.
 It can contain a list of integer numbers, indicating leading order diagrams to be
 selected. If no list is given, all diagrams are selected.       
 Otherwise, all diagrams whose numbers are not in the list will be discarded.          
 The list may also contain ranges, with increments different from one, e.g.                                    
 {\tt select.lo=1,2,5:10:3, 50:53} is equivalent to {\tt select.lo=1,2,5,8,50,51,52,53}, 
 i.e. the 3 in    {\tt 5:10:3} is the increment.
-\item[23] \texttt{select.nlo}: analogous to \texttt{select.lo},  for the one-loop diagrams.
-\item[24] \texttt{filter.lo}:  a python function which provides a filter for tree diagrams.    
+\item[24] \texttt{select.nlo}: analogous to \texttt{select.lo},  for the one-loop diagrams.
+\item[25] \texttt{filter.lo}:  a python function which provides a filter for tree diagrams.    
 Example:  \\  
 {\tt filter.lo=lambda d: d.iprop(Z) == 1  and}
 {\tt  d.vertices(Z, U, Ubar) == 0 } filters out
 diagrams containing exactly one $Z$ propagator and no $Zu\bar{u}$ couplings. 
-\item[25] \texttt{filter.nlo}:  analogous to \texttt{filter.lo},  for the one-loop diagrams.
+\item[26] \texttt{filter.nlo}:  analogous to \texttt{filter.lo},  for the one-loop diagrams.
 For details we refer to subsection \ref{sec:filter}.
-\item[26] \texttt{filter.module}: a python file of predefined functions which can be used as filters.   
-\item[27] \texttt{renorm\_beta}: activates or disables beta function renormalisation. The default is  {\tt True}. 
-\item[28] \texttt{renorm\_mqwf}:  activates or disables UV countertems coming from
+\item[27] \texttt{filter.module}: a python file of predefined functions which can be used as filters.   
+\item[28] \texttt{renorm\_beta}: activates or disables beta function renormalisation. The default is  {\tt True}. 
+\item[29] \texttt{renorm\_mqwf}:  activates or disables UV countertems coming from
 external massive quarks. The default is  {\tt True}.
-\item[29] \texttt{renorm\_decoupling}:   activates or disables UV counterterms coming from  
+\item[30] \texttt{renorm\_decoupling}:   activates or disables UV counterterms coming from  
 massive quark loops. The default is  {\tt True}.
-\item[30] \texttt{renorm\_mqse}:  activates or disables the UV counterterm coming from the 
+\item[31] \texttt{renorm\_mqse}:  activates or disables the UV counterterm coming from the 
 massive quark propagators. The default is  {\tt True}.
-\item[31] \texttt{renorm\_logs}: activates or disables the logarithmic finite terms  
+\item[32] \texttt{renorm\_logs}: activates or disables the logarithmic finite terms  
 associated with the UV counterterms.   The default is  {\tt True}.
 Implemented for QCD only, works only with the built-in model files.    The default is  {\tt True}.
 \item[33] \texttt{reduction\_interoperation}: denotes the reductuion libraries to be used. 
@@ -828,32 +831,32 @@ Example: \\
     $\langle$ gosam\_path$\rangle$/templates.                                         
     The directory must contain a file called {\tt template.xml}.
 \item[52] \texttt{qgraf.bin}: path to the {\tt QGraf} executable.
-The default path will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[53] \texttt{form.bin}:  path to the \form{} executable.
-The default path will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[54] \texttt{form.threads}: the number of \form{} threads when using {\tt tform},
 the parallel version of \form.  The default is 2.
 \item[55] \texttt{form.tempdir}: the temporary directory where \form{}
 can store (large) intermediate files.  the default is {\tt /tmp}.
 \item[56] \texttt{haggies.bin}: path to the {\tt haggies} executable.
-The default path will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[57] \texttt{fc.bin}: path to the {\tt Fortran} compiler.
-The default path will be set by the installation script.
+An automatic search is attempted if left empty.
 %{\tt /usr/bin/gfortran}.
 \item[58] \texttt{python.bin}:  path to the {\tt python} executable.
-The default path will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[59] \texttt{ninja.fcflags}: compiler flags to compile with \ninja.
-The default will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[60] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.
-The default will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[61] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai.
-The default will be set by the installation script.
+An automatic search is attempted if left empty.
 \item[62] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.
-The default will be set by the installation script. 
+An automatic search is attempted if left empty. 
 \item[63] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}.
-The default will be set by the installation script. 
+An automatic search is attempted if left empty. 
 \item[64] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.
-The default will be set by the installation script. 
+An automatic search is attempted if left empty. 
 \item[65] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
 \begin{itemize}
 \item {\tt implicit}: $\mu^2$ terms are kept in the numerator and reduced at runtime
