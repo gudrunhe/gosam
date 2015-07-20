@@ -1,0 +1,26 @@
+process_name=gghh
+process_path=virtual
+
+in=g,g,25,25
+out=
+order=QCD, none, 2, 4
+
+# one quark flavour [t] running in the loops:
+qgraf.verbatim=true=iprop[U,D,C,S,B,0,0];
+
+one=gs
+zero=mU,mD,mS,mC,mB,wT
+
+model=smdiag
+
+regularisation_scheme=cdr
+renorm_beta=False
+renorm_mqwf=False
+renorm_decoupling=False
+renorm_mqse=False
+renorm_logs=False
+renorm_gamma5=False
+
+diagsum=False
+
+extensions=dot2tex,reduze

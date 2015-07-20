@@ -1,5 +1,5 @@
 # vim: ts=3:sw=3:expandtab
-import sys, getopt
+import sys, getopt, os
 from shutil import copyfile
 
 class TermError(Exception):
@@ -12,25 +12,25 @@ def main(argv):
    inputfile = ''
    mprependfile = ''
    pprependfile = ''
+   formfile = ''
    try:
-      opts, args = getopt.getopt(argv,"hi:p:m:",["ifile=","mfile=","pfile="])
+      opts, args = getopt.getopt(argv,"hi:",["ifile="])
    except getopt.GetoptError:
-      print 'test.py -i <inputfile> -m <mathprependfile> -p <paramprependfile>'
+      print 'test.py -i <inputfile>'
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print 'test.py -i <inputfile> -m <mathprependfile> -p <paramprependfile>'
+         print 'test.py -i <inputfile>'
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
-      elif opt in ("-m", "--mfile"):
-         mprependfile = arg
-      elif opt in ("-p", "--mfile"):
-         pprependfile = arg
   
    try:
-      in_file = open(inputfile, 'r')
-
+      in_file = open(inputfile + ".log", 'r')
+      fout_file = open(inputfile + ".hh", 'w')
+      if not os.path.isdir(inputfile):
+         os.makedirs(inputfile)
+      
       # Build list of integrals
       with in_file as myfile:
          integrals = myfile.read().replace('\n','').replace(' ','')
@@ -40,31 +40,47 @@ def main(argv):
             line = line.strip()
             if line:
                linelist = line.split("[]")
-               print linelist
-               if len(linelist) != 4:
-                  raise TermError("Term: " + str(line) + ", does not consist of an integral and a familiy in " + inputfile)
+               if len(linelist) != 5:
+                  raise TermError("Term: " + str(line) + ", does not consist of an integral and a familiy in " + inputfile + ".log")
                family = linelist[0].strip('( ,')
-               integral = linelist[1].strip(' ,')
-               order = linelist[2].strip(' ,')
-               props = linelist[3].replace(',PropList(','').strip('() ')
-               graph = family + "_" + integral.strip(', ').replace(',','').replace('-','m')
-               moutputfile = graph + ".m"
-               poutputfile = graph + ".input"
+               tidrs = linelist[1].strip(' ,')
+               integral = linelist[2].strip(' ,')
+               order = linelist[3].strip(' ,')
+               props = linelist[4].replace(',PropList(','').strip(') ')
+#               if linelist[1].count(",1") >= 7:
+#                  if int(order) == 0:
+#                     print linelist
+               mypowerlist = integral.split(",")
+               intt = 0
+               intr = 0
+               ints = 0
+               for pow in mypowerlist:
+                  if int(pow) > 0:
+                     intt+= 1
+                     intr+= int(pow)
+                  else:
+                     ints-= int(pow)
+               graph = family + "pow" + integral.strip(', ').replace(',','').replace('-','m')
+               moutputfile = os.path.join(inputfile, graph + ".m")
+               poutputfile = os.path.join(inputfile, graph + ".input")
                proplist = "proplist = {" + props + "};"
                numerator = "numerator = {1};"
                powerlist = "powerlist = {" + integral + "};"
                # write math file
-               copyfile(mprependfile,moutputfile)
+               copyfile(inputfile + ".m",moutputfile)
                mout_file = open(moutputfile, 'a')
                mout_file.write(proplist + '\n')
                mout_file.write(numerator + '\n')
                mout_file.write(powerlist + '\n')
                mout_file.close()
                # write prep file
-               copyfile(pprependfile,poutputfile)
+               copyfile(inputfile + ".input",poutputfile)
                pout_file = open(poutputfile, 'a')
                pout_file.write("graph=" + graph + '\n')
                pout_file.write("epsord=" + order + '\n')
+               pout_file.close()
+               fout_file.write("Id INT(" + family + "," + tidrs + ",[]," + integral + ") = " + family + "pow" + integral.replace(',','').replace('-','m') +  ";\n")
+         fout_file.write('\n')
          #out_file.write(integrals)
 
    except IOError as ex:
@@ -76,6 +92,7 @@ def main(argv):
 
    else:
       in_file.close()
+      fout_file.close()
 
 if __name__ == "__main__":
    main(sys.argv[1:])

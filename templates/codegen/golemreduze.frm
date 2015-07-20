@@ -69,10 +69,51 @@ Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
 #call ones
 #call zeroes
 
+***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
+* sj - this will not always eliminate ProjPlus, need to handle this case also
+* use ProjMinus + ProjPlus = 1
+Id NCContainer(ProjMinus,?tail) = NCContainer(1,?tail) - NCContainer(ProjPlus,?tail);
+.sort
+***** END WARNING *****
+
 *---#[ Process Propagators:
 * If the mass is zero the width becomes irrelevant:
 Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
    proplorentz(sDUMMY1, vDUMMY1, 0, 0, ?tail);
+
+***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
+#IfDef `MASSCT'
+** Mass renormalization
+
+* Heavy Fermions, See B9 of  1103.0621 <------ ERROR - Assume only 1 CT insertion possible
+Repeat;
+Id Once proplorentz(1,k1?,m?,sDUMMY1?,sDUMMY2?,iv1?,iv2?) =
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iv2)
+- i_*dZmp*deltaZm(1,m)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iDUMMY1)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iDUMMY1,iv2);
+sum iDUMMY1;
+EndRepeat;
+.sort
+Id proplorentzct(?tail) = proplorentz(?tail);
+.sort
+
+* Yukawa Couplings <------ ERROR - Only gHT, Assume only 1 CT insertion possible
+FactArg PREFACTOR;
+ChainOut PREFACTOR;
+Id PREFACTOR(gHT) = gHT;
+Id gHT = (1+dZmp*deltaZm(1,mT)*Den(mT))*gHT;
+Id gHT = PREFACTOR(gHT);
+.sort
+
+* Throw non-mct terms, drop power counting
+if ( count(dZmp,1) == 0 ) Discard;
+.sort
+Id dZmp =1;
+.sort
+
+#EndIf
+***** END WARNING *****
 
 #Include- propagators.hh
 
@@ -81,6 +122,7 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
 
 #call coloralgebra(0)
 
+***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
 * sj - collect colour structures, can anything else appear? HOW TO GET ALL COLOUR STRUCTURES HERE
 AB TR,NC,NA,c1;
 .sort:abcolor1;
@@ -88,6 +130,7 @@ AB TR,NC,NA,c1;
 Collect COLORFACTOR;
 Normalize COLORFACTOR;
 .sort:abcolor2;
+***** END WARNING *****
 
 *---#[ Process Legs:
 
@@ -115,10 +158,6 @@ EndArgument;
 .sort:subst. vertices and fermion legs;
 
 Id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
-
-* use ProjMinus + ProjPlus = 1
-Id NCContainer(ProjMinus,?tail) = NCContainer(1,?tail) - NCContainer(ProjPlus,?tail);
-.sort
 
 #Call RemoveNCContainer
 
@@ -166,11 +205,9 @@ Id ZERO = 0;
 Id csqrt(0) = 0;
 
 *---#] Process Legs:
-
 Multiply replace_(Sqrt2, sqrt2);
 Id sqrt2^2  = 2;
 Id sqrt2^-2 = 1/2;
-
 Multiply replace_(Sqrt3, sqrt3);
 Id sqrt3^2  = 3;
 Id sqrt3^-2 = 1/3;
@@ -182,23 +219,21 @@ Id i_ = PREFACTOR(i_);
 Id dimS = Dim(dimS);
 Id dimD = PREFACTOR(dimD);
 
-* post processing
-Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
-Id sDUMMY1?^(-1) = Den(sDUMMY1);
-Denominators Den;
-FactArg Den;
-ChainOut Den;
-.sort
-Id Den(sDUMMY1?number_) = 1/sDUMMY1;
-Id sDUMMY1?*Den(sDUMMY1?) = 1;
-.sort:post;
-
-Multiply prf(1,1);
-Repeat Id Den(sDUMMY1?)*prf(sDUMMY2?,sDUMMY3?) = prf(sDUMMY2,sDUMMY1*sDUMMY3);
-Repeat Id sDUMMY1?*prf(sDUMMY2?,sDUMMY3?) = prf(sDUMMY1*sDUMMY2,sDUMMY3);
+* Simplify coefficients
+Repeat Id sDUMMY1? = prf(sDUMMY1,1);
+Repeat Id sDUMMY1?^(-1) = prf(1,sDUMMY1);
+Repeat Id Dim(sDUMMY1?) = prf(sDUMMY1,1);
+Repeat Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
+Repeat Id Den(sDUMMY1?) = prf(1,sDUMMY1);
 .sort:feed prf;
 PolyRatFun prf;
 .sort:prf;
+
+* post processing
+Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
+Normalize COLORFACTOR;
+Normalize PREFACTOR;
+Normalize Dim;
 
 *
 * Write amplitude
@@ -208,3 +243,4 @@ print+s;
 .sort
 #Write <`OUTFILE'.log> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
 .end
+

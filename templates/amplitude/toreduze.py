@@ -2,6 +2,12 @@
 import sys, getopt
 from string import maketrans
 
+class TermError(Exception):
+   def __init__(self, value):
+      self.value = value
+   def __str__(self):
+      return repr(self.value)
+
 def main(argv):
    inputfile = ''
    outputfile = ''
@@ -27,13 +33,36 @@ def main(argv):
 
       # Build list of integrals
       with in_file as myfile:
-         integrals = myfile.read().replace('\n','').replace("INT",'\n').strip()
-         translate_in = ","
-         translate_out = " "
-         translate_table = maketrans(translate_in,translate_out)
-         integrals = integrals.translate(translate_table," +()[]")
-         #print integrals
-         out_file.write(integrals)
+# New way
+         firstline = True
+         out_file.write("{")
+         integrals = myfile.read().replace('\n','').replace(' ','')
+         intlist= integrals.split("+INT")
+         for line in intlist:
+            line = line.strip()
+            if line:
+               linelist = line.split("[]")
+               if len(linelist) != 3:
+                  raise TermError("Term: " + str(line) + ", does not consist of an integral and a familiy in " + inputfile)
+               family = linelist[0].strip('() ,')
+               tidrs = linelist[1].strip('() ,')
+               integral = linelist[2].strip('() ,')
+               print tidrs
+               outline = "INT[\"" + family + "\"," + tidrs + ",{" + integral + "}]"
+               if firstline:
+                  out_file.write("\n" + outline)
+                  firstline = False
+               else:
+                  out_file.write(",\n" + outline)
+         out_file.write("\n}")
+## Old way
+#         integrals = myfile.read().replace('\n','').replace("INT",'\n').strip()
+#         translate_in = ","
+#         translate_out = " "
+#         translate_table = maketrans(translate_in,translate_out)
+#         integrals = integrals.translate(translate_table," +()[]")
+#         print integrals
+#         out_file.write(integrals)
 
    except IOError as ex:
          print "Error in toreduze.py: ", ex

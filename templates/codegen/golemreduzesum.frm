@@ -9,6 +9,19 @@ off statistics;
 #include- spinney.hh
 #include- model.hh
 
+***** WARNING THE FOLLOWING CODE DOES NOT WORK *****
+* #IfDef `MASSCT'
+* #Do i = `FIRST', `LAST'
+* #include- d`i'h0l`LOOPS'mct.log
+* #EndDo
+* #Else
+* #Do i = `FIRST', `LAST'
+* #include- d`i'h0l`LOOPS'.log
+* #EndDo
+* #EndIf
+***** END WARNING *****
+
+
 * Process sum
 * Load GoSam result
 #IF (`LOOPS' == 1)
@@ -44,10 +57,9 @@ G sum =
 Drop;
 NDrop sum;
 .sort
-
+* Simplify coefficients
 PolyRatFun prf;
 .sort:prf;
-
 PolyRatFun;
 .sort:noprf;
 
@@ -62,10 +74,27 @@ Collect SCREEN;
 *
 * Write list of integrals
 *
+Id INT(sDUMMY1?,?tail) = INT(sDUMMY1,[],?tail);
 Id SCREEN(?head)=1;
 .sort:drop screen;
 DropCoefficient;
 .sort:drop coeff;
-#Write <`OUTFILE'integrals.txt>, "%E", sum
+
+********* TESTING CODE ********
+* Throw away information regarding which INT are crossed (for FIRE/LiteRed)
+#Define UNCROSS "0"
+#If `UNCROSS'
+#Call UncrossIntReduze
+Id Sector(sDUMMY1?)*INT(sDUMMY2?,?tail) = INT(sDUMMY1,?tail);
+Id Crossing(?tail) = 1;
+Id CrossingShift(?tail)=1;
+Id CrossingInvariants(?tail)=1;
+.sort:uncross;
+DropCoefficient;
+.sort:drop coeff;
+#EndIf
+********* TESTING CODE ********
+#Write <`OUTFILE'integrals.log>, "+ %E", sum
 print+s;
 .end
+

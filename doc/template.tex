@@ -1,0 +1,833 @@
+\begin{description}
+\item[\texttt{process\_name}] (\textit{text})
+\begin{verbatim}
+A symbolic name for this process. This name will be used
+as a prefix for the Fortran modules.
+
+Golem will insert an underscore after this prefix.
+If the process name is left blank no prefix will be used
+and no extra underscore will be generated.
+\end{verbatim}
+\item[\texttt{process\_path}] (\textit{text})
+\begin{verbatim}
+The path to which all Form output is written.
+If no absolute path is given, the path is interpreted relative
+to the working directory from which gosam.py is run.
+
+Example:
+process_path=/scratch/golem_processes/process1
+\end{verbatim}
+\item[\texttt{in}] (\textit{comma separated list})
+\begin{verbatim}
+A comma-separated list of initial state particles.
+Which particle names are valid depends on the
+model file in use.
+
+Examples (Standard Model):
+1) in=u,u~
+2) in=e+,e-
+3) in=g,g
+\end{verbatim}
+\item[\texttt{out}] (\textit{comma separated list})
+\begin{verbatim}
+A comma-separated list of final state particles.
+Which particle names are valid depends on the
+model file in use.
+
+Examples (Standard Model):
+1) out=H,u,u~
+2) out=e+,e-,gamma
+3) out=b,b~,t,t~
+\end{verbatim}
+\item[\texttt{model}] (\textit{comma separated list})
+\begin{verbatim}
+This option allows the selection of a model for the
+Feynman rules. It has to conform with one of four possible
+formats:
+
+1) model=<name>
+2) model=<path>, <name>
+3) model=<path>, <number>
+4) model=FeynRules, <path>
+
+Format 1) searches for the model files <name>, <name>.hh
+and <name>.py in the models/ directory under the installation
+path of Golem.
+
+Format 2) is similar to format 1) but <path> is used instead
+of the models/ directory of the Golem installation
+
+Format 3) expects the files func<number>.mdl, lgrng<number>.mdl,
+prtcls<number>.mdl and vars<number>.mdl in the directory <path>.
+These files need to be in CalcHEP/CompHEP format.
+
+Format 4) expects files according to the new FeynRules Python
+interface in the directory specified by <path>.
+(Not fully implemented yet)
+\end{verbatim}
+Default: \verb|smdiag|
+\item[\texttt{model.options}] (\textit{comma separated list})
+\begin{verbatim}
+If the model in use supports options they can be passed via this
+property.
+
+For builtin models, the option "ewchoose"
+selects automatically the EW scheme based.
+\end{verbatim}
+Default: \verb|ewchoose|
+\item[\texttt{order}] (\textit{comma separated list})
+\begin{verbatim}
+A 3-tuple <coupling>,<born>,<virt> where <coupling> denotes
+a function of the qgraf style file which can be used as
+an argument in a 'vsum' statement. For the standard model
+file 'sm' there are two such functions, 'gs' which counts
+powers of the strong coupling and 'gw' which counts powers
+of the weak coupling. <born> is the sum of powers for the
+tree level amplitude and <virt> for the virtual amplitude.
+The line
+   order = gs, 4, 6
+would select all diagrams which have (gs)^4 at tree level
+and all loop graphs with (gs)^6.
+
+Note: The line
+   order = gw, 2, 2
+does not imply that no virtual corrections are calculated.
+Instead, for the virtual corrections diagrams are chosen
+with the same order in gw but higher order in gs.
+
+In other models with more than two different coupling
+constants additional 'vsum' statements, which can be passed
+via the qgraph.verbatim option, might be needed
+to select the correct set of diagrams.
+
+If the last number is omitted no virtual corrections are
+calculated.
+
+See also: qgraf.options, qgraf.verbatim
+\end{verbatim}
+\item[\texttt{zero}] (\textit{comma separated list})
+\begin{verbatim}
+A list of symbols that should be treated as identically
+zero throughout the whole calculation. All of these
+symbols must be defined by the model file.
+
+Examples:
+1) # Light masses are set to zero here:
+   zero=me,mU,mD,mS
+2) # Diagonal CKM matrix:
+   zero=VUS, VUB, CVDC, CVDT, \
+        VCD, VCB, CVSU, CVST, \
+        VTD, VTS, CVBU, CVBC
+   one=  VUD,  VCS,  VTB, \
+        CVDU, CVSC, CVBT
+
+See also: model, one
+\end{verbatim}
+\item[\texttt{one}] (\textit{comma separated list})
+\begin{verbatim}
+A list of symbols that should be treated as identically
+one throughout the whole calculation. All of these
+symbols must be defined by the model file.
+
+Example:
+one=gs, e
+
+See also: model, zero
+\end{verbatim}
+\item[\texttt{regularisation\_scheme}] (\textit{text})
+\begin{verbatim}
+Sets the used regularisation scheme.
+Possible values: dred (recommended), cdr
+\end{verbatim}
+Default: \verb|dred|
+\item[\texttt{helicities}] (\textit{comma separated list})
+\begin{verbatim}
+A list of helicities to be calculated. An empty list
+means that all possible helicities should be generated.
+
+The helicities are specified as a string of characters
+according to the following table:
+
+   spin massive  |  'm'  '-'  '0'   '+'   'k'
+     0   YES/NO  | ---- ----    0  ----  ----
+   1/2   YES/NO  | ---- -1/2 ----  +1/2  ----
+     1     NO    | ----   -1 ----    +1  ----
+     1    YES    | ----   -1    0    +1  ----
+   3/2     NO    | -3/2 ---- ----  ----  +3/2
+   3/2    YES    | -3/2 -1/2 ----  +1/2  +3/2
+     2     NO    |   -2 ---- ----  ----    +2
+     2    YES    |   -2   -1    0    +1    +2
+
+Please, note that 'k' and 'm' are not in use yet but reserved
+for future extensions to higher spins.
+
+The characters correspond to particle 1, 2, ... from left to
+right.
+
+Examples:
+   # e+, e- --> gamma, gamma:
+   # Only three helicities required; the other ones are
+   # either zero or can be obtained by symmetry
+   # transformations.
+   helicities=+-++,+-+-,+---;
+
+Multiple helicities can be encoded in patterns, which are expanded
+at the time of code generation. Patterns can have one of the following
+forms:
+   [+-], [+-0], [+0] etc. : the bracket expands to one of the symbols
+         in the bracket at a time.
+   EXAMPLE
+         helicities=[+-]+[+-0]
+         # expands to 6 different helicities:
+         # helicities=+++, ++-, ++0, -++, -+-, -+0
+   [a=+-], etc. : as above, but the helicity is also assigned to the
+         symbol and can be reused.
+   EXAMPLE
+         helicities=[i=+-]+i+
+         # expands to two helicities
+         # helicities=++++, -+-+
+   [ab=+-0], etc. : as above, the first symbol is assigned the helicity,
+         the second is minus the helicity
+   EXAMPLE
+         helicities=[qQ=+-][pP=+-]PQ[+-0]
+         # expands to 12 helicities
+         # helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\
+         #            -+-++,-+-+-,-+-+0,--+++,--++-,--++0
+\end{verbatim}
+\item[\texttt{qgraf.options}] (\textit{comma separated list})
+\begin{verbatim}
+A list of options which is passed to qgraf via the 'options' line.
+Possible values (as of qgraf.3.1.1) are zero, one or more of:
+   onepi, onshell, nosigma, nosnail, notadpole, floop
+   topol
+
+Please, refer to the QGraf documentation for details.
+\end{verbatim}
+Default: \verb|onshell,notadpole,nosnail|
+\item[\texttt{qgraf.verbatim}] (\textit{text})
+\begin{verbatim}
+This option allows to send verbatim lines to
+the file qgraf.dat. This can be useful if the user
+wishes to put additional restricitons to the selected diagrams.
+This option is mainly inteded for the use of the operators
+   rprop, iprop, chord, bridge, psum
+Note, that the use of 'vsum' might interfer with the
+option qgraf.power.
+
+Example:
+qgraf.verbatim=\
+   # no top quarks: \n\
+   true=iprop[T, 0, 0];\n\
+   # at least one Higgs:\n\
+   false=iprop[H, 0, 0];\n
+
+Please, refer to the QGraf documentation for details.
+
+See also: qgraf.options, order
+\end{verbatim}
+\item[\texttt{qgraf.verbatim.lo}] (\textit{text})
+\begin{verbatim}
+Same as qgraf.verbatim but only applied to LO diagrams.
+
+See also: qgraf.verbatim, qgraf.verbatim.nlo
+\end{verbatim}
+\item[\texttt{qgraf.verbatim.nlo}] (\textit{text})
+\begin{verbatim}
+Same as qgraf.verbatim but only applied to NLO diagrams.
+
+See also: qgraf.verbatim, qgraf.verbatim.nlo
+\end{verbatim}
+\item[\texttt{group}] (\textit{true/false})
+\begin{verbatim}
+Flag whether or not the tree-level diagrams should be grouped
+into a single file.
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{diagsum}] (\textit{true/false})
+\begin{verbatim}
+Flag whether or not 1-loop diagrams with the same propagators
+should be summed before the algebraic reduction.
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{reduction\_programs}] (\textit{comma separated list})
+\begin{verbatim}
+Specifies the reduction libraries which should be supported.
+
+Possible values: ninja, samurai, golem95, pjfry (experimental)
+
+See also reduction_interoperation, reduction_interoperation_rescue.
+\end{verbatim}
+Default: \verb|ninja,golem95|
+\item[\texttt{polvec}] (\textit{text})
+\begin{verbatim}
+Evaluate the polarisation vector
+'numerical' or 'explicit'.
+\end{verbatim}
+Default: \verb|numerical|
+\item[\texttt{extensions}] (\textit{comma separated list})
+\begin{verbatim}
+A list of extension names which should be activated for the
+code generation.
+
+Build system related extensions:
+
+autotools    --- use autotools to generate Makefiles
+shared       --- create shared libraries (=dynamically linkable code),
+                 enabled by default with autotools extension
+f77          --- in combination with the BLHA interface it generates
+                 an olp_module.f90 linkable with Fortran77
+
+Other extensions:
+noformopt    --- disable diagram optimization using FORM
+gaugecheck   --- modify gauge boson wave functions to allow for
+                 a limited gauge check (introduces gauge*z variables)
+customspin2prop --- replace the propagator of spin-2 particles
+                    with a custom function (read the manual for this).
+\end{verbatim}
+\item[\texttt{debug}] (\textit{comma separated list})
+\begin{verbatim}
+A list of debug flags.
+Currently, the words 'lo', 'nlo' and 'all' are supported.
+\end{verbatim}
+\item[\texttt{select.lo}] (\textit{comma separated list})
+\begin{verbatim}
+A list of integer numbers, indicating leading order diagrams to be
+selected. If no list is given, all diagrams are selected.
+Otherwise, all diagrams not in the list are discarded.
+
+The list may contain ranges:
+
+select.lo=1,2,5:10:3, 50:53
+
+which is equivalent to
+
+select.lo=1,2,5,8,50,51,52,53
+
+See also: select.nlo, filter.lo, filter.nlo
+\end{verbatim}
+\item[\texttt{select.nlo}] (\textit{comma separated list})
+\begin{verbatim}
+A list of integer numbers, indicating one-loop diagrams to be selected.
+If no list is given, all diagrams are selected.
+Otherwise, all diagrams   not in the list are discarded.
+
+The list may contain ranges:
+
+select.nlo=1,2,5:10:3, 50:53
+
+which is equivalent to
+
+select.nlo=1,2,5,8,50,51,52,53
+
+See also: select.lo, filter.lo, filter.nlo
+\end{verbatim}
+\item[\texttt{select.nnlo}] (\textit{comma separated list})
+\begin{verbatim}
+A list of integer numbers, indicating two-loop diagrams to be selected.
+If no list is given, all diagrams are selected.
+Otherwise, all diagrams   not in the list are discarded.
+
+The list may contain ranges:
+
+select.nnlo=1,2,5:10:3, 50:53
+
+which is equivalent to
+
+select.nnlo=1,2,5,8,50,51,52,53
+
+See also: select.lo, filter.lo, filter.nlo
+\end{verbatim}
+\item[\texttt{filter.lo}] (\textit{text})
+\begin{verbatim}
+A python function which provides a filter for tree diagrams.
+
+filter.lo=lambda d: d.iprop(Z) == 1 \
+   and d.vertices(Z, U, Ubar) == 0
+
+The following methods of the diagram class can be used:
+
+* d.rank() = the maximum rank in Q possible for this diagram
+* d.loopsize() = the number of propagators in the loop
+* d.vertices(field1, field2, ...) = number of vertices
+    with the given fields
+* d.loopvertices(field1, field2, ...) = number of vertices
+    with the given fields; only those vertices which have
+    at least one loop propagator attached to them
+* d.iprop(field, momentum="...", twospin=..., massive=True/False,
+                                                         color=...) =
+    the number of propagators with the given properties:
+     - field: a field or list of fields
+     - momentum: a string denoting the momentum through this propagator,
+            such as "k1+k2"
+     - twospin: two times the spin (integer number)
+     - massive: select only propagators with/without a non-zero mass
+     - color: one of the numbers 1, 3, -3 or 8, or a list of
+              these numbers
+* d.chord(...) = number of loop propagators with the given properties;
+    the arguments are the same as in iprop
+* d.bridge(...) = number of non-loop propagators with the given
+    properties; the arguments are the same as in iprop
+
+See also: filter.nlo, select.lo, select.nlo
+\end{verbatim}
+\item[\texttt{filter.nlo}] (\textit{text})
+\begin{verbatim}
+A python function which provides a filter for loop diagrams.
+
+See filter.lo for more explanation.
+\end{verbatim}
+\item[\texttt{filter.nnlo}] (\textit{text})
+\begin{verbatim}
+A python function which provides a filter for loop diagrams.
+
+See filter.lo for more explanation.
+\end{verbatim}
+\item[\texttt{filter.module}] (\textit{text})
+\begin{verbatim}
+A python file of predefined functions which should be available
+in filters.
+
+Example:
+
+filter.module=filter.py
+filter.nlo=my_nlo_filter("vertices.txt")
+filter.lo=my_nlo_filter("vertices.txt")
+
+------ filter.py -----
+
+class my_nlo_filter_class:
+   def __init__(self, fname):
+      self.fields = []
+      f = open(fname, 'r')
+      for line in f.readlines():
+         fields = map(lambda s: s.strip(),
+               line.split(","))
+         self.fields.append(fields)
+      f.close()
+
+   def __call__(self, diag):
+      for lst in self.fields:
+         if diag.vertices(*lst) > 0:
+            return False
+      return True
+
+----------------------
+
+See filter.lo, filter.nlo
+\end{verbatim}
+\item[\texttt{renorm\_beta}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables beta function renormalisation
+
+QCD only
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{renorm\_mqwf}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables UV countertems coming from
+external massive quarks
+
+QCD only
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{renorm\_decoupling}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables UV counterterms coming from
+massive quark loops
+
+QCD only
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{renorm\_mqse}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables the UV counterterm coming from the
+massive quark propagators
+
+QCD only
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{renorm\_logs}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables the logarithmic finite terms
+of all UV counterterms
+
+QCD only
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{renorm\_gamma5}] (\textit{true/false})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Activates finite renormalisation for axial couplings in the
+'t Hooft-Veltman scheme
+
+QCD only, works only with built-in model files.
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{reduction\_interoperation}] (\textit{text})
+\begin{verbatim}
+
+   Default reduction library.
+
+   Possible values are: ninja, samurai, golem95, pjfry (experimental)
+
+   Sets the same variable in config.f90. A value of '-1' lets GoSam decide
+   depending on reduction_libraries
+
+   See common/config.f90 for details.
+\end{verbatim}
+Default: \verb|-1|
+\item[\texttt{reduction\_interoperation\_rescue}] (\textit{text})
+\begin{verbatim}
+
+   Rescue reduction program.
+
+   Sets the same variable in config.f90. A value of '-1' lets GoSam
+   decide.
+
+   See common/config.f90 for details.
+\end{verbatim}
+Default: \verb|-1|
+\item[\texttt{samurai\_scalar}] (\textit{integer number})
+\begin{verbatim}
+
+   Sets the same variable in config.f90.
+
+   See common/config.f90 for details.
+\end{verbatim}
+Default: \verb|2|
+\item[\texttt{nlo\_prefactors}] (\textit{integer number})
+\begin{verbatim}
+
+   Sets the same variable in config.f90. The values have the
+   following meaning:
+
+   0: A factor of alpha_(s)/2/pi is not included in the NLO result
+   1: A factor of 1/8/pi^2 is not included in the NLO result
+   2: The NLO includes all prefactors
+
+   Note, however, that the factor of 1/Gamma(1-eps) is not
+   included in any of the cases.
+
+   Please note, that nlo_prefactors=0 is enforced temporary in test.f90
+   for better testing. In OLP interface mode (BLHA/BLHA2), the default is
+   nlo_prefactors=2.
+\end{verbatim}
+Default: \verb|0|
+\item[\texttt{PSP\_check}] (\textit{true/false})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Activates Phase-Space Point test for the full amplitude.
+
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{PSP\_rescue}] (\textit{true/false})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Activates Phase-Space Point rescue based on the estimated
+accuracy on the finite part. It needs PSP_check=True.
+The accuracy is estimated using information on the single
+pole accuracy and on the stability of the finite parte
+under rotation of the phase space point.
+
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|True|
+\item[\texttt{PSP\_verbosity}] (\textit{true/false})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Sets the verbosity of the PSP_check.
+verbosity = False: no output
+verbosity = True : bad point are written in a file gs_badpts.log
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|False|
+\item[\texttt{PSP\_chk\_th1}] (\textit{integer number})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold to activate accept the point without further treatments.
+The number has to be an integer indicating the wished minimum number
+of digits accuracy on the pole. For poles more precise than this
+threshold the finite part is not checked.
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|8|
+\item[\texttt{PSP\_chk\_th2}] (\textit{integer number})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold to declare a PSP as bad point, based of the precision of the pole.
+Points with precision less than this threshold are directly reprocessed with
+the rescue system (if available), or declared as unstable. According to the
+verbosity level set, such points are written to a file and not used when
+the code is interfaced to an external Monte Carlo using the new BLHA standards.
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|3|
+\item[\texttt{PSP\_chk\_th3}] (\textit{integer number})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold to declare a PSP as bad point, based on the precision of
+the finite part estimated with a rotation. According to the
+verbosity level set, such points are written to a file and not
+used when the code is interfaced to an external Monte Carlo
+using the new BLHA standards.
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|5|
+\item[\texttt{PSP\_chk\_kfactor}] (\textit{text})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold on the k-factor to perform a rotation check on the PSP.
+!!Works only for QCD and with built-in model files!!
+\end{verbatim}
+Default: \verb|1000|
+\item[\texttt{reference-vectors}] (\textit{comma separated list})
+\begin{verbatim}
+A list of reference vectors for massive and higher spin particles.
+For vectors which are not assigned here, the program picks a
+reference vector automatically.
+
+Each entry of the list has to be of the form <index>:<index>
+
+EXAMPLE
+
+in=g,u
+out=t,W+
+reference-vectors=1:2,3:4,4:3
+
+In this example, the gluon (particle 1) takes the momentum k2
+as reference momentum for the polarisation vector. The massive
+top quark (particle 3) uses the light-cone projection l4 of the
+W-boson as reference direction for its own momentum splitting.
+Similarly, the momentum of the W-boson is split into a direction
+l4 and one along l3.
+
+If cycles are generated in the list (l3 has to be known in order
+to determine l4 and vice versa in the above example) they must be
+at most of length two. For the reference momenta of lightlike
+gauge bosons the length of cycles does not matter, e.g.
+
+in=g,g
+out=g,g
+reference-vectors=1:2,2:3,3:4,4:1
+\end{verbatim}
+\item[\texttt{abbrev.limit}] (\textit{text})
+\begin{verbatim}
+Maximum number of instructions per subroutine when calculating
+abbreviations, if this number is positive.
+\end{verbatim}
+Default: \verb|0|
+\item[\texttt{templates}] (\textit{text})
+\begin{verbatim}
+Path pointing to the directory containing the template
+files for the process. If not set, golem uses the directory
+<golem_path>/templates.
+
+The directory must contain a file called 'template.xml'
+\end{verbatim}
+\item[\texttt{qgraf.bin}] (\textit{text})
+\begin{verbatim}
+Points to the QGraf executable.
+
+Example:
+qgraf.bin=/home/my_user_name/bin/qgraf
+\end{verbatim}
+Default: \verb|qgraf|
+\item[\texttt{form.bin}] (\textit{text})
+\begin{verbatim}
+Points to the Form executable.
+
+Examples:
+1) # Use TForm:
+   form.bin=tform
+2) # Use non-standard location:
+   form.bin=/home/my_user_name/bin/form
+\end{verbatim}
+Default: \verb|tform|
+\item[\texttt{form.threads}] (\textit{integer number})
+\begin{verbatim}
+Number of Form threads.
+
+Example:
+form.threads=4
+runs tform, the parallel version of FORM, on 4 cores.
+\end{verbatim}
+Default: \verb|2|
+\item[\texttt{form.tempdir}] (\textit{text})
+\begin{verbatim}
+Temporary directory for Form. Should point to a directory
+on a local disk.
+
+Examples:
+form.tempdir=/tmp
+form.tempdir=/scratch
+\end{verbatim}
+Default: \verb|/tmp|
+\item[\texttt{form.workspace}] (\textit{integer number})
+\begin{verbatim}
+Size of the heap (in megabytes) used by FORM.
+
+Example (for machines with <= 2GB RAM):
+form.workspace=100
+set WorkSpace to 100M in FORM via form.set file.
+\end{verbatim}
+Default: \verb|1000|
+\item[\texttt{haggies.bin}] (\textit{text})
+\begin{verbatim}
+Points to the Haggies executable.
+Haggies is used to transform the expressions of the diagrams
+into optimized Fortran90 programs. It can be obtained from
+   http://www.nikhef.nl/~thomasr/download.php
+
+Examples:
+   1) haggies.bin=/home/my_user_name/bin/haggies
+   2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
+\end{verbatim}
+Default: \verb|java -jar /Users/sj/Documents/repo/GoSam/Release/share/golem/haggies/haggies.jar|
+\item[\texttt{fc.bin}] (\textit{text})
+\begin{verbatim}
+Denotes the executable file of the Fortran90 compiler.
+\end{verbatim}
+Default: \verb|gfortran|
+\item[\texttt{python.bin}] (\textit{text})
+\begin{verbatim}
+Denotes the executable file of Python
+\end{verbatim}
+Default: \verb|python|
+\item[\texttt{projectors}] (\textit{text})
+\begin{verbatim}
+path to the form file containing projectors
+\end{verbatim}
+Default: \verb|projectors.hh|
+\item[\texttt{integral\_families\_1loop}] (\textit{text})
+\begin{verbatim}
+path to the yaml file containing the integral families
+\end{verbatim}
+Default: \verb|integral_families_1loop.yaml|
+\item[\texttt{integral\_families\_2loop}] (\textit{text})
+\begin{verbatim}
+path to the yaml file containing the integral families
+\end{verbatim}
+Default: \verb|integral_families_2loop.yaml|
+\item[\texttt{reduze.bin}] (\textit{text})
+\begin{verbatim}
+Points to reduze executable
+\end{verbatim}
+Default: \verb|reduze|
+\item[\texttt{ninja.fcflags}] (\textit{text})
+\begin{verbatim}
+FCFLAGS required to compile with ninja.
+
+Example:
+ninja.fcflags=-I/usr/local/include/ninja
+\end{verbatim}
+\item[\texttt{ninja.ldflags}] (\textit{text})
+\begin{verbatim}
+LDFLAGS required to link ninja.
+
+Example:
+ninja.ldflags=-L/usr/local/lib/ -lninja
+\end{verbatim}
+\item[\texttt{samurai.fcflags}] (\textit{text})
+\begin{verbatim}
+FCFLAGS required to compile with samurai.
+
+Example:
+samurai.fcflags=-I/usr/local/include/samurai
+\end{verbatim}
+\item[\texttt{samurai.ldflags}] (\textit{text})
+\begin{verbatim}
+LDFLAGS required to link samurai.
+
+Example:
+samurai.ldflags=-L/usr/local/lib/ -lsamurai-gfortran-double
+\end{verbatim}
+\item[\texttt{golem95.fcflags}] (\textit{text})
+\begin{verbatim}
+FCFLAGS required to compile with golem95.
+
+Example:
+golem95.fcflags=-I/usr/local/include/golem95
+\end{verbatim}
+\item[\texttt{golem95.ldflags}] (\textit{text})
+\begin{verbatim}
+LDFLAGS required to link golem95.
+
+Example:
+golem95.ldflags=-L/usr/local/lib/ -lgolem-gfortran-double
+\end{verbatim}
+\item[\texttt{r2}] (\textit{text})
+\begin{verbatim}
+The algorithm how to treat the R2 term:
+
+implicit    -- mu^2 terms are kept in the numerator and reduced
+               at runtime
+explicit    -- mu^2 terms are reduced analytically
+off         -- all mu^2 terms are set to zero
+\end{verbatim}
+Default: \verb|explicit|
+\item[\texttt{symmetries}] (\textit{comma separated list})
+\begin{verbatim}
+Specifies the symmetries of the amplitude.
+
+This information is used when the list of helicities is generated.
+
+Possible values are:
+
+* flavour    -- no flavour changing interactions
+         When calculating the list of helicities, fermion lines
+    of PDGs 1-6 are assumed not to mix.
+
+* family     -- flavour changing only within families
+         When calculating the list of helicities, fermion lines
+    of PDGs 1-6 are assumed to mix only within families,
+    i.e. a quark line connecting a up with a down quark would
+    be considered, while up-bottom is not.
+* lepton     -- means for leptons what 'flavour' means for quarks
+* generation -- means for leptons what 'family' means for quarks
+* parity     -- the amplitude is invariant under parity tranformation.
+                === Parity is not implemented yet.
+* <n>=<h>    -- restriction of particle helicities,
+         e.g. 1=-, 2=+ specifies helicities of particles 1 and 2
+* %<n>=<h>   -- restriction by PDG code,
+         e.g. %23=+- specifies the helicity of all Z-bosons to be
+         '+' and '-' only (no '0' polarisation).
+
+         %<n> refers to both +n and -n
+         %+<n> refers to +n only
+         %-<n> refers to -n only
+\end{verbatim}
+\item[\texttt{crossings}] (\textit{comma separated list})
+\begin{verbatim}
+A list of crossed processes derived from this process.
+
+For each process in the list a module similar to matrix.f90 is
+generated.
+
+Example:
+
+process_name=ddx_uux
+in=1,-1
+out=2,-2
+
+crossings=dxd_uux: -1 1 > 2 -2, ud_ud: 2 1 > 2 1
+\end{verbatim}
+\end{description}

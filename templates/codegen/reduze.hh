@@ -3,6 +3,12 @@ Symbols dimS,dimD;
 Dimension dimS; * space-time dimension (normally d)
 *UnitTrace dimD; * dirac algebra dimension (normally 4)
 
+
+***** DO NOT PUBLISH *****
+AutoDeclare Symbols F1,F2,F3,F4,F5;
+***** DO NOT PUBLISH *****
+
+
 AutoDeclare Symbols ReduzeT; * topologies/integral families
 AutoDeclare Symbols ReduzeN; * propagators
 AutoDeclare Symbols Proj; * projector labels
@@ -130,4 +136,9 @@ Symbols sDUMMY5,[];
    Id Crossing(?tail)=1;
    Id CrossingInvariants(?tail) = 1;
    Id Sector(?tail)=1;
+#EndProcedure
+
+#Procedure UncrossIntReduze()
+   Id INT(sDUMMY1?,?tail) = Sector(sDUMMY1)*INT(sDUMMY1,?tail);
+   #Call CrossReduze
 #EndProcedure
