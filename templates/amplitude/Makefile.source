@@ -81,7 +81,7 @@ l1.log: ../diagrams-1.hh
 	    ../codegen/golemreduzesum.frm
 
 toreduze_1loop:
-	python toreduze.py -i l1integrals.txt -o l1toreduze.txt  # python hack
+	python toreduze.py -i l1integrals.log -o l1integrals.txt  # python hack
 
 #prompt user to create codegen/reduzereduction-1.hh file containing reduction
 
