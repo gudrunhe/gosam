@@ -118,8 +118,31 @@ abbfile.write('      use [% process_name asprefix=\_ %]model\n')
 abbfile.write('      use [% process_name asprefix=\_ %]color, only: TR\n')
 abbfile.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 abbfile.write('      implicit none\n')
-abbfile.write('\n')
-abbfile.write(outdict['Abbreviations'])
+abbfile.write('\n')[%
+@if eval abbrev.limit > 0 %][% 'need to split into several subroutines' %]
+abb_chunks = []
+line_counter = 0
+routine_counter = 0
+for abb_line in outdict['Abbreviations'].split("\n"):
+	abbfile.write(abb_line + "\n")
+	line_counter += 1
+	if line_counter >= [% abbrev.limit %]: # abbrev.limit = [% abbrev.limit %]
+		routine_counter += 1
+		line_counter = 0
+		abbfile.write('      call init_abbrev_%i()\n' % routine_counter)
+		abbfile.write('   end subroutine\n')
+		abbfile.write('   subroutine init_abbrev_%i()\n' % routine_counter)
+		abbfile.write('      use [% process_name asprefix=\_ %]config, only: deltaOS, &\n')
+		abbfile.write('     &    logfile, debug_nlo_diagrams\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]kinematics\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]model\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]color, only: TR\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
+		abbfile.write('      implicit none\n')
+		abbfile.write('\n')[%
+@else %]
+abbfile.write(outdict['Abbreviations'])[%
+@end @if %]
 abbfile.write(outdict['R2'])
 abbfile.write('\n')
 abbfile.write('      rat2 = rat2 + R2d'+diag+'\n')

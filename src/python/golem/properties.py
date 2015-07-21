@@ -766,7 +766,7 @@ abbrev_limit = Property("abbrev.limit",
    Maximum number of instructions per subroutine when calculating
    abbreviations, if this number is positive.
    """,
-   str, "0")
+   str, "500")
 
 abbrev_level = Property("abbrev.level",
    """\
