@@ -152,6 +152,8 @@ Local d`DIAG'R2 =
 #EndIf
 #EndDo
 ;[%
+@case implicit off %]
+Local d`DIAG'R2 = 0;[%
 @end @select%]
 .sort
 
