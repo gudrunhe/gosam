@@ -194,7 +194,7 @@
         <file src="golemreduzesecdec.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>
-        <file src="golemreduzesource.frm" class="Verbatim">
+        <file src="golemreduzecode.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>
 	</directory>
