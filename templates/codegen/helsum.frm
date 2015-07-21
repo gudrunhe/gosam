@@ -102,6 +102,11 @@ Local dh`i'd`DIAG' = diagram`DIAG';[%
 Local R2dh`i'd`DIAG' = R2d`DIAG';[%
 @end @select%]
 .sort
+hide dh`i'd`DIAG';[%
+@select r2 @case explicit %]
+hide R2dh`i'd`DIAG';[%
+@end @select%]
+.sort
 #EndIf
 #EndDo
 .sort
@@ -120,6 +125,8 @@ Id c`c' = c`c'h`i';
 .sort
 #do irank=0,`RANK'
 Local d`irank'h`i'd`DIAG' = d`irank'diagram;
+.sort
+hide d`irank'h`i'd`DIAG';
 .sort
 #EndDo
 #EndIf
