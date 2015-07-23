@@ -4,9 +4,9 @@
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-SUBDIRS=doc common[%
+SUBDIRS=doc common[% @if extension reduze %] amplitude[% @else %][%
 @for helicities generated %] helicity[% helicity %][%
-@end @for helicities %] matrix
+@end @for helicities %][% @end @if %] matrix
 
 [% @if internal OLP_MODE %]
 include ../Makefile.conf[%

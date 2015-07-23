@@ -4,7 +4,30 @@ include ../Makefile.conf
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-.PHONY: source
+.PHONY: source compile clean very-clean
+
+compile : source # TODO: recipe to come
+
+clean:
+	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
+		-or -name '*.mod' -or -name '*.a' -or -name '*.so' \) \
+		-exec rm \{} \;
+
+very-clean: clean
+	$(Q)rm -f filelist-source
+ifeq ($(HAVE_MAKEFILE_SOURCE),1)
+	$(Q)$(FIND) $(FIND_OPT) . \( \
+		-name '*.f90' \
+		-or -name '*.log' \
+		\) -exec rm \{} \;
+endif
+
+filelist-source: source # TODO: probably not correct
+	$(Q)$(FIND) $(FIND_OPT) . \( \
+		-name '*.f90' \
+		-or -name 'Makefile' \
+		-or -name 'Makefile.dep' \
+		\) -fprint $@
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
