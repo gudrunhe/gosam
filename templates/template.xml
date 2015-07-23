@@ -5,35 +5,34 @@
 	description="This template is used by gosam.py"
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
-    
-    <directory src=".">
-        <file src="configure.ac" class="Kinematics">
-            <only if-extension="autotools" />
-            <except if-internal="OLP_MODE" />
-        </file>
-        <file src="autogen.sh" class="Verbatim" executable="yes">
-            <only if-extension="autotools" />
-            <except if-internal="OLP_MODE" />
-        </file>
-        <file src="Makefile.am" class="Kinematics">
-            <only if-extension="autotools" />
-        </file>
-        <file src="Makefile" class="Kinematics" >
-            <except if-extension="autotools" />
-        </file>
-        <file src="Makefile.source" class="Kinematics" />
-        <file src="Makefile.conf" class="Kinematics">
-            <except if-file="exists" in-mode="normal" />
-            <except if-internal="OLP_MODE" />
-        </file>
-        <file src="config.sh" class="Kinematics" executable="yes">
-            <except if-extension="autotools" />
-        </file>
-        <file src="config.sh.in" class="Kinematics">
-            <only if-extension="autotools" />
-        </file>
-    </directory>
-    
+
+	<file src="configure.ac" class="Kinematics">
+		<only if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
+	</file>
+	<file src="autogen.sh" class="Verbatim" executable="yes">
+		<only if-extension="autotools" />
+		<except if-internal="OLP_MODE" />
+	</file>
+	<file src="Makefile.am" class="Kinematics">
+		<only if-extension="autotools" />
+	</file>
+	<file src="Makefile" class="Kinematics" >
+		<except if-extension="autotools" />
+	</file>
+	<file src="Makefile.source" class="Kinematics" />
+	<file src="Makefile.conf" class="Kinematics">
+		<except if-file="exists" in-mode="normal" />
+		<except if-internal="OLP_MODE" />
+	</file>
+	<file src="config.sh" class="Kinematics" executable="yes">
+		<except if-extension="autotools" />
+	</file>
+	<file src="config.sh.in" class="Kinematics">
+		<only if-extension="autotools" />
+	</file>
+
+
     <directory src="amplitude" dest="amplitude">
         <only if-extension="reduze" />
         <file src="Makefile" class="Integrals">
@@ -61,14 +60,20 @@
 		<file src="color.out" class="Kinematics"/>
 		<file src="functions.out" class="Kinematics"/>
 		<file src="model.out" class="Model"/>
-		<file src="haggies-l0.in" class="Multi"/>
+
+		<file src="haggies-l0.in" class="Multi">
+			<except if-extension="extraopt" />
+		</file>
+
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
 				class="Integrals">
 			<only if-option="group" value="true"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l0-nogroup.out" dest="haggies-l0.out"
 				class="Kinematics">
 			<only if-option="group" value="false"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1.in" class="Multi">
 			<except if-extension="formopt" />
@@ -84,12 +89,15 @@
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.in" class="Multi">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1c.out" class="Kinematics">
 			<except if-option="genUV" value="false" />
+			<except if-extension="formopt" />
 		</file>
 		<file src="filter.py" class="Verbatim">
 			<only if-extension="formopt" />
@@ -104,8 +112,8 @@
 		</file>
 		<file src="info.frm" class="Kinematics" />
 		<file src="golem.frm" class="Kinematics" >
-            <except if-extension="reduze" />
-        </file>
+			<except if-extension="reduze" />
+		</file>
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
 			<only if-extension="extraopt" />
@@ -209,6 +217,7 @@
 	</directory>
     
     <directory src="codegen">
+        <only if-extension="reduze" />
         <directory src="reduze">
             <foreach iterator="loops">
                 <directory src="loop" dest="%dloop" arguments="loop">
@@ -219,15 +228,14 @@
                 </directory>
             </foreach>
         </directory>
-        <only if-extension="reduze" />
     </directory>
     
     <directory src="." usedby="reduze">
+        <only if-extension="reduze" />
         <foreach iterator="loops">
             <file src="integral_families_%dloop.yaml" dest="codegen/reduze/%dloop/config/integralfamilies.yaml" arguments="loop" usedby="reduze"/>
         </foreach>
         <file src="projectors.hh" dest="codegen/projectors.hh" usedby="reduze"/>
-        <only if-extension="reduze" />
     </directory>
     
 	<directory src="common">
@@ -242,6 +250,7 @@
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
+ 	   <file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
@@ -273,7 +282,7 @@
 			<except if-extension="autotools" />
 		</file>
 		<file src="Makefile.am" class="Kinematics">
-            <only if-extension="autotools" />
+			<only if-extension="autotools" />
 		</file>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
@@ -310,7 +319,7 @@
 
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
-            <except if-extension="reduze" />
+			<except if-extension="reduze" />
 			<file src="Makefile" class="Integrals">
 				<except if-extension="autotools" />
 			</file>
@@ -319,7 +328,7 @@
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
-			<file src="form.set" class="Kinematics"/>
+			<file src="../form.set" dest="form.set" class="Kinematics"/>
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
@@ -343,6 +352,7 @@
 				class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
 			</file>
 			<file src="amplitude.f90" dest="amplitudeh%d.f90"
 				arguments="helicity" class="Integrals" />

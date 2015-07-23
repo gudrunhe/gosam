@@ -27,7 +27,7 @@ SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
 
 REDUZE=[% reduze.bin %]
-TRANSLATE_REDUZE=python ../codegen/translate_reduze.py
+TRANSLATE_REDUZE=$(PYTHON) ../codegen/translate_reduze.py
 
 [% @if generate_nlo_virt %]
 DIAGRAMS_1LOOP_VIRT=reduze_1loop \
@@ -81,7 +81,7 @@ l1.log: ../diagrams-1.hh
 	    ../codegen/golemreduzesum.frm
 
 toreduze_1loop:
-	python toreduze.py -i l1integrals.log -o l1integrals.txt  # python hack
+	$(PYTHON) toreduze.py -i l1integrals.log -o l1integrals.txt
 
 #prompt user to create codegen/reduzereduction-1.hh file containing reduction
 
@@ -98,7 +98,7 @@ l1.cc: ../diagrams-1.hh
 		../codegen/golemreduzesecdec.frm
 
 tosecdec_1loop:
-	python tosecdec.py -i l2secdec.txt -m secdec-1loop.m -p secdec-1loop.input # python hack
+	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-1loop.m -p secdec-1loop.input
 [% @end @if %]
 
 [% @if generate_nnlo_virt %]
@@ -126,7 +126,7 @@ l2.log: ../diagrams-2.hh
 		../codegen/golemreduzesum.frm
 
 toreduze_2loop:
-	python toreduze.py -i l2integrals.txt -o l2toreduze.txt  # python hack
+	$(PYTHON) toreduze.py -i l2integrals.txt -o l2toreduze.txt
 
 #prompt user to create codegen/reduzereduction-2.hh file containing reduction for all integrals in l2toreduze.txt
 
@@ -143,7 +143,7 @@ l2.cc: ../diagrams-2.hh
 		../codegen/golemreduzesecdec.frm
 
 tosecdec_2loop:
-	python tosecdec.py -i l2secdec.txt -m secdec-2loop.m -p secdec-2loop.input # python hack
+	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-2loop.m -p secdec-2loop.input
 
 
 [% @end @if %]
