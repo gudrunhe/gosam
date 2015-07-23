@@ -35,7 +35,7 @@ clean:
 
 very-clean:	
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C test clean
 	rm -f virtual/.gosam.dir
 	rm -fr virtual
+	$(MAKE) -C test clean
 
