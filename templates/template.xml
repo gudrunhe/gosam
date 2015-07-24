@@ -223,6 +223,7 @@
             <foreach iterator="loops">
                 <directory src="loop" dest="%dloop" arguments="loop">
                     <file src="reduze_setup.yaml" class="Integrals"/>
+                    <file src="reduze_insert.yaml" class="Integrals"/>
                     <directory src="config">
                         <file src="kinematics.yaml" class="Integrals"/>
                     </directory>

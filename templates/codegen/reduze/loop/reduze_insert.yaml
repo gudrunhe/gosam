@@ -1,0 +1,11 @@
+jobs:
+  - select_reductions:
+      input_file: “integrals”
+      output_file: “tmp/integrals"
+  - reduce_files:
+      equation_files: [“tmp/integrals"]
+      output_file: "integrals.sol"
+  - export:
+      input_file: "integrals.sol"
+      output_file: “../../reduzereduction-[% loop %].hh”
+      output_format: "form"
