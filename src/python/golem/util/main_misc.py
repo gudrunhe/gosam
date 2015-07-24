@@ -545,6 +545,9 @@ def workflow(conf):
 
 	check_dont_overwrite(conf)
 
+	if len(powers) < 2:
+		raise GolemConfigError("The property %s must have 2 or more arguments." % \
+				golem.properties.qgraf_power)
 	if len(powers) == 2:
 		generate_lo_diagrams = True
 		generate_nlo_virt = False
@@ -553,19 +556,31 @@ def workflow(conf):
 		generate_lo_diagrams = powers[1].strip().lower() != "none"
 		generate_nlo_virt = powers[2].strip().lower() != "none"
 		generate_nnlo_virt = False
-	elif len(powers) == 4:
+	else:
 		generate_lo_diagrams = powers[1].strip().lower() != "none"
 		generate_nlo_virt = powers[2].strip().lower() != "none"
-		generate_nnlo_virt = True
-	else:
-		raise GolemConfigError("The property %s must have 2, 3 or 4 arguments." % \
-				golem.properties.qgraf_power)
+		generate_nnlo_virt = powers[3].strip().lower() != "none"
+		warning("Your configuration sets a calculation to loop-order higher than 1" +
+              "which is an undocumented and only partially tested feature.",
+              "Please, feel free to test this feature but be aware that",
+              "====== WE DON'T GUARANTEE FOR ANYTHING! =====")
+
+	# loop orders that are to be calculated
+	# parse the arument "order" of the run card
+	loops_to_generate = []
+	for i, power in enumerate(powers):
+		# first element in powers is the type of the coupling
+		if i == 0:
+			continue
+		if power.strip().lower() != "none":
+			loops_to_generate.append(i - 1)
 
         #if loops==2:
 	  #generate_nnlo_virt = True
 	#else:
 	  #generate_nnlo_virt = False
-	  
+
+	conf["loops_to_generate"] = loops_to_generate
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV')

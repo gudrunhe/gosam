@@ -2033,6 +2033,13 @@ additional information about each loop diagram.
    rank of the group, \synt{index} is an index running from zero to
    the number of groups which are in the loop, \synt{var}
    (default: \lit{\$\_}) holds the group number.
+\item[\texttt{loops_generated}]
+   This iterator loops over the number of loop momenta to which diagrams
+   are generated. Inside the loop, the following symbols are defined:
+   \begin{description}\footnotesize
+   \item[\texttt{is\_first}, \texttt{is\_last}] as usual
+   \item[\texttt{loop}] the number of loop momenta
+   \end{description}
 \item[\texttt{propagators} \texttt{group=}\synt{group}
    {[\texttt{index=}\synt{index}]}
    {[\texttt{shift=}\synt{shift}]}

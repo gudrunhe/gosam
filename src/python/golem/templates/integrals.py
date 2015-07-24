@@ -25,9 +25,23 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
 		self._eprops = eprops
+		self._loops_to_generate = conf.getProperty("loops_to_generate")
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
+
+	def loops_generated(self, *args, **opts):
+		"""
+		Iterate over the number of loops generated.
+
+		"""
+		props = Properties()
+
+		for loop in self._loops_to_generate:
+			props.setProperty("is_first", True if loop == self._loops_to_generate[ 0] else False)
+			props.setProperty("is_last" , True if loop == self._loops_to_generate[-1] else False)
+			props.setProperty("loop", loop)
+			yield props
 
 	def loopsize(self, *args, **opts):
 		if "group" in opts:
@@ -145,7 +159,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			prefix = opts["prefix"]
 		else:
 			prefix = ""
-        
+
 		var_name = self._setup_name("var", prefix + "$_", opts)
 		mass_name = self._setup_name("mass", prefix + "mass", opts)
 		first_name = self._setup_name("first", "is_first", opts)
@@ -158,9 +172,9 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			root = self._roots[g]
 			for i in range(0,root.size()):
 				mass_set.add(root.mass(i))
-        
+
 		mass_set.discard("0")
-        
+
 		idx = 0
 		is_first = True
 		last_idx = len(mass_set)
