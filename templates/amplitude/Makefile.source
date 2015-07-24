@@ -26,41 +26,62 @@ TXT_TREE= $(subst .cc,.log,$(DIAGRAMS_TREE))
 SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
 
-REDUZE=[% reduze.bin %]
-TRANSLATE_REDUZE=$(PYTHON) ../codegen/translate_reduze.py
+SOURCE_VIRT = [% @for loops_generated %]$(DIAGRAMS_[%loop%]LOOP_VIRT) [% @end @for %]
+
+[% @for loops_generated %][%
+@if is_first %]
+TRANSLATE_REDUZE=$(PYTHON) ../codegen/translate_reduze.py[%
+@end @if %]
+
+DIAGRAMS_[%loop%]LOOP_VIRT=reduze_[%loop%]loop \
+	translate_[%loop%]loop [% @for elements topolopy.keep.virt %] \
+	d[%$_%]l[%loop%].log[% @end @for %] \
+	l[%loop%].log \
+	toreduze_[%loop%]loop \
+	l[%loop%].cc
+
+TXT_[%loop%]LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_[%loop%]LOOP_VIRT))[%
+@end @for %]
+
+[% @for loops_generated %]
+
+reduze_[%loop%]loop:
+	cd ../codegen/reduze/[%loop%]loop; $(REDUZE) reduze_setup.yaml; cd -;
+	touch reduze_[%loop%]loop
+
+translate_[%loop%]loop:
+	$(TRANSLATE_REDUZE) ../codegen/reduze/[%loop%]loop/ [%loop%]
+	touch translate_[%loop%]loop
+
+toreduze_[%loop%]loop:
+	$(PYTHON) ../codegen/toreduze.py \
+                    -i l[%loop%]integrals.log \
+                    -t integralsl[%loop%].m \
+                    -s ../codegen/reduze/[%loop%]loop/log/find_diagram_shifts_for_reduze[%loop%]loop_yaml.log \
+                    -y ../codegen/reduze/[%loop%]loop/reduze_reduce.yaml
+	cd ../codegen/reduze/[%loop%]loop/ ; reduze reduze_reduce.yaml ; reduze reduze_insert.yaml
+	touch toreduze_[%loop%]loop
+
+#prompt user to create codegen/reduzereductionl[%loop%].hh file containing reduction
+
+#
+# STAGE 2
+#
+l[%loop%].cc: ../diagrams-[%loop%].hh
+	@echo Form is reducing [%loop%] loop diagrams
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D LOOPS=[%loop%] \
+		-D ORD=2 \
+		-D OUTFILE=l[%loop%] \
+		../codegen/golemreduzesecdec.frm
+
+tosecdec_[%loop%]loop:
+	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-[%loop%]loop.m -p secdec-[%loop%]loop.input
+
+[% @end @for %]
 
 [% @if generate_nlo_virt %]
-DIAGRAMS_1LOOP_VIRT=reduze_1loop \
-	translate_1loop [% @for elements topolopy.keep.virt %] \
-	d[%$_%]l1.log[% @end @for %] \
-	l1.log \
-	toreduze_1loop \
-	l1.cc
-
-TXT_1LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_1LOOP_VIRT))
-
-[% @end @if generate_nlo_virt %]
-
-[% @if generate_nnlo_virt %]
-DIAGRAMS_2LOOP_VIRT= reduze_2loop \
-	translate_2loop [% @for elements topolopy.keep.nnlo_virt %] \
-	d[%$_%]l2.log[% @end @for %] \
-	l2.log \
-	toreduze_2loop \
-	l2.cc
-
-TXT_2LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_2LOOP_VIRT))
-
-[% @end @if generate_nnlo_virt %]
-
-SOURCE_VIRT = [% @if generate_nlo_virt %] $(DIAGRAMS_1LOOP_VIRT) [% @end @if generate_nlo_virt %] [% 
-@if generate_nnlo_virt %] $(DIAGRAMS_2LOOP_VIRT) [% @end @if generate_nnlo_virt %]
-
-[% @if generate_nlo_virt %]
-reduze_1loop:
-	cd ../codegen/reduze/1loop; $(REDUZE) reduze_setup.yaml; cd -;
-translate_1loop:
-	$(TRANSLATE_REDUZE) ../codegen/reduze/1loop/ 1
 [% @for elements topolopy.keep.virt %]
 d[%$_%]l1.log: ../diagrams-1.hh
 	@echo Form is processing loop diagram [%$_%]
@@ -80,29 +101,6 @@ l1.log: ../diagrams-1.hh
 	    -D OUTFILE=l1 \
 	    ../codegen/golemreduzesum.frm
 
-toreduze_1loop:
-	$(PYTHON) ../codegen/toreduze.py \
-                    -i l1integrals.log \
-                    -t l1integrals.txt \
-                    -s ../codegen/reduze/1loop/log/find_diagram_shifts_for_reduze1loop_yaml.log \
-                    -y reduze_reduce.yaml
-
-#prompt user to create codegen/reduzereduction-1.hh file containing reduction
-
-#
-# STAGE 2
-#
-l1.cc: ../diagrams-1.hh
-	@echo Form is reducing 1 loop diagrams
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D LOOPS=1 \
-		-D ORD=2 \
-		-D OUTFILE=l1 \
-		../codegen/golemreduzesecdec.frm
-
-tosecdec_1loop:
-	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-1loop.m -p secdec-1loop.input
 [% @end @if %]
 
 [% @if generate_nnlo_virt %]

@@ -15,7 +15,7 @@ off statistics;
 G l`LOOPS' = l`LOOPS';
 .sort:sum;
 
-#include- reduzereduction-`LOOPS'.hh
+#include- reductionl`LOOPS'.hh
 .sort:reduce;
 
 Denominators Den;
