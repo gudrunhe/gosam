@@ -81,7 +81,11 @@ l1.log: ../diagrams-1.hh
 	    ../codegen/golemreduzesum.frm
 
 toreduze_1loop:
-	$(PYTHON) toreduze.py -i l1integrals.log -o l1integrals.txt
+	$(PYTHON) ../codegen/toreduze.py \
+                    -i l1integrals.log \
+                    -t l1integrals.txt \
+                    -s ../codegen/reduze/1loop/log/find_diagram_shifts_for_reduze1loop_yaml.log \
+                    -y reduze_reduce.yaml
 
 #prompt user to create codegen/reduzereduction-1.hh file containing reduction
 
@@ -126,7 +130,7 @@ l2.log: ../diagrams-2.hh
 		../codegen/golemreduzesum.frm
 
 toreduze_2loop:
-	$(PYTHON) toreduze.py -i l2integrals.txt -o l2toreduze.txt
+	$(PYTHON) ../codegen/toreduze.py -i l2integrals.txt -t l2toreduze.txt
 
 #prompt user to create codegen/reduzereduction-2.hh file containing reduction for all integrals in l2toreduze.txt
 

@@ -43,7 +43,6 @@
         </file>
         <file src="Makefile.dep" class="Integrals"/>
         <file src="Makefile.source" class="Integrals"/>
-        <file src="toreduze.py" class="Verbatim"/>
         <file src="tosecdec.py" class="Verbatim"/>
         <foreach iterator="loops">
             <file src="secdec.m" dest="secdec-%dloop.m" arguments="loop" class="Integrals"/>
@@ -60,7 +59,9 @@
 		<file src="color.out" class="Kinematics"/>
 		<file src="functions.out" class="Kinematics"/>
 		<file src="model.out" class="Model"/>
-
+      <file src="toreduze.py" class="Verbatim">
+			<only if-extension="reduze"/>
+		</file>
 		<file src="haggies-l0.in" class="Multi">
 			<except if-extension="extraopt" />
 		</file>
