@@ -32,7 +32,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	def loops_generated(self, *args, **opts):
 		"""
-		Iterate over the number of loops generated.
+		Iterate over the number of loops generated excluding 0.
 
 		"""
 		props = Properties()

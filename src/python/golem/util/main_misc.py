@@ -570,7 +570,8 @@ def workflow(conf):
 	loops_to_generate = []
 	for i, power in enumerate(powers):
 		# first element in powers is the type of the coupling
-		if i == 0:
+		# skip tree level (zero loops)
+		if i == 0 or i == 1:
 			continue
 		if power.strip().lower() != "none":
 			loops_to_generate.append(i - 1)
