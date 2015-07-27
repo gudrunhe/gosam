@@ -194,6 +194,9 @@
         <file src="secdec.hh" class="Verbatim">
             <only if-extension="reduze" />
         </file>
+        <file src="series.hh" class="Verbatim">
+            <only if-extension="reduze" />
+        </file>
 		<file src="golemreduze.frm" class="Verbatim">
             <only if-extension="reduze" />
         </file>

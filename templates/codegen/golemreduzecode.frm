@@ -30,7 +30,7 @@ Id prf(sDUMMY1?,sDUMMY2?) = sDUMMY1*Den(sDUMMY2);
 .sort
 
 CFunction den; * den(x)=1/x, special function for series package
-#include- series.h
+#include- series.hh
 * 2*`LOOPS'+`ORD'+1 is max possible # terms in expansion epsS^(-2*`LOOPS') + ... + 1 + ... + epsS^(`ORD')
 #call init({2*`LOOPS'+`ORD'+1})
 #call series(epsS,`ORD')
