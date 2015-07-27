@@ -34,7 +34,7 @@ TRANSLATE_REDUZE=$(PYTHON) ../codegen/translate_reduze.py[%
 @end @if %]
 
 DIAGRAMS_[%loop%]LOOP_VIRT=reduze_[%loop%]loop \
-	translate_[%loop%]loop [% @for elements topolopy.keep.virt %] \
+	translate_[%loop%]loop [% @for elements loop.keep.diagrams %] \
 	d[%$_%]l[%loop%].log[% @end @for %] \
 	l[%loop%].log \
 	toreduze_[%loop%]loop \
@@ -79,78 +79,27 @@ l[%loop%].cc: ../diagrams-[%loop%].hh
 tosecdec_[%loop%]loop:
 	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-[%loop%]loop.m -p secdec-[%loop%]loop.input
 
-[% @end @for %]
-
-[% @if generate_nlo_virt %]
-[% @for elements topolopy.keep.virt %]
-d[%$_%]l1.log: ../diagrams-1.hh
+[% @for elements loop.keep.diagrams %]
+d[%$_%]l[%loop%].log: ../diagrams-[%loop%].hh
 	@echo Form is processing loop diagram [%$_%]
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
-	    -D LOOPS=1 \
+	    -D LOOPS=[%loop%] \
 	    -D DIAG=[%$_%] \
-	    -D OUTFILE=d[%$_%]l1 \
+	    -D OUTFILE=d[%$_%]l[%loop%] \
 	    ../codegen/golemreduze.frm
 [% @end @for %]
 
-l1.log: ../diagrams-1.hh
-	@echo Form is summing 1 loop diagrams
+l[%loop%].log: ../diagrams-[%loop%].hh
+	@echo Form is summing [%loop%] loop diagrams
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
-	    -D LOOPS=1 \
-	    -D OUTFILE=l1 \
+	    -D LOOPS=[%loop%] \
+	    -D OUTFILE=l[%loop%] \
 	    ../codegen/golemreduzesum.frm
 
-[% @end @if %]
 
-[% @if generate_nnlo_virt %]
-reduze_2loop:
-	cd ../codegen/reduze/2loop; $(REDUZE) reduze_setup.yaml; cd -;
-translate_2loop:
-	$(TRANSLATE_REDUZE) ../codegen/reduze/2loop/ 2
-[% @for elements topolopy.keep.nnlo_virt %]
-d[%$_%]l2.log: ../diagrams-2.hh
-	@echo Form is processing loop diagram [%$_%]
-	@$(FORM) $(FORM_OPT) \
-	    -w$(FORM_THREADS) \
-	    -D LOOPS=2 \
-	    -D DIAG=[%$_%] \
-	    -D OUTFILE=d[%$_%]l2 \
-	    ../codegen/golemreduze.frm
 [% @end @for %]
-
-l2.log: ../diagrams-2.hh
-	@echo Form is summing 2 loop diagrams
-	@$(FORM) $(FORM_OPT) \
-	    -w$(FORM_THREADS) \
-		-D LOOPS=2 \
-		-D OUTFILE=l2 \
-		../codegen/golemreduzesum.frm
-
-toreduze_2loop:
-	$(PYTHON) ../codegen/toreduze.py -i l2integrals.txt -t l2toreduze.txt
-
-#prompt user to create codegen/reduzereduction-2.hh file containing reduction for all integrals in l2toreduze.txt
-
-#
-# STAGE 2
-#
-l2.cc: ../diagrams-2.hh
-	@echo Form is reducing 2 loop diagrams
-    @$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D LOOPS=2 \
-		-D ORD=0 \
-		-D OUTFILE=l2 \
-		../codegen/golemreduzesecdec.frm
-
-tosecdec_2loop:
-	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-2loop.m -p secdec-2loop.input
-
-
-[% @end @if %]
-
-
 
 .SUFFIXES:
 

@@ -222,10 +222,11 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
 
 
 
-def analyze_2loop_diagrams(diagrams, model, conf, onshell,
+def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
       quark_masses = None, complex_masses=None, filter_flags = None, massive_bubbles = {}):
-  # TODO: Modify this subroutine according to the needs of 2loop. Simply copy of NLO 
+  # TODO: Modify this subroutine according to the needs of nloop. Simply copy of NLO
   # at the moment
+  # TODO: This is still the special case for two loop -> generalize to nloop
    zero = golem.util.tools.getZeroes(conf)
    lst = setup_list(golem.properties.select_nnlo_diagrams, conf)
    fltr = setup_filter(golem.properties.filter_nnlo_diagrams, conf, model)
@@ -244,7 +245,7 @@ def analyze_2loop_diagrams(diagrams, model, conf, onshell,
             lose.append(idx)
             continue
       #keep.append(idx)
-      if analyze_2loop_diagram(diagram, zero, fltr):
+      if analyze_higher_loop_diagram(diagram, zero, fltr):
          keep.append(idx)
          keep_tot.append(idx)
          # check for massive quarks first. Even though the
@@ -284,8 +285,8 @@ def analyze_2loop_diagrams(diagrams, model, conf, onshell,
       else:
          lose.append(idx)
    #keep_tot = keep
-   debug("After analyzing 2loop diagrams: keeping %d, purging %d" % 
-            (len(keep_tot), len(lose)))
+   debug("After analyzing %sloop diagrams: keeping %s, purging %s" %
+            (loop_order, len(keep_tot), len(lose)))
 
 #--- new start
 
@@ -408,7 +409,7 @@ def analyze_diagram(diagram, zero, fltr):
          return True
 
 
-def analyze_2loop_diagram(diagram, zero, fltr):
+def analyze_higher_loop_diagram(diagram, zero, fltr):
    #if diagram.colorforbidden():
       #print 'color forbidden'
       #return False

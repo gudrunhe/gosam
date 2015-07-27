@@ -106,15 +106,11 @@
  @case 0 %]no LO diagrams[%
  @case 1 %]one LO diagram[%
  @else %][% topolopy.count.tree %] tree-level diagrams[%
- @end @select %] and [% @select topolopy.count.docu
- @case 0 %]no NLO diagrams.[%
- @case 1 %]one NLO diagram.[%
- @else %][% topolopy.count.docu %] NLO diagrams.[%
- @end @select %] [% @if generate_nnlo_virt %] There are [% @select topolopy.count.nnlo_docu 
- @case 0 %] no NNLO diagrams. [%
- @case 1 %] one NNLO diagram. [%
- @else %] [% topolopy.count.nnlo_docu %] NNLO diagrams. [%
- @end @select %] [% @end @if %] GoSam has identified [% @select count groups
+ @end @select %][% @for loops_generated %] There are [% @select loop.count.docu
+ @case 0 %] no N[%loop%]LO diagrams. [%
+ @case 1 %] one N[%loop%]LO diagram. [%
+ @else %] [% loop.count.docu %] N[%loop%]LO diagrams. [%
+ @end @select %] [% @end @for %] GoSam has identified [% @select count groups
     @case 0%]no different groups[%
     @case 1%]only one group[%
     @else %][% count groups %] groups [%

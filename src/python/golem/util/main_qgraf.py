@@ -332,8 +332,8 @@ def run_qgraf(conf, in_particles, out_particles):
 			
 	# -------------------- NNLO virt -------------------------------------
 	if flag_generate_nnlo_virt:
-	      output_name = consts.PATTERN_DIAGRAMS_NNLO_VIRT + form_ext
-	      log_name = consts.PATTERN_DIAGRAMS_NNLO_VIRT + log_ext
+	      output_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % 2 + form_ext
+	      log_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % 2 + log_ext
 	      
 	      if powers is not None:
 		new_verbatim = verbatim + "\n" + verbatim_nnlo + "\n" + \
@@ -356,8 +356,8 @@ def run_qgraf(conf, in_particles, out_particles):
 		#sys.exit()
 		
 		#new diagram generation
-		output_name = consts.PATTERN_DOTSTY_NNLO_VIRT
-		log_name = consts.PATTERN_DOTSTY_NNLO_VIRT + log_ext
+		output_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % 2
+		log_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % 2 + log_ext
 		write_qgraf_dat(path, dot_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [] ,2)
 		run_qgraf_dat(conf, output_name, log_name)
@@ -370,18 +370,18 @@ def run_qgraf(conf, in_particles, out_particles):
 		#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 		#		conf=conf)
 		for ext in [python_ext, pyo_ext, pyc_ext]:
-			cleanup_files.append(consts.PATTERN_PYXO_NNLO_VIRT + ext)
+			cleanup_files.append(consts.PATTERN_PYXO_HIGHER_VIRT % 2 + ext)
 
 		if flag_topolopy:
-			output_name = consts.PATTERN_TOPOLOPY_NNLO_VIRT + python_ext
-			log_name    = consts.PATTERN_TOPOLOPY_NNLO_VIRT + log_ext
+			output_name = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % 2 + python_ext
+			log_name    = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % 2 + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 2)
 			run_qgraf_dat(conf, output_name, log_name)
 
               if flag_reduze:
-	        output_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + yaml_ext
-	        log_name_reduze = consts.PATTERN_REDUZE_NNLO_VIRT + log_ext
+	        output_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % 2 + yaml_ext
+	        log_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % 2 + log_ext
 	        write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
 		  	  options, new_verbatim, in_particles, out_particles, [] ,2)
 	        run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
@@ -446,7 +446,7 @@ def run_neato(path,output_name):
   except:
     raise GolemConfigError("Could not run graphviz/neato")
   try:
-    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.eps '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.eps')
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.eps '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.1.eps')
     os.system('mkdir '+path+'/doc')
     os.system('mv '+path+'/*.eps '+path+'/doc')
     #subprocess.call('mv *.eps doc/', cwd=path, shell=True)
@@ -461,10 +461,10 @@ def run_dot2tex(path,output_name):
   except:
     raise GolemConfigError("Could not run dot2tex")
   try:
-    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.xdot '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.xdot')    
-    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.xdot.tikz '+path+'/'+consts.PATTERN_DOTSTY_NNLO_VIRT+'.1.xdot.tikz')        
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.xdot '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.1.xdot')
+    os.system('mv '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.xdot.tikz '+path+'/'+consts.PATTERN_DOTSTY_HIGHER_VIRT%2+'.1.xdot.tikz')
     os.system('mkdir '+path+'/doc')
     os.system('mv '+path+'/*.xdot* '+path+'/doc')
   except:
     raise GolemConfigError("Error in generation of two-loop eps files")
-  
+

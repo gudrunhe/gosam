@@ -83,6 +83,14 @@ def generate_process_files(conf, from_scratch=False):
 	for name in conf:
 		props[name] = conf[name]
 
+	# Special treatment for one loop due to old code
+	higher_loops = []
+	for loop in conf.getListProperty("loops_to_generate"):
+		# special treatment for 1loop
+		if int(loop) == 1:
+			continue
+		else:
+			higher_loops.append(loop)
 	# OBSOLETE:
 	## we only need the ff-<n>.hh files if we create the virtual amplitude
 	## and if we use the extension 'golem95':
@@ -110,21 +118,24 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, keep_nnlo_virt, keep_nnlo_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
-			run_analyzer(path, conf, in_particles, out_particles)
+	keep_tree, keep_virt, keep_vtot, keep_higher_virt, keep_higher_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
+			run_analyzer(path, conf, in_particles, out_particles, higher_loops)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
 #			run_analyzer(path, conf, in_particles, out_particles)
 
 	props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
 	props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
 	props.setProperty("topolopy.keep.vtot", ",".join(map(str, keep_vtot)))
-	props.setProperty("topolopy.keep.nnlo_virt",",".join(map(str, keep_nnlo_virt)))
+	assert len(higher_loops) == len(keep_higher_virt), "len(higher_loops) [%d] != len(keep_higher_virt) [%d]" % (len(higher_loops),len(keep_higher_virt))
+	for looporder, diagrams in zip(higher_loops, keep_higher_virt):
+		props.setProperty("topolopy.keep.n%slo_virt" % looporder,",".join(map(str, diagrams)))
+		props.setProperty("topolopy.count.n%slo_virt" % looporder, len(diagrams))
+	for looporder, diagrams in zip(higher_loops, keep_higher_vtot):
+		props.setProperty("topolopy.count.n%slo_docu" % looporder, len(diagrams))
 	props.setProperty("topolopy.keep.ct", ",".join(map(str, keep_ct)))
 	props.setProperty("topolopy.count.tree", len(keep_tree))
 	props.setProperty("topolopy.count.virt", len(keep_virt))
-	props.setProperty("topolopy.count.nnlo_virt", len(keep_nnlo_virt))
 	props.setProperty("topolopy.count.docu", len(keep_vtot))
-	props.setProperty("topolopy.count.nnlo_docu", len(keep_nnlo_vtot))
 	props.setProperty("topolopy.count.ct", len(keep_ct))
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
@@ -133,8 +144,8 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 	conf["__info.count.docu__"] = len(keep_vtot)
-	conf["__info.count.nnlo_virt__"] = len(keep_nnlo_virt)
-	conf["__info.count.nnlo_docu__"] = len(keep_nnlo_vtot)
+	conf["__info.count.higher_virt__"] = [len(diag) for diag in keep_higher_virt]
+	conf["__info.count.higher_docu__"] = [len(diag) for diag in keep_higher_vtot]
 	conf["__info.count.ct__"] = len(keep_ct)
 
 	for key, value in golem.util.tools.derive_coupling_names(conf).items():
@@ -184,12 +195,12 @@ def generate_process_files(conf, from_scratch=False):
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
 		
-
-	if conf["__REDUZE__"]=='True':
-          copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(path,"projectors.hh"))
-	  copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(path,"integral_families_1loop.yaml"))
-	  if conf.getBooleanProperty("generate_nnlo_virt"):
-	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(path,"integral_families_2loop.yaml"))
+# obsolete; should be done by template.xml
+#	if conf["__REDUZE__"]=='True':
+#          copy_file(os.path.join(os.getcwd(),conf.getProperty("projectors")), os.path.join(path,"projectors.hh"))
+#	  copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_1loop")), os.path.join(path,"integral_families_1loop.yaml"))
+#	  if conf.getBooleanProperty("generate_nnlo_virt"):
+#	    copy_file(os.path.join(os.getcwd(),conf.getProperty("integral_families_2loop")), os.path.join(path,"integral_families_2loop.yaml"))
 
 	golem.templates.xmltemplates.transform_templates(templates, path, path, props,
 			conf = conf,
@@ -702,7 +713,7 @@ def workflow(conf):
 		lst = conf.getProperty(prop)
 		golem.util.tools.expand_parameter_list(prop, conf)
 	
-def run_analyzer(path, conf, in_particles, out_particles):
+def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
 	generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
@@ -760,31 +771,41 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		eprops    = {}
 		loopcache     = golem.topolopy.objects.LoopCache()
 		loopcache_tot = golem.topolopy.objects.LoopCache()
-		
-		
-	if generate_nnlo_virt:
-		zero = golem.util.tools.getZeroes(conf)
-		onshell = {}
-		i=1
-		for p in in_particles:
-			m = p.getMass(zero)
-			key = "es%d" % i
-			if str(m) == "0":
-				onshell[key] = "0"
-			else:
-				onshell[key] = "%s**2" % m
 
-		modname = consts.PATTERN_TOPOLOPY_NNLO_VIRT
-		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading two-loop diagram file %r" % fname)
-		mod_diag_nnlo_virt = imp.load_source(modname, fname)
+	generate_higher_virt = False
+	for l in conf.getListProperty("loops_to_generate"):
+		if int(l) >= 2:
+			generate_higher_virt = True
+			break
+	if generate_higher_virt:
+		keep_higher_virt = []
+		keep_higher_vtot = []
+		for loop_order in higher_loops:
+			zero = golem.util.tools.getZeroes(conf)
+			onshell = {}
+			i=1
+			for p in in_particles:
+				m = p.getMass(zero)
+				key = "es%d" % i
+				if str(m) == "0":
+					onshell[key] = "0"
+				else:
+					onshell[key] = "%s**2" % m
+
+			modname = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % loop_order
+			fname = os.path.join(path, "%s.py" % modname)
+			debug("Loading %s-loop diagram file %r" % (loop_order,fname))
+			mod_diag_higher_virt = imp.load_source(modname, fname)
 		
-		keep_nnlo_virt, keep_nnlo_vtot = golem.topolopy.functions.analyze_2loop_diagrams(
-			mod_diag_nnlo_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
-			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+			tmp_keep_higher_virt, tmp_keep_higher_vtot = golem.topolopy.functions.analyze_higher_loop_diagrams(
+				mod_diag_higher_virt.diagrams, model, conf, onshell, loop_order, quark_masses, complex_masses,
+				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+
+			keep_higher_virt.append(tmp_keep_higher_virt)
+			keep_higher_vtot.append(tmp_keep_higher_vtot)
 	else:
-		keep_nnlo_virt = []
-		keep_nnlo_vtot = []
+		keep_higher_virt = []
+		keep_higher_vtot = []
 
 	
 	if generate_ct:
@@ -816,7 +837,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, keep_nnlo_virt, keep_nnlo_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
+	return keep_tree, keep_virt, keep_vtot, keep_higher_virt, keep_higher_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
 
 
 

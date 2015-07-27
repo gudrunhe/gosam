@@ -7,6 +7,7 @@ import golem.templates.integrals_doc
 import golem.templates.multi
 import golem.templates.olp
 import golem.util.parser
+from golem.util.config import Properties
 import os
 import stat
 
@@ -77,13 +78,41 @@ class TemplateFactory:
                lo_flags = opts["lo_flags"]
                nlo_flags = opts["nlo_flags"]
                massive_bubbles = opts["massive_bubbles"]
-	       diagram_sum = opts["diagram_sum"]
+               diagram_sum = opts["diagram_sum"]
+               topolopies = Properties()
+               for p in props:
+                  if p.getProperty("topolopy.keep.virt") is not None:
+                     if topolopies.getProperty("topolopy.keep.virt") is not None:
+                        assert topolopies["topolopy.keep.virt"] == p["topolopy.keep.virt"]
+                     else:
+                        topolopies["topolopy.keep.virt"] = p["topolopy.keep.virt"]
+                     for higher_loop in conf.getListProperty("loops_to_generate"):
+                        if higher_loop == 1:
+                           continue
+                        if p.getProperty("topolopy.keep.n%slo_virt" % higher_loop) is not None:
+                           if topolopies.getProperty("topolopy.keep.n%slo_virt" % higher_loop) is not None:
+                              assert topolopies["topolopy.keep.n%slo_virt" % higher_loop] == p["topolopy.keep.n%slo_virt" % higher_loop]
+                           else:
+                              topolopies["topolopy.keep.n%slo_virt" % higher_loop] = p["topolopy.keep.n%slo_virt" % higher_loop]
+                  if p.getProperty("topolopy.count.virt") is not None:
+                     if topolopies.getProperty("topolopy.count.virt") is not None:
+                        assert topolopies["topolopy.count.virt"] == p["topolopy.count.virt"]
+                     else:
+                        topolopies["topolopy.count.virt"] = p["topolopy.count.virt"]
+                     for higher_loop in conf.getListProperty("loops_to_generate"):
+                        if higher_loop == 1:
+                           continue
+                        if p.getProperty("topolopy.count.n%slo_virt" % higher_loop) is not None:
+                           if topolopies.getProperty("topolopy.count.n%slo_virt" % higher_loop) is not None:
+                              assert topolopies["topolopy.count.n%slo_virt" % higher_loop] == p["topolopy.count.n%slo_virt" % higher_loop]
+                           else:
+                              topolopies["topolopy.count.n%slo_virt" % higher_loop] = p["topolopy.count.n%slo_virt" % higher_loop]
 
                template = golem.templates.integrals.IntegralsTemplate(
                      f_template)
                template.setup(loopcache, loopcache_tot, in_particles, out_particles,
                      tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
-                     massive_bubbles, diagram_sum)
+                     massive_bubbles, diagram_sum, topolopies)
             elif class_name == "Integrals_doc":
                if "loopcache" not in opts \
                      or "in_particles" not in opts \
@@ -106,12 +135,40 @@ class TemplateFactory:
                lo_flags = opts["lo_flags"]
                nlo_flags = opts["nlo_flags"]
                massive_bubbles = opts["massive_bubbles"]
+               topolopies = Properties()
+               for p in props:
+                  if p.getProperty("topolopy.keep.virt") is not None:
+                     if topolopies.getProperty("topolopy.keep.virt") is not None:
+                        assert topolopies["topolopy.keep.virt"] == p["topolopy.keep.virt"]
+                     else:
+                        topolopies["topolopy.keep.virt"] = p["topolopy.keep.virt"]
+                     for higher_loop in conf.getListProperty("loops_to_generate"):
+                        if higher_loop == 1:
+                           continue
+                        if p.getProperty("topolopy.keep.n%slo_virt" % higher_loop) is not None:
+                           if topolopies.getProperty("topolopy.keep.n%slo_virt" % higher_loop) is not None:
+                              assert topolopies["topolopy.keep.n%slo_virt" % higher_loop] == p["topolopy.keep.n%slo_virt" % higher_loop]
+                           else:
+                              topolopies["topolopy.keep.n%slo_virt" % higher_loop] = p["topolopy.keep.n%slo_virt" % higher_loop]
+                  if p.getProperty("topolopy.count.virt") is not None:
+                     if topolopies.getProperty("topolopy.count.virt") is not None:
+                        assert topolopies["topolopy.count.virt"] == p["topolopy.count.virt"]
+                     else:
+                        topolopies["topolopy.count.virt"] = p["topolopy.count.virt"]
+                     for higher_loop in conf.getListProperty("loops_to_generate"):
+                        if higher_loop == 1:
+                           continue
+                        if p.getProperty("topolopy.count.n%slo_virt" % higher_loop) is not None:
+                           if topolopies.getProperty("topolopy.count.n%slo_virt" % higher_loop) is not None:
+                              assert topolopies["topolopy.count.n%slo_virt" % higher_loop] == p["topolopy.count.n%slo_virt" % higher_loop]
+                           else:
+                              topolopies["topolopy.count.n%slo_virt" % higher_loop] = p["topolopy.count.n%slo_virt" % higher_loop]
 
                template = golem.templates.integrals_doc.IntegralsTemplate_doc(
                      f_template)
                template.setup(loopcache, in_particles, out_particles,
                      tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
-                     massive_bubbles)
+                     massive_bubbles, topolopies)
             elif class_name == "Kinematics":
                if "in_particles" not in opts or \
                      "out_particles" not in opts or \

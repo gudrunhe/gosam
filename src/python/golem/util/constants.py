@@ -4,21 +4,21 @@ import golem.installation
 PATTERN_DIAGRAMS_LO = "diagrams-0"
 PATTERN_DIAGRAMS_CT = "diagrams-ct"
 PATTERN_DIAGRAMS_NLO_VIRT = "diagrams-1"
-PATTERN_DIAGRAMS_NNLO_VIRT = "diagrams-2"
+PATTERN_DIAGRAMS_HIGHER_VIRT = "diagrams-%s"
 
 PATTERN_PYXO_LO = "pyxotree"
 PATTERN_PYXO_CT = "pyxoct"
 PATTERN_PYXO_NLO_VIRT = "pyxovirt"
-PATTERN_PYXO_NNLO_VIRT = "pyxo2virt"
+PATTERN_PYXO_HIGHER_VIRT = "pyxo%svirt"
 
 PATTERN_TOPOLOPY_LO = "topotree"
 PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
-PATTERN_TOPOLOPY_NNLO_VIRT = "topo2virt"
+PATTERN_TOPOLOPY_HIGHER_VIRT = "topo%svirt"
 
-PATTERN_DOTSTY_NNLO_VIRT = "dot2virt"
+PATTERN_DOTSTY_HIGHER_VIRT = "dot%svirt"
 PATTERN_REDUZE_NLO_VIRT = "reduze1loop"
-PATTERN_REDUZE_NNLO_VIRT = "reduze2loop"
+PATTERN_REDUZE_HIGHER_VIRT = "reduze%sloop"
 
 AUTHORS = {
       "Gavin Cullen": ["gavin.cullen@desy.de"],
@@ -32,7 +32,8 @@ AUTHORS = {
       "Tiziano Peraro": ["peraro@mpp.mpg.de"],
       "Johannes Schlenk": ["jschlenk@mpp.mpg.de"],
       "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"],
-      "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"]
+      "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"],
+      "Stephan Jahn": ["sjahn@mpp.mpg.de"],
 }
 
 FORMER_AUTHORS = {

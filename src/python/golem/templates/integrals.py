@@ -11,7 +11,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, loopcache_tot, in_particles, out_particles, tree_signs,
 			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles,
-		        eprops):
+		        eprops, topolopies):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks)
 		self._loopcache = loopcache
@@ -25,7 +25,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
 		self._eprops = eprops
-		self._loops_to_generate = conf.getProperty("loops_to_generate")
+		self._config = conf
+		self._topolopies = topolopies
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -36,11 +37,18 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 		"""
 		props = Properties()
+		loops_to_generate = self._config.getListProperty("loops_to_generate")
 
-		for loop in self._loops_to_generate:
-			props.setProperty("is_first", True if loop == self._loops_to_generate[ 0] else False)
-			props.setProperty("is_last" , True if loop == self._loops_to_generate[-1] else False)
+		for i, loop in enumerate(loops_to_generate):
+			props.setProperty("is_first", True if loop == loops_to_generate[ 0] else False)
+			props.setProperty("is_last" , True if loop == loops_to_generate[-1] else False)
 			props.setProperty("loop", loop)
+			if int(loop) == 1:
+				props.setProperty("loop.keep.diagrams", self._topolopies["topolopy.keep.virt"])
+				props.setProperty("loop.count.diagrams", self._topolopies["topolopy.count.virt"])
+			else:
+				props.setProperty("loop.keep.diagrams", self._topolopies["topolopy.keep.n%slo_virt" % loop])
+				props.setProperty("loop.count.diagrams", self._topolopies.getListProperty("topolopy.count.n%slo_virt" % loop))
 			yield props
 
 	def loopsize(self, *args, **opts):
