@@ -381,7 +381,7 @@ def analyze_ct_diagrams(diagrams, model, conf, onshell,
 
 
 def analyze_diagram(diagram, zero, fltr):
-   if diagram.colorforbidden():
+   if diagram.colorforbidden1loop():
       return False
    diagram.substituteZero(zero)
 
@@ -410,9 +410,6 @@ def analyze_diagram(diagram, zero, fltr):
 
 
 def analyze_higher_loop_diagram(diagram, zero, fltr):
-   #if diagram.colorforbidden():
-      #print 'color forbidden'
-      #return False
    diagram.substituteZero(zero)
 
    if isinstance(fltr, list):

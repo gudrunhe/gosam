@@ -154,9 +154,16 @@ class Diagram:
       return LoopIntegral(
          [self._propagators[abs(l)] for l in self._loop], self.rank(MQSE))
 
-   def colorforbidden(self):
+   def colorforbidden1loop(self):
+      """
+      Return whether exactly 1 leg with non-trivial color structure
+      is connected to the loop.
+      """
       reps = []
-
+      
+      # create list of the non-trivial color structures
+      # of incoming/outgoing legs
+      # connected to loop
       for l in self._in_legs.values():
          if l.v in self._loop_vertices:
             c = abs(l.color)
@@ -168,6 +175,8 @@ class Diagram:
             if c != 1:
                reps.append(c)
 
+      # append to list the non-trivial color structures
+      # of 1PR legs connected to loop
       lp = map(abs, self._loop)
       for idx, p in self._propagators.items():
          if idx in lp:
