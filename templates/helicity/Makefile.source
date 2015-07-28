@@ -76,6 +76,12 @@ SOURCE_TREE=
 [% @if generate_nlo_virt %]
 DIAGRAMS_VIRT=[%
 @if helsum %][%
+   @for elements topolopy.keep.virt %] \
+	d[%$_%]h[%helicity%]l1.prc[%
+	   @if internal GENERATE_DERIVATIVES %] \
+	d[%$_%]h[%helicity%]l1d.prc[%
+      @end @if %][%
+   @end @for %][%
 @else %][%
 @select r2
 @case implicit explicit off %][%
@@ -89,24 +95,6 @@ DIAGRAMS_VIRT=[%
     d[%$_%]h[%helicity%]l132.f90 \
     d[%$_%]h[%helicity%]l121.f90[%
       @end @if %][%
-   @end @for %][%
-@end @select %][%
-@end @if %]
-
-PRC_LIST=[%
-@if helsum %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.prc[%
-	   @if internal GENERATE_DERIVATIVES %] \
-	d[%$_%]h[%helicity%]l1d.prc[%
-      @end @if %][%
-   @end @for %][%
-@else %][%
-@select r2
-@case implicit explicit off %]$(subst .f90,.prc,$(DIAGRAMS_VIRT))[%
-@case only %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.abb[%
    @end @for %][%
 @end @select %][%
 @end @if %]
@@ -155,10 +143,7 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 
 [% 
 @if extension formopt %]
-all_source: $(SOURCE_TREE) [% @if helsum %]$(PRC_LIST)[% @else %]$(SOURCE_VIRT)[% @end @if %][%
-@if helsum %]
-prc: $(PRC_LIST)[%
-@end @if %][% 
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @if extension parallelborn %][%
 @for elements topolopy.keep.tree %][%
 @if is_first %][% @if is_last %]
