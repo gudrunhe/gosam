@@ -16,72 +16,63 @@ FORM_OPT= \
 	-p ..:../codegen \
 	-M -q
 
+.SUFFIXES:
+
+.PHONY: all_source [% @for loops_generated %] prepare_reductionl[%loop%] reductionl[%loop%][% @end @for %]
+
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
+
 [% @if generate_lo_diagrams %]
-DIAGRAMS_TREE=[% @for elements topolopy.keep.tree %] \
-		d[%$_%]l0.log[%
+DIAGRAMS_TREE=[%
+	@for elements topolopy.keep.tree %] \
+		d[%$_%]l0.txt[%
 	@end @for %]
 
-TXT_TREE= $(subst .cc,.log,$(DIAGRAMS_TREE))
+TXT_TREE=$(subst .cc,.txt,$(DIAGRAMS_TREE))
 
 SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
 
-SOURCE_VIRT = [% @for loops_generated %]$(DIAGRAMS_[%loop%]LOOP_VIRT) [% @end @for %]
+SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
 
 [% @for loops_generated %][%
 @if is_first %]
 TRANSLATE_REDUZE=$(PYTHON) ../codegen/translate_reduze.py[%
 @end @if %]
 
-DIAGRAMS_[%loop%]LOOP_VIRT=reduze_[%loop%]loop \
-	translate_[%loop%]loop [% @for elements loop.keep.diagrams %] \
-	d[%$_%]l[%loop%].log[% @end @for %] \
-	l[%loop%].log \
-	toreduze_[%loop%]loop \
-	l[%loop%].cc
+REDUZE_PATH_L[%loop%]=../codegen/reduze/[%loop%]loop/
 
-TXT_[%loop%]LOOP_VIRT= $(subst .cc,.log,$(DIAGRAMS_[%loop%]LOOP_VIRT))[%
+DIAGRAMS_L[%loop%]=[%
+	@for elements loop.keep.diagrams %] \
+		d[%$_%]l[%loop%].txt[%
+	@end @for %]	
+
+SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
+	$(DIAGRAMS_L[%loop%]) \
+	integralsl[%loop%].m \
+	reduze_reduce_l[%loop%]-stamp \
+	l[%loop%].txt \
+	reducedl[%loop%].txt \
+	prepare_secdec_l[%loop%]-stamp[%
 @end @for %]
 
 [% @for loops_generated %]
 
-reduze_[%loop%]loop:
-	cd ../codegen/reduze/[%loop%]loop; $(REDUZE) reduze_setup.yaml; cd -;
-	touch reduze_[%loop%]loop
-
-translate_[%loop%]loop:
-	$(TRANSLATE_REDUZE) ../codegen/reduze/[%loop%]loop/ [%loop%]
-	touch translate_[%loop%]loop
-
-toreduze_[%loop%]loop:
-	$(PYTHON) ../codegen/toreduze.py \
-                    -i l[%loop%]integrals.log \
-                    -t integralsl[%loop%].m \
-                    -s ../codegen/reduze/[%loop%]loop/log/find_diagram_shifts_for_reduze[%loop%]loop_yaml.log \
-                    -y ../codegen/reduze/[%loop%]loop/reduze_reduce.yaml
-	cd ../codegen/reduze/[%loop%]loop/ ; reduze reduze_reduce.yaml ; reduze reduze_insert.yaml
-	touch toreduze_[%loop%]loop
-
-#prompt user to create codegen/reduzereductionl[%loop%].hh file containing reduction
-
 #
-# STAGE 2
+# STAGE 1
 #
-l[%loop%].cc: ../diagrams-[%loop%].hh
-	@echo Form is reducing [%loop%] loop diagrams
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D LOOPS=[%loop%] \
-		-D ORD=2 \
-		-D OUTFILE=l[%loop%] \
-		../codegen/golemreduzesecdec.frm
 
-tosecdec_[%loop%]loop:
-	$(PYTHON) tosecdec.py -i l2secdec.txt -m secdec-[%loop%]loop.m -p secdec-[%loop%]loop.input
+# Reduze also creates: reduze_match.yaml and reduzeshiftsl#loop.hh
+reduze_setup_l[%loop%]-stamp:
+	@echo Reduze is setting up integral families @ [%loop%] loop
+	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_setup.yaml > reduze_setup.log
+	@echo Python is processing integral families @ [%loop%] loop
+	@$(TRANSLATE_REDUZE) $(REDUZE_PATH_L[%loop%]) [%loop%]
+	@touch reduze_setup_l[%loop%]-stamp
 
 [% @for elements loop.keep.diagrams %]
-d[%$_%]l[%loop%].log: ../diagrams-[%loop%].hh
-	@echo Form is processing loop diagram [%$_%]
+d[%$_%]l[%loop%].txt: ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
+	@echo Form is processing loop diagram [%$_%] @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
 	    -D LOOPS=[%loop%] \
@@ -90,17 +81,59 @@ d[%$_%]l[%loop%].log: ../diagrams-[%loop%].hh
 	    ../codegen/golemreduze.frm
 [% @end @for %]
 
-l[%loop%].log: ../diagrams-[%loop%].hh
-	@echo Form is summing [%loop%] loop diagrams
+integralsl[%loop%].txt : l[%loop%].txt
+l[%loop%].txt: $(DIAGRAMS_L[%loop%])
+	@echo Form is summing loop diagrams @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
 	    -D LOOPS=[%loop%] \
-	    -D OUTFILE=l[%loop%] \
 	    ../codegen/golemreduzesum.frm
 
+prepare_reductionl[%loop%] : integralsl[%loop%].m
+integralsl[%loop%].m : integralsl[%loop%].txt reduze_setup_l[%loop%]-stamp
+	@echo Python is processing the integrals @ [%loop%] loop
+	@$(PYTHON) ../codegen/toreduze.py \
+                    -i integralsl[%loop%].txt \
+                    -t integralsl[%loop%].m \
+                    -s $(REDUZE_PATH_L[%loop%])log/find_diagram_shifts_for_reduze[%loop%]loop_yaml.log \
+                    -y $(REDUZE_PATH_L[%loop%])reduze_reduce.yaml
+
+reductionl[%loop%] : reduze_reduce_l[%loop%]-stamp
+reduze_reduce_l[%loop%]-stamp : integralsl[%loop%].m
+	@echo Reduze is reducing the compact recursive sector selection (CRSS) @ [%loop%] loop
+	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_reduce.yaml  > reduze_reduce.log
+	@touch reduze_reduce_l[%loop%]-stamp
+
+reduze_insert_l[%loop%]-stamp : reductionl[%loop%]
+	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_insert.yaml > reduze_insert.log
+	@touch reduze_insert_l[%loop%]-stamp
+
+#
+# STAGE 2
+#
+
+# TODO: calculate ORD
+l[%loop%]reduced.txt: reduze_insert_l[%loop%]-stamp
+	@echo Form is applying the reduction to the loop diagrams @ [%loop%] loop
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D LOOPS=[%loop%] \
+		-D ORD=2 \
+		../codegen/golemreduzesecdec.frm
+
+secdecintegralsl[%loop%].txt : l[%loop%]reduced
+
+prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
+	@echo Python is preparing integrals for SecDec @ [%loop%] loop
+	@$(PYTHON) ../codegen/tosecdec.py \
+		-i secdecintegralsl[%loop%].txt \
+		-m ../codegen/secdecl[%loop%]loop.m \
+		-p ../codegen/secdecl[%loop%]loop.input
+	@touch prepare_secdec_l[%loop%]-stamp
+
+# TODO:
+	- Run SecDec on integrals
+	- Generate Fortran/C++/C
 
 [% @end @for %]
 
-.SUFFIXES:
-
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT) 

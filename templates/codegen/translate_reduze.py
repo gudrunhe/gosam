@@ -197,9 +197,9 @@ if __name__=='__main__':
   path = sys.argv[1]
   loop = sys.argv[2]
   infile=file(os.path.join(path,'log','setup_sector_mappings.log'))
-  spfile=open(path+'../../reduzesptop-'+loop+'.hh','w')
-  mapfile=open(path+'../../reduzemap-'+loop+'.hh','w')
-  crossfile=open(path+'../../reduzecrossing-'+loop+'.hh','w')
+  spfile=open(path+'../../reduzesptopl'+loop+'.hh','w')
+  mapfile=open(path+'../../reduzemapl'+loop+'.hh','w')
+  crossfile=open(path+'../../reduzecrossingl'+loop+'.hh','w')
 
   topologies=gettopologies(infile)
   

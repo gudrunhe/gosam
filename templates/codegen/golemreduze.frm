@@ -241,6 +241,6 @@ Normalize Dim;
 Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 print+s;
 .sort
-#Write <`OUTFILE'.log> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
+#Write <`OUTFILE'.txt> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
 .end
 

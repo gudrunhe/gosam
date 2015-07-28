@@ -22,35 +22,22 @@ off statistics;
 ***** END WARNING *****
 
 
+[% @for loops_generated %]
 * Process sum
 * Load GoSam result
-#IF (`LOOPS' == 1)
-#Do i = {[%@for elements topolopy.keep.virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
-#include- d`i'l`LOOPS'.log;
+#IF (`LOOPS' == [%loop%])
+#Do i = {[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#include- d`i'l`LOOPS'.txt;
 #EndDo
 
-.sort:prefactors;
-
 G sum =
-#Do i = {[%@for elements topolopy.keep.virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
+#Do i = {[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
    + d`i'l`LOOPS'
 #EndDo
 ;
 #EndIf
 
-#IF (`LOOPS' == 2)
-#Do i = {[%@for elements topolopy.keep.nnlo_virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
-#include- d`i'l`LOOPS'.log;
-#EndDo
-
-.sort:prefactors;
-
-G sum =
-#Do i = {[%@for elements topolopy.keep.nnlo_virt%][%@if eval .not. is_last%][%$_%],[%@end @if%][%@if eval is_last%][%$_%]}[%@end @if%][%@end @for%]
-   + d`i'l`LOOPS'
-#EndDo
-;
-#EndIf
+[% @end @for %]
 
 .sort:sum;
 
@@ -68,7 +55,7 @@ B INT;
 Collect SCREEN;
 .sort:collect;
 
-#Write <`OUTFILE'.log>, "L l`LOOPS' = %e", sum
+#Write <l`LOOPS'.txt>, "L l`LOOPS' = %e", sum
 .sort:writesum;
 
 *
@@ -94,7 +81,7 @@ DropCoefficient;
 .sort:drop coeff;
 #EndIf
 ********* TESTING CODE ********
-#Write <`OUTFILE'integrals.log>, "+ %E", sum
+#Write <integralsl`LOOPS'.txt>, "+ %E", sum
 print+s;
 .end
 

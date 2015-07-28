@@ -58,14 +58,14 @@ Symbols sDUMMY5,[];
 
 * shift momenta to Reduze momenta
 #Procedure ShiftReduze()
-   #include- reduzeshifts-`LOOPS'.hh
+   #include- reduzeshiftsl`LOOPS'.hh
    Repeat Id Shift(?head,[],?tail) = Shift(?head,?tail);
    Id Once Shift(?tail) = replace_(?tail);
    .Sort:red-shifting;
 #EndProcedure
                   
 #Procedure CrossReduze()
-   #include- reduzecrossing-`LOOPS'.hh
+   #include- reduzecrossingl`LOOPS'.hh
 #EndProcedure
 
 * map crossed integral families to uncrossed
@@ -84,12 +84,12 @@ Symbols sDUMMY5,[];
                   
 * map scalar products to (inverse) propagators
 #Procedure SPToPropReduze()
-   #include- reduzesptop-`LOOPS'.hh
+   #include- reduzesptopl`LOOPS'.hh
    .Sort:SPToPropReduze;
 #EndProcedure
                      
 #Procedure TagReduze()
-   #include- reduzemap-`LOOPS'.hh
+   #include- reduzemapl`LOOPS'.hh
 #EndProcedure
                    
 * map propagators to Reduze ordered propagators

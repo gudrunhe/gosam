@@ -4,4 +4,4 @@ jobs:
   - find_diagram_shifts:
       qgraf_file: "../../../reduze[% loop %]loop.yaml"
       output_file: "reduze_match.yaml"
-      info_file_form: "../../reduzeshifts-[% loop %].hh"
+      info_file_form: "../../reduzeshiftsl[% loop %].hh"

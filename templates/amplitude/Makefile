@@ -4,9 +4,28 @@ include ../Makefile.conf
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-.PHONY: source compile clean very-clean
+.PHONY: source compile clean very-clean [% @for loops_generated %] reductionl[%loop%] prepare_reductionl[%loop%][% @end @for %] prepare_reduction reduce
 
 compile : source # TODO: recipe to come
+
+[% @for loops_generated %]
+prepare_reductionl[%loop%]:
+ifeq ($(HAVE_MAKEFILE_SOURCE),1)
+	$(MAKE) $(S) -f Makefile.source $@
+else
+	@echo Nothing to be done, you are in a distribution.
+endif
+reductionl[%loop%]:
+ifeq ($(HAVE_MAKEFILE_SOURCE),1)
+	$(MAKE) $(S) -f Makefile.source $@
+else
+	@echo Nothing to be done, you are in a distribution.
+endif
+
+[% @end @for %]
+
+prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end @for %]
+reduce : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 
 clean:
 	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \

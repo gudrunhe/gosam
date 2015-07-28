@@ -34,7 +34,7 @@ PolyRatFun;
 
 Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 .sort
-#Write <`OUTFILE'reduced.log>, "L l`LOOPS' = %e", l`LOOPS'
+#Write <l`LOOPS'reduced.txt>, "L l`LOOPS' = %e", l`LOOPS'
 print+s;
 .sort
 
@@ -68,7 +68,7 @@ DropCoefficient;
 .sort:drop coeff;
 #EndIf
 
-#Write <`OUTFILE'integrals.log>, "+ %E", l`LOOPS'
+#Write <l`LOOPS'integrals.log>, "+ %E", l`LOOPS'
 print+s;
 .end
 #EndIf
@@ -134,6 +134,6 @@ Id INT(?head)*SCREEN(sDUMMY1?) = INT(?head,[],-sDUMMY1+`ORD');
 #Call IntToSecDec
 .sort:tosecdec;
 
-#Write <`OUTFILE'secdec.txt>, "+ %E", l`LOOPS'
+#Write <secdecintegralsl`LOOPS'.txt>, "+ %E", l`LOOPS'
 print+s;
 .end
