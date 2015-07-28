@@ -25,14 +25,6 @@ FORM_OPT=-D PROCESSPATH=.. \
 	 -p ..:../codegen \
 	 -M -q
 
-helprc.log:[%
-@for helicities generated %] 
-	cd ../helicity[% helicity %];\
-	make -f Makefile.source prc; \[%
-@end @for helicities %]  
-   cd ../sum; \
-   touch helprc.log
-
 [% @if generate_nlo_virt %]
 DIAGRAMS_VIRT=[%
 @select r2
@@ -47,15 +39,6 @@ DIAGRAMS_VIRT=[%
     d[%$_%]l132.f90 \
     d[%$_%]l121.f90[%
       @end @if %][%
-   @end @for %][%
-@end @select %]
-
-PRC_LIST=[%
-@select r2
-@case implicit explicit off %]$(subst .f90,.prc,$(DIAGRAMS_VIRT))[%
-@case only %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]l1.abb[%
    @end @for %][%
 @end @select %]
 
@@ -98,7 +81,7 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
-d[%$_%]l1.prc: helprc.log
+d[%$_%]l1.prc:
 	@echo Form is optimizing loop diagram [%$_%] for all helicities
 	@$(FORM) $(FORM_OPT) \
 		-D DIAG=[%$_%] \
@@ -128,7 +111,7 @@ all_source: $(SOURCE_VIRT)
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
-d[%$_%]l1.txt: helprc.log d[%$_%]l1.prc
+d[%$_%]l1.txt: d[%$_%]l1.prc
 	@echo Form is optimizing loop diagram [%$_%] @ Helicity sum
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]l1 \
