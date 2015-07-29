@@ -57,7 +57,7 @@ SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
 
 prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end @for %]
-reduce : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
+reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 
 
 
