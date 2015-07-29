@@ -10,7 +10,7 @@ off statistics;
 #include- model.hh
 
 * Load GoSam result
-#include- l`LOOPS'.log;
+#include- l`LOOPS'.txt;
 
 G l`LOOPS' = l`LOOPS';
 .sort:sum;
@@ -34,7 +34,7 @@ PolyRatFun;
 
 Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 .sort
-#Write <l`LOOPS'reduced.txt>, "L l`LOOPS' = %e", l`LOOPS'
+#Write <reducedl`LOOPS'.txt>, "L l`LOOPS' = %e", l`LOOPS'
 print+s;
 .sort
 
@@ -68,7 +68,7 @@ DropCoefficient;
 .sort:drop coeff;
 #EndIf
 
-#Write <l`LOOPS'integrals.log>, "+ %E", l`LOOPS'
+#Write <integralsl`LOOPS'.txt>, "+ %E", l`LOOPS'
 print+s;
 .end
 #EndIf

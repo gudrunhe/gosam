@@ -20,8 +20,6 @@ FORM_OPT= \
 
 .PHONY: all_source [% @for loops_generated %] prepare_reductionl[%loop%] reductionl[%loop%][% @end @for %]
 
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
-
 [% @if generate_lo_diagrams %]
 DIAGRAMS_TREE=[%
 	@for elements topolopy.keep.tree %] \
@@ -32,8 +30,6 @@ TXT_TREE=$(subst .cc,.txt,$(DIAGRAMS_TREE))
 
 SOURCE_TREE= $(DIAGRAMS_TREE)
 [% @end @if generate_lo_diagrams %]
-
-SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
 
 [% @for loops_generated %][%
 @if is_first %]
@@ -55,6 +51,15 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	reducedl[%loop%].txt \
 	prepare_secdec_l[%loop%]-stamp[%
 @end @for %]
+
+SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
+
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT)
+
+prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end @for %]
+reduce : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
+
+
 
 [% @for loops_generated %]
 
@@ -100,11 +105,11 @@ integralsl[%loop%].m : integralsl[%loop%].txt reduze_setup_l[%loop%]-stamp
 
 reductionl[%loop%] : reduze_reduce_l[%loop%]-stamp
 reduze_reduce_l[%loop%]-stamp : integralsl[%loop%].m
-	@echo Reduze is reducing the compact recursive sector selection (CRSS) @ [%loop%] loop
+	@echo Reduze is reducing the compact recursive sector selection \(CRSS\) @ [%loop%] loop
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_reduce.yaml  > reduze_reduce.log
 	@touch reduze_reduce_l[%loop%]-stamp
 
-reduze_insert_l[%loop%]-stamp : reductionl[%loop%]
+reduze_insert_l[%loop%]-stamp : reduze_reduce_l[%loop%]-stamp #reductionl[%loop%]
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_insert.yaml > reduze_insert.log
 	@touch reduze_insert_l[%loop%]-stamp
 
@@ -113,7 +118,7 @@ reduze_insert_l[%loop%]-stamp : reductionl[%loop%]
 #
 
 # TODO: calculate ORD
-l[%loop%]reduced.txt: reduze_insert_l[%loop%]-stamp
+reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
 	@echo Form is applying the reduction to the loop diagrams @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
@@ -121,7 +126,7 @@ l[%loop%]reduced.txt: reduze_insert_l[%loop%]-stamp
 		-D ORD=2 \
 		../codegen/golemreduzesecdec.frm
 
-secdecintegralsl[%loop%].txt : l[%loop%]reduced
+secdecintegralsl[%loop%].txt : reducedl[%loop%].txt
 
 prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 	@echo Python is preparing integrals for SecDec @ [%loop%] loop
