@@ -77,15 +77,6 @@ OBJECTS= \
 	@end @for %][%
 @end @if %]
 GENERATED_SRC=[%
-@if generate_lo_diagrams %][%
-   @if group %] \
-	diagramsl0.f90[%
-   @else %][% 
-      @for elements topolopy.keep.tree %] \
-	d[%$_%]l0.f90[%
-      @end @for %][%
-   @end @if %][%
-@end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
@@ -191,7 +182,7 @@ very-clean: clean
 	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(Q)$(FIND) $(FIND_OPT) . \( \
-		-name 'd*l[01].f90' \
+		-name 'd*l1.f90' \
 		-or -name 'd*l[01]fr5.f90' \
 		-or -name 'd*l[014]*.txt' \
 		-or -name 'd*l1[123dmu]*.txt' \
