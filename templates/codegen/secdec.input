@@ -1,2 +1,6 @@
 contourdef=True
 togetherflag=1
+
+# these lines are replaced by tosecdec.py
+graph=%(graph)s
+epsord=%(epsord)s

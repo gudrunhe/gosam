@@ -128,17 +128,20 @@ reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
 
 secdecintegralsl[%loop%].txt : reducedl[%loop%].txt
 
+# Creates the directory ""
+#TODO: directory name
 prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 	@echo Python is preparing integrals for SecDec @ [%loop%] loop
 	@$(PYTHON) ../codegen/tosecdec.py \
 		-i secdecintegralsl[%loop%].txt \
-		-m ../codegen/secdecl[%loop%]loop.m \
-		-p ../codegen/secdecl[%loop%]loop.input
+		-k ../codegen/secdecl[%loop%].m \
+		-r ../codegen/secdecl[%loop%].input \
+		-o ../codegen/secdec/[%loop%]loop
 	@touch prepare_secdec_l[%loop%]-stamp
 
 # TODO:
-	- Run SecDec on integrals
-	- Generate Fortran/C++/C
+	# Run SecDec on integrals
+	# Generate Fortran/C++/C
 
 [% @end @for %]
 

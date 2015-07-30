@@ -60,8 +60,8 @@
 			<only if-extension="reduze"/>
 		</file>
 		<foreach iterator="loops">
-			<file src="secdec.m" dest="secdecl%dloop.m" arguments="loop" class="Integrals"/>
-			<file src="secdec.input" dest="secdecl%dloop.input" arguments="loop" class="Integrals"/>
+			<file src="secdec.m" dest="secdecl%d.m" arguments="loop" class="Integrals"/>
+			<file src="secdec.input" dest="secdecl%d.input" arguments="loop" class="Integrals"/>
 		</foreach>
 
 		<file src="haggies-l0.in" class="Multi">

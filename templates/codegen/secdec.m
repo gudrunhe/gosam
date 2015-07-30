@@ -29,7 +29,8 @@ ScalarProductRules = {[%@for mandelstam_subs diagonal upper %]
    @end @for %][% @if eval .not. is_last %],[% @end @if %][%
 @end @for %]
 };
+numerator={1};
 
-(* proplist *)
-(* numerator *)
-(* powerlist *)
+(* these lines are replaced by tosecdec.py *)
+proplist={%(proplist)s};
+powerlist={%(powerlist)s};

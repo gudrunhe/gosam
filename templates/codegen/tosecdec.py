@@ -1,99 +1,120 @@
 # vim: ts=3:sw=3:expandtab
-import sys, getopt, os
-from shutil import copyfile
+"""
+Create the input for SecDec to compute the master integrals
 
-class TermError(Exception):
-   def __init__(self, value):
-      self.value = value
-   def __str__(self):
-      return repr(self.value)
+"""
 
-def main(argv):
-   inputfile = ''
-   mprependfile = ''
-   pprependfile = ''
-   formfile = ''
-   try:
-      opts, args = getopt.getopt(argv,"hi:",["ifile="])
-   except getopt.GetoptError:
-      print 'test.py -i <inputfile>'
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt == '-h':
-         print 'test.py -i <inputfile>'
-         sys.exit()
-      elif opt in ("-i", "--ifile"):
-         inputfile = arg
-  
-   try:
-      in_file = open(inputfile + ".log", 'r')
-      fout_file = open(inputfile + ".hh", 'w')
-      if not os.path.isdir(inputfile):
-         os.makedirs(inputfile)
-      
-      # Build list of integrals
-      with in_file as myfile:
-         integrals = myfile.read().replace('\n','').replace(' ','')
-         integrals = integrals.replace("PropVec","")
-         intlist= integrals.split("+INT")
-         for line in intlist:
-            line = line.strip()
-            if line:
-               linelist = line.split("[]")
-               if len(linelist) != 5:
-                  raise TermError("Term: " + str(line) + ", does not consist of an integral and a familiy in " + inputfile + ".log")
-               family = linelist[0].strip('( ,')
-               tidrs = linelist[1].strip(' ,')
-               integral = linelist[2].strip(' ,')
-               order = linelist[3].strip(' ,')
-               props = linelist[4].replace(',PropList(','').strip(') ')
-#               if linelist[1].count(",1") >= 7:
-#                  if int(order) == 0:
-#                     print linelist
-               mypowerlist = integral.split(",")
-               intt = 0
-               intr = 0
-               ints = 0
-               for pow in mypowerlist:
-                  if int(pow) > 0:
-                     intt+= 1
-                     intr+= int(pow)
-                  else:
-                     ints-= int(pow)
-               graph = family + "pow" + integral.strip(', ').replace(',','').replace('-','m')
-               moutputfile = os.path.join(inputfile, graph + ".m")
-               poutputfile = os.path.join(inputfile, graph + ".input")
-               proplist = "proplist = {" + props + "};"
-               numerator = "numerator = {1};"
-               powerlist = "powerlist = {" + integral + "};"
-               # write math file
-               copyfile(inputfile + ".m",moutputfile)
-               mout_file = open(moutputfile, 'a')
-               mout_file.write(proplist + '\n')
-               mout_file.write(numerator + '\n')
-               mout_file.write(powerlist + '\n')
-               mout_file.close()
-               # write prep file
-               copyfile(inputfile + ".input",poutputfile)
-               pout_file = open(poutputfile, 'a')
-               pout_file.write("graph=" + graph + '\n')
-               pout_file.write("epsord=" + order + '\n')
-               pout_file.close()
-               fout_file.write("Id INT(" + family + "," + tidrs + ",[]," + integral + ") = " + family + "pow" + integral.replace(',','').replace('-','m') +  ";\n")
-         fout_file.write('\n')
-         #out_file.write(integrals)
+import os
+from argparse import ArgumentParser
 
-   except IOError as ex:
-      print "Error in tosecdec.py: ", ex
-      sys.exit(3)
-   except TermError as ex:
-      print "Error in tosecdec.py: ", ex
-      sys.exit(4)
+parser = ArgumentParser()
 
-   else:
-      in_file.close()
-      fout_file.close()
+parser.add_argument("-r", "--run-card", dest="run_card_template_file",
+                    action="store", type=str, required=True,
+                    help="the template for the secdec run card",
+                    metavar="INFILE")
 
-if __name__ == "__main__":
-   main(sys.argv[1:])
+parser.add_argument("-k", "--kinematics", dest="kinematics_template_file",
+                    action="store", type=str, required=True,
+                    help='the template for the file storing the kinematics',
+                    metavar="INFILE")
+
+parser.add_argument("-i", "--integrals", dest="integrals_file",
+                    action="store", type=str, required=True,
+                    help="the file with the master integrals",
+                    metavar="INFILE")
+
+parser.add_argument("-o", "--outpath", dest="outpath",
+                    action="store", type=str, required=True,
+                    help="the directory for the output",
+                    metavar="OUTPATH")
+
+args = parser.parse_args()
+
+
+# load input
+
+with open(args.run_card_template_file, 'r') as f:
+   run_card_template = f.read()
+
+with open(args.kinematics_template_file, 'r') as f:
+   kinematics_template = f.read()
+
+with open(args.integrals_file, 'r') as f:
+   integrals = f.read()
+
+
+# convert form sum of integrals into python list
+
+# strip trailing "+"
+if integrals.startswith("+"):
+   integrals = integrals[1:]
+
+# remove whitespaces and newline characters
+integrals = integrals.replace('\n','').replace(' ','')
+
+# The string "integrals" should now start with "INT(..."
+assert integrals.startswith("INT(")
+# remove the first "INT(" to avoid the first element
+# to be the empty string when invoking "split"
+integrals = integrals[4:]
+
+# generate a list with the expressions inside of "INT(...)"
+# strip the left parentheses
+integrals = integrals.split("INT(")
+# strip the right parentheses, the plusses between "INT(...)", and the trailing ";"
+integrals = [i[:i.rindex(')')] for i in integrals]
+
+
+# now the elements of integrals are expected to have the format:
+"""
+<family name>,[],t,ID,r,s,[],<power list>,[],<epsord>,[],
+PropList(-<some mass>^2+PropVec(<some lorentz vector>)^2,<possibly more propagators>)
+"""
+# example:
+"""
+ReduzeT1L1,[],2,5,2,0,[],1,0,1,0,[],1,[],PropList(-mT^2+PropVec(p1)^2,\
+-mT^2+PropVec(p1-k1)^2,-mT^2+PropVec(p1-k1-k2)^2,-mT^2+PropVec(p1-k1-k2-k3)^2)
+"""
+
+
+# create output directory if necessary
+import os, errno
+try:
+   os.makedirs(args.outpath)
+except OSError as error:
+   if error.errno != errno.EEXIST:
+      raise error
+
+
+# as part of the output, write a form file that replaces
+#    INT(<family name>,[],t,ID,r,s,[],<power list>,[],...)
+# by <family name>pow<power list where "-" -> m and "," -> _>
+form_outfilename = os.path.join(args.outpath, 'secdec_replace_integrals.hh')
+with open(form_outfilename, 'w') as form_outfile:
+
+   # parse the individual integrals
+   for integral in integrals:
+      name, tidrs, powerlist, epsord, proplist = integral.split(',[],')
+
+      # Remove "PropList(...)" and "PropVec" from the list of propagators.
+      # These are just introduced to prevent form from expanding the
+      # squares.
+      proplist = proplist.replace("PropList(", '').replace("PropVec", '')
+      assert proplist.endswith(')')
+      proplist = proplist[:-1]
+
+      graph = name + "pow" + powerlist.replace(',', '_')
+
+      kinematics_outfile = os.path.join(args.outpath, graph + '.m')
+      rc_outfile = os.path.join(args.outpath, graph + '.input')
+
+      # write SecDec kinematics file and run card
+      with open(kinematics_outfile, 'w') as f:
+         f.write(kinematics_template % locals())
+
+      with open(rc_outfile, 'w') as f:
+         f.write(run_card_template % locals())
+
+      form_outfile.write("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = " + name + "pow" + powerlist.replace(',','_').replace('-','m') +  ";\n")
 
