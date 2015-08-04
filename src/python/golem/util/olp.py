@@ -66,9 +66,9 @@ class OLPSubprocess:
    def getConf(self, conf, path, base=None):
 
       if base:
-         subproc_conf = base.copy(True)
+         subproc_conf = base.copy()
       else:
-         subproc_conf = conf.copy(True)
+         subproc_conf = conf.copy()
 
       subproc_conf.cache["model"] = conf.cache["model"]
       subproc_conf[golem.properties.process_name] = self.process_name
@@ -706,7 +706,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    golem.properties.setInternals(conf)
 
 
-   golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(True),
+   golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(),
          conf=conf,
          subprocesses=list(subprocesses.values()),
          subprocesses_conf=subprocesses_conf_short,
