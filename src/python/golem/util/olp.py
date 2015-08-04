@@ -70,7 +70,7 @@ class OLPSubprocess:
       else:
          subproc_conf = conf.copy()
 
-      subproc_conf.cache["model"] = conf.cache["model"]
+      #subproc_conf.cache["model"] = conf.cache["model"]
       subproc_conf[golem.properties.process_name] = self.process_name
       subproc_conf[golem.properties.process_path] = self.getPath(path)
       subproc_conf[golem.properties.qgraf_in] = map(str, self.p_ini)

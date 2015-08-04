@@ -238,6 +238,8 @@ def main(argv=sys.argv):
 		except IOError as ex:
 			golem.util.tools.warning(
 					"Order file %r could not be read." % arg)
+			golem.util.tools.warning(
+						"Error was: %s" % ex)
 			skipped += 1
 			continue
 		finally:
