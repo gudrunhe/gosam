@@ -1,4 +1,5 @@
 # vim: ts=3:sw=3:expandtab
+#@modelproperty: supports ewchoose
 from golem.model.particle import Particle
 from golem.model import MODEL_OPTIONS
 import golem.util.tools

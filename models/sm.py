@@ -1,4 +1,5 @@
 # vim: ts=3:sw=3:expandtab
+#@modelproperty: supports ewchoose
 from golem.model.particle import Particle
 import golem.util.tools
 from math import sqrt
