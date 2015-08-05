@@ -629,24 +629,14 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
-#Else[%
-@if extension parallelborn %]
+#Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
         #write <`OUTFILE'.txt> "#Procedure borndiag"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'[%
-@else %]
-   #If `BORNFLG' == 1
-	#Create <borndiag.prc>
-        #write <borndiag.prc> "#Procedure borndiag"
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == 0
-        #Append <borndiag.prc>
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'[%
-@end @if %]
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
         #Append <borndiag.prc>
 	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
@@ -672,24 +662,14 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
-#Else[%
-@if extension parallelborn %]
+#Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
         #write <`OUTFILE'.txt> "#Procedure borndiag"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'[%
-@else %]
-   #If `BORNFLG' == 1
-	#Create <borndiag.prc>
-        #write <borndiag.prc> "#Procedure borndiag"
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == 0
-        #Append <borndiag.prc>
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'[%
-@end @if %]
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
         #Append <borndiag.prc>
 	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
