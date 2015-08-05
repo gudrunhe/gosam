@@ -122,15 +122,13 @@ Id dZmp =1;
 
 #call coloralgebra(0)
 
-***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
-* sj - collect colour structures, can anything else appear? HOW TO GET ALL COLOUR STRUCTURES HERE
-AB TR,NC,NA,c1;
+AB TR,NC,NA,[%@for repeat num_colors shift=1%]c[% $_ %][%@if is_last%];[%@else%],[%@end @if%][%@end @for%]
 .sort:abcolor1;
 
 Collect COLORFACTOR;
 Normalize COLORFACTOR;
 .sort:abcolor2;
-***** END WARNING *****
+
 
 *---#[ Process Legs:
 

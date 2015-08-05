@@ -35,6 +35,7 @@
 
     <directory src="amplitude" dest="amplitude">
         <only if-extension="reduze" />
+        <file src="../form.set" dest="form.set" class="Kinematics"/>
         <file src="Makefile" class="Integrals">
             <except if-extension="autotools" />
         </file>
@@ -199,7 +200,7 @@
         <file src="series.hh" class="Verbatim">
             <only if-extension="reduze" />
         </file>
-		<file src="golemreduze.frm" class="Verbatim">
+		<file src="golemreduze.frm" class="Kinematics">
             <only if-extension="reduze" />
         </file>
 		<file src="golemreduzesum.frm" class="Integrals">
