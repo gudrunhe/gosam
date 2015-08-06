@@ -13,7 +13,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{tikz}
 \usetikzlibrary{decorations.pathmorphing,decorations.markings,arrows,shapes}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows}
 [% @end @if %]
 
 
@@ -623,7 +623,7 @@ $S^\prime=S[%
 \subsection*{General Information}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-2.log}
 \clearpage[%
-@for elements topolopy.keep.nnlo_virt var=DIAG index=DIAGINDEX %]
+@for elements topolopy.keep.n2lo_virt var=DIAG index=DIAGINDEX %]
 [% @if extension dot2tex %]
 \resizebox{0.4\textwidth}{!}{
 \input{dot2virt.[% DIAG %].xdot.tikz}}[%
