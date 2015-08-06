@@ -5,21 +5,9 @@ import sys
 ### [line replaced by setup.py - do not delete]
 
 from golem.util.config import Configurator, OPTIONAL, REQUIRED
+from golem.util.find_libpaths import find_libraries, components
 
 if __name__ == "__main__":
-   components = {
-#         "LoopTools": OPTIONAL,
-         "AVH_OneLoop": OPTIONAL,
-         "QCDLoop": OPTIONAL,
-         "Ninja": OPTIONAL,
-         "Samurai": OPTIONAL,
-         "Golem95": OPTIONAL,
-         "Fortran": OPTIONAL,
-         "PJFry": OPTIONAL,
-         "Form": REQUIRED,
-         "QGraf": REQUIRED,
-         "Java": REQUIRED
-   }
 
    hints = {}
 
@@ -48,10 +36,7 @@ if __name__ == "__main__":
       else:
          outfile = arg
 
-   config = Configurator(hints, **components)
-
-   cdict = {}
-   config.store(cdict)
+   cdict, config = find_libraries(hints, return_config=True)
 
    if outfile is None:
       f = sys.stdout

@@ -79,11 +79,15 @@
 			<only if-option="group" value="false"/>
 			<except if-extension="formopt" />
 		</file>
+
 		<file src="haggies-l1.in" class="Multi">
 			<except if-extension="formopt" />
 		</file>
 		<file src="haggies-l1.out" class="Kinematics">
 			<except if-extension="formopt" />
+		</file>
+		<file src="helsum.frm" class="Kinematics" >
+         <only if-option="helsum" value="true" />
 		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
@@ -103,6 +107,7 @@
 			<except if-option="genUV" value="false" />
 			<except if-extension="formopt" />
 		</file>
+
 		<file src="filter.py" class="Verbatim">
 			<only if-extension="formopt" />
 		</file>
@@ -134,6 +139,10 @@
 		</file>
 		<file src="ninjafinalopt.frm" class="Kinematics">
 			<only if-extension="ninja" />
+		</file>
+		<file src="replace.hh" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="helsum" value="true" />
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
@@ -189,29 +198,29 @@
 			<except if-option="genUV" value="false"/>
 		</file>
 		<file src="translate_reduze.py"  class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
-        <file src="reduze.hh" class="Verbatim">
 			<only if-extension="reduze" />
-        </file>
-        <file src="secdec.hh" class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
-        <file src="series.hh" class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
+		</file>
+		<file src="reduze.hh" class="Verbatim">
+			<only if-extension="reduze" />
+		</file>
+		<file src="secdec.hh" class="Verbatim">
+			<only if-extension="reduze" />
+		</file>
+		<file src="series.hh" class="Verbatim">
+			<only if-extension="reduze" />
+		</file>
 		<file src="golemreduze.frm" class="Kinematics">
-            <only if-extension="reduze" />
-        </file>
+			<only if-extension="reduze" />
+		</file>
 		<file src="golemreduzesum.frm" class="Integrals">
-            <only if-extension="reduze" />
-        </file>
-        <file src="golemreduzesecdec.frm" class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
-        <file src="golemreduzecode.frm" class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
+			<only if-extension="reduze" />
+		</file>
+		<file src="golemreduzesecdec.frm" class="Verbatim">
+			<only if-extension="reduze" />
+		</file>
+		<file src="golemreduzecode.frm" class="Verbatim">
+			<only if-extension="reduze" />
+		</file>
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">
@@ -258,7 +267,7 @@
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
- 	   <file src="../form.set" dest="form.set" class="Kinematics"/>
+		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
@@ -340,10 +349,6 @@
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
-			<file src="diagramsl0fr5.f90" class="Multi">
-				<only if-internal="REQUIRE_FR5"/>
-				<only if-option="group" value="false"/>
-			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="samurai" />
@@ -371,4 +376,29 @@
 		</directory>
 	</foreach>
 
+	<directory src="sum">
+      <only if-option="helsum" value="true" />
+		<file src="Makefile.source" class="Integrals"/>
+		<file src="Makefile.dep" class="Integrals"/>
+		<file src="Makefile" class="Integrals"/>
+		<file src="globals.f90" class="Kinematics"/>
+      <file src="../form.set" dest="form.set" class="Kinematics"/>
+      <file src="amplitude.f90" class="Integrals" />
+      <file src="samurai.f90"	class="Integrals" >
+            <only if-extension="samurai" />
+            <except if-option="r2" value="only" />
+            <filter name="Fortran90" width="80"/>
+      </file>
+		<file src="golem95.f90"	class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja.f90" class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="diagramsl0.f90" class="Integrals" />
+	</directory>
 </template>

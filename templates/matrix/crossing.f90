@@ -132,8 +132,13 @@ contains
       
       call twist_momenta(vecs, new_vecs)
 
-      if (present(h)) then
-         amp = orig_func(new_vecs, scale2, ok, rat2, h)
+      if (present(h)) then[%
+         @if helsum %]
+         print *, 'ERROR: Cannot select helicity when code was generated'
+         print *, 'with "helsum=1".'[%
+         @else %]
+         amp = orig_func(new_vecs, scale2, ok, rat2, h)[%
+         @end @if %]
       else
          amp = orig_func(new_vecs, scale2, ok, rat2)
       end if

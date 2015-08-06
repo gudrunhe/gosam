@@ -13,6 +13,7 @@ import golem
 import golem.util.ishell
 import golem.properties
 import golem.util.constants
+import golem.util.config
 
 from golem.util.main_misc import find_config_files, write_template_file, \
       workflow, generate_process_files
@@ -69,7 +70,6 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                "implicit", "explicit", "only", "off"],
             str(golem.properties.symmetries): [
                "flavour", "family", "lepton", "generation", "parity"],
-            str(golem.properties.config_renorm_gamma5): ["true", "false"],
             str(golem.properties.config_renorm_mqwf): ["true", "false"],
             str(golem.properties.config_renorm_decoupling): ["true", "false"],
             str(golem.properties.config_renorm_mqse): ["true", "false"],
@@ -682,7 +682,8 @@ class GENERATE(Command):
          process_name = conf.getProperty(golem.properties.process_name, "") \
                .strip()
 
-         order = conf.getListProperty(golem.properties.qgraf_power)
+         orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+         order = orders[0] if orders else []
          generate_lo = True
          generate_nlo = True
          if len(order) == 0:
@@ -699,7 +700,10 @@ class GENERATE(Command):
             if not any([e in extensions for e in REDUCTION_EXTENSIONS]):
                shell.recommendations["+add.extensions"] = "samurai"
                flag=True
-               
+
+         if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
+              conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
+
          if len(process_path) == 0:
             if len(process_name) == 0:
                rec = "."
@@ -757,7 +761,9 @@ class GENERATE(Command):
          f.close()
          conf["setup-file"] = os.path.abspath(in_file)
 
-         order = conf.getListProperty(golem.properties.qgraf_power)
+         orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+         order = orders[0] if orders else []
+
          generate_lo = True
          generate_nlo = True
          if len(order) == 0:

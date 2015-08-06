@@ -10,6 +10,7 @@
      & include_symmetry_factor, &
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor, reduction_interoperation, &
+     & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
      & reduction_interoperation_rescue, convert_to_cdr[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
@@ -20,6 +21,16 @@
    use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
      & incolors, init_color[%
+@if helsum %][%
+   @for helicities generated %][%
+      @if generate_lo_diagrams %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+      @end @if %][%
+   @end @for %]
+   use [% process_name asprefix=\_ 
+      %]amplitude, only: samplitudel1summed => samplitude[%
+@else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
@@ -28,10 +39,10 @@
       @if generate_nlo_virt %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%], [% ' '
-        %]only: samplitudeh[%helicity%]l1 => samplitude, &
-        &   finite_renormalisation[%helicity%] => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1 => samplitude[%
       @end @if %][%
-   @end @for %]
+   @end @for %][%
+@end @if %]
    use [% process_name asprefix=\_
       %]dipoles, only: insertion_operator, insertion_operator_qed
 
@@ -209,7 +220,7 @@ contains
       amp = ampdef
       ! RESCUE SYSTEM
       if(PSP_check) then[%
-              @if generate_lo_diagrams %]
+              @if anymember PoleRotation PSP_chk_method ignore_case=true %]
          call ir_subtraction(vecs, scale2, irp, h)
          if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
@@ -220,7 +231,16 @@ contains
             kfac = abs(ampdef(2)/ampdef(1))
          else
             kfac = 0.0_ki
+         endif
+         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
+              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
+         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+            icheck=3
+            fpprec1=-10        ! Set -10 as finite part precision
          endif[%
+         @elif anymember Rotation PSP_chk_method ignore_case=true %]
+         icheck=2 ! do rotation in all cases (PSP_chk_method=Rotation)
+         [%
          @else %]
          ! poles should be zero for loop-induced processes
          if(ampdef(2) .ne. 0.0_ki) then
@@ -228,14 +248,15 @@ contains
          else
             spprec1 = 16
          endif
-         kfac = 0.0_ki[%
-         @end @if %]
-         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
-              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
-         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+         kfac = 0.0_ki
+         if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
+            icheck=2 ! ROTATION
+         end if
+         if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
             icheck=3
             fpprec1=-10        ! Set -10 as finite part precision
-         endif
+         end if[%
+         @end @if %]
          if(icheck.eq.2) then
             do irot = 1,[%num_legs%]
                vecsrot(irot,1) = vecs(irot,1)
@@ -259,7 +280,7 @@ contains
             reduction_interoperation = reduction_interoperation_rescue
             call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
             amp=ampres[%
-            @if generate_lo_diagrams %]
+            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
             if((ampres(3)-irp(2)) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
             else
@@ -269,16 +290,7 @@ contains
                kfac = abs(ampres(2)/ampres(1))
             else
                kfac = 0.0_ki
-            endif[%
-            @else %]
-            ! poles should be zero for loop-induced processes
-            if(ampdef(2) .ne. 0.0_ki) then
-               spprec2 = -int(log10(abs(ampdef(3)/ampdef(2))))
-            else
-               spprec2 = 16
             endif
-            kfac = 0.0_ki[%
-            @end @if %]
             ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
             !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
             ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
@@ -286,7 +298,20 @@ contains
                  .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then ! DISCARD
                icheck=3
                fpprec2=-10        ! Set -10 as finite part precision
+            endif[%
+            @else %]
+            ! poles should be zero for loop-induced processes
+            if(ampres(2) .ne. 0.0_ki) then
+               spprec2 = -int(log10(abs(ampres(3)/ampres(2))))
+            else
+               spprec2 = 16
             endif
+            kfac = 0.0_ki
+            if(spprec2.lt.PSP_chk_li4) then ! DISCARD
+               icheck=3
+               fpprec2=-10        ! Set -10 as finite part precision
+            endif[%
+            @end @if %]
             if(icheck.eq.2) then
                do irot = 1,[%num_legs%]
                   vecsrot(irot,1) = vecs(irot,1)
@@ -311,11 +336,18 @@ contains
          if(icheck.eq.3.and.PSP_verbosity) then
             write(42,'(2x,A7)')"<event>"
             write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') & 
-                 &  "<process name='","[% process_name %]","'/>"
+                 &  "<process name='","[% process_name %]","'/>"[%
+           @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
             write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds th1='", PSP_chk_th1, &
                  &                "' th2='", PSP_chk_th2, &
-                 &                "' th3='", PSP_chk_th3,"'/>"
+                 &                "' th3='", PSP_chk_th3,"'/>"[%
+           @else %]
+            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
+                 &  "<PSP_thresholds li1='", PSP_chk_li1, &
+                 &                "' li2='", PSP_chk_li2, &
+                 &                "' li3='", PSP_chk_li3, &
+                 &                "' li4='", PSP_chk_li4,"'/>"[% @end @if %]
             write(42,'(4x,A16,D23.16,A3)') &
                  &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
@@ -395,9 +427,8 @@ contains
       @end @select %]
       end if
 
-      call init_event(vecs)
-
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
+         call init_event(vecs)
          write(logfile,'(A7)') "<event>"
          call inspect_kinematics(logfile)
       end if
@@ -433,8 +464,13 @@ contains
          stop
       end select
 
-      if (present(h)) then
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling
+      if (present(h)) then[%
+         @if helsum %]
+         print *, 'ERROR: Cannot select helicity when code was generated'
+         print *, 'with "helsum=1".'[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         @end @if %]
       else
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
       end if[%
@@ -454,7 +490,8 @@ contains
                @for effective_higgs %][%
                @if is_ehc%]
                ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
-               amp(2) = amp(2) + (11.0_ki -2.0_ki/3.0_ki*log(scale2/mH**2)) * amp(1)[%
+               !amp(2) = amp(2) + (11.0_ki -2.0_ki/3.0_ki*log(scale2/mH**2)) * amp(1)
+               amp(2) = amp(2) + (11.0_ki) * amp(1)[%
                @end @if %][%
                @end @for %][%
                @for quark_loop_masses %][%
@@ -567,11 +604,20 @@ contains
       end if
       select case(nlo_prefactors)
       case(0)
-         ! The result is already in its desired form
+         ! The result is already in its desired form[%
+      @if generate_lo_diagrams %]
       case(1)
          amp(2:4) = amp(2:4) * nlo_coupling
       case(2)
-         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi
+         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki / pi / pi[%
+      @else %]
+      case(1)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * (nlo_coupling / 8.0_ki / pi / pi)**2[%
+      @end @if %]
       end select
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
@@ -646,17 +692,20 @@ contains
    end function samplitudel0
    !---#] function samplitudel0 :
    !---#[ function samplitudel1 :
-   function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
+   function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
       use [% process_name asprefix=\_ %]config, only: &
-         & debug_nlo_diagrams, logfile, renorm_gamma5
+         & debug_nlo_diagrams, logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
       real(ki), intent(in) :: scale2
-      real(ki), intent(out) :: rat2
+      real(ki), intent(out) :: rat2[%
+      @if helsum %][%
+      @else %]
       integer, optional, intent(in) :: h
-      real(ki), dimension([%num_legs%], 4) :: pvecs
+      real(ki), dimension([%num_legs%], 4) :: pvecs[%
+      @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
       @else %]
@@ -665,7 +714,46 @@ contains
       @end @if %]
       logical :: my_ok
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
-      real(ki) :: fr, rational2
+      real(ki) :: rational2
+
+      amp(:) = 0.0_ki
+      rat2 = 0.0_ki
+      ok = .true.[%
+   @if generate_nlo_virt%][%
+   @if helsum %]
+      if(debug_nlo_diagrams) then
+         write(logfile,*) "<helicity index='sum'>"
+      end if
+      call init_event(vecs)[%
+      @if generate_lo_diagrams %]
+         heli_amp = samplitudel1summed(real(scale2,ki),my_ok,rational2)[%
+      @else %]
+         do c=1,numcs
+            colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square(colorvec(:, 0))
+         heli_amp(-1) = square(colorvec(:,-1))
+         heli_amp(-2) = square(colorvec(:,-2))[%
+      @end @if %]
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if[%
+   @else %][% 'if not helsum' %]
 
       if (present(h)) then
          eval_heli(:) = .false.
@@ -674,10 +762,7 @@ contains
          eval_heli(:) = .true.
       end if
 
-      amp(:) = 0.0_ki
-      rat2 = 0.0_ki
-      ok = .true.[%
-   @if generate_nlo_virt%][%
+[%
    @for helicities%]
       if (eval_heli([%helicity%])) then
          if(debug_nlo_diagrams) then
@@ -738,32 +823,6 @@ contains
          heli_amp(-2) = square(colorvec(:,-2))
       [%
       @end @if %]
-         if (corrections_are_qcd .and. renorm_gamma5) then
-            !---#[ reinitialize kinematics:[%
-      @for helicity_mapping shift=1 %][%
-         @if parity %][%
-            @select sign @case 1 %]
-            pvecs([%index%],1) = vecs([%$_%],1)
-            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-            @else %]
-            pvecs([%index%],1) = -vecs([%$_%],1)
-            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-            @end @select %][%
-         @else %][%
-            @select sign @case 1 %]
-            pvecs([%index%],:) = vecs([%$_%],:)[%
-            @else %]
-            pvecs([%index%],:) = -vecs([%$_%],:)[%
-            @end @select %][%
-         @end @if %][%
-      @end @for %]
-            call init_event(pvecs[%
-         @for particles lightlike vector %], [%hel%]1[%
-         @end @for %])
-            !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%](real(scale2,ki))
-            heli_amp(0) = heli_amp(0) + fr
-         end if
          ok = ok .and. my_ok
          amp = amp + heli_amp
          rat2 = rat2 + rational2
@@ -775,10 +834,6 @@ contains
                 & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
             write(logfile,'(A33,E24.16,A3)') &
                 & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-            if (corrections_are_qcd .and. renorm_gamma5) then
-               write(logfile,'(A30,E24.16,A3)') &
-                   & "<result kind='fin-ren' value='", fr, "'/>"
-            end if
             if(my_ok) then
                write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
             else
@@ -788,7 +843,8 @@ contains
          end if
       end if[%
    @end @for helicities%][%
-   @end @if %]
+   @end @if %][%
+   @end @if helsum %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -826,8 +882,6 @@ contains
       else
          eval_heli(:) = .true.
       end if
-
-      call init_event(vecs)
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME

@@ -18,15 +18,6 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
-   @if internal REQUIRE_FR5 %] \
-	diagramsl0fr5.f90[%
-      @if group %][%
-      @else %][%
-         @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.f90[%
-         @end @for %][%
-      @end @if %][%
-   @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
@@ -76,15 +67,6 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod[%
       @end @for %][%
    @end @if %][%
-   @if internal REQUIRE_FR5 %] \
-	[% process_name asprefix=\_ %]diagramsh[%helicity%]l0fr5.mod[%
-      @if group %][%
-      @else %][%
-         @for elements topolopy.keep.tree %] \
-	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0fr5.mod[%
-         @end @for %][%
-      @end @if %][%
-   @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
@@ -122,15 +104,6 @@ GENERATED_SRC=[%
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
-   @if internal REQUIRE_FR5 %][%
-      @if group %] \
-	diagramsl0fr5.f90[%
-      @else %][% 
-         @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.f90[%
-         @end @for %][%
-      @end @if %][%
-   @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
@@ -155,15 +128,15 @@ GENERATED_SRC=[%
 @end @if generate_nlo_virt %]
 
 $(GENERATED_SRC): %: source
-	
-	
+
+TEMPFILE:=$(shell mktemp -u -t gosam.tempfile.XXXXXX || echo gosam.tempfile.tmp)
+
 source:
 [% @if diagsum %]
-	@if grep -q 'Local' ../diagrams-1.hh; \
+	@if [ -e ../diagrams-1.hh ] && head -n 100 ../diagrams-1.hh | grep -q 'Local' ; \
 	then \
-		mv ../diagrams-1.hh ../diags-1.hh; \
-		sed -e "s/Local diagram/Id diag/g" ../diags-1.hh > ../diagrams-1.hh; \
-		rm ../diags-1.hh; \
+		sed -e "s/Local diagram/Id diag/g" ../diagrams-1.hh > $(TEMPFILE); \
+		mv $(TEMPFILE) ../diagrams-1.hh ; \
 	fi[%
 @end @if %]
 	@if [ -f Makefile.source ]; \

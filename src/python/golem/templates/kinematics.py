@@ -4,7 +4,7 @@ import golem.algorithms.mandelstam
 import golem.algorithms.color
 import golem.util.tools
 
-from golem.util.config import Properties
+from golem.util.config import Properties, split_qgrafPower
 import golem.util.parser
 from golem.model import MODEL_OPTIONS
 
@@ -537,7 +537,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
    def isqcd(self, *args, **opts):
       """
-      Deduct the correction type 
+      Deduct the correction type
 
       args -- optional list of names that refer to QCD couplings
       """
@@ -546,8 +546,11 @@ class KinematicsTemplate(golem.util.parser.Template):
       else:
          names = ["qcd", "gg", "gs"]
 
-      order = [s.strip().lower() for s in
-            self._properties.getProperty("order").split(",")]
+      orders = split_qgrafPower(self._properties.getProperty("order"))
+      if not orders:
+         return False
+
+      order= [str(s).strip().lower() for s in orders[0]]
       if len(order) < 3:
          return False
 
@@ -560,7 +563,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       else:
          # coupling is ew
          if order[1] == "none":
-            return False 
+            return False
          else:
             return int(order[1]) >= int(order[2])
 

@@ -22,12 +22,6 @@ parser.add_option("-i", "--input", dest="input",
 if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
-# print '----------------------------------'
-
-colorfile = open('color.f90', 'w')
-
-#print "--------------------"
-
 outdict=translatefile(options.input,config,True)
 
 # 'global' color variables
@@ -42,6 +36,8 @@ abb_max=getdata('color.dat')['number_abbs']
 
 
 # Write model.f90 file
+colorfile = open('color.f90', 'w')
+
 colorfile.write('module     [$ process_name asprefix=\_ $]color\n')
 colorfile.write('   ! file:      [% output.file %]\n')
 colorfile.write('   ! generator: [% program.name %] ([% program.version %])\n')

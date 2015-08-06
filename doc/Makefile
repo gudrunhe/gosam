@@ -21,11 +21,11 @@ all: refman.pdf devel.pdf
 	done
 
 template.tex:
-	${GOLEM} --no-defaults --format=LaTeX --template $@
+	${GOLEM} --format=LaTeX --template $@
 
 refman.pdf: template.tex refman.bib
 
 clean:
 	rm -f devel.aux devel.bbl devel.blg devel.do devel.log devel.out \
 	  devel.pdf devel.toc refman.aux refman.bbl refman.blg refman.do \
-	  refman.log refman.out refman.toc
+	  refman.log refman.out refman.toc refman.pdf template.tex

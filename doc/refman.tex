@@ -74,7 +74,7 @@
 %\section{Synopsis}
 \gosamv is a program package for the automated generation and evaluation of one-loop amplitudes, 
 within and beyond the Standard Model.
-Version 1.0 has been published in Ref.~\cite{Cullen:2011ac}.
+Version 1.0 has been published in Ref.~\cite{Cullen:2011ac}, version 2.0 in Ref.~\cite{Cullen:2014yla}.
 \gosamv-2.0 can also produce spin- and colour correlated tree amplitudes.
 The program produces \fortranXC code for a given process
 by generating Feynman diagrams and translating
@@ -455,7 +455,6 @@ The output directory is assumed to be in the relative path
 29 renorm_decoupling=True
 30 renorm_mqse=True
 31 renorm_logs=True
-32 renorm_gamma5=True
 33 reduction_interoperation=-1
 34 reduction_interoperation_rescue=-1
 35 samurai_scalar=2
@@ -467,25 +466,30 @@ The output directory is assumed to be in the relative path
 41 PSP_chk_th2=3
 42 PSP_chk_th3=5
 43 PSP_chk_kfactor=10000
-44 reference-vectors=
-45 abbrev.limit=0
-46 templates=
-47 qgraf.bin=qgraf
-48 form.bin=form
-49 form.threads=2
-50 form.tempdir=/tmp
-51 haggies.bin=
-52 fc.bin=/usr/bin/gfortran
-53 python.bin=python
-54 ninja.fcflags=
-55 ninja.ldflags=
-56 samurai.fcflags=
-57 samurai.ldflags=
-58 golem95.fcflags=
-59 golem95.ldflags=
-60 r2=explicit
-61 symmetries=family,generation
-62 crossings=
+44 PSP_chk_li1=16
+45 PSP_chk_li2=7
+46 PSP_chk_li3=6
+47 PSP_chk_li4=19
+48 PSP_chk_method=Automatic
+49 reference-vectors=
+50 abbrev.limit=0
+51 templates=
+52 qgraf.bin=qgraf
+53 form.bin=form
+54 form.threads=2
+55 form.tempdir=/tmp
+56 haggies.bin=
+57 fc.bin=/usr/bin/gfortran
+58 python.bin=python
+59 ninja.fcflags=
+60 ninja.ldflags=
+61 samurai.fcflags=
+62 samurai.ldflags=
+63 golem95.fcflags=
+64 golem95.ldflags=
+65 r2=explicit
+66 symmetries=family,generation
+67 crossings=
 \end{lstlisting}
 % 9 qgraf.options=nosnails,notadpoles,onshell
 
@@ -525,12 +529,19 @@ with a diagonal CKM matrix.
 \item[6] The option \texttt{model.options} can be used to pass options 
 which are specific to a certain model. The default is {\tt ewchoose}, 
 which means that the electro-weak scheme is selected automatically according to the 
-given input parameters.
+given input parameters. Note that this option also allows to set values of masses, widths etc. 
+For example, \texttt{model.options = mB=4.19,w*=0} defines massive b-quarks and sets all widths to zero.
 \item[7] The item \texttt{order} is a comma separated list with
 three entries. The first entry specifies a symbol that denotes a coupling
-constant. In the Standard Model file \texttt{sm} the only two possibilities
-are `\lstinline[basicstyle=\ttfamily]{gs}' for the strong coupling constant
-$g_s$ and `\lstinline[basicstyle=\ttfamily]{e}' for the electroweak coupling.
+constant. With the Standard Model files \texttt{sm*}, the  possibilities
+are `\lstinline[basicstyle=\ttfamily]{gs}' or (equivalently) 
+`\lstinline[basicstyle=\ttfamily]{QCD}' for the strong coupling constant
+$g_s$ and `\lstinline[basicstyle=\ttfamily]{e}' or 
+`\lstinline[basicstyle=\ttfamily]{gw}' or `\lstinline[basicstyle=\ttfamily]{QED}'
+for the electroweak coupling (the latter three are equivalent in what concerns the counting of 
+orders in the electroweak coupling). 
+The keywords `\lstinline[basicstyle=\ttfamily]{QCD}' and `\lstinline[basicstyle=\ttfamily]{QED}'
+also can be used to calculate QCD resp. electroweak corrections to BSM processes.\\
 The second number is the power of the chosen coupling constant for the
 tree-level diagrams and the third number specifies the power of that
 coupling constant for the one-loop diagrams.
@@ -620,12 +631,15 @@ rather than producing separate code for each helicity
 To switch off the use of numerical polarisation vectors, use {\tt polvec=explicit}.
 \item[18] \texttt{diagsum}:  if {\tt True}, one-loop diagrams sharing some propagators
 are combined before  the algebraic reduction.
-The default is {\tt diagsum = True}. 
-\item[19] The option \texttt{reduction\_programs} 
+The default is {\tt diagsum = True}.
+\item[19] \texttt{helsum}:  if {\tt True}, one-loop diagrams from all helicities are
+analytically summed. This produces larger but faster code.
+The default is {\tt helsum = False}. 
+\item[20] The option \texttt{reduction\_programs} 
 allows to choose the amplitude reduction method. If several choices are given, 
 the code is produced such that the reduction methods can be switched at runtime.
 The default is {\tt ninja,golem95}.
-\item[20] {\tt extensions}: 
+\item[21] {\tt extensions}: 
 this option  contains a list of useful extensions
 to the core of the program, which operate at the code generation stage. 
 The currently available extensions are 
@@ -646,35 +660,33 @@ with a custom function (we refer to subsection \ref{sec:spin2} for details).
 \end{itemize}
 In our example {\tt shared} tells the program to 
 build dynamic rather than static libraries.
-\item[21] \texttt{debug}: can take the values  {\tt lo}, {\tt nlo}, {\tt all}.
+\item[22] \texttt{debug}: can take the values  {\tt lo}, {\tt nlo}, {\tt all}.
 It sets the level of information printed to the file {\tt matrix/debug.xml} when running the test program.
-\item[22] \texttt{select.lo}: can be used to select/discard diagrams by their diagram numbers.
+\item[23] \texttt{select.lo}: can be used to select/discard diagrams by their diagram numbers.
 It can contain a list of integer numbers, indicating leading order diagrams to be
 selected. If no list is given, all diagrams are selected.       
 Otherwise, all diagrams whose numbers are not in the list will be discarded.          
 The list may also contain ranges, with increments different from one, e.g.                                    
 {\tt select.lo=1,2,5:10:3, 50:53} is equivalent to {\tt select.lo=1,2,5,8,50,51,52,53}, 
 i.e. the 3 in    {\tt 5:10:3} is the increment.
-\item[23] \texttt{select.nlo}: analogous to \texttt{select.lo},  for the one-loop diagrams.
-\item[24] \texttt{filter.lo}:  a python function which provides a filter for tree diagrams.    
+\item[24] \texttt{select.nlo}: analogous to \texttt{select.lo},  for the one-loop diagrams.
+\item[25] \texttt{filter.lo}:  a python function which provides a filter for tree diagrams.    
 Example:  \\  
 {\tt filter.lo=lambda d: d.iprop(Z) == 1  and}
 {\tt  d.vertices(Z, U, Ubar) == 0 } filters out
 diagrams containing exactly one $Z$ propagator and no $Zu\bar{u}$ couplings. 
-\item[25] \texttt{filter.nlo}:  analogous to \texttt{filter.lo},  for the one-loop diagrams.
+\item[26] \texttt{filter.nlo}:  analogous to \texttt{filter.lo},  for the one-loop diagrams.
 For details we refer to subsection \ref{sec:filter}.
-\item[26] \texttt{filter.module}: a python file of predefined functions which can be used as filters.   
-\item[27] \texttt{renorm\_beta}: activates or disables beta function renormalisation. The default is  {\tt True}. 
-\item[28] \texttt{renorm\_mqwf}:  activates or disables UV countertems coming from
+\item[27] \texttt{filter.module}: a python file of predefined functions which can be used as filters.   
+\item[28] \texttt{renorm\_beta}: activates or disables beta function renormalisation. The default is  {\tt True}. 
+\item[29] \texttt{renorm\_mqwf}:  activates or disables UV countertems coming from
 external massive quarks. The default is  {\tt True}.
-\item[29] \texttt{renorm\_decoupling}:   activates or disables UV counterterms coming from  
+\item[30] \texttt{renorm\_decoupling}:   activates or disables UV counterterms coming from  
 massive quark loops. The default is  {\tt True}.
-\item[30] \texttt{renorm\_mqse}:  activates or disables the UV counterterm coming from the 
+\item[31] \texttt{renorm\_mqse}:  activates or disables the UV counterterm coming from the 
 massive quark propagators. The default is  {\tt True}.
-\item[31] \texttt{renorm\_logs}: activates or disables the logarithmic finite terms  
+\item[32] \texttt{renorm\_logs}: activates or disables the logarithmic finite terms  
 associated with the UV counterterms.   The default is  {\tt True}.
-\item[32] \texttt{renorm\_gamma5}: activates finite renormalisation for axial couplings in the 
- \tHV{} scheme (CDR).                      
 Implemented for QCD only, works only with the built-in model files.    The default is  {\tt True}.
 \item[33] \texttt{reduction\_interoperation}: denotes the reductuion libraries to be used. 
   Possible values are: ninja, samurai, golem95 (listing all of them simultaneously is possible). 
@@ -705,10 +717,10 @@ Please note that this test only works for QCD  with the built-in model files.
 The default is \texttt{PSP\_check= True}. 
 \item[38] \texttt{PSP\_rescue}:  
     activates the phase space point rescue system based on the estimated       
-    accuracy of the finite part.                                    
+    accuracy.                                    
     The accuracy is estimated using information on the single       
-    pole accuracy and the cancellation between the cut-constructible    
-    part and $R_2$.                                                    
+    pole accuracy and information from the rotation test.
+%    the cancellation between the cut-constructible part and $R_2$. 
 %Please note that this only works for QCD  with the built-in model files.
 The default is \texttt{PSP\_rescue= True}. 
 \item[39] \texttt{PSP\_verbosity}:     sets the verbosity of the {\tt PSP\_check}. 
@@ -740,8 +752,65 @@ phase space point  as {\it bad point}. According
 to the verbosity level set, such points are written to a file and 
     not used when the code is interfaced to an external Monte Carlo program 
     using the new BLHA2 standards.                    
-The default is 10000.
-\item[44] \texttt{reference-vectors}: comma separated list of  reference vectors for massive 
+The default is 1000.
+\item[44] \texttt{PSP\_chk\_li1}: sets the same variable in config.f90. For loop-induced
+processes, it is used instead of \texttt{PSP\_chk\_th1}.
+It is the precision of the pole part (which should be zero) in
+comparison to the finite part. If the pole part is at least
+\texttt{PSP\_chk\_li1} orders smaller than the finite part, the point is
+accepted without any further check.
+The default is 16.
+If Samurai is used as default reduction program, it should
+be reduced to 8.
+%The number has to be an integer.
+It works normally only for QCD and with built-in model files.
+%
+\item[45] \texttt{PSP\_chk\_li2}:  sets the same variable in config.f90. For loop-induced
+processes, it is used instead of \texttt{PSP\_chk\_th2}.
+It is the threshold to declare a phase space point  as bad point, based on the precision
+of the pole in comparison to the finite part. Points with
+precision less than this threshold are directly reprocessed with
+the rescue system (if available), or declared as unstable.
+According to the verbosity level set, such points are written to
+a file and not used when the code is interfaced to an external
+Monte Carlo using the new BLHA standards.
+If Samurai is used as default reduction program, it should be
+be reduced to 6. The default is 7.
+%
+\item[46] \texttt{PSP\_chk\_li3}: sets the same variable in config.f90. For loop-induced
+processes, it is used instead of \texttt{PSP\_chk\_th3}.
+%
+It is the threshold to declare a PSP as bad point, based on the precision
+of the finite part estimated with a rotation test. Points with
+precision less than this threshold are reprocessed with the
+rescue system (if available) or declared as unstable.  According
+to the verbosity level set, such points are written to a file
+and not used when the code is interfaced to an external Monte
+Carlo using the new BLHA standards.
+The default value is 6.
+\item[47] \texttt{PSP\_chk\_li4} Sets the same variable in config.f90. Similar to \texttt{PSP\_chk\_li2,}
+but for the rescue system (by default Golem95).
+%
+It is the threshold to declare a PSP as bad point in the rescue system,
+based on the precision of the pole part in comparison to the
+finite part. According to the verbosity level set, such points
+are written to a file and not used when the code is interfaced
+to an external Monte Carlo using the new BLHA standards.
+The default value is 19.
+%
+\item[48] \texttt{PSP\_chk\_method}: 
+this option can be used to overwrite the automatic precision
+test method enabled with \texttt{PSP\_check=True}.
+Except for some BSM scenarios, the user does not need to change this.
+Possible options are
+\begin{itemize}
+	\item\texttt{Automatic} -- chooses automatically a suitable phase-space point test
+	\item\texttt{PoleRotation} -- checks first the pole and then rotates if necessary.
+	\item\texttt{Rotation}  -- forces a rotation check on every phase space point (slow).
+	\item\texttt{LoopInduced} -- checks that the pole part is zero and rotates if necessary. 
+	Needed e.g. for interference between BSM Born and SM loop-induced virtual.
+\end{itemize}
+\item[49] \texttt{reference-vectors}: comma separated list of  reference vectors for massive
 fermions and vector bosons.
 If no reference vectors are assigned here, the program picks the reference vectors automatically. 
 Each entry of the list has to be of the form $\langle index\rangle :\langle index\rangle $.  
@@ -755,40 +824,40 @@ Example: \\
     W-boson as reference direction for its own momentum splitting.  
     Similarly, the momentum of the W-boson is split into a direction
     $l_4$ and one along $l_3$.                                            
-\item[45] \texttt{abbrev.limit}: maximum number of instructions per subroutine when calculating  
+\item[50] \texttt{abbrev.limit}: maximum number of instructions per subroutine when calculating  
  abbreviations. The default is 0, which means that no maximum is set.
-\item[46] \texttt{templates}:   Path pointing to the directory containing the template 
+\item[51] \texttt{templates}:   Path pointing to the directory containing the template 
     files for the process. If not set, the program uses the directory      
     $\langle$ gosam\_path$\rangle$/templates.                                         
     The directory must contain a file called {\tt template.xml}.
-\item[47] \texttt{qgraf.bin}: path to the {\tt QGraf} executable.  
-The default path will be set by the installation script.
-\item[48] \texttt{form.bin}:  path to the \form{} executable.  
-The default path will be set by the installation script.
-\item[49] \texttt{form.threads}: the number of \form{} threads when using {\tt tform}, 
+\item[52] \texttt{qgraf.bin}: path to the {\tt QGraf} executable.
+An automatic search is attempted if left empty.
+\item[53] \texttt{form.bin}:  path to the \form{} executable.
+An automatic search is attempted if left empty.
+\item[54] \texttt{form.threads}: the number of \form{} threads when using {\tt tform},
 the parallel version of \form.  The default is 2.
-\item[50] \texttt{form.tempdir}: the temporary directory where \form{} 
+\item[55] \texttt{form.tempdir}: the temporary directory where \form{}
 can store (large) intermediate files.  the default is {\tt /tmp}.
-\item[51] \texttt{haggies.bin}: path to the {\tt haggies} executable.
-The default path will be set by the installation script.
-\item[52] \texttt{fc.bin}: path to the {\tt Fortran} compiler. 
-The default path will be set by the installation script.
+\item[56] \texttt{haggies.bin}: path to the {\tt haggies} executable.
+An automatic search is attempted if left empty.
+\item[57] \texttt{fc.bin}: path to the {\tt Fortran} compiler.
+An automatic search is attempted if left empty.
 %{\tt /usr/bin/gfortran}.
-\item[53] \texttt{python.bin}:  path to the {\tt python} executable. 
-The default path will be set by the installation script.
-\item[54] \texttt{ninja.fcflags}: compiler flags to compile with \ninja. 
-The default will be set by the installation script.
-\item[55] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.    
-The default will be set by the installation script.
-\item[56] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai. 
-The default will be set by the installation script.
-\item[57] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.    
-The default will be set by the installation script. 
-\item[58] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}. 
-The default will be set by the installation script. 
-\item[59] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.    
-The default will be set by the installation script. 
-\item[60] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
+\item[58] \texttt{python.bin}:  path to the {\tt python} executable.
+An automatic search is attempted if left empty.
+\item[59] \texttt{ninja.fcflags}: compiler flags to compile with \ninja.
+An automatic search is attempted if left empty.
+\item[60] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.
+An automatic search is attempted if left empty.
+\item[61] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai.
+An automatic search is attempted if left empty.
+\item[62] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.
+An automatic search is attempted if left empty. 
+\item[63] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}.
+An automatic search is attempted if left empty. 
+\item[64] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.
+An automatic search is attempted if left empty. 
+\item[65] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
 \begin{itemize}
 \item {\tt implicit}: $\mu^2$ terms are kept in the numerator and reduced at runtime
 \item {\tt explicit}: $\mu^2$ terms are reduced analytically 
@@ -796,7 +865,7 @@ The default will be set by the installation script.
 \item {\tt off}: all $\mu^2$ terms are set to zero.
 \end{itemize}
  The default is {\tt r2=explicit}.
-\item[61] \texttt{symmetries}: this information is used when the list of helicity configurations is generated. 
+\item[66] \texttt{symmetries}: this information is used when the list of helicity configurations is generated.
 An empty list means that all helicity configurations will be generated, even if some of them could be 
 mapped onto each other.
 Possible values are:  
@@ -821,14 +890,14 @@ with PDG codess 1-6 are assumed not to mix.
              \%+$\langle n\rangle $ refers to $+n$ only,                                 
              \%-$\langle n\rangle $ refers to $-n$ only  
 \end{itemize}	                                   
-\item[62] \texttt{crossings}:  a list of crossed processes derived from this process.          
+\item[67] \texttt{crossings}:  a list of crossed processes derived from this process.
     For each process in the list a module similar to {\tt matrix.f90} is  generated.  
     Example: \\                                                 
     {\tt process\_name=ddx\_uux }\\                                           
     {\tt in=1,-1 }\\                                                          
     {\tt out=2,-2  }\\                                                       
     {\tt crossings=dxd\_uux: -1 1 $\to$ 2 -2, ud\_ud: 2 1 $\to$ 2 1  }    
-%\item[63] 
+%\item[68]
 \end{enumerate}
 
 
@@ -1280,12 +1349,12 @@ and zero otherwise.
 \label{sec:model}
 
 The \gosam{}-2.0 package comes with the built-in model files 
-{\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, 
+{\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, {\tt smdiagehc},
 {\tt sm\_complex}, {\tt smdiag\_complex}, 
 where the latter two are needed in the case of complex masses and couplings, 
 see section \ref{sec:complexmasses}. 
 The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
-the model files {\tt smehc}  contain the effective Higgs-gluon couplings.
+the model files {\tt smehc} and {\tt smdiagehc} contain the effective Higgs-gluon couplings.
 
 Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua} format.
 The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
@@ -2368,21 +2437,26 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
     Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].\\
     
     {\bf GoSam-2.0}  \\
-    Copyright (C) 2014  The GoSam Collaboration
+    Copyright (C) 2014--2015  The GoSam Collaboration
      \begin{itemize}               
-                \item Gavin Cullen
 		\item Hans van Deurzen
                 \item Nicolas Greiner
                 \item Gudrun Heinrich
                 \item Gionata Luisoni
                 \item Pierpaolo Mastrolia
-		\item Edoardo Mirabella
                 \item Giovanni Ossola
 		\item Tiziano Peraro
-		\item Joscha Reichel
 		\item Johannes Schlenk
 		\item Johann Felix von Soden-Fraunhofen
                 \item Francesco Tramontano
+    \end{itemize}
+
+    Former members:
+    \begin{itemize}
+		\item Gavin Cullen
+		\item Edoardo Mirabella
+		\item Joscha Reichel
+		\item Thomas Reiter
     \end{itemize}
    
 %\bf{The program is distributed under the 
@@ -2416,7 +2490,7 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
               P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk, 
 	      J.F.von Soden-Fraunhofen, F. Tramontano, \\
 	``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond",\\
-	arXiv:1404.xxxx [hep-ph].
+	Eur.\ Phys.\ J.\ C {\bf 74} (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
     \end{quote}
 
 

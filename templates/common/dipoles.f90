@@ -182,16 +182,18 @@ contains
       logical :: flag
 
       I_if(:,:,:) = 0.0_ki[%
-  @for particles initial colored index=index_a color=color_a %][%
-     @if is_massive %]
-      PRINT*, "! WARNING: massive initial state partons are not"
-      PRINT*, "!          considered in this dipole framework. Please,"
-      PRINT*, "!          provide yourself, whatever you find"
-      PRINT*, "!          an appropriate piece of code."
-      PRINT*, "!"
-      PRINT*, "!          YOU HAVE BEEN WARNED!"
-      PRINT*, "!"[%
-     @else%][%
+  @for particles initial colored index=index_a color=color_a %]
+      [% @if is_massive %]
+      if ([% mass %] .ne. 0 ) then
+        PRINT*, "! WARNING: massive initial state partons are not"
+        PRINT*, "!          considered in this dipole framework. Please,"
+        PRINT*, "!          provide yourself, whatever you find"
+        PRINT*, "!          an appropriate piece of code."
+        PRINT*, "!"
+        PRINT*, "!          YOU HAVE BEEN WARNED!"
+        PRINT*, "!"
+      end if[% @end @if is_massive %][%
+
         @for particles final colored index=index_j color=color_j mass=mass_j 
              massive=is_massive_j %]
 
@@ -265,7 +267,6 @@ contains
               I_if(:,:,2) = I_if(:,:,2) + term(2) * matrix(:,:)
       end if[%
      @end @for %][%
-  @end @if is_massive %][%
   @end @for %]
    end  function I_if
    
@@ -450,14 +451,16 @@ contains
       [%
   @for particles initial charged index=index_a charge=charge_a %][%
      @if is_massive %]
-      PRINT*, "! WARNING: massive initial state partons are not"
-      PRINT*, "!          considered in this dipole framework. Please,"
-      PRINT*, "!          provide yourself, whatever you find"
-      PRINT*, "!          an appropriate piece of code."
-      PRINT*, "!"
-      PRINT*, "!          YOU HAVE BEEN WARNED!"
-      PRINT*, "!" [%
-     @else%][%
+      if ([% mass %] .ne. 0 ) then
+        PRINT*, "! WARNING: massive initial state partons are not"
+        PRINT*, "!          considered in this dipole framework. Please,"
+        PRINT*, "!          provide yourself, whatever you find"
+        PRINT*, "!          an appropriate piece of code."
+        PRINT*, "!"
+        PRINT*, "!          YOU HAVE BEEN WARNED!"
+        PRINT*, "!"
+      end if[% @end @if is_massive %][%
+
         @for particles final charged index=index_j charge=charge_j mass=mass_j 
              massive=is_massive_j %]
 
@@ -505,7 +508,6 @@ contains
               I_if_qed(:,:,2) = I_if_qed(:,:,2) + term(2) * matrix(:,:)
       end if[%
      @end @for %][%
-  @end @if is_massive %][%
   @end @for %]
    end  function I_if_qed
 

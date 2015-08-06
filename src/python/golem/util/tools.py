@@ -395,19 +395,30 @@ def getModel(conf, extra_path=None):
 
    extract_model_options(conf)
 
+   fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
+   debug("Loading model file %r" % fname)
+
    # --[ EW scheme management:
-   models_ewsupp = ['sm','sm_complex','smdiag','smdiag_complex','smehc','smdiagehc']
+
+   # Check if there is a line with "#@modelproperty: supports ewchoose"
+   # before the first line of code.
+
    ew_supp = False
-
-   if conf["modeltype"]:
-      conf["modeltype"] = os.path.basename(conf["modeltype"])
-
-   if conf["modeltype"] is not None:
-      if any(conf["modeltype"].startswith(item) for item in models_ewsupp):
-         ew_supp = True
-   if conf["model"] is not None:
-      if any(conf["model"].startswith(item) for item in models_ewsupp):
-         ew_supp = True
+   with open(fname, 'r') as modelfile:
+      for line in modelfile:
+         stripped_line = line.strip()
+         if stripped_line != '' and not stripped_line.startswith("#"):
+            # "#@modelproperty: supports ewchoose" not found
+            debug('Model seems to not support "ewchoose".\n' +
+                  'If it does, add the line\n' +
+                  '"#@modelproperty: supports ewchoose" to\n' +
+                  'the top of %s.' % fname)
+            break
+         elif stripped_line == "#@modelproperty: supports ewchoose":
+            debug('Model supports "ewchoose".\n')
+            ew_supp = True
+            break
+         # else: pass
 
    # Adapt EW scheme to order file request:
    if conf["olp.ewscheme"] is not None and ew_supp == True:
@@ -434,8 +445,6 @@ def getModel(conf, extra_path=None):
 
    # --] EW scheme management
 
-   fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
-   debug("Loading model file %r" % fname)
    mod = imp.load_source("model", fname)
 
    conf.cache["model"] = mod
@@ -505,9 +514,17 @@ def expand_parameter_list(prop, conf):
       elif value in params:
          new_values.add(value)
       else:
-         warning("Property '%s' contains an unknown parameter name (%s)."
-               % (prop, value),
-               "The errorneous symbol has been removed from the list.")
+         if str(prop)=="zero" and value=="mU":
+            warning("Property '%s' contains an unknown parameter name (%s)."
+                 % (prop, value),
+                 "You are probably using a different model than the built-in models",
+                 "and therefore cannot use the default value list of the 'zero' input parameter.",
+                 "To remove this warning add at least 'zero=' (or whatever is appropriate) to your input card.",
+                 "The symbol has been removed from the list.")
+         else:
+            warning("Property '%s' contains an unknown parameter name (%s)."
+                 % (prop, value),
+                 "The symbol has been removed from the list.")
    conf.setProperty(prop, list(new_values))
 
 def generate_parameter_list(conf):

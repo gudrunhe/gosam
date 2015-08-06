@@ -45,15 +45,19 @@ if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
 diag_name= options.input.split('.')[0]
-diag=diag_name.split('d')[1].split('h')[0]
-heli=diag_name.split('h')[1].split('l')[0]
+diag=str(options.diagram)
+heli=str(options.helicity)
 qsign=options.qsign
 qshift=options.qshift
 
 # print '----------------------------------'
 # print 'Input file is:      %s' % diag_name+'.txt'
-# print 'Diagram written in: %s' % diag_name+'.f90'
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90'
+# print 'Diagram written in: %s' % diag_name+'.f90'[%
+@if helsum %]
+# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'.f90'[%
+@else %]
+# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90'[%
+@end @if %]
 # print 'Diagram information:'
 # print 'diag:  %s' % options.diagram
 # print 'group: %s' % options.group
@@ -90,9 +94,9 @@ outdict=translatefile(diag_name+'.txt',config)
 
 # Write abbreviation file
 abbfile.write('module     [% process_name asprefix=\_ 
-            %]abbrevd'+diag+'h'+heli+'\n')
+            %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 abbfile.write('   use [% process_name asprefix=\_ %]config, only: ki\n')
-abbfile.write('   use [% process_name asprefix=\_ %]globalsh'+heli+'\n')[%
+abbfile.write('   use [% process_name asprefix=\_ %]globals'[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 abbfile.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
@@ -114,8 +118,31 @@ abbfile.write('      use [% process_name asprefix=\_ %]model\n')
 abbfile.write('      use [% process_name asprefix=\_ %]color, only: TR\n')
 abbfile.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 abbfile.write('      implicit none\n')
-abbfile.write('\n')
-abbfile.write(outdict['Abbreviations'])
+abbfile.write('\n')[%
+@if eval abbrev.limit > 0 %][% 'need to split into several subroutines' %]
+abb_chunks = []
+line_counter = 0
+routine_counter = 0
+for abb_line in outdict['Abbreviations'].split("\n"):
+	abbfile.write(abb_line + "\n")
+	line_counter += 1
+	if line_counter >= [% abbrev.limit %]: # abbrev.limit = [% abbrev.limit %]
+		routine_counter += 1
+		line_counter = 0
+		abbfile.write('      call init_abbrev_%i()\n' % routine_counter)
+		abbfile.write('   end subroutine\n')
+		abbfile.write('   subroutine init_abbrev_%i()\n' % routine_counter)
+		abbfile.write('      use [% process_name asprefix=\_ %]config, only: deltaOS, &\n')
+		abbfile.write('     &    logfile, debug_nlo_diagrams\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]kinematics\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]model\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]color, only: TR\n')
+		abbfile.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
+		abbfile.write('      implicit none\n')
+		abbfile.write('\n')[%
+@else %]
+abbfile.write(outdict['Abbreviations'])[%
+@end @if %]
 abbfile.write(outdict['R2'])
 abbfile.write('\n')
 abbfile.write('      rat2 = rat2 + R2d'+diag+'\n')
@@ -125,7 +152,7 @@ abbfile.write('          write (logfile,*) "<result name=\'r2\' index=\''+diag+'
 abbfile.write('          & R2d'+diag+', "\'/>"\n')
 abbfile.write('      end if\n')
 abbfile.write('   end subroutine\n')
-abbfile.write('end module [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+abbfile.write('end module [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 
 
 f90file.write('module     [% process_name asprefix=\_ %]'+diag_name+'\n')
@@ -156,7 +183,7 @@ f90file.write('   pure function brack_1(Q,mu2) result(brack)\n')
 f90file.write('      use [% process_name asprefix=\_ %]model\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use [% process_name asprefix=\_ %]color\n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none\n')
 f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
 f90file.write('      complex(ki), intent(in) :: mu2\n')
@@ -183,7 +210,7 @@ f90file.write('!      use [% process_name asprefix=\_ %]groups, only: &\n')
 f90file.write('!           & sign => diagram'+diag+'_sign, shift => diagram'+diag+'_shift\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none\n')
 f90file.write('\n')
 f90file.write('      integer, intent(in) :: ncut\n')
@@ -228,7 +255,7 @@ f90file.write('   function numerator_golem95(Q_ext, mu2_ext) result(numerator)\n
 f90file.write('      use precision_golem, only: ki_gol => ki\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none\n')
 f90file.write('\n')
 f90file.write('      real(ki_gol), dimension(0:3), intent(in) :: Q_ext\n')
@@ -265,7 +292,7 @@ f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'h'+heli+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none\n')
 f90file.write('\n')
 f90file.write('      integer(c_int), intent(in) :: ncut\n')
@@ -304,5 +331,8 @@ f90file.close()
 postformat(abb_tmpname)
 postformat(f90_tmpname)
 
-shutil.move(abb_tmpname,'abbrevd'+diag+'h'+heli+'.f90')
+if int(heli) == -1:
+    shutil.move(abb_tmpname,'abbrevd'+diag+'.f90')
+else:
+    shutil.move(abb_tmpname,'abbrevd'+diag+'h'+heli+'.f90')
 shutil.move(f90_tmpname,diag_name + '.f90')

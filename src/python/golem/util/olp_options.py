@@ -216,7 +216,7 @@ def CouplingPower(values, conf, ignore_case):
 		return __value_ERR__ + "too many values."
 
 	elif len(values) == 2:
-		
+
 		if values[0].lower() == 'qcd':
 			try:
 				power = int(values[1])
@@ -224,7 +224,6 @@ def CouplingPower(values, conf, ignore_case):
 				return __value_OK__
 			except ValueError:
 				return __value_ERR__ + "non-integer value encountered."
-			
 		elif values[0].lower() == 'qed':
 			try:
 				power = int(values[1])
@@ -232,8 +231,8 @@ def CouplingPower(values, conf, ignore_case):
 				return __value_OK__
 			except ValueError:
 				return __value_ERR__ + "non-integer value encountered."
-			else:
-				return __value_ERR__ + "unrecognized type of CouplingPower."
+		else:
+			return __value_ERR__ + "unrecognized type of CouplingPower."
 	else:
 		return __value_ERR__ + "too few arguments in CouplingPower."
 
@@ -271,7 +270,6 @@ def AlphaPower(values, conf, ignore_case):
 def EWScheme(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	
 	supported_values = ["alphaGF","alpha0","alphaMZ","alphaRUN","alphaMSbar","OLPDefined"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.ewscheme", supported_values)
@@ -282,7 +280,6 @@ def EWScheme(values, conf, ignore_case):
 def WidthScheme(values, conf, ignore_case):
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	
 	supported_values = ["ComplexMass","FixedWidth"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.widthscheme", supported_values)
@@ -293,17 +290,29 @@ def WidthScheme(values, conf, ignore_case):
 
 @optional_olp_option
 def AmplitudeType(values, conf, ignore_case):
+	# Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced"]
+	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced","LoopInterference","LIEffInterference"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.amplitudetype", supported_values)
+	if hasattr(conf,"psp_chk_method_last"):
+		# reset PSP_chk_method if necessary
+		conf["PSP_chk_method"]=conf.psp_chk_method_last if conf.psp_chk_method_last else "Automatic"
 	if ret.startswith(__value_OK__) and 'tree' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = True
 	if ret.startswith(__value_OK__) and 'loopinduced' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = True
-	if ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_loop_level"] = False
+	elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in ["loopinterference","lieffinterference"]:
+		conf["olp.no_tree_level"] = False
+		conf["olp.no_loop_level"] = False
+		if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic","polerotation"]:
+			conf.psp_chk_method_last=conf["PSP_chk_method"]
+			conf["PSP_chk_method"]="LoopInduced"
+	elif ret.startswith(__value_OK__) and 'loop' in conf["olp.amplitudetype"].lower():
+		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
 	return ret
 
@@ -316,9 +325,7 @@ def Precision(values, conf, ignore_case):
 			prec=-math.log10(float(values[0]))
 		except ValueError:
 			return __value_ERR__ + "not positive float value encountered."
-		#print conf["PSP_chk_threshold1"]
-		conf["PSP_chk_threshold1"]=str(int(prec))
-		#conf["PSP_chk_threshold1"]=0.01
+		conf["PSP_chk_th1"]=str(int(prec))
 		conf["PSP_check"]=True
 		return __value_OK__
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
@@ -332,7 +339,7 @@ def AccuracyTarget(values, conf, ignore_case):
 			prec=-math.log10(float(values[0]))
 		except ValueError:
 			return __value_ERR__ + "not positive float value encountered."
-		conf["PSP_chk_threshold1"]=str(int(prec))
+		conf["PSP_chk_th1"]=str(int(prec))
 		conf["PSP_check"]=True
 		return __value_OK__
 	return __value_OK__ + " # WARNING: blank -> Precision check disabled."
@@ -349,6 +356,16 @@ def DebugUnstable(values, conf, ignore_case):
 			conf["PSP_verbosity"]="False"
 	return ret
 
+@optional_olp_option
+def PrecisionCheck(values, conf, ignore_case):
+   supported_values = ["disabled","off"] + golem.properties.config_PSP_chk_method._options
+   ret=expect_one_keyword(values, conf, True,
+                  "PSP_chk_method", supported_values)
+   if ret==__value_OK__:
+      if conf["PSP_chk_method"].lower() in ["disabled","off"]:
+         conf["PSP_chk_method"]="Automatic"
+         conf["PSP_check"]="False"
+   return ret
 
 @optional_olp_option
 def ExcludedParticles(values, conf, ignore_case):
@@ -426,7 +443,7 @@ def Parameters(values, conf, ignore_case):
         parameters = list(values)
         if len(values) > 0:
                 if parameters[0] == "alpha_s":
-                        #parameters.remove("alpha_s")		
+                        #parameters.remove("alpha_s")
                         conf["olp.alphas"] = 1
                         conf["olp.parameters"] = parameters
                 else:
@@ -435,7 +452,7 @@ def Parameters(values, conf, ignore_case):
                         warning("WARNING: by convention the first parameter should be 'alpha_s.'")
                         return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
-	
+
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
 	err_flag = False
 

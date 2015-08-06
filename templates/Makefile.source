@@ -6,7 +6,7 @@
 
 SUBDIRS=doc common[%
 @if extension reduze %] amplitude[%
-@else %][%
+@else %][% @if helsum %] sum[% @end @if %][%
 @for helicities generated %] helicity[% helicity %][%
 @end @for helicities %][%
 @end @if %] matrix

@@ -114,6 +114,8 @@ qgraf_power = Property("order",
    via the qgraph.verbatim option, might be needed
    to select the correct set of diagrams.
 
+   The user can also use QCD instead of gs and QED instead of gw.
+
    If the last number is omitted no virtual corrections are
    calculated.
 
@@ -241,6 +243,9 @@ ldflags_golem95 = Property("golem95.ldflags",
    """\
    LDFLAGS required to link golem95.
 
+   GoSam will try to determine the required
+   flags automatically if not provided.
+
    Example:
    golem95.ldflags=-L/usr/local/lib/ -lgolem-gfortran-double
 
@@ -251,6 +256,9 @@ ldflags_golem95 = Property("golem95.ldflags",
 fcflags_golem95 = Property("golem95.fcflags",
    """\
    FCFLAGS required to compile with golem95.
+
+   GoSam will try to determine the required
+   flags automatically if not provided.
 
    Example:
    golem95.fcflags=-I/usr/local/include/golem95
@@ -263,6 +271,9 @@ ldflags_samurai = Property("samurai.ldflags",
    """\
    LDFLAGS required to link samurai.
 
+   GoSam will try to determine the required
+   flags automatically if not provided.
+
    Example:
    samurai.ldflags=-L/usr/local/lib/ -lsamurai-gfortran-double
 
@@ -273,6 +284,9 @@ ldflags_samurai = Property("samurai.ldflags",
 fcflags_samurai = Property("samurai.fcflags",
    """\
    FCFLAGS required to compile with samurai.
+
+   GoSam will try to determine the required
+   flags automatically if not provided.
 
    Example:
    samurai.fcflags=-I/usr/local/include/samurai
@@ -296,6 +310,9 @@ ldflags_ninja = Property("ninja.ldflags",
    """\
    LDFLAGS required to link ninja.
 
+   GoSam will try to determine the required
+   flags automatically if not provided.
+
    Example:
    ninja.ldflags=-L/usr/local/lib/ -lninja
 
@@ -306,6 +323,9 @@ ldflags_ninja = Property("ninja.ldflags",
 fcflags_ninja = Property("ninja.fcflags",
    """\
    FCFLAGS required to compile with ninja.
+
+   GoSam will try to determine the required
+   flags automatically if not provided.
 
    Example:
    ninja.fcflags=-I/usr/local/include/ninja
@@ -319,6 +339,8 @@ zero = Property("zero",
    A list of symbols that should be treated as identically
    zero throughout the whole calculation. All of these
    symbols must be defined by the model file.
+   If you do not use built-in models, you probably
+   need to overwrite the default value.
 
    Examples:
    1) # Light masses are set to zero here:
@@ -332,7 +354,8 @@ zero = Property("zero",
 
    See also: model, one
    """,
-   list)
+   list,
+   "mU,mD,mS,mC,mB,me,mmu")
 
 one = Property("one",
    """\
@@ -449,6 +472,14 @@ sum_diagrams = Property("diagsum",
    bool,
    True)
 
+sum_helicities = Property("helsum",
+   """\
+   Flag whether or not 1-loop diagrams should be analytically
+   summed over all helicities 
+   """,
+   bool,
+   False, experimental=True)
+
 renorm = Property("renorm",
    """\
    Indicates if the UV counterterms should be generated.
@@ -497,8 +528,7 @@ formopt_level = Property("formopt.level",
 
    """,
    str,
-   "2",
-   experimental=True)
+   "2")
 
 regularisation_scheme = Property("regularisation_scheme",
       """\
@@ -585,7 +615,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr",
-      "noderive","noformopt","reduze","dot2tex"])
+      "noderive","noformopt","reduze","dot2tex", "parallelborn"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -737,6 +767,7 @@ integral_families_1loop = Property("integral_families_1loop",
 integral_families_2loop = Property("integral_families_2loop",
   """\
   path to the yaml file containing the integral families """,str,"integralfamilies-2loop.yaml")
+
 debug_flags = Property("debug",
    """\
    A list of debug flags.
@@ -782,7 +813,7 @@ abbrev_limit = Property("abbrev.limit",
    Maximum number of instructions per subroutine when calculating
    abbreviations, if this number is positive.
    """,
-   str, "0")
+   str, "500")
 
 abbrev_level = Property("abbrev.level",
    """\
@@ -917,17 +948,6 @@ config_renorm_mqwf = Property("renorm_mqwf",
    """,
    bool, True)
 
-config_renorm_gamma5 = Property("renorm_gamma5",
-   """\
-   Sets the same variable in config.f90
-
-   Activates finite renormalisation for axial couplings in the
-   't Hooft-Veltman scheme
-
-   QCD only, works only with built-in model files.
-   """,
-   bool, True)
-
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
@@ -995,7 +1015,7 @@ config_PSP_rescue = Property("PSP_rescue",
    Activates Phase-Space Point rescue based on the estimated
    accuracy on the finite part. It needs PSP_check=True.
    The accuracy is estimated using information on the single
-   pole accuracy and on the stability of the finite parte 
+   pole accuracy and on the stability of the finite part
    under rotation of the phase space point.
 
    !!Works only for QCD and with built-in model files!!
@@ -1008,7 +1028,7 @@ config_PSP_verbosity = Property("PSP_verbosity",
 
    Sets the verbosity of the PSP_check.
    verbosity = False: no output
-   verbosity = True : bad point are written in a file gs_badpts.log
+   verbosity = True : bad point are written into gs_badpts.log
    !!Works only for QCD and with built-in model files!!
    """,
    bool, False)
@@ -1017,10 +1037,10 @@ config_PSP_chk_th1 = Property("PSP_chk_th1",
    """\
    Sets the same variable in config.f90
 
-   Threshold to activate accept the point without further treatments.
-   The number has to be an integer indicating the wished minimum number
-   of digits accuracy on the pole. For poles more precise than this
-   threshold the finite part is not checked.
+   Threshold to activate accept the point without further
+   treatments. The number has to be an integer indicating the
+   wished minimum number of digits accuracy on the pole. For poles
+   more precise than this threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 8)
@@ -1029,11 +1049,13 @@ config_PSP_chk_th2 = Property("PSP_chk_th2",
    """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based of the precision of the pole.
-   Points with precision less than this threshold are directly reprocessed with
-   the rescue system (if available), or declared as unstable. According to the
-   verbosity level set, such points are written to a file and not used when
-   the code is interfaced to an external Monte Carlo using the new BLHA standards.
+   Threshold to declare a PSP as bad point, based of the precision
+   of the pole.  Points with precision less than this threshold are
+   directly reprocessed with the rescue system (if available), or
+   declared as unstable. According to the verbosity level set, such
+   points are written to a file and not used when the code is
+   interfaced to an external Monte Carlo using the new BLHA
+   standards.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 3)
@@ -1042,14 +1064,85 @@ config_PSP_chk_th3 = Property("PSP_chk_th3",
    """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based on the precision of
-   the finite part estimated with a rotation. According to the
+   Threshold to declare a PSP as bad point, based on the precision
+   of the finite part estimated with a rotation. According to the
    verbosity level set, such points are written to a file and not
    used when the code is interfaced to an external Monte Carlo
    using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    """,
    int, 5)
+
+
+config_PSP_chk_li1 = Property("PSP_chk_li1",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th1.
+
+   It is precision of the pole part (which should be zero) in
+   comparison to the finite part. If the pole part is at least
+   PSP_chk_li1 orders smaller than the finite part, the point is
+   accepted without any other check.
+
+   If Samurai is used as default reduction program, this needs to
+   be reduced to 8.
+
+   The number has to be an integer.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 16)
+
+config_PSP_chk_li2 = Property("PSP_chk_li2",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th2.
+
+   Threshold to declare a PSP as bad point, based of the precision
+   of the pole in comparison to the finite part. Points with
+   precision less than this threshold are directly reprocessed with
+   the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written to
+   a file and not used when the code is interfaced to an external
+   Monte Carlo using the new BLHA standards.
+
+   If Samurai is used as default reduction program, this needs to
+   be reduced to 6.
+
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 7)
+
+config_PSP_chk_li3 = Property("PSP_chk_li3",
+   """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th3.
+
+   Threshold to declare a PSP as bad point, based on the precision
+   of the finite part estimated with a rotation. Points with
+   precision less than this threshold are reprocessed with the
+   rescue system (if available) or declared as unstable.  According
+   to the verbosity level set, such points are written to a file
+   and not used when the code is interfaced to an external Monte
+   Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 6)
+
+config_PSP_chk_li4 = Property("PSP_chk_li4",
+   """\
+   Sets the same variable in config.f90. Similar to PSP_chk_li2,
+   but for the rescue system (by default Golem95).
+
+   Threshold to declare a PSP as bad point in the rescue system,
+   based on the precision of the pole part in comparison to the
+   finite part. According to the verbosity level set, such points
+   are written to a file and not used when the code is interfaced
+   to an external Monte Carlo using the new BLHA standards.
+
+   !!Works only for QCD and with built-in model files!!
+   """,
+   int, 19)
+
 
 config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    """\
@@ -1059,6 +1152,24 @@ config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
    !!Works only for QCD and with built-in model files!!
    """,
    str, 1000)
+
+config_PSP_chk_method = Property("PSP_chk_method",
+   """\
+   This option can be used to overwrite the automatic phase-space point
+   test method enabled with PSP_check=True.
+   Except in some BSM scenarios, the user does not need to change this.
+
+   Possible options:
+   Automatic    - chooses automatically a suitable phase-space point test
+                  method (default).
+   PoleRotation - check first the pole and then rotate if necessary.
+   Rotation     - force a rotation check on every phase space point.
+   LoopInduced  - check that the pole part is zero and rotate if necessary.
+                  Needed e.g. for interferience between BSM Born and
+                  SM loop-induced virtual.
+   """,
+   str, "Automatic",options=["automatic","polerotation","rotation","loopinduced"])
+
 
 properties = [
    process_name,
@@ -1071,6 +1182,7 @@ properties = [
    zero,
    one,
    renorm,
+   sum_helicities,
    regularisation_scheme,
    genUV,
    helicities,
@@ -1098,7 +1210,6 @@ properties = [
    config_renorm_decoupling,
    config_renorm_mqse,
    config_renorm_logs,
-   config_renorm_gamma5,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,
@@ -1110,6 +1221,11 @@ properties = [
    config_PSP_chk_th2,
    config_PSP_chk_th3,
    config_PSP_chk_kfactor,
+   config_PSP_chk_li1,
+   config_PSP_chk_li2,
+   config_PSP_chk_li3,
+   config_PSP_chk_li4,
+   config_PSP_chk_method,
 
    reference_vectors,
    abbrev_limit,
@@ -1181,7 +1297,6 @@ def setInternals(conf):
          "__DERIVATIVES_AT_ZERO__",
          "__REGULARIZATION_DRED__",
          "__REGULARIZATION_HV__",
-         "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
@@ -1228,7 +1343,3 @@ def setInternals(conf):
    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
    if not "__OLP_MODE__" in conf:
       conf["__OLP_MODE__"] =  False
-
-   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-   #    and "no-fr5" not in extensions
-   conf["__REQUIRE_FR5__"]  = False

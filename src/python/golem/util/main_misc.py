@@ -21,12 +21,14 @@ import golem.util.constants as consts
 
 import golem.templates.xmltemplates
 
+from golem.util.find_libpaths import find_libraries
+
 from golem.util.path import golem_path, gosam_contrib_path
 from golem.util.tools import copy_file, \
 		debug, message, warning, \
 		generate_particle_lists
 
-from golem.util.config import GolemConfigError
+from golem.util.config import GolemConfigError, split_qgrafPower
 
 # The following files contain routines which originally were
 # part of golem-main itself:
@@ -243,6 +245,8 @@ def find_config_files():
 	Searches for configuration files in the default locations.
 	These are used to fill the fields of newly created input
 	files by preferred defaults.
+	Use "golem.util.find_libpaths.find_libraries()"
+	to find	external library paths.
 
 	The procedure looks in the following locations:
 		<golem path>
@@ -271,6 +275,9 @@ def find_config_files():
 				f = open(full_name, 'r')
 				props.load(f)
 				f.close()
+	libpaths = find_libraries()
+	for flag in libpaths:
+		props.setProperty(flag, libpaths[flag])
 	return props
 
 def write_template_file(fname, defaults, format=None):
@@ -301,6 +308,13 @@ def write_template_file(fname, defaults, format=None):
 				f.write("%s=%s\n" % (prop, value))
 	for prop in golem.properties.properties:
 		changed = str(prop) in defaults.propertyNames()
+		subprocess_specific_settings = False
+		for k in defaults:
+			if k.startswith(str(prop)+"["):
+				subprocess_specific_settings=True
+				changed=True
+				break
+
 		if prop.isExperimental() and not changed:
 			continue
 		if prop.isHidden() and not changed:
@@ -365,6 +379,10 @@ def write_template_file(fname, defaults, format=None):
 				f.write("# %s=\n" % prop)
 			else:
 				f.write("# %s=%s\n" % (prop, prop.getDefault()))
+			if subprocess_specific_settings:
+				for k in defaults:
+					if k.startswith(str(prop)+"["):
+						f.write("%s=%s\n" % (k, defaults.getProperty(k)))
 			f.write("\n")
 		elif format == "LaTeX":
 			if prop.getDefault() is not None:
@@ -374,11 +392,7 @@ def write_template_file(fname, defaults, format=None):
 
 	if format is None:
 		for prop in defaults:
-			if prop.startswith("+"):
-				value=defaults[prop]
-				newkey=prop[1:]
-				f.write("%s=%s\n" % (newkey, value))
-			elif prop.endswith(".extensions"):
+			if prop.startswith("+") or prop.endswith(".extensions"):
 				value=defaults[prop]
 				f.write("%s=%s\n" % (prop, value))
 	elif format == "LaTeX":
@@ -401,10 +415,19 @@ def read_golem_dir_file(path):
 
 		# be compatible between internal 1.99 releases and 2.0.*
 		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
+			warning("This directory has been generated with an older version "+
+				"of GoSam (%s)." % result["golem-version"],
+				"If you get compiler errors, you might need to remove all files",
+				"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		# be compatible to older 2.0.* releases
-		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:2]+[0]*5)[:3]:
+		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+			if ver[:3]!=(GOLEM_VERSION[:3]+[0]*5)[:3]:
+				warning("This directory has been generated with an older version "+
+					"of GoSam (%s)." % result["golem-version"],
+					"If you get compiler errors, you might need to remove all files",
+					"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
@@ -587,11 +610,6 @@ def workflow(conf):
 		if power.strip().lower() != "none":
 			loops_to_generate.append(i - 1)
 
-        #if loops==2:
-	  #generate_nnlo_virt = True
-	#else:
-	  #generate_nnlo_virt = False
-
 	conf["loops_to_generate"] = loops_to_generate
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
@@ -600,6 +618,8 @@ def workflow(conf):
 	#generate_uv_counterterms
 	#False
 
+	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
+		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
 
 	#if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
 	#	qgraf_options.append("onshell")
@@ -670,7 +690,7 @@ def workflow(conf):
 	if 'formopt' in ext:
 		if 'topolynomial' in ext:
 			raise GolemConfigError(
-						"Your configuaration has select the extension 'topolynomial' \n"
+						"Your configuration has select the extension 'topolynomial' \n"
 						"and optimization by FORM 'formopt'. " +
 						"The two options are not compatible. \nPlease change your input " +
 						"card (remove topolynomial or add noformopt) and re-run.")
@@ -692,9 +712,25 @@ def workflow(conf):
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
 
-	if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
-		ext.append("numpolvec")
-
+	if conf["helsum"]:
+		if not conf.getBooleanProperty("generate_lo_diagrams"):
+			raise GolemConfigError(
+				'The "helsum" feature is not implemented for loop-induced processes.\n' +
+				'Set "helsum=false" for the selected process.\n')
+		if "generate-all-helicities" not in ext:
+			ext.append("generate-all-helicities")
+		if conf.getProperty("polvec")=="numerical" or "numpolvec" in ext:
+			raise GolemConfigError(
+				'The "helsum" feature is only implemented for explicit\n' +
+				'polarization vectors. Please either set "helsum=false"\n' +
+				'or "polvec=explicit" in the input card."\n')
+		if "autotools" in ext:
+			raise GolemConfigError(
+				'The "helsum" feature is not implemented for autotools.\n' +
+				'Either set "helsum=false" or remove "autotools" from "extensions".\n')
+	else:
+		if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
+			ext.append("numpolvec")
 
 	for prop in golem.properties.properties:
 		lines = prop.check(conf)
