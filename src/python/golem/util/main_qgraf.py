@@ -147,7 +147,7 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 
 	f.write(";\n")
 
-	f.write("loops=%d;\nloop_momentum=p;\n" % loops)
+	f.write("loops=%s;\nloop_momentum=p;\n" % loops)
 
 	# write line: options = <opt1>, <opt2>, ...;
 	f.write("options=%s;\n" % ", ".join(options))
@@ -228,6 +228,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_topolopy = True
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
+	loops_to_generate = conf.getListProperty("loops_to_generate")
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
@@ -328,61 +329,71 @@ def run_qgraf(conf, in_particles, out_particles):
 			
 			
 			
-	# -------------------- NNLO virt -------------------------------------
-	if flag_generate_nnlo_virt:
-	      output_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % 2 + form_ext
-	      log_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % 2 + log_ext
-	      
-	      if powers is not None:
-		new_verbatim = verbatim + "\n" + verbatim_nnlo + "\n" + \
-				"true=vsum[%s,%s,%s];\n" % (powers[0], powers[3], powers[3])
-	      else:		      
-		new_verbatim = verbatim + "\n" + verbatim_nnlo
-		
-	      write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
-		       options, new_verbatim, in_particles, out_particles, [], 2)
+	# -------------------- higher virt -------------------------------------
+	for looporder in loops_to_generate:
+		if looporder == '1':
+			# already treated above
+			# TODO: include 1loop case in this for loop
+			continue
+		if looporder != '2':
+			# ********************** IMPORTANT ***********************
+			# This loop currently only works for exactly 2loops (nnlo)
+			# ********************************************************
+			raise GolemConfigError("More than 2loop is not implemented so far.")
 
-	      run_qgraf_dat(conf, output_name, log_name)
-	      
-	      if flag_draw_diagrams:
-		#leaving the old diagram generation in in case it might be useful.
-		#output_name = consts.PATTERN_PYXO_NNLO_VIRT + python_ext
-		#log_name = consts.PATTERN_PYXO_NNLO_VIRT + log_ext
-		#write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-		#		options, new_verbatim, in_particles, out_particles, [], 2)
-		#run_qgraf_dat(conf, output_name, log_name)
-		#sys.exit()
-		
-		#new diagram generation
-		output_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % 2
-		log_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % 2 + log_ext
-		write_qgraf_dat(path, dot_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [] ,2)
-		run_qgraf_dat(conf, output_name, log_name)
-		if flag_dot2tex:
-		  run_dot2tex(path,output_name)
+		output_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % looporder + form_ext
+		log_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % looporder + log_ext
+
+		if powers and powers is not None:
+			new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+				"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[int(looporder) + 1], po[int(looporder) + 1]) for po in powers])
 		else:
-		  run_neato(path,output_name)
+			new_verbatim = verbatim + "\n" + verbatim_nnlo
+		
+		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
+			options, new_verbatim, in_particles, out_particles, [], looporder)
+
+		run_qgraf_dat(conf, output_name, log_name)
+
+		if flag_draw_diagrams:
+			#leaving the old diagram generation in in case it might be useful.
+			#output_name = consts.PATTERN_PYXO_NNLO_VIRT + python_ext
+			#log_name = consts.PATTERN_PYXO_NNLO_VIRT + log_ext
+			#write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
+			#		options, new_verbatim, in_particles, out_particles, [], looporder)
+			#run_qgraf_dat(conf, output_name, log_name)
+			#sys.exit()
+
+			#new diagram generation
+			output_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % looporder
+			log_name = consts.PATTERN_DOTSTY_HIGHER_VIRT % looporder + log_ext
+			write_qgraf_dat(path, dot_sty, consts.MODEL_LOCAL, output_name,
+					options, new_verbatim, in_particles, out_particles, [] ,looporder)
+			run_qgraf_dat(conf, output_name, log_name)
+			if flag_dot2tex:
+			  run_dot2tex(path,output_name)
+			else:
+			  run_neato(path,output_name)
 		
 		
-		#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
-		#		conf=conf)
-		for ext in [python_ext, pyo_ext, pyc_ext]:
-			cleanup_files.append(consts.PATTERN_PYXO_HIGHER_VIRT % 2 + ext)
+			#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
+			#		conf=conf)
+			for ext in [python_ext, pyo_ext, pyc_ext]:
+				cleanup_files.append(consts.PATTERN_PYXO_HIGHER_VIRT + ext)
 
 		if flag_topolopy:
-			output_name = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % 2 + python_ext
-			log_name    = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % 2 + log_ext
+			output_name = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % looporder + python_ext
+			log_name    = consts.PATTERN_TOPOLOPY_HIGHER_VIRT % looporder + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 2)
+				options, new_verbatim, in_particles, out_particles, [], looporder)
 			run_qgraf_dat(conf, output_name, log_name)
 
-              if flag_reduze:
-	        output_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % 2 + yaml_ext
-	        log_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % 2 + log_ext
-	        write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
-		  	  options, new_verbatim, in_particles, out_particles, [] ,2)
-	        run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
+		if flag_reduze:
+			output_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % looporder + yaml_ext
+			log_name_reduze = consts.PATTERN_REDUZE_HIGHER_VIRT % looporder + log_ext
+			write_qgraf_dat(path, reduze_sty, consts.MODEL_LOCAL, output_name_reduze,
+			options, new_verbatim, in_particles, out_particles, [] ,looporder)
+			run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
 			
 		
 
