@@ -26,13 +26,17 @@ off statistics;
 * Process sum
 * Load GoSam result
 #IF (`LOOPS' == [%loop%])
-#Do i = {[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#Do i = {,[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#If x`i' != x
 #include- d`i'l`LOOPS'.txt;
+#EndIf
 #EndDo
 
 G sum =
-#Do i = {[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#If x`i' != x
    + d`i'l`LOOPS'
+#EndIf
 #EndDo
 ;
 #EndIf

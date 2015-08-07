@@ -10,7 +10,7 @@ kinematics:
 @for particles final %][%
    @if eval index .lt. num_legs %] - k[%index%][%
    @end @if %][%
-@end @for %]);[%
+@end @for %][%
 @else %] -([%
 @for particles initial %][%
    @if eval index .lt. num_legs %] + k[%index%][%
