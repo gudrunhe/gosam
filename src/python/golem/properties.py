@@ -412,9 +412,9 @@ form_workspace = Property("form.workspace",
 haggies_bin = Property("haggies.bin",
    """\
    Points to the Haggies executable.
-   Haggies is used to transform the expressions of the diagrams
-   into optimized Fortran90 programs. It can be obtained from
-      http://www.nikhef.nl/~thomasr/download.php
+   Haggies is used to transform the expressions of the
+   diagrams into optimized Fortran90 programs if the
+   extension "noformopt" is active.
 
    Examples:
       1) haggies.bin=/home/my_user_name/bin/haggies
@@ -586,8 +586,6 @@ extensions = Property("extensions",
 #                    not compatible with the formopt option.
 #   qshift       --- apply the shift of Q already at the FORM level
 #   numpolvec    --- evaluate polarisation vectors numerically
-#   extraopt     --- optimization using FORM for color and model files.
-#                     (experimental)
 #   One option which is affected by this is LDFLAGS. In the following
 #   example only ldflags.looptools is added to the LDFLAGS variable
 #   in the makefiles whereas the variable ldflags.qcdloop is ignored.
@@ -604,7 +602,8 @@ extensions = Property("extensions",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr","noderive","noformopt"])
+      "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
+      "noformopt"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -1264,7 +1263,6 @@ def setInternals(conf):
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
 
    conf["__FORMOPT__"] = "formopt" in extensions
-   conf["__EXTRAOPT__"] = "extraopt" in extensions
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions

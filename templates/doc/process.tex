@@ -563,7 +563,7 @@ program FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd} using the FORM library
 SPINNEY~\cite{Cullen:2010jv}.
 The Fortran~90 code is generated using 
 [% @if extensions noformopt %][% @else %]FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd}[%
-@end @if %][% @if extension extraopt %][% @else %] and HAGGIES~\cite{Reiter:2009ts}[% @end @if %].
+@end @if %][% @if extension formopt %][% @else %] and HAGGIES~\cite{Reiter:2009ts}[% @end @if %].
 [% @if extension ninja %]For the reduction of the tensor integrals
 the code uses an implementation of the Laurent series expansion 
 method~\cite{Mastrolia:2012bu}
@@ -636,7 +636,7 @@ the evaluation of the scalar integrals:
   \href{http://arxiv.org/abs/1008.0803}{arXiv:1008.0803 [hep-ph]}.
   %%CITATION = ARXIV:1008.0803;%%
 %\cite{Reiter:2009ts}[%
-@if extension extraopt %][%
+@if extension formopt %][%
 @else%]
 \bibitem{Reiter:2009ts}
   T.~Reiter,

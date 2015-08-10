@@ -27,7 +27,7 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
-[%@if extension extraopt %]
+[%@if extension formopt %]
 							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
 [%@else%]
 							+ c(`c1',`c2') * propcolor(`I', `J')
@@ -61,9 +61,10 @@ Repeat Id delta(iDUMMY1?, iDUMMY2?) * delta(iDUMMY2?, iDUMMY3?) =
 Id delta(iDUMMY1?, iDUMMY1?) = NC;
 
 
-[%@if extension extraopt %]
-* You are using Form Optimization, this is experimental
-* and may crash due to lack of memory
+[%@if extension formopt %]
+* You are using Form Optimization, this
+* may crash due to lack of memory.
+* In that case, increase MaxWorkSpace in "form.set".
 .sort
 *
 AutoDeclare S T,C;

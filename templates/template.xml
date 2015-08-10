@@ -42,7 +42,7 @@
 		<file src="model.out" class="Model"/>
 
 		<file src="haggies-l0.in" class="Multi">
-			<except if-extension="extraopt" />
+			<except if-extension="formopt" />
 		</file>
 
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
@@ -69,7 +69,7 @@
 			<only if-extension="formopt" />
 		</file>
 		<file src="colorin.py" class="Multi">
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
@@ -99,10 +99,10 @@
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="modelopt.frm" class="Kinematics">
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="abbreviate.hh" class="Kinematics"/>
 		<file src="optimizeborn.hh" class="Integrals">
@@ -146,7 +146,7 @@
 			<only if-extension="formopt" />
 		</file>
 		<file src="buildcolor.py" class="Kinematics">
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
@@ -162,7 +162,7 @@
 		<file src="spva.prc" class="Kinematics"/>
 		<file src="func.txt" class="Model" />
 		<file src="func.hh" class="Model" >
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="diagsum.frm" dest="diagsum.frm"
 		                class="Integrals" >

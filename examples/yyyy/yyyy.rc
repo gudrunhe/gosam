@@ -21,4 +21,3 @@ extensions=gaugecheck
 +olp.include_color_average=false
 +olp.include_helicity_average=false
 +olp.include_symmetry_factor=false
-
