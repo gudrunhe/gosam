@@ -40,9 +40,8 @@ def compare_version(version1, version2):
       else:
          return 0
 
-class TemplateXMLError(BaseException):
-   def __init__(self, msg):
-      BaseException.__init__(self, msg)
+class TemplateXMLError(Exception):
+   pass
 
 class _TemplateState:
    def __init__(self, template_dir, output_dir, *props, **opts):
@@ -67,7 +66,9 @@ class _TemplateState:
 
       self.cbuffer = None
       self.factory = golem.templates.factory.TemplateFactory()
-   
+
+      self.created_directories = []
+
    def setMode(self, mode):
       self._mode = mode
 
@@ -96,6 +97,22 @@ class _TemplateState:
       else:
          message("Creating directory %r ..." % dest)
          os.mkdir(dest)
+         self.created_directories.append(dest)
+
+   def delete_dir_if_empty(self, dest):
+      if not os.path.exists(dest):
+         error("Cannot check if directory %r " % dest +
+               "is empty because it does not exist.")
+
+      elif not os.path.isdir(dest):
+         error("Cannot check if %r " % dest +
+               "is empty because it is not a directory.")
+      else:
+         if not os.listdir(dest):
+            os.rmdir(dest)
+            message("Removed empty directory %r." % dest)
+         else:
+            message("Keeping non-empty directory %r." % dest)
 
    def transform_template_file(self, in_file, out_file, class_name, filter, executable):
       if out_file in self.produced_files:
@@ -138,7 +155,9 @@ class _TemplateState:
          entry["output-directory"] = self.output_dir
 
    def end_template(self):
-      pass
+      # delete empty directories
+      for directory in self.created_directories:
+         self.delete_dir_if_empty(directory)
 
    def expand_file(self, env, attrs):
       if "usedby" in attrs:
@@ -482,7 +501,7 @@ class _TemplateState:
 
       for env in envs:
          if (not flag) or self.evaluate_conditions(env, attrs):
-               new_envs.append(env)
+            new_envs.append(env)
 
       self.stack.append(new_envs)
 
