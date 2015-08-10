@@ -1,110 +1,95 @@
-noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%].la
-libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= \
-	globals.f90 amplitudeh[%helicity%].f90[%
-@if helsum%][%
-@else%][%
+noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_sum.la
+libgolem_process[% process_name assuffix=\_ %]_sum_la_SOURCES= \
+	globals.f90 amplitude.f90[%
 @select r2
 @case implicit explicit off %][%
-   @if extension golem95 %] golem95h[%helicity%].f90[%
+   @if extension golem95 %] golem95.f90[%
    @end @if %][%
-   @if extension samurai %] samuraih[%helicity%].f90[%
+   @if extension samurai %] samurai.f90[%
    @end @if %][%
-   @if extension ninja %] ninjah[%helicity%].f90[%
+   @if extension ninja %] ninja.f90[%
    @end @if %][%
 @end @select %][%
-@end @if helsum %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.f90[%
-   @if group %][%
-   @else %][% 
-      @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0.f90[%
-      @end @for %][%
-   @end @if %][%
 @end @if generate_lo_diagrams %][%
-@if helsum %][%
-@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
-	abbrevh[%helicity%].f90[%
+	abbrev.f90[%
    @case group %][%
       @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%].f90[%
+	abbrevg[%grp%].f90[%
       @end @for %][%
    @case diagram %][%
       @for elements topolopy.keep.virt %] \
-	abbrevd[%$_%]h[%helicity%].f90[%
+	abbrevd[%$_%].f90[%
       @end @for %][%
    @end @select %][%
    @select r2
    @case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.f90[%
-         @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.f90[%
+	d[%$_%]l1.f90[%
+         @if internal GENERATE_DERIVATIVES %] d[%$_%]l1d.f90[%
          @end @if %][%
-         @if extension ninja %] d[%$_%]h[%helicity%]l131.f90  d[%$_%]h[%helicity%]l132.f90  d[%$_%]h[%helicity%]l121.f90[%
+         @if extension ninja %] d[%$_%]l131.f90  d[%$_%]l132.f90  d[%$_%]l121.f90[%
          @end @if %][%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %][%
-@end @if helsum %]
+@end @if generate_nlo_virt %]
 
 nodist_pkginclude_HEADERS=[%
-	process_name asprefix=\_ %]globalsh[% helicity %].mod [%
-	process_name asprefix=\_ %]amplitudeh[%helicity%].mod[%
-@if helsum %][%
-@else %][%
+	process_name asprefix=\_ %]globals.mod [%
+	process_name asprefix=\_ %]amplitude.mod[%
 @select r2
 @case implicit explicit off %][%
    @if extension golem95 %] \
-        [% process_name asprefix=\_ %]golem95h[%helicity%].mod[%
+        [% process_name asprefix=\_ %]golem95.mod[%
    @end @if %][%
    @if extension samurai %] \
-	[% process_name asprefix=\_ %]samuraih[%helicity%].mod[%
+	[% process_name asprefix=\_ %]samurai.mod[%
    @end @if %][%
    @if extension ninja %] \
-	[% process_name asprefix=\_ %]ninjah[%helicity%].mod[%
+	[% process_name asprefix=\_ %]ninja.mod[%
    @end @if %][%
 @end @select %][%
-@end @if %][%
 @if generate_lo_diagrams %] \
-	[% process_name asprefix=\_ %]diagramsh[% helicity %]l0.mod[%
+	[% process_name asprefix=\_ %]diagramsl0.mod[%
    @if group %][%
    @else %][% 
       @for elements topolopy.keep.tree %] \
-	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod[%
+	[% process_name asprefix=\_ %]d[%$_%]l0.mod[%
       @end @for %][%
    @end @if %][%
 @end @if generate_lo_diagrams %][%
-@if helsum %][%
-@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
-	[% process_name asprefix=\_ %]abbrevh[%helicity%].mod[%
+	[% process_name asprefix=\_ %]abbrev.mod[%
    @case group %][%
       @for groups var=grp %] \
-	[% process_name asprefix=\_ %]abbrevg[%grp%]h[%helicity%].mod[%
+	[% process_name asprefix=\_ %]abbrevg[%grp%].mod[%
       @end @for %][%
    @case diagram %][%
       @for elements topolopy.keep.virt %] \
-	[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod[%
+	[% process_name asprefix=\_ %]abbrevd[%$_%].mod[%
       @end @for %][%
    @end @select %][%
    @select r2
    @case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
-	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod[%
+	[% process_name asprefix=\_ %]d[%$_%]l1.mod[%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %][%
-@end @if helsum %]
+@end @if generate_nlo_virt %]
 
 CLEANFILES=$(nodist_pkginclude_HEADERS)
 ACLOCAL_AMFLAGS=-I m4
 
-AM_FCFLAGS=$(GOLEM_CONFIG_FCFLAGS) -I../common
+AM_FCFLAGS=$(GOLEM_CONFIG_FCFLAGS) -I../common[%
+   @for helicities generated %] \
+	   -I../helicity[%helicity%][%
+   @end @for %]
 AM_LDFLAGS=$(GOLEM_CONFIG_LDFLAGS)
 
 GENERATED_SRC=[%
@@ -113,34 +98,31 @@ GENERATED_SRC=[%
 	diagramsl0.f90[%
    @else %][% 
       @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0.f90[%
+	d[%$_%]l0.f90[%
       @end @for %][%
    @end @if %][%
 @end @if generate_lo_diagrams %][%
-@if helsum %][%
-@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
-	abbrevh[%helicity%].f90[%
+	abbrev.f90[%
    @case group %][%
       @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%].f90[%
+	abbrevg[%grp%].f90[%
       @end @for %][%
    @case diagram %][%
       @for elements topolopy.keep.virt %] \
-	abbrevd[%$_%]h[%helicity%].f90[%
+	abbrevd[%$_%].f90[%
       @end @for %][%
    @end @select %][%
    @for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.f90[%
-      @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.f90[%
+	d[%$_%]l1.f90[%
+      @if internal GENERATE_DERIVATIVES %] d[%$_%]l1d.f90[%
       @end @if %][%
-      @if extension ninja %] d[%$_%]h[%helicity%]l131.f90  d[%$_%]h[%helicity%]l132.f90  d[%$_%]h[%helicity%]l121.f90[%
+      @if extension ninja %] d[%$_%]l131.f90  d[%$_%]l132.f90  d[%$_%]l121.f90[%
       @end @if %][%
    @end @for %][%
-@end @if generate_nlo_virt %][%
-@end @if helsum %]
+@end @if generate_nlo_virt %]
 
 $(GENERATED_SRC): %: source
 

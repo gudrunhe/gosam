@@ -303,6 +303,9 @@
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
 		<file src="Makefile" class="Integrals"/>
+		<file src="Makefile.am" class="Integrals">
+			<only if-extension="autotools" />
+		</file>
 		<file src="globals.f90" class="Kinematics"/>
       <file src="../form.set" dest="form.set" class="Kinematics"/>
       <file src="amplitude.f90" class="Integrals" />

@@ -74,7 +74,10 @@ AC_CONFIG_FILES([
    common/Makefile[%
 @for helicities generated %]
    helicity[% helicity %]/Makefile[%
-@end @for %]
+@end @for %][%
+@if helsum %]
+   sum/Makefile[%
+@end @if %]
    matrix/Makefile
 ])
 AC_OUTPUT
