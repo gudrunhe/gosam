@@ -31,6 +31,7 @@ LEX_OPTS=
 YACC=yacc
 YACC_OPTS=
 
+F_MODULES=olp_module.mod
 F_OBJECTS=olp_module.o
 C_OBJECTS=[%
 @if internal OLP_DAEMON %]olp_parser.o olp_lexer.o olp_daemon.o[%
@@ -68,8 +69,9 @@ clean:
 	do \
 		$(MAKE) -C $${dir} $@; \
 	done
+	rm -f $(F_MODULES) $(C_OBJECTS) $(F_OBJECTS)
 
-very-clean:
+very-clean: clean
 	@for dir in $(SUBDIRS); \
 	do \
 		$(MAKE) -C $${dir} $@; \

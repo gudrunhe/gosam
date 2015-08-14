@@ -248,7 +248,8 @@ def main(argv=sys.argv):
 
 	if skipped > 0:
 		golem.util.tools.error(
-				"There were errors. %d file(s) skipped." % skipped)
+				"There were errors. %d file(s) skipped.\n" % skipped +
+				"See .olc file for details.")
 	if len(args) == 0:
 		golem.util.tools.warning("No input files have been processed.")
 

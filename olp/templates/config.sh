@@ -4,12 +4,12 @@ PWD="$(dirname $(realpath "$0"))"
 
 USE_INTERNAL=
 
-FCFLAGS="[%
+CFLAGS="-I${PWD}"
+FCFLAGS="${CFLAGS}[%
 @for subprocesses %] \
  `sh ${PWD}/[%path%]/config.sh -[%
    @if is_first %][% @else %]p[% @end @if %]cflags`[%
 @end @for %]"
-CFLAGS="-I${PWD}"
 LDFLAGS="${PWD}/olp_module.o[%
 @for subprocesses %] \
  `sh ${PWD}/[%path%]/config.sh -[%

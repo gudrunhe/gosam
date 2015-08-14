@@ -1,0 +1,20 @@
+# OLE_order.lh
+# Created by Sherpa-2.1.0
+
+MatrixElementSquareType  CHsummed
+CorrectionType           QCD
+IRregularisation         DRED
+AlphasPower              4
+AlphaPower               1
+OperationMode            CouplingsStrippedOff
+ResonanceTreatment       FixedWidthScheme
+EWRenormalisationScheme  alphaMZ
+
+# PDG codes
+# u: 2, d: 1
+# Gluon: 21
+# Higgs-Boson: 25
+
+# process list
+21 21-> 25 1 -1
+1 -1 -> 25 2 -2
