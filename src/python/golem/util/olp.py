@@ -449,7 +449,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for lconf in [conf] + subprocesses_conf:
          golem.util.tools.prepare_model_files(lconf, imodel_path)
 
-         lconf["modeltype"] = lconf["model"]
+         lconf["modeltype"] = lconf.getListProperty("model")[-1]
 
          lconf["model"] = os.path.join(imodel_path,
                golem.util.constants.MODEL_LOCAL)
