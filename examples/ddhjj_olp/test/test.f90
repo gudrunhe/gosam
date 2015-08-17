@@ -149,11 +149,11 @@ subroutine     compute_gosam_result(subprocess, blha_kinematics, renorm_scale, g
       write(ch,'(A10,1x,A16,1x,G23.16)') "GOSAM,", "LO:", &
          & gosam_amp(0)
       write(ch,'(A10,1x,A16,1x,G23.16)') "GOSAM,", "NLO finite part:", &
-         & gosam_amp(1)/gosam_amp(0)
+         & gosam_amp(1)
       write(ch,'(A10,1x,A16,1x,G23.16)') "GOSAM,", "NLO single pole:", &
-         & gosam_amp(2)/gosam_amp(0)
+         & gosam_amp(2)
       write(ch,'(A10,1x,A16,1x,G23.16)') "GOSAM,", "NLO double pole:", &
-         & gosam_amp(3)/gosam_amp(0)
+         & gosam_amp(3)
    end do
 end subroutine compute_gosam_result
 
