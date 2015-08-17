@@ -38,7 +38,7 @@ C_OBJECTS=[%
 @end @if %]
 
 DISTFILES= \
-	Makefile olp.h config.sh olp_module.f90[%
+	Makefile olp.h config.sh olp_module.f90 Makefile.conf[%
 @if internal OLP_DAEMON %] \
 	olp_daemon.c olp_daemon.h olp_lexer.l olp_parser.y \
 	olp_lexer.c olp_parser.c olp_parser.h[%
@@ -85,7 +85,7 @@ source:
 
 filelist-source: source
 	@echo -n > $@
-	@for f in $(DIST_FILES); \
+	@for f in $(DISTFILES); \
 	do \
 		echo $${f} >> $@; \
 	done
