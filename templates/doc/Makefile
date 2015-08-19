@@ -59,3 +59,4 @@ filelist-source:
 	echo process.tex >> $@
 	echo axodraw.sty >> $@
 	echo redo.log >> $@
+	echo gind.ist >> $@

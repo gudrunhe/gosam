@@ -163,12 +163,13 @@ subroutine     compute_reference_result(subprocess, amp)
    real(ki), dimension(0:3), intent(out) :: amp
 
    if (subprocess .eq. 1) then
-      ! process d d~ -> h g g
+      ! process g g -> h d d~
       amp(0) =   0.5677813961826772E-06_ki
       amp(1) =  66.66351423714880_ki
       amp(2) = -16.58166333155296_ki
       amp(3) =  -8.666666666666572_ki
    else if (subprocess .eq. 0) then
+      ! process d d~ -> h u u~
       amp(0) =   0.1011096724203530E-06_ki
       amp(1) =  33.95216267342636_ki
       amp(2) = -13.86492928341135_ki
