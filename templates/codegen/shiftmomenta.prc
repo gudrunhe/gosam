@@ -7,9 +7,9 @@
   @for diagrams group=grp %]
   #Case [% $_ %]
      #If `WRAP'
-        Id p1 = [% sign %] Q - qshift * fshift([% shift %]);
+        Multiply replace_( p1 , [% sign %] Q - qshift * fshift([% shift %]) );
      #Else
-        Id p1 = [% sign %] Q - ([% shift %]);
+        Multiply replace_( p1 , [% sign %] Q - ([% shift %]) );
      #EndIf
      #Break[%
   @end @for diagrams %]

@@ -96,6 +96,7 @@ outdict=translatefile(diag_name+'.txt',config)
 abbfile.write('module     [% process_name asprefix=\_ 
             %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 abbfile.write('   use [% process_name asprefix=\_ %]config, only: ki\n')
+abbfile.write('   use [% process_name asprefix=\_ %]kinematics, only: epstensor\n')
 abbfile.write('   use [% process_name asprefix=\_ %]globals'[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 abbfile.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%

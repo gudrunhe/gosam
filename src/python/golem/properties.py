@@ -595,6 +595,8 @@ extensions = Property("extensions",
 #   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
 #   formopt      --- diagram optimization using FORM (works only with
 #                    abbrev.level=diagram and r2=implicit/explicit).
+#   tracify      --- transform loop momenta into traces before running
+#                    the numerics
 
    ,
    list,",".join(DEFAULT_EXTENSIONS),
@@ -603,7 +605,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
-      "noformopt"])
+      "noformopt","tracify"])
 
 select_lo_diagrams = Property("select.lo",
    """\

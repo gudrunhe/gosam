@@ -43,6 +43,11 @@ off statistics;
 @end @if %]
 
 [%
+@if extension tracify %]
+AutoDeclare S Qeps;[%
+@end @if %]
+
+[%
 @if extension formopt %]
 #If `LOOPS' == 1
    #Define abb`DIAG' "0"
@@ -553,6 +558,22 @@ Local d`DIAG'R2 = 0;[%
 
 
 #if `LOOPS' == 1[%
+@if extension tracify%]
+#Do left={`LIGHTLIKE'}
+  #Do right={`LIGHTLIKE'}
+    #Do aux={`LIGHTLIKE'}
+       #if `left' != `aux'
+          #if `right' != `aux'
+             #if `right' != `left'
+                #call SpTracify(`left',`right',`aux',p1)
+             #EndIf
+          #EndIf
+       #EndIf
+     #EndDo
+  #EndDo
+#EndDo
+#call SpTrace4[%
+@end @if extension tracify%][%
 @if extension qshift %]
    #Call shiftmomenta(`DIAG',0)
    Argument Spab, Spaa, Spbb, Spba;
@@ -608,7 +629,18 @@ Id inv(sDUMMY1?symbol_) = (1/sDUMMY1);
 Id vDUMMY1?{`LIGHTLIKE'}.vDUMMY2?{`LIGHTLIKE'} =
    1/2 * Spa2(vDUMMY1, vDUMMY2) * Spb2(vDUMMY2, vDUMMY1);
 
-#call spsymbols
+#call spsymbols[%
+@if extension tracify%]
+Argument;
+  #call spsymbols
+EndArgument;
+#If `LOOPS' == 1
+   Id e_(Q,vDUMMY1?,vDUMMY2?,vDUMMY3?) =  Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
+   Id e_(vDUMMY1?,Q,vDUMMY2?,vDUMMY3?) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
+   Id e_(vDUMMY1?,vDUMMY2?,Q,vDUMMY3?) =  Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
+   Id e_(vDUMMY1?,vDUMMY2?,vDUMMY3?,Q) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
+#EndIf[%
+@end @if %]
 
 Id SpDenominator(sDUMMY1?) = (1/sDUMMY1);
 Id inv(sDUMMY1?) = (1/sDUMMY1);

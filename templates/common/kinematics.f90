@@ -132,7 +132,13 @@
       module procedure Spba3_real
    end interface
 
-   public :: Spaa, Spbb, Spab3, Spba3, dotproduct
+   interface epstensor
+      module procedure e_first_cmplx
+      module procedure e_real
+      module procedure e_real_idx
+   end interface
+
+   public :: Spaa, Spbb, Spab3, Spba3, dotproduct, epstensor
    public :: inspect_kinematics, init_event
    public :: adjust_kinematics
    public :: boost_to_cms
@@ -140,6 +146,58 @@
    public :: epsi, epso
 
 contains
+   ! This is the contracted epsilon tensor in Schoonschip notation
+   ! adapted from golem95 version 1.3.0
+   !
+   ! Note: The final multiplication with i_ is due to FORM's metric
+   !       independent treatment of the Dirac algebra.
+   !       In particular gamma5(FORM) is defined as gamma5(usual)/i.
+   pure function e_real(k1,k2,k3,k4) result(res)
+      real(ki), intent (in), dimension(4) :: k1, k2, k3, k4
+      complex(ki) :: res
+
+      real(ki) :: k12, k23, k34, k13, k14, k24, tmp
+
+      k12 = k3(1)*k4(2)-k3(2)*k4(1)
+      k23 = k3(2)*k4(3)-k3(3)*k4(2)
+      k34 = k3(3)*k4(4)-k3(4)*k4(3)
+      k13 = k3(1)*k4(3)-k3(3)*k4(1)
+      k14 = k3(1)*k4(4)-k3(4)*k4(1)
+      k24 = k3(2)*k4(4)-k3(4)*k4(2)
+
+      tmp =  k1(1)*(k2(2)*k34 - k2(3)*k24 + k2(4)*k23)&
+      &    + k1(2)*(k2(3)*k14 - k2(1)*k34 - k2(4)*k13)&
+      &    + k1(3)*(k2(1)*k24 - k2(2)*k14 + k2(4)*k12)&
+      &    + k1(4)*(k2(2)*k13 - k2(1)*k23 - k2(3)*k12)
+
+      res =  i_*tmp
+
+   end function e_real
+
+   pure function  e_first_cmplx(k1,k2,k3,k4) result(res)
+      complex(ki), intent (in), dimension(4) :: k1
+      real(ki), intent (in), dimension(4) :: k2, k3, k4
+      complex(ki) :: res
+
+      res = e_real(real(k1),k2,k3,k4) + i_*e_real(aimag(k1),k2,k3,k4)
+
+    end function e_first_cmplx
+
+   pure function e_real_idx(idx,k1,k2,k3) result(res)
+      real(ki), intent (in), dimension(4) :: k1, k2, k3
+      integer, intent(in) :: idx
+      real(ki), dimension(1:4) :: idxvec
+      complex(ki) :: res
+      idxvec = (/0.0_ki,0.0_ki,0.0_ki,0.0_ki/)
+      ! Minkowski metric
+      if (idx==1) then
+         idxvec(idx) = 1.0_ki
+      else
+         idxvec(idx) = -1.0_ki
+      end if
+      res = e_real(idxvec,k1,k2,k3)
+   end function e_real_idx
+
 !---#[ subroutine inspect_kinematics:
    subroutine     inspect_kinematics(unit)
       implicit none

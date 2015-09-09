@@ -493,6 +493,23 @@ Set SpObject : UbarSpa, UbarSpb, USpa, USpb, Sm, Sm4, SmEps,
    ChainOut Sm4;
 #EndProcedure
 
+#Procedure SpTracify(left,right,aux,?internal)
+   #if "`?internal'" == ""
+   Id Spaa(`left',?chain,`right') = SpDenominator(Spbb(`right',`left')) * trL * ProjMinus * Sm4(`left',?chain,`right') * trR;
+   Id Spbb(`left',?chain,`right') = SpDenominator(Spaa(`right',`left')) * trL * ProjPlus * Sm4(`left',?chain,`right') * trR;
+   Id Spab(`left',?chain,`right') = SpDenominator(Spab(`right',`aux',`left')) * trL * ProjMinus * Sm4(`left',?chain,`right',`aux') * trR;
+   Id Spba(`left',?chain,`right') = SpDenominator(Spba(`right',`aux',`left')) * trL * ProjPlus * Sm4(`left',?chain,`right',`aux') * trR;
+   #else
+      #Do momentum={`?internal'}
+         Id Spaa(`left',?head, `momentum', ?tail,`right') = SpDenominator(Spbb(`right',`left')) * trL * ProjMinus * Sm4(`left',?head,`momentum',?tail,`right') * trR;
+         Id Spbb(`left',?head, `momentum', ?tail,`right') = SpDenominator(Spaa(`right',`left')) * trL * ProjPlus * Sm4(`left',?head,`momentum',?tail,`right') * trR;
+         Id Spab(`left',?head, `momentum', ?tail,`right') = SpDenominator(Spab(`right',`aux',`left')) * trL * ProjMinus * Sm4(`left',?head,`momentum',?tail,`right',`aux') * trR;
+         Id Spba(`left',?head, `momentum', ?tail,`right') = SpDenominator(Spba(`right',`aux',`left')) * trL * ProjPlus * Sm4(`left',?head,`momentum',?tail,`right',`aux') * trR;
+      #enddo
+   #endif
+   ChainOut Sm4;
+#EndProcedure
+
 #Procedure SpOrder(?all)
    #Define flag "0"
    Repeat;
