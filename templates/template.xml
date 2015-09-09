@@ -116,7 +116,7 @@
 		</file>
 		<file src="replace.hh" class="Kinematics">
 			<only if-extension="formopt" />
-         <only if-option="helsum" value="true" />
+			<only if-option="helsum" value="true" />
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
@@ -271,6 +271,10 @@
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
+			<file src="diagramsl0fr5.f90" class="Multi">
+				<only if-internal="REQUIRE_FR5"/>
+				<only if-option="group" value="false"/>
+			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="samurai" />
@@ -299,7 +303,7 @@
 	</foreach>
 
 	<directory src="sum">
-      <only if-option="helsum" value="true" />
+		<only if-option="helsum" value="true" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
 		<file src="Makefile" class="Integrals"/>
