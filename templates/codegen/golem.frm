@@ -47,7 +47,8 @@ off statistics;
 
 [%
 @if extension tracify %]
-AutoDeclare S Qeps;[%
+AutoDeclare S Qeps;
+CTensor epstensor;[%
 @end @if %]
 
 [%
@@ -562,6 +563,27 @@ Local d`DIAG'R2 = 0;[%
 
 #if `LOOPS' == 1[%
 @if extension tracify%]
+* Combine multiple spinor lines to one spinor line.
+* As a consequence, at most rank-l (where l is the
+* number of loops) tensor integrals appear.
+
+#call SpClose()
+
+#Do left={`LIGHTLIKE'}
+  #Do right={`LIGHTLIKE'}
+    #if `right' != `left'
+      #Do X={a,b}
+        #Do Z={a,b}
+          Id Sp`X'a(?head,`left')*Spa`Z'(`right',?tail) = Sp`X'a(?head,`left')*SpDenominator(Spbb(`left',`right'))*Spbb(`left',`right')*Spa`Z'(`right',?tail);
+          #call SpClose()
+          Id Sp`X'b(?head,`left')*Spb`Z'(`right',?tail) = Sp`X'b(?head,`left')*SpDenominator(Spaa(`left',`right'))*Spaa(`left',`right')*Spb`Z'(`right',?tail);
+          #call SpClose()
+        #EndDo
+      #EndDo
+    #EndIf
+  #EndDo
+#EndDo
+
 #Do left={`LIGHTLIKE'}
   #Do right={`LIGHTLIKE'}
     #Do aux={`LIGHTLIKE'}
@@ -642,6 +664,8 @@ EndArgument;
    Id e_(vDUMMY1?,Q,vDUMMY2?,vDUMMY3?) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
    Id e_(vDUMMY1?,vDUMMY2?,Q,vDUMMY3?) =  Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
    Id e_(vDUMMY1?,vDUMMY2?,vDUMMY3?,Q) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
+
+   Id e_(vDUMMY1?,vDUMMY2?,vDUMMY3?,vDUMMY4?) = epstensor(vDUMMY1,vDUMMY2,vDUMMY3,vDUMMY4);
 #EndIf[%
 @end @if %]
 
