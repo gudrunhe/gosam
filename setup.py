@@ -15,11 +15,18 @@ import os
 import fnmatch
 import fileinput
 
+def get_git_revision():
+		# Replace this function such that it just returns the
+		# hard-coded git commit id when creating a release.
+		from subprocess import check_output
+		desired_length = 7
+		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).replace('\n','')
+		assert len(revision) == desired_length
+		return revision
+
 VERSION = "2.0.2"
-SVN_REVISION = "$Rev$"
-TAR_VERSION = "%s-%d" % (
-		VERSION,
-		int(SVN_REVISION.replace("$Rev:", "").replace("$", "")))
+GIT_REVISION = get_git_revision()
+TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
 
 
 INFO = {
@@ -120,8 +127,7 @@ class build_py(_build_py):
 		f.write("\n}\n\n")
 		f.write("GOLEM_VERSION = [%s]\n" %
 				",".join(map(lambda s: s.strip(), VERSION.split("."))))
-		f.write("GOLEM_REVISION = %d\n" %
-				int(SVN_REVISION.replace("$Rev:", "").replace("$", "")))
+		f.write("GOLEM_REVISION = '%s'\n" % GIT_REVISION)
 		f.close()
 
 	def run(self):

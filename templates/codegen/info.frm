@@ -25,7 +25,7 @@
 #Write <`OUTPUT'> "   ! The SVN revision of [$ golem.name
                          $] used for code generation"
 #Write <`OUTPUT'> "   integer, parameter :: gosamrevision %"
-#Write <`OUTPUT'> "= [$ golem.revision $]"
+#Write <`OUTPUT'> "= z\'[$ golem.revision $]\'"
 #Write <`OUTPUT'> "end module [$ process_name asprefix=\_ $]version"
 #Close <`OUTPUT'>
 off statistics;
