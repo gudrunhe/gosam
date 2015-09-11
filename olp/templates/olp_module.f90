@@ -144,11 +144,11 @@ contains
    @end @for %]
 
    implicit none
-   character(kind=c_char), intent(inout), dimension(15)  :: olp_name
-   character(kind=c_char), intent(inout), dimension(15)  :: olp_version
+   character(kind=c_char), intent(inout), dimension(20)  :: olp_name
+   character(kind=c_char), intent(inout), dimension(20)  :: olp_version
    character(kind=c_char), intent(inout), dimension(255) :: message
    character(len=254) :: msg
-   character(len=6)   :: rev
+   character(len=7)   :: rev
    character(len=1)   :: ver1, ver2
 
    interface
@@ -162,7 +162,7 @@ contains
 
    write(ver1,'(I1)') gosamversion(1)
    write(ver2,'(I1)') gosamversion(2)
-   write(rev,'(I6)')  gosamrevision
+   write(rev,'(Z7)')  gosamrevision
 
    msg = new_line('C')//'Please cite the following references when using this program:'//&
         &new_line('C')//'Peraro:2014cba, Mastrolia:2012bu, '//&
@@ -171,8 +171,8 @@ contains
    call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
         len(c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR,kind=c_size_t))
 
-   call strncpy(olp_version, c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
-        len(c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
+   call strncpy(olp_version, c_char_'git rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
+        len(c_char_'git rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
 
    call strncpy(message, c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR, &
         len(c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR,kind=c_size_t))
