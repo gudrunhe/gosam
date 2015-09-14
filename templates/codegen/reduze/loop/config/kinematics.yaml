@@ -1,6 +1,6 @@
 kinematics:
   incoming_momenta: [[% @for particles initial %]k[%index%][% @if eval index .lt. num_in %], [% @end @if %][%@end @for %]]
-  outgoing_momenta: [[% @for particles final %]k[%index%][% @if eval index .lt. num_out %], [% @end @if %][%@end @for %]]
+  outgoing_momenta: [[% @for particles final %]k[%index%][% @if eval index - num_in .lt. num_out %], [% @end @if %][%@end @for %]]
   momentum_conservation: [k[% num_legs %],[%
 @if eval num_legs .gt. num_in %][%
 @for particles initial %][%
