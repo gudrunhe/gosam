@@ -1080,7 +1080,7 @@ class KinematicsTemplate(golem.util.parser.Template):
                continue
 
          idx += 1
-         
+
          props.setProperty(symbol_name, name)
          props.setProperty(zero_name, not is_massive)
          props.setProperty(nzero_name, is_massive)
