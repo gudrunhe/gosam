@@ -64,12 +64,16 @@ INFO = {
 
 DATA_DIRS = [
 			"templates",
+			"templates/amplitude",
 			"templates/codegen",
 			"templates/common",
 			"templates/doc",
 			"templates/helicity",
 			"templates/matrix",
 			"templates/sum",
+			"templates/codegen/reduze",
+			"templates/codegen/reduze/loop",
+			"templates/codegen/reduze/loop/config",
 			"olp/templates",
 			"models",
 			"src/form",
@@ -81,6 +85,8 @@ DATA_EXCLUDE = [
 	".svn*",
 	"*.pyc",
 	"*.pyo",
+	# Mac OS X cache
+	".DS_Store",
 ]
 
 def getDataFiles(data_dir):
