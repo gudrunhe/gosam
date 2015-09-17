@@ -567,6 +567,8 @@ Local d`DIAG'R2 = 0;[%
 * As a consequence, at most rank-l (where l is the
 * number of loops) tensor integrals appear.
 
+Hide d`DIAG'R2;
+
 #call SpClose()
 
 #Do left={`LIGHTLIKE'}
@@ -591,13 +593,29 @@ Local d`DIAG'R2 = 0;[%
           #if `right' != `aux'
              #if `right' != `left'
                 #call SpTracify(`left',`right',`aux',p1)
+             #Else
+*               If `right' == `left', we need two auxilary vectors for Spaa/Spbb
+                #Do aux2={`LIGHTLIKE'}
+                   #If `right' != `aux2'
+                      #If `aux' != `aux2'
+                         Id Spaa(`left',?chain,`right') = SpDenominator(Spbb(`right',`aux',`aux2',`left')) * trL * ProjMinus * Sm4(`left',?chain,`right',`aux',`aux2') * trR;
+                         Id Spbb(`left',?chain,`right') = SpDenominator(Spaa(`right',`aux',`aux2',`left')) * trL * ProjPlus * Sm4(`left',?chain,`right',`aux',`aux2') * trR;
+
+*                        But Spab/Spba can be closed to a trace without auxilary vectors if `left' == `right'
+                         Id Spab(`left',?chain,`right') = trL * ProjMinus * Sm4(`left',?chain) * trR;
+                         Id Spba(`left',?chain,`right') = trL * ProjPlus * Sm4(`left',?chain) * trR;
+                      #EndIf
+                   #EndIf
+                #EndDo
              #EndIf
           #EndIf
        #EndIf
      #EndDo
   #EndDo
 #EndDo
-#call SpTrace4[%
+#call SpTrace4
+.sort:tracify;
+UnHide d`DIAG'R2;[%
 @end @if extension tracify%][%
 @if extension qshift %]
    #Call shiftmomenta(`DIAG',0)
