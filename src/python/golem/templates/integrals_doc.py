@@ -40,12 +40,11 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty("loop", loop)
 			if int(loop) == 1:
 				props.setProperty("loop.keep.diagrams", self._topolopies["topolopy.keep.virt"])
-				props.setProperty("loop.count.docu", self._topolopies["topolopy.count.socu"])
+				props.setProperty("loop.count.docu", self._topolopies["topolopy.count.docu"])
 			else:
 				props.setProperty("loop.keep.diagrams", self._topolopies["topolopy.keep.n%slo_virt" % loop])
 				props.setProperty("loop.count.docu", self._topolopies.getListProperty("topolopy.count.n%slo_virt" % loop))
 			yield props
-
 	def loopsize(self, *args, **opts):
 		if "group" in opts:
 			nopts = opts.copy()

@@ -155,6 +155,7 @@ class TemplateFactory:
                         assert topolopies["topolopy.count.virt"] == p["topolopy.count.virt"]
                      else:
                         topolopies["topolopy.count.virt"] = p["topolopy.count.virt"]
+                        topolopies["topolopy.count.docu"] = p["topolopy.count.docu"]
                      for higher_loop in conf.getListProperty("loops_to_generate"):
                         if higher_loop == 1:
                            continue

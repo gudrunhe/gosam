@@ -608,8 +608,7 @@ def workflow(conf):
 		if i == 0 or i == 1:
 			continue
 		if power.strip().lower() != "none":
-			loops_to_generate.append(i - 1)
-
+			loops_to_generate.append(i - 1)        
 	conf["loops_to_generate"] = loops_to_generate
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
