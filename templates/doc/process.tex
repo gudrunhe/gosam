@@ -449,8 +449,8 @@ model~file.
 \subsubsection*{General Information}
 The maximum effective rank in this group is~[% rank %].
 
-\begin{subequations}
-\begin{align}[%
+\begin{equation}
+\begin{split}[%
 @for propagators group=grp prefix=k_{ suffix=} %]
 r_{[% $_ %]} &= [% momentum%][%
    @if eval mass .ne. 0 %],\quad m_{[% $_ %]} = [% latex_parameter mass %][%
@@ -462,8 +462,8 @@ r_{[% $_ %]} &= [% momentum%][%
    @else %]\\[%
    @end @if %][%
 @end @for %]
-\end{align}
-\end{subequations}
+\end{split}
+\end{equation}
 
 \begin{equation}
 S=[%
@@ -490,8 +490,8 @@ S=[%
 	suffix=}
 	%][%
    @if is_first %]
-\begin{subequations}
-\begin{align}[%
+\begin{equation}
+\begin{split}[%
    @end @if %]
    S_{[%rowindex%],[%colindex%]}&=[%
       @for elements re delimiter=; var=term first=first_term %][%
@@ -531,8 +531,8 @@ S=[%
          @end @for %][%
       @end @for %][%
    @if is_last %]
-\end{align}
-\end{subequations}[%
+\end{split}
+\end{equation}[%
    @else%]\\[%
    @end @if%][%
 @end @for %]
