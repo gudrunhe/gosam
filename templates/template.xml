@@ -306,7 +306,9 @@
 		<only if-option="helsum" value="true" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
-		<file src="Makefile" class="Integrals"/>
+		<file src="Makefile" class="Integrals">
+			<except if-extension="autotools" />
+		</file>
 		<file src="Makefile.am" class="Integrals">
 			<only if-extension="autotools" />
 		</file>
