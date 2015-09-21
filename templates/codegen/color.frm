@@ -74,7 +74,8 @@ AutoDeclare S T,C;
 			#If `J' >= `I'
 				#Do c1=1,`NUMCS'
 					#Do c2=1,`NUMCS'
-						Id T(`I',`J')*c(`c1',`c2') = T`I'`J'c`c1'`c2';
+						#$T`I'`J'c`c1'`c2' = TLabel^(`c1' + `c2'*(`NUMCS'+1) + `I'*(`NUMCS'+1)*(`NUMCS'+1) + `J'*([%num_legs%]+1)*(`NUMCS'+1)*(`NUMCS'+1));
+						Id T(`I',`J')*c(`c1',`c2') = $T`I'`J'c`c1'`c2';
 					#EndDo
 				#EndDo
 			#EndIf
@@ -83,7 +84,8 @@ AutoDeclare S T,C;
 #EndDo
 #Do c1=1,`NUMCS'
 	#Do c2=1,`NUMCS'
-	Id c(`c1',`c2') = C`c1'`c2';
+	#$C`c1'`c2' = CLabel^(`c1' + `c2'*(`NUMCS'+1));
+	Id c(`c1',`c2') = $C`c1'`c2';
 	#EndDo
 #EndDo
 ;
@@ -113,26 +115,7 @@ Drop CC
 ;
 
 .sort
-B 
-#Do I={`COLORED'}
-	#If `I'0 != 0
-		#Do J={`COLORED'}
-			#If `J' >= `I'
-				#Do c1=1,`NUMCS'
-					#Do c2=1,`NUMCS'
-						 T`I'`J'c`c1'`c2',
-					#EndDo
-				#EndDo
-			#EndIf
-		#EndDo
-	#EndIf
-#EndDo
-#Do c1=1,`NUMCS'
-	#Do c2=1,`NUMCS'
-		 C`c1'`c2',
-	#EndDo
-#EndDo
-;
+B TLabel,CLabel;
 .sort
 #Create <`OUTFILE'.txt>
 #Create <`OUTFILE'.tmp>
@@ -157,6 +140,26 @@ Format O[%formopt.level%],stats=off;
 #write <`OUTFILE'.tmp> "*--#[ BIG:"
 #write <`OUTFILE'.tmp> "L BIG=%E;",BIG
 #write <`OUTFILE'.tmp> "*--#] BIG:"
+#write <`OUTFILE'.tmp> "*--#[ labeltranslation:"
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				#Do c1=1,`NUMCS'
+					#Do c2=1,`NUMCS'
+						#write <`OUTFILE'.tmp> "#Define T`I'`J'c`c1'`c2' \"`$T`I'`J'c`c1'`c2''\""
+					#EndDo
+				#EndDo
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+#Do c1=1,`NUMCS'
+	#Do c2=1,`NUMCS'
+	#write <`OUTFILE'.tmp> "#Define C`c1'`c2' \"`$C`c1'`c2''\""
+	#EndDo
+#EndDo
+#write <`OUTFILE'.tmp> "*--#] labeltranslation:"
 #write <`OUTFILE'.dat> "number_abbs=`optimmaxvar_'";
 #Close<`OUTFILE'.dat>
 
