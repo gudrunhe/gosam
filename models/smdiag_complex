@@ -254,14 +254,14 @@
 [ghWmbar, ghWm, A; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghAbar, ghWm, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghAbar, ghWp, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
-[ghWmbar, ghA, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
-[ghWpbar, ghA, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
+[ghWmbar, ghA, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
+[ghWpbar, ghA, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghWpbar, ghWp, Z; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghWmbar, ghWm, Z; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghZbar, ghWm, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
 [ghZbar, ghWp, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
-[ghWmbar, ghZ, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
-[ghWpbar, ghZ, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
+[ghWmbar, ghZ, Wm; gs='0', gw='+1', QCD='0', QED='+1', RK='1']
+[ghWpbar, ghZ, Wp; gs='0', gw='+1', QCD='0', QED='+1', RK='1'] 
 
 % SGG
 [ghZbar, ghZ, H; gs='0', gw='+1', QCD='0', QED='+1', RK='0']
