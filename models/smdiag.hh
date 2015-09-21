@@ -272,15 +272,15 @@ Id C([field.ghWpbar], [field.ghWp], [field.A]) = PREFACTOR(e);
 Id C([field.ghWmbar], [field.ghWm], [field.A]) = PREFACTOR(-e);
 Id C([field.ghAbar], [field.ghWm], [field.Wp]) = PREFACTOR(e);
 Id C([field.ghAbar], [field.ghWp], [field.Wm]) = PREFACTOR(-e);
-Id C([field.ghWmbar], [field.ghA], [field.Wp]) = PREFACTOR(e);
-Id C([field.ghWpbar], [field.ghA], [field.Wm]) = PREFACTOR(-e);
+Id C([field.ghWmbar], [field.ghA], [field.Wm]) = PREFACTOR(e);
+Id C([field.ghWpbar], [field.ghA], [field.Wp]) = PREFACTOR(-e);
 Id C([field.ghWpbar], [field.ghWp], [field.Z]) = PREFACTOR(e * gWWZ);
 Id C([field.ghWmbar], [field.ghWm], [field.Z]) = PREFACTOR(- e * gWWZ);
 Id C([field.ghZbar], [field.ghWm], [field.Wp]) = PREFACTOR(e * gWWZ);
 Id C([field.ghZbar], [field.ghWp], [field.Wm]) = PREFACTOR(- e * gWWZ);
-Id C([field.ghWmbar], [field.ghZ], [field.Wp]) = PREFACTOR(e * gWWZ);
-Id C([field.ghWpbar], [field.ghZ], [field.Wm]) = PREFACTOR(- e * gWWZ);
-*---#] VGG (A.2.27) :
+Id C([field.ghWmbar], [field.ghZ], [field.Wm]) = PREFACTOR(e * gWWZ);
+Id C([field.ghWpbar], [field.ghZ], [field.Wp]) = PREFACTOR(- e * gWWZ);
+*---#] VGG (A.2.27) : 
 *---#[ SGG (A.2.27) :
 Id C([field.ghZbar], [field.ghZ], [field.H]) = PREFACTOR(e * gGZH);
 Id C([field.ghWpbar], [field.ghWp], [field.H]) = PREFACTOR(e * gGWH);
