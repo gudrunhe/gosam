@@ -27,11 +27,11 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
-[%@if extension formopt %]
-							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
-[%@else%]
+[%@select abbrev.color @case haggies none %]
 							+ c(`c1',`c2') * propcolor(`I', `J')
-[%@end @if %]
+[%@case form %]
+							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
+[%@end @select %]
 						#EndDo
 					#EndDo
 					;
@@ -61,10 +61,9 @@ Repeat Id delta(iDUMMY1?, iDUMMY2?) * delta(iDUMMY2?, iDUMMY3?) =
 Id delta(iDUMMY1?, iDUMMY1?) = NC;
 
 
-[%@if extension formopt %]
-* You are using Form Optimization, this
-* may crash due to lack of memory.
-* In that case, increase MaxWorkSpace in "form.set".
+[%@select abbrev.color @case form %]
+* You are using Form Optimization, this is experimental
+* and may crash due to lack of memory
 .sort
 *
 AutoDeclare S T,C;
@@ -166,7 +165,7 @@ Format O[%formopt.level%],stats=off;
 #Close<`OUTFILE'.tmp>
 #Close<`OUTFILE'.txt>
 .end
-[% @else %]
+[% @case haggies %]
 
 Brackets+ c;
 .sort
@@ -206,4 +205,50 @@ Brackets+ c;
 #EndIf
 #Close <`OUTFILE'.txt>
 .end
-[%@end @if%]
+[%@case none%]
+
+Brackets+ c;
+.sort
+#Create <`OUTFILE'.txt>
+#Write <`OUTFILE'.txt> "#####Color"
+#Write <`OUTFILE'.txt> "NA=NC*NC-1;"
+#If "`INCOLORS'" != ""
+	#Write <`OUTFILE'.txt> "incolors=1%"
+	#Do NC={`INCOLORS'}
+		#Write <`OUTFILE'.txt> " * `NC'%"
+	#EndDo
+	#Write <`OUTFILE'.txt> ";"
+#Else
+	#Write <`OUTFILE'.txt> "incolors=1;"
+#EndIf
+
+#Write <`OUTFILE'.txt> ""
+
+#Do c1=1,`NUMCS'
+#Do c2=1,`NUMCS'
+	#$t=CC[c(`c1',`c2')];
+	#Write <`OUTFILE'.txt> "CC(`c1',`c2') = %$;", $t
+#EndDo
+#EndDo
+#If `CREATETT'
+	#Do I={`COLORED'}
+		#If `I'0 != 0
+			#Do J={`COLORED'}
+				#If `J' >= `I'
+					#Do c1=1,`NUMCS'
+						#Do c2=`c1',`NUMCS'
+							#$t=T`I'T`J'[c(`c1',`c2')];
+							#Write <`OUTFILE'.txt> "T`I'T`J'(`c1',`c2') = %$;", $t
+							#If `c1' != `c2'
+								#Write <`OUTFILE'.txt> "T`I'T`J'(`c2',`c1') = %$;", $t
+							#EndIf
+						#EndDo
+					#EndDo
+				#EndIf
+			#EndDo
+		#EndIf
+	#EndDo
+#EndIf
+#Close <`OUTFILE'.txt>
+.end
+[%@end @select%]

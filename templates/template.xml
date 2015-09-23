@@ -33,16 +33,30 @@
 	</file>
 
 	<directory src="codegen">
-		<file src="abbrev.in" class="Multi"/>
-		<file src="abbrev.out" class="Integrals"/>
-		<file src="abbrevloc.out" class="Integrals"/>
-		<file src="color.in" class="Verbatim"/>
-		<file src="color.out" class="Kinematics"/>
-		<file src="functions.out" class="Kinematics"/>
-		<file src="model.out" class="Model"/>
+		<file src="abbrev.in" class="Multi">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="abbrev.out" class="Integrals">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="abbrevloc.out" class="Integrals">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="color.in" class="Verbatim">
+			<only if-option="abbrev.color" value="haggies" />
+		</file>
+		<file src="color.out" class="Kinematics">
+			<only if-option="abbrev.color" value="haggies" />
+		</file>
+		<file src="functions.out" class="Kinematics">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="model.out" class="Model">
+			<only if-internal="HAGGIES" />
+		</file>
 
 		<file src="haggies-l0.in" class="Multi">
-			<except if-extension="formopt" />
+			<only if-internal="HAGGIES" />
 		</file>
 
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
@@ -63,13 +77,13 @@
 			<except if-extension="formopt" />
 		</file>
 		<file src="helsum.frm" class="Kinematics" >
-         <only if-option="helsum" value="true" />
+			<only if-option="helsum" value="true" />
 		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
 		</file>
 		<file src="colorin.py" class="Multi">
-			<only if-extension="formopt" />
+			<except if-option="abbrev.color" value="haggies" />
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
@@ -84,9 +98,7 @@
 			<except if-extension="formopt" />
 		</file>
 
-		<file src="filter.py" class="Verbatim">
-			<only if-extension="formopt" />
-		</file>
+		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="derive" />
@@ -99,7 +111,7 @@
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
-			<only if-extension="formopt" />
+			<only if-option="abbrev.color" value="form" />
 		</file>
 		<file src="modelopt.frm" class="Kinematics">
 			<only if-extension="formopt" />
@@ -139,14 +151,12 @@
 		<file src="buildfortranborn.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
-		<file src="t2f.py" class="Verbatim">
-			<only if-extension="formopt" />
-		</file>
+		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />
 		</file>
 		<file src="buildcolor.py" class="Kinematics">
-			<only if-extension="formopt" />
+			<except if-option="abbrev.color" value="haggies" />
 		</file>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>

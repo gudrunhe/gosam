@@ -414,7 +414,8 @@ haggies_bin = Property("haggies.bin",
    Points to the Haggies executable.
    Haggies is used to transform the expressions of the
    diagrams into optimized Fortran90 programs if the
-   extension "noformopt" is active.
+   extension "noformopt" is active. It can also be used
+   to optimize the color expressions.
 
    Examples:
       1) haggies.bin=/home/my_user_name/bin/haggies
@@ -760,6 +761,17 @@ reference_vectors = Property("reference-vectors",
    reference-vectors=1:2,2:3,3:4,4:1
    """,
    list)
+
+abbrev_color = Property("abbrev.color",
+   """\
+   The program in use for the generation of color related abbreviations.
+   The value should be one of:
+      haggies        color algebra in form, optimization with haggies
+      form           color algebra and optimization in form
+      none           color algebra in form, no optimization
+   """,
+   str, "form",
+   options=["haggies","form","none"], hidden=True)
 
 abbrev_limit = Property("abbrev.limit",
    """\
@@ -1191,6 +1203,7 @@ properties = [
    config_PSP_chk_method,
 
    reference_vectors,
+   abbrev_color,
    abbrev_limit,
    abbrev_level,
 
@@ -1258,6 +1271,7 @@ def setInternals(conf):
          "__REGULARIZATION_HV__",
          "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
+         "__HAGGIES__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
          "__OLP_DAEMON__",
@@ -1286,6 +1300,8 @@ def setInternals(conf):
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
+
+   conf["__HAGGIES__"] = "noformopt" in extensions or "haggies" in conf["abbrev.color"].lower()
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
