@@ -261,6 +261,7 @@ class Model:
 		types['Nfrat'] = 'R'
 
 
+
 		for key, value in self.model_options.items():
 			if key in parameters or self.prefix+key in parameters:
 				if key in parameters:
@@ -293,24 +294,28 @@ class Model:
 		fsubs = {}
 		is_first = True
 		for name, value in functions.items():
-			expr = parser.compile(value)
-			for fn in cmath_functions:
+			try:
+			  expr = parser.compile(value)
+			  
+			  for fn in cmath_functions:
 				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
 						ex.SpecialExpression(str(fn)))
-			expr = expr.prefixSymbolsWith(self.prefix)
-			expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-			expr = expr.algsubs(sym_cmplx(
+			  expr = expr.prefixSymbolsWith(self.prefix)
+			  expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+			  expr = expr.algsubs(sym_cmplx(
 				ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
 
-			if is_first:
+			  if is_first:
 				is_first = False
 				f.write("\n")
-			else:
+			  else:
 				f.write(",\n")
-			f.write("\t%r: " % name)
-			f.write("'")
-			expr.write(f)
-			f.write("'")
+			  f.write("\t%r: " % name)
+			  f.write("'")
+			  expr.write(f)
+			  f.write("'")
+			except:
+			  pass
 		f.write("\n}\n\n")
 
 #		for c in self.all_ctcouplings:
@@ -931,7 +936,6 @@ class Model:
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
 		self.write_python_file(f)
-		#print f
 		f.close()
 
 		message("  Writing QGraf file ...")

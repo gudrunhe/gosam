@@ -89,7 +89,7 @@ def generate_process_files(conf, from_scratch=False):
 	higher_loops = []
 	for loop in conf.getListProperty("loops_to_generate"):
 		# special treatment for 1loop
-		if int(loop) == 1:
+		if int(loop) <= 1 :
 			continue
 		else:
 			higher_loops.append(loop)
@@ -608,8 +608,10 @@ def workflow(conf):
 		if i == 0 or i == 1:
 			continue
 		if power.strip().lower() != "none":
-			loops_to_generate.append(i - 1)        
-	conf["loops_to_generate"] = loops_to_generate
+			loops_to_generate.append(i - 1)
+        if len(loops_to_generate)==0:
+	  loops_to_generate.append(0)
+	conf["loops_to_generate"] = loops_to_generate	  
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV')

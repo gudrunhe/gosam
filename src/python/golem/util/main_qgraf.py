@@ -331,11 +331,13 @@ def run_qgraf(conf, in_particles, out_particles):
 			
 	# -------------------- higher virt -------------------------------------
 	for looporder in loops_to_generate:
+	        if looporder == '0':
+			continue
 		if looporder == '1':
 			# already treated above
 			# TODO: include 1loop case in this for loop
 			continue
-		if looporder != '2':
+		if looporder > '2':
 			# ********************** IMPORTANT ***********************
 			# This loop currently only works for exactly 2loops (nnlo)
 			# ********************************************************
