@@ -27,11 +27,11 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
-[%@if extension extraopt %]
-							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
-[%@else%]
+[%@select abbrev.color @case haggies none %]
 							+ c(`c1',`c2') * propcolor(`I', `J')
-[%@end @if %]
+[%@case form %]
+							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
+[%@end @select %]
 						#EndDo
 					#EndDo
 					;
@@ -61,7 +61,7 @@ Repeat Id delta(iDUMMY1?, iDUMMY2?) * delta(iDUMMY2?, iDUMMY3?) =
 Id delta(iDUMMY1?, iDUMMY1?) = NC;
 
 
-[%@if extension extraopt %]
+[%@select abbrev.color @case form %]
 * You are using Form Optimization, this is experimental
 * and may crash due to lack of memory
 .sort
@@ -73,7 +73,8 @@ AutoDeclare S T,C;
 			#If `J' >= `I'
 				#Do c1=1,`NUMCS'
 					#Do c2=1,`NUMCS'
-						Id T(`I',`J')*c(`c1',`c2') = T`I'`J'c`c1'`c2';
+						#$T`I'`J'c`c1'`c2' = TLabel^(`c1' + `c2'*(`NUMCS'+1) + `I'*(`NUMCS'+1)*(`NUMCS'+1) + `J'*([%num_legs%]+1)*(`NUMCS'+1)*(`NUMCS'+1));
+						Id T(`I',`J')*c(`c1',`c2') = $T`I'`J'c`c1'`c2';
 					#EndDo
 				#EndDo
 			#EndIf
@@ -82,7 +83,8 @@ AutoDeclare S T,C;
 #EndDo
 #Do c1=1,`NUMCS'
 	#Do c2=1,`NUMCS'
-	Id c(`c1',`c2') = C`c1'`c2';
+	#$C`c1'`c2' = CLabel^(`c1' + `c2'*(`NUMCS'+1));
+	Id c(`c1',`c2') = $C`c1'`c2';
 	#EndDo
 #EndDo
 ;
@@ -112,26 +114,7 @@ Drop CC
 ;
 
 .sort
-B 
-#Do I={`COLORED'}
-	#If `I'0 != 0
-		#Do J={`COLORED'}
-			#If `J' >= `I'
-				#Do c1=1,`NUMCS'
-					#Do c2=1,`NUMCS'
-						 T`I'`J'c`c1'`c2',
-					#EndDo
-				#EndDo
-			#EndIf
-		#EndDo
-	#EndIf
-#EndDo
-#Do c1=1,`NUMCS'
-	#Do c2=1,`NUMCS'
-		 C`c1'`c2',
-	#EndDo
-#EndDo
-;
+B TLabel,CLabel;
 .sort
 #Create <`OUTFILE'.txt>
 #Create <`OUTFILE'.tmp>
@@ -156,13 +139,33 @@ Format O[%formopt.level%],stats=off;
 #write <`OUTFILE'.tmp> "*--#[ BIG:"
 #write <`OUTFILE'.tmp> "L BIG=%E;",BIG
 #write <`OUTFILE'.tmp> "*--#] BIG:"
+#write <`OUTFILE'.tmp> "*--#[ labeltranslation:"
+#Do I={`COLORED'}
+	#If `I'0 != 0
+		#Do J={`COLORED'}
+			#If `J' >= `I'
+				#Do c1=1,`NUMCS'
+					#Do c2=1,`NUMCS'
+						#write <`OUTFILE'.tmp> "#Define T`I'`J'c`c1'`c2' \"`$T`I'`J'c`c1'`c2''\""
+					#EndDo
+				#EndDo
+			#EndIf
+		#EndDo
+	#EndIf
+#EndDo
+#Do c1=1,`NUMCS'
+	#Do c2=1,`NUMCS'
+	#write <`OUTFILE'.tmp> "#Define C`c1'`c2' \"`$C`c1'`c2''\""
+	#EndDo
+#EndDo
+#write <`OUTFILE'.tmp> "*--#] labeltranslation:"
 #write <`OUTFILE'.dat> "number_abbs=`optimmaxvar_'";
 #Close<`OUTFILE'.dat>
 
 #Close<`OUTFILE'.tmp>
 #Close<`OUTFILE'.txt>
 .end
-[% @else %]
+[% @case haggies %]
 
 Brackets+ c;
 .sort
@@ -202,4 +205,50 @@ Brackets+ c;
 #EndIf
 #Close <`OUTFILE'.txt>
 .end
-[%@end @if%]
+[%@case none%]
+
+Brackets+ c;
+.sort
+#Create <`OUTFILE'.txt>
+#Write <`OUTFILE'.txt> "#####Color"
+#Write <`OUTFILE'.txt> "NA=NC*NC-1;"
+#If "`INCOLORS'" != ""
+	#Write <`OUTFILE'.txt> "incolors=1%"
+	#Do NC={`INCOLORS'}
+		#Write <`OUTFILE'.txt> " * `NC'%"
+	#EndDo
+	#Write <`OUTFILE'.txt> ";"
+#Else
+	#Write <`OUTFILE'.txt> "incolors=1;"
+#EndIf
+
+#Write <`OUTFILE'.txt> ""
+
+#Do c1=1,`NUMCS'
+#Do c2=1,`NUMCS'
+	#$t=CC[c(`c1',`c2')];
+	#Write <`OUTFILE'.txt> "CC(`c1',`c2') = %$;", $t
+#EndDo
+#EndDo
+#If `CREATETT'
+	#Do I={`COLORED'}
+		#If `I'0 != 0
+			#Do J={`COLORED'}
+				#If `J' >= `I'
+					#Do c1=1,`NUMCS'
+						#Do c2=`c1',`NUMCS'
+							#$t=T`I'T`J'[c(`c1',`c2')];
+							#Write <`OUTFILE'.txt> "T`I'T`J'(`c1',`c2') = %$;", $t
+							#If `c1' != `c2'
+								#Write <`OUTFILE'.txt> "T`I'T`J'(`c2',`c1') = %$;", $t
+							#EndIf
+						#EndDo
+					#EndDo
+				#EndIf
+			#EndDo
+		#EndIf
+	#EndDo
+#EndIf
+#Close <`OUTFILE'.txt>
+.end
+[%@end @select%]

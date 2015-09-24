@@ -16,7 +16,11 @@ test_LDADD=\
 @for helicities generated %] \
    $(builddir)/../helicity[% helicity %]/libgolem_process[%
       process_name assuffix=\_ %]_helicity[% helicity %].la[%
-@end @for helicities %] \
+@end @for helicities %][%
+@if helsum %] \
+   $(builddir)/../sum/libgolem_process[%
+      process_name assuffix=\_ %]_sum.la[%
+@end @if %] \
    $(builddir)/../common/libgolem_process[%
       process_name assuffix=\_ %]_common.la \
    $(GOLEM_CONFIG_LDFLAGS)
@@ -27,6 +31,9 @@ ACLOCAL_AMFLAGS=-I m4
 AM_FCFLAGS=$(GOLEM_CONFIG_FCFLAGS) -I../common[%
    @for helicities generated %] \
 	   -I../helicity[%helicity%][%
-   @end @for %]
+   @end @for %][%
+   @if helsum %] \
+	   -I../sum[%
+   @end @if %]
 
 include Makefile.dep

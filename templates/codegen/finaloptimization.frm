@@ -46,7 +46,11 @@ CF Wrapper;[%
   Vector qshift;                                                                                                                                             
   CFunction fshift;
 [%@end @if %]
-CF abb`DIAG';
+CF abb`DIAG';[%
+@if extension tracify %]
+AutoDeclare S Qeps;
+CTensor epstensor;[%
+@end @if %]
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
    @if is_massive %],Qspl[% index %][%

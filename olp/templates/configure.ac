@@ -83,7 +83,10 @@ AC_CONFIG_FILES([
    [% path %]/common/Makefile[%
    @for generated_helicities var=helicity %]
    [% path %]/helicity[% helicity %]/Makefile[%
-   @end @for %]
+   @end @for %][%
+   @if helsum %]
+   [% path %]/sum/Makefile[%
+   @end @if %]
    [% path %]/matrix/Makefile[%
 @end @for %]
 ])

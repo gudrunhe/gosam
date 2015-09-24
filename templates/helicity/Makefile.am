@@ -1,6 +1,8 @@
 noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%].la
 libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= \
 	globals.f90 amplitudeh[%helicity%].f90[%
+@if helsum%][%
+@else%][%
 @select r2
 @case implicit explicit off %][%
    @if extension golem95 %] golem95h[%helicity%].f90[%
@@ -10,6 +12,7 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
    @if extension ninja %] ninjah[%helicity%].f90[%
    @end @if %][%
 @end @select %][%
+@end @if helsum %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.f90[%
    @if group %][%
@@ -18,7 +21,18 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
+   @if internal REQUIRE_FR5 %] \
+	diagramsl0fr5.f90[%
+      @if group %][%
+      @else %][%
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]h[%helicity%]l0fr5.f90[%
+         @end @for %][%
+      @end @if %][%
+   @end @if %][%
 @end @if generate_lo_diagrams %][%
+@if helsum %][%
+@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
@@ -42,11 +56,14 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
          @end @if %][%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@end @if helsum %]
 
 nodist_pkginclude_HEADERS=[%
 	process_name asprefix=\_ %]globalsh[% helicity %].mod [%
 	process_name asprefix=\_ %]amplitudeh[%helicity%].mod[%
+@if helsum %][%
+@else %][%
 @select r2
 @case implicit explicit off %][%
    @if extension golem95 %] \
@@ -59,6 +76,7 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]ninjah[%helicity%].mod[%
    @end @if %][%
 @end @select %][%
+@end @if %][%
 @if generate_lo_diagrams %] \
 	[% process_name asprefix=\_ %]diagramsh[% helicity %]l0.mod[%
    @if group %][%
@@ -67,7 +85,18 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod[%
       @end @for %][%
    @end @if %][%
+   @if internal REQUIRE_FR5 %] \
+	[% process_name asprefix=\_ %]diagramsh[%helicity%]l0fr5.mod[%
+      @if group %][%
+      @else %][%
+         @for elements topolopy.keep.tree %] \
+	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0fr5.mod[%
+         @end @for %][%
+      @end @if %][%
+   @end @if %][%
 @end @if generate_lo_diagrams %][%
+@if helsum %][%
+@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
@@ -87,7 +116,8 @@ nodist_pkginclude_HEADERS=[%
 	[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod[%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@end @if helsum %]
 
 CLEANFILES=$(nodist_pkginclude_HEADERS)
 ACLOCAL_AMFLAGS=-I m4
@@ -104,7 +134,18 @@ GENERATED_SRC=[%
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
+   @if internal REQUIRE_FR5 %][%
+      @if group %] \
+	diagramsl0fr5.f90[%
+      @else %][% 
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]h[%helicity%]l0fr5.f90[%
+         @end @for %][%
+      @end @if %][%
+   @end @if %][%
 @end @if generate_lo_diagrams %][%
+@if helsum %][%
+@else %][%
 @if generate_nlo_virt %][%
    @select abbrev.level
    @case helicity %] \
@@ -125,7 +166,8 @@ GENERATED_SRC=[%
       @if extension ninja %] d[%$_%]h[%helicity%]l131.f90  d[%$_%]h[%helicity%]l132.f90  d[%$_%]h[%helicity%]l121.f90[%
       @end @if %][%
    @end @for %][%
-@end @if generate_nlo_virt %]
+@end @if generate_nlo_virt %][%
+@end @if helsum %]
 
 $(GENERATED_SRC): %: source
 

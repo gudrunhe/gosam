@@ -3,7 +3,10 @@
 SUBDIRS=doc common[%
 @for helicities generated %] \
 	helicity[% helicity %][%
-@end @for helicities %] \
+@end @for helicities %][%
+@if helsum%] \
+	sum[%
+@end @if%] \
 	matrix
 
 [% 
@@ -19,10 +22,13 @@ libgolem_process[% process_name assuffix=\_ %]_la_LIBADD= \
 		$(builddir)/helicity[% helicity
 			%]/libgolem_process[%
 				process_name assuffix=\_ %]_helicity[% helicity %].la[%
-@end @for helicities %] \
+@end @for helicities %][%
+@if helsum %] \
+		$(builddir)/sum/libgolem_process[%
+				process_name assuffix=\_ %]_sum.la[%
+@end @if %] \
 		$(builddir)/matrix/libgolem_process[% 
-				process_name assuffix=\_ %]_matrix.la
-[%
+				process_name assuffix=\_ %]_matrix.la[%
 @select olp.process_name default=UNDEFINED
 @case UNDEFINED %]
 EXTRA_DIST=m4 \

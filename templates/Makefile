@@ -83,8 +83,11 @@ endif
 
 
 filelist-source: source
-	@echo Makefile > $@
-	@echo Makefile.conf >> $@
+	@echo Makefile > $@[%
+@if internal OLP_MODE %][%
+@else %]
+	@echo Makefile.conf >> $@[%
+@end @if %]
 	@echo config.sh >> $@[% 
 @if generate_lo_diagrams %]
 	@echo diagrams-0.log >> $@

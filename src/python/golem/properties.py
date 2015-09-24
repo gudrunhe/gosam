@@ -418,9 +418,10 @@ form_workspace = Property("form.workspace",
 haggies_bin = Property("haggies.bin",
    """\
    Points to the Haggies executable.
-   Haggies is used to transform the expressions of the diagrams
-   into optimized Fortran90 programs. It can be obtained from
-      http://www.nikhef.nl/~thomasr/download.php
+   Haggies is used to transform the expressions of the
+   diagrams into optimized Fortran90 programs if the
+   extension "noformopt" is active. It can also be used
+   to optimize the color expressions.
 
    Examples:
       1) haggies.bin=/home/my_user_name/bin/haggies
@@ -596,8 +597,6 @@ extensions = Property("extensions",
 #                    not compatible with the formopt option.
 #   qshift       --- apply the shift of Q already at the FORM level
 #   numpolvec    --- evaluate polarisation vectors numerically
-#   extraopt     --- optimization using FORM for color and model files.
-#                     (experimental)
 #   One option which is affected by this is LDFLAGS. In the following
 #   example only ldflags.looptools is added to the LDFLAGS variable
 #   in the makefiles whereas the variable ldflags.qcdloop is ignored.
@@ -607,6 +606,8 @@ extensions = Property("extensions",
 #   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
 #   formopt      --- diagram optimization using FORM (works only with
 #                    abbrev.level=diagram and r2=implicit/explicit).
+#   tracify      --- transform loop momenta into traces before running
+#                    the numerics
 
    ,
    list,",".join(DEFAULT_EXTENSIONS),
@@ -614,8 +615,8 @@ extensions = Property("extensions",
       "autotools", "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","extraopt","customspin2prop","shared","cdr",
-      "noderive","noformopt","reduze","dot2tex", "parallelborn"])
+      "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
+      "noformopt","reduze","dot2tex","tracify"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -808,6 +809,17 @@ reference_vectors = Property("reference-vectors",
    """,
    list)
 
+abbrev_color = Property("abbrev.color",
+   """\
+   The program in use for the generation of color related abbreviations.
+   The value should be one of:
+      haggies        color algebra in form, optimization with haggies
+      form           color algebra and optimization in form
+      none           color algebra in form, no optimization
+   """,
+   str, "form",
+   options=["haggies","form","none"], hidden=True)
+
 abbrev_limit = Property("abbrev.limit",
    """\
    Maximum number of instructions per subroutine when calculating
@@ -945,6 +957,17 @@ config_renorm_mqwf = Property("renorm_mqwf",
    external massive quarks
 
    QCD only
+   """,
+   bool, True)
+
+config_renorm_gamma5 = Property("renorm_gamma5",
+   """\
+   Sets the same variable in config.f90
+
+   Activates finite renormalisation for axial couplings in the
+   't Hooft-Veltman scheme
+
+   QCD only, works only with built-in model files.
    """,
    bool, True)
 
@@ -1210,6 +1233,7 @@ properties = [
    config_renorm_decoupling,
    config_renorm_mqse,
    config_renorm_logs,
+   config_renorm_gamma5,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,
@@ -1228,6 +1252,7 @@ properties = [
    config_PSP_chk_method,
 
    reference_vectors,
+   abbrev_color,
    abbrev_limit,
    abbrev_level,
 
@@ -1297,7 +1322,9 @@ def setInternals(conf):
          "__DERIVATIVES_AT_ZERO__",
          "__REGULARIZATION_DRED__",
          "__REGULARIZATION_HV__",
+         "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
+         "__HAGGIES__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
          "__OLP_DAEMON__",
@@ -1318,7 +1345,6 @@ def setInternals(conf):
    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
 
    conf["__FORMOPT__"] = "formopt" in extensions
-   conf["__EXTRAOPT__"] = "extraopt" in extensions
 
    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
@@ -1330,6 +1356,8 @@ def setInternals(conf):
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
+
+   conf["__HAGGIES__"] = "noformopt" in extensions or "haggies" in conf["abbrev.color"].lower()
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
@@ -1343,3 +1371,7 @@ def setInternals(conf):
    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
    if not "__OLP_MODE__" in conf:
       conf["__OLP_MODE__"] =  False
+
+   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
+   #    and "no-fr5" not in extensions
+   conf["__REQUIRE_FR5__"]  = False

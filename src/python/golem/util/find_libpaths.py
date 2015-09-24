@@ -13,7 +13,7 @@ components = {
                "PJFry": OPTIONAL,
                "Form": REQUIRED,
                "QGraf": REQUIRED,
-               "Java": REQUIRED
+               "Java": OPTIONAL
              }
 
 def find_libraries(hints={}, return_config=False):

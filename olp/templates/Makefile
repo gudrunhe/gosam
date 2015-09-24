@@ -31,13 +31,14 @@ LEX_OPTS=
 YACC=yacc
 YACC_OPTS=
 
+F_MODULES=olp_module.mod
 F_OBJECTS=olp_module.o
 C_OBJECTS=[%
 @if internal OLP_DAEMON %]olp_parser.o olp_lexer.o olp_daemon.o[%
 @end @if %]
 
 DISTFILES= \
-	Makefile olp.h config.sh olp_module.f90[%
+	Makefile olp.h config.sh olp_module.f90 Makefile.conf[%
 @if internal OLP_DAEMON %] \
 	olp_daemon.c olp_daemon.h olp_lexer.l olp_parser.y \
 	olp_lexer.c olp_parser.c olp_parser.h[%
@@ -68,8 +69,9 @@ clean:
 	do \
 		$(MAKE) -C $${dir} $@; \
 	done
+	rm -f $(F_MODULES) $(C_OBJECTS) $(F_OBJECTS)
 
-very-clean:
+very-clean: clean
 	@for dir in $(SUBDIRS); \
 	do \
 		$(MAKE) -C $${dir} $@; \
@@ -83,7 +85,7 @@ source:
 
 filelist-source: source
 	@echo -n > $@
-	@for f in $(DIST_FILES); \
+	@for f in $(DISTFILES); \
 	do \
 		echo $${f} >> $@; \
 	done

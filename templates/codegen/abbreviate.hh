@@ -73,11 +73,29 @@ Id Q.e[%index%] = Qspe[%index%];[%
 @end @for %][%
 @end @if %]
 .sort
-Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
+Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);[%
+@if extension tracify%]
+#Do vec1={`LIGHTLIKE'}
+  #Do vec2={`LIGHTLIKE'}
+    #Do vec3={`LIGHTLIKE'}
+      Id Qeps(`vec1',`vec2',`vec3') = Qeps`vec1'`vec2'`vec3';
+    #EndDo
+  #EndDo
+#EndDo[%
+@end @if%]
 .sort
 Hide diagram`DIAG',d`DIAG'R2;
 Format O[%formopt.level%],stats=off;
-Brackets CC,R2,Qt2,QspQ[%
+Brackets CC,R2,[%
+@if extension tracify%]
+  #Do vec1={`LIGHTLIKE'}
+    #Do vec2={`LIGHTLIKE'}
+      #Do vec3={`LIGHTLIKE'}
+        Qeps`vec1'`vec2'`vec3',
+      #EndDo
+    #EndDo
+  #EndDo
+[%@end @if%]Qt2,QspQ[%
 @for particles %],Qspk[%index%][%
    @if is_massive %],Qspl[%index%][%
    @end @if %][%
