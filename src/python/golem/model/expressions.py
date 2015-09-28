@@ -3,6 +3,8 @@
 import golem.model.scanner
 import golem.util.tools
 from golem.util.tools import error
+from golem.properties import zero
+from golem.util.config import Property
 
 class ExpressionParser:
 	"""
@@ -16,6 +18,16 @@ class ExpressionParser:
 	def compile(self, text):
 		tokens = golem.model.scanner.TokenStream(ExpressionScanner(), text)
 		return self.expression(tokens)
+	      
+	def check_mass(self, text, masses):
+	  if text.find("if ") >0:
+	    mass=text.split("if")[1].split("else")[0].strip()
+	    if masses["masses"].lower().find(mass.lower())>=0:
+	      return "("+text.split("else")[1].strip()
+	    else:
+	      return text.split("if")[0].strip() +")"
+	  else:
+	    return text
 
 	def expression(self, tokens):
 		terms = [self.product(tokens)]

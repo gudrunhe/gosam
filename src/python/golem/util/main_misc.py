@@ -231,9 +231,9 @@ def cleanup(path):
 		for stub in ["pyxotree", "pyxovirt", "pyxo2virt", "topotree", "topovirt", "pyxoct", "topoct"]:
 			cleanup_files.append(stub + ext)
 
-	if True:
-		for ext in ["", ".py", ".pyc", ".pyo"]:
-			cleanup_files.append("model" + ext)
+#	if True:
+#		for ext in ["", ".py", ".pyc", ".pyo"]:
+#			cleanup_files.append("model" + ext)
 
 	for filename in cleanup_files:
 		full_name = os.path.join(path, filename)

@@ -107,7 +107,7 @@ class Model:
 		self.all_lorentz    = mod.all_lorentz
 		self.model_orig = model_path
 		self.model_name = mname
-		self.prefix = "mdl"
+		self.prefix = ""#"mdl"
 		self.floats = []
 
 		parser = ex.ExpressionParser()
@@ -117,7 +117,7 @@ class Model:
 			structure = parser.compile(l.structure)
 			l.rank = get_rank(structure)	
 
-	def write_python_file(self, f):
+	def write_python_file(self, f, **masses):
 		# Edit : GC- 16.11.12 now have the dictionaries
 		# particlect and parameterct available
 		# if non-empty the model.py file is modified
@@ -293,6 +293,7 @@ class Model:
 		fcounter = [0]
 		fsubs = {}
 		is_first = True
+		#ct_functions="ct_functions = {\n"
 		for name, value in functions.items():
 			try:
 			  expr = parser.compile(value)
@@ -316,7 +317,53 @@ class Model:
 			  f.write("'")
 			except:
 			  pass
+
+
 		f.write("\n}\n\n")
+		message("      Generating counter term function list ...")
+		f.write("ct_functions = {")
+		is_first_ct = True
+		for name, value in functions.items():
+			try:
+			  expr = parser.compile(value)
+			except:
+			  print name
+			  print value
+			  print ''
+			  if is_first_ct:
+			    is_first_ct = False
+			    f.write("\n")
+			  else:
+			    f.write("\n")			  
+			  f.write("\t%r: " % name)
+			  is_first_key = True
+			  f.write("'{")			  
+			  for key in value.keys():
+			    expr = parser.check_mass(value[value.keys()[key]],masses)
+			    expr = parser.compile(expr)
+
+			    for fn in cmath_functions:
+				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
+						ex.SpecialExpression(str(fn)))
+			    expr = expr.prefixSymbolsWith(self.prefix)
+			    expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+			    expr = expr.algsubs(sym_cmplx(
+				ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                 
+			    f.write(str(key))
+			    f.write(":")
+			    expr.write(f)
+			    
+			    if is_first_key:
+			      if len(value.keys())>1:
+				f.write(',')
+			      else:
+			        f.write("}',")
+			    if not is_first_key and len(value.keys())>1:
+			      f.write("}',")
+			    is_first_key=False
+		f.write("\n}\n\n")
+
 
 #		for c in self.all_ctcouplings:
 #			# generally it is a laurent series in eps
@@ -925,17 +972,19 @@ class Model:
 
 
 
-
 	def containsMajoranaFermions(self):
 		for p in self.all_particles:
 			if p.spin % 2 == 0 and p.selfconjugate:
 				return True
 		return False
 
-	def store(self, path, local_name):
+	def store(self, path, local_name, **zeros):
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
-		self.write_python_file(f)
+		if len(zeros) >0 :
+		  self.write_python_file(f, masses=zeros["zeros"])
+		else:
+		  self.write_python_file(f)
 		f.close()
 
 		message("  Writing QGraf file ...")
