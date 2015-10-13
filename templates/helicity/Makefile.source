@@ -89,6 +89,9 @@ SOURCE_TREE= \
 	diagramsl0.f90 $(DIAGRAMS_TREE)[%
    @if internal REQUIRE_FR5 %] \
 	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
+   @end @if %][%
+   @if generate_uv_counterterms %] \
+	diagramsct.f90 [%
    @end @if %]
 [% @else %]
 SOURCE_TREE=
@@ -149,14 +152,7 @@ DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
 [% @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-DIAGRAMS_CT=[%
-   @for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.f90[%
-   @end @for %]
-TXT_CT=$(subst .f90,.txt,$(DIAGRAMS_CT))
-SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
-@end @if %]
+
 
 .PHONY: source
 .SUFFIXES:
@@ -179,6 +175,21 @@ born.txt: ../diagrams-0.hh
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch born-stamp[%
+@if generate_uv_counterterms %]
+ct[%$_%]h[%helicity%].txt:
+	   @echo "* dummy file" > $@
+ct.txt: ../diagrams-0ct.hh
+	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=3 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0ct \
+		../codegen/golem.frm
+	@touch ct-stamp[%
+@end @if%][%
 @else %]
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
@@ -191,7 +202,22 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch d[%$_%]h[%helicity%]l0-stamp
-d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
+@if generate_uv_counterterms %]
+ct[%$_%]h[%helicity%].txt:
+	   @echo "* dummy file" > $@
+ct.txt: ../diagrams-0ct.hh
+	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=3 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0ct \
+		../codegen/golem.frm
+	@touch ct-stamp[%
+@end @if%]
 [%@end @if%][%
 @else %][%
 @if is_last %]
@@ -233,6 +259,14 @@ diagramsl0.f90: born.txt born-stamp
 	@$(PYTHON) ../codegen/buildfortranborn.py \
 		-i $< \
 		--HELICITY=[%helicity%][% 
+@if generate_uv_counterterms %]
+ct-stamp: ct.txt
+diagramsct.f90: ct.txt ct-stamp
+	@echo Python is processing counter term diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortranct.py \
+		-i $< \
+		--HELICITY=[%helicity%][%
+@end @if %][%
 @end @if %][% @end @for %][%
 @else %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
@@ -605,31 +639,7 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 		-o $@ $+[%
 	@end @select %][%
 @end @for groups %][%
-@end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %]
-d[%$_%]h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
-		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]h[%helicity%]l1c \
-		../codegen/golem.frm
-d[%$_%]h[%helicity%]l1c.f90: d[%$_%]h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-	@end @for %][%
-@end @if %][%
+@end @if generate_nlo_virt %][% 
 @end @if %]
 
 

@@ -105,6 +105,9 @@ class Model:
 		self.all_parameters = mod.all_parameters
 		self.all_vertices   = mod.all_vertices
 		self.all_lorentz    = mod.all_lorentz
+		self.all_CTparameters = mod.object_library.all_CTparameters
+		self.all_CTvertices = mod.all_CTvertices
+		self.all_CTcouplings = mod.CT_couplings
 		self.model_orig = model_path
 		self.model_name = mname
 		self.prefix = ""#"mdl"
@@ -293,7 +296,6 @@ class Model:
 		fcounter = [0]
 		fsubs = {}
 		is_first = True
-		#ct_functions="ct_functions = {\n"
 		for name, value in functions.items():
 			try:
 			  expr = parser.compile(value)
@@ -327,9 +329,6 @@ class Model:
 			try:
 			  expr = parser.compile(value)
 			except:
-			  print name
-			  print value
-			  print ''
 			  if is_first_ct:
 			    is_first_ct = False
 			    f.write("\n")
@@ -810,7 +809,6 @@ class Model:
 			if brack_flag:
 				f.write(" (")
 
-
 			for coord, coupling in v.couplings.items():
 				ic, il = coord
 				lorentz = lorex[v.lorentz[il].name]
@@ -883,23 +881,50 @@ class Model:
 					"ModelDummyIndex", lsubs, lcounter)
 			structure = structure.replaceNegativeIndices(0, "MDLIndex%d",
 					dummy_found)
-			for i in range(2,33):
+			for i in [2]:
 				structure = structure.algsubs(
 					ex.FloatExpression("%d." % i),
 					ex.IntegerExpression("%d" % i))
-
-
+			lorex[name] = transform_lorentz(structure, l.spins)
 		lwf = LimitedWidthOutputStream(f, 70, 6)
 		f.write("* vim: syntax=form:ts=3:sw=3\n\n")
 		f.write("* This file has been generated from the FeynRule model files\n")
-		f.write("* in %s\n" % self.model_orig)
-		f.write("* for Counter Term Vertices\n\n")
+		f.write("* in %s\n\n" % self.model_orig)
 
 		f.write("*---#[ Symbol Definitions:\n")
+		f.write("*---#[ Fields:\n")
+
+		fields = []
+		for p in self.all_particles:
+			part, anti = canonical_field_names(p)
+			field = "[field.%s]" % part
+			if field not in fields:
+				fields.append(field)
+			if part != anti:
+				field = "[field.%s]" % anti
+				if field not in fields:
+					fields.append(field)
+
+		if len(fields) > 0:
+			if len(fields) == 1:
+				f.write("Symbol %s;" % fields[0])
+			else:
+				f.write("Symbols")
+				lwf.nl()
+				lwf.write(fields[0])
+				for p in fields[1:]:
+					lwf.write(",")
+					lwf.write(p)
+				lwf.write(";")
+		f.write("\n")
+		f.write("*---#] Fields:\n")
 		f.write("*---#[ Parameters:\n")
 
 		params = []
-		for c in self.all_ctcouplings:
+		for p in self.all_parameters:
+			params.append(self.prefix + p.name)
+
+		for c in self.all_couplings:
 			params.append(self.prefix + c.name.replace("_", ""))
 
 		if len(params) > 0:
@@ -929,46 +954,142 @@ class Model:
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
+		max_deg = max(map(lambda v: len(v.particles), self.all_vertices))
+		f.write("*---#[ Auxilliary Symbols:\n")
+		f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
+		f.write("*---#] Auxilliary Symbols:\n")
 		f.write("*---#] Symbol Definitions:\n")
-		f.write("*---#[ Procedure ReplaceCT :\n")
-		f.write("#Procedure ReplaceCT\n")
+		if self.containsMajoranaFermions():
+			f.write("* Model contains Majorana Fermions:\n")
+			debug("You are working with a model " +
+					"that contains Majorana fermions.")
+			f.write("#Define DISCARDQGRAFSIGN \"1\"\n")
+		f.write("#Define USEVERTEXPROC \"1\"\n")
+		f.write("*---#[ Procedure ReplaceVertices :\n")
+		f.write("#Procedure ReplaceVertices\n")
 
-		for v in self.all_ctvertices:
+		#f.write("*---#[ Procedure ReplaceCT :\n")
+		#f.write("#Procedure ReplaceCT\n")
+		
+		
+		for v in self.all_CTvertices:
 			particles = v.particles
 			names = []
 			fields = []
 			afields = []
+			spins = []
 			for p in particles:
 				names.append(p.name)
 				cn = canonical_field_names(p)
 				fields.append(cn[0])
 				afields.append(cn[1])
-
+				spins.append(p.spin - 1)
+                        try:
+			  flip = spins[0] == 1 and spins[2] == 1
+			except:
+			  flip=False
 			deg = len(particles)
 
 			xidx = range(deg)
+			if flip:
+				xidx[0] = 1
+				xidx[1] = 0
 
-			fold_name = "(%s) %s CT" % ( v.name, " -- ".join(names))
+			fold_name = "(%s) %s Vertex" % ( v.name, " -- ".join(names))
 			f.write("*---#[ %s:\n" % fold_name)
-			f.write("Identify Once delta(mass")
+			f.write("Identify Once vertex(iv?")
+			colors = []
 			for i in xidx:
 				p = particles[i]
 				field = afields[i]
-				f.write(",\n   [field.%s]" % field)
+				anti = fields[i]
+				color = abs(p.color)
+				spin = abs(p.spin) - 1
+				if field.startswith("anti") and not p.pdg_code in [24,-24]:
+					spin = - spin
+					color = - color
+				colors.append(color)
+
+				f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+						% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
+							abs(color)))
 			f.write(") =")
 
+			dummies = []
+
+			brack_flag = False
+			for i, s in enumerate(spins):
+				if s == 3 or s == 4:
+					brack_flag = True
+					idx = "idx%dL%d" % (i+1, s)
+					idxa = "idx%dL%da" % (i+1, s)
+					idxb = "idx%dL%db" % (i+1, s)
+					f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+					dummies.append(idxa)
+					dummies.append(idxb)
+
+			if brack_flag:
+				f.write(" (")
+
+
 			for coord, coupling in v.couplings.items():
-				ic, il = coord
+				ic, il , lp = coord
+				lorentz = lorex[v.lorentz[il].name]
+				scolor = v.color[ic]
 				f.write("\n   + %s"
 						% (self.prefix + coupling.name.replace("_", "")))
+				if scolor != "1":
+					color = parser.compile(scolor)
+					color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+					color = color.replaceNegativeIndices(0, "MDLIndex%d",
+							dummy_found)
+					color = transform_color(color, colors, xidx)
+					if lorentz == ex.IntegerExpression(1):
+						expr = color
+					else:
+						expr = color * lorentz
+				else:
+					expr = lorentz
+				if not expr == ex.IntegerExpression(1):
+					f.write(" * (")
+					lwf.nl()
+					expr.write(lwf)
+					f.write("\n   )")
+			
 				for ind in lsubs.values():
 					s = str(ind)
+					if expr.dependsOn(s):
+						if s not in dummies:
+							dummies.append(s)
 
+			if brack_flag:
+				f.write(")")
 			f.write(";\n")
 
+			for idx in dummy_found.values():
+				dummies.append(str(idx))
+
+			if len(dummies) > 0:
+				f.write("Sum %s;\n" % ", ".join(dummies))
 			f.write("*---#] %s:\n" % fold_name)
 		f.write("#EndProcedure\n")
-		f.write("*---#] Procedure ReplaceCT :\n")
+		f.write("*---#] Procedure ReplaceVertices :\n")
+		f.write("*---#[ Dummy Indices:\n")
+		for ind in lsubs.values():
+			f.write("Index %s;\n" % ind)
+		f.write("*---#] Dummy Indices:\n")
+		f.write("""\
+*---#[ Procedure VertexConstants :
+#Procedure VertexConstants
+* Just a dummy, all vertex constants are already
+* replaced in ReplaceVertices.
+*
+* This procedure might disappear in any future version of Golem
+* so don't rely on it.
+*
+#EndProcedure
+*---#] Procedure VertexConstants :
+""")		
 
 
 
@@ -997,10 +1118,10 @@ class Model:
 		self.write_form_file(f)
 		f.close()
 
-#		message("  Writing Form CT file ...")
-#		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
-#		self.write_formct_file(f)
-#		f.close()
+		message("  Writing Form CT file ...")
+		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
+		self.write_formct_file(f)
+		f.close()
 
 
 def canonical_field_names(p):
