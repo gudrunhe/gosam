@@ -98,7 +98,11 @@ Symbol Qt2;
 .global
 
 #include- diagrams-`LOOPS'.hh #global
-#include- model.hh[%
+#If `BORNFLG' == 3
+  #include- modelct.hh
+#Else
+  #include- model.hh
+#EndIf[%
 @if diagsum %]
 #If `LOOPS' == 0
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'
@@ -725,6 +729,12 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
         #write <borndiag.prc> "#EndProcedure"
         #Call OptimizeBorn()
+   #ElseIf `BORNFLG' == 3
+	#Create <ctdiag.prc>
+        #write <ctdiag.prc> "#Procedure ctdiag"
+	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
+        #write <ctdiag.prc> "#EndProcedure"
+        #Call OptimizeCT()        
    #EndIf
 #EndIf
 .end[%

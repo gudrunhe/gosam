@@ -84,13 +84,7 @@ OBJECTS= \
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if helsum %]
 GENERATED_SRC=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -140,13 +134,7 @@ GENERATED_SRC=[%
 	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %]
+@end @if helsum %]
 
 .PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
 .SUFFIXES:
@@ -237,6 +225,9 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'borndiag.prc' \
 		-or -name 'born.txt' \
 		-or -name 'born.dat' \
+		-or -name 'ctdiag.prc' \
+		-or -name 'ct.txt' \
+		-or -name 'ct.dat' \
 		-or -name '*-stamp' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \

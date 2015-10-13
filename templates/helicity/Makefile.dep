@@ -86,13 +86,7 @@ d[%$_%]h[%helicity%]l121.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
 	@end @if extension ninja %][%
 	@end @select %][%
    @end @if generate_nlo_virt%][%
-@end @if helsum %][%
-	@if generate_uv_counterterms %]
-diagramsct.[%O%]:[%
-     	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.[%O%][%
-		@end @for %][%
-	@end @if generate_uv_counterterms %]
+@end @if helsum %]
 amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%

@@ -319,11 +319,11 @@ def prepare_model_files(conf, output_path=None):
       for ext in ["", ".py", ".hh"]:
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
-      if genUV == 'true':
-         print 'Generating UV terms'
-         for ext in [".py", ".hh"]:
-            copy_file(os.path.join(src_path, model + 'ct' + ext),
-                  os.path.join(path, MODEL_LOCAL + 'ct' + ext))
+      #if genUV == 'true':
+         #print 'Generating UV terms'
+         #for ext in [".py", ".hh"]:
+            #copy_file(os.path.join(src_path, model + 'ct' + ext),
+                  #os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
          model_path = model_lst[1]
@@ -354,10 +354,10 @@ def prepare_model_files(conf, output_path=None):
             for ext in ["", ".py", ".hh"]:
                copy_file(os.path.join(model_path, model + ext),
                   os.path.join(path, MODEL_LOCAL + ext))
-            if genUV == 'true':
-               for ext in [".hh", ".py"]:
-                  copy_file(os.path.join(model_path, model + 'ct' + ext),
-                        os.path.join(path, MODEL_LOCAL + 'ct' + ext))
+            #if genUV == 'true':
+               #for ext in [".hh", ".py"]:
+                  #copy_file(os.path.join(model_path, model + 'ct' + ext),
+                        #os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
