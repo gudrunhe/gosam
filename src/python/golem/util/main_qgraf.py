@@ -8,6 +8,7 @@ import subprocess
 import os.path
 import os
 import itertools
+import shutil
 
 import golem.properties
 import golem.pyxo.pyxodraw
@@ -46,12 +47,12 @@ def diagram_count(conf, loops, cut=0):
 			fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_NLO_VIRT + ext)]
 		else:
 			return 0
-	elif loops == 2:
-		present = conf.getBooleanProperty("generate_uv_counterterms")
-		if present:
-			fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_CT + ext)]
-		else:
-			return 0
+	#elif loops == 2:
+		#present = conf.getBooleanProperty("generate_uv_counterterms")
+		#if present:
+			#fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_CT + ext)]
+		#else:
+			#return 0
 	else:
 		raise NotImplementedError(
 				"A value of loops=%d in diagram_count is not implemented."
@@ -283,6 +284,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
 		run_qgraf_dat(conf, output_name, log_name)
+		
 
 		if flag_draw_diagrams:
 			output_name = consts.PATTERN_PYXO_LO + python_ext
@@ -306,6 +308,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	if flag_generate_nlo_virt:
 		output_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_NLO_VIRT + log_ext
+		
 
 		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
@@ -342,6 +345,19 @@ def run_qgraf(conf, in_particles, out_particles):
 	          run_qgraf_dat(conf, output_name_reduze, log_name_reduze)
 			
 			
+			
+			
+	# -------------UV counterterms from Feynrules----------------------------
+	#if flag_generate_nlo_virt and len(conf.getProperty(golem.properties.model))>1:
+	if conf["generate_uv_counterterms"]==True:
+		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
+		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
+		modelct = consts.MODEL_LOCAL+'ct'
+		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
+		#write_qgraf_dat(path, form_sty, modelct, output_name,
+				#options, new_verbatim, in_particles, out_particles, [], 0)
+		#run_qgraf_dat(conf, output_name, log_name)		
+		
 			
 	# -------------------- higher virt -------------------------------------
 	for looporder in loops_to_generate:
@@ -417,39 +433,39 @@ def run_qgraf(conf, in_particles, out_particles):
 	# This doesn't work...at some point it would be better to add the RENO
 	# fields automatically
 	# Edited on 16.11.12
-	if flag_generate_uv_counterterms:
-		output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
-		log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
+	#if flag_generate_uv_counterterms:
+		#output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
+		#log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
 
-		if powers and powers is not None:
-			new_verbatim = verbatim + "\n" + \
-					"true=vsum[%s,%s,%s];\n" % (powers[0][0], str(int(powers[0][2])-6), str(int(powers[0][2])-6)) \
-					+ "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers[2:]])
-		else:
-			new_verbatim = verbatim
+		#if powers and powers is not None:
+			#new_verbatim = verbatim + "\n" + \
+					#"true=vsum[%s,%s,%s];\n" % (powers[0][0], str(int(powers[0][2])-6), str(int(powers[0][2])-6)) \
+					#+ "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers[2:]])
+		#else:
+			#new_verbatim = verbatim
 
-		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name, \
-				options, new_verbatim, in_particles, out_particles, \
-				["RENO"], 1)
-		run_qgraf_dat(conf, output_name, log_name)
+		#write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name, \
+				#options, new_verbatim, in_particles, out_particles, \
+				#["RENO"], 1)
+		#run_qgraf_dat(conf, output_name, log_name)
 
-		if flag_draw_diagrams:
-			output_name = consts.PATTERN_PYXO_CT + python_ext
-			log_name    = consts.PATTERN_PYXO_CT + log_ext
-			write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, \
-				["RENO"], 1)
-			run_qgraf_dat(conf, output_name, log_name)
-			golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
-					conf=conf)
-			for ext in [python_ext, pyo_ext, pyc_ext]:
-				cleanup_files.append(consts.PATTERN_PYXO_CT + ext)
-		if flag_topolopy:
-			output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
-			log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
-			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 1)
-			run_qgraf_dat(conf, output_name, log_name)
+		#if flag_draw_diagrams:
+			#output_name = consts.PATTERN_PYXO_CT + python_ext
+			#log_name    = consts.PATTERN_PYXO_CT + log_ext
+			#write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
+				#options, new_verbatim, in_particles, out_particles, \
+				#["RENO"], 1)
+			#run_qgraf_dat(conf, output_name, log_name)
+			#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
+					#conf=conf)
+			#for ext in [python_ext, pyo_ext, pyc_ext]:
+				#cleanup_files.append(consts.PATTERN_PYXO_CT + ext)
+		#if flag_topolopy:
+			#output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+			#log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+			#write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
+				#options, new_verbatim, in_particles, out_particles, [], 1)
+			#run_qgraf_dat(conf, output_name, log_name)
 
 	# Clean up and leave
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")

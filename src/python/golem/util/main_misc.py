@@ -615,7 +615,7 @@ def workflow(conf):
 	conf["loops_to_generate"] = loops_to_generate	  
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = conf.getProperty('genUV')
+	conf["generate_uv_counterterms"] = len(conf.getProperty(golem.properties.model))>1
 	conf["generate_nnlo_virt"] = generate_nnlo_virt
 	#generate_uv_counterterms
 	#False
@@ -849,20 +849,23 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 		keep_higher_virt = []
 		keep_higher_vtot = []
 
-	
-	if generate_ct:
-		modname = consts.PATTERN_TOPOLOPY_CT
-		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading counter term diagram file %r" % fname)
-		mod_diag_ct = imp.load_source(modname, fname)
-		# keep_tree, tree_signs, tree_flows =
-		keep_ct, ct_signs = \
-				golem.topolopy.functions.analyze_ct_diagrams(
-				mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
-				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
-	else:
-		keep_ct = []
-		ct_signs = {}
+	keep_ct = []
+	ct_signs = {}
+	#if generate_ct:
+		#modname = consts.PATTERN_TOPOLOPY_CT
+		#modname_LO = consts.PATTERN_TOPOLOPY_LO
+		#fname = os.path.join(path, "%s.py" % modname_LO)
+		#debug("Loading counter term diagram file %r" % fname)
+		#mod_diag_ct = imp.load_source(modname, fname)
+		#onshell={}
+		## keep_tree, tree_signs, tree_flows =
+		#keep_ct, ct_signs = \
+				#golem.topolopy.functions.analyze_ct_diagrams(
+				#mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
+				#filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+	#else:
+		#keep_ct = []
+		#ct_signs = {}
 	# tree_flows = {}
 
 

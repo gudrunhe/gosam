@@ -114,14 +114,8 @@
     @case 0%]no different groups[%
     @case 1%]only one group[%
     @else %][% count groups %] groups [%
- @end @select %] of NLO diagrams by analyzing their one-loop integrals.[%
- @if generate_uv_counterterms
-   %] There are [% @select topolopy.count.ct
- @case 0 %]no counterterms[%
- @case 1 %]one counter term[%
- @else %][%topolopy.count.ct %] counter terms[%
- @end @select %] from UV-renormalisation.[%
- @end @if %]
+ @end @select %] of NLO diagrams by analyzing their one-loop integrals.
+
 \end{abstract}
 \newpage
 \tableofcontents
@@ -589,33 +583,7 @@ $S^\prime=S[%
 @end @if pyxodraw %][%
 @end @for groups %][%
  @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-\section{Counter-Term Diagrams}
-\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}[%
-@if pyxodraw %][% 
-@with modules pyxoct.tex path=process %][% 
-   @for elements topolopy.keep.ct var=DIAG index=DIAGINDEX %][%
-     @if is_first %]
-\begin{longtable}{cc}
-\endfirsthead
-\endhead
-[% @end @if %]
-\hbox{
-\begin{minipage}{0.45\textwidth}
-\begin{center}
-[%diagram suffix=DIAG%]\\
-{\sl Diagram~[%DIAG%]}
-\end{center}
-\end{minipage}}
-[%   @if is_last %]
-\end{longtable}
-[%   @else %]
-[%   @if eval DIAG .mod. 2 .eq. 0 %]\\[% @else %]&[%@end @if%]
-[%   @end @if %]
-[% @end @for %][%
-   @end @with%][%
-@end @if pyxodraw %][%
-@end @if generate_uv_counterterms %]
+
 
 
 [% @if generate_nnlo_virt %]

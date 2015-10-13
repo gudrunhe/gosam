@@ -179,6 +179,9 @@
 		<file src="buildfortranborn.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
+		<file src="buildfortranct.py" class="Kinematics">
+			<only if-extension="formopt" />
+		</file>		
 		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />
