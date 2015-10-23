@@ -3,7 +3,9 @@
 @if extension samurai %]
    use msamurai, only: initsamurai, exitsamurai[%
 @end @if %]
-   use [% process_name asprefix=\_ %]util, only: square
+   use [% process_name asprefix=\_ %]util, only: square[%
+@if generate_uv_counterterms %] ,ct_square[%
+@end @if %]
    use [% process_name asprefix=\_ %]config, only: ki, &
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
@@ -35,6 +37,10 @@
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+      @end @if %][%
+      @if generate_uv_counterterms %]
+   use [% process_name asprefix=\_
+        %]ctdiagramsh[%helicity%]l0, only: ctamplitude[%helicity%]l0 => ctamplitude[%
       @end @if %][%
       @if generate_nlo_virt %]
    use [% process_name asprefix=\_
@@ -396,7 +402,10 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
-      real(ki), dimension(4), intent(out) :: amp
+      real(ki), dimension(4), intent(out) :: amp[%
+      @if generate_uv_counterterms %]
+      real(ki), dimension(0:1) :: ct_amp[%
+      @end @if %]
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -443,7 +452,14 @@ contains
       @else %]
       amp(1)   = 0.0_ki[%
       @end @if%][%
-      @if generate_nlo_virt %]
+      @if generate_nlo_virt %][%
+      @if generate_uv_counterterms %]
+      if (present(h)) then
+        ct_amp(:) = ct_samplitude(vecs, h)
+      else
+        ct_amp(:) = ct_samplitude(vecs)
+      endif[%
+      @else %]
       select case (renormalisation)
       case (0)
          ! no renormalisation
@@ -463,7 +479,8 @@ contains
          print*, "In [% process_name asprefix=\_ %]matrix:"
          print*, "  invalid value for renormalisation=", renormalisation
          stop
-      end select
+      end select[%
+      @end @if %]
 
       if (present(h)) then[%
          @if helsum %]
@@ -475,6 +492,31 @@ contains
       else
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
       end if[%
+      @if generate_uv_counterterms %]
+      select case (renormalisation)
+      case (0)
+         ! no renormalisation
+      case (1)
+         ! fully renormalized
+         select case (nlo_prefactors)
+         case (0)
+	    amp(3) = amp(3) + ct_amp(1)*8.0_ki*pi**2/nlo_coupling
+            amp(2) = amp(2) + ct_amp(0)*8.0_ki*pi**2/nlo_coupling
+         case (1)
+	    amp(3) = amp(3) + ct_amp(1)*8.0_ki*pi**2
+            amp(2) = amp(2) + ct_amp(0)*8.0_ki*pi**2         
+         case (2)
+	    amp(3) = amp(3) + ct_amp(1)
+            amp(2) = amp(2) + ct_amp(0)
+         end select[%
+          @if extension dred %]
+            if (corrections_are_qcd) then
+              amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)
+            endif[%
+          @end @if %]
+      end select
+      [%
+      @else %][%
 
          @select r2
          @case implicit explicit off %]
@@ -584,7 +626,8 @@ contains
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
          @end @if extension dred %]
       end if[%
-      @end @select r2 %]
+      @end @select r2 %][%
+      @end @if %]
       if (present(ok)) ok = my_ok
 
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
@@ -691,7 +734,82 @@ contains
       end if[%
    @end @if %]
    end function samplitudel0
-   !---#] function samplitudel0 :
+   !---#] function samplitudel0 :[%
+@if generate_uv_counterterms %]   
+   !---#[ function ct_samplitude :   
+   function     ct_samplitude(vecs, h) result(amp)
+      use [% process_name asprefix=\_ %]config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki) ,dimension(0:1) :: amp, heli_amp
+      complex(ki), dimension(numcs) :: vector_born
+      complex(ki), dimension(numcs,0:1) :: vector_ct
+      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
+
+      amp(:) = 0.0_ki[%
+  @if generate_lo_diagrams %][%
+  @for helicities %]
+      if (eval_heli([%helicity%])) then
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:
+         vector_born = amplitude[% map.index %]l0()
+         vector_ct = ctamplitude[% map.index %]l0()
+         heli_amp(:) = ct_square(vector_born, vector_ct)
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp(:) = amp(:) + heli_amp(:)
+      end if[%
+  @end @for helicities %]
+      if (include_helicity_avg_factor) then
+         amp(:) = amp(:) / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp(:) = amp(:) / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp(:) = amp(:) / real(symmetry_factor, ki)
+      end if[%
+   @end @if %]
+   end function ct_samplitude   
+   !---#] function ct_samplitude :[%
+@end @if %]
+   
    !---#[ function samplitudel1 :
    function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
       use [% process_name asprefix=\_ %]config, only: &

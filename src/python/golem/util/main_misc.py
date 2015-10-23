@@ -656,7 +656,6 @@ def workflow(conf):
 	if not conf["reduction_interoperation_rescue"]:
 		conf["reduction_interoperation_rescue"]=-1
 
-
 	if len(ini) > 2:
 		warning("You specified a process with %d incoming particles." %
 					len(ini),

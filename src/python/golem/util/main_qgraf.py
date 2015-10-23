@@ -334,15 +334,15 @@ def run_qgraf(conf, in_particles, out_particles):
 			
 			
 	# -------------UV counterterms from Feynrules----------------------------
-	#if flag_generate_nlo_virt and len(conf.getProperty(golem.properties.model))>1:
-	if conf["generate_uv_counterterms"]==True:
+	if flag_generate_nlo_virt and len(conf.getProperty(golem.properties.model))>1:
+	#if conf["generate_uv_counterterms"]:
 		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
 		modelct = consts.MODEL_LOCAL+'ct'
 		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
-		#write_qgraf_dat(path, form_sty, modelct, output_name,
-				#options, new_verbatim, in_particles, out_particles, [], 0)
-		#run_qgraf_dat(conf, output_name, log_name)		
+		write_qgraf_dat(path, form_sty, modelct, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 0)
+		run_qgraf_dat(conf, output_name, log_name)		
 		
 			
 	# -------------------- higher virt -------------------------------------

@@ -20,6 +20,8 @@ class ExpressionParser:
 		return self.expression(tokens)
 	      
 	def check_mass(self, text, masses):
+	  text=text.replace("_","")
+	  text=text.replace("reglog","log")
 	  if text.find("if ") >0:
 	    mass=text.split("if")[1].split("else")[0].strip()
 	    if masses["masses"].lower().find(mass.lower())>=0:

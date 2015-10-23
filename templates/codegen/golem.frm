@@ -98,8 +98,12 @@ Symbol Qt2;
 .global
 
 #include- diagrams-`LOOPS'.hh #global
+#If `LOOPS' == 0
 #If `BORNFLG' == 3
   #include- modelct.hh
+#Else
+  #include- model.hh
+#EndIf
 #Else
   #include- model.hh
 #EndIf[%
@@ -730,6 +734,13 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
         #write <borndiag.prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 3
+        repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
+        repeat id UVSET?UV[UVNR]^2 =0;
+        if (match(UVSET?UV[UVNR]) );
+        else;
+          id UVSET?NONUV[UVNR] = 0;
+        endif;
+        .sort;   
 	#Create <ctdiag.prc>
         #write <ctdiag.prc> "#Procedure ctdiag"
 	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
