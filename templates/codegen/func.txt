@@ -13,5 +13,12 @@ L [% $_ %]x = [% expression %];[%
 [% @end @if %]
 [% $_ %] = [% expression %];[%
 @end @for %]
+[%
+@for ct_functions_resolved %][%
+   @if is_first %][%
+   @else %]
+[% @end @if %]
+[% $_ %] = [% expression %];[%
+@end @for %]
 [%@end @if %]
 

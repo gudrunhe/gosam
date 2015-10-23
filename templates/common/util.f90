@@ -25,7 +25,10 @@
    end interface
 [% @end @if %]
 
-   public :: square
+   public :: square[%
+@if generate_uv_counterterms %]
+   public :: ct_square[%
+@end @if %]
    public :: inspect_lo_diagram
    public :: metric_tensor
    public :: cond[%
@@ -313,4 +316,22 @@ contains
       amp = real(sum(v1(:) * v2(:)), ki)
    end function  square_0l_0l_mat
    !---#] function square :
+[%
+@if generate_uv_counterterms %]
+   pure function ct_square(vector_born, vector_ct) result(amp)
+      use [% process_name asprefix=\_ %]color, only: cmat => CC
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: vector_born
+      complex(ki), dimension(numcs,0:1), intent(in) :: vector_ct
+      real(ki), dimension(0:1) :: amp
+      complex(ki), dimension(numcs) :: v1
+      complex(ki), dimension(numcs,0:1) :: v2
+
+      v1 = matmul(cmat, vector_born)
+      v2 = conjg(vector_ct)
+      amp(0) = 2.0_ki*real(sum(v1(:) * v2(:,0)), ki)
+      amp(1) = 2.0_ki*real(sum(v1(:) * v2(:,1)), ki)
+   end function  ct_square[%
+@end @if %]   
+   
 end module [% process_name asprefix=\_ %]util

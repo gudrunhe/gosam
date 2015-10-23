@@ -33,7 +33,10 @@
    @else %][% reduction_interoperation %][%
    @end @select %]
    ! Rescue reduction method. The rescue system is disabled
-   ! if it is equal to reduction_interoperation
+   ! if it is equal to reduction_interoperation [%
+   @if extensions ninja %]
+   HIER[%
+   @end @if %]
    integer :: reduction_interoperation_rescue = [%
    @select reduction_interoperation_rescue default="-1"
    @case -1 %][%

@@ -5,7 +5,7 @@
 	@else %]'complex'[%
 	@end @select%],[%
    @end @for %]
-[% @for functions R C %]
+[% @for functions R C CA %]
 	'[%$_%]' : [%
 	@select type
 	@case R %]'real'[%
