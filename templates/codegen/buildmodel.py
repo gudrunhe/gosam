@@ -85,6 +85,8 @@ modelfile.write('   complex(ki), parameter :: [$$_$] = ([$ real convert=float fo
 modelfile.write('   real(ki) :: [$$_$]\n')[$
             @case C $]
 modelfile.write('   complex(ki) :: [$$_$]\n')[$
+            @case CA $]
+modelfile.write('   complex(ki), dimension(0:1) :: [$$_$]\n')[$
          @end @select type $][$
       @end @for functions $]
 modelfile.write('   integer, parameter, private :: line_length = [$buffer_length$]\n')

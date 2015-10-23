@@ -335,7 +335,7 @@ def prepare_model_files(conf, output_path=None):
          message("Importing FeynRules model files ...")
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
-         mdl.store(path, MODEL_LOCAL,zeros=conf["zero"])
+         mdl.store(path, MODEL_LOCAL,zeros=conf["zero"],filternlo=conf.getProperty(golem.properties.filter_nlo_diagrams))
          message("Done with model import.")
       else:
          model_path = model_lst[0]
@@ -926,8 +926,8 @@ def derive_coupling_names(conf):
    result = {}
 
    candidates = {
-         'QCD': ['gs', 'mdlG', 'mdlGG'],
-         'QED': ['e', 'mdlee', 'mdlEE']
+         'QCD': ['gs', 'mdlG', 'mdlGG', 'G'],
+         'QED': ['e', 'mdlee', 'mdlEE', 'ee']
    }
 
    model = getModel(conf)

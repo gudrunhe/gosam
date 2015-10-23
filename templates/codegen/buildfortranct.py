@@ -3,6 +3,7 @@
 
 import sys
 import os
+import re
 from optparse import OptionParser
 from t2f import translatefile, getdata, postformat
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
@@ -26,9 +27,34 @@ parser.add_option("-H", "--HELICITY", dest="helicity",
 
 (options, args) = parser.parse_args()
 
-if not options.input:
-    sys.exit("Error: no input file was found! Please specify one with the -i options.")
+def corr_dim_abbrev(abbrev):
+  match=re.findall(r'ctabb\(\d+\)',abbrev)
+  new_abbrev=[]
+  for element in match:
+    new_abbrev.append(element.replace(')',',:)'))
+  for (i,j) in zip(match,new_abbrev):
+    abbrev=abbrev.replace(i,j)
 
+  match=re.findall(r'UV\w+\d+',abbrev)
+  new_abbrev=[]
+  for element in match:
+    new_abbrev.append(element.replace(element,element+'(:)'))
+  for (i,j) in zip(match,new_abbrev):
+    abbrev=abbrev.replace(i,j)
+    
+  return abbrev
+    
+def corr_dim_diag(diag,i):
+  diag=diag.replace('ctamplitude','  ctamplitude(:,'+i+')')
+  match=re.findall(r'ctabb\(\d+\)',diag)
+  new_diag=[]
+  for element in match:
+    new_diag.append(element.replace(')',','+i+')'))
+  for (i,j) in zip(match,new_diag):
+    diag=diag.replace(i,j)  
+  
+  return diag
+  
 file_name= options.input.split('.')[0]
 heli=options.helicity
 
@@ -47,7 +73,7 @@ txt_lines=[]
 abb_max=getdata(datfilename)['ctabbrev_terms']
 
 outdict=translatefile('ct.txt',config)
-f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
+f90file.write('module     [% process_name asprefix=\_ %]ctdiagramsh'+str(heli)+'l0\n')
 f90file.write('   ! file: '+str(os.getcwd())+'/diagramsct.f90 \n')
 f90file.write('   ! generator: buildfortranct.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
@@ -61,11 +87,11 @@ f90file.write('   private\n')
 f90file.write('\n')
 f90file.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
 f90file.write('   complex(ki), dimension(numcs), parameter :: zero_col = 0.0_ki\n')
-f90file.write('   public :: amplitude\n')
+f90file.write('   public :: ctamplitude\n')
 f90file.write('\n')
 f90file.write('contains\n')
-f90file.write('!---#[ function amplitude:\n')
-f90file.write('   function amplitude()\n')
+f90file.write('!---#[ function ctamplitude:\n')
+f90file.write('   function ctamplitude()\n')
 f90file.write('      use [% process_name asprefix=\_ %]model\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use [% process_name asprefix=\_ %]color\n')
@@ -74,17 +100,23 @@ f90file.write('        & use_sorted_sum\n')
 f90file.write('      use [% process_name asprefix=\_ %]accu, only: sorted_sum\n')
 f90file.write('      use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram\n')
 f90file.write('      implicit none\n')
-f90file.write('      complex(ki), dimension(numcs) :: amplitude\n')
-f90file.write('      complex(ki), dimension('+str(abb_max)+') :: abb\n')
+f90file.write('      complex(ki), dimension(numcs,0:1) :: ctamplitude\n')
+f90file.write('      complex(ki), dimension('+str(abb_max)+',0:1) :: ctabb\n')
 f90file.write('!      complex(ki), dimension(2,numcs) :: diagrams\n')
 f90file.write('      integer :: i\n')
 f90file.write('\n')
-f90file.write('      amplitude(:) = 0.0_ki\n')
+f90file.write('      ctamplitude(:,:) = 0.0_ki\n')
 f90file.write('\n')
 f90file.write('\n')
-f90file.write(outdict['Abbreviations'])
+abbrev = corr_dim_abbrev(outdict['Abbreviations'])
+f90file.write(abbrev)
 f90file.write('\n')
-f90file.write(outdict['Diagrams'])
+f90file.write('      do i=0,1\n')
+diag = corr_dim_diag(outdict['Diagrams'],'0')
+f90file.write(diag)
+diag = corr_dim_diag(outdict['Diagrams'],'1')
+f90file.write(diag)
+f90file.write('      enddo\n')
 f90file.write('\n')
 f90file.write('      if (debug_lo_diagrams) then\n')
 f90file.write('         write(*,*) "Using Born optimization, debug_lo_diagrams not implemented."\n')
@@ -92,16 +124,16 @@ f90file.write('      end if\n')
 f90file.write('\n')
 f90file.write('!      if (use_sorted_sum) then\n')
 f90file.write('!         do i=1,numcs\n')
-f90file.write('!            amplitude(i) = sorted_sum(diagrams(i))\n')
+f90file.write('!            ctamplitude(i) = sorted_sum(diagrams(i))\n')
 f90file.write('!         end do\n')
 f90file.write('!      else\n')
 f90file.write('!         do i=1,numcs\n')
-f90file.write('!            amplitude(i) = sum(diagrams(i))\n')
+f90file.write('!            ctamplitude(i) = sum(diagrams(i))\n')
 f90file.write('!         end do\n')
 f90file.write('!      end if\n')
-f90file.write('   end function     amplitude\n')
-f90file.write('!---#] function amplitude:\n')
-f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
+f90file.write('   end function     ctamplitude\n')
+f90file.write('!---#] function ctamplitude:\n')
+f90file.write('end module [% process_name asprefix=\_ %]ctdiagramsh'+str(heli)+'l0\n')
 txtfile.close()
 f90file.close()
 ### additional formatting for output files

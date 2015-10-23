@@ -54,6 +54,9 @@ OBJECTS= \
       @end @if %][%
    @end @if %][%
 @end @if generate_lo_diagrams %][%
+@if generate_uv_counterterms %] \
+	diagramsct.o [%
+@end @if %][%
 @if helsum %][%
 @else %][%
 @if generate_nlo_virt %][%
@@ -94,6 +97,9 @@ GENERATED_SRC=[%
 	d[%$_%]h[%helicity%]l0.f90[%
       @end @for %][%
    @end @if %][%
+@if generate_uv_counterterms %] \
+	diagramsct.o [%
+@end @if %][%
    @if internal REQUIRE_FR5 %][%
       @if group %] \
 	   diagramsl0fr5.f90[%

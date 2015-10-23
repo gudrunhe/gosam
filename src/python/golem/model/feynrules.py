@@ -7,6 +7,8 @@ Python interface.
 import os
 import os.path
 import imp
+import re
+import golem.properties
 import golem.model.expressions as ex
 
 from golem.util.tools import error, warning, message, debug, \
@@ -239,6 +241,9 @@ class Model:
 			except AttributeError:
 				pass
 			name = self.prefix + p.name
+			name = name.replace("_","")
+			if name == 'ZERO':
+				continue
 			if p.nature == 'external':
 				parameters[name] = p.value
 				slha_locations[name] = (p.lhablock, p.lhacode)
@@ -289,7 +294,11 @@ class Model:
 		for c in self.all_couplings:
 			name = self.prefix + c.name.replace("_", "")
 			functions[name] = c.value
-			types[name] = "C"
+			#types[name] = "C"
+			if name.startswith('UV'):
+			    types[name] = "CA"
+			else:
+			    types[name] = "C"
 
 		message("      Generating function list ...")
 		f.write("functions = {")
@@ -706,7 +715,8 @@ class Model:
 
 		params = []
 		for p in self.all_parameters:
-			params.append(self.prefix + p.name)
+		        if not p.name=='ZERO':
+			  params.append(self.prefix + p.name.replace("_", ""))
 
 		for c in self.all_couplings:
 			params.append(self.prefix + c.name.replace("_", ""))
@@ -868,7 +878,7 @@ class Model:
 *---#] Procedure VertexConstants :
 """)
 
-	def write_formct_file(self, f):
+	def write_formct_file(self, f,**filternlo):
 		parser = ex.ExpressionParser()
 		lorex = {}
 		lsubs = {}
@@ -922,7 +932,8 @@ class Model:
 
 		params = []
 		for p in self.all_parameters:
-			params.append(self.prefix + p.name)
+			if not p.name=='ZERO':
+			  params.append(self.prefix + p.name.replace("_", ""))
 
 		for c in self.all_couplings:
 			params.append(self.prefix + c.name.replace("_", ""))
@@ -937,6 +948,7 @@ class Model:
 				for p in params[1:]:
 					lwf.write(",")
 					lwf.write(p)
+				lwf.write(",UVSET,UVSET1,UVNR,UVNR1")
 				lwf.write(";")
 
 		f.write("\n")
@@ -951,10 +963,45 @@ class Model:
 				lwf.write(",")
 				lwf.write(p)
 			lwf.write(";\n")
+			
+		setUVparams = []
+		setNONUVparams = []
+		for c in self.all_couplings:
+		    if c.name.startswith("UV"):
+			setUVparams.append(self.prefix + c.name.replace("_", ""))
+		    else:
+			setNONUVparams.append(self.prefix + c.name.replace("_", ""))
+		if len(setUVparams) > 0:
+			if len(setUVparams) == 1:
+			    f.write("Set UV: %s;" % setUVparams[0])
+			else:
+			    f.write("Set UV:")
+			    lwf.nl()
+			    lwf.write(setUVparams[0])
+			    for p in setUVparams[1:]:
+				lwf.write(",")
+				lwf.write(p)
+			    lwf.write(";")
+
+		f.write("\n")			
+		
+		if len(setNONUVparams) > 0:
+			if len(setNONUVparams) == 1:
+			    f.write("Set NONUV: %s;" % setNONUVparams[0])
+			else:
+			    f.write("Set NONUV:")
+			    lwf.nl()
+			    lwf.write(setNONUVparams[0])
+			    for p in setNONUVparams[1:]:
+				lwf.write(",")
+				lwf.write(p)
+			    lwf.write(";")
+
+		f.write("\n")				
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
-		max_deg = max(map(lambda v: len(v.particles), self.all_vertices))
+		max_deg = max(map(lambda v: len(v.particles), self.all_CTvertices))
 		f.write("*---#[ Auxilliary Symbols:\n")
 		f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
 		f.write("*---#] Auxilliary Symbols:\n")
@@ -971,7 +1018,7 @@ class Model:
 		#f.write("*---#[ Procedure ReplaceCT :\n")
 		#f.write("#Procedure ReplaceCT\n")
 		
-		
+
 		for v in self.all_CTvertices:
 			particles = v.particles
 			names = []
@@ -1032,10 +1079,58 @@ class Model:
 				f.write(" (")
 
 
+
+			args=[]
+			try:
+			    match=re.findall(r'iprop\(.*\)',filternlo["filternlo"].lower())
+			    for element in match:
+				  args=args +element.strip('iprop').strip('(').strip(')').strip('[').strip(']').split(',')
+			except:
+			    pass
+			
 			for coord, coupling in v.couplings.items():
 				ic, il , lp = coord
-				lorentz = lorex[v.lorentz[il].name]
-				scolor = v.color[ic]
+				for element in v.loop_particles[lp]:
+				  canonical_name, canonical_anti = canonical_field_names(element[0])
+				  if canonical_name in args or canonical_anti in args:
+				      continue
+				  else:
+				      lorentz = lorex[v.lorentz[il].name]
+				      scolor = v.color[ic]
+				      f.write("\n   + %s"
+						      % (self.prefix + coupling.name.replace("_", "")))
+				      if scolor != "1":
+					      color = parser.compile(scolor)
+					      color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+					      color = color.replaceNegativeIndices(0, "MDLIndex%d",
+							      dummy_found)
+					      color = transform_color(color, colors, xidx)
+					      if lorentz == ex.IntegerExpression(1):
+						      expr = color
+					      else:
+						      expr = color * lorentz
+				      else:
+					      expr = lorentz
+				      if not expr == ex.IntegerExpression(1):
+					      f.write(" * (")
+					      lwf.nl()
+					      expr.write(lwf)
+					      f.write("\n   )")
+			      
+				      for ind in lsubs.values():
+					      s = str(ind)
+					      if expr.dependsOn(s):
+						      if s not in dummies:
+							      dummies.append(s)
+							
+							
+			for w in self.all_vertices:
+			    if w.particles==v.particles:
+			      
+			      for coord, coupling in w.couplings.items():
+				ic, il  = coord
+				lorentz = lorex[w.lorentz[il].name]
+				scolor = w.color[ic]
 				f.write("\n   + %s"
 						% (self.prefix + coupling.name.replace("_", "")))
 				if scolor != "1":
@@ -1061,6 +1156,7 @@ class Model:
 					if expr.dependsOn(s):
 						if s not in dummies:
 							dummies.append(s)
+
 
 			if brack_flag:
 				f.write(")")
@@ -1099,13 +1195,13 @@ class Model:
 				return True
 		return False
 
-	def store(self, path, local_name, **zeros):
+	def store(self, path, local_name, **conf):
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
-		if len(zeros) >0 :
-		  self.write_python_file(f, masses=zeros["zeros"])
+		if len(conf["zeros"]) >0 :
+		    self.write_python_file(f, masses=conf["zeros"])
 		else:
-		  self.write_python_file(f)
+		    self.write_python_file(f)
 		f.close()
 
 		message("  Writing QGraf file ...")
@@ -1120,7 +1216,10 @@ class Model:
 
 		message("  Writing Form CT file ...")
 		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
-		self.write_formct_file(f)
+		if len(conf["filternlo"]) >0:
+		    self.write_formct_file(f, filternlo=conf["filternlo"])
+		else:
+		    self.write_formct_file(f)
 		f.close()
 
 

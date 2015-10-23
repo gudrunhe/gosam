@@ -33,6 +33,7 @@ class ModelTemplate(Template):
 
 		self._parameters = {}
 		self._functions = {}
+		self._ct_functions = {}
 		name_length = 0
 		self._floats = {}
 		self._functions_fortran = {}
@@ -63,6 +64,15 @@ class ModelTemplate(Template):
 			#	name_length = len(name)
 
 			self._functions[name] = t
+			
+		try:
+		    for name, expression in self._mod.ct_functions.items():
+			    t = self._mod.types[name]
+			    self._ct_functions[name] = t
+			    self._functions[name] = t
+		except:
+		     pass
+
 		
 		self._name_length = name_length
 
@@ -170,9 +180,83 @@ class ModelTemplate(Template):
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
-	
+			
+			
 		golem.util.tools.message("Resolving dependencies between functions ...")
-		program = golem.model.expressions.resolve_dependencies(functions)
+		program = golem.model.expressions.resolve_dependencies(functions)			
+
+		nlines = len(program)
+
+		props = Properties()
+		for i, name in enumerate(program):
+			if i % 100 == 0:
+				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+
+			ast = functions[name]
+			buf = StringIO.StringIO()
+			try:
+				ast.write(buf)
+
+				props.setProperty(name_name, name)
+				props.setProperty(expression_name, buf.getvalue())
+				props.setProperty(index_name, i)
+				props.setProperty(first_name, i == 0)
+				props.setProperty(last_name, i == nlines - 1)
+			finally:
+				buf.close()
+			yield props
+
+
+
+
+	def functions_resolved_sum (self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expression_name  = self._setup_name("expression", "expression", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		
+		model_mod = self._mod
+	
+		nfunctions = len(model_mod.functions)
+
+		golem.util.tools.message("Compiling functions ...")
+
+
+		parser = golem.model.expressions.ExpressionParser()
+		functions = {}
+		i = 0
+		for name, value in model_mod.functions.items():
+			i += 1
+			if i % 100 == 0:
+				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+			expr = parser.compile(value)
+			functions[name] = expr
+			
+		try:
+		    for name, valuestr in model_mod.ct_functions.items():
+			    content = valuestr[1:-1]
+			    items = content.split(',')
+			    pairs = [item.split(':',1) for item in items]
+			    value = dict((k,str(v)) for (k,v) in pairs)
+			    if '0' in value.keys():
+			      expr0 = parser.compile(value['0'])
+			    else:
+			      expr0 = parser.compile('0')
+			    if '-1' in value.keys():
+			      expr1 = parser.compile(value['-1'])
+			    else:
+			      expr1 = parser.compile('0')
+			    name0=name+'(0)'  
+			    name1=name+'(1)'
+			    functions[name0]= expr0
+			    functions[name1]= expr1
+		except:
+		      pass
+		
+		
+		golem.util.tools.message("Resolving dependencies between functions ...")
+		program = golem.model.expressions.resolve_dependencies(functions)			
 
 		nlines = len(program)
 
@@ -198,6 +282,125 @@ class ModelTemplate(Template):
 				buf.close()
 			yield props
 
+
+
+	def ct_functions_resolved_name(self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expression_name  = self._setup_name("expression", "expression", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		
+		model_mod = self._mod
+	
+		nfunctions = len(model_mod.functions)
+
+		golem.util.tools.message("Compiling functions ...")
+
+
+		parser = golem.model.expressions.ExpressionParser()
+		ct_functions = {}
+		i = 0
+		
+		try:
+		    for name, valuestr in model_mod.ct_functions.items():
+			    content = valuestr[1:-1]
+			    items = content.split(',')
+			    pairs = [item.split(':',1) for item in items]
+			    value = dict((k,str(v)) for (k,v) in pairs)
+			    ct_functions[name]= parser.compile('0')
+		except:
+		    pass
+			
+		golem.util.tools.message("Resolving dependencies between ct_functions ...")
+		program = golem.model.expressions.resolve_dependencies(ct_functions)			
+
+		nlines = len(program)
+
+		props = Properties()
+		for i, name in enumerate(program):
+			if i % 100 == 0:
+				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+
+			ast = ct_functions[name]
+			buf = StringIO.StringIO()
+			try:
+				ast.write(buf)
+
+				props.setProperty(name_name, name)
+				props.setProperty(expression_name, buf.getvalue())
+				props.setProperty(index_name, i)
+				props.setProperty(first_name, i == 0)
+				props.setProperty(last_name, i == nlines - 1)
+			finally:
+				buf.close()
+			yield props
+
+
+	def ct_functions_resolved(self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		expression_name  = self._setup_name("expression", "expression", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		
+		model_mod = self._mod
+	
+		nfunctions = len(model_mod.functions)
+
+		golem.util.tools.message("Compiling functions ...")
+
+
+		parser = golem.model.expressions.ExpressionParser()
+		ct_functions = {}
+		i = 0
+		
+		try:
+		    for name, valuestr in model_mod.ct_functions.items():
+			    content = valuestr[1:-1]
+			    items = content.split(',')
+			    pairs = [item.split(':',1) for item in items]
+			    value = dict((k,str(v)) for (k,v) in pairs)
+			    if '0' in value.keys():
+			      expr0 = parser.compile(value['0'])
+			    else:
+			      expr0 = parser.compile('0')
+			    if '-1' in value.keys():
+			      expr1 = parser.compile(value['-1'])
+			    else:
+			      expr1 = parser.compile('0')
+			    name0=name+'(0)'  
+			    name1=name+'(1)'
+			    ct_functions[name0]= expr0
+			    ct_functions[name1]= expr1
+		except:
+		      pass
+			
+		golem.util.tools.message("Resolving dependencies between ct_functions ...")
+		program = golem.model.expressions.resolve_dependencies(ct_functions)			
+
+		nlines = len(program)
+
+		props = Properties()
+		for i, name in enumerate(program):
+			if i % 100 == 0:
+				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+
+			ast = ct_functions[name]
+			buf = StringIO.StringIO()
+			try:
+				ast.write(buf)
+
+				props.setProperty(name_name, name)
+				props.setProperty(expression_name, buf.getvalue())
+				props.setProperty(index_name, i)
+				props.setProperty(first_name, i == 0)
+				props.setProperty(last_name, i == nlines - 1)
+			finally:
+				buf.close()
+			yield props
+
+
 	def functions_resolved_reversed(self, *args, **opts):
 		index_name = self._setup_name("index", "index", opts)
 		name_name  = self._setup_name("name", "$_", opts)
@@ -221,6 +424,27 @@ class ModelTemplate(Template):
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
+			
+		try:
+		    for name, valuestr in model_mod.ct_functions.items():
+			    content = valuestr[1:-1]
+			    items = content.split(',')
+			    pairs = [item.split(':',1) for item in items]
+			    value = dict((k,str(v)) for (k,v) in pairs)
+			    if '0' in value.keys():
+			      expr0 = parser.compile(value['0'])
+			    else:
+			      expr0 = parser.compile('0')
+			    if '-1' in value.keys():
+			      expr1 = parser.compile(value['-1'])
+			    else:
+			      expr1 = parser.compile('0')
+			    name0=name+'(0)'  
+			    name1=name+'(1)'
+			    functions[name0]= expr0
+			    functions[name1]= expr1
+		except:
+		    pass
 	
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
@@ -429,7 +653,7 @@ class ModelTemplate(Template):
 			yield props
 
 	def functions(self, *args, **opts):
-		type_filter = self._setup_filter(["R", "C"], args)
+		type_filter = self._setup_filter(["R", "C", "CA"], args)
 
 		index_name = self._setup_name("index", "index", opts)
 		name_name  = self._setup_name("name", "$_", opts)
@@ -557,8 +781,11 @@ class ModelTemplate(Template):
 				functions[name] = expr
 			self._functions_fortran = functions
 			self._floats = fsubs
+			
 		else:
 			functions = self._functions_fortran
+			
+
 
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
