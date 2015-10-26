@@ -1046,6 +1046,9 @@ class Model:
 			f.write("*---#[ %s:\n" % fold_name)
 			f.write("Identify Once vertex(iv?")
 			colors = []
+			gg_vertex=False
+			if len(xidx)==2 and str(particles[0])=='g' and str(particles[1])=='g':
+			    gg_vertex=True
 			for i in xidx:
 				p = particles[i]
 				field = afields[i]
@@ -1116,6 +1119,8 @@ class Model:
 					      lwf.nl()
 					      expr.write(lwf)
 					      f.write("\n   )")
+				      if gg_vertex:
+					    f.write(" * inv(vec1,0,0)^2 ")
 			      
 				      for ind in lsubs.values():
 					      s = str(ind)
@@ -1189,6 +1194,7 @@ class Model:
 
 
 
+
 	def containsMajoranaFermions(self):
 		for p in self.all_particles:
 			if p.spin % 2 == 0 and p.selfconjugate:
@@ -1221,6 +1227,7 @@ class Model:
 		else:
 		    self.write_formct_file(f)
 		f.close()
+		
 
 
 def canonical_field_names(p):
