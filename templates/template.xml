@@ -248,6 +248,7 @@
 
 	<directory src="codegen" dest="." usedby="qgraf">
 		<file src="form.sty" class="Verbatim" usedby="qgraf"/>
+		<file src="formct.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="topolopy.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="dot.sty" class="Verbatim" usedby="qgraf"/>
 		<file src="reduze.sty" class="Verbatim" usedby="qgraf">

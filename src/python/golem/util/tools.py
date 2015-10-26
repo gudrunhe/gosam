@@ -302,6 +302,7 @@ def prepare_model_files(conf, output_path=None):
   # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
 
+
    if "setup-file" in conf:
       rel_path = os.path.dirname(conf["setup-file"])
    else:
@@ -334,7 +335,8 @@ def prepare_model_files(conf, output_path=None):
          message("Importing FeynRules model files ...")
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
-         mdl.store(path, MODEL_LOCAL,zeros=conf["zero"],filternlo=conf.getProperty(golem.properties.filter_nlo_diagrams))
+         mdl.store(path, MODEL_LOCAL,zeros=conf["zero"],filternlo=conf.getProperty(golem.properties.filter_nlo_diagrams),\
+	   generate_uv_counterterms=genUV)
          message("Done with model import.")
       else:
          model_path = model_lst[0]
