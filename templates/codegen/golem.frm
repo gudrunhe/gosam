@@ -97,19 +97,26 @@ Symbol Qt2;
 #include- color.hh
 .global
 
-#include- diagrams-`LOOPS'.hh #global
+
 #If `LOOPS' == 0
 #If `BORNFLG' == 3
-  #include- modelct.hh
-#Else
-  #include- model.hh
+  #include- diagrams-`LOOPS'ct.hh #global
+  #include- modelct.hh  
+#Else 
+  #include- diagrams-`LOOPS'.hh #global
+  #include- model.hh  
 #EndIf
 #Else
-  #include- model.hh
-#EndIf[%
+  #include- diagrams-`LOOPS'.hh #global
+  #include- model.hh  
+#Endif[%
 @if diagsum %]
 #If `LOOPS' == 0
+#If `BORNFLG' == 3
+#include- diagrams-`LOOPS'ct.hh #diagram`DIAG'
+#Else 
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'
+#EndIf
 #Else
 F diag1,...,diag`DIAGRAMCOUNT';
 #include- diagsum.frm #diag`DIAG'

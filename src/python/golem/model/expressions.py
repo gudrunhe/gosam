@@ -25,9 +25,21 @@ class ExpressionParser:
 	  if text.find("if ") >0:
 	    mass=text.split("if")[1].split("else")[0].strip()
 	    if masses["masses"].lower().find(mass.lower())>=0:
-	      return "("+text.split("else")[1].strip()
+	      #return "("+text.split("else")[1].strip()
+	      text_split=text.split()
+	      del text_split[text_split.index(mass) -2]
+	      del text_split[text_split.index(mass) -1]
+	      del text_split[text_split.index(mass) +1]
+	      del text_split[text_split.index(mass)]
+	      return ''.join(text_split)
 	    else:
-	      return text.split("if")[0].strip() +")"
+	      text_split=text.split()
+	      del text_split[text_split.index(mass) +2]
+	      del text_split[text_split.index(mass) -1]
+	      del text_split[text_split.index(mass) +1]
+	      del text_split[text_split.index(mass)]
+	      return ''.join(text_split)
+	      #return text.split("if")[0].strip() +")"
 	  else:
 	    return text
 

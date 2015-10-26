@@ -254,6 +254,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	# These are our default file names:
 	pyxo_sty    = "pyxo.sty"
 	form_sty    = "form.sty"
+	formct_sty  = "formct.sty"
 	topo_sty    = "topolopy.sty"
 	dot_sty     = "dot.sty"
 	reduze_sty  = "reduze.sty"
@@ -352,11 +353,17 @@ def run_qgraf(conf, in_particles, out_particles):
 	#if conf["generate_uv_counterterms"]:
 		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
-		modelct = consts.MODEL_LOCAL+'ct'
+		modelct = consts.MODEL_LOCAL +'ct'
+		if powers and powers is not None:
+			new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers])
+		else:
+			new_verbatim = verbatim + "\n" + verbatim_lo		
 		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
-		write_qgraf_dat(path, form_sty, modelct, output_name,
+		write_qgraf_dat(path, formct_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
-		run_qgraf_dat(conf, output_name, log_name)		
+		run_qgraf_dat(conf, output_name, log_name)	
+		cleanup_files.append(formct_sty)
 		
 			
 	# -------------------- higher virt -------------------------------------
