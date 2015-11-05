@@ -97,9 +97,10 @@ Symbol Qt2;
 #include- color.hh
 .global
 
-
+[%
+@if generate_uv_counterterms %]
 #If `LOOPS' == 0
-#If `BORNFLG' == 3
+#If `CTFLG' == 1
   #include- diagrams-`LOOPS'ct.hh #global
   #include- modelct.hh  
 #Else 
@@ -110,13 +111,21 @@ Symbol Qt2;
   #include- diagrams-`LOOPS'.hh #global
   #include- model.hh  
 #Endif[%
+@else %]
+#include- diagrams-`LOOPS'.hh #global
+#include- model.hh[%
+@end @if %][%
 @if diagsum %]
-#If `LOOPS' == 0
-#If `BORNFLG' == 3
+#If `LOOPS' == 0[%
+@if generate_uv_counterterms %]
+#If `CTFLG' == 1
 #include- diagrams-`LOOPS'ct.hh #diagram`DIAG'
 #Else 
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'
-#EndIf
+#EndIf[%
+@else %]
+#include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
+@end @if %]
 #Else
 F diag1,...,diag`DIAGRAMCOUNT';
 #include- diagsum.frm #diag`DIAG'
@@ -187,6 +196,8 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
 *   #EndIf
 *#EndIf
 
+[% @if generate_uv_counterterms %][%
+@else %]
 #IfDef `MQSE'
   SplitArg (p1), proplorentz;
 
@@ -240,7 +251,8 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
       Id deltaHV = -1/2;
    #EndIf
    .sort:MQSE 1.1;
-#EndIf
+#EndIf[%
+@end @if %]
 
 #include- propagators.hh
 
@@ -748,11 +760,44 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
           id UVSET?NONUV[UVNR] = 0;
         endif;
         .sort;   
+	#Create <`OUTFILE'.txt>
+        #write <`OUTFILE'.txt> "#Procedure ctdiag"
+	#write <`OUTFILE'.txt> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 4
+        repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
+        repeat id UVSET?UV[UVNR]^2 =0;
+        if (match(UVSET?UV[UVNR]) );
+        else;
+          id UVSET?NONUV[UVNR] = 0;
+        endif;
+        .sort;      
+        #Create <`OUTFILE'.txt>
+	#write <`OUTFILE'.txt> "Id ctdiag`DIAG'  = %e",diagram`DIAG'	
+   #ElseIf `BORNFLG' == -3
+        repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
+        repeat id UVSET?UV[UVNR]^2 =0;
+        if (match(UVSET?UV[UVNR]) );
+        else;
+          id UVSET?NONUV[UVNR] = 0;
+        endif;
+        .sort;         
+        #Append <ctdiag.prc>
+	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
+        #write <ctdiag.prc> "#EndProcedure"
+        #Call OptimizeCT()	
+   #ElseIf `BORNFLG' == 5
+        repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
+        repeat id UVSET?UV[UVNR]^2 =0;
+        if (match(UVSET?UV[UVNR]) );
+        else;
+          id UVSET?NONUV[UVNR] = 0;
+        endif;
+        .sort;            
 	#Create <ctdiag.prc>
         #write <ctdiag.prc> "#Procedure ctdiag"
 	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
         #write <ctdiag.prc> "#EndProcedure"
-        #Call OptimizeCT()        
+        #Call OptimizeCT()	
    #EndIf
 #EndIf
 .end[%

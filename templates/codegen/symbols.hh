@@ -14,7 +14,7 @@ CFunction csqrt;
 * Used in the output to keep eps and form factors together
 CFunction mulfirst;
 
-CTensors f(antisymmetric), f4, T;
+CTensors f(antisymmetric), f4, T, d(symmetric);
 
 CFunctions C(symmetric), CL(symmetric), CR(symmetric);
 

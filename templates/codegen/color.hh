@@ -68,8 +68,24 @@ CFunction dcolor(symmetric), dcolor8(symmetric);
 				  T(idx2C8, iDUMMY2, iDUMMY3) *
 				  T(idx1C8, iDUMMY3, iDUMMY1)
 			);
+			
 		Sum iDUMMY1, iDUMMY2, iDUMMY3;
 
+		#call liealgebra
+	EndRepeat;
+	
+	Repeat;
+		Id Once d(idx1C8?, idx2C8?, idx3C8?) = 
+			(
+				+ T(idx1C8, iDUMMY1, iDUMMY2) *
+				  T(idx2C8, iDUMMY2, iDUMMY3) *
+				  T(idx3C8, iDUMMY3, iDUMMY1)
+				+ T(idx3C8, iDUMMY1, iDUMMY2) *
+				  T(idx2C8, iDUMMY2, iDUMMY3) *
+				  T(idx1C8, iDUMMY3, iDUMMY1)
+			)/TR;	
+		Sum iDUMMY1, iDUMMY2, iDUMMY3;
+		
 		#call liealgebra
 	EndRepeat;
 
