@@ -27,6 +27,8 @@ class ExpressionParser:
 	    if masses["masses"].lower().find(mass.lower())>=0:
 	      #return "("+text.split("else")[1].strip()
 	      text_split=text.split()
+	      while text_split[text_split.index(mass) -3]!='(':
+		del text_split[text_split.index(mass) -3]
 	      del text_split[text_split.index(mass) -2]
 	      del text_split[text_split.index(mass) -1]
 	      del text_split[text_split.index(mass) +1]
@@ -34,6 +36,8 @@ class ExpressionParser:
 	      return ''.join(text_split)
 	    else:
 	      text_split=text.split()
+	      while text_split[text_split.index(mass) +3]!=')':
+		del text_split[text_split.index(mass) +3]	      
 	      del text_split[text_split.index(mass) +2]
 	      del text_split[text_split.index(mass) -1]
 	      del text_split[text_split.index(mass) +1]

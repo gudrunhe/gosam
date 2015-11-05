@@ -232,8 +232,8 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'born.txt' \
 		-or -name 'born.dat' \
 		-or -name 'ctdiag.prc' \
-		-or -name 'ct.txt' \
-		-or -name 'ct.dat' \
+		-or -name 'ct*.txt' \
+		-or -name 'ct*.dat' \
 		-or -name '*-stamp' [%
 @end @if %] \
 		-or -name 'lightconedecomp.prc' \
