@@ -964,6 +964,7 @@ class Model:
 				lwf.write(p)
 			lwf.write(";\n")
 			
+		f.write("Symbols anyfield1,anyfield2,anyspin,anycolor;\n")
 		setUVparams = []
 		setNONUVparams = []
 		for c in self.all_couplings:
@@ -999,7 +1000,7 @@ class Model:
 
 		f.write("\n")				
 
-		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
+		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex, twopIndex;\n")
 		f.write("*---#] Parameters:\n")
 		max_deg = max(map(lambda v: len(v.particles), self.all_CTvertices))
 		f.write("*---#[ Auxilliary Symbols:\n")
@@ -1018,8 +1019,13 @@ class Model:
 		#f.write("*---#[ Procedure ReplaceCT :\n")
 		#f.write("#Procedure ReplaceCT\n")
 		
-
-		for v in self.all_CTvertices:
+		for v in self.all_vertices:
+		  exist=False
+		  for w in self.all_CTvertices:
+		    if v.particles==w.particles:
+		      exist=True
+		  if not exist:
+		        v.name=v.name+'_bare'
 			particles = v.particles
 			names = []
 			fields = []
@@ -1031,10 +1037,8 @@ class Model:
 				fields.append(cn[0])
 				afields.append(cn[1])
 				spins.append(p.spin - 1)
-                        try:
-			  flip = spins[0] == 1 and spins[2] == 1
-			except:
-			  flip=False
+
+			flip = spins[0] == 1 and spins[2] == 1
 			deg = len(particles)
 
 			xidx = range(deg)
@@ -1046,9 +1050,6 @@ class Model:
 			f.write("*---#[ %s:\n" % fold_name)
 			f.write("Identify Once vertex(iv?")
 			colors = []
-			gg_vertex=False
-			if len(xidx)==2 and str(particles[0])=='g' and str(particles[1])=='g':
-			    gg_vertex=True
 			for i in xidx:
 				p = particles[i]
 				field = afields[i]
@@ -1081,19 +1082,133 @@ class Model:
 			if brack_flag:
 				f.write(" (")
 
+			for coord, coupling in v.couplings.items():
+				ic, il = coord
+				lorentz = lorex[v.lorentz[il].name]
+				scolor = v.color[ic]
+				f.write("\n   + %s"
+						% (self.prefix + coupling.name.replace("_", "")))
+				if scolor != "1":
+					color = parser.compile(scolor)
+					color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+					color = color.replaceNegativeIndices(0, "MDLIndex%d",
+							dummy_found)
+					color = transform_color(color, colors, xidx)
+					if lorentz == ex.IntegerExpression(1):
+						expr = color
+					else:
+						expr = color * lorentz
+				else:
+					expr = lorentz
+				if not expr == ex.IntegerExpression(1):
+					f.write(" * (")
+					lwf.nl()
+					expr.write(lwf)
+					f.write("\n   )")
+			
+				for ind in lsubs.values():
+					s = str(ind)
+					if expr.dependsOn(s):
+						if s not in dummies:
+							dummies.append(s)
+
+			if brack_flag:
+				f.write(")")
+			f.write(";\n")
+
+			for idx in dummy_found.values():
+				dummies.append(str(idx))
+
+			if len(dummies) > 0:
+				f.write("Sum %s;\n" % ", ".join(dummies))
+			f.write("*---#] %s:\n" % fold_name)
+
+
+
+		
+
+		for v in self.all_CTvertices:
+			particles = v.particles
+			names = []
+			fields = []
+			afields = []
+			spins = []
+			for p in particles:
+				names.append(p.name)
+				cn = canonical_field_names(p)
+				fields.append(cn[0])
+				afields.append(cn[1])
+				spins.append(p.spin - 1)
+                        try:
+			  flip = spins[0] == 1 and spins[2] == 1
+			except:
+			  flip=False
+			deg = len(particles)
+
+			xidx = range(deg)
+			if flip:
+				xidx[0] = 1
+				xidx[1] = 0
+
+			fold_name = "(%s) %s Vertex" % ( v.name, " -- ".join(names))
+			f.write("*---#[ %s:\n" % fold_name)
+			f.write("Identify Once vertex(iv?")
+			colors = []
+			pp_vertex=False
+			if len(xidx)==2:
+			    pp_vertex=True
+			for i in xidx:
+				p = particles[i]
+				field = afields[i]
+				anti = fields[i]
+				color = abs(p.color)
+				spin = abs(p.spin) - 1
+				if field.startswith("anti") and not p.pdg_code in [24,-24]:
+					spin = - spin
+					color = - color
+				colors.append(color)
+
+				if pp_vertex:
+				    f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+						    % (field, i+1, abs(spin), i+1, i+1, abs(spin), abs(color), i+1,
+							    abs(color)))
+				else:
+				    f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+						    % (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
+							    abs(color)))				  
+				  
+			f.write(") =")
+
+			dummies = []
+
+			brack_flag = False
+			for i, s in enumerate(spins):
+				if s == 3 or s == 4:
+					brack_flag = True
+					idx = "idx%dL%d" % (i+1, s)
+					idxa = "idx%dL%da" % (i+1, s)
+					idxb = "idx%dL%db" % (i+1, s)
+					f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+					dummies.append(idxa)
+					dummies.append(idxb)
+
+			if brack_flag:
+				f.write(" (")
+
 
 
 			args=[]
-			try:
-			    match=re.findall(r'iprop\(.*\)',filternlo["filternlo"].lower())
-			    for element in match:
-				  args=args +element.strip('iprop').strip('(').strip(')').strip('[').strip(']').split(',')
-			except:
-			    pass
-			
+			#try:
+			    #match=re.findall(r'iprop\(.*\)',filternlo["filternlo"].lower())
+			    #for element in match:
+				  #args=args +element.strip('iprop').strip('(').strip(')').strip('[').strip(']').split(',')
+			#except:
+			    #pass
+			#print v.name
 			for coord, coupling in v.couplings.items():
 				ic, il , lp = coord
 				for element in v.loop_particles[lp]:
+				  #print element
 				  canonical_name, canonical_anti = canonical_field_names(element[0])
 				  if canonical_name in args or canonical_anti in args:
 				      continue
@@ -1119,8 +1234,16 @@ class Model:
 					      lwf.nl()
 					      expr.write(lwf)
 					      f.write("\n   )")
-				      if gg_vertex:
-					    f.write(" * inv(vec1,0,0)^2 ")
+				      #if pp_vertex:
+					    #if str(v.particles[0].mass) =='ZERO':
+					      #pmass='0'
+					    #else:
+					      #pmass=str(v.particles[0].mass)
+					    #if str(v.particles[0].width) =='ZERO':
+					      #pwidth='0'
+					    #else:
+					      #pwidth=str(v.particles[0].width)
+					    #f.write(" * inv(vec1,"+pmass+","+pwidth+")^2 ")
 			      
 				      for ind in lsubs.values():
 					      s = str(ind)
@@ -1173,6 +1296,11 @@ class Model:
 			if len(dummies) > 0:
 				f.write("Sum %s;\n" % ", ".join(dummies))
 			f.write("*---#] %s:\n" % fold_name)
+			
+		# At this point two-point vertices that do not have a ct are left over, set them to zero
+		f.write("Identify Once vertex(iv1?,\n")
+		f.write("   anyfield1?, idx1?, anyspin?, vec1?, idx1L1?, anycolor?, idx1C3?,\n")
+		f.write("   anyfield2?, idx2?, anyspin?, vec2?, idx2L1?, anycolor?, idx2C3?) = 0;\n")  
 		f.write("#EndProcedure\n")
 		f.write("*---#] Procedure ReplaceVertices :\n")
 		f.write("*---#[ Dummy Indices:\n")
@@ -1514,6 +1642,7 @@ def transform_lorentz(expr, spins):
 
 col_T = ex.SymbolExpression("T")
 col_f = ex.SymbolExpression("f")
+col_d = ex.SymbolExpression("d")
 col_Identity = ex.SymbolExpression("Identity")
 col_d_ = ex.SymbolExpression("d_")
 col_d8 = ex.SymbolExpression("dcolor8")
@@ -1540,7 +1669,7 @@ def transform_color(expr, colors, xidx):
 	elif isinstance(expr, ex.FunctionExpression):
 		head = expr.getHead()
 		args = expr.getArguments()
-		if head == col_T or head == col_f:
+		if head == col_T or head == col_f or head == col_d:
 			indices = []
 			order = []
 			xi = []

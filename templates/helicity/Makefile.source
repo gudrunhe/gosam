@@ -45,7 +45,17 @@ DIAGRAMS_TREE=[%
 	@for elements topolopy.keep.tree %] \
 		d[%$_%]h[%helicity%]l0.f90[%
 	@end @for %][%
+@end @if %][%
+@if generate_uv_counterterms %]
+DIAGRAMS_CT=[%
+@if group %][%
+@else %][% 
+	@for elements topolopy.keep.tree %] \
+		ct[%$_%]h[%helicity%].f90[%
+	@end @for %][%
+@end @if %][%
 @end @if %]
+
 
 DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
@@ -63,7 +73,18 @@ TXT_TREE=[%
    @end @for %][%
 @else %] \
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
+@end @if %][%
+@if generate_uv_counterterms %]
+TXT_CT=[%
+@if group %][%
+   @for elements topolopy.keep.tree %] \
+		ct[%$_%]h[%helicity%].txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_CT))[%
+@end @if %][%
 @end @if %]
+
 
 TXT_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
@@ -82,6 +103,16 @@ TXT_TREE_STAMP=[%
    @end @for %][%
 @else %] \
    $(subst .f90,-stamp,$(DIAGRAMS_TREE))[%
+@end @if %][%
+@if generate_uv_counterterms %]
+TXT_CT_STAMP=[%
+@if group %][%
+   @for elements topolopy.keep.tree %] \
+		ct[%$_%]h[%helicity%]-stamp[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,-stamp,$(DIAGRAMS_CT))[%
+@end @if %][%
 @end @if %]
 
 [% @if generate_lo_diagrams %]
@@ -91,7 +122,7 @@ SOURCE_TREE= \
 	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
    @end @if %][%
    @if generate_uv_counterterms %] \
-	diagramsct.f90 [%
+	diagramsct.f90 $(DIAGRAMS_CT)[%
    @end @if %]
 [% @else %]
 SOURCE_TREE=
@@ -171,7 +202,10 @@ born.txt: ../diagrams-0.hh
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=2 \
+		-D BORNFLG=2 \[%
+@if generate_uv_counterterms %]		
+		-D CTFLG=0 \[%
+@end @if %]		
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch born-stamp[%
@@ -185,8 +219,9 @@ ct.txt: ../diagrams-0ct.hh
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=3 \
-		-D OUTFILE=d[%$_%]h[%helicity%]l0ct \
+		-D BORNFLG=5 \
+		-D CTFLG=1 \
+		-D OUTFILE=ct[%$_%]h[%helicity%] \
 		../codegen/golem.frm
 	@touch ct-stamp[%
 @end @if%][%
@@ -198,15 +233,16 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=1 \
+		-D BORNFLG=1 \[%
+@if generate_uv_counterterms %]		
+		-D CTFLG=0 \[%
+@end @if %]		
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch d[%$_%]h[%helicity%]l0-stamp
 d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
 @if generate_uv_counterterms %]
-ct[%$_%]h[%helicity%].txt:
-	   @echo "* dummy file" > $@
-ct.txt: ../diagrams-0ct.hh
+ct[%$_%]h[%helicity%].txt: ../diagrams-0ct.hh
 	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
@@ -214,9 +250,11 @@ ct.txt: ../diagrams-0ct.hh
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
 		-D BORNFLG=3 \
-		-D OUTFILE=d[%$_%]h[%helicity%]l0ct \
+		-D CTFLG=1 \
+		-D OUTFILE=ct[%$_%]h[%helicity%] \
 		../codegen/golem.frm
-	@touch ct-stamp[%
+	@touch ct[%$_%]h[%helicity%]-stamp
+ct[%$_%]h[%helicity%]-stamp: ct[%$_%]h[%helicity%].txt[%
 @end @if%]
 [%@end @if%][%
 @else %][%
@@ -233,10 +271,32 @@ born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=-1 \
+		-D BORNFLG=-1 \[%
+@if generate_uv_counterterms %]		
+		-D CTFLG=0 \[%
+@end @if %]		
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch born-stamp[%
+@if generate_uv_counterterms %]
+ct[%$_%]h[%helicity%].txt:
+	@echo "* dummy file" > $@
+	@touch ct[%$_%]h[%helicity%]-stamp
+ct[%$_%]h[%helicity%]-stamp: ct[%$_%]h[%helicity%].txt
+ct.txt: ../diagrams-0ct.hh $(TXT_CT_STAMP)
+	@cat $(TXT_CT) > ctdiag.prc
+	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=-3 \
+		-D CTFLG=1 \
+		-D OUTFILE=ct[%$_%]h[%helicity%] \
+		../codegen/golem.frm
+	@touch ct-stamp[%
+@end @if %][%
 @else %]
 d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
@@ -245,12 +305,31 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=0 \
+		-D BORNFLG=0 \[%
+@if generate_uv_counterterms %]		
+		-D CTFLG=0 \[%
+@end @if %]		
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
 	@touch d[%$_%]h[%helicity%]l0-stamp
 d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
-@end @if %][% @end @if %][%
+@if generate_uv_counterterms %]
+ct[%$_%]h[%helicity%].txt: ../diagrams-0ct.hh
+	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=4 \
+		-D CTFLG=1 \
+		-D OUTFILE=ct[%$_%]h[%helicity%] \
+		../codegen/golem.frm
+	@touch ct[%$_%]h[%helicity%]-stamp
+ct[%$_%]h[%helicity%]-stamp: ct[%$_%]h[%helicity%].txt[%
+@end @if %][% 
+@end @if %][%
+@end @if %][%
 @end @for %][%
 @for elements topolopy.keep.tree %][% @if is_last %]
 born-stamp: born.txt

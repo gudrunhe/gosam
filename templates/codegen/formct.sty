@@ -45,16 +45,24 @@ Local diagram<diagram_index> =
   proplorentz([CONJ][TWOSPIN],
 <back> <momentum>+ZERO, [MASS], [WIDTH], [AUX],
 <back> iv<dual-vertex_index>r<dual-ray_index>L[TWOSPIN],
-<back> iv<vertex_index>r<ray_index>L[TWOSPIN]) -
+<back> iv<vertex_index>r<ray_index>L[TWOSPIN]) +
+  proplorentz([CONJ][TWOSPIN],
+<back> <momentum>+ZERO, [MASS], [WIDTH], [AUX],
+<back> iv<dual-vertex_index>r<dual-ray_index>L[TWOSPIN],
+<back> twopIndex<vertex_index>r<ray_index>)*
   vertex(iv<vertex_index>, 
     [[field.<field>]], idx<vertex_index>r<ray_index>,
 <back> [CONJ][TWOSPIN], <momentum>+ZERO, 
-<back> iv<vertex_index>r<ray_index>L[TWOSPIN],
+<back> twopIndex<vertex_index>r<ray_index>,
 <back> [CONJ][COLOR], iv<vertex_index>r<ray_index>C[COLOR],
-    [[field.<field>]], idx<dual-vertex_index>r<dual-ray_index>,
-<back> [CONJ][TWOSPIN], <momentum>+ZERO, 
-<back> iv<dual-vertex_index>r<dual-ray_index>L[TWOSPIN],
-<back> [CONJ][COLOR], iv<dual-vertex_index>r<dual-ray_index>C[COLOR]) )
+    [[field.<dual-field>]], idx<dual-vertex_index>r<dual-ray_index>,
+<back> [TWOSPIN], <momentum>+ZERO, 
+<back> twopIndex<dual-vertex_index>r<ray_index>,
+<back> [COLOR], iv<dual-vertex_index>r<dual-ray_index>C[COLOR])*
+  proplorentz([CONJ][TWOSPIN],
+<back> <momentum>+ZERO, [MASS], [WIDTH], [AUX],
+<back> twopIndex<dual-vertex_index>r<ray_index>,
+<back> iv<vertex_index>r<ray_index>L[TWOSPIN]))
 <end><back>
 ;
 *--#]] diagram<diagram_index>:

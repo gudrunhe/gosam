@@ -38,9 +38,16 @@ def corr_dim_abbrev(abbrev):
   match=re.findall(r'UV\w+\d+',abbrev)
   new_abbrev=[]
   for element in match:
-    new_abbrev.append(element.replace(element,element+'(:)'))
-  for (i,j) in zip(match,new_abbrev):
-    abbrev=abbrev.replace(i,j)
+      if not (element+'(:)' in new_abbrev):
+	new_abbrev.append(element.replace(element,element+'(:)'))
+
+  for element in match:
+    try:
+      i= new_abbrev.index(element+'(:)')
+      abbrev=abbrev.replace(element,new_abbrev[i])
+      del new_abbrev[i]
+    except ValueError:
+      pass
     
   return abbrev
     

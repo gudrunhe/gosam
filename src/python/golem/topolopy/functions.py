@@ -359,7 +359,7 @@ def analyze_ct_diagrams(diagrams, model, conf, onshell,
             keep.append(idx)
             loopcache.add(diagram, idx)
             
-            diagram.isMassiveBubble(idx, massive_bubbles)
+            #diagram.isMassiveBubble(idx, massive_bubbles)
 
             if filter_flags is not None:
                for flag in diagram.filter_flags:
