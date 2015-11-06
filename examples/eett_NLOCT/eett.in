@@ -1,0 +1,29 @@
+
+process_name=eett
+
+
+process_path=eett
+
+
+in=11, -11
+
+
+out=6, -6
+
+zero=MU,MD,MC,MS,MB
+
+model=FeynRules, ../../models/SM_UFO_QCD_onshell/
+reduction_programs=ninja,golem95,samurai
+
+filter.lo=lambda d: d.iprop(part23)==0
+filter.nlo= lambda d: d.iprop(part23)==0
+
+
+order=QCD,0,2
+
+
+qgraf.options=onshell,notadpole,nosnail
+
+
+
+
