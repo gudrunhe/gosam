@@ -1277,6 +1277,10 @@ def transform_color(expr, colors, xidx):
 					order.append(0)
 					xi.append(-1)
 			if head == col_T:
+			        # Modification for Dirac-gluinos:
+			        if order[0]==-8:
+				    order[0]=8
+				# representation is real
 				if order == [8, -3, 0]:
 					order[2] = 3
 				elif order == [8, 0, 3]:
