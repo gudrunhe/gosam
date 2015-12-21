@@ -627,7 +627,7 @@ def workflow(conf):
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
 
-	if conf["helsum"]:
+	if conf.getBooleanProperty("helsum"):
 		if not conf.getBooleanProperty("generate_lo_diagrams"):
 			raise GolemConfigError(
 				'The "helsum" feature is not implemented for loop-induced processes.\n' +
