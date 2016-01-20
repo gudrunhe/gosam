@@ -103,6 +103,10 @@ contains
          init_third_party = is_first
       else
          init_third_party = .true.
+      end if
+
+      if(.not. corrections_are_qcd) then
+         PSP_check = .false.
       end if[%
 
 @select r2
@@ -114,9 +118,6 @@ contains
    @end @if %]
       ! call our banner
       call banner()
-      if(.not. corrections_are_qcd) then
-         PSP_check = .false.
-      end if
       if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
          inquire(file=dir_name, exist=dir_exists)
          if(.not. dir_exists) then
@@ -247,10 +248,10 @@ contains
          [%
          @else %]
          ! poles should be zero for loop-induced processes
-         if(ampdef(2) .ne. 0.0_ki) then
+         if(ampdef(2) .ne. 0.0_ki .and. ampdef(3) .ne. 0.0_ki) then
             spprec1 = -int(log10(abs((ampdef(3)/ampdef(2)))))
          else
-            spprec1 = 16
+            spprec1 = 18
          endif
          kfac = 0.0_ki
          if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
@@ -305,7 +306,7 @@ contains
             endif[%
             @else %]
             ! poles should be zero for loop-induced processes
-            if(ampres(2) .ne. 0.0_ki) then
+            if(ampres(2) .ne. 0.0_ki .and. ampres(3) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs(ampres(3)/ampres(2))))
             else
                spprec2 = 16
@@ -609,8 +610,8 @@ contains
       @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
       amp(1) = amp(1) * get_formfactor_lo(vecs)[%@end @if %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
-      amp(2:4) = amp(2:4) * get_formfactor_nlo(vecs)[%@end @if %]
-
+      amp(2:4) = amp(2:4) * get_formfactor_nlo(vecs)[%@end @if %][%
+      @if generate_nlo_virt %]
       select case(nlo_prefactors)
       case(0)
          ! The result is already in its desired form[%
@@ -627,7 +628,7 @@ contains
          ! loop-induced
          amp(2:4) = amp(2:4) * (nlo_coupling / 8.0_ki / pi / pi)**2[%
       @end @if %]
-      end select
+      end select[%@end @if %]
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
    !---#[ function samplitudel0 :
