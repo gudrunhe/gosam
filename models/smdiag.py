@@ -43,8 +43,8 @@ particles = {
    'ntaubar': Particle('ntaubar', -1,      0,  1, 'ntau',   '0',     -16,     0.0),
 
    'H':       Particle('H',        0,   'mH',  1, 'H',      'wH',     25,     0.0),
-   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251,    -1.0),
-   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251,     1.0),
+   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251,    -3.0),
+   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251,     3.0),
    'chi':     Particle('chi',      0,   'mZ',  1, 'chi',  'wchi',    250,     0.0),
 
    'ghA':     Particle('ghA',      0,      0,  1, 'ghAbar', '0', 9000002,     0.0),
@@ -54,13 +54,13 @@ particles = {
    'ghZbar':  Particle('ghZbar',   0,   'mZ',  1, 'ghZ',    'wghZ',
                                                            -9000003,     0.0),
    'ghWp':    Particle('ghWp',     0,   'mW',  1, 'ghWpbar', 'wghWp',
-                                                       9000004,     1.0),
+                                                       9000004,     3.0),
    'ghWpbar': Particle('ghWpbar',  0,   'mW',  1, 'ghWp',    'wghWp',
-                                                      -9000004,    -1.0),
+                                                      -9000004,    -3.0),
    'ghWm':    Particle('ghWm',     0,   'mW',  1, 'ghWmbar', 'wghWm',
-                                                       9000005,    -1.0),
+                                                       9000005,    -3.0),
    'ghWmbar': Particle('ghWmbar',  0,   'mW',  1, 'ghWm',    'wghWm',
-                                                      -9000005,     1.0)
+                                                      -9000005,     3.0)
 }
 #---#] particles:
 #---#[ mnemonics:
