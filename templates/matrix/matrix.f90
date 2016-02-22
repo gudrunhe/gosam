@@ -57,6 +57,10 @@
    public :: samplitudel0, samplitudel1
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
    public :: OLP_color_correlated, OLP_spin_correlated_lo2
+
+   [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]private:: get_formfactor_lo [% @end @if %]
+   [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]private:: get_formfactor_nlo [% @end @if %]
+
 contains
    !---#[ subroutine banner:
    subroutine     banner()
@@ -601,7 +605,12 @@ contains
             write(logfile,'(A29)') "<flag name='ok' status='no'/>"
          end if
          write(logfile,'(A8)') "</event>"
-      end if
+      end if[%
+      @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
+      amp(1) = amp(1) * get_formfactor_lo(vecs)[%@end @if %][%
+      @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
+      amp(2:4) = amp(2:4) * get_formfactor_nlo(vecs)[%@end @if %]
+
       select case(nlo_prefactors)
       case(0)
          ! The result is already in its desired form[%
@@ -943,7 +952,9 @@ contains
          endif
          amp = amp + heli_amp
       endif[%
-  @end @for helicities %]
+  @end @for helicities %][%
+      @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
+      amp = amp * get_formfactor_nlo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -1094,6 +1105,8 @@ contains
       call OLP_color_correlated_lo(color_vector,ampcc_heli)
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %]
+
+      [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]ampcc = ampcc*get_formfactor_lo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
          ampcc = ampcc / real(in_helicities, ki)
       end if
@@ -1222,6 +1235,8 @@ contains
       bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)
       !---#] particle [%index%] :[%
    @end @for %]
+
+      [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]bornsc = bornsc*get_formfactor_lo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
          bornsc = bornsc / real(in_helicities, ki)
       end if
@@ -1312,6 +1327,7 @@ contains
      [% @end @if %] [%
    @end @for %]
 
+      [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]ampsc = ampsc * get_formfactor_lo(vecs)[%@end @if %]
 
       if (include_helicity_avg_factor) then
          ampsc = ampsc / real(in_helicities, ki)
@@ -1373,5 +1389,27 @@ contains
    end function  square_[%index1%]_[%index2%]_sc
      [% @end @if %] [%
    @end @for %]
+
+   [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
+   function get_formfactor_lo(vecs) result(factor)
+      use [% process_name asprefix=\_ %]model
+      use [% process_name asprefix=\_ %]kinematics
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki) :: factor
+
+      factor = [% form_factor_lo %]
+   end function
+   [% @end @if %]
+
+   [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
+   function get_formfactor_nlo(vecs) result(factor)
+      use [% process_name asprefix=\_ %]model
+      use [% process_name asprefix=\_ %]kinematics
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki) :: factor
+
+      factor = [% form_factor_nlo %]
+   end function
+   [% @end @if %] 
 
 end module [% process_name asprefix=\_ %]matrix

@@ -1124,6 +1124,20 @@ config_PSP_chk_method = Property("PSP_chk_method",
    str, "Automatic",options=["automatic","polerotation","rotation","loopinduced"])
 
 
+form_factor_lo=Property("form_factor_lo",
+   """\
+   This option allows to define a form factor which LO results are multiplied with.
+   Example: form_factor_lo="(1000._ki**2/(1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:))))"
+   """,
+   str, "", experimental=True)
+
+form_factor_nlo=Property("form_factor_nlo",
+   """\
+   This option allows to define a form factor which NLO/loop-induced results are multiplied with.
+   """,
+   str, "", experimental=True)
+
+
 properties = [
    process_name,
    process_path,
@@ -1205,7 +1219,10 @@ properties = [
    symmetries,
    crossings,
    formopt_level,
-   pyxodraw
+   pyxodraw,
+
+   form_factor_lo,
+   form_factor_nlo
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
