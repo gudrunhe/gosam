@@ -44,8 +44,10 @@ PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
 -lgosam_process[% process_name assuffix=\_ %]_matrix[%
 	@for helicities generated %] \
 -lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][%
-	@end @for helicities %] \
--lgosam_process[% process_name assuffix=\_ %]_amplitude \
+	@end @for helicities %][%
+	@if helsum%] \
+-lgosam_process[% process_name assuffix=\_ %]_amplitude[%
+	@end @if %] \
 -lgosam_process[% process_name assuffix=\_ %]_common"
 [% @else %]
 PROCESS_LDFLAGS="$PWD/matrix/matrix.a[%
