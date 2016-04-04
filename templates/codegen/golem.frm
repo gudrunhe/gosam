@@ -99,7 +99,7 @@ Symbol Qt2;
 
 [%
 @if generate_uv_counterterms %]
-#If `LOOPS' == 0
+#IfDef `CTFLG'
 #If `CTFLG' == 1
   #include- diagrams-`LOOPS'ct.hh #global
   #include- modelct.hh  
@@ -273,6 +273,10 @@ Argument inv;
    #call kinematics
 EndArgument;
 Id inv(sDUMMY1?symbol_) = 1/sDUMMY1;
+Argument log;
+   Id ZERO = 0;
+   #call kinematics
+EndArgument;
 
 [% @if internal CUSTOM_SPIN2_PROP %]
 Id customSpin2Prop(k1?, m?, sDUMMY1?) = customSpin2Prop(k1.k1,m^2 - i_ * m * sDUMMY1);

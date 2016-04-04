@@ -470,7 +470,7 @@ AutoDeclare CFunctions Lor;
      @else %]
    Id e[%index%].[%
        @if eval reference > 0 %]k[%reference %]=;[%
-       @else %][% eval - reference %][%
+       @else %]k[% eval - reference %]=;[%
        @end @if %][%
      @end @if %][% 
    @end @for %][%

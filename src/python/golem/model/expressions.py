@@ -73,6 +73,15 @@ class ExpressionParser:
 			return o1
 		else:
 			return ProductExpression(factors)
+                    
+        def log(self, tokens):
+            print 'HIER1'
+            name=tokens.name()
+            term = self.product(tokens)
+            if tokens.name() == "log":
+                return LogExpression(term)
+            else:
+                return term
 
 	def factor(self, tokens):
 		name = tokens.name()
@@ -414,6 +423,9 @@ class Expression:
 
 	def __neg__(self):
 		return UnaryMinusExpression(self)
+            
+        def __log__(self):
+                return LogExpression(self)
 
 class ConstantExpression(Expression):
 	def getPrecedence(self):
@@ -582,6 +594,8 @@ class SymbolExpression(Expression):
 	def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
 		return self
 
+
+
 class FunctionExpression(Expression):
 	def __init__(self, head, args):
 		self._deps = {}
@@ -642,7 +656,6 @@ class FunctionExpression(Expression):
 			out.write("(")
 			self._head.write(out)
 			out.write(")")
-
 		out.write("(")
 		first = True
 		for arg in self._arguments:
@@ -726,6 +739,8 @@ class FunctionExpression(Expression):
 				return False
 		else:
 			return False
+                    
+
 
 class DotExpression(Expression):
 	def __init__(self, first, second):
@@ -994,6 +1009,9 @@ class PowerExpression(Expression):
 
 
 class ProductExpression(Expression):
+    
+        logexpression = False
+    
 	def __init__(self, factors):
 		self._factors = factors[:]
 
@@ -1108,27 +1126,54 @@ class ProductExpression(Expression):
 
 	def write(self, out):
 		first_sig, first_term = self._factors[0]
-		follow = self._factors[1:]
-		if first_sig == -1:
-			out.write("1/")
-		if first_term.getPrecedence() >= self.getPrecedence():
-			first_term.write(out)
-		else:
-			out.write("(")
-			first_term.write(out)
-			out.write(")")
 
-		for sig, term in follow:
-			if sig == 1:
-				out.write("*")
-			else:
-				out.write("/")
-			if term.getPrecedence() > self.getPrecedence():
-				term.write(out)
-			else:
-				out.write("(")
-				term.write(out)
-				out.write(")")
+			
+                if str(self._factors[0][1])=="log":
+                    first_term.write(out)
+                    out.write("(")
+                    second_sig, second_term = self._factors[1]
+                    if second_term.getPrecedence() > self.getPrecedence():
+                            second_term.write(out)
+                    else:
+                            out.write("(")
+                            second_term.write(out)
+                            out.write(")")                                        
+                    follow = self._factors[2:]
+                    for sig, term in follow:
+                            if sig == 1:
+                                    out.write("*")
+                            else:
+                                    out.write("/")
+                            if term.getPrecedence() > self.getPrecedence():
+                                    term.write(out)
+                            else:
+                                    out.write("(")
+                                    term.write(out)
+                                    out.write(")")                    
+                    out.write(")")
+                    
+                else:
+                    follow = self._factors[1:]
+                    if first_sig == -1:
+                            out.write("1/")
+                    if first_term.getPrecedence() >= self.getPrecedence():
+                            first_term.write(out)
+                    else:
+                            out.write("(")
+                            first_term.write(out)
+                            out.write(")")                    
+
+                    for sig, term in follow:
+                            if sig == 1:
+                                    out.write("*")
+                            else:
+                                    out.write("/")
+                            if term.getPrecedence() > self.getPrecedence():
+                                    term.write(out)
+                            else:
+                                    out.write("(")
+                                    term.write(out)
+                                    out.write(")")
 
 	def write_fortran(self):
 		first_sig, first_term = self._factors[0]
@@ -1426,6 +1471,7 @@ class UnaryMinusExpression(Expression):
 
 	def getPrecedence(self):
 		return 100
+
 
 class SpecialExpression(ConstantExpression):
 	def __init__(self, image):
