@@ -890,12 +890,13 @@ class Model:
 			structure = structure.replaceStrings(
 					"ModelDummyIndex", lsubs, lcounter)
 			structure = structure.replaceNegativeIndices(0, "MDLIndex%d",
-					dummy_found)
+					dummy_found)           
 			for i in [2]:
 				structure = structure.algsubs(
 					ex.FloatExpression("%d." % i),
 					ex.IntegerExpression("%d" % i))
 			lorex[name] = transform_lorentz(structure, l.spins)
+
 		lwf = LimitedWidthOutputStream(f, 70, 6)
 		f.write("* vim: syntax=form:ts=3:sw=3\n\n")
 		f.write("* This file has been generated from the FeynRule model files\n")
@@ -938,6 +939,7 @@ class Model:
 		for c in self.all_couplings:
 			params.append(self.prefix + c.name.replace("_", ""))
 
+                #params.append("log")
 		if len(params) > 0:
 			if len(params) == 1:
 				f.write("Symbol %s;" % params[0])
@@ -1376,6 +1378,7 @@ def canonical_field_names(p):
 	return (canonical_name, canonical_anti)
 
 lor_P = ex.SymbolExpression("P")
+lor_log = ex.SymbolExpression("log")
 lor_Metric = ex.SymbolExpression("Metric")
 lor_Epsilon = ex.SymbolExpression("Epsilon")
 lor_Identity = ex.SymbolExpression("Identity")
@@ -1472,6 +1475,23 @@ def transform_lorentz(expr, spins):
 			mom = ex.SymbolExpression("vec%d" % int(args[1]))
 			# UFO files have all momenta outgoing:
 			return -mom(index)
+                elif head == lor_log:
+
+                    
+                    if isinstance(args[0], ex.ProductExpression):
+                        n = len(args[0])
+                        new_factors = []
+                        new_factors.append((1,head))
+
+                        for i in range(n):
+                                sign, factor = args[0][i]
+                                new_factors.append( (sign, transform_lorentz(factor, spins)) )
+                        expr_new = ex.ProductExpression(new_factors)
+                        return expr_new
+                    else:
+                        return expr
+
+
 		elif head == lor_Metric or head == lor_Identity:
 			my_spins = []
 			if isinstance(args[0], ex.IntegerExpression):
