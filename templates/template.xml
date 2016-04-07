@@ -31,6 +31,9 @@
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
+	<file src="acinclude.m4" class="Kinematics">
+		<only if-extension="autotools" />
+	</file>
 
 	<directory src="codegen">
 		<file src="abbrev.in" class="Multi"/>
