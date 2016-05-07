@@ -251,6 +251,7 @@
                     <file src="reduze_insert.yaml" class="Integrals"/>
                     <directory src="config">
                         <file src="kinematics.yaml" class="Integrals"/>
+                        <file src="global.yaml" class="Integrals"/>
                     </directory>
                 </directory>
             </foreach>
