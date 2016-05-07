@@ -1,9 +1,11 @@
 process_name=gghh
 process_path=virtual
 
-in=g,g,25,25
+# PDG codes # Gluon: 21 # Higgs-Boson: 25
+
+in=21,21,25,25
 out=
-order=QCD, none, 2
+order=QCD, NONE, 2
 
 # one quark flavour [t] running in the loops:
 qgraf.verbatim=true=iprop[U,D,C,S,B,0,0];
