@@ -5,11 +5,11 @@ Dimension dimS; * space-time dimension (normally d)
 
 
 ***** DO NOT PUBLISH *****
-AutoDeclare Symbols F1,F2,F3,F4,F5;
+CFunction scalarProduct;
 ***** DO NOT PUBLISH *****
 
 
-AutoDeclare Symbols ReduzeT; * topologies/integral families
+AutoDeclare Symbols ReduzeF; * topologies/integral families
 AutoDeclare Symbols ReduzeN; * propagators
 AutoDeclare Symbols Proj; * projector labels
 CFunction prf; * for PolyRatFun
@@ -17,8 +17,7 @@ CFunction Sector;
 CFunction Tag; * container for momentum/mass of ReduzeN
 CFunction Shift; * container for momentum shifts
 CFunction DiaMatch; * container for diagram number
-CFunction Crossing, CrossingShift, CrossingInvariants; * functions to store crossings
-CFunctions num; * inverse propagator num=inv^(-1)
+CFunctions inversePropagator; * inverse propagator inversePropagator(p1,m^2) = p1.p1 - m^2
 CFunctions INT; * Reduze integral function (stores the inverse powers of the propagators)
 CFunction ProjDen; * function for storing projector denominators ProjDen(x)=1/x;
 CFunction DenDim; * function for storing dimension denominators DenDim(dimS+n) = 1/(dimS+n);
@@ -63,29 +62,15 @@ Symbols sDUMMY5,[];
    Id Once Shift(?tail) = replace_(?tail);
    .Sort:red-shifting;
 #EndProcedure
-                  
-#Procedure CrossReduze()
-   #include- reduzecrossingl`LOOPS'.hh
-#EndProcedure
 
-* map crossed integral families to uncrossed
-#Procedure CrossMomentaReduze()
-   Repeat Id CrossingShift(?head,[],?tail) = CrossingShift(?head,?tail);
-   Id Once CrossingShift(?tail) = replace_(?tail);
-   .Sort:red-crossing;
-#EndProcedure
-
-* assumes that CrossingInvariants() already exists in the expression
-#Procedure CrossInvariantsReduze()
-   Repeat Id CrossingInvariants(?head,[],?tail) = CrossingInvariants(?head,?tail);
-   Id Once CrossingInvariants(?tail) = replace_(?tail);
-   .Sort:red-crossinginvar;
-#EndProcedure
-                  
 * map scalar products to (inverse) propagators
 #Procedure SPToPropReduze()
    #include- reduzesptopl`LOOPS'.hh
    .Sort:SPToPropReduze;
+***** DO NOT PUBLISH *****
+   Id scalarProduct(vDUMMY1?,vDUMMY2?) = vDUMMY1.vDUMMY2;
+   .sort:SPToPropReduze;
+***** DO NOT PUBLISH *****
 #EndProcedure
                      
 #Procedure TagReduze()
@@ -95,16 +80,16 @@ Symbols sDUMMY5,[];
 * map propagators to Reduze ordered propagators
 #Procedure MapReduze()
    #Call TagReduze
-* try to map propagators with inv/num(+...) and inv/num(-...)
+* try to map propagators with inv/inversePropagator(+...) and inv/inversePropagator(-...)
    #Do i = 0,1
 * map propagators
    Repeat Id Tag(sDUMMY1?,vDUMMY1?,sDUMMY2?)*inv(vDUMMY1?,sDUMMY2?,?tail)=
       Tag(sDUMMY1,vDUMMY1,sDUMMY2)*sDUMMY1^(-1);
-   Repeat Id Tag(sDUMMY1?,vDUMMY1?,sDUMMY2?)*num(vDUMMY1?,sDUMMY2?,?tail)=
+   Repeat Id Tag(sDUMMY1?,vDUMMY1?,sDUMMY2?)*inversePropagator(vDUMMY1?,sDUMMY2?^2,?tail)=
       Tag(sDUMMY1,vDUMMY1,sDUMMY2)*sDUMMY1;
-* now flip sign of momentum in even functions inv/num
+* now flip sign of momentum in even functions inv/inversePropagator
    Id inv(vDUMMY1?,?tail)=inv(-vDUMMY1,?tail);
-   Id num(vDUMMY1?,?tail)=num(-vDUMMY1,?tail);
+   Id inversePropagator(vDUMMY1?,?tail)=inversePropagator(-vDUMMY1,?tail);
    #EndDo
    Id Tag(?tail) = 1;
 *  .Sort:red-map;
@@ -123,22 +108,12 @@ Symbols sDUMMY5,[];
    #EndDo
    .Sort:red-toint1;
    Id Sector(sDUMMY1?,?head)*INT(?tail)=INT(sDUMMY1,?tail);
-   Id Crossing(sDUMMY1?)*INT(sDUMMY2?,?tail)=INT(sDUMMY1,?tail);
    .Sort:red-toint2;
 #EndProcedure
              
 * tag each integral with its propagators
 #Procedure TagIntReduze()
    Id INT(sDUMMY1?,?tail) = Sector(sDUMMY1)*INT(sDUMMY1,?tail);
-   #Call CrossReduze
    #Call TagReduze
-   #Call CrossMomentaReduze
-   Id Crossing(?tail)=1;
-   Id CrossingInvariants(?tail) = 1;
    Id Sector(?tail)=1;
-#EndProcedure
-
-#Procedure UncrossIntReduze()
-   Id INT(sDUMMY1?,?tail) = Sector(sDUMMY1)*INT(sDUMMY1,?tail);
-   #Call CrossReduze
 #EndProcedure

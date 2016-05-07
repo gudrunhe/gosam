@@ -72,7 +72,13 @@ reduze_setup_l[%loop%]-stamp:
 	@echo Reduze is setting up integral families @ [%loop%] loop
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_setup.yaml > reduze_setup.log
 	@echo Python is processing integral families @ [%loop%] loop
-	@$(TRANSLATE_REDUZE) $(REDUZE_PATH_L[%loop%]) [%loop%]
+	@$(TRANSLATE_REDUZE) \
+		-i $(REDUZE_PATH_L[%loop%])/config/integralfamilies.yaml \
+		-k $(REDUZE_PATH_L[%loop%])/config/kinematics.yaml \
+		-c $(REDUZE_PATH_L[%loop%])/sectormappings/crossings.yaml \
+		-o allfamilies.yaml \
+		-m reduzemapl[%loop%].hh \
+		-s reduzesptopl[%loop%].hh
 	@touch reduze_setup_l[%loop%]-stamp
 
 [% @for elements loop.keep.diagrams %]

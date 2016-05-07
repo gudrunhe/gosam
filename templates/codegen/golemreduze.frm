@@ -50,8 +50,6 @@ Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
 #Call enforceconservation
 #Call DiaMatchTagReduze
 #Call ShiftReduze
-#Call CrossReduze
-#Call CrossMomentaReduze
 
 * models that implement their own vertex replacements
 * must define the preprocessor variable USEVERTEXPROC
@@ -174,6 +172,8 @@ Id Projector(sDUMMY1?) = sDUMMY1;
 #Call TraceReduze
 #Call kinematics
 #Call SPToPropReduze
+#Call enforceconservation
+#Call kinematics
 #Call MapReduze
 
 * process 1PR propagators
@@ -182,7 +182,6 @@ Id inv(k1?, m?) = inv(k1.k1 - m^2);
 Id inv(0, m?) = - inv(m^2);
 Id inv(0, m?, sDUMMY1?) = + inv(-m^2 + i_ * m * sDUMMY1);
 
-* sj - added - MAY WANT TO CALL THIS FUNCTION DEN!
 Denominators Den;
 Id inv(?tail) = Den(?tail);
 Id ProjDen(?tail) = Den(?tail);
@@ -193,7 +192,6 @@ EndArgument;
 .sort
 
 #Call ToIntReduze
-#Call CrossInvariantsReduze
 
 Id inp(?all) = 1;
 Id out(?all) = 1;
