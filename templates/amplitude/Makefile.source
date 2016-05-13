@@ -106,7 +106,7 @@ integralsl[%loop%].m : integralsl[%loop%].txt reduze_setup_l[%loop%]-stamp
 	@$(PYTHON) ../codegen/toreduze.py \
                     -i integralsl[%loop%].txt \
                     -t integralsl[%loop%].m \
-                    -s $(REDUZE_PATH_L[%loop%])log/find_diagram_shifts_for_reduze[%loop%]loop_yaml.log \
+                    -s $(REDUZE_PATH_L[%loop%])/sectormappings/crss.yaml \
                     -y $(REDUZE_PATH_L[%loop%])reduze_reduce.yaml
 
 reductionl[%loop%] : reduze_reduce_l[%loop%]-stamp
