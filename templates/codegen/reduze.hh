@@ -87,6 +87,9 @@ Symbols sDUMMY5,[];
       Tag(sDUMMY1,vDUMMY1,sDUMMY2)*sDUMMY1^(-1);
    Repeat Id Tag(sDUMMY1?,vDUMMY1?,sDUMMY2?)*inversePropagator(vDUMMY1?,sDUMMY2?^2,?tail)=
       Tag(sDUMMY1,vDUMMY1,sDUMMY2)*sDUMMY1;
+* special case for massless inversePropagator
+   Repeat Id Tag(sDUMMY1?,vDUMMY1?,0)*inversePropagator(vDUMMY1?,0,?tail)=
+      Tag(sDUMMY1,vDUMMY1,0)*sDUMMY1;
 * now flip sign of momentum in even functions inv/inversePropagator
    Id inv(vDUMMY1?,?tail)=inv(-vDUMMY1,?tail);
    Id inversePropagator(vDUMMY1?,?tail)=inversePropagator(-vDUMMY1,?tail);

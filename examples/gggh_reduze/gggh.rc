@@ -1,0 +1,32 @@
+process_name=gggh
+process_path=virtual
+
+# PDG codes
+# Gluon: 21
+# Higgs-Boson: 25
+
+in=21,21,21,25
+out=
+
+model=smdiag_no_qh_massless
+model.options= Nf:5, Nfgen:1
+
+order=QCD, none, 3, 5
+
+# one light quark flavour [u] and one heavy quark [t]:
+qgraf.verbatim=true=iprop[D,C,S,B,0,0];
+
+one=gs
+zero=wT
+
+regularisation_scheme=cdr
+renorm_beta=False
+renorm_mqwf=False
+renorm_decoupling=False
+renorm_mqse=False
+renorm_logs=False
+renorm_gamma5=False
+
+diagsum=False
+
+extensions=dot2tex,reduze
