@@ -1,0 +1,9 @@
+integralfamilies:
+
+  - name: "ReduzeF1L1"
+    loop_momenta: [p1]
+    propagators:
+      - [ "p1"         , "mT^2" ]
+      - [ "p1-k1"      , "mT^2" ]
+      - [ "p1-k1-k2"   , "mT^2" ]
+      - [ "p1-k1-k2-k3", "mT^2" ]
