@@ -103,6 +103,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    # flows = {}
 
    for idx, diagram in diagrams.items():
+
       if lst:
          if idx not in lst:
             lose.append(idx)
@@ -122,6 +123,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
                   filter_flags[flag].append(idx)
       else:
          lose.append(idx)
+
 
       signs[idx] = diagram.sign()
    #   flows[idx] = diagram.fermion_flow()
@@ -328,57 +330,49 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
 
 
 
-def analyze_ct_diagrams(diagrams, model, conf, onshell,
-      quark_masses = None, filter_flags = None, massive_bubbles = {}):
+def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):
    zero = golem.util.tools.getZeroes(conf)
-   lst = setup_list(golem.properties.select_nlo_diagrams, conf)
-   fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
+   lst = setup_list(golem.properties.select_lo_diagrams, conf)
+   fltr = setup_filter(golem.properties.filter_lo_diagrams, conf, model)
    keep = []
    lose = []
-   max_rank = 0
-
-   loopcache = LoopCache()
+   signs = {}
+   # flows = {}
 
    for idx, diagram in diagrams.items():
+
       if lst:
          if idx not in lst:
             lose.append(idx)
             continue
+
+      if diagram.EHCfound():
+         conf["ehc"]=True
+
       if analyze_diagram(diagram, zero, fltr):
-         # check for massive quarks first. Even though the
-         # diagram might fail the next test it contributes
-         # to the renormalization of the gluon wave function.
-         if quark_masses is not None:
-            for qm in diagram.QuarkBubbleMasses():
-               if qm not in quark_masses:
-                  quark_masses.append(qm)
+         keep.append(idx)
 
-         if diagram.onshell() > 0:
-            lose.append(idx)
-         else:
-            keep.append(idx)
-            loopcache.add(diagram, idx)
-            
-            #diagram.isMassiveBubble(idx, massive_bubbles)
-
-            if filter_flags is not None:
-               for flag in diagram.filter_flags:
-                  if flag not in filter_flags:
-                     filter_flags[flag] = [idx]
-                  else:
-                     filter_flags[flag].append(idx)
-            rk = diagram.rank()
-            if rk > max_rank:
-               max_rank = rk
+         if filter_flags is not None:
+            for flag in diagram.filter_flags:
+               if flag not in filter_flags:
+                  filter_flags[flag] = [idx]
+               else:
+                  filter_flags[flag].append(idx)
       else:
          lose.append(idx)
 
-   debug("After analyzing counter term diagrams: keeping %d, purging %d" % 
-            (len(keep), len(lose)))
+      for prop in diagram._propagators.items():
+          if str(prop[1]._mom).find('kx')>=0 and len(str(prop[1]._mom))<=6:
+              keep.remove(idx)
+              lose.append(idx)
 
-   conf["__max_rank__"] = max_rank
-   return keep, loopcache
 
+      signs[idx] = diagram.sign()
+   #   flows[idx] = diagram.fermion_flow()
+
+   debug("After analyzing ct diagrams: keeping %d, purging %d" % 
+         (len(keep), len(lose)))
+   return keep, signs #, flows
 
 def analyze_diagram(diagram, zero, fltr):
    if diagram.colorforbidden1loop():

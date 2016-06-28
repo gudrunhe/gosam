@@ -1163,7 +1163,7 @@ $]if (name.eq."VV12") then
 @for symbols match="\\$(.*)" format="reg%s" %]
       [% type.repr %] :: [% $_ %][%
 @end @for symbols %][$
-@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc  $][$
 @if ewchoose $]
       call ewschemechoice(ewchoice)[$
 @end @if $][$

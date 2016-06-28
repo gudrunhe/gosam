@@ -302,7 +302,25 @@
 		<file src="custompropagator.f90" class="Model">
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
 			<except if-file="exists" in-mode="normal" />
-	   </file>
+                </file>
+		<file src="ew_ct.f90" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>
+		<file src="declmasses.h" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>
+		<file src="declscalars.h" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>                                
+		<file src="dzdecl.h" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>                            
+		<file src="ddrrdecl.h" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>                                            
+		<file src="realparam.h" class="Multi">
+			<only if-option="generate_ct_internal" value="true"/>
+		</file>                                                
 	</directory>
 
 	<directory src="doc">

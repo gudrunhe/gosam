@@ -41,11 +41,11 @@ Brackets c1,...,c[% num_colors %];
 #Create <ct.dat>
 
 Symbol [% 
-@for elements topolopy.keep.tree %][% 
+@for elements topolopy.keep.ct %][% 
    @if is_first %]ctdiag[%$_%][% @else %][% 
    @end @if %][%
 @end @for %],...,[% 
-@for elements topolopy.keep.tree %][% 
+@for elements topolopy.keep.ct %][% 
    @if is_last %]ctdiag[%$_%][% 
    @end @if %][%
 @end @for %];
@@ -53,7 +53,7 @@ Symbol [%
 ExtraSymbols,vector,ctabb;
 
 Local ctdiagrams=[% 
-@for elements topolopy.keep.tree %][% 
+@for elements topolopy.keep.ct %][% 
   @if is_first %][% @else %]
   +[% @end @if %]ctdiag[%$_%][%
 @end @for %];

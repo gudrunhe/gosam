@@ -17,6 +17,8 @@ OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
 @if extension pjfry %] \
 		  precision_pjfry.o pjfry95pg.o pjfry_comb.o[%
 @end @if %][% @if internal CUSTOM_SPIN2_PROP %] custompropagator.o[%
+@end @if %][%
+@if generate_ct_internal %] ew_ct.o [%
 @end @if %]
 
 .PHONY: compile source clean very-clean doc

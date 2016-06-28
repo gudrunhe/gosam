@@ -84,7 +84,10 @@ contains
    !---#] subroutine banner:
 
    !---#[ subroutine initgolem :
-   subroutine     initgolem(is_first,stage,rndseed)
+   subroutine     initgolem(is_first,stage,rndseed)[%
+@if generate_ct_internal %]
+      use [% process_name asprefix=\_ %]ew_ct[%
+@end @if %]      
       implicit none
       logical, optional, intent(in) :: is_first
       integer, optional, intent(in) :: stage
@@ -156,7 +159,10 @@ contains
 @end @select %]
 
       call init_functions()
-      call init_color()
+      call init_color()[%
+@if generate_ct_internal %]
+      call ew_ren()[%
+@end @if %]      
 
    end subroutine initgolem
    !---#] subroutine initgolem :
@@ -453,12 +459,20 @@ contains
       amp(1)   = 0.0_ki[%
       @end @if%][%
       @if generate_nlo_virt %][%
-      @if generate_uv_counterterms %]
+      @if generate_uv_counterterms %][%
+      @if generate_ct_internal %]
+      if (present(h)) then
+        ct_amp(:) = ct_samplitude(vecs,scale2, h)
+      else
+        ct_amp(:) = ct_samplitude(vecs,scale2)
+      endif[%
+      @else %]
       if (present(h)) then
         ct_amp(:) = ct_samplitude(vecs, h)
       else
         ct_amp(:) = ct_samplitude(vecs)
       endif[%
+      @end @if %][%
       @else %]
       select case (renormalisation)
       case (0)
@@ -736,13 +750,21 @@ contains
    end function samplitudel0
    !---#] function samplitudel0 :[%
 @if generate_uv_counterterms %]   
-   !---#[ function ct_samplitude :   
-   function     ct_samplitude(vecs, h) result(amp)
+   !---#[ function ct_samplitude : [%
+@if generate_ct_internal %]   
+   function     ct_samplitude(vecs,scale2, h) result(amp)
+   use [% process_name asprefix=\_ %]ew_ct[%
+@else %]
+   function     ct_samplitude(vecs, h) result(amp)[%
+@end @if %]   
       use [% process_name asprefix=\_ %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      integer, optional, intent(in) :: h
+      integer, optional, intent(in) :: h[%
+@if generate_ct_internal %]
+      real(ki), intent(in) :: scale2[%
+@end @if %]      
       real(ki) ,dimension(0:1) :: amp, heli_amp
       complex(ki), dimension(numcs) :: vector_born
       complex(ki), dimension(numcs,0:1) :: vector_ct
@@ -786,7 +808,11 @@ contains
      @end @for %])
          !---#] reinitialize kinematics:
          vector_born = amplitude[% map.index %]l0()
-         vector_ct = ctamplitude[% map.index %]l0()
+         vector_ct = ctamplitude[% map.index %]l0()[%
+         @if generate_ct_internal %]
+         vector_ct(:,0) = vector_ct(:,0) - ddrr(1)*vector_born(:)
+         vector_ct(:,1) = vector_ct(:,1) - ddrr(2)*vector_born(:)[%
+         @end @if %]
          heli_amp(:) = ct_square(vector_born, vector_ct)
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
@@ -795,7 +821,11 @@ contains
          end if
          amp(:) = amp(:) + heli_amp(:)
       end if[%
-  @end @for helicities %]
+  @end @for helicities %][%
+  @if generate_ct_internal %]
+      amp(0) = amp(0) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(1)
+      amp(1) = amp(1) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(2)[%
+  @end @if %]
       if (include_helicity_avg_factor) then
          amp(:) = amp(:) / real(in_helicities, ki)
       end if

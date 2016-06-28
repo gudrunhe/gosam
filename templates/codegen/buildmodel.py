@@ -1219,7 +1219,10 @@ modelfile.write("!---#] subroutine set_parameter\n")
 
 modelfile.write("!---#[ subroutine init_functions:\n")
 modelfile.write("   subroutine     init_functions()\n")
-modelfile.write("      implicit none\n")
+modelfile.write("      implicit none\n")[$
+@if generate_ct_internal $]
+modelfile.write("      include 'realparam.h'\n")[$
+@end @if $]                                                  
 modelfile.write("      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
 modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
 modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")[$
@@ -1228,7 +1231,27 @@ modelfile.write("     &3383279502884197169399375105820974944592307816406286209_k
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @if $][$
 @end @select $]
-modelfile.write("%s" % outdict['Functions'])
+modelfile.write("%s" % outdict['Functions'])[$
+@if generate_ct_internal $]
+modelfile.write("      ctme=me\n")
+modelfile.write("      ctmm=mmu\n")
+modelfile.write("      ctmtl=mtau\n")
+modelfile.write("      ctmu=mu\n")
+modelfile.write("      ctmd=md\n")
+modelfile.write("      ctmc=mc\n")
+modelfile.write("      ctms=ms\n")
+modelfile.write("      ctmb=mb\n")
+modelfile.write("      ctalpha=alpha\n")
+modelfile.write("      ctrmw=mw\n")
+modelfile.write("      ctrmz=mz\n")
+modelfile.write("      ctrmt=mt\n")
+modelfile.write("      ctrmh=mh\n")
+modelfile.write("      ctWwidth=ww\n")
+modelfile.write("      ctZwidth=wz\n")
+modelfile.write("      ctHwidth=wh\n")
+modelfile.write("      ctTwidth=wt\n")
+modelfile.write("      ctgfermi=1.0_ki\n")[$
+@end @if $]                                           
 modelfile.write("end subroutine init_functions\n")
 modelfile.write("!---#] subroutine init_functions:\n")
 modelfile.write("!---#[ utility functions for model initialization:\n")

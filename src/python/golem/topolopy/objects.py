@@ -896,6 +896,7 @@ class Propagator(DiagramComponent):
                   self.momentum,
                   self.aux, self.twospin,
                   self.color)
+                  
 
    def copy(self, momentum=None):
       if momentum is None:

@@ -101,8 +101,12 @@ Symbol Qt2;
 @if generate_uv_counterterms %]
 #IfDef `CTFLG'
 #If `CTFLG' == 1
-  #include- diagrams-`LOOPS'ct.hh #global
-  #include- modelct.hh  
+  #include- diagrams-`LOOPS'ct.hh #global[%
+  @if generate_ct_internal %]
+  #include- model.hh[%
+  @else %]
+  #include- modelct.hh[%
+  @end @if %]
 #Else 
   #include- diagrams-`LOOPS'.hh #global
   #include- model.hh  
@@ -756,47 +760,55 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
         #write <borndiag.prc> "#EndProcedure"
         #Call OptimizeBorn()
-   #ElseIf `BORNFLG' == 3
+   #ElseIf `BORNFLG' == 3[% 
+@if eval .not. generate_ct_internal %]   
         repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
         repeat id UVSET?UV[UVNR]^2 =0;
         if (match(UVSET?UV[UVNR]) );
         else;
           id UVSET?NONUV[UVNR] = 0;
         endif;
-        .sort;   
+        .sort;[%
+@end @if %]        
 	#Create <`OUTFILE'.txt>
         #write <`OUTFILE'.txt> "#Procedure ctdiag"
 	#write <`OUTFILE'.txt> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == 4
+   #ElseIf `BORNFLG' == 4[% 
+@if eval .not. generate_ct_internal %]   
         repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
         repeat id UVSET?UV[UVNR]^2 =0;
         if (match(UVSET?UV[UVNR]) );
         else;
           id UVSET?NONUV[UVNR] = 0;
         endif;
-        .sort;      
+        .sort;[%
+@end @if %]         
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id ctdiag`DIAG'  = %e",diagram`DIAG'	
-   #ElseIf `BORNFLG' == -3
+   #ElseIf `BORNFLG' == -3[% 
+@if eval .not. generate_ct_internal %]   
         repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
         repeat id UVSET?UV[UVNR]^2 =0;
         if (match(UVSET?UV[UVNR]) );
         else;
           id UVSET?NONUV[UVNR] = 0;
         endif;
-        .sort;         
+        .sort; [%
+@end @if %]           
         #Append <ctdiag.prc>
 	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
         #write <ctdiag.prc> "#EndProcedure"
         #Call OptimizeCT()	
-   #ElseIf `BORNFLG' == 5
+   #ElseIf `BORNFLG' == 5[% 
+@if eval .not. generate_ct_internal %]   
         repeat id UVSET?UV[UVNR]*UVSET1?UV[UVNR1] =0;
         repeat id UVSET?UV[UVNR]^2 =0;
         if (match(UVSET?UV[UVNR]) );
         else;
           id UVSET?NONUV[UVNR] = 0;
         endif;
-        .sort;            
+        .sort;[%
+@end @if %]               
 	#Create <ctdiag.prc>
         #write <ctdiag.prc> "#Procedure ctdiag"
 	#write <ctdiag.prc> "Id ctdiag`DIAG'  = %e",diagram`DIAG'
