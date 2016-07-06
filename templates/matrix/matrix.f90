@@ -19,7 +19,8 @@
 @end @if %]
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
-       lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
+       lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons, &
+       lo_ew_couplings, num_photons
    use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
      & incolors, init_color[%
@@ -630,7 +631,8 @@ contains
       @end @if%][%
 
       @select r2
-      @case implicit explicit off %]
+      @case implicit explicit off %][%
+      @if isqcd %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -645,6 +647,13 @@ contains
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
          @end @if extension dred %]
       end if[%
+      @else %][%
+      @if generate_ct_internal %][%
+      @for particles %]
+      if (real([% mass %]) ==0.0_ki) amp(2) = amp(2) -0.5_ki*([% charge %]_ki/3.0_ki)**2*amp(1)[%
+      @end @for %]
+      [% @end @if %][%
+      @end @if %][%
       @end @select r2 %][%
       @end @if %]
       if (present(ok)) ok = my_ok
@@ -820,8 +829,8 @@ contains
          vector_born = amplitude[% map.index %]l0()
          vector_ct = ctamplitude[% map.index %]l0()[%
          @if generate_ct_internal %]
-         vector_ct(:,0) = vector_ct(:,0) - ddrr(1)*vector_born(:)
-         vector_ct(:,1) = vector_ct(:,1) - ddrr(2)*vector_born(:)[%
+         vector_ct(:,0) = vector_ct(:,0) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(1)*vector_born(:)
+         vector_ct(:,1) = vector_ct(:,1) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(2)*vector_born(:)[%
          @end @if %]
          heli_amp(:) = ct_square(vector_born, vector_ct)
          if (debug_lo_diagrams) then
@@ -833,8 +842,7 @@ contains
       end if[%
   @end @for helicities %][%
   @if generate_ct_internal %]
-      amp(0) = amp(0) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(1)
-      amp(1) = amp(1) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(2)[%
+      amp(0) = amp(1)*log(scale2) + amp(0)[%
   @end @if %]
       if (include_helicity_avg_factor) then
          amp(:) = amp(:) / real(in_helicities, ki)

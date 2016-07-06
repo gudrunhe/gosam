@@ -40,6 +40,7 @@ def setup_list(prop, conf):
    return result
 
 def setup_filter(prop, conf, model):
+   generate_ct_internal = conf.getBooleanProperty("generate_ct_internal")
    locs = {}
    globs = globals().copy()
 
@@ -50,6 +51,23 @@ def setup_filter(prop, conf, model):
    leptons = []
    fermions = []
    bosons = []
+   
+   #if generate_ct_internal and prop._name=='filter.nlo':
+       #try:
+            #if len(conf["filter.nlo"])==0:
+                #conf["filter.nlo"]='lambda d: d.iprop(Cx)==0'
+            #else:
+                #conf["filter.nlo"]+='and d.iprop(Cx)==0'
+       #except:
+           ##conf["filter.nlo"]='lambda d: d.iprop(Cx)==0'
+           #conf.setProperty("filter.nlo",'lambda d: d.iprop(Cx)==0')
+           
+           
+   #golem.properties.filter_nlo_diagrams.setProperty('lambda d: d.iprop(g)==0')           
+   #golem.properties.
+   #prop._default='lambda d: d.iprop(Cx)==0'
+   #print conf["filter.nlo"]
+
 
    for name, prtcl in model.particles.items():
       tsp = prtcl.getSpin()
@@ -147,6 +165,8 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
 
    loopcache     = LoopCache()
    loopcache_tot = LoopCache()
+   
+
 
    for idx, diagram in diagrams.items():
       if lst:
@@ -167,25 +187,40 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
                   complex_masses.append(cqm)
                if cqm=='0' and complex_masses[len(complex_masses)-1]!='0' and (len(complex_masses) % 2)==1:
                   complex_masses.append(cqm)
+         
+         cx=False
+         for prop in diagram._propagators.items():
+             if prop[1].field=='Cx':
+                 cx=True
+                 
+         if not cx:
+           if diagram.onshell() > 0:
+              lose.append(idx)
+           else:
+              keep.append(idx)
+              keep_tot.append(idx)
+              loopcache_tot.add(diagram, idx)
 
-         if diagram.onshell() > 0:
-            lose.append(idx)
-         else:
-            keep.append(idx)
-            keep_tot.append(idx)
-            loopcache_tot.add(diagram, idx)
+              diagram.isMassiveBubble(idx, massive_bubbles)
 
-            diagram.isMassiveBubble(idx, massive_bubbles)
-
-            if filter_flags is not None:
-               for flag in diagram.filter_flags:
-                  if flag not in filter_flags:
-                     filter_flags[flag] = [idx]
-                  else:
-                     filter_flags[flag].append(idx)
-            rk = diagram.rank()
-            if rk > max_rank:
-               max_rank = rk
+              if filter_flags is not None:
+                 for flag in diagram.filter_flags:
+                    if flag not in filter_flags:
+                       filter_flags[flag] = [idx]
+                    else:
+                       filter_flags[flag].append(idx)
+              rk = diagram.rank()
+              if rk > max_rank:
+                 max_rank = rk
+               
+        
+         #for prop in diagram._propagators.items():
+             #if prop[1].field=='Cx':
+                 #keep.remove(idx)
+                 #keep_tot.remove(idx)
+                 #lose.append(idx)
+                 #break
+        
       else:
          lose.append(idx)
 
@@ -222,6 +257,12 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
             (len(keep), len(lose)))
 
    conf["__max_rank__"] = max_rank
+   
+
+   print keep_tot
+   print len(keep_tot)
+   print keep
+   print len(keep)
 
    return keep, keep_tot, eprops, loopcache, loopcache_tot
 

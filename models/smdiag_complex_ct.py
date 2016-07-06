@@ -59,7 +59,8 @@ particles = {
    'ghWm':    Particle('ghWm',     0,   'mW',  1, 'ghWmbar', 'wghWm',
                                                        9000005,    -1.0),
    'ghWmbar': Particle('ghWmbar',  0,   'mW',  1, 'ghWm',    'wghWm',
-                                                      -9000005,     1.0)
+                                                      -9000005,     1.0),
+   'Cx':      Particle('Cx',      0,      0,  1, None, '0', 0,     0.0)   
 }
 #---#] particles:
 #---#[ mnemonics:
@@ -443,8 +444,7 @@ types = {
    'gPT': 'C', 'gPe': 'C', 'gPmu': 'C', 'gPtau': 'C',
    'gGWX': 'C', 'gGWH': 'C', 'gGZH': 'C', 'gGWZP': 'C', 'gGZWP': 'C',
 
-   'gZ': 'C', 'gW': 'C', 'gH': 'C',
-   'gctWWZZ' : 'CA', 'gctWWAZ' : 'CA', 'gctWWAA': 'CA', 'gctWWWW': 'CA', 'gctWWZ': 'CA', 'gctWWA': 'CA'
+   'gZ': 'C', 'gW': 'C', 'gH': 'C'
 }
 #---#] types:
 #---#[ latex_names:

@@ -754,7 +754,8 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
 	generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
-	generate_ct_internal = conf["generate_ct_internal"]
+	generate_ct_internal = conf.getBooleanProperty("generate_ct_internal")
+
 
 	model = golem.util.tools.getModel(conf)
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
