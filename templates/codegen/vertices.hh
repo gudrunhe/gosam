@@ -40,8 +40,8 @@ id vertex(iv?,
 
 *---#[ SSCT vertex (A.4) :
 id vertex(iv?,
-	field1?   , idx1?, 0, vDUMMY1?, iv1L?, 1, iv1C?,
-	field2?   , idx2?, 0, vDUMMY2?, iv2L?, -1, iv2C?,
+	field1?   , idx1?, 0, vDUMMY1?, iv1L?,sign1?{-1,1} , iv1C?,
+	field2?   , idx2?, 0, vDUMMY2?, iv2L?,sign2?{-1,1} , iv2C?,
         [field.Cx], idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
 	        -i_ * C1(field1, field2, [field.Cx]) *
         d(vDUMMY1, vDUMMY2)

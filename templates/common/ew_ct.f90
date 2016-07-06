@@ -127,6 +127,7 @@ contains
       gmuscheme=.true.
 
 !   external parameres
+
       me=ctme
       mm=ctmm
       mtl=ctmtl
@@ -258,8 +259,8 @@ contains
       gdm= (-0.5d0*cone - sw2 * qd)/sw/cw
       gdp= -sw/cw*qd
 
-      masslesswf=.true. 
-!     masslesswf=.false.! per confonto LoopTools
+!      masslesswf=.true. 
+      masslesswf=.false.! per confonto LoopTools
 
       noqed=.false.
       dred=.true.       ! per ora
@@ -1417,13 +1418,16 @@ contains
       implicit none
       include 'declscalars.h'
       include 'declmasses.h'
-      complex*16 b11(0:2),b00(0:2),b0(0:2),s,t,v
+      complex*16 b11(0:2),b00(0:2),b0(0:2),s,t,v,zeroout(0:2)
       complex*16 cone,zero,ii
       common/complexunit/cone,zero,ii
       real*8 scale
       common/scalale/scale
       real*8 epsilon
       common/epsi/epsilon
+
+      complex*16 mtprova(0:2)
+
       call olo_onshell( 1d-10 )
       call olo_scale( scale )
 !
@@ -1803,42 +1807,159 @@ contains
       v=cone*abs(mb2)
       call olo_b11(b11,b00,b1dmtmbmw,b0, t,v,s )
       call olo_b11(b11,b00,b1dmbmtmw,b0, v,mt2,s )
-! derivate b1
+! derivatives of b1
+      zeroout(0) = zero
+      zeroout(1) = zero
+      zeroout(2) = zero
       s=mz2
-      call b1avo(zero          ,zero          ,s,b1pd00mz  )
-      call b1avo(cone*abs(me2) ,cone*abs(me2) ,s,b1pdmememz)
-      call b1avo(cone*abs(mm2) ,cone*abs(mm2) ,s,b1pdmmmmmz)
-      call b1avo(cone*abs(mtl2),cone*abs(mtl2),s,b1pdmlmlmz)
-      call b1avo(cone*abs(mu2) ,cone*abs(mu2) ,s,b1pdmumumz)
-      call b1avo(cone*abs(md2) ,cone*abs(md2) ,s,b1pdmdmdmz)
-      call b1avo(cone*abs(mc2) ,cone*abs(mc2) ,s,b1pdmcmcmz)
-      call b1avo(cone*abs(ms2) ,cone*abs(ms2) ,s,b1pdmsmsmz)
+! b1p(m,x,y) only enter in m*dS/dp --> simply set them to zero
+! if the external mass is zero 
+!      call b1avo(zero          ,zero          ,s,b1pd00mz  )
+      b1pd00mz = zeroout
+      if(abs(me2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(me2) ,cone*abs(me2) ,s,b1pdmememz)
+      else
+         b1pdmememz = zeroout
+      end if
+      if(abs(mm2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mm2) ,cone*abs(mm2) ,s,b1pdmmmmmz)
+      else
+         b1pdmmmmmz = zeroout
+      end if
+      if(abs(mtl2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mtl2),cone*abs(mtl2),s,b1pdmlmlmz)
+      else
+         b1pdmlmlmz = zeroout
+      end if
+      if(abs(mu2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mu2) ,cone*abs(mu2) ,s,b1pdmumumz)
+      else
+         b1pdmumumz = zeroout
+      end if
+      if(abs(md2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(md2) ,cone*abs(md2) ,s,b1pdmdmdmz)
+      else
+         b1pdmdmdmz = zeroout
+      end if
+      if(abs(mc2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mc2) ,cone*abs(mc2) ,s,b1pdmcmcmz)
+      else
+         b1pdmcmcmz = zeroout
+      end if
+      if(abs(ms2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(ms2) ,cone*abs(ms2) ,s,b1pdmsmsmz)
+      else
+         b1pdmsmsmz = zeroout
+      end if
       call b1avo(cone*dble(mt2),         mt2  ,s,b1pdmtmtmz)
-      call b1avo(cone*abs(mb2) ,cone*abs(mb2) ,s,b1pdmbmbmz)
+      if(abs(mb2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mb2) ,cone*abs(mb2) ,s,b1pdmbmbmz)
+      else
+         b1pdmbmbmz = zeroout
+      end if
 
       s=mh2
-      call b1avo(cone*abs(me2) ,cone*abs(me2) ,s,b1pdmememh)
-      call b1avo(cone*abs(mm2) ,cone*abs(mm2) ,s,b1pdmmmmmh)
-      call b1avo(cone*abs(mtl2),cone*abs(mtl2),s,b1pdmlmlmh)
-      call b1avo(cone*abs(mu2) ,cone*abs(mu2) ,s,b1pdmumumh)
-      call b1avo(cone*abs(md2) ,cone*abs(md2) ,s,b1pdmdmdmh)
-      call b1avo(cone*abs(mc2) ,cone*abs(mc2) ,s,b1pdmcmcmh)
-      call b1avo(cone*abs(ms2) ,cone*abs(ms2) ,s,b1pdmsmsmh)
+      if(abs(me2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(me2) ,cone*abs(me2) ,s,b1pdmememh)
+      else
+         b1pdmememh = zeroout
+      end if
+      if(abs(mm2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mm2) ,cone*abs(mm2) ,s,b1pdmmmmmh)
+      else
+         b1pdmmmmmh = zeroout
+      end if
+      if(abs(mtl2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mtl2),cone*abs(mtl2),s,b1pdmlmlmh)
+      else
+         b1pdmlmlmh = zeroout
+      end if
+      if(abs(mu2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mu2) ,cone*abs(mu2) ,s,b1pdmumumh)
+      else
+         b1pdmumumh = zeroout
+      end if
+      if(abs(md2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(md2) ,cone*abs(md2) ,s,b1pdmdmdmh)
+      else
+         b1pdmdmdmh = zeroout
+      end if
+      if(abs(mc2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mc2) ,cone*abs(mc2) ,s,b1pdmcmcmh)
+      else
+         b1pdmcmcmh = zeroout
+      end if
+      if(abs(ms2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(ms2) ,cone*abs(ms2) ,s,b1pdmsmsmh)
+      else
+         b1pdmsmsmh = zeroout
+      end if
       call b1avo(cone*dble(mt2),         mt2  ,s,b1pdmtmtmh)
-      call b1avo(cone*abs(mb2) ,cone*abs(mb2) ,s,b1pdmbmbmh)
+      if(abs(mb2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mb2) ,cone*abs(mb2) ,s,b1pdmbmbmh)
+      else
+         b1pdmbmbmh = zeroout
+      end if
+
+
       s=mw2
-      call b1avo(cone*abs(me2) ,zero          ,s,b1pdme0mw )
-      call b1avo(cone*abs(mm2) ,zero          ,s,b1pdmm0mw )
-      call b1avo(cone*abs(mtl2),zero          ,s,b1pdml0mw )
-      call b1avo(zero          ,cone*abs(me2) ,s,b1pd0memw )
-      call b1avo(zero          ,cone*abs(mm2) ,s,b1pd0mmmw )
-      call b1avo(zero          ,cone*abs(mtl2),s,b1pd0mlmw )
-      call b1avo(cone*abs(mu2) ,cone*abs(md2) ,s,b1pdmumdmw)
-      call b1avo(cone*abs(md2) ,cone*abs(mu2) ,s,b1pdmdmumw)
-      call b1avo(cone*abs(mc2) ,cone*abs(ms2) ,s,b1pdmcmsmw)
-      call b1avo(cone*abs(ms2) ,cone*abs(mc2) ,s,b1pdmsmcmw)
-      call b1avo(cone*dble(mt2),cone*abs(mb2) ,s,b1pdmtmbmw)
-      call b1avo(cone*abs(mb2) ,         mt2  ,s,b1pdmbmtmw)
+      if(abs(me2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(me2) ,zero          ,s,b1pdme0mw )
+      else
+         b1pdme0mw = zeroout
+      end if
+      if(abs(mm2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mm2) ,zero          ,s,b1pdmm0mw )
+      else
+         b1pdmm0mw = zeroout
+      end if
+      if(abs(mtl2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mtl2),zero          ,s,b1pdml0mw )
+      else
+         b1pdml0mw = zeroout
+      end if
+
+!      call b1avo(zero          ,cone*abs(me2) ,s,b1pd0memw )
+      b1pd0memw = zeroout
+
+!      call b1avo(zero          ,cone*abs(mm2) ,s,b1pd0mmmw )
+      b1pd0mmmw = zeroout
+
+!      call b1avo(zero          ,cone*abs(mtl2),s,b1pd0mlmw )
+      b1pd0mlmw = zeroout
+
+      if(abs(mu2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mu2) ,cone*abs(md2) ,s,b1pdmumdmw)
+      else
+         b1pdmumdmw = zeroout
+      end if
+      if(abs(md2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(md2) ,cone*abs(mu2) ,s,b1pdmdmumw)
+      else
+         b1pdmdmumw = zeroout
+      end if
+      if(abs(mc2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mc2) ,cone*abs(ms2) ,s,b1pdmcmsmw)
+      else
+         b1pdmcmsmw = zeroout
+      end if
+      if(abs(ms2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(ms2) ,cone*abs(mc2) ,s,b1pdmsmcmw)
+      else
+         b1pdmsmcmw = zeroout
+      end if
+
+      if(abs(mb2).lt.epsilon*1d3)then
+         call b1pp0m(cone*dble(mt2), mw2, b1pdmtmbmw)
+      else
+         call b1avo(cone*dble(mt2),cone*abs(mb2) ,s,b1pdmtmbmw)
+      end if
+!
+      if(abs(mb2).gt.epsilon*1d3) then
+         call b1avo(cone*abs(mb2) ,         mt2  ,s,b1pdmbmtmw)
+      else
+         b1pdmbmtmw = zeroout
+      end if
 ! regular gamma
       s=zero
       call olo(b0dmememg,cone*abs(me2) ,cone*abs(me2) ,s)
@@ -1879,8 +2000,11 @@ contains
       call b0pir(cone*abs(mc2) ,cone*abs(mc2) ,b0pdmcmcmg)
       call b0pir(cone*abs(ms2) ,cone*abs(ms2) ,b0pdmsmsmg)
       call b0pir(cone*dble(mt2),         mt2  ,b0pdmtmtmg)
-      call b0pir(cone*abs(mb2) ,cone*abs(mb2) ,b0pdmbmbmg)
-
+      if(abs(dimag(mt2)).gt.epsilon) then
+         call b0pcomplexmt(cone*abs(mt2),mt2,b0pdmtmtmg)
+      else
+         call b0pir(cone*abs(mb2) ,cone*abs(mb2) ,b0pdmbmbmg)
+      end if
       call olo_db0(b0pdmwmwmg,dble(mw2),         mw2, zero )
 
       call b0preg(dble(zero)*cone, mw2,zero, b0pd0mwmg)
@@ -1892,18 +2016,76 @@ contains
       call b1pir(cone*abs(md2) ,cone*abs(md2) ,b1pdmdmdmg)
       call b1pir(cone*abs(mc2) ,cone*abs(mc2) ,b1pdmcmcmg)
       call b1pir(cone*abs(ms2) ,cone*abs(ms2) ,b1pdmsmsmg)
-      call b1pir(cone*dble(mt2),         mt2  ,b1pdmtmtmg)
+
+      if(abs(dimag(mt2)).lt.epsilon) then
+         call b1pir(cone*dble(mt2),         mt2  ,b1pdmtmtmg)
+      else
+         call b1pcomplexmt(cone*dble(mt2),  mt2,  b1pdmtmtmg)
+      end if
+
       call b1pir(cone*abs(mb2) ,cone*abs(mb2) ,b1pdmbmbmg)
+
       end subroutine init_scalars
 
 ! routines for scalar integrals (also with olo)
+      subroutine b0pcomplexmt(p2in ,m0 ,out)
+        implicit none
+        complex*16 p2in,m0,out(0:2)
+        real*8 mm,gg,aa
+        complex*16 cone,zero,ii
+        common/complexunit/cone,zero,ii
+        if(dimag(p2in).gt.1d-20)then
+           write(*,*)'improper call to b0pcomplexmt'
+           stop
+        endif
+        out=zero
+        mm=sqrt(dble(m0))
+        gg=-dimag(m0)/mm
+        aa=gg/mm
+        out(0)=(cone-ii*aa)*log((ii*aa-cone)/ii/aa)-cone
+        out(0)=out(0)/mm/mm
+      end subroutine b0pcomplexmt
 
+      subroutine b1pcomplexmt(p2in ,m0 ,out)
+        implicit none
+        complex*16 p2in,m0,out(0:2)
+        real*8 mm,gg,aa
+        complex*16 cone,zero,ii
+        common/complexunit/cone,zero,ii
+        if(dimag(p2in).gt.1d-20)then
+           write(*,*)'improper call to b1pcomplexmt'
+           stop
+        endif
+        out=zero
+        mm=sqrt(dble(m0))
+        gg=-dimag(m0)/mm
+        aa=gg/mm
+        out(0)=-1.5d0+ii*aa+(1d0-aa**2-2d0*ii*aa)*log((ii*aa-cone)/ii/aa)
+        out(0)=-out(0)/mm/mm
+      end subroutine b1pcomplexmt
+      subroutine b1pp0m(p2in, m12, out)
+        implicit none
+        complex*16 p2in,m12,out(0:2),aa,bb
+        complex*16 cone,zero,ii
+        common/complexunit/cone,zero,ii
+        if(dimag(p2in).gt.1d-20)then
+           write(*,*)'improper call to b1pp0m'
+           stop
+        endif
+        out=zero
+        aa=m12/p2in
+        bb=p2in/m12
+        out(0)=-aa/p2in+cone/2d0/p2in-(aa-cone)*log(cone-bb)*aa/p2in
+      end subroutine b1pp0m
       subroutine b1avo(p12,m02,m12,out)
       implicit none
       complex*16 p12,m02,m12,out(0:2)
       complex*16 a,tmp,x1,x2
       integer i1
-      real*8 aa,bb
+      complex*16 aa,bb,coeff,xp,xm
+      complex*32 f0dxp,f1dxp,f2dxp,f3dxp
+      complex*32 f0dxm,f1dxm,f2dxm,f3dxm
+      complex*16 cquad1,cquad2
       complex*16 cone,zero,ii
       common/complexunit/cone,zero,ii
       out(2)=zero
@@ -1916,76 +2098,88 @@ contains
                out(0)=-1d0/6d0/m12
             endif
          else ! not general but here 0M0 doesn't exist
-            a=m02/m12
-            out(0)=-(1-6d0*a+3d0*a*a+2d0*a*a*a-6d0*a*a*log(a))/ &
-      &             6d0/m12/(a-1d0)**4
+            write(*,*)'derivative of b1 in 0,M,0 ?'
+            stop
          endif
          return
       endif
- 
-      if(abs(1d0-abs(p12)/abs(m02)).lt.1d-10) then
-         if(abs(p12).lt.abs(m12)) then
-            out(0)=  -1/(6.*m12) +  &
-     &           p12/(4.*m12**2) +  &
-     &           (p12**2* &
-     &           (137 + 60*Log(1/m12) +  &
-     &           60*Log(p12)))/ &
-     &           (60.*m12**3) +  &
-     &           (p12**3* &
-     &           (243 +  &
-     &           140*Log(1/m12) + & 
-     &           140*Log(p12)))/ &
-     &           (20.*m12**4) +  &
-     &           (4*p12**4* &
-     &           (493 +  &
-     &           315*Log(1/m12) + & 
-     &           315*Log(p12)))/ &
-     &           (35.*m12**5) +  &
-     &           (p12**5* &
-     &           (41263 +  &
-     &           27720*Log(1/m12) + & 
-     &           27720*Log(p12)))/ &
-     &           (168.*m12**6) +  &
-     &           (p12**7* &
-     &           (513209 +  &
-     &           360360*Log(1/m12) + & 
-     &           360360*Log(p12)))/ &
-     &           (120.*m12**8) +  &
-     &           (p12**6* &
-     &           (521789 +  &
-     &           360360*Log(1/m12) + & 
-     &           360360*Log(p12)))/ &
-     &           (504.*m12**7) +  &
-     &           (p12**8* &
-     &           (8633098 + & 
-     &           6126120*Log(1/m12) + & 
-     &           6126120*Log(p12)))/ &
-     &           (495.*m12**9) +  &
-     &           (5*p12**10* &
-     &           (32421637 +  &
-     &           23279256* &
-     &           Log(1/m12) + & 
-     &           23279256*Log(p12)))/ &
-     &           (572.*m12**11) +  &
-     &           (p12**9* &  
-     &           (81443146 +  &
-     &           58198140* &
-     &           Log(1/m12) +  &
-     &           58198140*Log(p12)))/ &
-     &           (1155.*m12**10)
+
+      if(abs(m02).gt.1d-20) then
+         if(abs(1d0-abs(p12)/abs(m02)).lt.1d-10) then
+            if(abs(p12).lt.abs(m12)) then
+               out(0)=  -1/(6.*m12) +  &
+                    &           p12/(4.*m12**2) +  &
+                    &           (p12**2* &
+                    &           (137 + 60*Log(1/m12) +  &
+                    &           60*Log(p12)))/ &
+                    &           (60.*m12**3) +  &
+                    &           (p12**3* &
+                    &           (243 +  &
+                    &           140*Log(1/m12) + & 
+                    &           140*Log(p12)))/ &
+                    &           (20.*m12**4) +  &
+                    &           (4*p12**4* &
+                    &           (493 +  &
+                    &           315*Log(1/m12) + & 
+                    &           315*Log(p12)))/ &
+                    &           (35.*m12**5) +  &
+                    &           (p12**5* &
+                    &           (41263 +  &
+                    &           27720*Log(1/m12) + & 
+                    &           27720*Log(p12)))/ &
+                    &           (168.*m12**6) +  &
+                    &           (p12**7* &
+                    &           (513209 +  &
+                    &           360360*Log(1/m12) + & 
+                    &           360360*Log(p12)))/ &
+                    &           (120.*m12**8) +  &
+                    &           (p12**6* &
+                    &           (521789 +  &
+                    &           360360*Log(1/m12) + & 
+                    &           360360*Log(p12)))/ &
+                    &           (504.*m12**7) +  &
+                    &           (p12**8* &
+                    &           (8633098 + & 
+                    &           6126120*Log(1/m12) + & 
+                    &           6126120*Log(p12)))/ &
+                    &           (495.*m12**9) +  &
+                    &           (5*p12**10* &
+                    &           (32421637 +  &
+                    &           23279256* &
+                    &           Log(1/m12) + & 
+                    &           23279256*Log(p12)))/ &
+                    &           (572.*m12**11) +  &
+                    &           (p12**9* &  
+                    &           (81443146 +  &
+                    &           58198140* &
+                    &           Log(1/m12) +  &
+                    &           58198140*Log(p12)))/ &
+                    &           (1155.*m12**10)
+            else
+               aa = sqrt( 4d0*p12/m12 -1d0)
+               bb = m12 / p12
+               out(0)= 2.d0 * m12 / p12 - 3.d0
+               out(0) = out(0) - ( bb**2 -3d0*bb +1d0 )*log(bb)
+               out(0) = out(0) + ( bb**2 -5d0*bb +5d0 )* &
+                    &              2d0*Atan(aa)/aa 
+               out(0)=-out(0)/2d0/p12
+            endif
+            return
          else
-            aa = sqrt( 4d0*abs(p12)/abs(m12) -1d0)
-            bb = abs(m12) / abs(p12)
-!            out(0) = (bb*bb-3d0*bb+1d0)*log(abs(p12)/abs(m12))
-!     +        - (bb*bb-5d0*bb+5d0)*log((1 -aa)/(1 +aa))/aa)
-            out(0)= 2.d0 * abs(m12) / abs(p12) - 3.d0
-            out(0) = out(0) - ( bb**2 -3d0*bb +1d0 )*log(bb)
-            out(0) = out(0) + ( bb**2 -5d0*bb +5d0 )* &
-     &              2d0*Atan(aa)/aa 
-            out(0)=-out(0)/2d0/abs(p12)
+            if(abs(m02).gt.abs(m12)) then ! for mb,mt,mw
+               ! general expression form green-veltman 1980
+               coeff=-(p12-m02+m12)
+               call qcroots(p12,coeff,m12,xp,xm,cquad1,cquad2)
+               call ffc(xp,f0dxp,f1dxp,f2dxp,f3dxp)
+               call ffc(xm,f0dxm,f1dxm,f2dxm,f3dxm)
+               !
+               out(0)=f3dxp-f3dxm-2d0*(f2dxp-f2dxm)+f1dxp-f1dxm
+               out(0)=out(0)/p12/(xp-xm)
+               return
+            endif
          endif
-         return
-      endif
+      end if
+
 !
       if(abs(m02).lt.1d-20) then ! p0m
          if(abs(m12).gt.abs(p12)) then
@@ -2063,7 +2257,17 @@ contains
 
       endif
       end subroutine b1avo
-    
+      subroutine ffc(yin,f0,f1,f2,f3)
+        implicit none
+        complex*16 yin
+        complex*32 y,f0,f1,f2,f3,qcone
+        qcone=(1q0,0q0)
+        y=yin*qcone
+        f0=-Log(qcone-qcone/y)
+        f1=y*f0-qcone
+        f2=y*f1-0.5d0*qcone
+        f3=y*f2-qcone/(3d0*qcone)
+      end subroutine ffc
       subroutine b0preg(p2i,m02i,m12i,b0peps)
       implicit none
       complex*16 p2i,m02i,m12i
@@ -2672,7 +2876,11 @@ contains
             b0pdsmfmg(i1)   = zero
          enddo
       else
-         call b0pir( s ,mf2 ,b0pdsmfmg)
+         if(abs(dimag(mf2)).lt.1d-20) then
+            call b0pir( s ,mf2 ,b0pdsmfmg)
+         else
+            call b0pcomplexmt( s ,mf2 ,b0pdsmfmg)
+         end if
       endif
       if(abs(mf2).lt.1d-20 .and. abs(mfp2).lt.1d-20) then
          call b0preg(s,mf2,mz2  , b0pdsmfmz)
@@ -2720,8 +2928,7 @@ contains
       logical noqed
       common/qedswitch/noqed
       complex*16 xx
-      logical basta
-      parameter(basta=.true.)
+
       xx=1d0
       if(noqed) xx=zero                                                 
       call olo_onshell( 1d-10 )
@@ -2731,12 +2938,20 @@ contains
             b1pdsmfmg(i1)   = zero
          enddo
       else
-         call b1pir( s ,mf2 ,b1pdsmfmg)
+         if(abs(dimag(mf2)).lt.1d-20) then
+            call b1pir( s ,mf2 ,b1pdsmfmg)
+         else
+            call b1pcomplexmt( s ,mf2 ,b1pdsmfmg)
+         endif
       endif
       call b1avo( s ,mf2 ,mz2,b1pdsmfmz )
       call b1avo( s ,mf2 ,mh2,b1pdsmfmh )
-      call b1avo( s ,mfp2,mw2,b1pdsmfpmw)
-      
+      if(abs(mfp2).lt.10d-20.and.abs(s).gt.abs(mw2)) then
+         call b1pp0m(s, mw2, b1pdsmfpmw)
+      else
+         call b1avo( s ,mfp2,mw2,b1pdsmfpmw)
+      end if
+
       sflpeps(2)= zero
       
       sflpeps(1)= - alsu4pi * (xx*qf**2 * (2.d0*b1pdsmfmg(1)) &
@@ -2780,12 +2995,21 @@ contains
             b1pdsmfmg(i1)   = zero
          enddo
       else
-         call b1pir( s ,mf2 ,b1pdsmfmg)
+         if(abs(dimag(mf2)).lt.1d-20) then
+            call b1pir( s ,mf2 ,b1pdsmfmg)
+         else
+            call b1pcomplexmt( s ,mf2 ,b1pdsmfmg)
+         endif
       endif
 
       call b1avo( s ,mf2 ,mz2,b1pdsmfmz )
       call b1avo( s ,mf2 ,mh2,b1pdsmfmh )
-      call b1avo( s ,mfp2,mw2,b1pdsmfpmw)
+      if(abs(mfp2).lt.10d-20.and.abs(s).gt.abs(mw2)) then
+         call b1pp0m(s, mw2, b1pdsmfpmw)
+      else
+         call b1avo( s ,mfp2,mw2,b1pdsmfpmw)
+      end if
+
       
       sfrpeps(2)= zero
       

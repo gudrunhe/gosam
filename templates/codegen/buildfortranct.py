@@ -35,7 +35,26 @@ def corr_dim_abbrev(abbrev):
   for (i,j) in zip(match,new_abbrev):
     abbrev=abbrev.replace(i,j)
 
-  match=re.findall(r'UV\w+\d+',abbrev) or re.findall(r'gct\w+',abbrev)
+  match=re.findall(r'UV\w+\d+',abbrev) or re.findall(r'gct\w+',abbrev)[%
+@if generate_ct_internal %]
+  new_abbrev=[]
+  for element in match:
+      if not (element+'(:)' in new_abbrev):
+        element=element.replace('gct','g1ct')
+	new_abbrev.append(element.replace(element,element+'(:)'))  
+  match.sort()
+  match.reverse()
+  new_abbrev.sort()
+  new_abbrev.reverse()
+  
+  for element in new_abbrev:
+    try:
+      i= new_abbrev.index(element)
+      abbrev=abbrev.replace(match[i],new_abbrev[i])
+    except ValueError:
+      pass
+  abbrev=abbrev.replace('g1ct','gct')[%
+@else %]  
   new_abbrev=[]
   for element in match:
       if not (element+'(:)' in new_abbrev):
@@ -47,7 +66,8 @@ def corr_dim_abbrev(abbrev):
       abbrev=abbrev.replace(element,new_abbrev[i])
       del new_abbrev[i]
     except ValueError:
-      pass
+      pass[%
+@end @if %]           
     
   return abbrev
     
@@ -112,7 +132,6 @@ f90file.write('      use [% process_name asprefix=\_ %]ew_ct\n')[%
 f90file.write('      implicit none\n')[%
 @if generate_ct_internal %]
 f90file.write('      include "../common/dzdecl.h"\n')      
-f90file.write('      include "../common/ddrrdecl.h"\n')
 f90file.write('      include "../common/declscalars.h"\n')
 f90file.write('      include "../common/realparam.h"\n')[%
 @end @if %]  
