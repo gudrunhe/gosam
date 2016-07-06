@@ -322,12 +322,12 @@
 
 
 % QCD
-[Ubar, U, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
-[Dbar, D, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
-[Sbar, S, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
-[Cbar, C, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
-[Bbar, B, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
-[Tbar, T, g, Cx;   gs='+1', gw='2', QCD='+1', QED='2', RK='0']
+[Ubar, U, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
+[Dbar, D, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
+[Sbar, S, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
+[Cbar, C, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
+[Bbar, B, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
+[Tbar, T, g, Cx;   gs='+1', gw='+2', QCD='+1', QED='+2', RK='0']
 
 % VVVV
 [Wp, Wm, Z, Z, Cx; gs='0', gw='+4', QCD='0', QED='+4', RK='0']

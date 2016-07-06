@@ -1474,6 +1474,7 @@ class LoopCache:
 
       # Invalidate Cache
       self._roots = None
+              
 
    def partition(self, MQSE=True):
       if self._roots is not None:
