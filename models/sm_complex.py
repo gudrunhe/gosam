@@ -379,7 +379,7 @@ functions = {
    'gWWXX': '1/2/sw/sw',
    'gWWPP': '1/2/sw/sw',
    'gAAPP': '2',
-   'gAZPP': '- (cw*cw-sw*sw)/cw/sw',
+   'gAZPP': '-1*(cw*cw-sw*sw)/cw/sw',
    'gZZPP': ' ((cw*cw-sw*sw)/cw/sw)^2/2',
    'gWAPH': '- 1/2/sw',
    'gWZPH': '- 1/2/cw',
@@ -428,7 +428,7 @@ functions = {
    'gGWX': '- i_*csqrt(mW*mW-i_*mW*wW)/2/sw',
    'gGWH': '- csqrt(mW*mW-i_*mW*wW)/2/sw',
    'gGZH': '- csqrt(mW*mW-i_*mW*wW)/(2*cw*cw*sw)',
-   'gGWZP': '- (cw*cw-sw*sw)/(2*cw*sw)*csqrt(mW*mW-i_*mW*wW)',
+   'gGWZP': '-1*(cw*cw-sw*sw)/(2*cw*sw)*csqrt(mW*mW-i_*mW*wW)',
    'gGZWP': 'csqrt(mW*mW-i_*mW*wW)/(2*cw*sw)',
    'gH': '1/(24*pi*pi*csqrt(mW*mW-i_*mW*wW)*sw)',
 
