@@ -44,5 +44,4 @@ kinematics:
       @end @if %][%
    @end @for %]][%
 @end @for %]
-  dimension: dimS
 

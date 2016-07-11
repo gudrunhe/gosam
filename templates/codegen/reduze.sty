@@ -5,6 +5,9 @@
 #
 #  QGRAF style-file to generate the diagrams in a YAML readable format
 #
+#  2015-07-11 changed ordering of fields in propagator loop
+#  2016-05-03 changed "mass" to "MASS" for GoSam compatibility (Stephen Jones)
+#
 # ##############################################################################
 
 <prologue>
@@ -33,12 +36,17 @@ qgraf_globals:
 #   * The momenta directions of the initial state particles are
 #     incoming and the momenta of the final state particles are
 #     outgoing.
-#   * A Propagator has two fields: anti-particle and particle.
-#     The direction of the momentum of the propagator (from-vertex
-#     to to-vertex) is given by the momentum of the second field.
-#     This is the same direction as the particle (charge) flow.
 #   * The momenta of the fields around a vertex are all ingoing
 #     to that vertex.
+#   * For a propagator, the first entry in the fields list specifies
+#     the particle type and the propagator momentum along the particle
+#     flow.
+#   * Particle flows are directed from higher to lower field indices,
+#     such that fermion chains will usually be assembled from lower
+#     to higher field indices. 
+#   * When glueing together a vertex and a propagator at a given field
+#     index, the particle names in the respective first entries of the
+#     field specifications coincide.
 #
 
 <diagram>
@@ -57,11 +65,13 @@ diagram:
 <back>
   propagators:
   <back><back><back><propagator_loop>
-    - [[ [[<dual-vertex_index>, <vertex_index>]], <field>_<dual-field>:
-<back> [[[[<dual-field>, <field_type>, <field_sign>1, <dual-momentum>, [MASS],
-<back> <dual-field_index>]],
-<back> [[<field>, <field_type>, <field_sign>1, <momentum>, [MASS],
-<back> <field_index>]]]] ]]<end>
+    - [[
+<back> [[<dual-vertex_index>, <vertex_index>]], <field>_<dual-field>:
+<back> [[[[<field>, <field_type>, <field_sign>1, <momentum>, [MASS],
+<back> <field_index>]],
+<back> [[<dual-field>, <field_type>, <field_sign>1, <dual-momentum>, [MASS],
+<back> <dual-field_index>]]]]
+<back> ]]<end>
 <back>
   vertices:
   <back><back><back><vertex_loop>

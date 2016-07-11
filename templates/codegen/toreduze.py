@@ -1,25 +1,26 @@
 # vim: ts=3:sw=3:expandtab
 
+from yaml import load, dump
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
 
 parser.add_argument("-i", "--intfile", dest="intfile",
                     action="store", type=str, required=True,
-                    help="integrals input file", metavar="INTFILE")
+                    help='integrals input file', metavar="INTFILE")
 
 parser.add_argument("-s", "--secfile", dest="secfile",
                     action="store", type=str, required=True,
-                    help='the file "find_diagram_schifts_for_reduze#loop_yaml.log"',
+                    help='the Reduze output file "crss.yaml" produced by the Reduze job setup_sector_mappings_alt',
                     metavar="SECFILE")
 
 parser.add_argument("-t", "--txtfile", dest="txtfile",
                     action="store", type=str, required=True,
-                    help="txt output file", metavar="OUTFILE")
+                    help='txt output file', metavar="OUTFILE")
 
 parser.add_argument("-y", "--yamlfile", dest="yamlfile",
                     action="store", type=str, required=True,
-                    help="yaml output file", metavar="OUTFILE")
+                    help='yaml output file', metavar="OUTFILE")
 
 args = parser.parse_args()
 
@@ -102,48 +103,54 @@ jobs:
           - { r: [t, 7], s: [0, 4] }
 """
 
-# read input file
+# read secfile file
+# example:
+"""
+-
+  -
+    - sector_selection:
+        select_all: false
+        select:
+          []
+        select_recursively:
+          - [ReduzeF2L1, 15]
+          - [ReduzeF1L1, 15]
+        deselect:
+          []
+        deselect_recursively:
+          []
+        deselect_independents:
+          []
+        deselect_graphless: false
+        t_restriction: [-1, -1]
+"""
 with open(args.secfile, 'r') as infile:
-   instring = infile.read()
+   inyaml = load(infile)
 
-# remove everything before the line "sector_selection:"
-instring = instring[instring.index("sector_selection:"):]
+# select identities to be generated and used by reduze
+identities = {
+    "ibp":
+        [{"r": ["t", rmax], "s": [0, smax]}],
+    "lorentz":
+        [{"r": [rmax, rmax], "s": [smax, smax]}],
+    "sector_symmetries":
+        [{"r": ["t", rmax], "s": [0, smax]}]
+}
 
-# make sure that "sector_selection:" occurs only once in the string
-assert instring.rindex("sector_selection:") == 0, 'Found "sector_selection:" more than once'
+# add identities key to sector selection, need to strip three - - -
+inyaml[0][0][0]["identities"] = identities
 
-# split string into lines
-inlines = instring.split("\n")
-
-# keep only the indented lines after "sector_selection:"
-outlines = ["sector_selection:"]
-for line in inlines[1:]:
-   if line.startswith(" "):
-      outlines.append(line)
-   else:
-      break
-
-# must increase indentation
-outlines = ["      " + outline for outline in outlines]
+# generate output yaml file with reduce_sectors job
+outyaml = {
+    "jobs":
+        [
+            {"reduce_sectors":
+                 inyaml[0][0][0]
+             }
+        ]
+}
 
 # write yaml file
+# large width aids human readibility by preventing lines from wrapping
 with open(args.yamlfile, 'w') as outfile:
-   # prepend
-   outfile.write("jobs:\n")
-   outfile.write("  - reduce_sectors:\n")
-   outfile.write("      conditional: true\n")
-
-   # sector selection
-   for line in outlines:
-      outfile.write(line)
-      outfile.write("\n")
-
-   # append
-   outfile.write("      identities:\n")
-   outfile.write("         ibp:\n")
-   outfile.write("           - {r: [t, %(rmax)d], s: [0, %(smax)d] }\n" % maxvals)
-   outfile.write("         lorentz:\n")
-   outfile.write("           - {r: [%(rmax)d, %(rmax)d], s: [%(smax)d, %(smax)d] }\n" % maxvals)
-   outfile.write("         sector_symmetries:\n")
-   outfile.write("           - {r: [t, %(rmax)d], s: [0, %(smax)d] }\n" % maxvals)
-
+    outfile.write(dump(outyaml, width=10000))
