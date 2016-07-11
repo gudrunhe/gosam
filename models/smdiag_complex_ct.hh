@@ -287,12 +287,12 @@ Id CR([field.Bbar], [field.T], [field.Wm], [field.Cx]) = 0;
 
 *---#[   AFF :
 #Do f={U,D,C,S,T,B}
-   Id CL([field.`f'bar], [field.`f'], [field.A], [field.Cx]) = PREFACTOR(- (`Q`f'') * e * gctAl`f');
-   Id CR([field.`f'bar], [field.`f'], [field.A], [field.Cx]) = PREFACTOR(- (`Q`f'') * e * gctAr`f');
+   Id CL([field.`f'bar], [field.`f'], [field.A], [field.Cx]) = PREFACTOR( e * gctAl`f');
+   Id CR([field.`f'bar], [field.`f'], [field.A], [field.Cx]) = PREFACTOR( e * gctAr`f');
 #EndDo
 #Do f={e,mu,tau}
-	Id CL([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR(- (`Q`f'') * e * gctAl`f');
-	Id CR([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR(- (`Q`f'') * e * gctAr`f');
+	Id CL([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR( e * gctAl`f');
+	Id CR([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR( e * gctAr`f');
 #EndDo
 *---#]   AFF :
 *---#[   ZFF :
