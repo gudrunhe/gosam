@@ -517,9 +517,30 @@ def workflow(conf):
 	ini = conf.getProperty(golem.properties.qgraf_in)
 	fin = conf.getProperty(golem.properties.qgraf_out)
 	path = golem.util.tools.process_path(conf)
+	#conf["helsum"] = conf.getBooleanProperty(golem.properties.sum_helicities)
+	
 
-	orders = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
-	powers = orders[0] if orders else []
+        if conf["__OLP_MODE__"]:
+            correction_type = conf.getProperty("olp.correctiontype", default=None)
+            if correction_type=="EW":
+                correction_type="QED"
+            powers=[]
+            for i, power in enumerate(conf.getProperty(golem.properties.qgraf_power)):
+                if power == correction_type:
+                    j = i+1
+                    powers.append(correction_type)
+                    for k, entry in enumerate(conf.getProperty(golem.properties.qgraf_power)[j:]):
+                        if entry != ("QCD" or "QED" or "EW"):
+                            powers.append(entry)
+                        else:
+                            break
+                        
+                        
+                        
+        else:
+            powers = conf.getProperty(golem.properties.qgraf_power)
+            
+
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
@@ -716,7 +737,8 @@ def workflow(conf):
 	if "shared" in ext:
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
-
+		
+		
 	if conf.getBooleanProperty("helsum"):
 		if not conf.getBooleanProperty("generate_lo_diagrams"):
 			raise GolemConfigError(
