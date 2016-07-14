@@ -256,10 +256,6 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    conf["__max_rank__"] = max_rank
    
 
-   print keep_tot
-   print len(keep_tot)
-   print keep
-   print len(keep)
 
    return keep, keep_tot, eprops, loopcache, loopcache_tot
 
