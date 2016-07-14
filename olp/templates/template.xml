@@ -20,6 +20,7 @@
 	</file>
 	<file src="configure.ac" class="OLP" usedby="olp">
 		<only if-extension="autotools"/>
+                <only if-option="helsum" value="true" />
 	</file>
 	<file src="autogen.sh" class="Verbatim" usedby="olp" executable="yes">
 		<only if-extension="autotools"/>

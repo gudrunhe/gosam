@@ -21,7 +21,7 @@
 *
 #Procedure ExpandVertices
 
-
+[% @if generate_ct_internal %]
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *%                                             %
 *%                   EW-CT                     %
@@ -224,7 +224,8 @@ id vertex(iv?,
 	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
 	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
        i_ * C(field1, field2, field3, [field.Cx]);
-*---#] SGG vertex (A.2.28) :
+*---#] SGG vertex (A.2.28) :[%
+@end @if %]
 
 
 
