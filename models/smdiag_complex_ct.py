@@ -496,7 +496,8 @@ latex_names = {
    'ghWp':    'u_+',
    'ghWpbar': '\\bar{u}_+',
    'ghWm':    'u_-',
-   'ghWmbar': '\\bar{u}_-'
+   'ghWmbar': '\\bar{u}_-',
+   'Cx': 'Cx'
 }
 #---#] latex_names:
 #---#[ line_styles:
