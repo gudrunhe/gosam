@@ -65,8 +65,8 @@ id vertex(iv?,
         );
 
 id vertex(iv?,
-    field1?   , idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C1?,
-    field2?   , idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C1?,
+    field1?   , idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
+    field2?   , idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
     [field.Cx], idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) =
                  i_ * (
         + CL(field1, field2, [field.Cx]) *
@@ -178,7 +178,23 @@ id vertex(iv?,
 		  )
 		) * dcolor(iv1C3, iv2C3);
 *---#] VFF vertex (A.2.20) :
-
+*---#[ VFF vertex (QCD) (2.4.32) :
+            id vertex(iv?,
+                      field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
+                      field2?, idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
+                      field3?, idx3?,  2, vDUMMY3?, iv3L?,  8, iv3C8?,
+                      [field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =i_ * (
+        + 1/2 * (CR(field1, field2, field3, [field.Cx])
+                        + CL(field1, field2, field3, [field.Cx]) ) *
+          NCContainer(Sm(iv3L), iv1L, iv2L)
+        + (CR(field1, field2, field3, [field.Cx])
+                - CL(field1, field2, field3, [field.Cx])) *
+            1/4 * (1 + 2*deltaaxial) * (
+            + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
+            - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
+            )
+        ) * T(iv3C8, iv1C3, iv2C3);
+*---#] VFF vertex (QCD) (2.4.32) :
 *---#[ SFF vertex (A.2.24) :
 * TODO: Have a look at hep-ph/9302240 --> peudoscalar coupling might not be correct yet.
 id vertex(iv?,

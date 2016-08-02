@@ -872,7 +872,7 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 
 	keep_ct = []
 	ct_signs = {}
-	if generate_ct_internal:
+	if generate_virt and generate_ct_internal:
 		modname = consts.PATTERN_TOPOLOPY_CT
 		modname_LO = consts.PATTERN_TOPOLOPY_LO
 		fname = os.path.join(path, "%s.py" % modname)
