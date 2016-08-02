@@ -434,6 +434,7 @@ def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):
 
    debug("After analyzing ct diagrams: keeping %d, purging %d" % 
          (len(keep), len(lose)))
+
    return keep, signs #, flows
 
 def analyze_diagram(diagram, zero, fltr):

@@ -170,6 +170,7 @@ Id CM([field.`f'p], [field.`f'm], [field.Cx]) = PREFACTOR(gctCM`f');
 #do f={U,D,S,C,B,T}
        Id CR([field.`f'bar], [field.`f'], [field.g], [field.Cx]) = PREFACTOR(gs * gctGr`f');
        Id CL([field.`f'bar], [field.`f'], [field.g], [field.Cx]) = PREFACTOR(gs * gctGl`f');
+       Id C([field.`f'bar], [field.`f'], [field.g], [field.Cx]) = PREFACTOR(gs * gctGl`f');
 #enddo
 *---#] FFV (QCD) (2.4.32) :
 
