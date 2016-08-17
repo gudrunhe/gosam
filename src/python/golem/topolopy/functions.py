@@ -163,6 +163,10 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
 
       signs[idx] = diagram.sign()
    #   flows[idx] = diagram.fermion_flow()
+   #keep.remove(1)
+   #lose.append(1)
+   #keep.remove(3)
+   #lose.append(3)
 
    debug("After analyzing tree diagrams: keeping %d, purging %d" % 
          (len(keep), len(lose)))
@@ -433,11 +437,29 @@ def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):
 
       for prop in diagram._propagators.items():
           if str(prop[1]._mom).find('kx')>=0 and len(str(prop[1]._mom))<=6:
-              keep.remove(idx)
-              lose.append(idx)
+              try:
+                keep.remove(idx)
+                lose.append(idx)
+              except:
+                pass
 
 
       signs[idx] = diagram.sign()
+      
+   #keep.remove(1)
+   #lose.append(1)
+   #keep.remove(2)
+   #lose.append(2)
+   #keep.remove(3)
+   #lose.append(3)
+   #keep.remove(4)
+   #lose.append(4)
+   #keep.remove(5)
+   #lose.append(5)
+   #keep.remove(8)
+   #lose.append(8)   
+   #keep.remove(10)
+   #lose.append(10)
    #   flows[idx] = diagram.fermion_flow()
 
    debug("After analyzing ct diagrams: keeping %d, purging %d" % 

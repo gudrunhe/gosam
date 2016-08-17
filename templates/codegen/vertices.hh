@@ -54,9 +54,9 @@ id vertex(iv?,
     field2?   , idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,
     [field.Cx], idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) =
                  i_ * (
-        + CL(field1, field2, [field.Cx]) *
+        - CL(field1, field2, [field.Cx]) *
           NCContainer(Sm(vDUMMY1)*ProjMinus, iv1L, iv2L)
-        + CR(field1, field2, [field.Cx]) *
+        - CR(field1, field2, [field.Cx]) *
           NCContainer(Sm(vDUMMY1)*ProjPlus , iv1L, iv2L)
         - CM(field1, field2, [field.Cx]) *
           NCContainer(ProjMinus, iv1L, iv2L)
@@ -69,9 +69,9 @@ id vertex(iv?,
     field2?   , idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
     [field.Cx], idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) =
                  i_ * (
-        + CL(field1, field2, [field.Cx]) *
+        - CL(field1, field2, [field.Cx]) *
           NCContainer(Sm(vDUMMY1)*ProjMinus, iv1L, iv2L)
-        + CR(field1, field2, [field.Cx]) *
+        - CR(field1, field2, [field.Cx]) *
           NCContainer(Sm(vDUMMY1)*ProjPlus , iv1L, iv2L)
         - CM(field1, field2, [field.Cx]) *
           NCContainer(ProjMinus, iv1L, iv2L)
