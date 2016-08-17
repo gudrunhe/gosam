@@ -675,54 +675,54 @@ contains
 ! it is equivalent to keep dm(re) and dz separately !       
          ddMW2(1)=ddMW2(1) + 2d0/3d0*MW2/SW2*alsu4pi
          ddMZ2(1)=ddMZ2(1) + 2d0/3d0*cw2*MZ2/sw2*alsu4pi
-         ddMH2(1)=ddMH2(1) + 3d0*(2d0*cw2*MW2+MZ2)/2d0/cw2/sw2
+         ddMH2(1)=ddMH2(1) + 3d0*(2d0*cw2*MW2+MZ2)/2d0/cw2/sw2*alsu4pi
 
-         dtad(1) =dtad(1) - convt
+         dtad(1) =dtad(1) - convt ! this already includes alsu4pi
 
          ddcwcw(1)=0.5d0*(ddmw2(1)/mw2-ddmz2(1)/mz2) ! dcw/cw
          ddswsw(1)=-cw2/sw2*ddcwcw(1) ! dsw/sw
 ! effectively only if are massive
          ddmu2(1) = ddmu2(1) + MU*((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmd2(1) = ddmd2(1) + MD*(9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddme2(1) = ddme2(1) + ME*(1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
          ddmc2(1) = ddmc2(1) + Mc*((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddms2(1) = ddms2(1) + Ms*(9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmm2(1) = ddmm2(1) + MM*(1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
 ! scheme change on sigma:: not sigma' :: mass multiplied afterwards
 ! same scheme conversion for RE and CMPLX top mass  
          ddmt2(1) = ddmt2(1) + sqrt(dble(mt2))*((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
 
 
          ddmb2(1) = ddmb2(1) + mb*(9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmtl2(1) = ddmtl2(1) + mtl*(1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
 
          ddmu2omu(1) = ddmu2omu(1) + ((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmd2omd(1) = ddmd2omd(1) + (9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddme2ome(1) = ddme2ome(1) + (1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
          ddmc2omc(1) = ddmc2omc(1) + ((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddms2oms(1) = ddms2oms(1) + (9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmm2omm(1) = ddmm2omm(1) + (1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
          ddmt2omt(1) = ddmt2omt(1) +          ((3d0-4d0*sw2)**2 &
-                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+8d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmb2omb(1) = ddmb2omb(1) + (9d0+4d0*sw2**2 &
-                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2
+                        +2d0*cw2*(9d0+2d0*sw2))/72d0/cw2/sw2*alsu4pi
          ddmtl2omtl(1) = ddmtl2omtl(1) + (1d0+4d0*(-2d0+sw2)*sw2 &
-                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2
+                        +cw2*(2d0+4d0*sw2))/8d0/cw2/sw2*alsu4pi
 
 
          ddzel(1)=ddzel(1) -(1d0+2d0*CW2)/4d0/CW2/SW2*alsu4pi
@@ -895,33 +895,33 @@ contains
 ! fermion propagator A.5
          gctCLU(i1)=0.5d0*(ddzul(i1)+conjg(ddzul(i1)))
          gctCRU(i1)=0.5d0*(ddzur(i1)+conjg(ddzur(i1)))
-         gctCPU(i1)=xx*(mu*conjg(ddzul(i1))+mu*ddzur(i1)+ddmu2(i1))
-         gctCMU(i1)=xx*(mu*conjg(ddzur(i1))+mu*ddzul(i1)+ddmu2(i1))
+         gctCPU(i1)=xx*(mu*conjg(ddzul(i1)/2d0)+mu*ddzur(i1)/2d0+ddmu2(i1))
+         gctCMU(i1)=xx*(mu*conjg(ddzur(i1)/2d0)+mu*ddzul(i1)/2d0+ddmu2(i1))
 !
          gctCLC(i1)=0.5d0*(ddzcl(i1)+conjg(ddzcl(i1)))
          gctCRC(i1)=0.5d0*(ddzcr(i1)+conjg(ddzcr(i1)))
-         gctCPC(i1)=xx*(mc*conjg(ddzcl(i1))+mc*ddzcr(i1)+ddmc2(i1))
-         gctCMC(i1)=xx*(mc*conjg(ddzcr(i1))+mc*ddzcl(i1)+ddmc2(i1))
+         gctCPC(i1)=xx*(mc*conjg(ddzcl(i1)/2d0)+mc*ddzcr(i1)/2d0+ddmc2(i1))
+         gctCMC(i1)=xx*(mc*conjg(ddzcr(i1)/2d0)+mc*ddzcl(i1)/2d0+ddmc2(i1))
 ! 
          gctCLT(i1)=0.5d0*(ddztl(i1)+conjg(ddztl(i1)))
          gctCRT(i1)=0.5d0*(ddztr(i1)+conjg(ddztr(i1)))
-         gctCPT(i1)=mt*(conjg(ddztl(i1))+ddztr(i1)+ddmt2omt(i1))
-         gctCMT(i1)=mt*(conjg(ddztr(i1))+ddztl(i1)+ddmt2omt(i1))
+         gctCPT(i1)=mt*(conjg(ddztl(i1)/2d0)+ddztr(i1)/2d0+ddmt2omt(i1))
+         gctCMT(i1)=mt*(conjg(ddztr(i1)/2d0)+ddztl(i1)/2d0+ddmt2omt(i1))
 !
          gctCLD(i1)=0.5d0*(ddzdl(i1)+conjg(ddzdl(i1)))
          gctCRD(i1)=0.5d0*(ddzdr(i1)+conjg(ddzdr(i1)))
-         gctCPD(i1)=xx*(md*conjg(ddzdl(i1))+md*ddzdr(i1)+ddmd2(i1))
-         gctCMD(i1)=xx*(md*conjg(ddzdr(i1))+md*ddzdl(i1)+ddmd2(i1))
+         gctCPD(i1)=xx*(md*conjg(ddzdl(i1)/2d0)+md*ddzdr(i1)/2d0+ddmd2(i1))
+         gctCMD(i1)=xx*(md*conjg(ddzdr(i1)/2d0)+md*ddzdl(i1)/2d0+ddmd2(i1))
 !
          gctCLS(i1)=0.5d0*(ddzsl(i1)+conjg(ddzsl(i1)))
          gctCRS(i1)=0.5d0*(ddzsr(i1)+conjg(ddzsr(i1)))
-         gctCPS(i1)=xx*(ms*conjg(ddzsl(i1))+ms*ddzsr(i1)+ddms2(i1))
-         gctCMS(i1)=xx*(ms*conjg(ddzsr(i1))+ms*ddzsl(i1)+ddms2(i1))
+         gctCPS(i1)=xx*(ms*conjg(ddzsl(i1)/2d0)+ms*ddzsr(i1)/2d0+ddms2(i1))
+         gctCMS(i1)=xx*(ms*conjg(ddzsr(i1)/2d0)+ms*ddzsl(i1)/2d0+ddms2(i1))
 !
          gctCLB(i1)=0.5d0*(ddzbl(i1)+conjg(ddzbl(i1)))
          gctCRB(i1)=0.5d0*(ddzbr(i1)+conjg(ddzbr(i1)))
-         gctCPB(i1)=xx*(mb*conjg(ddzbl(i1))+mc*ddzbr(i1)+ddmb2(i1))
-         gctCMB(i1)=xx*(mb*conjg(ddzbr(i1))+mc*ddzbl(i1)+ddmb2(i1))
+         gctCPB(i1)=xx*(mb*conjg(ddzbl(i1)/2d0)+mc*ddzbr(i1)/2d0+ddmb2(i1))
+         gctCMB(i1)=xx*(mb*conjg(ddzbr(i1)/2d0)+mc*ddzbl(i1)/2d0+ddmb2(i1))
 !
          gctCLne(i1)=0.5d0*(ddznel(i1)+conjg(ddznel(i1)))
          gctCRne(i1)=0d0!0.5d0*(ddzner(i1)+conjg(ddzner(i1)))
@@ -934,19 +934,19 @@ contains
 !
          gctCLe(i1)=0.5d0*(ddzel(i1)+conjg(ddzel(i1)))
          gctCRe(i1)=0.5d0*(ddzer(i1)+conjg(ddzer(i1)))
-         gctCPe(i1)=xx*(me*conjg(ddzel(i1))+me*ddzer(i1)+ddme2(i1))
-         gctCMe(i1)=xx*(me*conjg(ddzer(i1))+me*ddzel(i1)+ddme2(i1))
+         gctCPe(i1)=xx*(me*conjg(ddzel(i1)/2d0)+me*ddzer(i1)/2d0+ddme2(i1))
+         gctCMe(i1)=xx*(me*conjg(ddzer(i1)/2d0)+me*ddzel(i1)/2d0+ddme2(i1))
 !
          gctCLmu(i1)=0.5d0*(ddzml(i1)+conjg(ddzml(i1)))
          gctCRmu(i1)=0.5d0*(ddzmr(i1)+conjg(ddzmr(i1)))
-         gctCPmu(i1)=xx*(mm*conjg(ddzml(i1))+mm*ddzmr(i1)+ddmm2(i1))
-         gctCMmu(i1)=xx*(mm*conjg(ddzmr(i1))+mm*ddzml(i1)+ddmm2(i1))
+         gctCPmu(i1)=xx*(mm*conjg(ddzml(i1)/2d0)+mm*ddzmr(i1)/2d0+ddmm2(i1))
+         gctCMmu(i1)=xx*(mm*conjg(ddzmr(i1)/2d0)+mm*ddzml(i1)/2d0+ddmm2(i1))
 !
          gctCLtau(i1)=0.5d0*(ddztll(i1)+conjg(ddztll(i1)))
          gctCRtau(i1)=0.5d0*(ddztlr(i1)+conjg(ddztlr(i1)))
-         gctCPtau(i1)=xx*(mtl*conjg(ddztll(i1))+mtl*ddztlr(i1) &
+         gctCPtau(i1)=xx*(mtl*conjg(ddztll(i1)/2d0)+mtl*ddztlr(i1)/2d0 &
               +ddmtl2(i1))
-         gctCMtau(i1)=xx*(mtl*conjg(ddztlr(i1))+mtl*ddztll(i1) &
+         gctCMtau(i1)=xx*(mtl*conjg(ddztlr(i1)/2d0)+mtl*ddztll(i1)/2d0 &
               +ddmtl2(i1))
 !c quartic gauge boson interaction A.6
          gctWWZZ(i1) = -(cw2/sw2)*( 2d0*ddee(i1) &
@@ -3178,6 +3178,8 @@ contains
       complex*16 sw,cw,sw2,cw2,sw4,cw4,alpha,el2,alsu4pi
       common/couplings/sw,sw2,sw4,cw,cw2,cw4,alpha,el2,alsu4pi
 
+      real*8 xxme,xxmm,xxmtl,xxmu,xxmd,xxmc,xxms,xxmt,xxmb
+      
       saatpeps(2)= zero
 ! in s=0
       saatpeps(1)= 2.d0/3.d0*( &
@@ -3196,37 +3198,60 @@ contains
      &     +3.d0 * b0d0mwmw(1) 
       saatpeps(1)= - alsu4pi * saatpeps(1)
 
+      ! if fermions are massive -2*m2*b0p+1/3 =0d0
+      ! if they are massless put -2*m2*b0p+1/3 =0d0 rather than 1/3
+      ! that wouldn't be smooth
+      ! in practice always avoided in the mixed agf-a0 scheme
+      xxme =1d0
+      xxmm =1d0
+      xxmtl=1d0
+      xxmu =1d0
+      xxmd =1d0
+      xxmc =1d0
+      xxms =1d0
+      xxmt =1d0
+      xxmb =1d0
+      if(dble(me2).lt.1d-20) xxme=0d0
+      if(dble(mm2).lt.1d-20) xxmm=0d0
+      if(dble(mtl2).lt.1d-20) xxmtl=0d0
+      if(dble(mu2).lt.1d-20) xxmu=0d0
+      if(dble(md2).lt.1d-20) xxmd=0d0
+      if(dble(mc2).lt.1d-20) xxmc=0d0
+      if(dble(ms2).lt.1d-20) xxms=0d0
+      if(dble(mt2).lt.1d-20) xxmt=0d0
+      if(dble(mb2).lt.1d-20) xxmb=0d0
 
+      
       saatpeps(0)= 2.d0/3.d0*( &
 !* sum over three charged leptons
      &      2.d0*ql*ql*( (-1.d0)*b0d0meme(0)  &
      &                    - (s+2.d0*me2*cone)*b0pd0meme(0) &
-     &                    + 1.d0/3.d0*cone ) &
+     &                    + 1.d0/3.d0*cone*xxme ) &
      &     +2.d0*ql*ql*( (-1.d0)*b0d0mmmm(0)  &
      &                    - (s+2.d0*mm2*cone)*b0pd0mmmm(0) &
-     &                    + 1.d0/3.d0*cone ) &
+     &                    + 1.d0/3.d0*cone*xxmm ) &
      &     +2.d0*ql*ql*( (-1.d0)*b0d0mlml(0) &
      &                    -(s+2.d0*mtl2*cone)*b0pd0mlml(0) &
-     &                    + 1.d0/3.d0*cone ) &
+     &                    + 1.d0/3.d0*cone*xxmtl ) &
 !* sum over quarks
      &     +3.d0* 2.d0*qu*qu*( (-1.d0)*b0d0mumu(0) &
      &                          - (s+2.d0*mu2*cone)*b0pd0mumu(0) &
-     &                        + 1.d0/3.d0*cone ) &
+     &                        + 1.d0/3.d0*cone*xxmu ) &
      &     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0d0mdmd(0) &
      &                          - (s+2.d0*md2*cone)*b0pd0mdmd(0) &
-     &                        + 1.d0/3.d0*cone ) &
+     &                        + 1.d0/3.d0*cone*xxmd ) &
      &     +3.d0* 2.d0*qu*qu*( (-1.d0)*b0d0mcmc(0) &
      &                          - (s+2.d0*mc2*cone)*b0pd0mcmc(0) &
-     &                        + 1.d0/3.d0*cone ) &
+     &                        + 1.d0/3.d0*cone*xxmc ) &
      &     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0d0msms(0) &
      &                          - (s+2.d0*ms2*cone)*b0pd0msms(0) &
-     &                        + 1.d0/3.d0*cone ) &
+     &                        + 1.d0/3.d0*cone*xxms ) &
      &     +3.d0* 2.d0*qu*qu*( (-1.d0)*b0d0mtmt(0) &
      &                          - (s+2.d0*mt2*cone)*b0pd0mtmt(0) &
-     &                        + 1.d0/3.d0*cone ) &
+     &                        + 1.d0/3.d0*cone*xxmt ) &
      &     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0d0mbmb(0) &
      &                          - (s+2.d0*mb2*cone)*b0pd0mbmb(0) &
-     &                        + 1.d0/3.d0*cone ) ) &
+     &                        + 1.d0/3.d0*cone*xxmb ) ) &
 !* bosonic part
      &    +3.d0 * b0d0mwmw(0) + (3.d0*s + 4.d0*mw2) * b0pd0mwmw(0)
       saatpeps(0) = - alsu4pi * saatpeps(0)
