@@ -641,7 +641,7 @@ contains
                             &      / (1.0_ki - mu1_2 - mu2_2)
                       rho   = sqrt((1.0_ki - v_jk)/(1.0_ki + v_jk))
                       ! (6.20), case 1, both massive
-                      V_SING_QED(1) = log(rho)/v_jk
+                      V_SING_QED(1) = log(rho)/v_jk + 1.0_ki
                       V_SING_QED(2) = 0.0_ki
                else
                        V_SING_QED(1) = 0.5_ki * (5.0_ki/2.0_ki+log(m1_2/s_jk))
