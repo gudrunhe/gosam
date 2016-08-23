@@ -28,7 +28,7 @@
    integer, parameter, public :: num_gluons = [%
       count particles adjoint vector lightlike %]
    integer, parameter, public :: num_photons = [%
-      count particles vector lightlike %]      
+      count particles white vector lightlike %]      
    integer, parameter, public :: lo_qcd_couplings = [% loqcd %]
    integer, parameter, public :: lo_ew_couplings = [% loew %]   
    logical, parameter, public :: corrections_are_qcd = [%
