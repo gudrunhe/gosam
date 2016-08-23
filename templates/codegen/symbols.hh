@@ -466,6 +466,12 @@ AutoDeclare CFunctions Lor;
       @end @if %][%
    @end @for %];[%
 @end @for %][%
+@if generate_ct_internal %]
+   Id kx.kx = 0;[%
+@for particles initial final %]
+   Id kx.k[%index%] = 0;[%
+@end @for %][%
+@end @if %][%
 @if internal NUMPOLVEC %][%
    @for particles lightlike vector %]
    Id k[%index%].e[%index%]=;[%

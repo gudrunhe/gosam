@@ -681,6 +681,11 @@ Id d4(vDUMMY1?, iDUMMY1?) = vDUMMY1(iDUMMY1);
 .sort:part 5.1;
 #EndIf
 
+[% @if generate_ct_internal %]
+Id Spab(vDUMMY1?, kx, vDUMMY2?) = 0;
+Id Spba(vDUMMY1?, kx, vDUMMY2?) = 0;[%
+@end @if %]
+
 Id Spa2(vDUMMY1?{`EXTERNAL'}, vDUMMY2?{`EXTERNAL'}) *
    Spb2(vDUMMY2?, vDUMMY1?) = 2 * fDUMMY1(vDUMMY1.vDUMMY2);
 
