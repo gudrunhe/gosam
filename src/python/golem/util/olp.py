@@ -428,12 +428,32 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       golem.util.tools.warning(
             "Please, check configuration and contract files for errors!")
 
-   for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
-      subconf=orig_conf.copy()
-      subconf.activate_subconfig(subprocess_number)
-      file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
-         ignore_case, ignore_unknown, lineo, quiet=True)
-      subprocesses_conf.append(subconf)
+   if conf["olp.correctiontype"]=="EW":
+     i=0
+     for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
+         if subprocess_number != 0:
+           subprocess_number+=2
+         for j in range(0,2):
+             subprocess_number+=j
+             subconf=orig_conf.copy()
+             subconf.activate_subconfig(subprocess_number)
+             #print conf["olp.alphapower"], conf["olp.alphaspower"]
+             if j==1:
+               subconf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
+               subconf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
+             file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
+                       ignore_case, ignore_unknown, lineo, quiet=True)
+             subprocesses_conf.append(subconf)
+             print subprocess_number
+
+   else:
+
+     for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
+        subconf=orig_conf.copy()
+        subconf.activate_subconfig(subprocess_number)
+        file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
+           ignore_case, ignore_unknown, lineo, quiet=True)
+        subprocesses_conf.append(subconf)
 
    #---#] Read order file:
    if file_ok:

@@ -451,9 +451,9 @@ contains
       call sigmaazt(dble(mz2)*cone,saztmz2)
       call sigmazzt(dble(mz2)*cone,sztmz2)
       call sigmazzt(          zero,szt0)
-      call sigmazztp(dble(mz2)*cone,sztpmz2 )
-      call sigmahh(   mh2,shh)
-      call sigmahhp(  mh2,shhp)
+      call sigmazztp(dble(mz2)*cone,sztpmz2 )      
+      call sigmahh(   dble(mh2)*cone,shh)
+      call sigmahhp(  dble(mh2)*cone,shhp)
       call sigmaaat( zero,sat0)
       call sigmaaatp(zero,satp0)
 ! tadpole
@@ -633,6 +633,11 @@ contains
 
       ddmz2(1)=ddmz2(1)+sztpmz2(0)*(0d0,1d0)*dimag(mz2) 
       ddmz2(2)=ddmz2(2)+sztpmz2(1)*(0d0,1d0)*dimag(mz2)
+
+      ! ADDED 29/08 begin
+      ddmh2(1)=ddmh2(1)+shhp(0)*(0d0,1d0)*dimag(mh2) 
+      ddmh2(2)=ddmh2(2)+shhp(1)*(0d0,1d0)*dimag(mh2)
+      ! ADDED 29/08 end
 
       ddmt2omt(1)=ddmt2omt(1)+(0d0,1d0)*dimag(mt2)*( &
            0.5d0*stpl(1) +0.5d0*stpr(1) +stps(1)   )  &
@@ -855,7 +860,6 @@ contains
       complex*16 ssl(0:2) ,ssr(0:2), sss(0:2)
       complex*16 stl(0:2) ,str(0:2), sts(0:2)
       complex*16 sbl(0:2) ,sbr(0:2), sbs(0:2)
-      complex*16 ttt(0:2) ,convt
       complex*16 stpl(0:2) ,stpr(0:2), stps(0:2)
 !
       complex*16 ccgp(0:2),ccgm(0:2)
@@ -890,8 +894,8 @@ contains
 ! scalar propagators A.4
          gctH1(i1 )=ddzh(i1)
          gctH2(i1 )=mh2*ddzh(i1)+ddmh2(i1)
-         gctchi(i1)=ddmz2(i1)-unite*ttt(i1)/2d0/sw/mw
-         gctphi(i1)=ddmw2(i1)-unite*ttt(i1)/2d0/sw/mw
+         gctchi(i1)=ddmz2(i1)-unite*dtad(i1)/2d0/sw/mw
+         gctphi(i1)=ddmw2(i1)-unite*dtad(i1)/2d0/sw/mw
 ! fermion propagator A.5
          gctCLU(i1)=0.5d0*(ddzul(i1)+conjg(ddzul(i1)))
          gctCRU(i1)=0.5d0*(ddzur(i1)+conjg(ddzur(i1)))
@@ -920,8 +924,8 @@ contains
 !
          gctCLB(i1)=0.5d0*(ddzbl(i1)+conjg(ddzbl(i1)))
          gctCRB(i1)=0.5d0*(ddzbr(i1)+conjg(ddzbr(i1)))
-         gctCPB(i1)=xx*(mb*conjg(ddzbl(i1)/2d0)+mc*ddzbr(i1)/2d0+ddmb2(i1))
-         gctCMB(i1)=xx*(mb*conjg(ddzbr(i1)/2d0)+mc*ddzbl(i1)/2d0+ddmb2(i1))
+         gctCPB(i1)=xx*(mb*conjg(ddzbl(i1)/2d0)+mb*ddzbr(i1)/2d0+ddmb2(i1))
+         gctCMB(i1)=xx*(mb*conjg(ddzbr(i1)/2d0)+mb*ddzbl(i1)/2d0+ddmb2(i1))
 !
          gctCLne(i1)=0.5d0*(ddznel(i1)+conjg(ddznel(i1)))
          gctCRne(i1)=0d0!0.5d0*(ddzner(i1)+conjg(ddzner(i1)))
@@ -967,36 +971,36 @@ contains
          coeff =mh2/4d0/sw2/mw2
          coeff2=unite/2d0/sw/mw/mh2
          gctHHHH(i1)=-3d0*coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) -ddmw2(i1)/mw2  &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) -ddmw2(i1)/mw2  &
               +2d0*ddzh(i1))
          gctHHXX(i1)=    -coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - ddmw2(i1)/mw2  &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - ddmw2(i1)/mw2  &
               + ddzh(i1))
          gctHHPP(i1)=    -coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - ddmw2(i1)/mw2 &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - ddmw2(i1)/mw2 &
               + ddzh(i1))
          gctXXXX(i1)=-3d0*coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - ddmw2(i1)/mw2 )
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - ddmw2(i1)/mw2 )
          gctXXPP(i1)=-1d0*coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - ddmw2(i1)/mw2 )
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - ddmw2(i1)/mw2 )
          gctPPPP(i1)=-2d0*coeff*(2d0*ddee(i1) - 2d0*ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - ddmw2(i1)/mw2 )
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - ddmw2(i1)/mw2 )
 ! 3 scalars A.9
          coeff =mh2/2d0/sw/mw
          gctHHH(i1)=-3d0*coeff*(ddee(i1) - ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - 0.5d0*ddmw2(i1)/mw2 &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - 0.5d0*ddmw2(i1)/mw2 &
               + 1.5d0*ddzh(i1))
          gctHPP(i1)=-coeff*(ddee(i1) - ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - 0.5d0*ddmw2(i1)/mw2 &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - 0.5d0*ddmw2(i1)/mw2 &
               + 0.5d0*ddzh(i1))
          gctHXX(i1)=-coeff*(ddee(i1) - ddswsw(i1) &
-              + ddmh2(i1)/mh2 + coeff2*ttt(i1) - 0.5d0*ddmw2(i1)/mw2 &
+              + ddmh2(i1)/mh2 + coeff2*dtad(i1) - 0.5d0*ddmw2(i1)/mw2 &
               + 0.5d0*ddzh(i1))
 ! 2 vectors 2 scalars A.10
-         gctWWHH(i1)=(1d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) + ddzw(i1) &
+         gctWWHH(i1)=(1d0/2d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) + ddzw(i1) &
               + ddzh(i1))
-         gctWWXX(i1)=(1d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) +ddzw(i1))
-         gctWWPP(i1)=(1d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) +ddzw(i1))
+         gctWWXX(i1)=(1d0/2d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) +ddzw(i1))
+         gctWWPP(i1)=(1d0/2d0/sw2)*(2d0*ddee(i1) - 2d0*ddswsw(i1) +ddzw(i1))
          gctZZPP(i1)=(sw2-cw2)**2/2d0/sw2/cw2*( 2d0*ddee(i1) &
               +2d0*ddswsw(i1)/cw2/(sw2-cw2)+ddzz(i1) )  &
               +(sw2-cw2)/sw/cw*ddz_az(i1)
@@ -1086,7 +1090,15 @@ contains
          gctWmtau(i1)=1d0/sqrt(2d0)/sw*(ddee(i1)-ddswsw(i1) &
               +0.5d0*ddzw(i1) &
               +0.5d0*conjg(ddztll(i1)) + 0.5d0*ddzntl(i1) )
-!         
+         !
+         ! added
+         gctArne(i1)=0d0 ! gnp=0d0 ! q=0
+         gctAlne(i1)=gnm*0.5d0*ddz_za(i1)
+         gctArnmu(i1)=0d0 ! gnp=0d0 ! q=0
+         gctAlnmu(i1)=gnm*0.5d0*ddz_za(i1)
+         gctArntau(i1)=0d0 ! gnp=0d0 ! q=0
+         gctAlntau(i1)=gnm*0.5d0*ddz_za(i1)
+         ! added
          gctAre(i1)=-ql*(ddee(i1)+0.5d0*ddza(i1) &
               +0.5d0*(conjg(ddzer(i1))+ddzer(i1)) ) &
               +glp*0.5d0*ddz_za(i1)
@@ -1235,180 +1247,180 @@ contains
 ! scalar fermion fermion A.16
          coeff=-1d0/2d0/sw/mw
          gctHre(i1)=coeff*me*( ddee(i1)-ddswsw(i1)+ddme2ome(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzer(i1)+conjg(ddzel(i1)) ) )
          gctHle(i1)=coeff*me*( ddee(i1)-ddswsw(i1)+ddme2ome(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzel(i1)+conjg(ddzer(i1)) ) )
          gctHrmu (i1)=coeff*mm*(ddee(i1)-ddswsw(i1)+ddmm2omm(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1) &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1) &
               +0.5d0*( ddzmr(i1)+conjg(ddzml(i1)) ) )
          gctHlmu(i1)=mm*coeff*(ddee(i1)-ddswsw(i1)+ddmm2omm(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1) &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1) &
               +0.5d0*( ddzml(i1)+conjg(ddzmr(i1)) ) )
          gctHrtau(i1)=coeff*mtl*(ddee(i1)-ddswsw(i1)+ddmtl2omtl(i1) & 
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1) &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1) &
               +0.5d0*( ddztlr(i1)+conjg(ddztll(i1)) ) )
          gctHltau(i1)=mtl*coeff*(ddee(i1)-ddswsw(i1)+ddmtl2omtl(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1) &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1) &
               +0.5d0*( ddztll(i1)+conjg(ddztlr(i1)) ) )
          gctHrU(i1)=coeff*mu*( ddee(i1)-ddswsw(i1)+ddmu2omu(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzur(i1)+conjg(ddzul(i1)) ) )
          gctHlU(i1)=coeff*mu*( ddee(i1)-ddswsw(i1)+ddmu2omu(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzul(i1)+conjg(ddzur(i1)) ) )
          gctHrD(i1)=coeff*md*( ddee(i1)-ddswsw(i1)+ddmd2omd(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzdr(i1)+conjg(ddzdl(i1)) ) )
          gctHlD(i1)=coeff*md*( ddee(i1)-ddswsw(i1)+ddmd2omd(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzdl(i1)+conjg(ddzdr(i1)) ) )
          gctHrC(i1)=coeff*mc*( ddee(i1)-ddswsw(i1)+ddmc2omc(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzcr(i1)+conjg(ddzcl(i1)) ) )
          gctHlC(i1)=coeff*mc*( ddee(i1)-ddswsw(i1)+ddmc2omc(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzcl(i1)+conjg(ddzcr(i1)) ) )
          gctHrS(i1)=coeff*ms*( ddee(i1)-ddswsw(i1)+ddms2oms(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzsr(i1)+conjg(ddzsl(i1)) ) )
          gctHlS(i1)=coeff*ms*( ddee(i1)-ddswsw(i1)+ddms2oms(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzsl(i1)+conjg(ddzsr(i1)) ) )
          gctHrT(i1)=coeff*mt*( ddee(i1)-ddswsw(i1)+ddmt2omt(i1) &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddztr(i1)+conjg(ddztl(i1)) ) )
          gctHlT(i1)=coeff*mt*( ddee(i1)-ddswsw(i1)+ddmt2omt(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddztl(i1)+conjg(ddztr(i1)) ) )
          gctHrB(i1)=coeff*mb*( ddee(i1)-ddswsw(i1)+ddmb2omb(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzbr(i1)+conjg(ddzbl(i1)) ) )
          gctHlB(i1)=coeff*mb*( ddee(i1)-ddswsw(i1)+ddmb2omb(i1)  &
-              -ddmw2(i1)/mw +0.5d0*ddzh(i1)  &
+              -0.5d0*ddmw2(i1)/mw2 +0.5d0*ddzh(i1)  &
               +0.5d0*( ddzbl(i1)+conjg(ddzbr(i1)) ) )
 ! NB
          coeff=-1d0/sw/mw
          gctXre(i1)=+coeff*me*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddme2ome(i1) - ddmw2(i1)/mw  &
+              +ddme2ome(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzer(i1)+conjg(ddzel(i1)) ) )
          gctXle(i1)=+coeff*me*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddme2ome(i1) - ddmw2(i1)/mw  &
+              +ddme2ome(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzel(i1)+conjg(ddzer(i1)) ) )         
          gctXrmu(i1)=+coeff*mm*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddmm2omm(i1) - ddmw2(i1)/mw  &
+              +ddmm2omm(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzmr(i1)+conjg(ddzml(i1)) ) )
          gctXlmu(i1)=+coeff*mm*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddmm2omm(i1) - ddmw2(i1)/mw  &
+              +ddmm2omm(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzml(i1)+conjg(ddzmr(i1)) ) )         
          gctXrtau(i1)=+coeff*mtl*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddmtl2omtl(i1) - ddmw2(i1)/mw  &
+              +ddmtl2omtl(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddztlr(i1)+conjg(ddztll(i1)) ) )
          gctXltau(i1)=+coeff*mtl*i3l*( ddee(i1)-ddswsw(i1)  &
-              +ddmtl2omtl(i1) - ddmw2(i1)/mw  &
+              +ddmtl2omtl(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddztll(i1)+conjg(ddztlr(i1)) ) )         
 !
          gctXrU(i1)=+coeff*mu*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmu2omu(i1) - ddmw2(i1)/mw  &
+              +ddmu2omu(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzur(i1)+conjg(ddzul(i1)) ) )
          gctXlU(i1)=+coeff*mu*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmu2omu(i1) - ddmw2(i1)/mw  &
+              +ddmu2omu(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzul(i1)+conjg(ddzur(i1)) ) )         
          gctXrC(i1)=+coeff*mc*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmc2omc(i1) - ddmw2(i1)/mw  &
+              +ddmc2omc(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzcr(i1)+conjg(ddzcl(i1)) ) )
          gctXlC(i1)=+coeff*mc*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmc2omc(i1) - ddmw2(i1)/mw  &
+              +ddmc2omc(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzcl(i1)+conjg(ddzcr(i1)) ) )         
          gctXrT(i1)=+coeff*mt*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmt2omt(i1)    - ddmw2(i1)/mw  &
+              +ddmt2omt(i1)    - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddztr(i1)+conjg(ddztl(i1)) ) )
          gctXlT(i1)=+coeff*mt*i3u*( ddee(i1)-ddswsw(i1)  &
-              +ddmt2omt(i1)    - ddmw2(i1)/mw  &
+              +ddmt2omt(i1)    - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddztl(i1)+conjg(ddztr(i1)) ) )         
          gctXrD(i1)=+coeff*md*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddmd2omd(i1) - ddmw2(i1)/mw  &
+              +ddmd2omd(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzdr(i1)+conjg(ddzdl(i1)) ) )
          gctXlD(i1)=+coeff*md*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddmd2omd(i1) - ddmw2(i1)/mw  &
+              +ddmd2omd(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzdl(i1)+conjg(ddzdr(i1)) ) )         
          gctXrS(i1)=+coeff*ms*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddms2oms(i1) - ddmw2(i1)/mw  &
+              +ddms2oms(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzsr(i1)+conjg(ddzsl(i1)) ) )
          gctXlS(i1)=+coeff*ms*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddms2oms(i1) - ddmw2(i1)/mw  &
+              +ddms2oms(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzsl(i1)+conjg(ddzsr(i1)) ) )         
          gctXrB(i1)=+coeff*mb*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddmb2omb(i1) - ddmw2(i1)/mw  &
+              +ddmb2omb(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzbr(i1)+conjg(ddzbl(i1)) ) )
          gctXlB(i1)=+coeff*mb*i3d*( ddee(i1)-ddswsw(i1)  &
-              +ddmb2omb(i1) - ddmw2(i1)/mw  &
+              +ddmb2omb(i1) - 0.5d0*ddmw2(i1)/mw2  &
               +0.5d0*( ddzbl(i1)+conjg(ddzbr(i1)) ) ) 
 ! 
          coeff=+1d0/sqrt(2d0)/sw/mw
          gctPpre(i1)=-coeff*me*(ddee(i1)-ddswsw(i1) &
-              +ddme2ome(i1) - ddmw2(i1)/mw &
+              +ddme2ome(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddznel(i1)) + ddzer(i1)) )
          gctPple(i1)=0d0! mnu*
          gctPprmu(i1)=-coeff*mm*(ddee(i1)-ddswsw(i1) &
-              +ddmm2omm(i1) - ddmw2(i1)/mw &
+              +ddmm2omm(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddznml(i1)) + ddzmr(i1)) )
          gctPplmu(i1)=0d0! mnu*
          gctPprtau(i1)=-coeff*mtl*(ddee(i1)-ddswsw(i1) &
-              +ddmtl2omtl(i1) - ddmw2(i1)/mw &
+              +ddmtl2omtl(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzntl(i1)) + ddztlr(i1)) )
          gctPpltau(i1)=0d0! mnu*
 !
          gctPprud(i1)=-coeff*md*(ddee(i1)-ddswsw(i1) &
-              +ddmd2omd(i1) - ddmw2(i1)/mw &
+              +ddmd2omd(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzul(i1)) + ddzdr(i1)) )
          gctPplud(i1)=+coeff*mu*(ddee(i1)-ddswsw(i1) &
-              +ddmu2omu(i1) - ddmw2(i1)/mw &
+              +ddmu2omu(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzur(i1)) + ddzdl(i1)) )
          gctPprcs(i1)=-coeff*ms*(ddee(i1)-ddswsw(i1) &
-              +ddms2oms(i1) - ddmw2(i1)/mw &
+              +ddms2oms(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzcl(i1)) + ddzsr(i1)) )
          gctPplcs(i1)=+coeff*mc*(ddee(i1)-ddswsw(i1) &
-              +ddmc2omc(i1) - ddmw2(i1)/mw &
+              +ddmc2omc(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzcr(i1)) + ddzsl(i1)) )
          gctPprtb(i1)=-coeff*mb*(ddee(i1)-ddswsw(i1) &
-              +ddmb2omb(i1) - ddmw2(i1)/mw &
+              +ddmb2omb(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddztl(i1)) + ddzbr(i1)) )
          gctPpltb(i1)=+coeff*mt*(ddee(i1)-ddswsw(i1) &
-              +ddmt2omt(i1) - ddmw2(i1)/mw &
+              +ddmt2omt(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddztr(i1)) + ddzbl(i1)) )
  
          gctPmre(i1)=0d0!mnu
          gctPmle(i1)=-coeff*me*(ddee(i1)-ddswsw(i1) &
-              +ddme2ome(i1) - ddmw2(i1)/mw &
+              +ddme2ome(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzer(i1)) + ddznel(i1)) )
          gctPmrmu(i1)=0d0!mnu
          gctPmlmu(i1)=-coeff*mm*(ddee(i1)-ddswsw(i1) &
-              +ddmm2omm(i1) - ddmw2(i1)/mw &
+              +ddmm2omm(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzmr(i1)) + ddznml(i1)) )
          gctPmrtau(i1)=0d0!mnu
          gctPmltau(i1)=-coeff*mtl*(ddee(i1)-ddswsw(i1) &
-              +ddmtl2omtl(i1) - ddmw2(i1)/mw &
+              +ddmtl2omtl(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddztlr(i1)) + ddzntl(i1)) )
  
          gctPmrud(i1)=+coeff*mu*(ddee(i1)-ddswsw(i1) &
-              +ddmu2omu(i1) - ddmw2(i1)/mw &
+              +ddmu2omu(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzdl(i1)) + ddzur(i1)) )
          gctPmlud(i1)=-coeff*md*(ddee(i1)-ddswsw(i1) &
-              +ddmd2omd(i1) - ddmw2(i1)/mw &
+              +ddmd2omd(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzdr(i1)) + ddzul(i1)) )
          gctPmrcs(i1)=+coeff*mc*(ddee(i1)-ddswsw(i1) &
-              +ddmc2omc(i1) - ddmw2(i1)/mw &
+              +ddmc2omc(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzsl(i1)) + ddzcr(i1)) )
          gctPmlcs(i1)=-coeff*ms*(ddee(i1)-ddswsw(i1) &
-              +ddms2oms(i1) - ddmw2(i1)/mw &
+              +ddms2oms(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzsr(i1)) + ddzcl(i1)) )
          gctPmrtb(i1)=+coeff*mt*(ddee(i1)-ddswsw(i1) &
-              +ddmt2omt(i1) - ddmw2(i1)/mw &
+              +ddmt2omt(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzbl(i1)) + ddztr(i1)) )
          gctPmltb(i1)=-coeff*mb*(ddee(i1)-ddswsw(i1) &
-              +ddmb2omb(i1) - ddmw2(i1)/mw &
+              +ddmb2omb(i1) - 0.5d0*ddmw2(i1)/mw2 &
               +0.5d0*(conjg(ddzbr(i1)) + ddztl(i1)) ) 
       enddo
       end subroutine computectcoeff
@@ -2929,7 +2941,7 @@ contains
       common/qedswitch/noqed
       complex*16 xx
 
-      xx=1d0
+      xx=cone
       if(noqed) xx=zero                                                 
       call olo_onshell( 1d-10 )
       call olo_scale( scale )
