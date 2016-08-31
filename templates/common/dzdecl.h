@@ -73,7 +73,10 @@
      & gctAlS, gctArS, gctZlS, gctZrS,  &
      & gctAlT, gctArT, gctZlT, gctZrT,  &
      & gctAlB, gctArB, gctZlB, gctZrB,  &
-     & gctAle, gctAre, gctZle, gctZre,  &
+     & gctAle, gctAre, gctZle, gctZre,  &	
+     & gctAlne, gctArne,  &
+     & gctAlnmu, gctArnmu,  &
+     & gctAlntau, gctArntau,  &
      & gctAlmu, gctArmu, gctZlmu, gctZrmu,  &
      & gctAltau, gctArtau, gctZltau, gctZrtau,  &
      & gctZlne, gctZrne, gctCLne, gctCRne,  &
@@ -138,6 +141,9 @@
      & gctAlT(1:2), gctArT(1:2), gctZlT(1:2), gctZrT(1:2),  &
      & gctAlB(1:2), gctArB(1:2), gctZlB(1:2), gctZrB(1:2),  &
      & gctAle(1:2), gctAre(1:2), gctZle(1:2), gctZre(1:2),  &
+     & gctAlne(1:2), gctArne(1:2),  &
+     & gctAlnmu(1:2), gctArnmu(1:2),  &
+     & gctAlntau(1:2), gctArntau(1:2),  &
      & gctAlmu(1:2), gctArmu(1:2), gctZlmu(1:2), gctZrmu(1:2),  &
      & gctAltau(1:2), gctArtau(1:2), gctZltau(1:2), gctZrtau(1:2),  &
      & gctZlne(1:2), gctZrne(1:2), gctCLne(1:2), gctCRne(1:2),  &

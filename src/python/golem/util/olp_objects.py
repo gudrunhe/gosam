@@ -204,9 +204,7 @@ class OLPOrderFile:
 		is_subprocess = False
 		is_contract = False
 		is_blank = True
-		print line
 		for tok in self._tokens(s):
-                        print tok
 			is_blank = False
 			if tok == 1:
 				sp = 1
