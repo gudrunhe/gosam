@@ -739,7 +739,7 @@ contains
          ddznml(1)=ddznml(1) -(1d0+2d0*CW2)/4d0/CW2/SW2*alsu4pi
 
          ddztll(1)=ddztll(1) -(1d0+2d0*CW2)/4d0/CW2/SW2*alsu4pi
-         ddztll(1)=ddztll(1) -1d0/CW2*alsu4pi
+         ddztlr(1)=ddztlr(1) -1d0/CW2*alsu4pi
          ddzntl(1)=ddzntl(1) -(1d0+2d0*CW2)/4d0/CW2/SW2*alsu4pi
 
          ddzul(1)=ddzul(1) -((3d0-4d0*SW2)**2 + 2d0*CW2*(9d0+8d0*SW2)) &

@@ -83,7 +83,7 @@ class OLPSubprocess:
       return subproc_conf
 
 
-def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf):
+def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf, ew_index=0):
 
    def getparticle(name):
       return golem.util.tools.interpret_particle_name(name, model)
@@ -101,6 +101,15 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
       process_name = "p%d_%s_%s" \
             % (id, "".join(s_ini), "".join(s_fin))
    process_name = process_name.lower()
+   if ew_index == 1:
+       process_name += '_ew'
+       try: 
+           conf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
+           conf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
+           #conf["olp.qcd_in_ew"]=True
+           conf.setProperty("olp.qcd_in_ew",True)
+       except:
+           golem.util.tools.warning("Error in assigning alphapower and alphaspower for EW process")
    originalkey = tuple(sorted(s_ini + s_fin))
 
    if use_crossings:
@@ -113,15 +122,30 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    if use_crossings:
       # look for existing compatible subprocesses
       for skey in subprocesses:
-       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf):
+       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf) and ew_index!= 1:
          key = skey
          break
 
    if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
-      sp = subprocesses[key]
-      sp.addCrossing(id, process_name, p_ini, p_fin, conf)
-      is_new = False
-      adapt_config(subprocesses[key].conf,conf)
+       if ew_index==0:
+            sp = subprocesses[key]
+            sp.addCrossing(id, process_name, p_ini, p_fin, conf)
+            if ew_index == 1:
+                is_new = True
+            else:
+                is_new = False
+            adapt_config(subprocesses[key].conf,conf)
+       else:
+            i=0
+            # append digit to distinguish it from other subprocesses
+            while key in subprocesses:
+                key=key+(i,) if i==0 else key[:-1]+(i,)
+                i = i + 1
+            sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
+            subprocesses[key] = sp
+            is_new = True          
+      
+
    else:
       i=0
       # append digit to distinguish it from other subprocesses
@@ -141,6 +165,10 @@ def is_config_compatible(conf1, conf2):
          "olp.no_loop_level" : (lambda a,b: True), # => ignored
          "order" : (lambda a,b: a.startswith(b) or b.startswith(a))
          }
+   #if conf1["olp.alphapower"] != None and conf2["olp.alphapower"] != None and conf1["olp.alphapower"] != conf2["olp.alphapower"]:
+       #return False
+   #if conf1["olp.alphaspower"] != None and conf2["olp.alphaspower"] != None and conf1["olp.alphaspower"] != conf2["olp.alphaspower"]:
+       #return False   
    for i in conf1:
       if not i in conf2 or conf1[i]!=conf2[i]:
          bval = conf2[i] if i in conf2 else ""
@@ -255,6 +283,8 @@ def get_qgraf_power(conf):
    correction_type = conf.getProperty("olp.correctiontype", default=None)
    notreelevel = conf.getBooleanProperty("olp.no_tree_level", default=False)
    nolooplevel = conf.getBooleanProperty("olp.no_loop_level", default=False)
+   qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
+
 
    qcd_name = "QCD"
    qed_name = "QED"
@@ -275,7 +305,7 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD" and not nolooplevel:
+         if (correction_type == "QCD" or qcd_in_ew) and not nolooplevel:
             return [qcd_name, treepower, ipower + 2]
          elif correction_type == "EW" and not nolooplevel:
             return [qcd_name, treepower, ipower]
@@ -294,7 +324,7 @@ def get_qgraf_power(conf):
          else:
             treepower = ipower
 
-         if correction_type == "QCD" and not nolooplevel:
+         if (correction_type == "QCD" or qcd_in_ew) and not nolooplevel:
             return [qed_name, treepower, ipower]
          elif correction_type == "EW" and not nolooplevel:
             return [qed_name, treepower, ipower + 2]
@@ -307,7 +337,7 @@ def get_qgraf_power(conf):
          except ValueError:
             return []
 
-         if correction_type == "QCD":
+         if correction_type == "QCD" or qcd_in_ew:
             if notreelevel:
                treepower = "NONE"
             else:
@@ -428,23 +458,24 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       golem.util.tools.warning(
             "Please, check configuration and contract files for errors!")
 
+
    if conf["olp.correctiontype"]=="EW":
      i=0
+     subprocess_number_real=0
      for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
          if subprocess_number != 0:
-           subprocess_number+=2
+           subprocess_number_real+=1
          for j in range(0,2):
-             subprocess_number+=j
+             subprocess_number_real+=j
              subconf=orig_conf.copy()
-             subconf.activate_subconfig(subprocess_number)
+             subconf.activate_subconfig(subprocess_number_real)
              #print conf["olp.alphapower"], conf["olp.alphaspower"]
-             if j==1:
-               subconf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
-               subconf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
+             #if j==1:
+               #subconf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
+               #subconf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
              file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
                        ignore_case, ignore_unknown, lineo, quiet=True)
              subprocesses_conf.append(subconf)
-             print subprocess_number
 
    else:
 
@@ -553,6 +584,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for lconf in [conf] + subprocesses_conf:
          qcd_name, qed_name, all_couplings = derive_coupling_names(imodel_path,
                lconf)
+         #print lconf
          qgraf_power = get_qgraf_power(lconf)
 
          if len(qgraf_power) == 0:
@@ -612,84 +644,201 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    subprocesses_conf_short = []
 
    if file_ok:
-      for lineno,id, inp, outp in contract_file.processes_ordered():
-         subprocess, is_new = getSubprocess(
-               olp_process_name, id, inp, outp, subprocesses, subprocesses_flav, model,
-               use_crossings, subprocesses_conf[id])
-         if is_new:
-            subdir = str(subprocess)
-            process_path = os.path.join(path, subdir)
-            if not os.path.exists(process_path):
-               golem.util.tools.message("Creating directory %r" % process_path)
-               try:
-                  os.mkdir(process_path)
-               except IOError as err:
-                  golem.util.tools.error(str(err))
+       
+       if conf["olp.correctiontype"]=="EW":
+            i=0
+            id_real=0
+            #max_occupied_channel=3
+            contract_file._proc_res*=2
+            for lineno,id, inp, outp in contract_file.processes_ordered():
+                if id != 0:
+                    id_real+=1
+                for j in range(0,2):
+                    id_real+=j
+                    subprocess, is_new = getSubprocess(
+                        olp_process_name, id_real, inp, outp, subprocesses, subprocesses_flav, model,
+                        use_crossings, subprocesses_conf[id_real],int(j))
+                    qgraf_power = get_qgraf_power(lconf)
+                    
+                    if len(qgraf_power) == 0:
+                        contract_file.setPropertyResponse("CorrectionType",
+                            ["Error:", "Wrong or missing entries in",
+                                "CorrectionType, AlphaPower or AlphasPower"])
+                        file_ok = False
+                    else:
+                        lconf[golem.properties.qgraf_power] = ",".join(map(str,qgraf_power))                    
+                    print lconf["order"]
+                    #if j==1:
+                        #is_new=True
+                    #print id_real
+                    #print subprocess
+                    #print subprocesses_conf[id_real]["olp.alphaspower"]
+                    #print subprocesses_conf[id_real]["olp.alphapower"]
+                    #print subprocess.getIDs()
+                    #print is_new
+                    if is_new:
+                        subdir = str(subprocess)
+                        #if j==1:
+                            #subdir+='_EW'
+                        process_path = os.path.join(path, subdir)
+                        if not os.path.exists(process_path):
+                            golem.util.tools.message("Creating directory %r" % process_path)
+                            try:
+                                os.mkdir(process_path)
+                            except IOError as err:
+                                golem.util.tools.error(str(err))
 
-      # Now we run the loop again since all required crossings are added
+            # Now we run the loop again since all required crossings are added
 
-      # store initial symmetries infos
-      start_symmetries = conf["symmetries"]
+            # store initial symmetries infos
+            start_symmetries = conf["symmetries"]
 
-      # handle case that first subprocess does not initalize samurai (LO process)
-      for subprocess in subprocesses.values():
-         sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
-         if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
-            # add samurai to first subprocess, which is called by "initgolem(true)"
-            first_subprocess = int(subprocesses.values()[0])
-            subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
-            break
+            # handle case that first subprocess does not initalize samurai (LO process)
+            for subprocess in subprocesses.values():
+                sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+                if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
+                    # add samurai to first subprocess, which is called by "initgolem(true)"
+                    first_subprocess = int(subprocesses.values()[0])
+                    subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
+                    break
 
-      for subprocess in subprocesses.values():
-         process_path = subprocess.getPath(path)
-         subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
-         subprocess_conf["golem.name"] = "GoSam"
-         subprocess_conf["golem.version"] = ".".join(map(str,
-            golem.installation.GOLEM_VERSION))
-         subprocess_conf["golem.full-name"] = GOLEM_FULL
-         subprocess_conf["golem.revision"] = \
-            golem.installation.GOLEM_REVISION
+            for subprocess in subprocesses.values():
+                process_path = subprocess.getPath(path)
+                print subprocess, int(subprocess)
+                subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+                subprocess_conf["golem.name"] = "GoSam"
+                subprocess_conf["golem.version"] = ".".join(map(str,
+                    golem.installation.GOLEM_VERSION))
+                subprocess_conf["golem.full-name"] = GOLEM_FULL
+                subprocess_conf["golem.revision"] = \
+                    golem.installation.GOLEM_REVISION
 
-         golem.util.tools.POSTMORTEM_CFG = subprocess_conf
+                golem.util.tools.POSTMORTEM_CFG = subprocess_conf
 
-         try:
-            golem.util.main_misc.workflow(subprocess_conf)
-            merge_extensions(subprocess_conf,conf)
+                try:
+                    golem.util.main_misc.workflow(subprocess_conf)
+                    merge_extensions(subprocess_conf,conf)
 
-            golem.util.main_misc.generate_process_files(subprocess_conf,
-                  from_scratch)
 
-            helicities = list(
-                  golem.util.tools.enumerate_and_reduce_helicities(
-                     subprocess_conf))
+                    golem.util.main_misc.generate_process_files(subprocess_conf,
+                        from_scratch)
+                    print subprocess_conf["olp.alphaspower"]
+                    print subprocess_conf["olp.alphapower"] 
+                    print subprocess_conf["order"]
+                    sys.exit()                                        
 
-            generated_helicities = map(lambda t: t[0],
-                  filter(lambda t: t[1] is None, helicities))
+                    helicities = list(
+                        golem.util.tools.enumerate_and_reduce_helicities(
+                            subprocess_conf))
 
-            for id in subprocess.getIDs():
-               chelis[id] = len(helicities)
-               if subdivide:
-                  num_channels = len(helicities)
-                  min_channel = max_occupied_channel + 1
-                  max_channel = min_channel + num_channels - 1
-                  max_occupied_channel += num_channels
-                  channels[id] = range(min_channel, max_channel + 1)
-               else:
-                  max_occupied_channel += 1
-                  channel = max_occupied_channel
-                  channels[id] = [ channel ]
+                    generated_helicities = map(lambda t: t[0],
+                        filter(lambda t: t[1] is None, helicities))
 
-               contract_file.setProcessResponse(id, channels[id])
-               subprocess.assignChannels(id, channels[id])
-               subprocess.assignNumberHelicities(len(helicities),
-                     generated_helicities)
+                    for id in subprocess.getIDs():
+                        chelis[id] = len(helicities)
+                        if subdivide:
+                            num_channels = len(helicities)
+                            min_channel = max_occupied_channel + 1
+                            max_channel = min_channel + num_channels - 1
+                            max_occupied_channel += num_channels
+                            channels[id] = range(min_channel, max_channel + 1)
+                        else:
+                            max_occupied_channel += 1
+                            channel = max_occupied_channel
+                            channels[id] = [ channel ]
 
-         except golem.util.config.GolemConfigError as err:
-            result = 1
-            for id in subprocess.getIDs():
-               contract_file.setProcessError(id, "Error: %s" % err)
+                        contract_file.setProcessResponse(id, channels[id])
+                        subprocess.assignChannels(id, channels[id])
+                        subprocess.assignNumberHelicities(len(helicities),
+                                generated_helicities)
 
-         subprocesses_conf_short.append(subprocess_conf)
+                except golem.util.config.GolemConfigError as err:
+                    result = 1
+                    for id in subprocess.getIDs():
+                        contract_file.setProcessError(id, "Error: %s" % err)
+
+                subprocesses_conf_short.append(subprocess_conf)           
+           
+           
+       else:
+            for lineno,id, inp, outp in contract_file.processes_ordered():
+                subprocess, is_new = getSubprocess(
+                    olp_process_name, id, inp, outp, subprocesses, subprocesses_flav, model,
+                    use_crossings, subprocesses_conf[id])
+                if is_new:
+                    subdir = str(subprocess)
+                    process_path = os.path.join(path, subdir)
+                    if not os.path.exists(process_path):
+                        golem.util.tools.message("Creating directory %r" % process_path)
+                        try:
+                            os.mkdir(process_path)
+                        except IOError as err:
+                            golem.util.tools.error(str(err))
+
+            # Now we run the loop again since all required crossings are added
+
+            # store initial symmetries infos
+            start_symmetries = conf["symmetries"]
+
+            # handle case that first subprocess does not initalize samurai (LO process)
+            for subprocess in subprocesses.values():
+                sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+                if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
+                    # add samurai to first subprocess, which is called by "initgolem(true)"
+                    first_subprocess = int(subprocesses.values()[0])
+                    subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
+                    break
+
+            for subprocess in subprocesses.values():
+                process_path = subprocess.getPath(path)
+                subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+                subprocess_conf["golem.name"] = "GoSam"
+                subprocess_conf["golem.version"] = ".".join(map(str,
+                    golem.installation.GOLEM_VERSION))
+                subprocess_conf["golem.full-name"] = GOLEM_FULL
+                subprocess_conf["golem.revision"] = \
+                    golem.installation.GOLEM_REVISION
+
+                golem.util.tools.POSTMORTEM_CFG = subprocess_conf
+
+                try:
+                    golem.util.main_misc.workflow(subprocess_conf)
+                    merge_extensions(subprocess_conf,conf)
+
+                    golem.util.main_misc.generate_process_files(subprocess_conf,
+                        from_scratch)
+
+                    helicities = list(
+                        golem.util.tools.enumerate_and_reduce_helicities(
+                            subprocess_conf))
+
+                    generated_helicities = map(lambda t: t[0],
+                        filter(lambda t: t[1] is None, helicities))
+
+                    for id in subprocess.getIDs():
+                        chelis[id] = len(helicities)
+                        if subdivide:
+                            num_channels = len(helicities)
+                            min_channel = max_occupied_channel + 1
+                            max_channel = min_channel + num_channels - 1
+                            max_occupied_channel += num_channels
+                            channels[id] = range(min_channel, max_channel + 1)
+                        else:
+                            max_occupied_channel += 1
+                            channel = max_occupied_channel
+                            channels[id] = [ channel ]
+
+                        contract_file.setProcessResponse(id, channels[id])
+                        subprocess.assignChannels(id, channels[id])
+                        subprocess.assignNumberHelicities(len(helicities),
+                                generated_helicities)
+
+                except golem.util.config.GolemConfigError as err:
+                    result = 1
+                    for id in subprocess.getIDs():
+                        contract_file.setProcessError(id, "Error: %s" % err)
+
+                subprocesses_conf_short.append(subprocess_conf)
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")

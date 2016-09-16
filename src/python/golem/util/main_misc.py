@@ -109,6 +109,7 @@ def generate_process_files(conf, from_scratch=False):
 			generate_particle_lists(conf)
 
 	# Obtain the files required by QGraf from the template file.
+	#print conf
 	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
