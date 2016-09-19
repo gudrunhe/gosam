@@ -6,12 +6,12 @@ GoSam.
 
 gggg       g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^4
            Purely gluonic process without quark-loops, only one helicity.
-	   Comparison with analytic formula
+           Comparison with analytic formula
            Calculation is done using 't Hooft-Veltman
 
 gggg_dred  g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^4
            Purely gluonic process without quark-loops, only one helicity.
-	   Comparison with analytic formula.
+           Comparison with analytic formula.
            Calculation is done using dim. reduction
 
 gggg_tree  g(k1)+g(k2) -> g(k3)+g(k4) @ alpha_s^2
@@ -52,8 +52,8 @@ udeneg_dred u~(k1)+d(k2) -> e-(k3) + \nu_e~(k4) + g(k5) @ alpha_s^3 alpha^2
 
 uu_graviton_yy
            u + u~ -> Graviton -> gamma + gamma
-	   Calculation is done in the ADD model (model/LED_UFO) using
-	   dim. reduction. with a custom propagator for the spin-2 particle
+           Calculation is done in the ADD model (model/LED_UFO) using
+           dim. reduction. with a custom propagator for the spin-2 particle
            summing all KK modes.
 
 
@@ -66,20 +66,34 @@ setup.in.template:
    If no such file exists, only the default values and the values
    from config files are used.
 
-summarize.sh:
-   By running summarize.sh the user obtains a printout of the status
+make summarize:
+   By running "make summarize" the user obtains a printout of the status
    of all processes for which 'make test' has been run earlier.
    Note that 'make test' is not invoked by this script.
 
-runtests.sh:
-   This script runs 'make test' for all subdirectories.
+make runtests:
+   This command runs 'make test' for all subdirectories.
+
+make runselected:
+   This command runs a selection of tests. These tests are
+   chosen to cover most features of GoSam.
+
+make check_selection:
+   Print a list of the tests in the selection tests.
+   Check if they exist or not.
+
+make clean:
+   Run 'make very-clean' in every test directory.
+
+make <dirname>:
+   Run 'make test' in the directory <dirname>.
 
 HOW TO RUN THE EXAMPLES
 =======================
 
 After GoSam has been successfully installed, each example can be run by
-executing 'make test' for the respective subdirectory. The script 'runtests.sh'
-can be invoked to run all tests. The script 'summarize.sh' gives a one-line
+executing 'make test' for the respective subdirectory. 'make runtests'
+can be invoked to run all tests. 'make summarize.sh' gives a one-line
 summary for each test that has been run so far. By setting up the file
 'setup.in' (see setup.in.template) one can impose default options for all
 tests.
