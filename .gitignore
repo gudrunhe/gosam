@@ -7,4 +7,9 @@
 *.toc
 *.pdf
 *.log
+*.o
 build/
+
+# Generated files in examples directory
+examples/*/virtual
+examples/*/*.in
