@@ -222,6 +222,9 @@
 		<file src="series.hh" class="Verbatim">
 			<only if-extension="reduze" />
 		</file>
+        <file src="seriesprocedures.hh" class="Verbatim">
+            <only if-extension="reduze" />
+        </file>
 		<file src="golemreduze.frm" class="Kinematics">
 			<only if-extension="reduze" />
 		</file>

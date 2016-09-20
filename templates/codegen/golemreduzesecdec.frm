@@ -38,95 +38,29 @@ Bracket ProjLabel,PREFACTOR,COLORFACTOR;
 print+s;
 .sort
 
-********* TESTING CODE ********
-#Define OUTPUTREDUCED "0"
-#If `OUTPUTREDUCED'
-*
-* Write list of integrals
-*
-PolyRatFun;
-.sort:no prf;
-B INT;
-.sort:bracket;
-Collect SCREEN;
-.sort:collect;
-Id SCREEN(?head)=1;
-.sort:drop screen;
-DropCoefficient;
-.sort:drop coeff;
-
-* Throw away information regarding which INT are crossed (for FIRE/LiteRed)
-#Define UNCROSS "0"
-#If `UNCROSS'
-#Call UncrossIntReduze
-Id Sector(sDUMMY1?)*INT(sDUMMY2?,?tail) = INT(sDUMMY1,[],?tail);
-Id Crossing(?tail) = 1;
-Id CrossingShift(?tail)=1;
-Id CrossingInvariants(?tail)=1;
-.sort:uncross;
-DropCoefficient;
-.sort:drop coeff;
-#EndIf
-
-#Write <integralsl`LOOPS'.txt>, "+ %E", l`LOOPS'
-print+s;
-.end
-#EndIf
-********* TESTING CODE ********
-
 * Compute the leading pole multiplying each integral
 Multiply replace_(dimS,4-2*epsS);
-.sort
-Id prf(sDUMMY1?,sDUMMY2?) = sDUMMY1*Den(sDUMMY2);
-.sort
+.sort:dimS;
+PolyRatFun prf(divergence,epsS);
+.sort:prf;
+PolyRatFun;
+.sort:noprf;
 
-* Note: room for optimisation here, we really just need the LOWEST pole not ALL the poles!
-CFunction den; * den(x)=1/x, special function for series package
-#include- series.hh
-* 2*`LOOPS'+`ORD'+1 is max possible # terms in expansion epsS^(-2*`LOOPS') + ... + 1 + ... + epsS^(`ORD')
-#call init({2*`LOOPS'+`ORD'+1})
-#call series(epsS,{2*`LOOPS'+`ORD'+1})
-Id Den(sDUMMY1?) = den(sDUMMY1);
-#call expand(den)
-Id den(sDUMMY1?) = Den(sDUMMY1);
-.sort
-
-B INT,epsS;
+* Drop everything except the INT and its required order
+B INT,prf;
 .sort:bracket;
 Collect SCREEN;
 .sort:collect;
-Id SCREEN(?head)=1;
+Id SCREEN(?head) = 1;
 .sort:drop screen;
-DropCoefficient;
-.sort:drop coeff;
-
-********* TESTING CODE ********
-* Throw away information regarding which INT are crossed (for FIRE/LiteRed)
-#Define UNCROSS "0"
-#If `UNCROSS'
-#Call UncrossIntReduze
-Id Sector(sDUMMY1?)*INT(sDUMMY2?,?tail) = INT(sDUMMY1,?tail);
-Id Crossing(?tail) = 1;
-Id CrossingShift(?tail)=1;
-Id CrossingInvariants(?tail)=1;
-.sort:uncross;
-DropCoefficient;
-.sort:drop coeff;
-#EndIf
-********* TESTING CODE ********
-
-B INT;
-.sort:bracket;
-Collect SCREEN;
-.sort:collect;
-SplitArg;
-Argument SCREEN;
-Id epsS^sDUMMY1? = sDUMMY1;
-EndArgument;
 
 * Store the epsS order to which we must compute the integral
-Id SCREEN(?head) = SCREEN(min_(?head));
-Id INT(?head)*SCREEN(sDUMMY1?) = INT(?head,[],-sDUMMY1+`ORD');
+Id prf(sDUMMY1?,sDUMMY2?) = SCREEN(sDUMMY1/sDUMMY2);
+Id SCREEN(epsS^sDUMMY1?) = SCREEN(epsS^sDUMMY1,sDUMMY1);
+Id SCREEN(epsS) = SCREEN(epsS,1);
+Id SCREEN(1) = SCREEN(epsS,0);
+Id INT(?head)*SCREEN(?a,sDUMMY1?) = INT(?head,[],-sDUMMY1+`ORD');
+.sort:int order;
 
 * Export Integrals to SecDec
 #Call TagIntReduze
