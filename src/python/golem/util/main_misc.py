@@ -783,6 +783,7 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 
 
 	model = golem.util.tools.getModel(conf)
+	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 
 		
 	lo_flags = {}
@@ -828,6 +829,10 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
 			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
 			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+			
+		if flag_reduze:
+		  golem.topolopy.functions.analyze_yaml(path, conf,keep_vtot, consts.PATTERN_REDUZE_NLO_VIRT)
+		  
 
 	else:
 		keep_virt = []
@@ -867,6 +872,9 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 
 			keep_higher_virt.append(tmp_keep_higher_virt)
 			keep_higher_vtot.append(tmp_keep_higher_vtot)
+			
+			if flag_reduze:
+			  golem.topolopy.functions.analyze_yaml(path, conf,keep_higher_virt, consts.PATTERN_REDUZE_HIGHER_VIRT %loop_order)
 	else:
 		keep_higher_virt = []
 		keep_higher_vtot = []
