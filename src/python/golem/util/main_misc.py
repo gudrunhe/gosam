@@ -231,9 +231,9 @@ def cleanup(path):
 		for stub in ["pyxotree", "pyxovirt", "pyxo2virt", "topotree", "topovirt", "pyxoct", "topoct"]:
 			cleanup_files.append(stub + ext)
 
-	if True:
-		for ext in ["", ".py", ".pyc", ".pyo"]:
-			cleanup_files.append("model" + ext)
+#	if True:
+#		for ext in ["", ".py", ".pyc", ".pyo"]:
+#			cleanup_files.append("model" + ext)
 
 	for filename in cleanup_files:
 		full_name = os.path.join(path, filename)
@@ -656,7 +656,6 @@ def workflow(conf):
 	if not conf["reduction_interoperation_rescue"]:
 		conf["reduction_interoperation_rescue"]=-1
 
-
 	if len(ini) > 2:
 		warning("You specified a process with %d incoming particles." %
 					len(ini),
@@ -753,6 +752,8 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
 
 	model = golem.util.tools.getModel(conf)
+	flag_reduze = conf.getBooleanProperty("__REDUZE__")
+
 		
 	lo_flags = {}
 	virt_flags = {}
@@ -797,6 +798,10 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
 			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
 			filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+			
+		if flag_reduze:
+		  golem.topolopy.functions.analyze_yaml(path, conf,keep_vtot, consts.PATTERN_REDUZE_NLO_VIRT)
+		  
 
 	else:
 		keep_virt = []
@@ -836,6 +841,9 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 
 			keep_higher_virt.append(tmp_keep_higher_virt)
 			keep_higher_vtot.append(tmp_keep_higher_vtot)
+			
+			if flag_reduze:
+			  golem.topolopy.functions.analyze_yaml(path, conf,keep_higher_virt, consts.PATTERN_REDUZE_HIGHER_VIRT %loop_order)
 	else:
 		keep_higher_virt = []
 		keep_higher_vtot = []

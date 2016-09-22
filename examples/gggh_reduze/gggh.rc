@@ -8,7 +8,7 @@ process_path=virtual
 in=21,21,21,25
 out=
 
-model=smdiag_no_qh_massless
+model=smdiag
 model.options= Nf:5, Nfgen:1
 
 order=QCD, none, 3, 5
@@ -17,7 +17,7 @@ order=QCD, none, 3, 5
 qgraf.verbatim=true=iprop[D,C,S,B,0,0];
 
 one=gs
-zero=wT
+zero=wT,mU
 
 regularisation_scheme=cdr
 renorm_beta=False
