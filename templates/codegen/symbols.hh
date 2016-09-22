@@ -19,8 +19,9 @@ CTensors f(antisymmetric), f4, T, d(symmetric);
 CFunctions C(symmetric), CL(symmetric), CR(symmetric);[%
 @if generate_uv_counterterms %]
 CFunctions C1(symmetric), C2(symmetric), CM(symmetric), CP(symmetric);
-Symbols vDUMMY5, sign5;
-Vector kx;[%
+Symbols sign5;
+Vectors vDUMMY5;
+Vectors kx;[%
 @end @if %]
 
 CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
