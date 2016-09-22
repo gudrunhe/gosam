@@ -42,7 +42,7 @@ li = psd.loop_integral.LoopIntegralFromPropagators(proplist,gosamInternal,gosamE
 kinematicInvariants=[[% @for mandelstam sym_prefix=es non-zero non-mass %]'[% symbol %]',[% @end @for %]]
 masses=[[% @for all_masses %]'[% mass %]',[% @end @for %]]
 
-psd.loop_integral.loop_package(
+li_info = psd.loop_integral.loop_package(
 name,
 li,
 epsord,
@@ -50,3 +50,8 @@ form_optimization_level=2, form_work_space='100M',decomposition_method='geometri
 contour_deformation=True,
 real_parameters=kinematicInvariants+masses
 )
+
+# write FORM file containing information about 'eps' orders appearing in the expansion of the prefactor and integral
+form_outfilename = name + ".hh"
+with open(form_outfilename, 'w') as form_outfile:
+   form_outfile.write("Id INT(" + name + ") = INT(" + name + "," + li_info["lowest_prefactor_orders"] + "," + li_info["lowest_orders"] + ");\n" )
