@@ -77,6 +77,7 @@
 		<foreach iterator="loops">
 			<file src="secdec.m" dest="secdecl%d.m" arguments="loop" class="Integrals"/>
 			<file src="secdec.input" dest="secdecl%d.input" arguments="loop" class="Integrals"/>
+            <file src="secdec.py" dest="secdecl%d.py" arguments="loop" class="Integrals"/>
 		</foreach>
 
 		<file src="haggies-l0.in" class="Multi">

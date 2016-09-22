@@ -141,5 +141,6 @@ with open(form_outfilename, 'w') as form_outfile:
       with open(pysecdec_outfile, 'w') as f:
          f.write(pysecdec_template % locals())
 
-      form_outfile.write("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = " + name + "pow" + powerlist.replace(',','_').replace('-','m') +  ";\n")
+      # write FORM file containing name of this integral
+      form_outfile.write("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = INT(" + name + "pow" + powerlist.replace(',','_').replace('-','m') +  ");\n")
 
