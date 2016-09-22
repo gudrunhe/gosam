@@ -5,6 +5,7 @@ Create the input for SecDec to compute the master integrals
 """
 
 import os
+import re
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -17,6 +18,11 @@ parser.add_argument("-r", "--run-card", dest="run_card_template_file",
 parser.add_argument("-k", "--kinematics", dest="kinematics_template_file",
                     action="store", type=str, required=True,
                     help='the template for the file storing the kinematics',
+                    metavar="INFILE")
+
+parser.add_argument("-p", "--pysecdec", dest="pysecdec_template_file",
+                    action="store", type=str, required=True,
+                    help='the template file for pysecdec',
                     metavar="INFILE")
 
 parser.add_argument("-i", "--integrals", dest="integrals_file",
@@ -39,6 +45,9 @@ with open(args.run_card_template_file, 'r') as f:
 
 with open(args.kinematics_template_file, 'r') as f:
    kinematics_template = f.read()
+
+with open(args.pysecdec_template_file, 'r') as f:
+   pysecdec_template = f.read()
 
 with open(args.integrals_file, 'r') as f:
    integrals = f.read()
@@ -106,8 +115,20 @@ with open(form_outfilename, 'w') as form_outfile:
 
       graph = name + "pow" + powerlist.replace(',', '_')
 
+      # check for integral in shifted dimensions
+      dim=4
+      dimRegex = re.findall('dim(inc|dec)(\d+)',name)
+      if dimRegex:
+        assert len(dimRegex)==1
+        if dimRegex[0][0]=='inc':
+          dim += int(dimRegex[0][1])
+        else:
+          dim -= int(dimRegex[0][1])
+          
+
       kinematics_outfile = os.path.join(args.outpath, graph + '.m')
       rc_outfile = os.path.join(args.outpath, graph + '.input')
+      pysecdec_outfile = os.path.join(args.outpath, graph + '.py')
 
       # write SecDec kinematics file and run card
       with open(kinematics_outfile, 'w') as f:
@@ -115,6 +136,10 @@ with open(form_outfilename, 'w') as form_outfile:
 
       with open(rc_outfile, 'w') as f:
          f.write(run_card_template % locals())
+
+      proplist = "'" + proplist.replace("^", "**").replace("," , "','") + "'"
+      with open(pysecdec_outfile, 'w') as f:
+         f.write(pysecdec_template % locals())
 
       form_outfile.write("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = " + name + "pow" + powerlist.replace(',','_').replace('-','m') +  ";\n")
 
