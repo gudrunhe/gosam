@@ -40,6 +40,7 @@ Symbols field1, ..., field5;
 Symbols m, TR, NC, NA, eps(-2:2), sign1, ..., sign4;
 Symbol sqrt2, Sqrt2, sqrt3, Sqrt3, scale2;
 Symbol deltaaxial, deltaOS, deltaHV;
+Symbols TermLabel;
 
 Vector ZERO, vDUMMYA;
 
