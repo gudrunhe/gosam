@@ -1,4 +1,4 @@
-Dim=4-2*eps;
+Dim=%(dim)s-2*eps;
 prefactor=1;
 
 momlist=ToExpression["p" <> ToString[#]] & /@ Range[[% loop %]];

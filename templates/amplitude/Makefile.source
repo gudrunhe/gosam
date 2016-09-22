@@ -142,6 +142,7 @@ prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 		-i secdecintegralsl[%loop%].txt \
 		-k ../codegen/secdecl[%loop%].m \
 		-r ../codegen/secdecl[%loop%].input \
+		-p ../codegen/secdecl[%loop%].py \
 		-o ../codegen/secdec/[%loop%]loop
 	@touch prepare_secdec_l[%loop%]-stamp
 
