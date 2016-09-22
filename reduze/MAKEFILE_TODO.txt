@@ -1,0 +1,15 @@
+cd secdec
+cd 1loop
+
+python ReduzeF1L1pow1_0_1_0.py
+...
+python ReduzeF2L1pow1_1_1_1.py
+
+cat ReduzeF*.hh > secdecordersl1.hh
+cp secdecordersl1.hh ../../../amplitude/secdecordersl1.hh
+cp secdec_replace_integrals.hh ../../../amplitude/secdecnamesl1.hh
+tform -D PROCESSPATH=.. -D PWD=. -p ..:../codegen -M -q -D LOOPS=1 ../codegen/golemreduzesplit.frm
+
+tform -D PROCESSPATH=.. -D PWD=. -p ..:../codegen -M -q -D COFILE=coefficient_ReduzeF1L1pow1_0_1_0.txt -D ORD=2 -D LOOPS=1 ../codegen/golemreduzecode.frm
+...
+tform -D PROCESSPATH=.. -D PWD=. -p ..:../codegen -M -q -D COFILE=coefficient_ReduzeF2L1pow1_1_1_1.txt -D ORD=2 -D LOOPS=1 ../codegen/golemreduzecode.frm

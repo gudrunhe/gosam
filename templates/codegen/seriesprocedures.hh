@@ -1,3 +1,5 @@
+CFunctions den;
+
 #include- series.hh
 
 #Procedure getHighestPole(expression, regulator)
@@ -15,7 +17,11 @@
   PolyRatFun prf(divergence,`regulator');
   .sort
 
+* TODO - instead bracket prf and drop bracket contents?
   Id INT(?a) = 1;
+  Id ProjLabel(?a) = 1;
+  Id PREFACTOR(?a) = 1;
+  Id COLORFACTOR(?a) = 1;
   .sort
 
   PolyRatFun;
