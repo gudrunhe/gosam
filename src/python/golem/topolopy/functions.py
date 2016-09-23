@@ -235,7 +235,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    props=[]
    eprops = {}
    for idx in keep:
-	props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+     props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    if conf.getProperty(golem.properties.sum_diagrams):   
       for i,item in props:
@@ -338,7 +338,7 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
    props=[]
    eprops = {}
    #for idx in keep:
-	#props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+     #props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    #if conf.getProperty(golem.properties.sum_diagrams):   
       #for i,item in props:
@@ -519,11 +519,11 @@ def replace_zeroes(objects, zeroes):
          replace_zeroes(objects[key],zeroes)
        else:
          if objects[key] in zeroes:
-	   objects[key]=0
+           objects[key]=0
   elif type(objects)==type(list()):
      for index, element in enumerate(objects):
        if type(element)==type(list()) or type(element)==type(dict()):
          replace_zeroes(element,zeroes)
        else:
          if objects[index] in zeroes:
-	   objects[index]=0
+           objects[index]=0
