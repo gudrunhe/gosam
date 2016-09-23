@@ -46,7 +46,7 @@ li_info = psd.loop_integral.loop_package(
 name,
 li,
 epsord,
-form_optimization_level=2, form_work_space='100M',decomposition_method='geometric',
+form_optimization_level=2, form_work_space='[%form.workspace%]M',decomposition_method='iterative',
 contour_deformation=True,
 real_parameters=kinematicInvariants+masses
 )
