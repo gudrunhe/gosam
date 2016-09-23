@@ -1,4 +1,6 @@
+#Define NUMPROJ "2"
 
+#Procedure ApplyProjectors
 * D dimensional Glover/ van der Bij projectors
 Id SCREEN(inplorentz(2,iDUMMY1?,k1,0))*
 SCREEN(inplorentz(2,iDUMMY2?,k2,0))*
@@ -44,4 +46,4 @@ Projector
       )*(k1.k1+k2.k2+2*k1.k2)*ProjDen((k1.k1+k3.k3+2*k1.k3)*(k2.k2+k3.k3+2*k2.k3)-k3.k3*k3.k3)
    )
 );
-
+#EndProcedure
