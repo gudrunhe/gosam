@@ -335,12 +335,12 @@ def analyze_yaml(path, conf, keep_loop, loop_yaml):
        with open(loop_file,'r') as infile:
          for data in load_all(infile):
            try:
-	     diag_number = data["diagram"]["name"]
-	     if diag_number in keep_loop:
-	       replace_zeroes(data,zero)
-	       outfile.write(dump(data, width=10000, explicit_start=True))
-	   except:
-	     outfile.write(dump(data, width=10000, explicit_start=True))
+             diag_number = data["diagram"]["name"]
+             if diag_number in keep_loop:
+               replace_zeroes(data,zero)
+               outfile.write(dump(data, width=10000, explicit_start=True))
+           except:
+             outfile.write(dump(data, width=10000, explicit_start=True))
    except:
       golem.util.tools.warning("Error processing %s file" % loop_file)
    
