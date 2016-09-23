@@ -49,7 +49,8 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	reduze_reduce_l[%loop%]-stamp \
 	l[%loop%].txt \
 	reducedl[%loop%].txt \
-	prepare_secdec_l[%loop%]-stamp[%
+	prepare_secdec_l[%loop%]-stamp \
+	secdecnamesl[%loop%].hh[%
 @end @for %]
 
 SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
@@ -134,6 +135,7 @@ reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
 
 secdecintegralsl[%loop%].txt : reducedl[%loop%].txt
 
+
 # Creates the directory ""
 #TODO: directory name
 prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
@@ -149,6 +151,10 @@ prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 # TODO:
 	# Run SecDec on integrals
 	# Generate Fortran/C++/C
+secdecnamesl[%loop%].hh: prepare_secdec_l[%loop%]-stamp
+	@echo SecDec is decomposing integrals @ [%loop%] loop
+	make -C ../codegen/secdec/[%loop%]loop
+	$(FORM) -D PROCESSPATH=.. -D PWD=. -p ..:../codegen -M -q -D LOOPS=[%loop%] ../codegen/golemreduzesplit.frm
+
 
 [% @end @for %]
-

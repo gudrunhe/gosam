@@ -73,6 +73,8 @@ DATA_DIRS = [
 			"templates/sum",
 			"templates/codegen/reduze",
 			"templates/codegen/reduze/loop",
+			"templates/codegen/secdec",
+			"templates/codegen/secdec/loop",
 			"templates/codegen/reduze/loop/config",
 			"olp/templates",
 			"models",

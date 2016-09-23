@@ -263,6 +263,13 @@
                 </directory>
             </foreach>
         </directory>
+        <directory src="secdec">
+            <foreach iterator="loops">
+                <directory src="loop" dest="%dloop" arguments="loop">
+                    <file src="Makefile" class="Verbatim"/>
+                </directory>
+            </foreach>
+        </directory>
     </directory>
     
     <directory src=".." dest="." usedby="reduze">
