@@ -45,7 +45,7 @@ Multiply TermLabel ^ $NumberOfTerms;
   #write <coefficient_`$IntegralName'.txt> "* "
   #write <coefficient_`$IntegralName'.txt> "* Reduced integral times coefficient of integral `$IntegralName' "
   #write <coefficient_`$IntegralName'.txt> "* "
-  #write <coefficient_`$IntegralName'.txt> "L coeff = %e", [`TermNumber']
+  #write <coefficient_`$IntegralName'.txt> "L l`LOOPS' = %e", [`TermNumber']
 * Write log of coefficient files
 *  #write <coefficient_log.yaml> "---"
 *  #write <coefficient_log.yaml> "integral:"
