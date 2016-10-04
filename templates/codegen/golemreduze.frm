@@ -82,6 +82,10 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
 
 ***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
 #IfDef `MASSCT'
+
+#If `MASSCT' == 1
+
+
 ** Mass renormalization
 
 * Heavy Fermions, See B9 of  1103.0621 <------ ERROR - Assume only 1 CT insertion possible
@@ -110,6 +114,68 @@ if ( count(dZmp,1) == 0 ) Discard;
 .sort
 Id dZmp =1;
 .sort
+
+
+#ElseIf `MASSCT' == 2
+
+** Mass renormalization
+* First, two insertions on the same fermion line, a two-loop insertion 
+* plus two one-loop insertions
+
+Repeat;
+Id Once proplorentz(1,k1?,m?,sDUMMY1?,sDUMMY2?,iv1?,iv2?) =
+proplorentzct1(1,k1,m,sDUMMY1,sDUMMY2,iv1,iv2)
+- i_*dZmp2*deltaZm(2,m)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iDUMMY1)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iDUMMY1,iv2)
+-dZmp2*deltaZm(1,m)^2*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iDUMMY1)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iDUMMY1,iDUMMY2)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iDUMMY2,iv2)
+;
+sum iDUMMY1, iDUMMY2;
+EndRepeat;
+.sort
+
+* Second , two insertion on different lines
+Repeat;
+Id proplorentzct1(1,k1?,m?,sDUMMY1?,sDUMMY2?,iv1?,iv2?) =
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iv2)
+- i_*dZmp*deltaZm(1,m)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iv1,iDUMMY1)*
+proplorentzct(1,k1,m,sDUMMY1,sDUMMY2,iDUMMY1,iv2);
+EndRepeat;
+.sort
+
+
+Id proplorentzct(?tail) = proplorentz(?tail);
+.sort
+
+
+
+* Yukawa Coupling
+FactArg PREFACTOR;
+ChainOut PREFACTOR;
+Id PREFACTOR(gHT) = gHT;
+Id gHT = (1+dZmp*deltaZm(1,mT)*Den(mT)+dZmp2*deltaZm(2,mT)*Den(mT))*gHT;
+Id gHT = PREFACTOR(gHT);
+.sort
+
+
+
+
+* Same as above, throw away non-mct terms
+if (count(dZmp,1) != 2 || count(dZmp2,1) == 0) Discard;
+.sort
+Id dZmp2 =1;
+Id dZmp =1;
+.sort
+
+
+
+#EndIf
+
+
 
 #EndIf
 ***** END WARNING *****
