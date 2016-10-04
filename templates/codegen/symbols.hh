@@ -41,9 +41,9 @@ Vector ZERO, vDUMMYA;
 ***** WARNING THE FOLLOWING CODE DOES NOT WORK IN GENERAL *****
 #IfDef `MASSCT'
 * used for mass CT insertions --- ERROR dZmp SHOULD NOT BE LIMITED TO 1 HERE!
-Symbols dZmp(0:`MASSCT'); * Symbol to count number of mass CT insertions
+Symbols dZmp(0:`MASSCT'),dZmp2(0:`MASSCT'); * Symbol to count number of mass CT insertions
 CFunctions deltaZm; * Function to store the loop order and mass of the mass CT insertion
-CFunctions proplorentzct;
+CFunctions proplorentzct,proplorentzct1;
 #EndIf
 ***** END WARNING *****
         
