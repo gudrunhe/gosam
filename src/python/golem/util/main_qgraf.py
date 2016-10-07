@@ -10,6 +10,7 @@ import os.path
 import os
 import itertools
 import shutil
+import copy
 
 import golem.properties
 import golem.pyxo.pyxodraw
@@ -250,6 +251,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
 	loops_to_generate = conf.getListProperty("loops_to_generate")
 	flag_internal_ct=conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
+	flag_qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
@@ -318,8 +320,29 @@ def run_qgraf(conf, in_particles, out_particles):
 		
 
 		if powers and powers is not None:
-			new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])
+                        if not flag_qcd_in_ew:
+			    new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+			  	 	  "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])
+                        else:
+                            for index, po in enumerate(powers):
+                                if po[0].lower()=='qed':
+                                    po_new=copy.copy(po)
+                                    po_new[2] = str(int(po[2])-2)
+                                    powers[index]=po_new
+                                else:
+                                    po_new=copy.copy(po)
+                                    po_new[2] = str(int(po[2])+2)
+                                    powers[index]=po_new
+                        print 'pwers', powers
+                        new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+				 "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                        
+                                
+                                #if po[0].lower()=='qed':
+                                    #new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+			  	 	        #"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], str(int(po[2])-2)) ])
+                                #else:
+                                    #new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+			  	 	        #"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], str(int(po[2])+2)) ])
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
