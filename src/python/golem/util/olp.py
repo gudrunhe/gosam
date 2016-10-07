@@ -155,6 +155,7 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
       sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
       subprocesses[key] = sp
       is_new = True
+      
 
    return sp, is_new
 
@@ -469,10 +470,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
              subprocess_number_real+=j
              subconf=orig_conf.copy()
              subconf.activate_subconfig(subprocess_number_real)
-             #print conf["olp.alphapower"], conf["olp.alphaspower"]
-             #if j==1:
-               #subconf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
-               #subconf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
              file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
                        ignore_case, ignore_unknown, lineo, quiet=True)
              subprocesses_conf.append(subconf)
@@ -584,7 +581,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for lconf in [conf] + subprocesses_conf:
          qcd_name, qed_name, all_couplings = derive_coupling_names(imodel_path,
                lconf)
-         #print lconf
          qgraf_power = get_qgraf_power(lconf)
 
          if len(qgraf_power) == 0:
@@ -658,7 +654,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                     subprocess, is_new = getSubprocess(
                         olp_process_name, id_real, inp, outp, subprocesses, subprocesses_flav, model,
                         use_crossings, subprocesses_conf[id_real],int(j))
-                    qgraf_power = get_qgraf_power(lconf)
+                    qgraf_power = get_qgraf_power(subprocesses_conf[id_real])
+                    subprocesses_conf[id_real].setProperty("order", qgraf_power)
                     
                     if len(qgraf_power) == 0:
                         contract_file.setPropertyResponse("CorrectionType",
@@ -667,19 +664,10 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                         file_ok = False
                     else:
                         lconf[golem.properties.qgraf_power] = ",".join(map(str,qgraf_power))                    
-                    print lconf["order"]
-                    #if j==1:
-                        #is_new=True
-                    #print id_real
-                    #print subprocess
-                    #print subprocesses_conf[id_real]["olp.alphaspower"]
-                    #print subprocesses_conf[id_real]["olp.alphapower"]
-                    #print subprocess.getIDs()
-                    #print is_new
+
                     if is_new:
                         subdir = str(subprocess)
-                        #if j==1:
-                            #subdir+='_EW'
+
                         process_path = os.path.join(path, subdir)
                         if not os.path.exists(process_path):
                             golem.util.tools.message("Creating directory %r" % process_path)
@@ -704,7 +692,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
             for subprocess in subprocesses.values():
                 process_path = subprocess.getPath(path)
-                print subprocess, int(subprocess)
                 subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
                 subprocess_conf["golem.name"] = "GoSam"
                 subprocess_conf["golem.version"] = ".".join(map(str,
@@ -721,11 +708,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
 
                     golem.util.main_misc.generate_process_files(subprocess_conf,
-                        from_scratch)
-                    print subprocess_conf["olp.alphaspower"]
-                    print subprocess_conf["olp.alphapower"] 
-                    print subprocess_conf["order"]
-                    sys.exit()                                        
+                        from_scratch)           
 
                     helicities = list(
                         golem.util.tools.enumerate_and_reduce_helicities(

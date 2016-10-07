@@ -317,7 +317,54 @@ contains
          res(:) = 0.0d0
       end select
    end subroutine OLP_EvalSubProcess2
+   
 
+[% @if eval olp.correctiontype .eq. 'EW' %]
+   subroutine     OLP_EvalSubProcess_EW(label, momenta, mu, res, acc) &
+   & bind(C,name="[%
+   @if internal OLP_TO_LOWER %][%
+      olp.process_name asprefix=\_ convert=lower %]olp_evalsubprocess_ew[%
+   @else %][%
+      olp.process_name asprefix=\_ %]OLP_EvalSubProcess_EW[%
+   @end @if %][%
+   @if internal OLP_TRAILING_UNDERSCORE %]_[%
+   @end @if %]")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=c_int), intent(in) :: label
+      real(kind=c_double), intent(in) :: mu
+      real(kind=c_double), dimension(50), intent(in) :: momenta
+      real(kind=c_double), dimension(60), intent(out) :: res
+      real(kind=c_double), intent(out) :: acc
+
+      real(kind=c_double), dimension(10) :: parameters
+
+      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
+
+      select case(label)[%
+      @for subprocesses prefix=sp. %][%
+         @for crossings include-self prefix=cr. %][%
+            @select count elements cr.channels
+            @case 1 %]
+      case([% cr.channels %])
+              call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
+               %]), mu, parameters, res, acc)[%
+            @else %][%
+               @for elements cr.channels %]
+      case([% $_ %])
+              call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
+              %]), mu, parameters, res, acc)[%
+               @end @for %][%
+            @end @select %][%
+         @end @for %][%
+      @end @for %]
+      case default
+         res(:) = 0.0d0
+      end select
+   end subroutine OLP_EvalSubProcess_EW
+
+[% @end @if %]
+   
    subroutine     OLP_Finalize() &
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
