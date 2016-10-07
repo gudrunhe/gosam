@@ -367,6 +367,26 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
 
 
 
+def analyze_yaml(path, conf, keep_loop, loop_yaml):
+   zero = golem.util.tools.getZeroes(conf)
+   loop_file = os.path.join(path, "%s.yaml" % loop_yaml)
+   outfile_loop = os.path.join(path, loop_yaml+"_out.yaml")
+   try:
+     with open(outfile_loop,'w') as outfile:
+       with open(loop_file,'r') as infile:
+         for data in load_all(infile):
+           try:
+             diag_number = data["diagram"]["name"]
+             if diag_number in keep_loop:
+               replace_zeroes(data,zero)
+               outfile.write(dump(data, width=10000, explicit_start=True))
+           except:
+             outfile.write(dump(data, width=10000, explicit_start=True))
+   except:
+      golem.util.tools.warning("Error processing %s file" % loop_file)
+   
+   outfile.close()   
+   os.system('mv '+outfile_loop+' '+loop_file)
 
 
 
