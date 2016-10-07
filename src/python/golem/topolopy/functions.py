@@ -105,6 +105,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    # flows = {}
 
    for idx, diagram in diagrams.items():
+
       if lst:
          if idx not in lst:
             lose.append(idx)
@@ -295,7 +296,7 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
    props=[]
    eprops = {}
    #for idx in keep:
-	#props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+     #props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    #if conf.getProperty(golem.properties.sum_diagrams):   
       #for i,item in props:
