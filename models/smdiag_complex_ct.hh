@@ -76,6 +76,7 @@ Symbols gctCL`f', gctCR`f', gctCP`f', gctCM`f';
 
 #Do f={ne,nmu,ntau}
 Symbols gctZl`f', gctZr`f';
+Symbols gctAl`f', gctAr`f';
 Symbols gctCL`f', gctCR`f';
 #EndDo
 
@@ -295,6 +296,10 @@ Id CR([field.Bbar], [field.T], [field.Wm], [field.Cx]) = 0;
 	Id CL([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR( e * gctAl`f');
 	Id CR([field.`f'p], [field.`f'm], [field.A], [field.Cx]) = PREFACTOR( e * gctAr`f');
 #EndDo
+#Do f={ne,nmu,ntau}
+	Id CL([field.`f'], [field.`f'], [field.A], [field.Cx]) = PREFACTOR( e * gctAl`f');
+	Id CR([field.`f'], [field.`f'], [field.A], [field.Cx]) = PREFACTOR( e * gctAr`f');
+#EndDo        
 *---#]   AFF :
 *---#[   ZFF :
 #Do f={U,D,C,S,T,B,ne,nmu,ntau}
