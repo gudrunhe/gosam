@@ -472,6 +472,9 @@ AutoDeclare CFunctions Lor;
    Id kx.kx = 0;[%
 @for particles initial final %]
    Id kx.k[%index%] = 0;[%
+   @if is_massive %]
+   Id kx.l[%index%] = 0;[%
+   @end @if %][%
 @end @for %][%
 @end @if %][%
 @if internal NUMPOLVEC %][%
