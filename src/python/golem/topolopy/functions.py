@@ -2,8 +2,6 @@
 
 import imp
 import os.path
-from yaml import load, load_all, dump
-import sys
 
 import golem.properties
 
@@ -389,7 +387,8 @@ def analyze_yaml(path, conf, keep_loop, loop_yaml):
    
    outfile.close()   
    os.system('mv '+outfile_loop+' '+loop_file)
-   
+
+
 
 
 def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):

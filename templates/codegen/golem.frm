@@ -465,17 +465,21 @@ EndArgument;
 #Call tHooftAlgebra
 
 [% @if extension better_num %]
+
+
+
 #If `LOOPS' == 1
    
    #IfDef `DRED'
-   
-    Id Sm4(p1) = Sm4(p1) + SmQt;
+    Id d4(p1,p1) = d4(p1,p1) - Qt2;
+    Id Sm4(p1) = Sm4(p1) + SmQt;
     Repeat;
         Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
+        
             Id SmQt * Sm4(iDUMMY1?) = - Sm4(iDUMMY1) * SmQt;
     Endrepeat
-        Id d4(p1, p1) = p1.p1;
         Id p1.p1 = p1.p1 - Qt2;
+        Id d4(p1, p1) = p1.p1;
         Id SmQt * SmQt = -Qt2;
         Id SmQt = 0;
    #Else
