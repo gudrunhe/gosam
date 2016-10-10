@@ -569,7 +569,7 @@ def workflow(conf):
 				("Your configuration sets the property %r " % name) +
 				"which is an undocumented and only partially tested feature.",
 				"Please, feel free to test this feature but be aware that",
-				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
+				"====== WE DON'T GUARANTEE ANYTHING! =====")
 
 
 	# This fills in the defaults where no option is given:
@@ -620,10 +620,10 @@ def workflow(conf):
 		generate_lo_diagrams = powers[1].strip().lower() != "none"
 		generate_nlo_virt = powers[2].strip().lower() != "none"
 		generate_nnlo_virt = powers[3].strip().lower() != "none"
-		warning("Your configuration sets a calculation to loop-order higher than 1" +
+		warning("Your configuration sets a calculation to loop-order higher than 1 " +
               "which is an undocumented and only partially tested feature.",
               "Please, feel free to test this feature but be aware that",
-              "====== WE DON'T GUARANTEE FOR ANYTHING! =====")
+              "====== WE DON'T GUARANTEE ANYTHING! =====")
 
 	# loop orders that are to be calculated
 	# parse the arument "order" of the run card
@@ -688,10 +688,10 @@ def workflow(conf):
 		warning("You specified a process with %d incoming particles." %
 					len(ini),
 				"This software has not been fully tested for processes",
-				"with more than two incoming particles."
+				"with more than two incoming particles.",
 				"We don't say this is impossible or wrong.",
 				"",
-				"====== BUT WE DON'T GUARANTEE FOR ANYTHING! =====")
+				"====== WE DON'T GUARANTEE ANYTHING! =====")
 
 	# retrive final extensions from other options
 	ext = golem.properties.getExtensions(conf)
