@@ -2,7 +2,7 @@ integralfamilies:
 
   # Gehrmann Top A with many masses (1404.4853) - double boxes with adjacent massive legs
   # Symmetries should match REDUZE "planarbox" example
-  - name: "ReduzeT1L2"
+  - name: "ReduzeF1L2"
     loop_momenta: [p1,p2]
     propagators:
       - [ "p1"         , "mT^2" ]
@@ -21,7 +21,7 @@ integralfamilies:
   # Gehrmann Top B with masses (1404.4853) - double boxes with non-adjacent massive legs + non-planar
   # Note: 
   # - We have split k-k1 and k2 by having k-l flowing in
-  - name: "ReduzeT2L2"
+  - name: "ReduzeF2L2"
     loop_momenta: [p1,p2]
     propagators:
       - [ "p1"         , "mT^2" ]
@@ -35,7 +35,7 @@ integralfamilies:
       - [ "p2-k1-k2-k3", "mT^2" ]
 
   # Gehrmann Top A with few masses (1404.4853) - double boxes with adjacent massive legs + non-planar
-  - name: "ReduzeT3L2"
+  - name: "ReduzeF3L2"
     loop_momenta: [p1,p2]
     propagators:
       - [ "p1"         , 0 ]
@@ -51,7 +51,7 @@ integralfamilies:
   # Gehrmann Top C with masses (1404.4853) - non-planar
   # Note:
   # - Could shift k-> k+k2
-  - name: "ReduzeT4L2"
+  - name: "ReduzeF4L2"
     loop_momenta: [p1,p2]
     propagators:
       - [ "p1"         , 0 ]        # genuine auxiliary propagator (add mass?)
