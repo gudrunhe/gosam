@@ -874,7 +874,7 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 			keep_higher_vtot.append(tmp_keep_higher_vtot)
 			
 			if flag_reduze:
-			  golem.topolopy.functions.analyze_yaml(path, conf,keep_higher_virt, consts.PATTERN_REDUZE_HIGHER_VIRT %loop_order)
+			  golem.topolopy.functions.analyze_yaml(path, conf, tmp_keep_higher_vtot, consts.PATTERN_REDUZE_HIGHER_VIRT %loop_order)
 	else:
 		keep_higher_virt = []
 		keep_higher_vtot = []
