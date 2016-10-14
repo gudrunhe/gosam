@@ -2,8 +2,8 @@
 
 import imp
 import os.path
-from yaml import load, load_all, dump
 import sys
+import shutil
 
 import golem.properties
 
@@ -11,6 +11,7 @@ from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache
 import golem.topolopy.userlib
 from golem.util.config import GolemConfigError
 from golem.util.tools import error, warning, debug
+from yaml import load, load_all, dump
 
 def setup_list(prop, conf):
    result = []
@@ -195,7 +196,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    props=[]
    eprops = {}
    for idx in keep:
-	props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+     props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    if conf.getProperty(golem.properties.sum_diagrams):   
       for i,item in props:
@@ -318,9 +319,9 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
          #eprops[idx].append(idx)
 #--- new end
 
-   debug("After analyzing 2loop diagrams and diagram sum: keeping %d, purging %d" % 
-            (len(keep), len(lose)))
-
+   debug("After analyzing %sloop diagrams and diagram sum: keeping %d, purging %d" %
+            (loop_order, len(keep), len(lose)))
+ 
    #conf["__max_rank__"] = max_rank
 
    return keep, keep_tot
@@ -330,25 +331,26 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
 def analyze_yaml(path, conf, keep_loop, loop_yaml):
    zero = golem.util.tools.getZeroes(conf)
    loop_file = os.path.join(path, "%s.yaml" % loop_yaml)
+   backup_loop_file = os.path.join(path, "%s_orig.yaml" % loop_yaml)
    outfile_loop = os.path.join(path, loop_yaml+"_out.yaml")
-   try:
-     with open(outfile_loop,'w') as outfile:
-       with open(loop_file,'r') as infile:
-         for data in load_all(infile):
-           try:
-             diag_number = data["diagram"]["name"]
-             if diag_number in keep_loop:
-               replace_zeroes(data,zero)
-               outfile.write(dump(data, width=10000, explicit_start=True))
-           except:
+   with open(outfile_loop,'w') as outfile:
+     with open(loop_file,'r') as infile:
+       for data in load_all(infile):
+         try:
+           diagram = data["diagram"]
+         except KeyError:
+           # `data` does not describe a diagram
+           # --> write to output unchanged and continue
+           outfile.write(dump(data, width=10000, explicit_start=True))
+         else:
+           # parse the diagram
+           diag_number = diagram["name"]
+           if diag_number in keep_loop:
+             replace_zeroes(data,zero)
              outfile.write(dump(data, width=10000, explicit_start=True))
-   except:
-      golem.util.tools.warning("Error processing %s file" % loop_file)
-   
-   outfile.close()   
-   os.system('mv '+outfile_loop+' '+loop_file)
-   
 
+   shutil.move(loop_file, backup_loop_file)
+   shutil.move(outfile_loop, loop_file)
 
 
 
