@@ -319,7 +319,6 @@ def run_qgraf(conf, in_particles, out_particles):
                                     po_new=copy.copy(po)
                                     po_new[2] = str(int(po[2])+2)
                                     powers[index]=po_new
-                        print 'pwers', powers
                         new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
 				 "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                        
                                 
