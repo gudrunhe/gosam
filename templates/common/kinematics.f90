@@ -372,7 +372,7 @@ contains
    @end @for %][%
    @for particles lightlike vector final %][%
       @with eval 'k .rep. ( reference > 0 ) . 'l .rep. ( reference < 0 )
-          . reference result=refvec %]
+         . ( .abs. reference ) result=refvec %]
          select case(hel[%index%])
          case(1)
             flag[%index%] = .true.
@@ -395,7 +395,7 @@ contains
    @for pairs ordered %][%
       @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
          @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
-          . reference2 result=refvec2 %][%
+            . ( .abs. reference2 ) result=refvec2 %][%
             @with eval 'k .rep. ( is_lightlike1 ~> 'rue )
              . 'l .rep. ( is_lightlike1 ~> 'lse )
              . index1 result=vec1 %]
@@ -423,7 +423,7 @@ contains
       @end @if %][%
       @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) %][%
          @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
-          . reference1 result=refvec1 %][%
+            . ( .abs. reference1 ) result=refvec1 %][%
             @with eval 'k .rep. ( is_lightlike2 ~> 'rue )
              . 'l .rep. ( is_lightlike2 ~> 'lse )
              . index2 result=vec2 %]
@@ -454,9 +454,9 @@ contains
       @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
                is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
          @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
-          . reference1 result=refvec1 %][%
+          . ( .abs. reference1 ) result=refvec1 %][%
             @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
-          . reference2 result=refvec2 %]
+          . ( .abs. reference2 ) result=refvec2 %]
          if (flag[%index1%]) then
             if (flag[%index2%]) then
                spae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2
@@ -503,7 +503,7 @@ contains
    @for pairs %][%
       @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
          @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
-          . reference2 result=refvec2 %][%
+           . ( .abs. reference2 ) result=refvec2 %][%
             @with eval 'k .rep. ( is_lightlike1 ~> 'rue )
              . 'l .rep. ( is_lightlike1 ~> 'lse )
              . index1 result=vec1 %]
@@ -534,9 +534,9 @@ contains
       @if eval is_lightlike1 .and. ( 2spin1 .eq. 2 ) .and.
                is_lightlike2 .and. ( 2spin2 .eq. 2 ) %][%
          @with eval 'k .rep. ( reference1 > 0 ) . 'l .rep. ( reference1 < 0 )
-          . reference1 result=refvec1 %][%
+          . ( .abs. reference1 ) result=refvec1 %][%
             @with eval 'k .rep. ( reference2 > 0 ) . 'l .rep. ( reference2 < 0 )
-          . reference2 result=refvec2 %]
+          . ( .abs. reference2 ) result=refvec2 %]
          if (flag[%index1%]) then
             if (flag[%index2%]) then[% '
                ! T T => <k1 r2] %]

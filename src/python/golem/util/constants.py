@@ -21,9 +21,9 @@ PATTERN_REDUZE_NLO_VIRT = "reduze1loop"
 PATTERN_REDUZE_HIGHER_VIRT = "reduze%sloop"
 
 AUTHORS = {
-      "Hans van Deurzen": ["hdeurzen@mpp.mpg.de"],
       "Nicolas Greiner": ["greiner@mpp.mpg.de"],
       "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
+      "Stephan Jahn": ["sjahn@mpp.mpg.de"],
       "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
       "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
       "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
@@ -36,6 +36,7 @@ AUTHORS = {
 
 FORMER_AUTHORS = {
       "Gavin Cullen": ["gavin.cullen@desy.de"],
+      "Hans van Deurzen": ["hdeurzen@mpp.mpg.de"],
       "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
       "Joscha Reichel": ["joscha@mpp.mpg.de"],
       "Thomas Reiter": ["reiterth@mpp.mpg.de"]
@@ -108,7 +109,7 @@ CLINES = [
               ( ".".join(map(str,golem.installation.GOLEM_VERSION)),
                 golem.installation.GOLEM_REVISION),
             '',
-            '(c) The GoSam Collaboration 2011-2015',
+            '(c) The GoSam Collaboration 2011-2016',
             ''
       ]
 

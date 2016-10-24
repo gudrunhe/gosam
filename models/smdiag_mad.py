@@ -28,24 +28,24 @@ particles = {
    'Wm':      Particle('Wm',       2,   'mW',  1, 'Wp',   'wW',      -24,    -3.0),
    'Wp':      Particle('Wp',       2,   'mW',  1, 'Wm',   'wW',       24,     3.0),
 
-   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11,    -1.0),
-   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11,    -1.0),
+   'em':      Particle('em',       1,   'me',  1, 'ep',    '0',       11,    -3.0),
+   'ep':      Particle('ep',      -1,   'me',  1, 'em',    '0',      -11,    -3.0),
    'ne':      Particle('ne',       1,      0,  1, 'nebar', '0',       12,     0.0),
    'nebar':   Particle('nebar',   -1,      0,  1, 'ne',    '0',      -12,     0.0),
 
-   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13,    -1.0),
-   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13,    -1.0),
+   'mum':     Particle('mum',      1,  'mmu',  1, 'mup',   '0',       13,    -3.0),
+   'mup':     Particle('mup',     -1,  'mmu',  1, 'mum',   '0',      -13,    -3.0),
    'nmu':     Particle('nmu',      1,      0,  1, 'nmubar', '0',      14,     0.0),
    'nmubar':  Particle('nmubar',  -1,      0,  1, 'nmu',   '0',      -14,     0.0),
 
-   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15,    -1.0),
-   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15,    -1.0),
+   'taum':    Particle('taum',     1, 'mtau',  1, 'taup', 'wtau',     15,    -3.0),
+   'taup':    Particle('taup',    -1, 'mtau',  1, 'taum', 'wtau',    -15,    -3.0),
    'ntau':    Particle('ntau',     1,      0,  1, 'ntaubar', '0',     16,     0.0),
    'ntaubar': Particle('ntaubar', -1,      0,  1, 'ntau',   '0',     -16,     0.0),
 
    'H':       Particle('H',        0,   'mH',  1, 'H',      'wH',     25,     0.0),
-   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251,    -1.0),
-   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251,     1.0),
+   'phim':    Particle('phim',     0,   'mW',  1, 'phip', 'wphi',   -251,    -3.0),
+   'phip':    Particle('phip',     0,   'mW',  1, 'phim', 'wphi',    251,     3.0),
    'chi':     Particle('chi',      0,   'mZ',  1, 'chi',  'wchi',    250,     0.0),
 
    'ghA':     Particle('ghA',      0,      0,  1, 'ghAbar', '0', 9000002,     0.0),
@@ -55,13 +55,13 @@ particles = {
    'ghZbar':  Particle('ghZbar',   0,   'mZ',  1, 'ghZ',    'wghZ',
                                                            -9000003,     0.0),
    'ghWp':    Particle('ghWp',     0,   'mW',  1, 'ghWpbar', 'wghWp',
-                                                       9000004,     1.0),
+                                                       9000004,     3.0),
    'ghWpbar': Particle('ghWpbar',  0,   'mW',  1, 'ghWp',    'wghWp',
-                                                      -9000004,    -1.0),
+                                                      -9000004,    -3.0),
    'ghWm':    Particle('ghWm',     0,   'mW',  1, 'ghWmbar', 'wghWm',
-                                                       9000005,    -1.0),
+                                                       9000005,    -3.0),
    'ghWmbar': Particle('ghWmbar',  0,   'mW',  1, 'ghWm',    'wghWm',
-                                                      -9000005,     1.0)
+                                                      -9000005,     3.0)
 }
 #---#] particles:
 #---#[ mnemonics:
