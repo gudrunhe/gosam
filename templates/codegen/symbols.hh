@@ -16,7 +16,12 @@ CFunction mulfirst;
 
 CTensors f(antisymmetric), f4, T, d(symmetric);
 
-CFunctions C(symmetric), CL(symmetric), CR(symmetric);
+CFunctions C(symmetric), CL(symmetric), CR(symmetric);[%
+@if generate_uv_counterterms %]
+CFunctions C1(symmetric), C2(symmetric), CM(symmetric), CP(symmetric);
+Symbols vDUMMY5, sign5;
+Vector kx;[%
+@end @if %]
 
 CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
 CFunction customSpin2Prop;
@@ -508,6 +513,9 @@ AutoDeclare CFunctions Lor;
       T(idx[%io%][%lindex%]C[%rep%]?, idx[%prev%]C3t?, idx[%index%]C3t?)[%
       @end @for %][%
    @end @for %] = c[% index %];[%
+@if generate_ct_internal %]
+    Id outcolor([% eval num_out + 1 %], idx[% num_out %][% num_out %]C[% num_out %]?) = 1;[%
+@end @if %][%
 @end @for %]
 #EndProcedure
 *------#] procedure colorbasis:

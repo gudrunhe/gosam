@@ -4,6 +4,7 @@
 This file contains routines for the communication with QGraf
 and is only used in gosam.py
 """
+
 import subprocess
 import os.path
 import os
@@ -13,6 +14,7 @@ import shutil
 import golem.properties
 import golem.pyxo.pyxodraw
 import golem.model.calchep
+import golem.model
 
 from golem.util.tools import copy_file, \
 		debug, message, warning
@@ -137,7 +139,6 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 		if length >= 70:
 			f.write("\n")
 			length=0
-
 	# add r-particle if present
 #	if len(r_particles) == 1:
 #		if comma:
@@ -146,6 +147,8 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 #			comma = True
 #		f.write("%s[ZERO]" % str(r_particles[0]))
 
+        if model=='modelct':
+            f.write(',Cx[kx]')
 	f.write(";\n")
 
 	f.write("loops=%s;\nloop_momentum=p;\n" % loops)
@@ -160,6 +163,7 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	f.write(verbatim)
 	f.write("\n%------- EOF ----------\n")
 	f.close()
+
 
 def run_qgraf_dat(conf, output_short_name, log_name):
 	path = golem.util.tools.process_path(conf)
@@ -234,6 +238,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 
+
 	flag_generate_nlo_virt = conf.getBooleanProperty("generate_nlo_virt")
 	flag_generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	flag_generate_lo_diagrams = conf.getBooleanProperty("generate_lo_diagrams")
@@ -244,6 +249,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
 	loops_to_generate = conf.getListProperty("loops_to_generate")
+	flag_internal_ct=conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
@@ -348,8 +354,8 @@ def run_qgraf(conf, in_particles, out_particles):
 			
 			
 			
-	# -------------UV counterterms from Feynrules----------------------------
-	if flag_generate_nlo_virt and len(conf.getProperty(golem.properties.model))>1:
+	# -------------UV counterterms from Feynrules or internally ----------------------------
+	if flag_generate_nlo_virt and (len(conf.getProperty(golem.properties.model))>1 or flag_internal_ct):
 	#if conf["generate_uv_counterterms"]:
 		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
@@ -360,10 +366,26 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo		
 		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
-		write_qgraf_dat(path, formct_sty, modelct, output_name,
+		if not flag_internal_ct:
+                    write_qgraf_dat(path, formct_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
-		run_qgraf_dat(conf, output_name, log_name)	
+                else:
+                    new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                    
+                    write_qgraf_dat(path, form_sty, modelct, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 0)
+
+		run_qgraf_dat(conf, output_name, log_name)
+		if flag_internal_ct:
+                    if flag_topolopy:
+                            output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+                            log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+                            write_qgraf_dat(path, topo_sty, modelct, output_name,
+                                    options, new_verbatim, in_particles, out_particles, [], 0)
+                            run_qgraf_dat(conf, output_name, log_name)                    
+		
 		cleanup_files.append(formct_sty)
+		
 		
 			
 	# -------------------- higher virt -------------------------------------

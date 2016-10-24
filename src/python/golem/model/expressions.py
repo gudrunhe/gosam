@@ -75,7 +75,6 @@ class ExpressionParser:
 			return ProductExpression(factors)
                     
         def log(self, tokens):
-            print 'HIER1'
             name=tokens.name()
             term = self.product(tokens)
             if tokens.name() == "log":

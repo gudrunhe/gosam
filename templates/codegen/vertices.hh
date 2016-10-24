@@ -20,6 +20,214 @@
 * the extra index x at this point.
 *
 #Procedure ExpandVertices
+
+
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*%                                             %
+*%                   EW-CT                     %
+*%                                             %
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+*---#[ VVCT vertex (A.3) :
+id vertex(iv?,
+	field1?   , idx1?, 2, vDUMMY1?, iv1L?, 1, iv1C?,
+	field2?   , idx2?, 2, vDUMMY2?, iv2L?, 1, iv2C?,
+        [field.Cx], idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
+	       +i_ * C1(field1, field2, [field.Cx]) *
+        d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
+	       +i_ * C2(field1, field2, [field.Cx]) *
+        d(iv1L, iv2L);
+
+*---#[ SSCT vertex (A.4) :
+id vertex(iv?,
+	field1?   , idx1?, 0, vDUMMY1?, iv1L?, 1, iv1C?,
+	field2?   , idx2?, 0, vDUMMY2?, iv2L?, -1, iv2C?,
+        [field.Cx], idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
+	        -i_ * C1(field1, field2, [field.Cx]) *
+        d(vDUMMY1, vDUMMY2)
+	        -i_ * C2(field1, field2, [field.Cx]);
+
+
+*---#[ FFCT vertex (A.5) :
+id vertex(iv?,
+    field1?   , idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C1?,
+    field2?   , idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,
+    [field.Cx], idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) =
+                 i_ * (
+        + CL(field1, field2, [field.Cx]) *
+          NCContainer(Sm(vDUMMY1)*ProjMinus, iv1L, iv2L)
+        + CR(field1, field2, [field.Cx]) *
+          NCContainer(Sm(vDUMMY1)*ProjPlus , iv1L, iv2L)
+        - CM(field1, field2, [field.Cx]) *
+          NCContainer(ProjMinus, iv1L, iv2L)
+        - CP(field1, field2, [field.Cx]) *
+          NCContainer(ProjPlus, iv1L, iv2L)
+        );
+
+id vertex(iv?,
+    field1?   , idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C1?,
+    field2?   , idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C1?,
+    [field.Cx], idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) =
+                 i_ * (
+        + CL(field1, field2, [field.Cx]) *
+          NCContainer(Sm(vDUMMY1)*ProjMinus, iv1L, iv2L)
+        + CR(field1, field2, [field.Cx]) *
+          NCContainer(Sm(vDUMMY1)*ProjPlus , iv1L, iv2L)
+        - CM(field1, field2, [field.Cx]) *
+          NCContainer(ProjMinus, iv1L, iv2L)
+        - CP(field1, field2, [field.Cx]) *
+          NCContainer(ProjPlus, iv1L, iv2L)
+        ) * dcolor(iv1C3, iv2C3); 
+
+
+*---#[ VVVV vertex (A.2.6) :
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+        field4?, idx4?, 2, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?,
+	[field.Cx], idx5?,  0, vDUMMY5?, iv5L?, sign5?{-1,1}, iv5C?) =
+       PREFACTOR(i_) * C(field1, field2, field3, field4, [field.Cx]) * 
+			LorVVVV(iv1L, iv2L, iv3L, iv4L);
+*---#] VVVV vertex (A.2.6) :
+
+
+*---#[ VVV vertex (A.2.8) :
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+        field3?, idx3?, 2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]) *
+      LorVVV(vDUMMY1,vDUMMY2,vDUMMY3,iv1L,iv2L,iv3L);
+*---#] VVV vertex (A.2.8) :
+
+*---#[ SSSS vertex (A.2.10) :
+id vertex(iv?,
+	field1?, idx1?, 0, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 0, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	field4?, idx4?, 0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?,
+	[field.Cx], idx5?,  0, vDUMMY5?, iv5L?, sign5?{-1,1}, iv5C?) =
+       i_ * C(field1, field2, field3, field4, [field.Cx]);
+*---#] SSSS vertex (A.2.10) :
+*---#[ SSS vertex (A.2.12) :
+id vertex(iv?,
+	field1?, idx1?, 0, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 0, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+        field3?, idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]);
+*---#] SSS vertex (A.2.12) :
+*---#[ VVSS vertex (A.2.14) :
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	field4?, idx4?, 0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?,
+	[field.Cx], idx5?,  0, vDUMMY5?, iv5L?, sign5?{-1,1}, iv5C?) =
+       i_ * C(field1, field2, field3, field4, [field.Cx]) * d(iv1L, iv2L);
+*---#] VVSS vertex (A.2.14) :
+*---#[ VSS vertex (A.2.16) :
+* Note: The momenta of (S1,S2) in the book correspond to (vDUMMY2,vDUMMY3) here.
+* This determins the sign of C.
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 0, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]) * (vDUMMY2(iv1L) - vDUMMY3(iv1L));
+*---#] VSS vertex (A.2.16) :
+*---#[ SVV vertex (A.2.18) :
+id vertex(iv?,
+	field1?, idx1?, 0, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
+	field3?, idx3?, 2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]) * d(iv2L, iv3L);
+*---#] SVV vertex (A.2.18) :
+*---#[ VFF vertex (A.2.20) :
+id vertex(iv?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C?,
+	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C?,
+	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) = i_ * (
+		+ 1/2 * (CR(field1, field2, field3, [field.Cx]) 
+                       + CL(field1, field2, field3, [field.Cx]) ) *
+		  NCContainer(Sm(iv3L), iv1L, iv2L)
+		+ (CR(field1, field2, field3, [field.Cx]) 
+                 - CL(field1, field2, field3, [field.Cx]) ) *
+		  1/4 * (1 + 0*deltaaxial) * (
+		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
+		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
+		  )
+		);
+id vertex(iv?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
+	field2?, idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
+	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C1?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) = i_ * (
+		+ 1/2 * (CR(field1, field2, field3, [field.Cx]) 
+                       + CL(field1, field2, field3, [field.Cx]) ) *
+		  NCContainer(Sm(iv3L), iv1L, iv2L)
+		+ (CR(field1, field2, field3, [field.Cx])
+                 - CL(field1, field2, field3, [field.Cx])) *
+		  1/4 * (1 + 2*deltaaxial) * (
+		  + NCContainer(Sm(iv3L) * Gamma5, iv1L, iv2L)
+		  - NCContainer(Gamma5 * Sm(iv3L), iv1L, iv2L)
+		  )
+		) * dcolor(iv1C3, iv2C3);
+*---#] VFF vertex (A.2.20) :
+
+*---#[ SFF vertex (A.2.24) :
+* TODO: Have a look at hep-ph/9302240 --> peudoscalar coupling might not be correct yet.
+id vertex(iv?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C1?,
+	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,
+	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) = i_ * (
+		+ CL(field1, field2, field3, [field.Cx]) *
+		  NCContainer(ProjMinus, iv1L, iv2L)
+		+ CR(field1, field2, field3, [field.Cx]) *
+		  NCContainer(ProjPlus, iv1L, iv2L)
+		+ ( CR(field1, field2, field3, [field.Cx]) 
+                -   CL(field1, field2, field3, [field.Cx]) ) *
+		  1/2 * 0*deltaaxial * NCContainer(Gamma5, iv1L, iv2L)
+		);
+id vertex(iv?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
+	field2?, idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
+	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) = i_ * (
+       	     + CL(field1, field2, field3, [field.Cx]) *
+		  NCContainer(ProjMinus, iv1L, iv2L)
+		+ CR(field1, field2, field3, [field.Cx]) *
+		  NCContainer(ProjPlus, iv1L, iv2L)
+		+ (CR(field1, field2, field3, [field.Cx])
+		   - CL(field1, field2, field3, [field.Cx]) ) *
+		  1/2 * deltaaxial * NCContainer(Gamma5, iv1L, iv2L)
+		) * dcolor(iv1C3, iv2C3);
+*---#] SFF vertex (A.2.24) :
+*---#[ VGG vertex (A.2.26) :
+id vertex(iv?,
+	field1?, idx1?,  0, vDUMMY1?, iv1L?, -1, iv1C?,
+	field2?, idx2?,  0, vDUMMY2?, iv2L?,  1, iv2C?,
+	field3?, idx3?,  2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]) * vDUMMY1(iv3L);
+*---#] VGG vertex (A.2.26) :
+
+*---#[ SGG vertex (A.2.28) :
+id vertex(iv?,
+	field1?, idx1?,  0, vDUMMY1?, iv1L?, -1, iv1C?,
+	field2?, idx2?,  0, vDUMMY2?, iv2L?,  1, iv2C?,
+	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
+	[field.Cx], idx4?,  0, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
+       i_ * C(field1, field2, field3, [field.Cx]);
+*---#] SGG vertex (A.2.28) :
+
+
+
 *---#[ replace zero vectors :
 id vertex(iv?,
 		field1?, idx1?, sDUMMY1?, 0, iv1L?, sign1?, iv1C?,
@@ -283,7 +491,11 @@ id vertex(iv?,
 		i_ * C(field1, field2, field3) *
       ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
 		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));
-*---#] effective AAH:      
+*---#] effective AAH:     
+
+
+
+
 #EndProcedure
 
 #Procedure ExpandLorentzStructures
