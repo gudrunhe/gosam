@@ -50,6 +50,7 @@
 	</directory>
 
 	<directory src="codegen">
+        <except if-extension="reduze" />
 		<file src="abbrev.in" class="Multi">
 			<only if-internal="HAGGIES" />
 		</file>
@@ -71,17 +72,7 @@
 		<file src="model.out" class="Model">
 			<only if-internal="HAGGIES" />
 		</file>
-		<file src="toreduze.py" class="Verbatim">
-			<only if-extension="reduze"/>
-		</file>
-		<file src="tosecdec.py" class="Verbatim">
-			<only if-extension="reduze"/>
-		</file>
-		<foreach iterator="loops">
-			<file src="secdec.m" dest="secdecl%d.m" arguments="loop" class="Integrals"/>
-			<file src="secdec.input" dest="secdecl%d.input" arguments="loop" class="Integrals"/>
-            <file src="secdec.py" dest="secdecl%d.py" arguments="loop" class="Integrals"/>
-		</foreach>
+
 
 		<file src="haggies-l0.in" class="Multi">
 			<only if-internal="HAGGIES" />
@@ -126,7 +117,6 @@
 			<except if-extension="formopt" />
 		</file>
 
-		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="derive" />
@@ -139,14 +129,6 @@
 		<file src="golem.frm" class="Kinematics" >
 			<except if-extension="reduze" />
 		</file>
-		<file src="color.frm" class="Kinematics"/>
-		<file src="coloropt.frm" class="Kinematics">
-			<only if-option="abbrev.color" value="form" />
-		</file>
-		<file src="modelopt.frm" class="Kinematics">
-			<only if-extension="formopt" />
-		</file>
-		<file src="abbreviate.hh" class="Kinematics"/>
 		<file src="optimizeborn.hh" class="Integrals">
 			<only if-extension="formopt" />
 		</file>
@@ -155,10 +137,6 @@
 		</file>
 		<file src="ninjafinalopt.frm" class="Kinematics">
 			<only if-extension="ninja" />
-		</file>
-		<file src="replace.hh" class="Kinematics">
-			<only if-extension="formopt" />
-			<only if-option="helsum" value="true" />
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
@@ -188,22 +166,12 @@
 		<file src="buildcolor.py" class="Kinematics">
 			<except if-option="abbrev.color" value="haggies" />
 		</file>
-		<file src="symbols.hh" class="Kinematics"/>
-		<file src="spinney.hh" class="Verbatim"/>
-		<file src="color.hh" class="Verbatim"/>
-		<file src="vertices.hh" class="Verbatim"/>
-		<file src="legs.hh" class="Verbatim"/>
-		<file src="propagators.hh" class="Verbatim"/>
 		<!-- file src="fermion_flow.hh" class="Integrals" /-->
 		<file src="shiftmomenta.prc" class="Integrals" />
 		<file src="r2.hh" class="Integrals" />
 		<file src="r2integrals.hh" class="Verbatim" />
 		<file src="lightconedecomp.prc" class="Kinematics"/>
 		<file src="spva.prc" class="Kinematics"/>
-		<file src="func.txt" class="Model" />
-		<file src="func.hh" class="Model" >
-			<only if-extension="formopt" />
-		</file>
 		<file src="diagsum.frm" dest="diagsum.frm"
 		                class="Integrals" >
 			<only if-option="diagsum" value="true"/>
@@ -211,37 +179,33 @@
 		<file src="ct.hh" class="Integrals">
 			<except if-option="genUV" value="false"/>
 		</file>
-		<file src="translate_reduze.py"  class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
-		<file src="reduze.hh" class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
-		<file src="secdec.hh" class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
-		<file src="series.hh" class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
-        <file src="seriesprocedures.hh" class="Verbatim">
-            <only if-extension="reduze" />
-        </file>
-		<file src="golemreduze.frm" class="Kinematics">
-			<only if-extension="reduze" />
-		</file>
-		<file src="golemreduzesum.frm" class="Integrals">
-			<only if-extension="reduze" />
-		</file>
-		<file src="golemreduzesecdec.frm" class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
-		<file src="golemreduzesplit.frm" class="Verbatim">
-			<only if-extension="reduze" />
-        </file>
-		<file src="golemreduzecode.frm" class="Verbatim">
-			<only if-extension="reduze" />
-		</file>
 	</directory>
+
+    <directory src="codegen">
+        <file src="filter.py" class="Verbatim"/>
+        <file src="color.frm" class="Kinematics"/>
+        <file src="coloropt.frm" class="Kinematics">
+            <only if-option="abbrev.color" value="form" />
+        </file>
+        <file src="modelopt.frm" class="Kinematics">
+            <only if-extension="formopt" />
+        </file>
+        <file src="abbreviate.hh" class="Kinematics"/>
+        <file src="replace.hh" class="Kinematics">
+            <only if-extension="formopt" />
+            <only if-option="helsum" value="true" />
+        </file>
+        <file src="symbols.hh" class="Kinematics"/>
+        <file src="spinney.hh" class="Verbatim"/>
+        <file src="color.hh" class="Verbatim"/>
+        <file src="vertices.hh" class="Verbatim"/>
+        <file src="legs.hh" class="Verbatim"/>
+        <file src="propagators.hh" class="Verbatim"/>
+        <file src="func.txt" class="Model" />
+        <file src="func.hh" class="Model" >
+            <only if-extension="formopt" />
+        </file>
+    </directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">
 		<file src="form.sty" class="Verbatim" usedby="qgraf"/>
@@ -273,6 +237,23 @@
                 </directory>
             </foreach>
         </directory>
+        <file src="toreduze.py" class="Verbatim"/>
+        <file src="tosecdec.py" class="Verbatim"/>
+        <foreach iterator="loops">
+            <file src="secdec.m" dest="secdecl%d.m" arguments="loop" class="Integrals"/>
+            <file src="secdec.input" dest="secdecl%d.input" arguments="loop" class="Integrals"/>
+            <file src="secdec.py" dest="secdecl%d.py" arguments="loop" class="Integrals"/>
+        </foreach>
+        <file src="translate_reduze.py"  class="Verbatim"/>
+        <file src="reduze.hh" class="Verbatim"/>
+        <file src="secdec.hh" class="Verbatim"/>
+        <file src="series.hh" class="Verbatim"/>
+        <file src="seriesprocedures.hh" class="Verbatim"/>
+        <file src="golemreduze.frm" class="Kinematics"/>
+        <file src="golemreduzesum.frm" class="Integrals"/>
+        <file src="golemreduzesecdec.frm" class="Verbatim"/>
+        <file src="golemreduzesplit.frm" class="Verbatim"/>
+        <file src="golemreduzecode.frm" class="Verbatim"/>
     </directory>
     
     <directory src=".." dest="." usedby="reduze">
@@ -284,6 +265,7 @@
     </directory>
     
 	<directory src="common">
+        <except if-extension="reduze" />
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
 		</file>
@@ -340,6 +322,7 @@
 	</directory>
 
 	<directory src="matrix">
+        <except if-extension="reduze" />
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
 		</file>
@@ -410,6 +393,7 @@
 
 	<directory src="sum">
 		<only if-option="helsum" value="true" />
+        <except if-extension="reduze" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
 		<file src="Makefile" class="Integrals">
