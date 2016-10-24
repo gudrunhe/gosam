@@ -932,10 +932,99 @@ class Form(Program):
          raise ConfigurationException(
                "Could not run FORM (%s) properly" % executable)
 
+   def checkCompatibility(self,p):
+      if not testFormCompatibility(p):
+         return False
+      return True
+
    def store(self, conf):
-      conf["form.bin"] = self.undohome(self.getInstance())
+      conf["form.bin"] = self.undohome(self.getInstance(check=True))
       #if version_compare(self.version, [4,0]) >= 0:
       #   conf["+form.extensions"] = "topolynomial"
+
+   def getInstance(self,check=False):
+      if check:
+         for p in self.locations:
+            print "# ~~~ " + p + " usable with GoSam? ... ",
+            if self.checkCompatibility(p):
+               print "Yes"
+               return p
+            else:
+               print "No"
+         print("==> Configuration failed:")
+         print("    FORM version is not compatible with GoSam.")
+         sys.exit(1)
+      elif len(self.locations) > 0:
+         return self.locations[0]
+
+class Yaml(Component):
+   def __init__(self):
+      Component.__init__(self)
+      self.installed = False
+
+   def examine(self, hints, **opts):
+      try:
+         import yaml
+         self.installed = True
+      except ImportError:
+         return
+
+   def isInstalled(self):
+      return self.installed
+
+   def getInstallationPath(self):
+      try:
+         import yaml
+         return [str(yaml.__file__)]
+      except ImportError:
+         return []
+
+class Reduze(Program):
+   def __init__(self):
+      Program.__init__(self, "Reduze", "reduze")
+
+   def examine(self, hints):
+      Program.examine(self, hints)
+      executable = self.getInstance()
+
+      try:
+         pipe = subprocess.Popen(executable,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout
+
+      except OSError:
+         raise ConfigurationException(
+              "Could not run Reduze (%s) properly" % executable)
+
+   def checkCompatibility(self,p):
+      pipe = subprocess.Popen([p, "-v"],
+                              stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+      for line in pipe.readlines():
+         lline = line.lower().strip()
+         if "reduze" not in lline:
+            # reduze version 2.1 prints
+            # "Reduze 2.1.x-297-g01c1202 (non-MPI build)"
+            return False
+      if not testReduzeCompatibility(p):
+         return False
+      return True
+
+   def getInstance(self,check=False):
+      if check:
+         for p in self.locations:
+            print "# ~~~ " + p + " usable with GoSam? ... ",
+            if self.checkCompatibility(p):
+               print "Yes"
+               return p
+            else:
+               print "No"
+               return
+      elif len(self.locations) > 0:
+         return self.locations[0]
+
+   def store(self, conf):
+      conf["reduze.bin"] = self.undohome(self.getInstance(check=True))
 
 class Fortran(Program):
    def __init__(self):
@@ -1169,6 +1258,180 @@ def testCompilerLibCompatibility (compiler,lib,flags):
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       (stdout, stderr) = p.communicate()
       return p.returncode==0
+   finally:
+      os.chdir(cur_path)
+      try:
+         shutil.rmtree(tmp_dir) # delete directory
+      except OSError, e:
+         if e.errno != 2: # no such file or directory
+            raise
+
+def testFormCompatibility(executable):
+   cur_path=os.getcwd()
+   try:
+      tmp_dir = tempfile.mkdtemp()
+      os.chdir(tmp_dir)
+
+      # Check that required newer FORM features work
+
+      #  1) PolyRatFun rat(divergence,x)
+      with open("divergence.frm","w") as f:
+         f.write("CF rat;\n")
+         f.write("S x;\n")
+         f.write("PolyRatFun rat(divergence, x);\n")
+         f.write("L e = rat(x+1,x^2);\n")
+         f.write(".sort\n")
+         f.write("#Write <divergence.out> \"%e\",e\n")
+         f.write(".end\n")
+      p = subprocess.Popen([executable, "divergence.frm"],
+                           stdin=subprocess.PIPE,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (stdout, stderr) = p.communicate()
+      divergence_output_expected =  "rat(1,x^2);"
+      with open("divergence.out","r") as f:
+         divergence_output = f.read()
+      divergence_output = divergence_output.strip()
+      if divergence_output != divergence_output_expected:
+         return False
+
+      return p.returncode == 0
+
+   except:
+      return False
+
+   finally:
+      os.chdir(cur_path)
+      try:
+         shutil.rmtree(tmp_dir)  # delete directory
+      except OSError, e:
+         if e.errno != 2:  # no such file or directory
+            raise
+
+def testReduzeCompatibility(executable):
+   try:
+      from yaml import load, dump
+   except ImportError:
+      return False
+
+   cur_path=os.getcwd()
+   try:
+      # setup a very basic reduction and match a basic diagram
+      tmp_dir=tempfile.mkdtemp()
+      os.chdir(tmp_dir)
+      os.mkdir(tmp_dir+'/config')
+      os.chdir(tmp_dir+'/config')
+
+      with open("integralfamilies.yaml","w") as f:
+         f.write("integralfamilies:\n")
+         f.write("  - name: triangle\n")
+         f.write("    loop_momenta: [k1]\n")
+         f.write("    propagators:\n")
+         f.write("      - [\"k1\",0]\n")
+         f.write("      - [\"k1+p1\",0]\n")
+         f.write("      - [\"k1+p1+p2\",0]\n")
+
+      with open("kinematics.yaml","w") as f:
+         f.write("kinematics:\n")
+         f.write("  incoming_momenta: [p1, p2, p3]\n")
+         f.write("  outgoing_momenta: []\n")
+         f.write("  momentum_conservation: [p3, -p1 -p2]\n")
+         f.write("  kinematic_invariants:\n")
+         f.write("    - [s,  2]\n")
+         f.write("    - [m,  1]\n")
+         f.write("  scalarproduct_rules:\n")
+         f.write("    - [[p1,p1],\"0\"]\n")
+         f.write("    - [[p2,p2],\"0\"]\n")
+         f.write("    - [[p1+p2,p1+p2],\"m^2\"]\n")
+         f.write("  symbol_to_replace_by_one: s\n")
+
+      os.chdir(tmp_dir)
+
+      with open("diagrams.yaml","w") as f:
+         f.write("---\n")
+         f.write("qgraf_globals:\n")
+         f.write("  - \"in=phi[p1],phi[p2],phim[p3];\"\n")
+         f.write("  - \"out=;\"\n")
+         f.write("  - \"loops=1;\"\n")
+         f.write("  - \"loop_momentum = k;\"\n")
+         f.write("\n")
+         f.write("---\n")
+         f.write("diagram:\n")
+         f.write("  name: 1\n")
+         f.write("  external_legs:\n")
+         f.write("    - [ [-1, 1], in-phi: [[phi, 1, +1, p1, 0, -1]] ]\n")
+         f.write("    - [ [-2, 2], in-phi: [[phi, 1, +1, p2, 0, -3]] ]\n")
+         f.write("    - [ [-3, 3], in-phim: [[phim, 1, +1, p3, m, -5]] ]\n")
+         f.write("  propagators:\n")
+         f.write("    - [ [2, 1], phi_phi: [[phi, 3, +1, -k1, 0, 1], [phi, 3, +1, k1, 0, 2]] ]\n")
+         f.write("    - [ [3, 1], phi_phi: [[phi, 3, +1, k1-p1, 0, 3], [phi, 3, +1, -k1+p1, 0, 4]] ]\n")
+         f.write("    - [ [3, 2], phi_phi: [[phi, 3, +1, -k1-p2, 0, 5], [phi, 3, +1, k1+p2, 0, 6]] ]\n")
+         f.write("  vertices:\n")
+         f.write(
+            "    - [ phi_phi_phi: [[phi, 1, +1, p1, 0, -1], [phi, 3, +1, -k1, 0, 1], [phi, 3, +1, k1-p1, 0, 3]] ]\n")
+         f.write(
+            "    - [ phi_phi_phi: [[phi, 1, +1, p2, 0, -3], [phi, 3, +1, k1, 0, 2], [phi, 3, +1, -k1-p2, 0, 5]] ]\n")
+         f.write(
+            "    - [ phi_phi_phim: [[phi, 3, +1, -k1+p1, 0, 4], [phi, 3, +1, k1+p2, 0, 6], [phim, 1, +1, p3, m, -5]] ]\n")
+         f.write("  symmetry_factor: 1\n")
+         f.write("  num_legs_in: 3\n")
+         f.write("  num_legs_out: 0\n")
+         f.write("  num_loops: 1\n")
+         f.write("  num_propagators: 3\n")
+         f.write("  num_vertices: 3\n")
+
+      with open("job.yaml","w") as f:
+         f.write("jobs:\n")
+         f.write("  - setup_sector_mappings:\n")
+         f.write("      construct_minimal_graphs: true\n")
+         f.write("  - setup_sector_mappings_alt:\n")
+         f.write("      source_sectors:\n")
+         f.write("        select_all: true\n")
+         f.write("      find_sector_symmetries: true\n")
+         f.write("  - find_diagram_shifts:\n")
+         f.write("      qgraf_file: \"diagrams.yaml\"\n")
+         f.write("      output_file: \"diagrams.match.yaml\"\n")
+         f.write("      info_file_form: \"diagrams.match.inc\"\n")
+      p=subprocess.Popen([executable,"job.yaml"],
+                          stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      (stdout, stderr) = p.communicate()
+
+      # Check sectormappings folder was created by Reduze
+      os.chdir(tmp_dir+"/sectormappings")
+
+      # Check crossings.yaml has name key (created by Reduze)
+      # Note: can not check entire crossings.yaml as rules_momenta are not written deterministically
+      crossings_output_expected_name = "x12"
+      with open("crossings.yaml","r") as f:
+         crossings_output = load(f)
+      if crossings_output['crossings'][0]['ordered_crossings'][0]['name'] != crossings_output_expected_name:
+         return False
+
+      # Check crss.yaml is correct (created by Reduze)
+      crss_output_expected = \
+         [[[
+            {'sector_selection':
+                {'deselect': [],
+                 'select_all': False,
+                 'deselect_recursively': [],
+                 'deselect_independents': [],
+                 'deselect_graphless': False,
+                 't_restriction': [-1, -1],
+                 'select_recursively': [['triangle', 7]],
+                 'select': []
+                 }
+             }
+         ]]]
+      with open("crss.yaml","r") as f:
+         crss_output = load(f)
+      if crss_output != crss_output_expected:
+         return False
+
+      return p.returncode==0
+
+   except:
+      return False
+
    finally:
       os.chdir(cur_path)
       try:
