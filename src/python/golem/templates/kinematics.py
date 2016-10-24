@@ -535,6 +535,37 @@ class KinematicsTemplate(golem.util.parser.Template):
          else:
             return str(lo_couplings - int(order[1]))
 
+
+   def loew(self, *args, **opts):
+      """
+      Deduct the number of EW couplings at LO
+
+      args -- optional list of names that refer to EW couplings
+      """
+      if args:
+         names = [s.lower() for s in args]
+      else:
+         names = ["qed", "ew", "g", "e"]
+
+      order = [s.strip().lower() for s in
+            self._properties.getProperty("order").split(",")]
+      if order[0] in names:
+         # coupling is qcd
+         if order[1] == "none":
+            # we just assume the LO EW order is NLO - 2
+            return str(int(order[2]) - 2)
+         else:
+            return str(int(order[1]))
+      else:
+         # coupling is qcd
+         # over all number of tree level couplings (qcd+qed)
+         lo_couplings = self._num_legs - 2
+         if order[1] == "none":
+            # we just assume the LO qcd order is NLO - 2
+            return str(lo_couplings - (int(order[2]) - 2))
+         else:
+            return str(lo_couplings - int(order[1]))
+
    def isqcd(self, *args, **opts):
       """
       Deduct the correction type

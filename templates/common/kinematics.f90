@@ -19,13 +19,18 @@
    integer, parameter, public :: num_legs = [% num_legs %]
    integer, parameter, public :: num_light_quarks = [%
       count particles fundamental spinor lightlike %]
+   integer, parameter, public :: num_light_fermions = [%
+      count particles spinor lightlike %]      
    integer, parameter, public :: num_heavy_quarks = [%
       count particles fundamental spinor  massive %]
    integer, parameter, public :: num_quarks = [%
       count particles fundamental spinor %]
    integer, parameter, public :: num_gluons = [%
       count particles adjoint vector lightlike %]
+   integer, parameter, public :: num_photons = [%
+      count particles vector lightlike %]      
    integer, parameter, public :: lo_qcd_couplings = [% loqcd %]
+   integer, parameter, public :: lo_ew_couplings = [% loew %]   
    logical, parameter, public :: corrections_are_qcd = [%
       @if isqcd %].true.[% @else %].false.[% @end @if %]
    integer, parameter, public :: in_helicities = [% in_helicities %]

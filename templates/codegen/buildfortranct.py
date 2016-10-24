@@ -35,7 +35,7 @@ def corr_dim_abbrev(abbrev):
   for (i,j) in zip(match,new_abbrev):
     abbrev=abbrev.replace(i,j)
 
-  match=re.findall(r'UV\w+\d+',abbrev)
+  match=re.findall(r'UV\w+\d+',abbrev) or re.findall(r'gct\w+',abbrev)
   new_abbrev=[]
   for element in match:
       if not (element+'(:)' in new_abbrev):
@@ -87,7 +87,7 @@ f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
 f90file.write('   use [% process_name asprefix=\_ %]config, only: ki\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 f90file.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
-@end @if %]
+@end @if %]                                                            
 f90file.write('\n')
 f90file.write('   implicit none\n')
 f90file.write('   private\n')
@@ -105,8 +105,17 @@ f90file.write('      use [% process_name asprefix=\_ %]color\n')
 f90file.write('      use [% process_name asprefix=\_ %]config, only: debug_lo_diagrams, &\n')
 f90file.write('        & use_sorted_sum\n')
 f90file.write('      use [% process_name asprefix=\_ %]accu, only: sorted_sum\n')
-f90file.write('      use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram\n')
-f90file.write('      implicit none\n')
+f90file.write('      use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram\n')[%
+@if generate_ct_internal %]
+f90file.write('      use [% process_name asprefix=\_ %]ew_ct\n')[%
+@end @if %]  
+f90file.write('      implicit none\n')[%
+@if generate_ct_internal %]
+f90file.write('      include "../common/dzdecl.h"\n')      
+f90file.write('      include "../common/ddrrdecl.h"\n')
+f90file.write('      include "../common/declscalars.h"\n')
+f90file.write('      include "../common/realparam.h"\n')[%
+@end @if %]  
 f90file.write('      complex(ki), dimension(numcs,0:1) :: ctamplitude\n')
 f90file.write('      complex(ki), dimension('+str(abb_max)+',0:1) :: ctabb\n')
 f90file.write('!      complex(ki), dimension(2,numcs) :: diagrams\n')

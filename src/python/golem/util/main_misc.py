@@ -67,12 +67,14 @@ def generate_process_files(conf, from_scratch=False):
 	"""
 	# properties will be filled later:
 	props = golem.util.config.Properties()
+    
 
 	# This fills in the defaults where no option is given:
 	for p in golem.properties.properties:
 		props.setProperty(str(p), conf.getProperty(p))
 
 	golem.properties.setInternals(conf)
+
 
 	path = golem.util.tools.process_path(conf)
 
@@ -614,7 +616,9 @@ def workflow(conf):
 	conf["loops_to_generate"] = loops_to_generate	  
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = len(conf.getProperty(golem.properties.model))>1
+	conf["generate_uv_counterterms"] = len(conf.getProperty(golem.properties.model))>1 \
+                    or conf.getProperty("model")=="smdiag_complex_ct"
+        conf["generate_ct_internal"] = conf.getProperty("model")=="smdiag_complex_ct"
 	conf["generate_nnlo_virt"] = generate_nnlo_virt
 	#generate_uv_counterterms
 	#False
@@ -750,6 +754,7 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
 	generate_nnlo_virt = conf.getBooleanProperty("generate_nnlo_virt")
 	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
+	generate_ct_internal = conf["generate_ct_internal"]
 
 	model = golem.util.tools.getModel(conf)
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
@@ -850,22 +855,22 @@ def run_analyzer(path, conf, in_particles, out_particles, higher_loops):
 
 	keep_ct = []
 	ct_signs = {}
-	#if generate_ct:
-		#modname = consts.PATTERN_TOPOLOPY_CT
-		#modname_LO = consts.PATTERN_TOPOLOPY_LO
-		#fname = os.path.join(path, "%s.py" % modname_LO)
-		#debug("Loading counter term diagram file %r" % fname)
-		#mod_diag_ct = imp.load_source(modname, fname)
-		#onshell={}
-		## keep_tree, tree_signs, tree_flows =
-		#keep_ct, ct_signs = \
-				#golem.topolopy.functions.analyze_ct_diagrams(
-				#mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
-				#filter_flags = virt_flags, massive_bubbles = massive_bubbles)
-	#else:
-		#keep_ct = []
-		#ct_signs = {}
-	# tree_flows = {}
+	if generate_ct_internal:
+		modname = consts.PATTERN_TOPOLOPY_CT
+		modname_LO = consts.PATTERN_TOPOLOPY_LO
+		fname = os.path.join(path, "%s.py" % modname)
+		debug("Loading counter term diagram file %r" % fname)
+		mod_diag_ct = imp.load_source(modname, fname)
+		onshell={}
+		#props.SetProperty("model","modelct")
+		# keep_tree, tree_signs, tree_flows =
+		keep_ct, ct_signs = \
+				golem.topolopy.functions.analyze_ct_diagrams(
+				mod_diag_ct.diagrams, model, conf, filter_flags = lo_flags)
+	else:
+		keep_ct = keep_tree
+		ct_signs = tree_signs
+	tree_flows = {}
 
 
 	conf["__heavy_quarks__"] = quark_masses
