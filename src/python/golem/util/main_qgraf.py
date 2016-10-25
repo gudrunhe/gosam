@@ -191,9 +191,8 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 					"Detailed output has been written to %r.")
 				% (output_name, log_name))
 
-def format_qgraf_verbatim(conf, prop):
+def parse_qgraf_verbatim(verbatim):
 	result = []
-	verbatim = conf.getProperty(prop)
 	lines = verbatim.splitlines()
 	for line in lines:
 		lhs, sep, rhs = line.partition(";")
@@ -202,6 +201,21 @@ def format_qgraf_verbatim(conf, prop):
 			lhs, sep, rhs = rhs.partition(";")
 		result.append(lhs+sep)
 	return "\n".join(result)
+
+def format_qgraf_verbatim(conf, prop, higher_loop=None):
+	result = []
+	if higher_loop:
+		try:
+			verbatim_list = conf.getListProperty(prop)
+			for verbatim in verbatim_list:
+				result.append(parse_qgraf_verbatim(verbatim))
+			return result
+		except IndexError:
+			return result
+	else:
+		verbatim = conf.getProperty(prop)
+		result = parse_qgraf_verbatim(verbatim)
+	return result
 
 def run_qgraf(conf, in_particles, out_particles):
 	path = golem.util.tools.process_path(conf)
@@ -214,8 +228,8 @@ def run_qgraf(conf, in_particles, out_particles):
 			golem.properties.qgraf_verbatim_lo)
 	verbatim_nlo = format_qgraf_verbatim(conf,
 			golem.properties.qgraf_verbatim_nlo)
-	verbatim_nnlo = format_qgraf_verbatim(conf,
-			golem.properties.qgraf_verbatim_nnlo)
+	verbatim_higher_list = format_qgraf_verbatim(conf,
+			golem.properties.qgraf_verbatim_higher, higher_loop=True)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 
@@ -337,20 +351,20 @@ def run_qgraf(conf, in_particles, out_particles):
 			# already treated above
 			# TODO: include 1loop case in this for loop
 			continue
-		if looporder > '2':
-			# ********************** IMPORTANT ***********************
-			# This loop currently only works for exactly 2loops (nnlo)
-			# ********************************************************
-			raise GolemConfigError("More than 2loop is not implemented so far.")
 
 		output_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % looporder + form_ext
 		log_name = consts.PATTERN_DIAGRAMS_HIGHER_VIRT % looporder + log_ext
 
+		try:
+			verbatim_higher = verbatim_higher_list[ int(looporder) - 2]
+		except IndexError:
+			verbatim_higher = ""
+
 		if powers and powers is not None:
-			new_verbatim = verbatim + "\n" + verbatim_nlo + "\n" + \
+			new_verbatim = verbatim + "\n" + verbatim_higher + "\n" + \
 				"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[int(looporder) + 1], po[int(looporder) + 1]) for po in powers])
 		else:
-			new_verbatim = verbatim + "\n" + verbatim_nnlo
+			new_verbatim = verbatim + "\n" + verbatim_higher
 		
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 			options, new_verbatim, in_particles, out_particles, [], looporder)

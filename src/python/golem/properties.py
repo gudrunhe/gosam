@@ -200,7 +200,7 @@ qgraf_verbatim = Property("qgraf.verbatim",
    wishes to put additional restricitons to the selected diagrams.
    This option is mainly inteded for the use of the operators
       rprop, iprop, chord, bridge, psum
-   Note, that the use of 'vsum' might interfer with the
+   Note, that the use of 'vsum' might interfere with the
    option qgraf.power.
 
    Example:
@@ -233,11 +233,19 @@ qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
    """,
    str, "")
 
-qgraf_verbatim_nnlo = Property("qgraf.verbatim.nnlo",
+qgraf_verbatim_higher = Property("qgraf.verbatim.higher",
   """\
-  Same as qgraf.verbatim.nlo but only applied to NNLO diagrams.
+  Takes a colon separated list of qgraf.verbatim lines,
+  the first element is applied to NNLO diagrams,
+  the second element is applied to NNNLO diagrams 
+  and so forth.
+  
+  Example:
+  qgraf.verbatim.higher= \\
+     # no top quarks at NNLO at least one Higgs at NNNLO: \\n\\
+     true=iprop[T, 0, 0];:false=iprop[H, 0, 0];
   """,
-  str,"")
+  list,sep=":")
 
 ldflags_golem95 = Property("golem95.ldflags",
    """\
@@ -654,23 +662,27 @@ select_nlo_diagrams = Property("select.nlo",
    """,
    list,sep=",")
 
-select_nnlo_diagrams = Property("select.nnlo",
+select_higher_diagrams = Property("select.higher",
    """\
-   A list of integer numbers, indicating two-loop diagrams to be selected.
+   A semi-colon separated list of
+   comma separated lists of integer numbers, 
+   indicating diagrams to be selected.
+   The first list indicates two-loop diagrams to be selected,
+   the second list indicates three-loop diagrams to be selected
+   and so forth.
+
    If no list is given, all diagrams are selected.
    Otherwise, all diagrams   not in the list are discarded.
 
-   The list may contain ranges:
+   Example:
+      select.higher=1,2,3;1,2,4
+      
+   which would select two-loop diagrams 1,2,3
+   and three-loop diagrams 1,2,4
 
-   select.nnlo=1,2,5:10:3, 50:53
-
-   which is equivalent to
-
-   select.nnlo=1,2,5,8,50,51,52,53
-
-   See also: select.lo, filter.lo, filter.nlo
+   See also: select.lo, select.nlo, filter.lo, filter.nlo
    """,
-   list,sep=",")
+   "nested_list",seps=[";",","])
 
 
 filter_lo_diagrams = Property("filter.lo",
@@ -716,13 +728,16 @@ filter_nlo_diagrams = Property("filter.nlo",
    """,
    str,"")
 
-filter_nnlo_diagrams = Property("filter.nnlo",
+filter_higher_diagrams = Property("filter.higher",
    """\
-   A python function which provides a filter for loop diagrams.
+   A list of python functions which provide a filter for loop diagrams.
+   The first function is applied to two-loop diagrams,
+   the second function is applied to three-loop diagrams
+   and so forth.
 
-   See filter.lo for more explanation.
+   See filter.lo, filter.nlo for more explanation.
    """,
-   str,"")
+   list,"")
 
 filter_module = Property("filter.module",
    """\
@@ -1227,6 +1242,7 @@ properties = [
    qgraf_verbatim,
    qgraf_verbatim_lo,
    qgraf_verbatim_nlo,
+   qgraf_verbatim_higher,
    group_diagrams,
    sum_diagrams,
    reduction_programs,
@@ -1236,10 +1252,10 @@ properties = [
 
    select_lo_diagrams,
    select_nlo_diagrams,
-   select_nnlo_diagrams,
+   select_higher_diagrams,
    filter_lo_diagrams,
    filter_nlo_diagrams,
-   filter_nnlo_diagrams,
+   filter_higher_diagrams,
    filter_module,
 
    config_renorm_beta,

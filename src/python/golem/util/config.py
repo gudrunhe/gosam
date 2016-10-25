@@ -39,11 +39,15 @@ class Property:
    without affecting the source code in many places.
    """
    def __init__(self, name, description, type=str, default=None,
-         experimental=False, options=None, sep=None, hidden=False):
+         experimental=False, options=None, sep=None, hidden=False, seps=None):
       """
-      Note, in the case of type=list sep encodes the
-      delimiter character (';' or ',') with if sep=None
+      Note:
+      1) in the case of type=list sep encodes the
+      delimiter character (';' or ',') if sep=None
       the comma is used.
+      2) in the case of type="nested_list" seps is a list
+      which encodes the delimiter characters if seps=None
+      then the default seps=[';' ,','] is used.
       """
       self._name = name
       self._description = description
@@ -53,6 +57,7 @@ class Property:
       self._options = options
       self._sep = sep
       self._hidden = hidden
+      self._seps = seps
 
    def _guess_correct(self, options, *given):
       result = []
@@ -159,6 +164,9 @@ class Property:
    def getSep(self):
       return self._sep
 
+   def getSeps(self):
+      return self._seps
+
    def __str__(self):
       return self.getName()
 
@@ -208,6 +216,7 @@ class Properties:
          name = str(key)
          default = key.getDefault()
          sep = key.getSep()
+         seps = key.getSeps()
          if(type == int):
             return self.getIntegerProperty(name, default)
          elif(type == bool):
@@ -217,6 +226,11 @@ class Properties:
                return self.getListProperty(name, default, ',')
             else:
                return self.getListProperty(name, default, sep)
+         elif(type == "nested_list"):
+            if seps is None:
+               return self.getNestedListProperty(name, default, [';',','])
+            else:
+               return self.getNestedListProperty(name, default, seps)
          else:
             return self.getProperty(name, default)
       else:
@@ -250,6 +264,16 @@ class Properties:
       else:
          if default:
             return default.split(delimiter)
+         else:
+            return []
+
+   def getNestedListProperty(self, key, default=None, delimiters=[';',',']):
+      name = str(key)
+      if name in self:
+         return list(map(lambda x: x.strip(), [ value_list.split(delimiters[1]) for value_list in self[name].split(delimiters[0]) ]))
+      else:
+         if default:
+            return [ default_list.split(delimiters[1]) for default_list in default.split(delimiters[0]) ]
          else:
             return []
 
@@ -327,6 +351,8 @@ class Properties:
             stype = "true/false"
          elif prop.getType() == list:
             stype = "comma separated list"
+         elif prop.getType() == "nested_list":
+            stype = "semi-colon separated list of comma separated lists"
          else:
             stype = str(prop.getType())
 
