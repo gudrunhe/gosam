@@ -1,28 +1,19 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 #-
 off statistics;
-*Format 255; * Number of characters per line
-
-#If `LOOPS' >= 1
-   #Define abb`DIAG' "0"
-   #Include- abbreviate.hh
-#Else
-   #Include- optimizeborn.hh
-#EndIf
-
-#Include- reduze.hh
-#Include- spinney.hh
-#redefine SPCANCEL "0"
 
 #Include- symbols.hh
+#Include- reduze.hh
+#Include- spinney.hh
+
+* disable spinor flipping rules in spinney.hh (RemoveNCContainer)
+* does not implement arXiv:1008.0803v1 Eq(21), discussion at the end of section 3.5.2
+#Define NOSPFLIP
+#Redefine SPCANCEL "0"
 
 #ifndef `USEVERTEXPROC'
    #Include- vertices.hh
 #endif
-
-CFunctions Spab3, Spba3;
-CFunction epspow;
-AutoDeclare Vectors spva;
 
 #Include- color.hh
 .global
@@ -41,13 +32,10 @@ AutoDeclare Vectors spva;
 #endif
 
 Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
-
 #call zeroes
-#call ScreenExternalReduze
 
 #Include- projectors.hh
-#call ApplyProjectors
-
+#Call ApplyProjectors
 #Call enforceconservation
 #Call DiaMatchTagReduze
 #Call ShiftReduze
@@ -195,8 +183,6 @@ Normalize COLORFACTOR;
 .sort:abcolor2;
 
 
-*---#[ Process Legs:
-
 #Include- legs.hh
 
 #IfNDef `USEVERTEXPROC'
@@ -222,6 +208,14 @@ EndArgument;
 
 Id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
 
+Id inp(?all) = 1;
+Id out(?all) = 1;
+Id ZERO = 0;
+Id PREFACTOR(sDUMMY1?)^sDUMMY2 = PREFACTOR(sDUMMY1^sDUMMY2);
+Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
+Normalize PREFACTOR;
+.sort
+
 #Call RemoveNCContainer
 
 #Do f = {`FERMIONS',}
@@ -234,12 +228,11 @@ Id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
 #EndDo
 .sort:process fermions;
 
-Id Projector(sDUMMY1?) = sDUMMY1;
-
+* compute traces, match to integral families
 #Call TraceReduze
 #Call kinematics
 #Call SPToPropReduze
-#Call enforceconservation
+*#Call enforceconservation
 #Call kinematics
 #Call MapReduze
 
@@ -248,60 +241,54 @@ Id inv(k1?, m?, sDUMMY1?) = inv(k1.k1 - m^2 + i_ * m * sDUMMY1);
 Id inv(k1?, m?) = inv(k1.k1 - m^2);
 Id inv(0, m?) = - inv(m^2);
 Id inv(0, m?, sDUMMY1?) = + inv(-m^2 + i_ * m * sDUMMY1);
-
-Denominators Den;
 Id inv(?tail) = Den(?tail);
-Id ProjDen(?tail) = Den(?tail);
-Argument Den;
-   Id ZERO = 0;
-   #call kinematics
-EndArgument;
 .sort
 
 #Call ToIntReduze
 
-Id inp(?all) = 1;
-Id out(?all) = 1;
-Id ZERO = 0;
-
 #call zeroes
 Id csqrt(0) = 0;
-
-*---#] Process Legs:
 Multiply replace_(Sqrt2, sqrt2);
 Id sqrt2^2  = 2;
 Id sqrt2^-2 = 1/2;
 Multiply replace_(Sqrt3, sqrt3);
 Id sqrt3^2  = 3;
 Id sqrt3^-2 = 1/3;
-
 Id csqrt(sDUMMY1?^2) = sDUMMY1;
 
 * prevent some prefactors entering prf
 Id i_ = PREFACTOR(i_);
 Id dimS = Dim(dimS);
 Id dimD = PREFACTOR(dimD);
+Normalize Dim, DenDim;
+.sort
+
+#Call ExpandProjectors
+#Call kinematics
+Argument ProjNum,ProjDen,Den;
+  Id ZERO = 0;
+  #Call kinematics;
+EndArgument;
+.sort
+
+* Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
+#Define ProjectorLabels ""
+#Do label = 1, `NUMPROJ'
+#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+#EndDo
+.sort
 
 * Simplify coefficients
-Repeat Id sDUMMY1? = prf(sDUMMY1,1);
-Repeat Id sDUMMY1?^(-1) = prf(1,sDUMMY1);
-Repeat Id Dim(sDUMMY1?) = prf(sDUMMY1,1);
-Repeat Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
-Repeat Id Den(sDUMMY1?) = prf(1,sDUMMY1);
-.sort:feed prf;
+#Call FeedPolyRatFun(`ProjectorLabels')
 PolyRatFun prf;
 .sort:prf;
-
-* post processing
-Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
-Normalize COLORFACTOR;
-Normalize PREFACTOR;
-Normalize Dim;
+PolyRatFun;
+.sort:prf;
 
 *
 * Write amplitude
 *
-Bracket ProjLabel,PREFACTOR,COLORFACTOR;
+Bracket `ProjectorLabels',PREFACTOR,COLORFACTOR;
 print+s;
 .sort
 #Write <`OUTFILE'.txt> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
