@@ -47,6 +47,19 @@
 		</file>
 		<file src="Makefile.dep" class="Integrals"/>
 		<file src="Makefile.source" class="Integrals"/>
+		<directory src="coefficients">
+			<foreach iterator="loops">
+				<directory src="loop" dest="%dloop" arguments="loop">
+                    <directory src="codegen" dest="codegen">
+						<file src="Makefile" class="Integrals"/>
+						<file src="mv.py" class="Verbatim"/>
+					</directory>
+					<directory src="src" dest="src">
+						<file src="Makefile" class="Integrals"/>
+					</directory>
+				</directory>
+			</foreach>
+		</directory>
 	</directory>
 
 	<directory src="codegen">
