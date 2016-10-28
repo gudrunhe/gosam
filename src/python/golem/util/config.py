@@ -1337,7 +1337,7 @@ def testReduzeCompatibility(executable):
 
    cur_path=os.getcwd()
    try:
-      # setup a very basic reduction and match a basic diagram
+      # setup a very basic reduction and match a basic diagram, then check all output is as we expect
       tmp_dir=tempfile.mkdtemp()
       os.chdir(tmp_dir)
       os.mkdir(tmp_dir+'/config')
@@ -1378,7 +1378,7 @@ def testReduzeCompatibility(executable):
          f.write("\n")
          f.write("---\n")
          f.write("diagram:\n")
-         f.write("  name: 1\n")
+         f.write("  name: 5\n") # Note: diagram is not diagram 1, this checks if Reduze is renumbering diagrams (it should not)
          f.write("  external_legs:\n")
          f.write("    - [ [-1, 1], in-phi: [[phi, 1, +1, p1, 0, -1]] ]\n")
          f.write("    - [ [-2, 2], in-phi: [[phi, 1, +1, p2, 0, -3]] ]\n")
@@ -1417,6 +1417,12 @@ def testReduzeCompatibility(executable):
                           stdin=subprocess.PIPE,
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       (stdout, stderr) = p.communicate()
+
+      # Check if the diagram was matched and if the name of the diagram was correctly maintained
+      with open("diagrams.match.yaml","r") as f:
+         diagrams_match = load(f)
+      if diagrams_match['diagram']['name'] != 5:
+         return False
 
       # Check sectormappings folder was created by Reduze
       os.chdir(tmp_dir+"/sectormappings")
