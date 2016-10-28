@@ -268,12 +268,23 @@ class Properties:
             return []
 
    def getNestedListProperty(self, key, default=None, delimiters=[';',',']):
+
+      def split_recursive(string, delimiters, index=0):
+         result = []
+         try:
+            current_delimiter = delimiters[index]
+         except IndexError:
+            return string.strip()
+         for item in string.split(current_delimiter):
+            result.append(split_recursive(item, delimiters, index+1))
+         return result
+
       name = str(key)
       if name in self:
-         return list(map(lambda x: x.strip(), [ value_list.split(delimiters[1]) for value_list in self[name].split(delimiters[0]) ]))
+         return split_recursive(self[name], delimiters)
       else:
          if default:
-            return [ default_list.split(delimiters[1]) for default_list in default.split(delimiters[0]) ]
+            return split_recursive(default, delimiters)
          else:
             return []
 
