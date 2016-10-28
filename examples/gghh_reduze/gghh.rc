@@ -11,7 +11,7 @@ order=QCD, NONE, 2
 qgraf.verbatim=true=iprop[U,D,C,S,B,0,0];
 
 one=gs
-zero=mU,mD,mS,mC,mB,wT
+zero=mU,mD,mS,mC,mB,wT,wH
 
 model=smdiag
 
