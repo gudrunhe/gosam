@@ -15,7 +15,8 @@ components = {
                "QGraf": REQUIRED,
                "Java": OPTIONAL,
                "Yaml": OPTIONAL,
-               "Reduze": OPTIONAL
+               "Reduze": OPTIONAL,
+               "SymPy": OPTIONAL
              }
 
 def find_libraries(hints={}, return_config=False):

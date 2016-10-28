@@ -1026,6 +1026,28 @@ class Reduze(Program):
    def store(self, conf):
       conf["reduze.bin"] = self.undohome(self.getInstance(check=True))
 
+class SymPy(Component):
+   def __init__(self):
+      Component.__init__(self)
+      self.installed = False
+
+   def examine(self, hints, **opts):
+      try:
+         import sympy
+         self.installed = True
+      except ImportError:
+         return
+
+   def isInstalled(self):
+      return self.installed
+
+   def getInstallationPath(self):
+      try:
+         import sympy
+         return [str(sympy.__file__)]
+      except ImportError:
+         return []
+
 class Fortran(Program):
    def __init__(self):
       Program.__init__(self, "Fortran",
