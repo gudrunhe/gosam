@@ -202,7 +202,7 @@ def parse_qgraf_verbatim(verbatim):
 		result.append(lhs+sep)
 	return "\n".join(result)
 
-def format_qgraf_verbatim(conf, prop, higher_loop=None):
+def format_qgraf_verbatim(conf, prop, higher_loop=False):
 	result = []
 	if higher_loop:
 		try:
