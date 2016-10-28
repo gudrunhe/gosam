@@ -4,7 +4,16 @@ off statistics;
 
 #Include- symbols.hh
 #Include- reduze.hh
+#Include- secdec.hh
+#Include- projectors.hh
 #Include- spinney.hh
+
+* Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
+#Define ProjectorLabels ""
+#Do label = 1, `NUMPROJ'
+#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+#EndDo
+.sort
 
 * disable spinor flipping rules in spinney.hh (RemoveNCContainer)
 * does not implement arXiv:1008.0803v1 Eq(21), discussion at the end of section 3.5.2
@@ -34,7 +43,6 @@ off statistics;
 Id QGRAFSIGN(sDUMMY1?) = sDUMMY1;
 #call zeroes
 
-#Include- projectors.hh
 #Call ApplyProjectors
 #Call enforceconservation
 #Call DiaMatchTagReduze
@@ -271,13 +279,6 @@ Argument ProjNum,ProjDen,Den;
 EndArgument;
 .sort
 
-* Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
-#Define ProjectorLabels ""
-#Do label = 1, `NUMPROJ'
-#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
-#EndDo
-.sort
-
 * Simplify coefficients
 #Call FeedPolyRatFun(`ProjectorLabels')
 PolyRatFun prf;
@@ -289,7 +290,7 @@ PolyRatFun;
 * Write amplitude
 *
 Bracket `ProjectorLabels',PREFACTOR,COLORFACTOR;
-print+s;
+*print+s;
 .sort
 #Write <`OUTFILE'.txt> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
 .end
