@@ -3,11 +3,19 @@
 off statistics;
 *Format 255; * Number of characters per line
 
-#include- reduze.hh
-#include- secdec.hh
-#include- symbols.hh
-#include- spinney.hh
-#include- model.hh
+#Include- reduze.hh
+#Include- secdec.hh
+#Include- projectors.hh
+#Include- symbols.hh
+#Include- spinney.hh
+#Include- model.hh
+
+* Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
+#Define ProjectorLabels ""
+#Do label = 1, `NUMPROJ'
+#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+#EndDo
+.sort
 
 * Load GoSam result
 #include- l`LOOPS'.txt;
@@ -19,23 +27,22 @@ G l`LOOPS' = l`LOOPS';
 .sort:reduce;
 
 Denominators Den;
-** Check that 1/(a+Den(b)) terms from Reduze are handled correctly
-Repeat Id Den(sDUMMY1?) = prf(1,sDUMMY1);
-Repeat Id sDUMMY1? = prf(sDUMMY1,1);
-.sort:feed prf;
+.sort
 
-Id SCREEN(sDUMMY1?) = sDUMMY1;
-.sort:unscreen;
-
+* Simplify coefficients
+Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
+Id Dim(sDUMMY1?) = prf(sDUMMY1,1);
+** TODO: Check that 1/(a+Den(b)) terms from Reduze are handled correctly
+#Call FeedPolyRatFun(`ProjectorLabels')
 PolyRatFun prf;
 .sort:prf;
 PolyRatFun;
 .sort:noprf;
 
-Bracket ProjLabel,PREFACTOR,COLORFACTOR;
+Bracket `ProjectorLabels',PREFACTOR,COLORFACTOR;
 .sort
 #Write <reducedl`LOOPS'.txt>, "L l`LOOPS' = %e", l`LOOPS'
-print+s;
+*print+s;
 .sort
 
 * Compute the leading pole multiplying each integral
@@ -47,12 +54,11 @@ PolyRatFun;
 .sort:noprf;
 
 * Drop everything except the INT and its required order
-B INT,prf;
-.sort:bracket;
-Collect SCREEN;
-.sort:collect;
-Id SCREEN(?head) = 1;
+Id SCREEN?!{,INT,prf}(?head)=1;
+Id sDUMMY1?=1;
 .sort:drop screen;
+DropCoefficient;
+.sort:drop coeff;
 
 * Store the epsS order to which we must compute the integral
 Id prf(sDUMMY1?,sDUMMY2?) = SCREEN(sDUMMY1/sDUMMY2);
@@ -69,5 +75,5 @@ Id INT(?head)*SCREEN(?a,sDUMMY1?) = INT(?head,[],-sDUMMY1+`ORD');
 .sort:tosecdec;
 
 #Write <secdecintegralsl`LOOPS'.txt>, "+ %E", l`LOOPS'
-print+s;
+*print+s;
 .end

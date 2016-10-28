@@ -123,6 +123,7 @@ Symbols sDUMMY5,[];
 
 Repeat Id sDUMMY1?!{,`?exclude'}^sDUMMY2?pos_ = prf(sDUMMY1^sDUMMY2,1);
 Repeat Id sDUMMY1?!{,`?exclude'}^sDUMMY2?neg_ = prf(1,sDUMMY1^(-sDUMMY2));
+Repeat Id sDUMMY1?!{,`?exclude'} = prf(sDUMMY1,1);
 
 Repeat Id Den(sDUMMY1?) = prf(1,sDUMMY1);
 
