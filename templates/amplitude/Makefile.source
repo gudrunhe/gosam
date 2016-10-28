@@ -50,7 +50,9 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	l[%loop%].txt \
 	reducedl[%loop%].txt \
 	prepare_secdec_l[%loop%]-stamp \
-	secdecnamesl[%loop%].hh[%
+	secdecnamesl[%loop%].hh \
+	prepare_code_l[%loop%]-stamp \
+	compile_code_l[%loop%]-stamp[%
 @end @for %]
 
 SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
@@ -148,13 +150,23 @@ prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 		-o ../codegen/secdec/[%loop%]loop
 	@touch prepare_secdec_l[%loop%]-stamp
 
-# TODO:
-	# Run SecDec on integrals
-	# Generate Fortran/C++/C
+# Run SecDec on integrals
 secdecnamesl[%loop%].hh: prepare_secdec_l[%loop%]-stamp
 	@echo SecDec is decomposing integrals @ [%loop%] loop
-	make -C ../codegen/secdec/[%loop%]loop
-	$(FORM) -D PROCESSPATH=.. -D PWD=. -p ..:../codegen -M -q -D LOOPS=[%loop%] ../codegen/golemreduzesplit.frm
+	@$(MAKE) -C ../codegen/secdec/[%loop%]loop
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D LOOPS=[%loop%] \
+		../codegen/golemreduzesplit.frm
 
+# Generate Fortran/C++/C
+prepare_code_l[%loop%]-stamp: secdecnamesl[%loop%].hh
+	@$(MAKE) -C coefficients/[%loop%]loop/codegen
+	@touch prepare_code_l[%loop%]-stamp
+
+# Compile Fortran/C++/C
+compile_code_l[%loop%]-stamp: prepare_code_l[%loop%]-stamp
+	@$(MAKE) -C coefficients/[%loop%]loop/src
+	@touch compile_code_l[%loop%]-stamp
 
 [% @end @for %]
