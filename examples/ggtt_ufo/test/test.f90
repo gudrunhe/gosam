@@ -111,7 +111,7 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggtt_config
-   use ggtt_model, only: Nf, Nfgen, mT => mdlMT, mdlaS
+   use ggtt_model, only: Nf, Nfgen, mT => MT, aS
    implicit none
 
    renormalisation = 1
@@ -124,12 +124,12 @@ subroutine     setup_parameters()
    Nf    = 5.0_ki
    Nfgen = 1.0_ki
    ! set g_s to one
-   mdlaS = 1.0_ki / (16.0_ki * atan(1.0_ki))
+   aS = 1.0_ki / (16.0_ki * atan(1.0_ki))
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
    use ggtt_matrix, only: samplitude
-   use ggtt_model, only: gs => mdlG
+   use ggtt_model, only: gs => G
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
@@ -154,7 +154,7 @@ end subroutine compute_gosam_result
 subroutine     compute_reference_result(vecs, scale2, amp)
    use ggtt_kinematics, only: dotproduct, lo_qcd_couplings
    use ggtt_matrix, only: ir_subtraction
-   use ggtt_model, only: mT => mdlMT, Nf, gs => mdlG
+   use ggtt_model, only: mT => MT, Nf, gs => G
    use ggtt_color, only: CA, TR, CF
    implicit none
 

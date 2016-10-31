@@ -10,7 +10,7 @@ order=QCD, 2, 4
 qgraf.verbatim=true=chord[part2,part3,part4,part5,0,0];
 model.options=Nfgen:1
 model=FeynRules, ../model/Standard_Model_UFO
-zero=mdlMB,mdlWT
+zero=MU,MD,MC,MS,MB,WT
 
 filter.nlo=lambda d: not d.isScaleless()
 r2=explicit

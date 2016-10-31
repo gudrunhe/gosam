@@ -107,9 +107,14 @@ class Model:
 		self.all_parameters = mod.all_parameters
 		self.all_vertices   = mod.all_vertices
 		self.all_lorentz    = mod.all_lorentz
-		self.all_CTparameters = mod.object_library.all_CTparameters
-		self.all_CTvertices = mod.all_CTvertices
-		self.all_CTcouplings = mod.CT_couplings
+		try:
+                    self.all_CTparameters = mod.object_library.all_CTparameters
+                    self.all_CTvertices = mod.all_CTvertices
+                    self.all_CTcouplings = mod.CT_couplings
+                except:
+                    self.all_CTparameters={}
+                    self.all_CTvertices={}
+                    self.all_CTcouplings={}
 		self.model_orig = model_path
 		self.model_name = mname
 		self.prefix = ""#"mdl"
@@ -1349,13 +1354,15 @@ class Model:
 		f = open(os.path.join(path, "%s.hh" % local_name), 'w')
 		self.write_form_file(f)
 		f.close()
+                
 
-		message("  Writing Form CT file ...")
-		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
-		if len(conf["filternlo"]) >0:
-		    self.write_formct_file(f, filternlo=conf["filternlo"])
-		else:
-		    self.write_formct_file(f)
+                if conf["generate_uv_counterterms"]=='True':
+                    message("  Writing Form CT file ...")
+                    f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
+                    if len(conf["filternlo"]) >0:
+                        self.write_formct_file(f, filternlo=conf["filternlo"])
+                    else:
+                        self.write_formct_file(f)
 		f.close()
 		
 
