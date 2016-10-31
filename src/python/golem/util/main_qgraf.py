@@ -73,7 +73,7 @@ def diagram_count(conf, loops, cut=0):
 	return result
 
 def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
-		in_particles, out_particles, r_particles, loops):
+		in_particles, out_particles, r_particles, loops, generate_ct_internal=False):
 	"""
 	Prepares the file 'qgraf.dat' for the next subprocess.
 
@@ -148,7 +148,7 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 #			comma = True
 #		f.write("%s[ZERO]" % str(r_particles[0]))
 
-        if model=='modelct':
+        if model=='modelct' and generate_ct_internal:
             f.write(',Cx[kx]')
 	f.write(";\n")
 
@@ -395,7 +395,7 @@ def run_qgraf(conf, in_particles, out_particles):
                     new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
 					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                    
                     write_qgraf_dat(path, form_sty, modelct, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, [], 0,flag_internal_ct)
 
 		run_qgraf_dat(conf, output_name, log_name)
 		if flag_internal_ct:

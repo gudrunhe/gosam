@@ -2208,197 +2208,421 @@ contains
         bb=p2in/m12
         out(0)=-aa/p2in+cone/2d0/p2in-(aa-cone)*log(cone-bb)*aa/p2in
       end subroutine b1pp0m
-      subroutine b1avo(p12,m02,m12,out)
-      implicit none
-      complex*16 p12,m02,m12,out(0:2)
-      complex*16 a,tmp,x1,x2
-      integer i1
-      complex*16 aa,bb,coeff,xp,xm
-      complex*32 f0dxp,f1dxp,f2dxp,f3dxp
-      complex*32 f0dxm,f1dxm,f2dxm,f3dxm
-      complex*16 cquad1,cquad2
-      complex*16 cone,zero,ii
-      common/complexunit/cone,zero,ii
-      out(2)=zero
-      out(1)=zero
-      if(abs(p12).lt.1d-20) then
-         if(abs(m02).lt.1d-20) then
-            if(abs(m12).lt.1d-20) then
-               out(0)=zero ! 000, non IR (pm0)
-            else
-               out(0)=-1d0/6d0/m12
-            endif
-         else ! not general but here 0M0 doesn't exist
-            write(*,*)'derivative of b1 in 0,M,0 ?'
-            stop
-         endif
-         return
-      endif
-
-      if(abs(m02).gt.1d-20) then
-         if(abs(1d0-abs(p12)/abs(m02)).lt.1d-10) then
-            if(abs(p12).lt.abs(m12)) then
-               out(0)=  -1/(6.*m12) +  &
-                    &           p12/(4.*m12**2) +  &
-                    &           (p12**2* &
-                    &           (137 + 60*Log(1/m12) +  &
-                    &           60*Log(p12)))/ &
-                    &           (60.*m12**3) +  &
-                    &           (p12**3* &
-                    &           (243 +  &
-                    &           140*Log(1/m12) + & 
-                    &           140*Log(p12)))/ &
-                    &           (20.*m12**4) +  &
-                    &           (4*p12**4* &
-                    &           (493 +  &
-                    &           315*Log(1/m12) + & 
-                    &           315*Log(p12)))/ &
-                    &           (35.*m12**5) +  &
-                    &           (p12**5* &
-                    &           (41263 +  &
-                    &           27720*Log(1/m12) + & 
-                    &           27720*Log(p12)))/ &
-                    &           (168.*m12**6) +  &
-                    &           (p12**7* &
-                    &           (513209 +  &
-                    &           360360*Log(1/m12) + & 
-                    &           360360*Log(p12)))/ &
-                    &           (120.*m12**8) +  &
-                    &           (p12**6* &
-                    &           (521789 +  &
-                    &           360360*Log(1/m12) + & 
-                    &           360360*Log(p12)))/ &
-                    &           (504.*m12**7) +  &
-                    &           (p12**8* &
-                    &           (8633098 + & 
-                    &           6126120*Log(1/m12) + & 
-                    &           6126120*Log(p12)))/ &
-                    &           (495.*m12**9) +  &
-                    &           (5*p12**10* &
-                    &           (32421637 +  &
-                    &           23279256* &
-                    &           Log(1/m12) + & 
-                    &           23279256*Log(p12)))/ &
-                    &           (572.*m12**11) +  &
-                    &           (p12**9* &  
-                    &           (81443146 +  &
-                    &           58198140* &
-                    &           Log(1/m12) +  &
-                    &           58198140*Log(p12)))/ &
-                    &           (1155.*m12**10)
-            else
-               aa = sqrt( 4d0*p12/m12 -1d0)
-               bb = m12 / p12
-               out(0)= 2.d0 * m12 / p12 - 3.d0
-               out(0) = out(0) - ( bb**2 -3d0*bb +1d0 )*log(bb)
-               out(0) = out(0) + ( bb**2 -5d0*bb +5d0 )* &
-                    &              2d0*Atan(aa)/aa 
-               out(0)=-out(0)/2d0/p12
-            endif
-            return
-         else
-            if(abs(m02).gt.abs(m12)) then ! for mb,mt,mw
-               ! general expression form green-veltman 1980
-               coeff=-(p12-m02+m12)
-               call qcroots(p12,coeff,m12,xp,xm,cquad1,cquad2)
-               call ffc(xp,f0dxp,f1dxp,f2dxp,f3dxp)
-               call ffc(xm,f0dxm,f1dxm,f2dxm,f3dxm)
-               !
-               out(0)=f3dxp-f3dxm-2d0*(f2dxp-f2dxm)+f1dxp-f1dxm
-               out(0)=out(0)/p12/(xp-xm)
-               return
-            endif
-         endif
-      end if
-
-!
-      if(abs(m02).lt.1d-20) then ! p0m
-         if(abs(m12).gt.abs(p12)) then
-            out(0) = -1/(6.*m12) -  &
-     &           p12/(12.*m12**2) -  &
-     &           p12**2/(20.*m12**3) - & 
-     &           p12**3/(30.*m12**4) -  &
-     &           p12**4/(42.*m12**5) -  &
-     &           p12**5/(56.*m12**6) -  &
-     &           p12**6/(72.*m12**7) -  &
-     &           p12**7/(90.*m12**8) -  &
-     &           p12**8/(110.*m12**9) -  &
-     &           p12**9/(132.*m12**10) -  &
-     &           p12**10/(156.*m12**11)
-         else
-            out(0)=  -(1 + (2*m02**3)/m12**3 +  &
-     &           (3*m02**2)/m12**2 -  &
-     &           (6*m02)/m12 -  &
-     &           (6*m02**2* &
-     &           Log(m02/m12))/m12**2 &
-     &           )/ &
-     &           (6.*(-1 + m02/m12)**4*m12)
-         endif
-         return
-      endif
-!  general case  
-      if(abs(p12).lt.abs(m12)) then 
-         if(abs(m02).lt.abs(m12)) then !series 1/mw2...
-            out(0) =         -1/(6.*m12) + (4*m02 - p12)/(12.*m12**2)  &
-     &   + ((110*m02**2 + 30*m02*p12 - 3*p12**2)/60. + m02**2*(Log(m02) &
-     &           + Log(1/m12)))/ &
-     &   m12**3 + ((260*m02**3 + 435*m02**2*p12 + 36*m02*p12**2 & 
-     &   - 2*p12**3)/60. + m02**2*(4*m02 + 3*p12)*(Log(m02)  &
-     &   + Log(1/m12)))/ &
-     &   m12**4 + (1645*m02**4 + 6440*m02**3*p12 + 3612*m02**2*p12**2 & 
-     &   + 140*m02*p12**3 - 5*p12**4 +  &
-     &     420*m02**2*(5*m02**2 + 10*m02*p12 + 3*p12**2)*(Log(m02) & 
-     &   + Log(1/m12)))/(210.*m12**5) +  &
-     &  (2072*m02**5 + 14490*m02**4*p12 + 19152*m02**3*p12**2 & 
-     &  + 5432*m02**2*p12**3 + 120*m02*p12**4 - 3*p12**5 +  &
-     &     840*m02**2*(4*m02**3 + 15*m02**2*p12 + 12*m02*p12**2 & 
-     &  + 2*p12**3)*(Log(m02) + Log(1/m12)))/(168.*m12**6)
-            return
-         else ! b-> tW -- series mb
-            x1=(-m02 + m12 + p12 - Sqrt((m02 - m12 - p12)**2  &
-     &           - 4*m12*p12))/(2.*p12)
-            x2=(-m02 + m12 + p12 + Sqrt((m02 - m12 - p12)**2 &
-     &           - 4*m12*p12))/(2.*p12)
-   
-            out(0)= -(5*(m02 - m12)**6*(2*m02**2 + 5*m02*m12 - m12**2)  &
-     &  + 5*(m02 - m12)**5*Sqrt((m02 - m12)**2)*(2*m02**2 + 5*m02*m12  &
-     &  - m12**2) +  &
-     &     5*(m02 - m12)**4*(3*m02**3 + 35*m02**2*m12 + 11*m02*m12**2  &
-     &  - m12**3)*p12 +  &
-     &     3*(m02 - m12)**2*(4*m02**4 + 109*m02**3*m12 & 
-     &  + 169*m02**2*m12**2 + 19*m02*m12**3 - m12**4)*p12**2 + & 
-     &     2*(5*m02**5 + 249*m02**4*m12 + 879*m02**3*m12**2  &
-     &  + 519*m02**2*m12**3 + 29*m02*m12**4 - m12**5)*p12**3)/ &
-     &  (30.*(m02 - m12)**8*(m02 + Sqrt((m02 - m12)**2) - m12))
-   
-            out(0)= out(0) + &
-     &        ((-x2 + (2 - x2)*x2**2)*Log((-1 + x2)/x2)) &
-     &        /(p12*(-x1 + x2))
-         endif
-      else ! top
-         x1=(-m02 + m12 + p12 - Sqrt((m02 - m12 - p12)**2  &
-     &        - 4*m12*p12))/(2.*p12)
-         x2=(-m02 + m12 + p12 + Sqrt((m02 - m12 - p12)**2 &
-     &         - 4*m12*p12))/(2.*p12)
-         out(0)=        -((-1.5 + x1 + x2)/p12)  &
-     &        - ((-x1 + (2 - x1)*x1**2)*Log((-1 +  &
-     &        x1)/x1))/(p12*(-x1 + x2)) +  &
-     &        ((-x2 + (2 - x2)*x2**2)*Log((-1 + x2)/x2)) &
-     &        /(p12*(-x1 + x2))
-
-      endif
-      end subroutine b1avo
-      subroutine ffc(yin,f0,f1,f2,f3)
+      subroutine b1avo(p2in,m02in,m12in,out)
         implicit none
-        complex*16 yin
-        complex*32 y,f0,f1,f2,f3,qcone
-        qcone=(1q0,0q0)
-        y=yin*qcone
-        f0=-Log(qcone-qcone/y)
-        f1=y*f0-qcone
-        f2=y*f1-0.5d0*qcone
-        f3=y*f2-qcone/(3d0*qcone)
-      end subroutine ffc
+        complex(kind= 8) p2in,m02in,m12in,out(0:2)
+        complex(kind= 8) p2conv,m02conv
+        complex(kind=16) p2,m02,m12,outpr
+        complex(kind=16) cone
+        parameter(cone=(1q0,0q0))
+        complex(kind=16) ii
+        parameter(ii=(0q0,1q0))
+        complex(kind=16) zero
+        parameter(zero=(0q0,0q0))
+        real(kind=16) eps
+        parameter(eps=1q-30)
+        complex(kind=16) qda,qdb,qdc,qdr1,qdr2,cquad1,cquad2
+        complex(kind=16) x1,x2,y1,y2,f1x1,f1x2,int1,int2,in21,in22,coeff
+        
+        complex(kind=16) f3x1,f3x2,dd,ss,pp2
+        
+        complex(kind=16) r8qda,r8qdb,r8qdc,r8qdr1,r8qdr2,r8cquad1,r8cquad2
+        
+        integer i1
+        
+        real(kind=16) mprec
+        integer :: ini=0
+        save ini
+        
+        complex(kind=16) coeffp2,coeffm02,coeffm12
+        
+        real(kind=8) oloscale
+        parameter(oloscale=1d-10)
+        
+        if(ini.eq.0) then
+           ini=1
+           write(*,*)'!-------------------------------------------------------!'
+           write(*,*)'! This subroutine computes the derivatives of the B1    !'
+           write(*,*)'! functions needed in the wave function renormalization !'
+           write(*,*)'! counterterms. NB it is not meant to be general:       !'
+           write(*,*)'! p2 , m02 , m12 => Im(p2)=0, m12=mz,mw,mh,0            !'
+           write(*,*)'! p2 , p2 , 0 => IR singular                            !'
+           write(*,*)'! 0  , m02, m12 IS NOT COMPUTED as we need p2*dB1/dp2   !'
+           write(*,*)'!-------------------------------------------------------!'
+        end if
+        
+        
+        mprec=1q-5
+        do i1=0,2
+           out(i1)  =(0d0,0d0)
+        end do
+        outpr=(0q0,0q0)
+        
+        ! 0 move the output to 0:2 and init all entries to (0d0,0d0)
+        
+        ! 1
+        ! TO DO : as in olo_on_shell import the parameter AND set to
+        ! zero all the smaller entries (a coefficient to multiply in
+        ! the lines below
+        coeffp2=cone ; coeffm02=cone; coeffm12=cone;
+        if(abs(p2in ).lt.oloscale) coeffp2 =zero
+        if(abs(m02in).lt.oloscale) coeffm02=zero
+        if(abs(m12in).lt.oloscale) coeffm12=zero
+        
+        
+        ! 2 check if p2=0 -> out=0 return
+        !   check if Im(p2)=/=0 -> ERROR return
+        
+        p2 =p2in *coeffp2
+        m02=m02in*coeffm02
+        m12=m12in*coeffm12
+        
+        
+        !  write(*,*)'p2 ',p2
+        !  write(*,*)'m02',m02
+        !  write(*,*)'m12',m12
+        
+        ! 3
+        ! before the quadrati LOOK FOR THE SPECIAL CONFIGURATIONS
+        ! p2 0 0
+        ! p2 p2 0  -> IR (add the POLE PART)
+        ! p2 m02 0 -> re(m02)=p2 --> b1complexmt
+        ! p2 0 p2 --> special regular case
+        
+        if(imagpart(p2).ne.0q0) then
+           write(*,*)'the p2 value in DB1 must be real, stop'
+           stop
+        end if
+        
+        if(realpart(p2).eq.0q0) then
+           return ! out is zero
+        endif
+        
+        if(m02.eq.zero.and.m12.eq.zero) then
+           out(0)=1d0/2d0/p2
+           return
+        endif
+        
+        
+        if(realpart(p2).eq.realpart(m02).and.m12.eq.zero) then
+           
+           if(imagpart(m02).eq.zero) then
+              
+              p2conv =p2
+              m02conv=m02
+        
+              !        write(*,*)'p2conv ',p2conv
+              !        write(*,*)'m02conv',m02conv
+
+              
+              call b1pir(p2conv,m02conv,out)
+              return
+           else
+              p2conv =p2
+              m02conv=m02
+              call b1pcomplexmt(p2conv,m02conv,out)
+              return
+           end if
+        end if
+        
+
+        if(realpart(p2).eq.realpart(m12).and.m02.eq.zero) then
+           if(imagpart(m12).eq.zero) then
+              out(0) = -1d0/2d0/p2
+              return
+           end if
+        end if
+        
+        ! 4 all the other configurations are handeld below
+        
+        qda= p2
+        qdb=-(p2-m02+m12)
+        qdc=+m12 + ii*eps
+        
+        call q0qcroots(qda,qdb,qdc,qdr1,qdr2,cquad1,cquad2)
+        
+        
+        x1=qdr1
+        x2=qdr2
+        
+        
+        !  write(*,*)'x1,x2',x1,x2
+        
+        if(x1.eq.x2) then
+           
+           coeff=  - cone/p2
+           call expand_deg(x1,outpr)
+           outpr=coeff*outpr
+           out(0)=outpr
+           return
+        endif
+        
+        if(abs(x1-x2)/abs(x1+x2).lt.mprec) then
+           
+           coeff=   cone/p2
+           dd=x1-x2
+           ss=x1+x2
+           pp2=p2
+           
+           !     write(*,*)'dd',dd
+           !     write(*,*)'ss',ss
+           !     write(*,*)'p2',pp2
+           
+           outpr=-(dd**20q0*((14q0 - ss)/(-2q0 + ss)**19 + 228q0/ss**20             &
+                &        + 24q0/ss**19 + ss**(-18)))/(95760.q0*pp2) -                    &
+                &        (dd**18*((38q0 - 3q0*ss)/(-2q0 + ss)**17 + 544q0/ss**18         &
+                &        + 64q0/ss**17 + 3q0/ss**16))/(186048.q0*pp2) -                  &
+                &        (dd**16*((34q0 - 3q0*ss)/(-2q0 + ss)**15 + 420q0/ss**16         &
+                &        + 56q0/ss**15 + 3q0/ss**14))/(114240.q0*pp2) -                  &
+                &        (dd**14*((10q0 - ss)/(-2q0 + ss)**13 + 104q0/ss**14             &
+                &        + 16q0/ss**13 + ss**(-12)))/(21840.q0*pp2) -                    &
+                &        (dd**12*((26q0 - 3q0*ss)/(-2q0 + ss)**11 + 220q0/ss**12         &
+                &        + 40q0/ss**11 + 3q0/ss**10))/(34320.q0*pp2) +                   &
+                &        (dd**4*(6q0 - 5q0*ss))/(15.q0*pp2*(-2q0 + ss)**3*ss**4)         &
+                &        + (dd**6*(80q0 - 7q0*ss*(24q0 + ss*(-18q0 + 5*ss))))            &
+                &        /(105.q0*pp2*(-2q0 + ss)**5*ss**6) +                            &
+                &        (dd**8*(112q0 - 3q0*ss*(120q0 + ss*(-160q0 + 7q0*ss*(16q0       &
+                &        + (-6q0 + ss)*ss)))))/(63.q0*pp2*(-2q0 + ss)**7*ss**8) +        &
+                &        (dd**10*(2304q0 - 11q0*ss*(896q0 + 3q0*ss*(-560q0               &
+                &        + ss*(600q0 + ss*(-400q0 + ss*(168q0                            &
+                &        + ss*(-42q0 + 5*ss))))))))/(495.q0*pp2*(-2q0                    &
+                &        + ss)**9*ss**10) +                                              &
+                &        (dd**2*(4q0 - 6q0*(-1q0 + ss)*ss                                &
+                &        - 3q0*(-2q0 + ss)*ss**2*Log((-2q0 + ss)/ss)))                   &
+                &        /(12.q0*pp2*(-2q0 + ss)*ss**2) +                                &
+                &        (10q0 - 6q0*ss + (-4q0 + (8q0 - 3q0*ss)*ss)*Log((-2q0           &
+                &        + ss)/ss))/(4.q0*pp2)                                                   
+           
+           out(0)=outpr
+           
+           !     write(*,*)'??????????????????',out
+           
+           return
+        endif
+        
+        coeff=   cone/p2/(x1-x2)
+        
+        if(abs(x1).lt.10q0.and.abs(x2).lt.10q0) then
+           
+           f1x1= - cone - x1*log((x1-cone)/x1)
+           f1x2= - cone - x2*log((x2-cone)/x2)
+           
+           outpr=coeff*((x1-cone)**2*f1x1-(x2-cone)**2*f1x2-(x1-x2)/2q0)
+           
+        elseif(abs(x1).gt.10q0.and.abs(x2).gt.10q0) then
+
+           !     f1x1= - cone - x1*log((x1-cone)/x1)
+           !     f1x2= - cone - x2*log((x2-cone)/x2)
+           !
+           !     write(*,*)'unstable old', &
+           !          &        coeff*((x1-cone)**2*f1x1-(x2-cone)**2*f1x2-(x1-x2)/2q0)
+           !
+           !     f3x1 = -x1**3* log((x1 - cone)/x1) - x1**2 - x1/2q0 - cone/3q0
+           !     f3x2 = -x2**3* log((x2 - cone)/x2) - x2**2 - x2/2q0 - cone/3q0
+           !
+           !
+           !     outpr=coeff*(f3x1 - f3x2 + f3x1/x1**2 - (2q0* f3x1)/x1   &
+           !          &              - f3x2/x2**2 + (2q0*f3x2)/x2 )                &
+           !          &        + (-((x1 + x2)/(3q0* x1**2 * x2**2))                &
+           !          &           + cone/(6q0* x1*x2))*cone/p2                     
+           !
+           !
+           !
+           !     write(*,*)'unstable new',outpr
+           
+           ! with the expansion
+           f3x1=(0q0,0q0)
+           f3x2=(0q0,0q0)
+           call expand(x1,f3x1)
+           call expand(x2,f3x2)
+           
+           
+           outpr=coeff*(f3x1 - f3x2 + f3x1/x1**2 - (2q0* f3x1)/x1  &
+                &              - f3x2/x2**2 + (2q0*f3x2)/x2 )           &
+                &        + (-((x1 + x2)/(3q0* x1**2 * x2**2))           &
+                &           + cone/(6q0* x1*x2))*cone/p2                  
+           
+           
+           !     write(*,*)'expanded new',outpr
+           
+           
+        elseif(abs(x1).lt.10q0.and.abs(x2).gt.10q0) then
+           
+           f1x1= - cone - x1*log((x1-cone)/x1)
+           call expand(x2,f3x2)
+           outpr=coeff*(                           &
+                & (2q0/3q0)*cone + f1x1 - f3x2 - x1/2q0 &
+                & - 2q0* f1x1* x1 + f1x1* x1**2         &
+                & - cone/( 3q0* x2**2) - f3x2/x2**2 +   &
+                & cone/(6q0* x2) + (2q0* f3x2)/x2 )      
+           
+           
+        elseif(abs(x1).gt.10q0.and.abs(x2).lt.10q0) then
+           
+           f1x2= - cone - x2*log((x2-cone)/x2)
+           call expand(x1,f3x1)
+           
+           outpr=coeff*(                                                 &
+                & - (2q0/3q0)*cone - f1x2 + f3x1 + cone/(3q0* x1**2)              &
+                & + f3x1/x1**2 - cone/(6q0* x1) - (                               &
+                &        2q0*  f3x1)/x1 + x2/2q0 + 2q0* f1x2* x2 - f1x2* x2**2 )  
+        endif
+        out(0)=outpr
+        
+        ! write(*,*)'out',out
+        
+      end subroutine b1avo
+      
+      subroutine expand_deg(yy,out)
+        implicit none
+        complex(kind=16) yy,x,out
+        x=1q0/yy
+        out= x**2/12.q0 + x**3/15.q0 + x**4/20.q0 +          &
+             &  (4q0*x**5)/105.q0 + (5q0*x**6)/168.q0 +            &
+             &  x**7/42.q0 + (7q0*x**8)/360.q0 +                   &
+             &  (8q0*x**9)/495.q0 + (3q0*x**10)/220.q0 +           &
+             &  (5q0*x**11)/429.q0 + (11q0*x**12)/1092.q0 +        &
+             &  (4q0*x**13)/455.q0 + (13q0*x**14)/1680.q0 +        &
+             &  (7q0*x**15)/1020.q0 + (5q0*x**16)/816.q0 +         &
+             &  (16q0*x**17)/2907.q0 + (17q0*x**18)/3420.q0 +      &
+             &  (3q0*x**19)/665.q0 + (19q0*x**20)/4620.q0 +        &
+             &  (20q0*x**21)/5313.q0 + (7q0*x**22)/2024.q0 +       &
+             &  (11q0*x**23)/3450.q0 + (23q0*x**24)/7800.q0 +      &
+             &  (8q0*x**25)/2925.q0 + (25q0*x**26)/9828.q0 +       &
+             &  (13q0*x**27)/5481.q0 + (9q0*x**28)/4060.q0 +       &
+             &  (28q0*x**29)/13485.q0 + (29q0*x**30)/14880.q0 +    &
+             &  (5q0*x**31)/2728.q0 + (31q0*x**32)/17952.q0 +      &
+             &  (32q0*x**33)/19635.q0 + (11q0*x**34)/7140.q0 +     &
+             &  (17q0*x**35)/11655.q0 + (35q0*x**36)/25308.q0 +    &
+             &  (12q0*x**37)/9139.q0 + (37q0*x**38)/29640.q0 +     &
+             &  (19q0*x**39)/15990.q0 + (13q0*x**40)/11480.q0 +    &
+             &  (40q0*x**41)/37023.q0 + (41q0*x**42)/39732.q0 +    &
+             &  (7q0*x**43)/7095.q0 + (43q0*x**44)/45540.q0 +      &
+             &  (44q0*x**45)/48645.q0 + (15q0*x**46)/17296.q0 +    &
+             &  (23q0*x**47)/27636.q0 + (47q0*x**48)/58800.q0 +    &
+             &  (16q0*x**49)/20825.q0 + (49q0*x**50)/66300.q0 +    &
+             &  (25q0*x**51)/35139.q0 + (17q0*x**52)/24804.q0 +    &
+             &  (52q0*x**53)/78705.q0 + (53q0*x**54)/83160.q0 +    &
+             &  (9q0*x**55)/14630.q0 + (55q0*x**56)/92568.q0 +     &
+             &  (56q0*x**57)/97527.q0 + (19q0*x**58)/34220.q0 +    &
+             &  (29q0*x**59)/53985.q0 + (59q0*x**60)/113460.q0 +   &
+             &  (20q0*x**61)/39711.q0 + (61q0*x**62)/124992.q0 +   &
+             &  (31q0*x**63)/65520.q0 + (21q0*x**64)/45760.q0 +    &
+             &  (64q0*x**65)/143715.q0 + (65q0*x**66)/150348.q0 +  &
+             &  (11q0*x**67)/26197.q0 + (67q0*x**68)/164220.q0 +   &
+             &  (68q0*x**69)/171465.q0 + (23q0*x**70)/59640.q0 +   &
+             &  (35q0*x**71)/93294.q0 + (71q0*x**72)/194472.q0 +   &
+             &  (24q0*x**73)/67525.q0 + (73q0*x**74)/210900.q0 +   &
+             &  (37q0*x**75)/109725.q0 + (25q0*x**76)/76076.q0 +   &
+             &  (76q0*x**77)/237237.q0 + (77q0*x**78)/246480.q0 +  &
+             &  (13q0*x**79)/42660.q0 + (79q0*x**80)/265680.q0 +   &
+             &  (80q0*x**81)/275643.q0 + (27q0*x**82)/95284.q0 +   &
+             &  (41q0*x**83)/148155.q0 + (83q0*x**84)/307020.q0 +  &
+             &  (28q0*x**85)/105995.q0 + (85q0*x**86)/329208.q0 +  &
+             &  (43q0*x**87)/170346.q0 + (29q0*x**88)/117480.q0 +  &
+             &  (88q0*x**89)/364455.q0 + (89q0*x**90)/376740.q0 +  &
+             &  (15q0*x**91)/64883.q0 + (91q0*x**92)/402132.q0 +   &
+             &  (92q0*x**93)/415245.q0 + (31q0*x**94)/142880.q0 +  &
+             &  (47q0*x**95)/221160.q0 + (95q0*x**96)/456288.q0 +  &
+             &  (32q0*x**97)/156849.q0 + (97q0*x**98)/485100.q0 +  &
+             &  (49q0*x**99)/249975.q0 + (33q0*x**100)/171700.d0                              
+        ! end sub q0*x
+      end subroutine expand_deg
+      
+      subroutine expand(in,out)
+        implicit none
+        complex(kind=16) in,out
+        integer ini
+        data ini/0/
+        save ini
+        integer nmax,i1
+        parameter(nmax=200)
+        real(kind=16) vecc(nmax)
+        integer vece(nmax)
+        save vecc,vece
+        complex(kind=16) cone
+        parameter(cone=(1q0,0q0))
+        real(kind=16) check
+        
+        if(ini.eq.0) then
+           ini=1
+           do i1=1,nmax
+              vece(i1)=i1
+              vecc(i1)=i1*1q0 +3q0
+           end do
+        endif
+        
+        out=(0q0,0q0)
+        do i1=1,nmax
+           
+           check=realpart(cone/(vecc(i1)*in**vece(i1)))
+           if(check.ne.check) return
+           check=imagpart(cone/(vecc(i1)*in**vece(i1)))
+           if(check.ne.check) return
+           
+           out= out + cone/(vecc(i1)*in**vece(i1))
+        end do
+        
+      end subroutine expand
+      
+      subroutine q0qcroots(qda,qdb,qdc,qdr1,qdr2,cquad1,cquad2)
+        implicit none
+        complex(kind=16) qda,qdb,qdc,qdr1,qdr2,cquad1,cquad2
+        complex(kind=16) qa,qb,qc,qr1,qr2
+        real(kind=16) si
+        complex(kind=16) sqdisc,argsq
+        complex(kind=16) qtmp
+        complex(kind=16) cone
+        parameter(cone=(1q0,0q0))
+        complex(kind=16) ii
+        parameter(ii=(0q0,1q0))
+        !
+        qa= qda
+        qb= qdb
+        qc= qdc
+        
+        if (abs(qda).gt.0.q0) then
+           if (abs(qb).gt.0.q0) then
+              argsq=1.q0 * &
+                   &      (1.q0-2.q0*sqrt(qa*qc)/qb)*(1.q0+2.q0*sqrt(qa*qc)/qb) 
+              argsq =cone*realpart(argsq)+ii*imagpart(- 4.q0*qa*qc/qb/qb)
+              sqdisc = qb*sqrt(argsq)
+              si = 1.q0
+              if (realpart(conjg(qb)*sqdisc).lt.0.q0) si = -1.q0
+              
+              !      write(*,*)'si',si
+              
+           else
+              argsq=1.q0 * &
+                   &           (qb-2.q0*sqrt(qa*qc))*(qb+2.q0*sqrt(qa*qc))
+              argsq = realpart(argsq)*cone+ii*imagpart(- 4.q0*qa*qc)
+              sqdisc = sqrt(argsq)
+              si = 1.q0
+              if (realpart(conjg(qb)*sqdisc).lt.0.q0) si = -1.q0
+           endif
+           
+           qtmp = -0.5q0*(qb + si*sqdisc)
+           qr1 = qtmp/qa
+           qr2 = qc/qr1/qa
+        else
+           if (abs(qdb).gt.0.q0) then
+              qr1 = -qdc/qdb
+              qr2 = qr1
+           else
+              qr1 = (0.q0,0.q0)
+              qr2 = (0.q0,0.q0)
+           endif
+        endif
+        cquad1= qa*qr1*qr1 + qb*qr1 + qc
+        cquad2= qa*qr2*qr2 + qb*qr2 + qc
+        qdr1 = qr1
+        qdr2 = qr2
+        
+        ! write(*,*)'cquad1,cquad2',cquad1,cquad2
+        
+        return
+      end subroutine q0qcroots
+
       subroutine b0preg(p2i,m02i,m12i,b0peps)
       implicit none
       complex*16 p2i,m02i,m12i

@@ -639,7 +639,7 @@ def workflow(conf):
 	conf["loops_to_generate"] = loops_to_generate	  
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = len(conf.getProperty(golem.properties.model))>1 \
+	conf["generate_uv_counterterms"] = (len(conf.getProperty(golem.properties.model))>1 and conf.getProperty(golem.properties.model)[1]!='../model/Standard_Model_UFO')\
                     or conf.getProperty("model")=="smdiag_complex_ct"
         conf["generate_ct_internal"] = conf.getProperty("model")=="smdiag_complex_ct"
 	conf["generate_nnlo_virt"] = generate_nnlo_virt
