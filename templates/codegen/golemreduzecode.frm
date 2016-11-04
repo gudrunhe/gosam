@@ -63,34 +63,81 @@ PolyRatFun;
 .sort:noprf;
 *--#] multiply coupling constants into coefficient:
 
-*--#[ write entry in coefficients.hpp.tmp:
-#Append <coefficients.hpp.tmp>
-#Write <coefficients.hpp.tmp> "std::vector<std::vector<secdecutil::Series<coeff_return_t>>> coefficient_of_`$IntegralName'#@GoSamInternalNewline@#"
-#Write <coefficients.hpp.tmp> "{#@GoSamInternalNewline@#"
+*--#[ write header:
+#Define HeaderFile "coefficient_`$IntegralName'.hpp.tmp"
+#Write <`HeaderFile'> "#ifndef coefficient_`$IntegralName'_hpp_included#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#define coefficient_`$IntegralName'_hpp_included#@GoSamInternalNewline@#"
+
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
 #Do ProjectorIndex = 1, `NUMPROJ'
-  #Write <coefficients.hpp.tmp> "  {#@GoSamInternalNewline@#"
   #Do ColorSymbolIndex = 1, `NUMCS'
-    #Write <coefficients.hpp.tmp> "     coefficient_of_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
+    #Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+  #EndDo
+#EndDo
+
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
+
+#Write <`HeaderFile'> "integral_coeffs_t `$IntegralName'#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "{#@GoSamInternalNewline@#"
+#Do ProjectorIndex = 1, `NUMPROJ'
+  #Write <`HeaderFile'> "{"
+  #Do ColorSymbolIndex = 1, `NUMCS'
+    #Write <`HeaderFile'> "`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'"
     #If ( `ColorSymbolIndex' != `NUMCS')
-      #Write <coefficients.hpp.tmp> "     ,#@GoSamInternalNewline@#"
+      #Write <`HeaderFile'> ",#@GoSamInternalNewline@#"
     #EndIf
   #EndDo
-  #Write <coefficients.hpp.tmp> "  };#@GoSamInternalNewline@#"
+  #Write <`HeaderFile'> "}"
   #If ( `ProjectorIndex' != `NUMPROJ')
-    #Write <coefficients.hpp.tmp> "  ,#@GoSamInternalNewline@#"
+    #Write <`HeaderFile'> ",#@GoSamInternalNewline@#"
+  #Else
+     #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
   #EndIf
 #EndDo
-#Write <coefficients.hpp.tmp> "};#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "};#@GoSamInternalNewline@#"
+
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "};#@GoSamInternalNewline@#"
+
+#Write <`HeaderFile'> "#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#endif#@GoSamInternalNewline@#"
+
 .sort
-*--#] write entry in coefficients.hpp.tmp:
+*--#] write header:
 
 *--#[ write coefficient header:
 #Do ProjectorIndex = 1, `NUMPROJ'
   #Do ColorSymbolIndex = 1, `NUMCS'
     #Define CoefficientHeaderFile "coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'.hpp.tmp"
-    #Write <`CoefficientHeaderFile'> "secdecutil::Series<coeff_return_t> coefficient_of_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
-    #Write <`CoefficientHeaderFile'> "\{`$highestPole', // Minimum epsS order#@GoSamInternalNewline@#"
-    #Write <`CoefficientHeaderFile'> " {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}, // Maximum epsS order#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#ifndef coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#define coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+
+    #Do EpsOrder = `$highestPole', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+* Since we are not allowed to have a "-" in c++ names
+* replace the "-" by an "m" if required   
+      #If `EpsOrder' < 0
+        #Redefine cppOrder "m{-`EpsOrder'}"
+      #Else 
+        #Redefine cppOrder "`EpsOrder'"
+      #EndIf
+    #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, physical_parameters_t parameters);#@GoSamInternalNewline@#"
+    #EndDo
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+
+    #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "\{#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "`$highestPole', // Minimum epsS order#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "{`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}, // Maximum epsS order#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "  {#@GoSamInternalNewline@#"
     #Do EpsOrder = `$highestPole', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
 * Since we are not allowed to have a "-" in c++ names
@@ -100,13 +147,22 @@ PolyRatFun;
       #Else 
         #Redefine cppOrder "`EpsOrder'"
       #EndIf
-      #Write <`CoefficientHeaderFile'> "coefficient_of_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants)#@GoSamInternalNewline@#"
+      #Write <`CoefficientHeaderFile'> "`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'"
       #If ( `EpsOrder' != {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'} )
-        #Write <coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'.hpp.tmp> ",#@GoSamInternalNewline@#"
+        #Write <`CoefficientHeaderFile'> ",#@GoSamInternalNewline@#"
       #EndIf
     #EndDo
-    #Write <`CoefficientHeaderFile'> "  },#@GoSamInternalNewline@#"
-    #Write <`CoefficientHeaderFile'> "true,#@SecDecInternalDblquote@#eps#@SecDecInternalDblquote@#}; // series is truncated#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "},#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "true, // series is truncated#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalDblquote@#eps#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "};#@GoSamInternalNewline@#"
+    
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "};#@GoSamInternalNewline@#"
+
+    #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#endif#@GoSamInternalNewline@#"
   #EndDo
 #EndDo
 .sort
@@ -139,12 +195,22 @@ PolyRatFun;
       #Write <`CoefficientFile'> "  ProjectorLabel: Proj`ProjectorIndex'#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "  ColorSymbol: c`ColorSymbolIndex'#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "  EpsOrder: `EpsOrder'#@GoSamInternalNewline@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "coeff_return_t coeff_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants)#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@#"
+      
+      #Write <`CoefficientFile'>"#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+
+      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
+
+      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, physical_parameters_t parameters)#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "{#@GoSamInternalNewline@##@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "  coeff_return_t coeff = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(c`ColorSymbolIndex')](#@no_split_expression@#)
       #Write <`CoefficientFile'> "  return coeff;#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "};#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
       Drop [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(c`ColorSymbolIndex')];
       UnHide l`LOOPS'; 
       .sort
