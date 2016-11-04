@@ -51,6 +51,7 @@
 			<foreach iterator="loops">
 				<directory src="loop" dest="%dloop" arguments="loop">
                     <directory src="codegen" dest="codegen">
+						<file src="invariants_hunk.cpp" class="Kinematics"/>
 						<file src="Makefile" class="Integrals"/>
 						<file src="mv.py" class="Verbatim"/>
 					</directory>
@@ -60,6 +61,7 @@
 				</directory>
 			</foreach>
 		</directory>
+		<file src="invariants.hpp" class="Kinematics"/>
 	</directory>
 
 	<directory src="codegen">
