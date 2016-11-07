@@ -51,17 +51,21 @@
 			<foreach iterator="loops">
 				<directory src="loop" dest="%dloop" arguments="loop">
                     <directory src="codegen" dest="codegen">
-						<file src="invariants_hunk.cpp" class="Kinematics"/>
 						<file src="Makefile" class="Integrals"/>
 						<file src="mv.py" class="Verbatim"/>
 					</directory>
 					<directory src="src" dest="src">
+						<file src="invariants_hunk.cpp" class="Kinematics"/>
 						<file src="Makefile" class="Integrals"/>
 					</directory>
 				</directory>
 			</foreach>
 		</directory>
 		<file src="invariants.hpp" class="Kinematics"/>
+		<file src="typedef.hpp" class="Verbatim"/>
+        <foreach iterator="loops">
+			<file src="amplitude.hpp" dest="amplitudel%d.hpp" arguments="loop" class="Integrals"/>
+        </foreach>
 	</directory>
 
 	<directory src="codegen">

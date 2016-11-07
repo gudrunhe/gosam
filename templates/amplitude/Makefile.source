@@ -147,7 +147,8 @@ prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 		-k ../codegen/secdecl[%loop%].m \
 		-r ../codegen/secdecl[%loop%].input \
 		-p ../codegen/secdecl[%loop%].py \
-		-o ../codegen/secdec/[%loop%]loop
+		-o ../codegen/secdec/[%loop%]loop \
+		-a amplitudel[%loop%].hpp
 	@touch prepare_secdec_l[%loop%]-stamp
 
 # Run SecDec on integrals

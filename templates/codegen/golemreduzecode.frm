@@ -69,7 +69,7 @@ PolyRatFun;
 #Write <`HeaderFile'> "#define coefficient_`$IntegralName'_hpp_included#@GoSamInternalNewline@#"
 
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
-#Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
 
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
 #Do ProjectorIndex = 1, `NUMPROJ'
@@ -117,7 +117,7 @@ PolyRatFun;
     #Write <`CoefficientHeaderFile'> "#ifndef coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#define coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
-    #Write <`CoefficientHeaderFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
@@ -198,14 +198,17 @@ PolyRatFun;
       #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@#"
       
       #Write <`CoefficientFile'>"#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#coefficients_typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
 
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
 
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, physical_parameters_t parameters)#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "{#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "{#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "  coeff_return_t coeff = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(c`ColorSymbolIndex')](#@no_split_expression@#)
       #Write <`CoefficientFile'> "  return coeff;#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
