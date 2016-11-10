@@ -8,8 +8,6 @@
 #ifndef invariants_hpp_included
 #define invariants_hpp_included
 
-// TODO include header with typedef for invariants_t and invariant_t
-
 struct invariants_t
 {
 [% @for mandelstam sym_prefix=es non-zero non-mass%]

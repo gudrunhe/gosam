@@ -5,17 +5,14 @@
  *
  */
 
-#ifndef amplitude_hpp_included
-#define amplitude_hpp_included
+#ifndef amplitudel[%loop%]_hpp_included
+#define amplitudel[%loop%]_hpp_included
+
+#include "typedef.hpp"
 
 %(coefficient_includes)s
 
-struct amplitude_term_t {
-    integral_coeffs_t coefficient;
-    integral_t integral_sectors;
-};
-
-std::vector<amplitude_term_t> amplitude_l[%loop%]_terms
+amplitude_t amplitude_l[%loop%]_terms
 {
     %(amplitude_terms)s
 };

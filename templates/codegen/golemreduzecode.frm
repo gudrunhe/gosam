@@ -130,7 +130,7 @@ PolyRatFun;
       #Else 
         #Redefine cppOrder "`EpsOrder'"
       #EndIf
-    #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, physical_parameters_t parameters);#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, parameters_t parameters);#@GoSamInternalNewline@#"
     #EndDo
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 
@@ -204,7 +204,7 @@ PolyRatFun;
       #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
 
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, physical_parameters_t parameters)#@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_ord`cppOrder'(invariants_t invariants, parameters_t parameters)#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "{#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
