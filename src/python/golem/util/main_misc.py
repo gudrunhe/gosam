@@ -525,21 +525,9 @@ def workflow(conf):
             correction_type = conf.getProperty("olp.correctiontype", default=None)
             if correction_type=="EW":
                 correction_type="QED"
-            powers=[]
-            for i, power in enumerate(conf.getProperty(golem.properties.qgraf_power)):
-                if power == correction_type:
-                    j = i+1
-                    powers.append(correction_type)
-                    for k, entry in enumerate(conf.getProperty(golem.properties.qgraf_power)[j:j+2]):
-                        if entry != ("QCD" or "QED" or "EW"):
-                            powers.append(entry)
-                        else:
-                            break
-                        
-                        
-                        
-        else:
-            powers = conf.getProperty(golem.properties.qgraf_power)
+
+        orders = split_qgrafPower(",".join(map(str,conf.getProperty(golem.properties.qgraf_power))))
+        powers = orders[0] if orders else []
             
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
