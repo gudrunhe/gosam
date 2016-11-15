@@ -516,7 +516,8 @@ def workflow(conf):
 	fin = conf.getProperty(golem.properties.qgraf_out)
 	path = golem.util.tools.process_path(conf)
 
-	powers = conf.getProperty(golem.properties.qgraf_power)
+	orders = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+	powers = orders[0] if orders else []
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
