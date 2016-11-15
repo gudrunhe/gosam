@@ -530,7 +530,7 @@ def workflow(conf):
                 if power == correction_type:
                     j = i+1
                     powers.append(correction_type)
-                    for k, entry in enumerate(conf.getProperty(golem.properties.qgraf_power)[j:]):
+                    for k, entry in enumerate(conf.getProperty(golem.properties.qgraf_power)[j:j+2]):
                         if entry != ("QCD" or "QED" or "EW"):
                             powers.append(entry)
                         else:
@@ -541,7 +541,6 @@ def workflow(conf):
         else:
             powers = conf.getProperty(golem.properties.qgraf_power)
             
-
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)

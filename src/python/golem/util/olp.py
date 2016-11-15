@@ -13,11 +13,13 @@ class OLPSubprocess:
          p_ini, p_fin,
          key, conf):
       self.id = id
+      self.id_ew = None
       self.process_name = process_name
       self.process_path = process_path
       self.p_ini = p_ini
       self.p_fin = p_fin
       self.crossings = {}
+      self.crossings_main = {}
       self.crossings_conf = {}
       self.ids = {id: process_name}
       self.channels = {}
@@ -32,8 +34,16 @@ class OLPSubprocess:
    def addCrossing(self, id, process_name, p_ini, p_fin, conf):
       self.crossings[process_name] = "%s > %s" \
             % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))
+      self.crossings_main[process_name] = "%s > %s" \
+            % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))        
       self.ids[id] = process_name
       self.crossings_conf[id] = conf
+      
+   def addCrossing_main(self, id, process_name, p_ini, p_fin, conf):
+      self.crossings_main[process_name] = "%s > %s" \
+            % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))        
+      self.ids[id] = process_name
+      self.crossings_conf[id] = conf      
 
    def assignChannels(self, id, channels):
       self.channels[id] = channels
@@ -158,6 +168,77 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
       
 
    return sp, is_new
+
+
+def getSubprocess_main(olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf, ew_index=0):
+
+   def getparticle(name):
+      return golem.util.tools.interpret_particle_name(name, model)
+
+   p_ini = map(getparticle, inp)
+   p_fin = map(getparticle, out)
+
+   s_ini = map(str,p_ini)
+   s_fin = map(str,p_fin)
+
+   if len(olpname) > 0:
+      process_name = "%s_p%d_%s_%s" \
+            % (olpname, id, "".join(s_ini), "".join(s_fin))
+   else:
+      process_name = "p%d_%s_%s" \
+            % (id, "".join(s_ini), "".join(s_fin))
+   process_name = process_name.lower()
+
+   originalkey = tuple(sorted(s_ini + s_fin))
+
+   if use_crossings:
+      key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
+
+   else:
+      key = tuple(s_ini + [p.getPartner() for p in p_fin])
+
+
+   if use_crossings:
+      # look for existing compatible subprocesses
+      for skey in subprocesses:
+       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf) and ew_index!= 1:
+         key = skey
+         break
+
+   if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
+       if ew_index==0:
+            sp = subprocesses[key]
+            sp.addCrossing_main(id, process_name, p_ini, p_fin, conf)
+            if ew_index == 1:
+                is_new = True
+            else:
+                is_new = False
+            adapt_config(subprocesses[key].conf,conf)
+       else:
+            i=0
+            # append digit to distinguish it from other subprocesses
+            while key in subprocesses:
+                key=key+(i,) if i==0 else key[:-1]+(i,)
+                i = i + 1
+            sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
+            subprocesses[key] = sp
+            is_new = True          
+      
+
+   else:
+      i=0
+      # append digit to distinguish it from other subprocesses
+      while key in subprocesses:
+         key=key+(i,) if i==0 else key[:-1]+(i,)
+         i = i + 1
+      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
+      subprocesses[key] = sp
+      is_new = True
+      
+
+   return sp, is_new
+
+
 
 def is_config_compatible(conf1, conf2):
    """ Checks if a subprocess with conf2 can be a crossing of conf1 """
@@ -449,6 +530,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    tmp_contract_file = golem.util.olp_objects.OLPContractFile(order_file)
    subprocesses_conf=[]
+   subprocesses_main_conf = []   
 
    conf.setProperty("setup-file", order_file_name)
    orig_conf=conf.copy()
@@ -464,6 +546,10 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
      i=0
      subprocess_number_real=0
      for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
+         subconf=orig_conf.copy()
+         file_ok = golem.util.olp_options.process_olp_options(tmp_contract_file, subconf,
+                       ignore_case, ignore_unknown, lineo, quiet=True)         
+         subprocesses_main_conf.append(subconf)
          if subprocess_number != 0:
            subprocess_number_real+=1
          for j in range(0,2):
@@ -636,6 +722,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    max_occupied_channel = -1
    subprocesses = {}
    subprocesses_flav = {}
+   subprocesses_main = {}
 
    subprocesses_conf_short = []
 
@@ -647,10 +734,19 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             #max_occupied_channel=3
             contract_file._proc_res*=2
             for lineno,id, inp, outp in contract_file.processes_ordered():
+                #subprocess_main, is_new_main = getSubprocess_main(
+                    #olp_process_name, id, inp, outp, subprocesses_main, subprocesses_flav, model,
+                    #use_crossings, subprocesses_main_conf[id])                 
                 if id != 0:
                     id_real+=1
                 for j in range(0,2):
                     id_real+=j
+                    
+                    if j==0:
+                        subprocess_main, is_new_main = getSubprocess_main(
+                            olp_process_name, id_real, inp, outp, subprocesses_main, subprocesses_flav, model,
+                            use_crossings, subprocesses_main_conf[id])    
+                                       
                     subprocess, is_new = getSubprocess(
                         olp_process_name, id_real, inp, outp, subprocesses, subprocesses_flav, model,
                         use_crossings, subprocesses_conf[id_real],int(j))
@@ -680,6 +776,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
             # store initial symmetries infos
             start_symmetries = conf["symmetries"]
+            
 
             # handle case that first subprocess does not initalize samurai (LO process)
             for subprocess in subprocesses.values():
@@ -689,6 +786,35 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                     first_subprocess = int(subprocesses.values()[0])
                     subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
                     break
+
+            #for subprocess in subprocesses_main.values():
+                #subprocess_main_conf = subprocess.getConf(subprocesses_main_conf[0], path)
+                #subprocesses_main_conf.append(subprocess_main_conf)
+
+            #for subprocess in subprocesses_main.values():
+                #helicities = list(
+                    #golem.util.tools.enumerate_and_reduce_helicities(
+                        #subprocess_main_conf))
+
+                #generated_helicities = map(lambda t: t[0],
+                    #filter(lambda t: t[1] is None, helicities))                
+                #for id in subprocess.getIDs():
+                    #chelis[id] = len(helicities)
+                    #if subdivide:
+                        #num_channels = len(helicities)
+                        #min_channel = max_occupied_channel + 1
+                        #max_channel = min_channel + num_channels - 1
+                        #max_occupied_channel += num_channels
+                        #channels[id] = range(min_channel, max_channel + 1)
+                    #else:
+                        #max_occupied_channel += 1
+                        #channel = max_occupied_channel
+                        #channels[id] = [ channel ]
+
+                    #contract_file.setProcessResponse(id, channels[id])
+                    #subprocess.assignChannels(id, channels[id])
+                    #subprocess.assignNumberHelicities(len(helicities),
+                            #generated_helicities)                
 
             for subprocess in subprocesses.values():
                 process_path = subprocess.getPath(path)
@@ -734,14 +860,28 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                         subprocess.assignChannels(id, channels[id])
                         subprocess.assignNumberHelicities(len(helicities),
                                 generated_helicities)
+                        for subprocess_main in subprocesses_main.values():
+                            if str(subprocess) == str(subprocess_main):
+                                subprocess_main.assignChannels(id, channels[id])
+                                subprocess.assignNumberHelicities(len(helicities),
+                                        generated_helicities)
+                                subprocess_main.id_ew = 100
+
 
                 except golem.util.config.GolemConfigError as err:
                     result = 1
                     for id in subprocess.getIDs():
                         contract_file.setProcessError(id, "Error: %s" % err)
 
-                subprocesses_conf_short.append(subprocess_conf)           
-           
+                subprocesses_conf_short.append(subprocess_conf)
+                if not str(subprocess).endswith('_ew'):
+                    subprocesses_main_conf.append(subprocess_conf)
+                
+            #for subprocess in subprocesses_main.values():
+                #subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+                #merge_extensions(subprocess_conf,conf)
+                #helicities = list(golem.util.tools.enumerate_and_reduce_helicities(subprocess_conf))                
+
            
        else:
             for lineno,id, inp, outp in contract_file.processes_ordered():
@@ -863,7 +1003,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          subprocesses=list(subprocesses.values()),
          subprocesses_conf=subprocesses_conf_short,
          contract=contract_file,
-         user="olp")
+         user="olp",
+         subprocesses_main=list(subprocesses_main.values()),
+         subprocesses_main_conf=subprocesses_conf_short)
 
    #---#] Process global templates:
    return result
