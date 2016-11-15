@@ -70,7 +70,7 @@ class OLPSubprocess:
       else:
          subproc_conf = conf.copy()
 
-      subproc_conf.cache["model"] = conf.cache["model"]
+      #subproc_conf.cache["model"] = conf.cache["model"]
       subproc_conf[golem.properties.process_name] = self.process_name
       subproc_conf[golem.properties.process_path] = self.getPath(path)
       subproc_conf[golem.properties.qgraf_in] = map(str, self.p_ini)
@@ -449,7 +449,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for lconf in [conf] + subprocesses_conf:
          golem.util.tools.prepare_model_files(lconf, imodel_path)
 
-         lconf["modeltype"] = lconf["model"]
+         lconf["modeltype"] = lconf.getListProperty("model")[-1]
 
          lconf["model"] = os.path.join(imodel_path,
                golem.util.constants.MODEL_LOCAL)

@@ -36,16 +36,30 @@
 	</file>
 
 	<directory src="codegen">
-		<file src="abbrev.in" class="Multi"/>
-		<file src="abbrev.out" class="Integrals"/>
-		<file src="abbrevloc.out" class="Integrals"/>
-		<file src="color.in" class="Verbatim"/>
-		<file src="color.out" class="Kinematics"/>
-		<file src="functions.out" class="Kinematics"/>
-		<file src="model.out" class="Model"/>
+		<file src="abbrev.in" class="Multi">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="abbrev.out" class="Integrals">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="abbrevloc.out" class="Integrals">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="color.in" class="Verbatim">
+			<only if-option="abbrev.color" value="haggies" />
+		</file>
+		<file src="color.out" class="Kinematics">
+			<only if-option="abbrev.color" value="haggies" />
+		</file>
+		<file src="functions.out" class="Kinematics">
+			<only if-internal="HAGGIES" />
+		</file>
+		<file src="model.out" class="Model">
+			<only if-internal="HAGGIES" />
+		</file>
 
 		<file src="haggies-l0.in" class="Multi">
-			<except if-extension="extraopt" />
+			<only if-internal="HAGGIES" />
 		</file>
 
 		<file src="haggies-l0-group.out" dest="haggies-l0.out"
@@ -66,13 +80,13 @@
 			<except if-extension="formopt" />
 		</file>
 		<file src="helsum.frm" class="Kinematics" >
-         <only if-option="helsum" value="true" />
+			<only if-option="helsum" value="true" />
 		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
 		</file>
 		<file src="colorin.py" class="Multi">
-			<only if-extension="extraopt" />
+			<except if-option="abbrev.color" value="haggies" />
 		</file>
 		<file src="haggies-l1d.out" class="Kinematics">
 			<only if-internal="GENERATE_DERIVATIVES"/>
@@ -87,9 +101,7 @@
 			<except if-extension="formopt" />
 		</file>
 
-		<file src="filter.py" class="Verbatim">
-			<only if-extension="formopt" />
-		</file>
+		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="derive" />
@@ -102,10 +114,10 @@
 		<file src="golem.frm" class="Kinematics" />
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
-			<only if-extension="extraopt" />
+			<only if-option="abbrev.color" value="form" />
 		</file>
 		<file src="modelopt.frm" class="Kinematics">
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="abbreviate.hh" class="Kinematics"/>
 		<file src="optimizeborn.hh" class="Integrals">
@@ -119,7 +131,7 @@
 		</file>
 		<file src="replace.hh" class="Kinematics">
 			<only if-extension="formopt" />
-         <only if-option="helsum" value="true" />
+			<only if-option="helsum" value="true" />
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
@@ -142,14 +154,12 @@
 		<file src="buildfortranborn.py" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
-		<file src="t2f.py" class="Verbatim">
-			<only if-extension="formopt" />
-		</file>
+		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />
 		</file>
 		<file src="buildcolor.py" class="Kinematics">
-			<only if-extension="extraopt" />
+			<except if-option="abbrev.color" value="haggies" />
 		</file>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
@@ -165,7 +175,7 @@
 		<file src="spva.prc" class="Kinematics"/>
 		<file src="func.txt" class="Model" />
 		<file src="func.hh" class="Model" >
-			<only if-extension="extraopt" />
+			<only if-extension="formopt" />
 		</file>
 		<file src="diagsum.frm" dest="diagsum.frm"
 		                class="Integrals" >
@@ -274,6 +284,10 @@
 			<file src="diagramsl0.f90" class="Multi">
 				<only if-option="group" value="false"/>
 			</file>
+			<file src="diagramsl0fr5.f90" class="Multi">
+				<only if-internal="REQUIRE_FR5"/>
+				<only if-option="group" value="false"/>
+			</file>
 			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="samurai" />
@@ -302,10 +316,15 @@
 	</foreach>
 
 	<directory src="sum">
-      <only if-option="helsum" value="true" />
+		<only if-option="helsum" value="true" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
-		<file src="Makefile" class="Integrals"/>
+		<file src="Makefile" class="Integrals">
+			<except if-extension="autotools" />
+		</file>
+		<file src="Makefile.am" class="Integrals">
+			<only if-extension="autotools" />
+		</file>
 		<file src="globals.f90" class="Kinematics"/>
       <file src="../form.set" dest="form.set" class="Kinematics"/>
       <file src="amplitude.f90" class="Integrals" />

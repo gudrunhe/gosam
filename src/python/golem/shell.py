@@ -70,6 +70,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                "implicit", "explicit", "only", "off"],
             str(golem.properties.symmetries): [
                "flavour", "family", "lepton", "generation", "parity"],
+            str(golem.properties.config_renorm_gamma5): ["true", "false"],
             str(golem.properties.config_renorm_mqwf): ["true", "false"],
             str(golem.properties.config_renorm_decoupling): ["true", "false"],
             str(golem.properties.config_renorm_mqse): ["true", "false"],

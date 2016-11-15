@@ -103,5 +103,12 @@ dotproducts={
   'Qspvae[%index2%]e[%index1%]' : 'dotproduct(Q,spvae[%index2%]e[%index1%])'[%
       @end @if %][%
    @end @for %][%
-@end @if%]}
+@end @if%][%
+@if extension tracify%][%
+   @for pairs distinct %][%
+      @for particles %],
+		'Qeps[%@if is_lightlike1%]k[%@else%]l[%@end @if%][%index1%][%@if is_lightlike2%]k[%@else%]l[%@end @if%][%index2%][%@if is_lightlike%]k[%@else%]l[%@end @if%][%index%]' : 'epstensor(Q,[%@if is_lightlike1%]k[%@else%]l[%@end @if%][%index1%],[%@if is_lightlike2%]k[%@else%]l[%@end @if%][%index2%],[%@if is_lightlike%]k[%@else%]l[%@end @if%][%index%])'[%
+      @end @for %][%
+   @end @for %][%
+@end @if %]}
 

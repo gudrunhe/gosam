@@ -39,7 +39,8 @@
       @if generate_nlo_virt %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%], [% ' '
-        %]only: samplitudeh[%helicity%]l1 => samplitude[%
+        %]only: samplitudeh[%helicity%]l1 => samplitude, &
+        &   finite_renormalisation[%helicity%] => finite_renormalisation[%
       @end @if %][%
    @end @for %][%
 @end @if %]
@@ -704,7 +705,7 @@ contains
    !---#[ function samplitudel1 :
    function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
       use [% process_name asprefix=\_ %]config, only: &
-         & debug_nlo_diagrams, logfile
+         & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -724,7 +725,7 @@ contains
       @end @if %]
       logical :: my_ok
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
-      real(ki) :: rational2
+      real(ki) :: fr, rational2
 
       amp(:) = 0.0_ki
       rat2 = 0.0_ki
@@ -833,6 +834,32 @@ contains
          heli_amp(-2) = square(colorvec(:,-2))
       [%
       @end @if %]
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:[%
+      @for helicity_mapping shift=1 %][%
+         @if parity %][%
+            @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+            @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+            @end @select %][%
+         @else %][%
+            @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+            @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+            @end @select %][%
+         @end @if %][%
+      @end @for %]
+            call init_event(pvecs[%
+         @for particles lightlike vector %], [%hel%]1[%
+         @end @for %])
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation[%map.index%](real(scale2,ki))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
          ok = ok .and. my_ok
          amp = amp + heli_amp
          rat2 = rat2 + rational2
@@ -844,6 +871,10 @@ contains
                 & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
             write(logfile,'(A33,E24.16,A3)') &
                 & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
             if(my_ok) then
                write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
             else

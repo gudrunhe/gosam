@@ -8,7 +8,8 @@ module     [% process_name asprefix=\_ %]globalsl1
    [% @if generate_lo_diagrams %]
    ! amp0 is used to store the LO amplitude between the calls
    ! for one kinematics.
-   complex(ki), dimension(numcs[%@if helsum%],0:max(0,[%@for helicities generated%][%@if is_first%][%@else%],[%@end @if%][%helicity%][%@end @for%])[%@end @if%]), public :: amp0[%
+   complex(ki), dimension(numcs[%@if helsum%],0:max(0[%@for helicities generated%],&
+                                     &[%helicity%][%@end @for%])[%@end @if%]), public :: amp0[%
    @else %]
    ! col0 is the color index to be returned in the virtual diagrams
    integer, public :: col0[%

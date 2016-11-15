@@ -627,7 +627,7 @@ def workflow(conf):
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
 
-	if conf["helsum"]:
+	if conf.getBooleanProperty("helsum"):
 		if not conf.getBooleanProperty("generate_lo_diagrams"):
 			raise GolemConfigError(
 				'The "helsum" feature is not implemented for loop-induced processes.\n' +
@@ -639,10 +639,6 @@ def workflow(conf):
 				'The "helsum" feature is only implemented for explicit\n' +
 				'polarization vectors. Please either set "helsum=false"\n' +
 				'or "polvec=explicit" in the input card."\n')
-		if "autotools" in ext:
-			raise GolemConfigError(
-				'The "helsum" feature is not implemented for autotools.\n' +
-				'Either set "helsum=false" or remove "autotools" from "extensions".\n')
 	else:
 		if conf.getProperty("polvec")=="numerical" and not "numpolvec" in ext:
 			ext.append("numpolvec")

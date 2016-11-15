@@ -455,6 +455,7 @@ The output directory is assumed to be in the relative path
 29 renorm_decoupling=True
 30 renorm_mqse=True
 31 renorm_logs=True
+32 renorm_gamma5=True
 33 reduction_interoperation=-1
 34 reduction_interoperation_rescue=-1
 35 samurai_scalar=2
@@ -687,6 +688,8 @@ massive quark loops. The default is  {\tt True}.
 massive quark propagators. The default is  {\tt True}.
 \item[32] \texttt{renorm\_logs}: activates or disables the logarithmic finite terms  
 associated with the UV counterterms.   The default is  {\tt True}.
+\item[32] \texttt{renorm\_gamma5}: activates finite renormalisation for axial couplings in the 
+ \tHV{} scheme (CDR).                      
 Implemented for QCD only, works only with the built-in model files.    The default is  {\tt True}.
 \item[33] \texttt{reduction\_interoperation}: denotes the reductuion libraries to be used. 
   Possible values are: ninja, samurai, golem95 (listing all of them simultaneously is possible). 
@@ -824,40 +827,50 @@ Example: \\
     W-boson as reference direction for its own momentum splitting.  
     Similarly, the momentum of the W-boson is split into a direction
     $l_4$ and one along $l_3$.                                            
-\item[50] \texttt{abbrev.limit}: maximum number of instructions per subroutine when calculating  
- abbreviations. The default is 0, which means that no maximum is set.
-\item[51] \texttt{templates}:   Path pointing to the directory containing the template 
+\item[50] \texttt{abbrev.color}: the program in use for the generation
+of color related abbreviations.
+Possible options are
+\begin{itemize}
+	\item\texttt{haggies} -- color algebra in form, optimization with haggies
+	\item\texttt{form} -- color algebra and optimization in form (default)
+	\item\texttt{none} -- color algebra in form, no optimization
+\end{itemize}
+The optimization can need a lot of memory. If the execution of ``color.frm" crashes due
+to a lack of memory, try \texttt{abbrev.color=none}.
+\item[51] \texttt{abbrev.limit}: maximum number of instructions per subroutine when calculating  
+ abbreviations. 0 means that no maximum is set. The default is 500.
+\item[52] \texttt{templates}:   Path pointing to the directory containing the template 
     files for the process. If not set, the program uses the directory      
     $\langle$ gosam\_path$\rangle$/templates.                                         
     The directory must contain a file called {\tt template.xml}.
-\item[52] \texttt{qgraf.bin}: path to the {\tt QGraf} executable.
+\item[53] \texttt{qgraf.bin}: path to the {\tt QGraf} executable.
 An automatic search is attempted if left empty.
-\item[53] \texttt{form.bin}:  path to the \form{} executable.
+\item[54] \texttt{form.bin}:  path to the \form{} executable.
 An automatic search is attempted if left empty.
-\item[54] \texttt{form.threads}: the number of \form{} threads when using {\tt tform},
+\item[55] \texttt{form.threads}: the number of \form{} threads when using {\tt tform},
 the parallel version of \form.  The default is 2.
-\item[55] \texttt{form.tempdir}: the temporary directory where \form{}
+\item[56] \texttt{form.tempdir}: the temporary directory where \form{}
 can store (large) intermediate files.  the default is {\tt /tmp}.
-\item[56] \texttt{haggies.bin}: path to the {\tt haggies} executable.
+\item[57] \texttt{haggies.bin}: path to the {\tt haggies} executable.
 An automatic search is attempted if left empty.
-\item[57] \texttt{fc.bin}: path to the {\tt Fortran} compiler.
+\item[58] \texttt{fc.bin}: path to the {\tt Fortran} compiler.
 An automatic search is attempted if left empty.
 %{\tt /usr/bin/gfortran}.
-\item[58] \texttt{python.bin}:  path to the {\tt python} executable.
+\item[59] \texttt{python.bin}:  path to the {\tt python} executable.
 An automatic search is attempted if left empty.
-\item[59] \texttt{ninja.fcflags}: compiler flags to compile with \ninja.
+\item[60] \texttt{ninja.fcflags}: compiler flags to compile with \ninja.
 An automatic search is attempted if left empty.
-\item[60] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.
+\item[61] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.
 An automatic search is attempted if left empty.
-\item[61] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai.
+\item[62] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai.
 An automatic search is attempted if left empty.
-\item[62] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.
+\item[63] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.
 An automatic search is attempted if left empty. 
-\item[63] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}.
+\item[64] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}.
 An automatic search is attempted if left empty. 
-\item[64] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.
+\item[65] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.
 An automatic search is attempted if left empty. 
-\item[65] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
+\item[66] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
 \begin{itemize}
 \item {\tt implicit}: $\mu^2$ terms are kept in the numerator and reduced at runtime
 \item {\tt explicit}: $\mu^2$ terms are reduced analytically 

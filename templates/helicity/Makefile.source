@@ -47,6 +47,15 @@ DIAGRAMS_TREE=[%
 	@end @for %][%
 @end @if %]
 
+DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+@else %][% 
+	@for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0fr5.f90[%
+	@end @for %][%
+@end @if %][%
+@end @if %]
+
 TXT_TREE=[%
 @if group %][%
    @for elements topolopy.keep.tree %] \
@@ -56,20 +65,31 @@ TXT_TREE=[%
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %]
 
-[% @if extension parallelborn 
-%]TXT_TREE_STAMP=[%
+TXT_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+   @for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0-fr.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
+@end @if %][%
+@end @if %]
+
+TXT_TREE_STAMP=[%
 @if group %][%
    @for elements topolopy.keep.tree %] \
 		d[%$_%]h[%helicity%]l0-stamp[%
    @end @for %][%
 @else %] \
    $(subst .f90,-stamp,$(DIAGRAMS_TREE))[%
-@end @if %][%
 @end @if %]
 
 [% @if generate_lo_diagrams %]
 SOURCE_TREE= \
-	diagramsl0.f90 $(DIAGRAMS_TREE)
+	diagramsl0.f90 $(DIAGRAMS_TREE)[%
+   @if internal REQUIRE_FR5 %] \
+	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
+   @end @if %]
 [% @else %]
 SOURCE_TREE=
 [% @end @if %]
@@ -144,7 +164,6 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 [% 
 @if extension formopt %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
-@if extension parallelborn %][%
 @for elements topolopy.keep.tree %][%
 @if is_first %][% @if is_last %]
 d[%$_%]h[%helicity%]l0.txt:
@@ -207,30 +226,6 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
 @end @if %][% @end @if %][%
 @end @for %][%
-@else %][%
-@for elements topolopy.keep.tree %][%
-@if is_first %]
-born.txt: ../diagrams-0.hh[% @end @if %]
-	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \[% 
-@if is_first %][% @if is_last %]
-    	     	-D BORNFLG=2 \[%
-@else %] 
-    	     	-D BORNFLG=1 \[% @end @if %][% 
-@else %][% @if is_last %]
-    	     	-D BORNFLG=-1 \[% 
-@else %]
-    	     	-D BORNFLG=0 \[% 
-@end @if %][% @end @if %]
-		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
-		../codegen/golem.frm[%
-@end @for %]
-	@touch born-stamp[%
-@end @if%][%
 @for elements topolopy.keep.tree %][% @if is_last %]
 born-stamp: born.txt
 diagramsl0.f90: born.txt born-stamp
@@ -262,6 +257,9 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-D DIAG=[%$_%] \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm[%
+   @if internal REQUIRE_FR5 %]
+d[%$_%]h[%helicity%]l0-fr.txt: d[%$_%]h[%helicity%]l0.txt[%
+	@end @if %][%
 	@if group %][%
 	@else %]
 d[%$_%]h[%helicity%]l0.f90: d[%$_%]h[%helicity%]l0.txt
@@ -273,6 +271,17 @@ d[%$_%]h[%helicity%]l0.f90: d[%$_%]h[%helicity%]l0.txt
 			d[%$_%]h[%helicity%]l0.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ $<[%
+      @if internal REQUIRE_FR5 %]
+d[%$_%]h[%helicity%]l0fr5.f90: d[%$_%]h[%helicity%]l0-fr.txt
+	@echo Haggies is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-c ../codegen/haggies-l0.in \
+		-t ../codegen/haggies-l0.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]h[%helicity%]l0.dat \
+			| sed 's/extraysymbols=//')) \
+		-o $@ $<[%
+      @end @if internal REQUIRE_FR5 %][%
    @end @if %][%
 @end @for %][%
 	
@@ -284,6 +293,15 @@ diagramsl0.f90: $(TXT_TREE)
 		-t ../codegen/haggies-l0.out \
 		-D helicity=[%helicity%] -D "modsuffix=" \
 		-o $@ $+[%
+   @if internal REQUIRE_FR5 %]
+diagramsl0fr5.f90: $(TXT_TREE_FR5)
+	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-c ../codegen/haggies-l0.in \
+		-t ../codegen/haggies-l0.out \
+		-D helicity=[%helicity%] -D modsuffix=fr5 \
+		-o $@ $+[%
+   @end @if %][%
 @end @if %][%
 @end @if %]
 

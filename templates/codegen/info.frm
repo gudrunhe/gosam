@@ -4,10 +4,8 @@
 #Write <`OUTPUT'> "   implicit none"
 #Write <`OUTPUT'> "   ! The version of Form used for code generation"
 #Write <`OUTPUT'> "   integer, parameter, dimension(2) :: formversion %"
-#Write <`OUTPUT'> "= (/`VERSION_', `SUBVERSION_'/)"
-[$ @if extension extraopt$]
-* if extraopt is active, Haggies is not used
-[$ @else $]
+#Write <`OUTPUT'> "= (/`VERSION_', `SUBVERSION_'/)"[$
+@if internal HAGGIES$]
 #Write <`OUTPUT'> "   ! The version of haggies used for code generation"
 #Write <`OUTPUT'> "   integer, parameter, dimension(2) :: haggiesversion %"
 #Write <`OUTPUT'> "= (/[%%"
