@@ -81,7 +81,7 @@ filelist-source: source
 		-name "ph_test.f" -or \
 		-name "test.f90" -or \
 		-name "ltest.dat" \
-	\) -fprint $@
+	\) -print >> $@
 	@for f in $(subst .o,.f90,$(OBJECTS)); \
 	do \
 		echo $${f} >> $@; \

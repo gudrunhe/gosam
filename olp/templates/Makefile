@@ -84,7 +84,7 @@ source:
 	done
 
 filelist-source: source
-	@echo -n > $@
+	@touch $@
 	@for f in $(DISTFILES); \
 	do \
 		echo $${f} >> $@; \
