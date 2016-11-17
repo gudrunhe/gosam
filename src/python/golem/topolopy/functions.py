@@ -2,7 +2,6 @@
 
 import imp
 import os.path
-import sys
 import shutil
 
 import golem.properties
@@ -363,7 +362,7 @@ def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
 
    debug("After analyzing %sloop diagrams and diagram sum: keeping %d, purging %d" %
             (loop_order, len(keep), len(lose)))
- 
+
    #conf["__max_rank__"] = max_rank
 
    return keep, keep_tot
@@ -393,6 +392,7 @@ def analyze_yaml(path, conf, keep_loop, loop_yaml):
 
    shutil.move(loop_file, backup_loop_file)
    shutil.move(outfile_loop, loop_file)
+
 
 
 

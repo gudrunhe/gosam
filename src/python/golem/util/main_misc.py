@@ -521,30 +521,16 @@ def workflow(conf):
 	#conf["helsum"] = conf.getBooleanProperty(golem.properties.sum_helicities)
 	
 
-        if conf["__OLP_MODE__"]:
-            correction_type = conf.getProperty("olp.correctiontype", default=None)
-            if correction_type=="EW":
-                correction_type="QED"
-            powers=[]
-            for i, power in enumerate(conf.getProperty(golem.properties.qgraf_power)):
-                if power == correction_type:
-                    j = i+1
-                    powers.append(correction_type)
-                    for k, entry in enumerate(conf.getProperty(golem.properties.qgraf_power)[j:j+2]):
-                        if entry != ("QCD" or "QED" or "EW"):
-                            powers.append(entry)
-                        else:
-                            break
-                        
-                        
-                        
-        else:
-            powers = conf.getProperty(golem.properties.qgraf_power)
+        orders = split_qgrafPower(",".join(map(str,conf.getProperty(golem.properties.qgraf_power))))
+        powers = orders[0] if orders else []
+
             
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
 	templates = os.path.expandvars(templates)
 	qgraf_options = conf.getProperty(golem.properties.qgraf_options)
+
+	
 
 	r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
 #	formopt = conf.getProperty(golem.properties.formopt)
@@ -640,8 +626,10 @@ def workflow(conf):
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = (len(conf.getProperty(golem.properties.model))>1 and conf.getProperty(golem.properties.model)[1]!='../model/Standard_Model_UFO')\
-                    or conf.getProperty("model")=="smdiag_complex_ct"
-        conf["generate_ct_internal"] = conf.getProperty("model")=="smdiag_complex_ct"
+                    or conf["modeltype"]=="smdiag_complex_ct" or \
+                    conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
+        conf["generate_ct_internal"] = conf["modeltype"]=="smdiag_complex_ct" or \
+            conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
 	conf["generate_nnlo_virt"] = generate_nnlo_virt
 	#generate_uv_counterterms
 	#False

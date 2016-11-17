@@ -464,7 +464,7 @@ contains
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
-      @if eval olp.correctiontype .eq. 'EW' %]ir_subtraction [% @end @if %][%
+      @if eval olp.correctiontype .eq. 'EW' %], ir_subtraction [% @end @if %][%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
@@ -490,7 +490,10 @@ contains
       %][%@elif eval cr.amplitudetype ~ "ccTree" %][%
                 eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
       %]) :: amp
-      real(kind=c_double), optional :: acc
+      real(kind=c_double), optional :: acc[%
+      @if eval olp.correctiontype .eq. 'EW' %]
+      real(kind=ki), dimension(2:3) :: ir[%
+      @end @if %]
       logical, optional :: blha1_mode
       real(kind=ki) :: zero[% 
       @if eval olp.mc.name ~ "amcatnlo" %]
@@ -501,7 +504,6 @@ contains
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
-
       call init_event_parameters([% cr.id %], parameters)[%
       @else %]
       character(len=255) :: buffer
@@ -566,7 +568,9 @@ contains
       @end @if %][%
       @if extension ninja %]
       call ninja_exit()[%
-      @end @if %]
+      @end @if %][%
+      @if eval olp.correctiontype .eq. 'EW' %][%
+      @else %]
       if (ok) then
          !
       else
@@ -586,7 +590,8 @@ contains
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
-      end if
+      end if[%
+      @end @if %]
 
       [% @if eval cr.amplitudetype ~ "scTree"
       %]do i=1, size(amp)
@@ -596,11 +601,18 @@ contains
       do i=1, size(amp)
         res(i) = real(amp(i), c_double)
       end do[%
-      @else%]
+      @else%][%
+      @if eval olp.correctiontype .eq. 'EW' %]
+      res(1) = real(amp(4)-ir(3), c_double)
+      res(2) = real(amp(3)-ir(2), c_double)
+      res(3) = real(amp(2), c_double)
+      res(4) = real(amp(1), c_double)[%
+      @else %]
       res(1) = real(amp(4), c_double)
       res(2) = real(amp(3), c_double)
       res(3) = real(amp(2), c_double)
       res(4) = real(amp(1), c_double)[%
+      @end @if %][%
       @end @if %]
 
       if(present(blha1_mode)) then

@@ -214,6 +214,9 @@ def run_qgraf(conf, in_particles, out_particles):
 
 	powers = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
 	options = conf.getProperty(golem.properties.qgraf_options)
+	if conf.getProperty("olp.correctiontype") == 'EW' and not conf.getProperty("olp.qcd_in_ew"):
+	  options=['onshell','notadpole']	
+	  warning("Warning: qgraf options are overwritten using onshell and notadpole")
 	verbatim =     format_qgraf_verbatim(conf,
 			golem.properties.qgraf_verbatim)
 	verbatim_lo =  format_qgraf_verbatim(conf,
@@ -236,7 +239,8 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
 	loops_to_generate = conf.getListProperty("loops_to_generate")
-	flag_internal_ct=conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
+	flag_internal_ct=conf["modeltype"]=='smdiag_complex_ct' or \
+            conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
 	flag_qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
 
 	if not (flag_generate_nlo_virt or
@@ -368,9 +372,10 @@ def run_qgraf(conf, in_particles, out_particles):
 		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
 		modelct = consts.MODEL_LOCAL +'ct'
+
 		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers])
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in [powers[0]]])
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo		
 		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
@@ -379,7 +384,7 @@ def run_qgraf(conf, in_particles, out_particles):
 				options, new_verbatim, in_particles, out_particles, [], 0)
                 else:
                     new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                    
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in [powers[0]]])                    
                     write_qgraf_dat(path, form_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0,flag_internal_ct)
 
