@@ -248,6 +248,6 @@ filelist-source: source
 		-name '*.f90' \
 		-or -name 'Makefile' \
 		-or -name 'Makefile.dep' \
-		\) -fprint $@
+		\) -print > $@
 
 include Makefile.dep
