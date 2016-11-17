@@ -192,7 +192,8 @@ def combinations(map):
 def enumerate_qgraf_powers(conf):
       """
       """
-      powers = conf.getProperty(golem.properties.qgraf_power) # example: ['QCD','none','2','4']
+      orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
+      powers = orders[0] if orders else [] # example: ['QCD','none','2','4']
       del powers[0]
       for loop, power in enumerate(powers):
          if power.lower() != "none":
