@@ -521,6 +521,11 @@ def workflow(conf):
 	#conf["helsum"] = conf.getBooleanProperty(golem.properties.sum_helicities)
 	
 
+        if conf["__OLP_MODE__"]:
+            correction_type = conf.getProperty("olp.correctiontype", default=None)
+            if correction_type=="EW":
+                correction_type="QED"
+
         orders = split_qgrafPower(",".join(map(str,conf.getProperty(golem.properties.qgraf_power))))
         powers = orders[0] if orders else []
 
