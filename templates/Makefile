@@ -99,7 +99,7 @@ filelist-source: source
 	@for dir in $(SUBDIRS); \
 	do \
 		$(MAKE) -C $${dir} $@; \
-		$(SED) $(SED_OPT) -e "s/^\\(.\\/\\)\\?/$${dir}\\//" $${dir}/$@ >> $@; \
+		$(SED) $(SED_OPT) -E -e "s/^(.\/)?/$${dir}\//" $${dir}/$@ >> $@; \
 	done
 
 [% process_name asprefix=\_ %]matrix.tar.gz: source filelist-source
