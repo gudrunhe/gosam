@@ -1,6 +1,10 @@
 #!/bin/sh
 
-PWD="$(dirname $(realpath "$0"))"
+if command -v realpath >/dev/null 2>&1 ; then
+   PWD="$(dirname $(realpath "$0"))"
+else
+   PWD="$(dirname "$0")"
+fi
 
 USE_INTERNAL=
 
@@ -33,28 +37,28 @@ while [ $# -gt 0 ]; do
       -libs)
 [% @if extension shared %]
         if [ -n "$USE_INTERNAL" ] ; then
-              echo -n " $LDFLAGS"
+              printf " $LDFLAGS"
         else
-              echo -n " $LDFLAGS_ALL"
+              printf " $LDFLAGS_ALL"
         fi
 [% @else %]
-              echo -n " $LDFLAGS"
+              printf " $LDFLAGS"
 [% @end @if %]
    ;;
       -olibs)
-              echo -n " $OLIBS"
+              printf " $OLIBS"
    ;;
       -cflags)
-              echo -n " $CFLAGS"
+              printf " $CFLAGS"
    ;;
       -ocflags)
-              echo -n " $OCFLAGS"
+              printf " $OCFLAGS"
    ;;
       -fcflags)
-              echo -n " $FCFLAGS"
+              printf " $FCFLAGS"
    ;;
       -fortcom)
-              echo -n " $FC"
+              printf " $FC"
    ;;
       -help|--help)
               echo
@@ -85,7 +89,7 @@ while [ $# -gt 0 ]; do
    ;;
 [% @end @if %]
       *)
-              echo -n " $1"
+              printf " $1"
    ;;
    esac
    shift
