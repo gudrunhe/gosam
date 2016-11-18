@@ -334,29 +334,38 @@ contains
       integer(kind=c_int), intent(in) :: label
       real(kind=c_double), intent(in) :: mu
       real(kind=c_double), dimension(50), intent(in) :: momenta
-      real(kind=c_double), dimension(60), intent(out) :: res
-      real(kind=c_double), intent(out) :: acc
+      real(kind=c_double), dimension(60), intent(out) :: res, res1, res2
+      real(kind=c_double), intent(out) :: acc, acc1, acc2
 
       real(kind=c_double), dimension(10) :: parameters
 
       real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
 
       select case(label)[%
-      @for subprocesses prefix=sp. %][%
-         @for crossings include-self prefix=cr. %][%
+      @for subprocesses_main prefix=sp. %][%
+         @for crossings_main include-self prefix=cr. %][%
             @select count elements cr.channels
             @case 1 %]
       case([% cr.channels %])
               call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
-               %]), mu, parameters, res, acc)[%
+               %]), mu, parameters, res1, acc1)
+              call eval[% eval cr.id + 1 %](momenta(1:[% eval 5 * sp.num_legs
+               %]), mu, parameters, res2, acc2)
+              res = res1 + res2
+              acc = acc1 + acc2 [%
             @else %][%
                @for elements cr.channels %]
       case([% $_ %])
-              call eval[% cr.id %]([%index%], momenta(1:[% eval 5 * sp.num_legs
-              %]), mu, parameters, res, acc)[%
+              call eval[% cr.id %](momenta(1:[% eval 5 * sp.num_legs
+               %]), mu, parameters, res1, acc1)
+              call eval[% eval cr.id + 1 %](momenta(1:[% eval 5 * sp.num_legs
+               %]), mu, parameters, res2, acc2)
+              res = res1 + res2
+              acc = acc1 + acc2[%
                @end @for %][%
             @end @select %][%
-         @end @for %][%
+         @end @for %]
+         [%
       @end @for %]
       case default
          res(:) = 0.0d0
@@ -455,7 +464,7 @@ contains
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
-      @if eval olp.correctiontype .eq. 'EW' %], ir_subtraction [% @end @if %][%
+      @if eval olp.correctiontype .eq. 'EW' %]ir_subtraction [% @end @if %][%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
@@ -543,7 +552,16 @@ contains
       @select count elements cr.channels
       @case 1 %][%
       @else %], h[%
-      @end @select %])[%@end @if %][%
+      @end @select %])[%
+      @end @if %][%
+      @if eval olp.correctiontype .eq. 'EW'
+      %]
+      call ir_subtraction(vecs,real(mu,ki)*real(mu,ki), ir,ok[%
+      @select count elements cr.channels
+      @case 1 %][%
+      @else %], h[%
+      @end @select %])[%
+      @end @if %][%
       @if extension golem95 %]
       call tear_down_golem95()[%
       @end @if %][%
