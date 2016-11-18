@@ -388,7 +388,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		modelct = consts.MODEL_LOCAL +'ct'
 		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers])
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in [powers[0]]])
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo		
 		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
@@ -397,7 +397,7 @@ def run_qgraf(conf, in_particles, out_particles):
 				options, new_verbatim, in_particles, out_particles, [], 0)
                 else:
                     new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers])                    
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in [powers[0]]])                    
                     write_qgraf_dat(path, form_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0,flag_internal_ct)
 
