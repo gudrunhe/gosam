@@ -250,7 +250,8 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_reduze = conf.getBooleanProperty("__REDUZE__")
 	flag_dot2tex = conf.getBooleanProperty("__dot2tex__")
 	loops_to_generate = conf.getListProperty("loops_to_generate")
-	flag_internal_ct=conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
+	flag_internal_ct=conf["modeltype"]=='smdiag_complex_ct' or \
+            conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
 	flag_qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
 
 	if not (flag_generate_nlo_virt or
