@@ -506,11 +506,19 @@ contains
          @if helsum %]
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
-         @else %]
+         @else %][%
+         @if generate_lo_diagrams %]
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
+         @end @if %][%
          @end @if %]
-      else
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
+      else[%
+         @if generate_lo_diagrams %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
+         @end @if %]
       end if[%
       @if generate_uv_counterterms %]
       select case (renormalisation)
