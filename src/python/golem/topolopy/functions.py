@@ -2,7 +2,6 @@
 
 import imp
 import os.path
-import sys
 import shutil
 
 import golem.properties
