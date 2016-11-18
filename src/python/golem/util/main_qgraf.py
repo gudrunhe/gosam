@@ -228,6 +228,9 @@ def run_qgraf(conf, in_particles, out_particles):
 
 	powers = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
 	options = conf.getProperty(golem.properties.qgraf_options)
+	if conf.getProperty("olp.correctiontype") == 'EW' and not conf.getProperty("olp.qcd_in_ew"):
+	  options=['onshell','notadpole']	
+	  warning("Warning: qgraf options are overwritten using onshell and notadpole")
 	verbatim =     format_qgraf_verbatim(conf,
 			golem.properties.qgraf_verbatim)
 	verbatim_lo =  format_qgraf_verbatim(conf,
