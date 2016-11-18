@@ -464,7 +464,7 @@ contains
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
-      @if eval olp.correctiontype .eq. 'EW' %]ir_subtraction [% @end @if %][%
+      @if eval olp.correctiontype .eq. 'EW' %], ir_subtraction [% @end @if %][%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
