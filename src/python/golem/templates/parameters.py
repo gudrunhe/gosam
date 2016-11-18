@@ -197,7 +197,10 @@ class ModelTemplate(Template):
 			try:
 				ast.write(buf)
 
+				type = self._functions[name]
+
 				props.setProperty(name_name, name)
+				props.setProperty(type_name, type)
 				props.setProperty(expression_name, buf.getvalue())
 				props.setProperty(index_name, i)
 				props.setProperty(first_name, i == 0)
@@ -270,10 +273,7 @@ class ModelTemplate(Template):
 			try:
 				ast.write(buf)
 
-				type = self._functions[name]
-
 				props.setProperty(name_name, name)
-				props.setProperty(type_name, type)
 				props.setProperty(expression_name, buf.getvalue())
 				props.setProperty(index_name, i)
 				props.setProperty(first_name, i == 0)
