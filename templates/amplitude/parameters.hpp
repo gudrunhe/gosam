@@ -21,7 +21,7 @@ struct parameters_t
     [$ @end @select type $][$ @end @for parameters $]
 
     // Parameters derived from input parameters
-    [$ @for functions_resolved $]
+    [$ @for functions_resolved language=cpp $]
     [$ @select type
     @case R $]real_parameter_t [$ $_ $] = [$ expression $];[$
     @case C $]complex_parameter_t [$ $_ $] = [$ expression $];
