@@ -432,8 +432,13 @@ class FloatExpression(ConstantExpression):
 	def write(self, out):
 		out.write(str(self._float))
 
-	def write_fortran(self ):
-		return str(self._float) 
+	def write_code(self, language):
+		if language == 'cpp':
+			return str(self._float) + "."
+		elif language == 'fortran':
+			return str(self._float)
+		else:
+			error("write_code called with unknown language %s." % language)
 
 	def replaceFloats(self, prefix, subs, counter=[0]):
 		for name, value in subs.items():
@@ -464,8 +469,13 @@ class IntegerExpression(ConstantExpression):
 	def write(self, out):
 		out.write(str(self._integer))
 
-	def write_fortran(self):
-		return str(self._integer)
+	def write_code(self, language):
+		if language == 'cpp':
+			return str(self._integer )
+		elif language == 'fortran':
+			return str(self._integer)
+		else:
+			error("write_code called with unknown language %s." % language)
 
 	def __eq__(self, other):
 		if isinstance(other, IntegerExpression):
@@ -519,8 +529,13 @@ class SymbolExpression(Expression):
 	def write(self, out):
 		out.write(self._symbol)
 
-	def write_fortran(self):
-		return self._symbol
+	def write_code(self, language):
+		if language == 'cpp':
+			return self._symbol
+		elif language == 'fortran':
+			return self._symbol
+		else:
+			error("write_code called with unknown language %s." % language)
 
 	def replaceNegativeIndices(self, lvl, pattern, found):
 		return self
@@ -624,13 +639,13 @@ class FunctionExpression(Expression):
 		out.write(")")
 
 
-	def write_fortran(self):
+	def write_code(self, language):
 		r_string=''
 		if self._head.getPrecedence() >= self.getPrecedence():
-			r_string += self._head.write_fortran()
+			r_string += self._head.write_code(language)
 		else:
 			r_string += "("
-			r_string += self._head.write_fortran()
+			r_string += self._head.write_code(language)
 			r_string += ")"
 
 		r_string += "("
@@ -640,7 +655,7 @@ class FunctionExpression(Expression):
 				first = False
 			else:
 				r_string += ","
-			r_string += arg.write_fortran()
+			r_string += arg.write_code(language)
 		r_string += ")"
 		return r_string
 
@@ -821,22 +836,22 @@ class DotExpression(Expression):
 			self._second.write(out)
 			out.write(")")
 
-	def write_fortran(self):
+	def write_code(self, language):
 		r_string = "dotproduct"
 		if self._first.getPrecedence() >= self.getPrecedence():
-			r_string += self._first.write_fortran()
+			r_string += self._first.write_code(language)
 		else:
 			r_string += "("
-			r_string += self._first.write_fortran()
+			r_string += self._first.write_code(language)
 			r_string += ")"
 
 		r_string += ","
 
 		if self._second.getPrecedence() >= self.getPrecedence():
-			r_string += self._second.write_fortran()
+			r_string += self._second.write_code(language)
 		else:
 			r_string += "("
-			r_string += self._second.write_fortran()
+			r_string += self._second.write_code(language)
 			r_string += ")"
 		return r_string
 
@@ -942,26 +957,39 @@ class PowerExpression(Expression):
 			self._exponent.write(out)
 			out.write(")")
 
-	def write_fortran(self):
+	def write_code(self, language):
 		r_string = ''
-		if self._base.getPrecedence() >= self.getPrecedence():
-			r_string += self._base.write_fortran()
-		else:
-			r_string += "("
-			r_string += self._base.write_fortran()
+
+		if language == 'cpp':
+
+			r_string += "pow("
+			r_string += self._base.write_code(language)
+			r_string += ","
+			r_string += self._exponent.write_code(language)
 			r_string += ")"
+			return r_string
 
-		r_string += "**"
+		elif language == 'fortran':
 
-		if self._exponent.getPrecedence() >= self.getPrecedence():
-			r_string += self._exponent.write_fortran()
+			if self._base.getPrecedence() >= self.getPrecedence():
+				r_string += self._base.write_code(language)
+			else:
+				r_string += "("
+				r_string += self._base.write_code(language)
+				r_string += ")"
+
+			r_string += "**"
+
+			if self._exponent.getPrecedence() >= self.getPrecedence():
+				r_string += self._exponent.write_code(language)
+			else:
+				r_string += "("
+				r_string += self._exponent.write_code(language)
+				r_string += ")"
+			return r_string
+
 		else:
-			r_string += "("
-			r_string += self._exponent.write_fortran()
-			r_string += ")"
-		return r_string
-
-
+			error("write_code called with unknown language %s." % language)
 
 class ProductExpression(Expression):
 	def __init__(self, factors):
@@ -1100,17 +1128,17 @@ class ProductExpression(Expression):
 				term.write(out)
 				out.write(")")
 
-	def write_fortran(self):
+	def write_code(self, language):
 		first_sig, first_term = self._factors[0]
 		follow = self._factors[1:]
 		r_string = ""
 		if first_sig == -1:
 			r_string += "1.0_ki/"
 		if first_term.getPrecedence() >= self.getPrecedence():
-			r_string += first_term.write_fortran()
+			r_string += first_term.write_code(language)
 		else:
 			r_string += "("
-			r_string += first_term.write_fortran()
+			r_string += first_term.write_code(language)
 			r_string += ")"
 		
 		for sig, term in follow:
@@ -1119,10 +1147,10 @@ class ProductExpression(Expression):
 			else:
 				r_string += "/"
 			if term.getPrecedence() > self.getPrecedence():
-				r_string += term.write_fortran()
+				r_string += term.write_code(language)
 			else:
 				r_string += "("
-				r_string += term.write_fortran()
+				r_string += term.write_code(language)
 				r_string += ")"
 		return r_string
 
@@ -1265,27 +1293,28 @@ class SumExpression(Expression):
 					out.write(")")
 
 
-	def write_fortran(self):
+	def write_code(self, language):
 		r_string = ""
 		first = self._terms[0]
 		follow = self._terms[1:]
 		if first.getPrecedence() >= self.getPrecedence():
-			r_string += first.write_fortran()
+			r_string += first.write_code(language)
 		else:
 			r_string +="("
-			r_string +=first.write_fortran(out)
+#			r_string +=first.write_fortran(out) # broken?
+			r_string +=first.write_code(language)
 			r_string +=")"
 
 		for term in follow:
 			if isinstance(term, UnaryMinusExpression):
-				r_string +=term.write_fortran()
+				r_string +=term.write_code(language)
 			else:
 				r_string +="+"
 				if term.getPrecedence() >= self.getPrecedence():
-					r_string +=term.write_fortran()
+					r_string +=term.write_code(language)
 				else:
 					r_string +="("
-					r_string +=term.write_fortran()
+					r_string +=term.write_code(language)
 					r_string +=")"
 		return r_string
 
@@ -1383,14 +1412,14 @@ class UnaryMinusExpression(Expression):
 			out.write(")")
 
 
-	def write_fortran(self):
+	def write_code(self, language):
 		r_string = ""
 		r_string += "-"
 		if self._term.getPrecedence() >= self.getPrecedence():
-			r_string += self._term.write_fortran()
+			r_string += self._term.write_code(language)
 		else:
 			r_string += "("
-			r_string += self._term.write_fortran()
+			r_string += self._term.write_code(language)
 			r_string += ")"
 		return r_string
 
@@ -1410,8 +1439,13 @@ class SpecialExpression(ConstantExpression):
 	def write(self, out):
 		out.write(self._image)
 
-	def write_fortran(self):
-		return self._image
+	def write_code(self, language):
+		if language == 'cpp':
+			return self._image
+		elif language == 'fortran':
+			return self._image
+		else:
+			error("write_code called with unknown language %s." % language)
 
 	def __str__(self):
 		return self._image
@@ -1435,9 +1469,13 @@ class StringExpression(ConstantExpression):
 	def write(self, out):
 		out.write("'" + self._image + "'")
 
-	def write_fortran(self):
-		return "'" + self._image + "'"
-
+	def write_code(self, language):
+		if language == 'cpp':
+			return "'" + self._image + "'"
+		elif language == 'fortran':
+			return "'" + self._image + "'"
+		else:
+			error("write_code called with unknown language %s." % language)
 
 	def __str__(self):
 		return "'" + self._image + "'"

@@ -145,6 +145,11 @@ class ModelTemplate(Template):
 			yield chunk
 
 	def functions_resolved(self, *args, **opts):
+		"""
+		Resolves the type, name and correct order for declaring functions in <model_name>.py
+		Writes in FORM (default), Fortran (langage=fortran) or CPP (langage=cpp) syntax
+		as requested in the template file
+		"""
 		type_filter = self._setup_filter(["R", "C"], args)
 
 		index_name = self._setup_name("index", "index", opts)
@@ -182,20 +187,33 @@ class ModelTemplate(Template):
 				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
-			buf = StringIO.StringIO()
+
+			# for historical reasons buf is a string for CPP and Fortran
+			if "language" in opts:
+				buf = ""
+			else:
+				buf = StringIO.StringIO()
+
 			try:
-				ast.write(buf)
+				if "language" in opts:
+					buf += ast.write_code(opts["language"])
+				else:
+					ast.write(buf)
 
 				type = self._functions[name]
 
 				props.setProperty(name_name, name)
 				props.setProperty(type_name, type)
-				props.setProperty(expression_name, buf.getvalue())
+				if "language" in opts:
+					props.setProperty(expression_name, buf)
+				else:
+					props.setProperty(expression_name, buf.getvalue())
 				props.setProperty(index_name, i)
 				props.setProperty(first_name, i == 0)
 				props.setProperty(last_name, i == nlines - 1)
 			finally:
-				buf.close()
+				if "language" not in opts:
+					buf.close()
 			yield props
 
 	def functions_resolved_reversed(self, *args, **opts):
@@ -572,7 +590,7 @@ class ModelTemplate(Template):
 			ast = functions[name]
 			buf =""
 			try:
-				buf += ast.write_fortran()
+				buf += ast.write_code(language="fortran")
 
 				props.setProperty(name_name, name)
 				props.setProperty(expression_name, buf)
