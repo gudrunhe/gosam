@@ -208,6 +208,7 @@ PolyRatFun;
       #Write <`CoefficientFile'> "{#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#parameters_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "  coeff_return_t coeff = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(c`ColorSymbolIndex')](#@no_split_expression@#)
       #Write <`CoefficientFile'> "  return coeff;#@GoSamInternalNewline@#"
