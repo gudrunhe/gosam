@@ -69,7 +69,7 @@ PolyRatFun;
 #Write <`HeaderFile'> "#define coefficient_`$IntegralName'_hpp_included#@GoSamInternalNewline@#"
 
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
-#Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "#include #@GoSamInternalDblquote@#../../../typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
 
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
 #Do ProjectorIndex = 1, `NUMPROJ'
@@ -117,7 +117,7 @@ PolyRatFun;
     #Write <`CoefficientHeaderFile'> "#ifndef coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#define coefficient_`$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'_hpp_included#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
-    #Write <`CoefficientHeaderFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "#include #@GoSamInternalDblquote@#../../../typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
@@ -198,7 +198,7 @@ PolyRatFun;
       #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@#"
       
       #Write <`CoefficientFile'>"#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#../../../typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
 
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
