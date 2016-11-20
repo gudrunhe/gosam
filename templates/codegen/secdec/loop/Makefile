@@ -6,6 +6,7 @@ FORMHEADERS=$(SRCS:.py=.hh)
 %.hh: %.py
 	@echo Secdec is decomposing integral $(subst .py,,$<)
 	@$(PYTHON) $<
+	@$(MAKE) -C $(subst .py,,$<)
 
 decompose: $(FORMHEADERS)
 	cat ReduzeF*.hh > secdecordersl1.hh
