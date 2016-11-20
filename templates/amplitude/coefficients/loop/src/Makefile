@@ -6,9 +6,10 @@ include ../../../../Makefile.conf
 
 SOURCES=$(patsubst %.cc.tmp, %.cc, $(notdir $(wildcard ../codegen/*.cc.tmp)))
 HEADERS=$(patsubst %.hpp.tmp, %.hpp, $(notdir $(wildcard ../codegen/*.hpp.tmp)))
+OBJECTS=$(patsubst %.cc, %.o, $(SOURCES))
 
 .PHONY: coeff
-coeff: $(SOURCES) $(HEADERS)
+coeff: $(SOURCES) $(HEADERS) $(OBJECTS)
 
 %.cc : ../codegen/%.cc.tmp
 	@cd ../codegen; $(PYTHON) mv.py $(notdir $<) ../src;
