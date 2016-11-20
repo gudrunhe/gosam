@@ -37,7 +37,7 @@ typedef std::vector<std::vector<integral_coeff_t>> integral_coeffs_t;
 // Integrals
 typedef double integral_real_t;
 typedef std::complex<double> integral_complex_t;
-typedef std::vector<secdecutil::Series<secdecutil::SectorContainerWithDeformation<integral_real_t,integral_complex_t> integral_t
+typedef std::vector<secdecutil::Series<secdecutil::SectorContainerWithDeformation<integral_real_t,integral_complex_t>>> integral_t;
 
 // Amplitude
 struct amplitude_term_t {
