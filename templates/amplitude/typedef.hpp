@@ -10,9 +10,14 @@
 
 #include <functional>
 #include <vector>
+#include <cmath> // sqrt
 #include <complex>
 #include <secdecutil/series.hpp> // secdecutil::Series
 #include <secdecutil/sector_container.hpp> // secdecutil::SectorContainerWithDeformation
+
+// Global Constants
+const std::complex<double> i_(0.,1.);
+const double sqrt2 = sqrt(2.);
 
 // Invariants
 typedef double invariant_t;
