@@ -641,6 +641,25 @@ class FunctionExpression(Expression):
 
 	def write_code(self, language):
 		r_string=''
+
+		# Special handling of 'if(a,b,c)' -> '(a)?(b):(c)' function for cpp (translate to ternary)
+		if language == 'cpp':
+			if self._head.getPrecedence() >= self.getPrecedence():
+				if str(self._head) == "if":
+					if len(self._arguments) == 3:
+						r_string += "("
+						r_string += self._arguments[0].write_code(language)
+						r_string += ")"
+						r_string += "?"
+						r_string += "("
+						r_string += self._arguments[1].write_code(language)
+						r_string += ")"
+						r_string += ":"
+						r_string += "("
+						r_string += self._arguments[2].write_code(language)
+						r_string += ")"
+						return r_string
+
 		if self._head.getPrecedence() >= self.getPrecedence():
 			r_string += self._head.write_code(language)
 		else:
