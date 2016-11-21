@@ -134,7 +134,7 @@ PolyRatFun;
     #EndDo
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 
-    #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "integral_coeff_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "\{#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "`$highestPole', // Minimum epsS order#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "{`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}, // Maximum epsS order#@GoSamInternalNewline@#"
