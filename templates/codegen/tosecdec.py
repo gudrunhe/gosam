@@ -104,6 +104,7 @@ except OSError as error:
       raise error
 
 coefficient_include_list = []
+integral_include_list = []
 amplitude_term_list = []
 code_form = []
 
@@ -134,8 +135,11 @@ for integral in integrals:
    # Generate name of integral for use in FORM, cpp code
    name_cpp = name + "pow" + powerlist.replace(',','_').replace('-','m')
 
-   # generate include statement for amplitude
+   # generate coefficient include statement for amplitude
    coefficient_include_list.append('#include "coefficient_' + name_cpp + '.hpp"')
+
+   # generate integral include statement for amplitude
+   integral_include_list.append('#include "' + name_cpp + '.hpp"')
 
    # generate amplitude term declaration for amplitude
    amplitude_term_list.append('{ integral_coefficients::' + name_cpp + ', ' + name_cpp + '::sectors }')
@@ -158,6 +162,7 @@ for integral in integrals:
 
 
 coefficient_includes = '\n'.join(coefficient_include_list)
+integral_includes = '\n'.join(integral_include_list)
 amplitude_terms = ',\n    '.join(amplitude_term_list)
 
 # write a FORM file that replaces

@@ -69,6 +69,7 @@ DATA_DIRS = [
             "templates/amplitude/coefficients/loop",
             "templates/amplitude/coefficients/loop/codegen",
             "templates/amplitude/coefficients/loop/src",
+            "templates/amplitude/integrals",
 			"templates/codegen",
 			"templates/common",
 			"templates/doc",

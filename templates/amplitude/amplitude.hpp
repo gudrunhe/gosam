@@ -12,6 +12,8 @@
 
 %(coefficient_includes)s
 
+%(integral_includes)s
+
 amplitude_t amplitude_l[%loop%]_terms
 {
     %(amplitude_terms)s

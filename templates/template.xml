@@ -68,6 +68,9 @@
         <foreach iterator="loops">
 			<file src="amplitude.hpp" dest="amplitudel%d.hpp" arguments="loop" class="Integrals"/>
         </foreach>
+		<directory src="integrals">
+			<file src="Makefile" class="Verbatim"/>
+		</directory>
 	</directory>
 
 	<directory src="codegen">
