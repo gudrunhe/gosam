@@ -61,6 +61,9 @@ PolyRatFun prf;
 .sort:prf;
 PolyRatFun;
 .sort:noprf;
+
+Id prf(sDUMMY1?, sDUMMY2?) = sDUMMY1/sDUMMY2; * Test: No optimisation
+
 *--#] multiply coupling constants into coefficient:
 
 *--#[ write header:
