@@ -1030,10 +1030,14 @@ class Reduze(Program):
       Program.examine(self, hints)
       executable = self.getInstance()
 
+      if executable is None:
+         return
+
       try:
          pipe = subprocess.Popen(executable,
                 stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout
+                stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+         (stdout, stderr) = pipe.communicate()
 
       except OSError:
          raise ConfigurationException(
@@ -1042,13 +1046,17 @@ class Reduze(Program):
    def checkCompatibility(self,p):
       pipe = subprocess.Popen([p, "-v"],
                               stdin=subprocess.PIPE,
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-      for line in pipe.readlines():
-         lline = line.lower().strip()
-         if "reduze" not in lline:
-            # reduze version 2.1 prints
-            # "Reduze 2.1.x-297-g01c1202 (non-MPI build)"
-            return False
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      (stdout, stderr) = pipe.communicate()
+
+      stdout_lines = stdout.splitlines()
+
+      # first line
+      lline = stdout_lines[0].lower().strip()
+      if "reduze" not in lline:
+         # reduze version 2.1 prints
+         # "Reduze 2.1.x-297-g01c1202 (non-MPI build)"
+         return False
       if not testReduzeCompatibility(p):
          return False
       return True
