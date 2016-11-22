@@ -940,13 +940,19 @@ class Form(Program):
       Program.examine(self, hints)
       executable = self.getInstance()
 
+      if executable is None:
+         return
+
       try:
          pipe = subprocess.Popen(executable,
-               shell=True,
-               bufsize=500, stdout=subprocess.PIPE).stdout
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+         (stdout, stderr) = pipe.communicate()
+
+         stdout_lines = stdout.splitlines()
 
          firstline=True
-         for line in pipe.readlines():
+         for line in stdout_lines:
             lline = line.lower().strip()
             if "version" in lline:
                i = lline.index("version")
@@ -1230,6 +1236,9 @@ class Configurator:
                for i, path in enumerate(paths):
                   self.message("#%2d: %s" % (i+1, path))
             self.installed_components.append(component)
+
+      if len(not_found) > 0:
+         self.fail("Required component(s): %s not installed." % ', '.join(not_found))
 
    def message(self, message):
       print("# ~~~ " + message)
