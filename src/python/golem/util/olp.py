@@ -116,10 +116,11 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
        try: 
            conf["olp.alphapower"]=str(int(conf["olp.alphapower"])+2)
            conf["olp.alphaspower"]=str(int(conf["olp.alphaspower"])-2)
-           #conf["olp.qcd_in_ew"]=True
            conf.setProperty("olp.qcd_in_ew",True)
        except:
            golem.util.tools.warning("Error in assigning alphapower and alphaspower for EW process")
+   else:
+       conf.setProperty("olp.qcd_in_ew",False)
    originalkey = tuple(sorted(s_ini + s_fin))
 
    if use_crossings:
