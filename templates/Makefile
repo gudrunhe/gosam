@@ -4,7 +4,7 @@
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
-SUBDIRS=doc common[% @if extension reduze %] amplitude[% @else %][%
+SUBDIRS=doc[% @if extension reduze %] amplitude[% @else %] common[%
 @for helicities generated %] helicity[% helicity %][%
 @end @for helicities %][%@if helsum%] sum[%@end @if%] matrix[%
 @end @if %]
@@ -100,7 +100,7 @@ filelist-source: source
 	@for dir in $(SUBDIRS); \
 	do \
 		$(MAKE) -C $${dir} $@; \
-		$(SED) $(SED_OPT) -e "s/^\\(.\\/\\)\\?/$${dir}\\//" $${dir}/$@ >> $@; \
+		$(SED) $(SED_OPT) -E -e "s/^(.\/)?/$${dir}\//" $${dir}/$@ >> $@; \
 	done
 
 [% process_name asprefix=\_ %]matrix.tar.gz: source filelist-source

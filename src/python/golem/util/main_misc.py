@@ -528,7 +528,6 @@ def workflow(conf):
 
         orders = split_qgrafPower(",".join(map(str,conf.getProperty(golem.properties.qgraf_power))))
         powers = orders[0] if orders else []
-
             
 	renorm = conf.getProperty(golem.properties.renorm)
 	templates = conf.getProperty(golem.properties.template_path)
@@ -733,7 +732,8 @@ def workflow(conf):
 		conf["shared.ldflags"]="-fPIC"
 		
 		
-	if conf["helsum"]:
+
+	if conf.getBooleanProperty("helsum"):
 		if not conf.getBooleanProperty("generate_lo_diagrams"):
 			raise GolemConfigError(
 				'The "helsum" feature is not implemented for loop-induced processes.\n' +

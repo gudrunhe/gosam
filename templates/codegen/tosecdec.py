@@ -25,6 +25,11 @@ parser.add_argument("-p", "--pysecdec", dest="pysecdec_template_file",
                     help='the template file for pysecdec',
                     metavar="INFILE")
 
+parser.add_argument("-a", "--amplitude", dest="amplitude_template_file",
+                    action="store", type=str, required=True,
+                    help='the template file for storing the amplitude',
+                    metavar="INFILE")
+
 parser.add_argument("-i", "--integrals", dest="integrals_file",
                     action="store", type=str, required=True,
                     help="the file with the master integrals",
@@ -48,6 +53,9 @@ with open(args.kinematics_template_file, 'r') as f:
 
 with open(args.pysecdec_template_file, 'r') as f:
    pysecdec_template = f.read()
+
+with open(args.amplitude_template_file, 'r') as f:
+    amplitude_template = f.read()
 
 with open(args.integrals_file, 'r') as f:
    integrals = f.read()
@@ -95,52 +103,69 @@ except OSError as error:
    if error.errno != errno.EEXIST:
       raise error
 
+coefficient_include_list = []
+amplitude_term_list = []
+code_form = []
 
-# as part of the output, write a form file that replaces
-#    INT(<family name>,[],t,ID,r,s,[],<power list>,[],...)
-# by <family name>pow<power list where "-" -> m and "," -> _>
+# parse the individual integrals
+for integral in integrals:
+   name, tidrs, powerlist, epsord, proplist = integral.split(',[],')
+
+   # Remove "PropList(...)" and "PropVec" from the list of propagators.
+   # These are just introduced to prevent form from expanding the
+   # squares.
+   proplist = proplist.replace("PropList(", '').replace("PropVec", '')
+   assert proplist.endswith(')')
+   proplist = proplist[:-1]
+   proplist = "'" + proplist.replace("^", "**").replace("," , "','") + "'"
+
+   graph = name + "pow" + powerlist.replace(',', '_')
+
+   # check for integral in shifted dimensions
+   dim=4
+   dimRegex = re.findall('dim(inc|dec)(\d+)',name)
+   if dimRegex:
+      assert len(dimRegex)==1
+      if dimRegex[0][0]=='inc':
+         dim += int(dimRegex[0][1])
+      else:
+         dim -= int(dimRegex[0][1])
+
+   # Generate name of integral for use in FORM, cpp code
+   name_cpp = name + "pow" + powerlist.replace(',','_').replace('-','m')
+
+   # generate include statement for amplitude
+   coefficient_include_list.append('#include "coefficient_' + name_cpp + '.hpp"')
+
+   # generate amplitude term declaration for amplitude
+   amplitude_term_list.append('{ integral_coefficients::' + name_cpp + ', ' + name_cpp + '::sectors }')
+
+   # generate FORM code
+   code_form.append("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = INT(" + name_cpp +  ");")
+
+   # write SecDec kinematics file and run card
+   kinematics_outfile = os.path.join(args.outpath, graph + '.m')
+   with open(kinematics_outfile, 'w') as f:
+      f.write(kinematics_template % locals())
+
+   rc_outfile = os.path.join(args.outpath, graph + '.input')
+   with open(rc_outfile, 'w') as f:
+      f.write(run_card_template % locals())
+
+   pysecdec_outfile = os.path.join(args.outpath, graph + '.py')
+   with open(pysecdec_outfile, 'w') as f:
+      f.write(pysecdec_template % locals())
+
+
+coefficient_includes = '\n'.join(coefficient_include_list)
+amplitude_terms = ',\n    '.join(amplitude_term_list)
+
+# write a FORM file that replaces
+# INT(<family name>,[],t,ID,r,s,[],<power list>,[],...) by INT(<family name>pow<power list where "-" -> m and "," -> _>)
 form_outfilename = os.path.join(args.outpath, 'secdec_replace_integrals.hh')
-with open(form_outfilename, 'w') as form_outfile:
+with open(form_outfilename, 'w') as f:
+   f.write('\n'.join(code_form))
 
-   # parse the individual integrals
-   for integral in integrals:
-      name, tidrs, powerlist, epsord, proplist = integral.split(',[],')
-
-      # Remove "PropList(...)" and "PropVec" from the list of propagators.
-      # These are just introduced to prevent form from expanding the
-      # squares.
-      proplist = proplist.replace("PropList(", '').replace("PropVec", '')
-      assert proplist.endswith(')')
-      proplist = proplist[:-1]
-
-      graph = name + "pow" + powerlist.replace(',', '_')
-
-      # check for integral in shifted dimensions
-      dim=4
-      dimRegex = re.findall('dim(inc|dec)(\d+)',name)
-      if dimRegex:
-        assert len(dimRegex)==1
-        if dimRegex[0][0]=='inc':
-          dim += int(dimRegex[0][1])
-        else:
-          dim -= int(dimRegex[0][1])
-          
-
-      kinematics_outfile = os.path.join(args.outpath, graph + '.m')
-      rc_outfile = os.path.join(args.outpath, graph + '.input')
-      pysecdec_outfile = os.path.join(args.outpath, graph + '.py')
-
-      # write SecDec kinematics file and run card
-      with open(kinematics_outfile, 'w') as f:
-         f.write(kinematics_template % locals())
-
-      with open(rc_outfile, 'w') as f:
-         f.write(run_card_template % locals())
-
-      proplist = "'" + proplist.replace("^", "**").replace("," , "','") + "'"
-      with open(pysecdec_outfile, 'w') as f:
-         f.write(pysecdec_template % locals())
-
-      # write FORM file containing name of this integral
-      form_outfile.write("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = INT(" + name + "pow" + powerlist.replace(',','_').replace('-','m') +  ");\n")
-
+amplitude_outfilename = args.amplitude_template_file
+with open(amplitude_outfilename, 'w') as f:
+   f.write(amplitude_template % locals())

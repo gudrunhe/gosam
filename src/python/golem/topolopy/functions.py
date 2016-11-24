@@ -12,9 +12,17 @@ from golem.util.config import GolemConfigError
 from golem.util.tools import error, warning, debug
 from yaml import load, load_all, dump
 
-def setup_list(prop, conf):
+def setup_list(prop, conf, loop_order=None):
    result = []
-   for r in conf.getListProperty(prop):
+   properties = []
+   if loop_order:
+      try:
+         properties = conf.getNestedListProperty(prop)[ int(loop_order) - 2 ]
+      except IndexError:
+         return result
+   else:
+      properties = conf.getListProperty(prop)
+   for r in properties:
       if r=='':
          continue
       if ":" in r:
@@ -38,7 +46,8 @@ def setup_list(prop, conf):
          result.append(int(r))
    return result
 
-def setup_filter(prop, conf, model):
+
+def setup_filter(prop, conf, model, loop_order=None):
    generate_ct_internal = conf.getBooleanProperty("generate_ct_internal")
    locs = {}
    globs = globals().copy()
@@ -104,7 +113,14 @@ def setup_filter(prop, conf, model):
                (ex.filename, ex.lineno, ex.offset, ex.msg),
                ex.text)
 
-   fltr = conf.getProperty(prop)
+   if loop_order:
+      try:
+         fltr = conf.getNestedListProperty(prop)[ int(loop_order) - 2 ]
+      except IndexError:
+         return lambda d: True
+   else:
+      fltr = conf.getProperty(prop)
+
    if len(fltr.strip()):
       try:
          return eval(fltr, globs)
@@ -269,12 +285,9 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
 
 def analyze_higher_loop_diagrams(diagrams, model, conf, onshell, loop_order,
       quark_masses = None, complex_masses=None, filter_flags = None, massive_bubbles = {}):
-  # TODO: Modify this subroutine according to the needs of nloop. Simply copy of NLO
-  # at the moment
-  # TODO: This is still the special case for two loop -> generalize to nloop
    zero = golem.util.tools.getZeroes(conf)
-   lst = setup_list(golem.properties.select_nnlo_diagrams, conf)
-   fltr = setup_filter(golem.properties.filter_nnlo_diagrams, conf, model)
+   lst = setup_list(golem.properties.select_higher_diagrams, conf, loop_order)
+   fltr = setup_filter(golem.properties.filter_higher_diagrams, conf, model, loop_order)
    keep = []
    keep_tot = []
    lose = []
@@ -392,7 +405,6 @@ def analyze_yaml(path, conf, keep_loop, loop_yaml):
 
    shutil.move(loop_file, backup_loop_file)
    shutil.move(outfile_loop, loop_file)
-
 
 
 

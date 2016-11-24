@@ -6,7 +6,7 @@ CFunctions den;
 * Extract the highest pole of a regulator in an expression consisting of terms prf(...,...)*INT(...)
 * Result is stored in $highestPole
 * Requires:
-*   CFunction prf;
+*   CFunction prf,SCREEN;
 *   Symbols sDUMMY1, sDUMMY2;
 
   Hide;
@@ -17,11 +17,8 @@ CFunctions den;
   PolyRatFun prf(divergence,`regulator');
   .sort
 
-* TODO - instead bracket prf and drop bracket contents?
-  Id INT(?a) = 1;
-  Id ProjLabel(?a) = 1;
-  Id PREFACTOR(?a) = 1;
-  Id COLORFACTOR(?a) = 1;
+  Id SCREEN?!{,prf}(?a)=1;
+  Id sDUMMY1?=1;
   .sort
 
   PolyRatFun;
@@ -69,8 +66,8 @@ CFunctions den;
   ModuleOption,maximum,$highestRegulatorPowerInDenominator;
   .sort
 
-  #write "$highestPole = `$highestPole'"
-  #write "$highestRegulatorPowerInDenominator = `$highestRegulatorPowerInDenominator'"
+*  #Write "$highestPole = `$highestPole'"
+*  #Write "$highestRegulatorPowerInDenominator = `$highestRegulatorPowerInDenominator'"
 
   #define SERIESTERMS "{-`$highestPole'+ 1 + `order'}"
   #if ( `SERIESTERMS' > `$highestRegulatorPowerInDenominator' )
@@ -83,20 +80,8 @@ CFunctions den;
   #call expand(den)
   .sort
 
-* Simplify
-  Repeat Id sDUMMY1?!{`regulator'} = prf(sDUMMY1,1);
-  Repeat Id sDUMMY1?!{`regulator'}^(-1) = prf(1,sDUMMY1);
-  Repeat Id den(sDUMMY1?) = prf(1,sDUMMY1);
-  .sort
-  PolyRatFun prf;
-  .sort
-
 * Restore correct dependence on regulator
   Multiply `regulator'^$highestPole;
-  .sort
-
-  PolyRatFun;
-  Unhide;
   .sort
 
 #EndProcedure

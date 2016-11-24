@@ -14,13 +14,13 @@ clean :
 summarize :
 	printf "\n"
 	printf "\033[0;32m"
-	find -type d -name 'test' -exec grep -Hl "@@@ SUCCESS @@@" \{}/test.log \
+	find . -type d -name 'test' -exec grep -Hl "@@@ SUCCESS @@@" \{}/test.log \
 		   2>/dev/null \; | \
 		sed 's/\.\/\([A-Za-z0-9_-]*\)\/test\/test.log/+ \1 (succeeded)/' | \
 		sort
 	printf "\033[0m"
 	printf "\033[1;31m"
-	find -type d -name 'test' -exec grep -HL "@@@ SUCCESS @@@" \{}/test.log \; | \
+	find . -type d -name 'test' -exec grep -HL "@@@ SUCCESS @@@" \{}/test.log \; | \
 		sed 's/\.\/\([A-Za-z0-9_-]*\)\/test\/test.log/+ \1 (FAILED)/' | \
 		sort
 	printf "\033[0m"
@@ -29,12 +29,6 @@ summarize :
 ALL_TESTS = $(shell ls -d */ | sed s\#/\#\#)
 .PHONY .SILENT : $(ALL_TESTS)
 $(ALL_TESTS) :
-	echo ------------------------------------------------------------
-	echo "$ uname -a"
-	uname -a
-	echo ------------------------------------------------------------
-	echo "$ cat /proc/cpuinfo | grep 'model name'"
-	cat /proc/cpuinfo | grep 'model name'
 	echo ------------------------------------------------------------
 	echo "START `date +'%s'`"
 	echo ------------------------------------------------------------

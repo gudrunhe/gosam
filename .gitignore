@@ -8,8 +8,15 @@
 *.pdf
 *.log
 *.o
+*.pyc
+.idea
 build/
 
 # Generated files in examples directory
 examples/*/virtual
 examples/*/*.in
+examples/*/gosam.crashed
+examples/*/*/test_program
+examples/*/include
+examples/*/lib
+examples/*/fort

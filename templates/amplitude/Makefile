@@ -45,7 +45,7 @@ filelist-source: source # TODO: probably not correct
 		-name '*.f90' \
 		-or -name 'Makefile' \
 		-or -name 'Makefile.dep' \
-		\) -fprint $@
+		\) -print > $@
 
 source:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)

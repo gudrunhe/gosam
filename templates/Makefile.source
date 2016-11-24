@@ -4,12 +4,12 @@
 	in the main directory.
 ' %]# vim: ts=3:sw=3
 
-SUBDIRS=doc common[%
+SUBDIRS=doc[%
 @if extension reduze %] amplitude[%
-@else %][% @if helsum %] sum[% @end @if %][%
+@else %] common[% @if helsum %] sum[% @end @if %][%
 @for helicities generated %] helicity[% helicity %][%
-@end @for helicities %][%
-@end @if %] matrix
+@end @for helicities %] matrix[%
+@end @if %]
 
 [% @if internal OLP_MODE %]
 include ../Makefile.conf[%

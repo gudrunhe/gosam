@@ -155,8 +155,11 @@ class ModelTemplate(Template):
 			yield chunk
 
 	def functions_resolved(self, *args, **opts):
+		type_filter = self._setup_filter(["R", "C"], args)
+
 		index_name = self._setup_name("index", "index", opts)
 		name_name  = self._setup_name("name", "$_", opts)
+		type_name  = self._setup_name("type", "type", opts)
 		expression_name  = self._setup_name("expression", "expression", opts)
 		first_name = self._setup_name("first", "is_first", opts)
 		last_name = self._setup_name("last", "is_last", opts)
@@ -194,7 +197,10 @@ class ModelTemplate(Template):
 			try:
 				ast.write(buf)
 
+				type = self._functions[name]
+
 				props.setProperty(name_name, name)
+				props.setProperty(type_name, type)
 				props.setProperty(expression_name, buf.getvalue())
 				props.setProperty(index_name, i)
 				props.setProperty(first_name, i == 0)

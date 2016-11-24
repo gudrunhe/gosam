@@ -2,11 +2,19 @@
 off statistics;
 *Format 255; * Number of characters per line
 
-#include- reduze.hh
-#include- secdec.hh
-#include- symbols.hh
-#include- spinney.hh
-#include- model.hh
+#Include- symbols.hh
+#Include- reduze.hh
+#Include- secdec.hh
+#Include- projectors.hh
+#Include- spinney.hh
+#Include- model.hh
+
+* Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
+#Define ProjectorLabels ""
+#Do label = 1, `NUMPROJ'
+#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+#EndDo
+.sort
 
 * Load GoSam result
 #include- reducedl`LOOPS'.txt;
@@ -42,15 +50,16 @@ Multiply TermLabel ^ $NumberOfTerms;
   Id INT(ReduzeF?$IntegralName,?a) = INT(ReduzeF,?a); * Get integral name
   .sort
 * Write coefficient to file
-  #write <coefficient_`$IntegralName'.txt> "* "
-  #write <coefficient_`$IntegralName'.txt> "* Reduced integral times coefficient of integral `$IntegralName' "
-  #write <coefficient_`$IntegralName'.txt> "* "
-  #write <coefficient_`$IntegralName'.txt> "L l`LOOPS' = %e", [`TermNumber']
+  #Define CoefficientFile "coefficients/`LOOPS'loop/codegen/coefficient_`$IntegralName'.coeff"
+  #Write <`CoefficientFile'> "* "
+  #Write <`CoefficientFile'> "* Reduced integral times coefficient of integral `$IntegralName' "
+  #Write <`CoefficientFile'> "* "
+  #Write <`CoefficientFile'> "L l`LOOPS' = %e", [`TermNumber']
 * Write log of coefficient files
 *  #write <coefficient_log.yaml> "---"
 *  #write <coefficient_log.yaml> "integral:"
 *  #write <coefficient_log.yaml> "  name: `$IntegralName'"
-*  #write <coefficient_log.yaml> "  file: coefficient_`$IntegralName'.txt"
+*  #write <coefficient_log.yaml> "  file: coefficient_`$IntegralName'.coeff"
   Drop [`TermNumber'];
   Unhide l`LOOPS';
  #EndDo
@@ -58,5 +67,5 @@ Multiply TermLabel ^ $NumberOfTerms;
 Id TermLabel = 1;
 .sort
 
-print+s;
+*print+s;
 .end
