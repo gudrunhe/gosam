@@ -275,9 +275,14 @@ contains
                fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
             else
                fpprec1 = 16
-            endif
+            endif[%
+            @if anymember PoleRotation PSP_chk_method ignore_case=true %]
             if(fpprec1.ge.PSP_chk_th3) icheck=1                            ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th3) icheck=3                            ! RESCUE
+            if(fpprec1.lt.PSP_chk_th3) icheck=3                            ! RESCUE[%
+            @else %]
+            if(fpprec1.ge.PSP_chk_li3) icheck=1                            ! ACCEPTED
+            if(fpprec1.lt.PSP_chk_li3) icheck=3                            ! RESCUE[%
+            @end @if %]
          endif
          prec = min(spprec1,fpprec1)
 
@@ -331,9 +336,14 @@ contains
                   fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
                else
                   fpprec2 = 16
-               endif
+               endif[%
+            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
                if(fpprec2.ge.PSP_chk_th3) icheck=1                         ! ACCEPTED
-               if(fpprec2.lt.PSP_chk_th3) icheck=3                         ! DISCARD
+               if(fpprec2.lt.PSP_chk_th3) icheck=3                         ! DISCARD[%
+               @else %]
+               if(fpprec2.ge.PSP_chk_li3) icheck=1                         ! ACCEPTED
+               if(fpprec2.lt.PSP_chk_li3) icheck=3                         ! DISCARD[%
+               @end @if %]
             endif
             reduction_interoperation = tmp_red_int
             prec = min(spprec2,fpprec2)
