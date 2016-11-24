@@ -44,10 +44,10 @@
 
       scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
-      call print_parameters(scale2)
       call samplitude(vecs, scale2, amp, prec)
       call ir_subtraction(vecs, scale2, irp)
-      if(ievt.eq.NEVT) then[%
+      if(ievt.eq.NEVT) then
+         call print_parameters(scale2)[%
       @if generate_lo_diagrams %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "LO:", amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, finite part:", &

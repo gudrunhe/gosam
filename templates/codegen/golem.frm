@@ -86,6 +86,7 @@ AutoDeclare Vectors spva;
 * - Qt2 = \tilde{Q}^2
 *
 Symbol Qt2;
+Function SmQt;
 [% @if diagsum %]Symbol Nfrat;[%
 @end @if %]
 
@@ -428,6 +429,64 @@ EndArgument;
 
 #Call tHooftAlgebra
 
+[% @if extension better_num %]
+
+#If `LOOPS' == 1
+   
+   #IfDef `DRED'
+    Id d4(p1,p1) = d4(p1,p1) - Qt2;
+    Id Sm4(p1) = Sm4(p1) + SmQt;
+    Repeat;
+        Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
+        
+            Id SmQt * Sm4(iDUMMY1?) = - Sm4(iDUMMY1) * SmQt;
+    Endrepeat
+        Id p1.p1 = p1.p1 - Qt2;
+        Id d4(p1, p1) = p1.p1;
+        Id SmQt * SmQt = -Qt2;
+        Id SmQt = 0;
+   #Else
+      Id dEps(iDUMMY1?, iDUMMY1?) = -2*eps;
+      Id dEps(p1, p1) = -Qt2;
+      Id dEps(vDUMMY1?{`EXTERNAL'}, iDUMMY2?) = 0;
+   #EndIf
+
+* Qt2 terms only contribute to finite part
+* Therefore Qt2 * eps cannot contribute to the result
+   Id Qt2 * eps = 0;
+   Id eps^sDUMMY1?{>2} = 0;
+
+   #If `LOOPSIZE' > 6
+      Id Qt2 = 0;
+
+
+   #ElseIf `LOOPSIZE' == 5
+      ToTensor, Functions, p1, ptens;
+      If(count(ptens,1)==0) Multiply ptens;
+* For pentagons we need to consider integrals of rank 6 only
+      Id Only ptens * Qt2 = 0;
+      Id Only ptens * Qt2^2 = 0;
+      Id Only ptens(iDUMMY1?) * Qt2 = 0;
+      Id Only ptens(iDUMMY1?,iDUMMY2?) * Qt2 = 0;
+      Id Only ptens(iDUMMY1?,iDUMMY2?,iDUMMY3?) * Qt2 = 0;
+      ToVector, ptens, p1;
+   #ElseIf `LOOPSIZE' == 4
+      ToTensor, Functions, p1, ptens;
+      If(count(ptens,1)==0) Multiply ptens;
+* For boxes we need to consider integrals of type mu2*ptens(mu,nu),
+* mu2^2 and the one with rank 5
+      Id Only ptens * Qt2 = 0;
+      Id Only ptens(iDUMMY1?) * Qt2 = 0;
+      ToVector, ptens, p1;
+   #EndIf
+
+#Else
+   Id dEps(iDUMMY1?, iDUMMY1?) = 0;
+#EndIf
+
+[% @else %]
+
+
 #If `LOOPS' == 1
    
    #IfDef `DRED'
@@ -476,6 +535,8 @@ EndArgument;
 #Else
    Id dEps(iDUMMY1?, iDUMMY1?) = 0;
 #EndIf
+
+[% @end @if %]
 
 #Call SpCollect
 #Call SpClear()
