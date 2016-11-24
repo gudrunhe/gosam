@@ -303,6 +303,7 @@ def prepare_model_files(conf, output_path=None):
   # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
    generate_ct_internal = conf["generate_ct_internal"]
+   qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
 
 
    if "setup-file" in conf:

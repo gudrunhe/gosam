@@ -109,7 +109,6 @@ def generate_process_files(conf, from_scratch=False):
 			generate_particle_lists(conf)
 
 	# Obtain the files required by QGraf from the template file.
-	#print conf
 	golem.templates.xmltemplates.transform_templates(templates, templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
@@ -631,6 +630,7 @@ def workflow(conf):
                     conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
         conf["generate_ct_internal"] = conf["modeltype"]=="smdiag_complex_ct" or \
             conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
+        conf["qcd_in_ew"] = conf.getBooleanProperty("olp.qcd_in_ew")
 	conf["generate_nnlo_virt"] = generate_nnlo_virt
 	#generate_uv_counterterms
 	#False

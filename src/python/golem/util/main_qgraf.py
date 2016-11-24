@@ -228,7 +228,7 @@ def run_qgraf(conf, in_particles, out_particles):
 
 	powers = split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
 	options = conf.getProperty(golem.properties.qgraf_options)
-	if conf.getProperty("olp.correctiontype") == 'EW' and not conf.getProperty("olp.qcd_in_ew"):
+	if conf.getProperty("olp.correctiontype") == 'EW' and not conf.getBooleanProperty("olp.qcd_in_ew"):
 	  options=['onshell','notadpole']	
 	  warning("Warning: qgraf options are overwritten using onshell and notadpole")
 	verbatim =     format_qgraf_verbatim(conf,
@@ -256,6 +256,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	flag_internal_ct=conf["modeltype"]=='smdiag_complex_ct' or \
             conf.getProperty(golem.properties.model)[0]=='smdiag_complex_ct'
 	flag_qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
+	conf["qcd_in_ew"] = flag_qcd_in_ew
 
 	if not (flag_generate_nlo_virt or
 			flag_generate_lo_diagrams or flag_generate_uv_counterterms or flag_generate_nnlo_virt):
@@ -386,30 +387,80 @@ def run_qgraf(conf, in_particles, out_particles):
 		output_name = consts.PATTERN_DIAGRAMS_LO+'ct' + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_LO+'ct' + log_ext
 		modelct = consts.MODEL_LOCAL +'ct'
+<<<<<<< Updated upstream
 		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+=======
+
+                if not flag_qcd_in_ew:
+                    if powers and powers is not None:
+                            new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+>>>>>>> Stashed changes
 					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in [powers[0]]])
-		else:
-			new_verbatim = verbatim + "\n" + verbatim_lo		
-		shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
-		if not flag_internal_ct:
-                    write_qgraf_dat(path, formct_sty, modelct, output_name,
+                    else:
+                            new_verbatim = verbatim + "\n" + verbatim_lo		
+                    shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
+                    if not flag_internal_ct:
+                        write_qgraf_dat(path, formct_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
-                else:
-                    new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+                    else:
+                        new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
 					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in [powers[0]]])                    
-                    write_qgraf_dat(path, form_sty, modelct, output_name,
+                        write_qgraf_dat(path, form_sty, modelct, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0,flag_internal_ct)
 
-		run_qgraf_dat(conf, output_name, log_name)
-		if flag_internal_ct:
-                    if flag_topolopy:
-                            output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
-                            log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
-                            write_qgraf_dat(path, topo_sty, modelct, output_name,
-                                    options, new_verbatim, in_particles, out_particles, [], 0)
-                            run_qgraf_dat(conf, output_name, log_name)                    
+                    run_qgraf_dat(conf, output_name, log_name)
+                    if flag_internal_ct:
+                        if flag_topolopy:
+                                output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+                                log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+                                write_qgraf_dat(path, topo_sty, modelct, output_name,
+                                        options, new_verbatim, in_particles, out_particles, [],
+                                        0, flag_internal_ct)
+                                run_qgraf_dat(conf, output_name, log_name)                    
 		
+		else:
+                    #if powers and powers is not None:
+                            #new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+					#"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in [powers[0]]])
+                    #else:
+                            #new_verbatim = verbatim + "\n" + verbatim_lo		
+                    #shutil.copy(os.path.join(path,consts.MODEL_LOCAL), os.path.join(path,modelct))
+                    #if not flag_internal_ct:
+                        #write_qgraf_dat(path, formct_sty, modelct, output_name,
+				#options, new_verbatim, in_particles, out_particles, [], 0)
+                    #else:
+                        #new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+					#"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in [powers[0]]])                    
+                        #write_qgraf_dat(path, form_sty, modelct, output_name,
+				#options, new_verbatim, in_particles, out_particles, [], 0,flag_internal_ct)
+
+                    #run_qgraf_dat(conf, output_name, log_name)
+                    #if flag_internal_ct:
+                        #if flag_topolopy:
+                                #output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+                                #log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+                                #write_qgraf_dat(path, topo_sty, modelct, output_name,
+                                        #options, new_verbatim, in_particles, out_particles, [], 0)
+                                #run_qgraf_dat(conf, output_name, log_name)                                        
+                    
+                    if powers and powers is not None:
+                            new_verbatim = verbatim + "\n" + verbatim_lo + "\n" + \
+					"".join(["true=vsum[%s,%s,%s];\n" % (powers[0][0], powers[1][1], powers[1][1])])
+                    else:
+                            new_verbatim = verbatim + "\n" + verbatim_lo
+
+                    write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 0)
+                    run_qgraf_dat(conf, output_name, log_name)                    
+                    
+                    if flag_topolopy:
+			output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
+			log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
+			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
+				options, new_verbatim, in_particles, out_particles, [], 0)
+			run_qgraf_dat(conf, output_name, log_name)                    
+                    
 		cleanup_files.append(formct_sty)
 		
 		

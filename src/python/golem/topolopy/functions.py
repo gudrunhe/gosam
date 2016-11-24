@@ -48,6 +48,7 @@ def setup_list(prop, conf, loop_order=None):
 
 def setup_filter(prop, conf, model, loop_order=None):
    generate_ct_internal = conf.getBooleanProperty("generate_ct_internal")
+   qcd_in_ew = conf.getBooleanProperty("olp.qcd_in_ew")
    locs = {}
    globs = globals().copy()
 
