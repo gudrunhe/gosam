@@ -50,15 +50,14 @@ Multiply replace_(dimS,4-2*epsS);
 .sort:dimS;
 PolyRatFun prf(divergence,epsS);
 .sort:prf;
-PolyRatFun;
-.sort:noprf;
 
 * Drop everything except the INT and its required order
 Id SCREEN?!{,INT,prf}(?head)=1;
 Id sDUMMY1?=1;
 .sort:drop screen;
-DropCoefficient;
-.sort:drop coeff;
+
+PolyRatFun;
+.sort:noprf;
 
 * Store the epsS order to which we must compute the integral
 Id prf(sDUMMY1?,sDUMMY2?) = SCREEN(sDUMMY1/sDUMMY2);
