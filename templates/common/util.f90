@@ -10,6 +10,14 @@
       module procedure square_0l_1l
       module procedure square_0l_0l_mat
    end interface square
+   
+[% @if generate_ct_internal %]
+   interface ct_square
+     module procedure ct_square_0l_0l
+     module procedure ct_square_0l_0l_mat
+   end interface ct_square
+[% @end @if %]  
+
 
    interface     cond
       module procedure cond_q_mu2
@@ -318,7 +326,7 @@ contains
    !---#] function square :
 [%
 @if generate_uv_counterterms %]
-   pure function ct_square(vector_born, vector_ct) result(amp)
+   pure function ct_square_0l_0l(vector_born, vector_ct) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
       implicit none
       complex(ki), dimension(numcs), intent(in) :: vector_born
@@ -331,7 +339,21 @@ contains
       v2 = conjg(vector_ct)
       amp(0) = 2.0_ki*real(sum(v1(:) * v2(:,0)), ki)
       amp(1) = 2.0_ki*real(sum(v1(:) * v2(:,1)), ki)
-   end function  ct_square[%
+   end function  ct_square_0l_0l
+   
+   pure function ct_square_0l_0l_mat(vector_born, vector_ct, mat) result(amp)
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: vector_born
+      complex(ki), dimension(numcs,0:1), intent(in) :: vector_ct
+      complex(ki), dimension(numcs,numcs), intent(in) :: mat      
+      real(ki) :: amp
+      complex(ki), dimension(numcs) :: v1
+      complex(ki), dimension(numcs,0:1) :: v2
+
+      v1 = matmul(mat, vector_born)
+      v2 = conjg(vector_ct)
+      amp = 2.0_ki*real(sum(v1(:) * v2(:,0)), ki)
+   end function  ct_square_0l_0l_mat[%
 @end @if %]   
    
 end module [% process_name asprefix=\_ %]util

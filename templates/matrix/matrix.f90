@@ -520,7 +520,8 @@ contains
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
          @end @if %]
       end if[%
-      @if generate_uv_counterterms %]
+      @if generate_uv_counterterms %][%
+      @if eval .not. qcd_in_ew %]
       select case (renormalisation)
       case (0)
          ! no renormalisation
@@ -542,9 +543,10 @@ contains
               amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)
             endif[%
           @end @if %]
-      end select
-      [%
-      @else %][%
+      end select[%
+      @end @if %][%
+      @end @if %]
+      [% @if qcd_in_ew .or. eval .not. generate_uv_counterterms %][%
 
          @select r2
          @case implicit explicit off %]
@@ -556,8 +558,12 @@ contains
             @if generate_lo_diagrams %]
          if(corrections_are_qcd) then
             if (renorm_beta) then
-               beta0 = (11.0_ki * CA - 4.0_ki * TR * (NF + NFh)) / 6.0_ki
+               beta0 = (11.0_ki * CA - 4.0_ki * TR * (NF + NFh)) / 6.0_ki[%
+               @if qcd_in_ew %]
+               amp(3) = amp(3) - lo_qcd_couplings * beta0 * ct_amp(0)[%
+               @else %]
                amp(3) = amp(3) - lo_qcd_couplings * beta0 * amp(1)[%
+               @end @if %][%
                @for effective_higgs %][%
                @if is_ehc%]
                ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
@@ -569,27 +575,51 @@ contains
                   @if is_first %]
                if (renorm_logs) then[%
                   @end @if %][%
-                  @if is_real %]
+                  @if is_real %][%
+                  @if qcd_in_ew %]
+                  amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
+                      &            log(scale2/[% $_ %]**2) * ct_amp(0)[%
+                  @else %]
                   amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %][%
                   @end @if %] [%
-                  @if is_complex %]
+                  @if is_complex %][%
+                  @if qcd_in_ew %]
+                  amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
+                      &            log(scale2/[% $_ %]/conjg([% $_ %])) * ct_amp(0)[%
+                  @else %]
                   amp(2) = amp(2) + lo_qcd_couplings * 4.0_ki * TR / 6.0_ki * &
                       &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %][%
                   @end @if %] [%
                   @if is_last %]
                end if[%
                   @end @if %][%
                @end @for %][%
-               @if extension dred %]
+               @if extension dred %][%
+               @if qcd_in_ew %]
+               amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * ct_amp(0)[%
+               @else %]
                amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)[%
+               @end @if %][%
                @end @if %]
             end if
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]
             ! wave function renormalisation:[%
-               @end @if %]
+               @end @if %][%
+               @if qcd_in_ew %]
+               amp(3) = amp(3) - 1.5_ki * CF * ct_amp(0)
+               amp(2) = amp(2) - [%
+               @if extension dred %]2.5[% @else %]2.0[%
+               @end @if %]_ki * CF * ct_amp(0)
+               if (renorm_logs) then
+                  amp(2) = amp(2) &
+                 &   - (1.5_ki*log(scale2/[%mass%]/[%mass%])) * CF * ct_amp(0)
+               end if[%
+               @else %]                              
                amp(3) = amp(3) - 1.5_ki * CF * amp(1)
                amp(2) = amp(2) - [%
                @if extension dred %]2.5[% @else %]2.0[%
@@ -598,23 +628,39 @@ contains
                   amp(2) = amp(2) &
                  &   - (1.5_ki*log(scale2/[%mass%]/[%mass%])) * CF * amp(1)
                end if[%
+               @end @if %][%
             @end @for %]
             end if[%
             @for quark_loop_masses %][%
                @if is_first %]
-            if (renorm_decoupling) then
+            if (renorm_decoupling) then[%
+               @if qcd_in_ew %]
                amp(3) = amp(3) - num_gluons * 2.0_ki * TR / 3.0_ki * NFh * &
-                                &  amp(1)
+                                &  ct_amp(0)[%
+               @else %]
+               amp(3) = amp(3) - num_gluons * 2.0_ki * TR / 3.0_ki * NFh * &
+                                &  amp(1)[%
+               @end @if %]
                     
                if (renorm_logs) then[%
                @end @if %][%
-               @if is_real %]
+               @if is_real %][%
+                  @if qcd_in_ew %]
+                  amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
+                      &            log(scale2/[% $_ %]**2) * ct_amp(0)[%
+                  @else %]
                   amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
                       &            log(scale2/[% $_ %]**2) * amp(1)[%
+                  @end @if %][%
                   @end @if %] [%
-                  @if is_complex %]
+                  @if is_complex %][%
+                  @if qcd_in_ew %]
+                  amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
+                       &            log(scale2/[% $_ %]/conjg([% $_ %])) * ct_amp(0)[%
+                  @else %]
                   amp(2) = amp(2) - num_gluons * 2.0_ki * TR / 3.0_ki * &
                        &            log(scale2/[% $_ %]/conjg([% $_ %])) * amp(1)[%
+                  @end @if %][%
                   @end @if %] [%
                @if is_last %]
                end if
@@ -634,7 +680,7 @@ contains
          stop
       end select[%
          @end @select r2 %][%
-      @else %]
+      @else %][% @else %]
       amp(2:4) = 0.0_ki[%
       @end @if%][%
 
@@ -649,17 +695,24 @@ contains
          !   in QCD cross-sections,''
          ! Phys.Rev. D 55 (1997) 6819
          ! arXiv:hep-ph/9610553[%
-         @if extension dred %]
+         @if extension dred %][%
+         @if qcd_in_ew %]
+         amp(2) = amp(2) - ct_amp(0) * (&
+           &          num_light_quarks * 0.5_ki * CF &
+           &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
+         @else %]
          amp(2) = amp(2) - amp(1) * (&
            &          num_light_quarks * 0.5_ki * CF &
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
+         @end @if %][%
          @end @if extension dred %]
       end if[%
       @else %][%
-      @if generate_ct_internal %][%
+      @if generate_ct_internal %][% @if qcd_in_ew %][% @else %][%
       @for particles %]
       if (real([% mass %]) ==0.0_ki) amp(2) = amp(2) -0.5_ki*([% charge %]_ki/3.0_ki)**2*amp(1)[%
-      @end @for %]
+      @end @for %][%
+      @end @if %]
       [% @end @if %][%
       @end @if %][%
       @end @select r2 %][%
@@ -836,9 +889,11 @@ contains
          !---#] reinitialize kinematics:
          vector_born = amplitude[% map.index %]l0()
          vector_ct = ctamplitude[% map.index %]l0()[%
-         @if generate_ct_internal %]
+         @if generate_ct_internal %][%
+         @if eval .not. qcd_in_ew %]
          vector_ct(:,0) = vector_ct(:,0) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(1)*vector_born(:)
          vector_ct(:,1) = vector_ct(:,1) - (lo_ew_couplings - num_photons)*0.5_ki*ddrr(2)*vector_born(:)[%
+         @end @if %][%
          @end @if %]
          heli_amp(:) = ct_square(vector_born, vector_ct)
          if (debug_lo_diagrams) then
@@ -1077,7 +1132,11 @@ contains
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper
-      complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
+      @if qcd_in_ew %]
+      complex(ki), dimension(numcs) :: vector_born
+      complex(ki), dimension(numcs,0:1) :: vector_ct[%
+      @end @if %]
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki) :: nlo_coupling
 
@@ -1135,6 +1194,13 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
+     [% @if qcd_in_ew %]         
+         vector_born = amplitude[% map.index %]l0()
+         vector_ct = ctamplitude[% map.index %]l0()
+         heli_amp(1) = ct_square(vector_born, vector_ct, oper(:,:,1))
+         heli_amp(2) = ct_square(vector_born, vector_ct, oper(:,:,2))
+         amp = amp + heli_amp[% 
+     @else %]
          pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
@@ -1146,7 +1212,8 @@ contains
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
          endif
-         amp = amp + heli_amp
+         amp = amp + heli_amp[%
+     @end @if %]
       endif[%
   @end @for helicities %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
