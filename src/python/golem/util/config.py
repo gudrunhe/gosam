@@ -970,8 +970,8 @@ class Form(Program):
                "Could not run FORM (%s) properly" % executable)
 
    def checkCompatibility(self,p):
-      if not testFormCompatibility(p):
-         return False
+      #if not testFormCompatibility(p):
+      #   return False
       return True
 
    def store(self, conf):

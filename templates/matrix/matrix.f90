@@ -904,8 +904,10 @@ contains
          amp(:) = amp(:) + heli_amp(:)
       end if[%
   @end @for helicities %][%
-  @if generate_ct_internal %]
+  @if generate_ct_internal %][%
+  @if eval .not. qcd_in_ew %]
       amp(0) = amp(1)*log(scale2) + amp(0)[%
+  @end @if %][%
   @end @if %]
       if (include_helicity_avg_factor) then
          amp(:) = amp(:) / real(in_helicities, ki)

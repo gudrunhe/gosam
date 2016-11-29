@@ -28,8 +28,12 @@
    integer, parameter, public :: num_gluons = [%
       count particles adjoint vector lightlike %]
    integer, parameter, public :: num_photons = [%
-      count particles white vector lightlike %]      
-   integer, parameter, public :: lo_qcd_couplings = [% loqcd %]
+      count particles white vector lightlike %][%
+@if qcd_in_ew %]      
+   integer, parameter, public :: lo_qcd_couplings = [% eval loqcd + 2 %][%
+@else %]
+   integer, parameter, public :: lo_qcd_couplings = [% loqcd %][%
+@end @if %]   
    integer, parameter, public :: lo_ew_couplings = [% loew %]   
    logical, parameter, public :: corrections_are_qcd = [%
       @if isqcd %].true.[% @else %].false.[% @end @if %]

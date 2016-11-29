@@ -336,9 +336,14 @@ contains
       complex(ki), dimension(numcs,0:1) :: v2
 
       v1 = matmul(cmat, vector_born)
-      v2 = conjg(vector_ct)
+      v2 = conjg(vector_ct)[%
+@if qcd_in_ew %]
+      amp(0) = real(sum(v1(:) * v2(:,0)), ki)
+      amp(1) = real(sum(v1(:) * v2(:,1)), ki)[%
+@else %]
       amp(0) = 2.0_ki*real(sum(v1(:) * v2(:,0)), ki)
-      amp(1) = 2.0_ki*real(sum(v1(:) * v2(:,1)), ki)
+      amp(1) = 2.0_ki*real(sum(v1(:) * v2(:,1)), ki)[%
+@end @if %]      
    end function  ct_square_0l_0l
    
    pure function ct_square_0l_0l_mat(vector_born, vector_ct, mat) result(amp)
