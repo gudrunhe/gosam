@@ -10,8 +10,8 @@
 
 struct invariants_t
 {
-[% @for mandelstam sym_prefix=es non-zero non-mass%]
-    invariant_t [%symbol%];[% @end @for mandelstam non-zero%]
+[% @for mandelstam sym_prefix=es non-zero non-mass %]
+    invariant_t [% symbol %];[% @end @for mandelstam %]
 
 };
 

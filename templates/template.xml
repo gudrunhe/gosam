@@ -64,7 +64,7 @@
 		</directory>
 		<file src="parameters.hpp" class="Model"/>
 		<file src="invariants.hpp" class="Kinematics"/>
-		<file src="typedef.hpp" class="Verbatim"/>
+		<file src="typedef.hpp" class="Integrals"/>
         <foreach iterator="loops">
 			<file src="amplitude.hpp" dest="amplitudel%d.hpp" arguments="loop" class="Integrals"/>
         </foreach>
