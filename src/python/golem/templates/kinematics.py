@@ -1036,7 +1036,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       nmass_name = self._setup_name("mass", "is_non-mass", opts)
       symbol_name = self._setup_name("symbol", "symbol", opts)
       first_name = self._setup_name("first", "is_first", opts)
-      #last_name = self._setup_name("last", "is_last", opts)
+      last_name = self._setup_name("last", "is_last", opts)
       index_name = self._setup_name("index", "index", opts)
       gindex_name = self._setup_name("global_index", "global_index", opts)
 
@@ -1050,9 +1050,35 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       idx = 0
       gidx = 0
+      last_idx = 0
       
       #last_gidx = len(self._mandel_parts) # warning, this gets the global length! (before filtering)
-      
+
+      # count how many invariants pass our filters (compute last_idx)
+      for parts, vecs in self._mandel_parts.items():
+         is_massive = True
+         is_mass = False
+         if len(vecs) == 1:
+            mass = self._masses[vecs[0] - 1]
+            is_massive = (mass != "0")
+            is_mass = True
+
+         if is_mass:
+            if "mass" not in mass_filter:
+               continue
+         else:
+            if "non-mass" not in mass_filter:
+               continue
+
+         if is_massive:
+            if "non-zero" not in zero_filter:
+               continue
+         else:
+            if "zero" not in zero_filter:
+               continue
+
+         last_idx += 1
+
       for parts, vecs in self._mandel_parts.items():
          gidx += 1
          default_name = "s" + "".join(parts.split())
@@ -1087,7 +1113,7 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(mass_name, is_mass)
          props.setProperty(nmass_name, not is_mass)
          props.setProperty(first_name, is_first)
-         #props.setProperty(last_name, gidx == last_gidx)
+         props.setProperty(last_name, idx == last_idx)
          props.setProperty(index_name, idx)
          props.setProperty(gindex_name, gidx)
 

@@ -172,6 +172,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		mass_name = self._setup_name("mass", prefix + "mass", opts)
 		first_name = self._setup_name("first", "is_first", opts)
 		last_name = self._setup_name("last", "is_last", opts)
+		index_name = self._setup_name("index", "index", opts)
 
 		props = Properties()
 		mass_set = set(self._masses)
@@ -191,6 +192,7 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(mass_name, mass)
 			props.setProperty(first_name, is_first)
 			props.setProperty(last_name, idx == last_idx)
+			props.setProperty(index_name, idx)
 			is_first = False
 			yield props
 # eof - sj
