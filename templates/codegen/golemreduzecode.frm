@@ -3,10 +3,10 @@
 Off Statistics;
 
 *--#[ include definitions and procedures: 
+#Include- reduze.hh
 #Include- symbols.hh
 #Include- spinney.hh
 #Include- model.hh
-#Include- reduze.hh
 #Include- secdec.hh
 #Include- seriesprocedures.hh
 #Include- projectors.hh

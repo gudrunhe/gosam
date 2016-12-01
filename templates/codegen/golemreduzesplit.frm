@@ -2,8 +2,8 @@
 off statistics;
 *Format 255; * Number of characters per line
 
-#Include- symbols.hh
 #Include- reduze.hh
+#Include- symbols.hh
 #Include- secdec.hh
 #Include- projectors.hh
 #Include- spinney.hh
