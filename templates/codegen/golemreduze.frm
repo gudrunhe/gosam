@@ -233,9 +233,6 @@ Id d(iv1L?, iv2L?) = d_(iv1L, iv2L);
 Id inp(?all) = 1;
 Id out(?all) = 1;
 Id ZERO = 0;
-Id PREFACTOR(sDUMMY1?)^sDUMMY2 = PREFACTOR(sDUMMY1^sDUMMY2);
-Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
-Normalize PREFACTOR;
 .sort
 
 #Call RemoveNCContainer
@@ -291,6 +288,12 @@ Argument ProjNum,ProjDen,Den;
   Id ZERO = 0;
   #Call kinematics;
 EndArgument;
+.sort
+
+
+Id PREFACTOR(sDUMMY1?)^sDUMMY2 = PREFACTOR(sDUMMY1^sDUMMY2);
+Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
+Normalize PREFACTOR;
 .sort
 
 * Simplify coefficients
