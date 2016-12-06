@@ -7,13 +7,14 @@ in=21,21,25,25
 out=
 order=QCD, NONE, 2
 
-# one quark flavour [t] running in the loops:
-qgraf.verbatim=true=iprop[U,D,C,S,B,0,0];
+# require at least one higgs-top coupling
+filter.nlo= lambda d: d.vertices(Tbar, T, H) >= 1
 
 one=gs
 zero=mU,mD,mS,mC,mB,wT,wH
 
 model=smdiag
+#model.options= Nf:5, Nfgen:1
 
 regularisation_scheme=cdr
 renorm_beta=False
