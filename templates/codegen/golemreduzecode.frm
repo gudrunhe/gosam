@@ -63,6 +63,7 @@ PolyRatFun;
 .sort:noprf;
 
 Id prf(sDUMMY1?, sDUMMY2?) = sDUMMY1/sDUMMY2; * Test: No optimisation
+Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function from code
 
 *--#] multiply coupling constants into coefficient:
 

@@ -183,13 +183,27 @@ Id dZmp =1;
 
 #call coloralgebra(0)
 
-AB TR,NC,NA,[%@for repeat num_colors shift=1%]c[% $_ %][%@if is_last%];[%@else%],[%@end @if%][%@end @for%]
+AB TR,NC,NA;
 .sort:abcolor1;
 
-Collect COLORFACTOR;
-Normalize COLORFACTOR;
+Collect COLORINTERNAL;
+Normalize COLORINTERNAL;
 .sort:abcolor2;
 
+AB [%@for repeat num_colors shift=1%]c[% $_ %][%@if is_last%];[%@else%],[%@end @if%][%@end @for%]
+.sort:abcolor3;
+
+Collect COLORFACTOR;
+.sort:abcolor4;
+
+SplitArg COLORFACTOR;
+.sort
+
+Repeat Id COLORFACTOR(sDUMMY1?,?a,sDUMMY2?) = COLORFACTOR(sDUMMY1) + COLORFACTOR(?a,sDUMMY2);
+.sort:splitcolor5;
+
+Normalize COLORFACTOR;
+.sort:splitcolor6;
 
 #Include- legs.hh
 
