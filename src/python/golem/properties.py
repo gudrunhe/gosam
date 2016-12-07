@@ -730,14 +730,15 @@ filter_nlo_diagrams = Property("filter.nlo",
 
 filter_higher_diagrams = Property("filter.higher",
    """\
-   A list of python functions which provide a filter for loop diagrams.
+   A semi-colon separated list of python functions
+   which provide a filter for loop diagrams.
    The first function is applied to two-loop diagrams,
    the second function is applied to three-loop diagrams
    and so forth.
 
    See filter.lo, filter.nlo for more explanation.
    """,
-   list,"")
+   list,sep=";")
 
 filter_module = Property("filter.module",
    """\

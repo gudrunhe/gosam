@@ -97,7 +97,7 @@ def setup_filter(prop, conf, model, loop_order=None):
 
    if loop_order:
       try:
-         fltr = conf.getNestedListProperty(prop)[ int(loop_order) - 2 ]
+         fltr = conf.getProperty(prop)[ int(loop_order) - 2 ]
       except IndexError:
          return lambda d: True
    else:
