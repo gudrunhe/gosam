@@ -1,0 +1,33 @@
+process_name=gggh
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Higgs-Boson: 25
+
+in=21,21,21,25
+out=
+order=QCD, NONE, 3, 5
+
+# one light quark flavour [u] and one heavy quark [t]:
+qgraf.verbatim=true=iprop[D,C,S,B,0,0];
+
+# require at least one higgs-top coupling
+filter.nlo= lambda d: d.vertices(Tbar, T, H) >= 1
+filter.higher= lambda d: d.vertices(Tbar, T, H) >= 1
+
+one=gs
+zero=mU,mD,mS,mC,mB,wT,wH
+
+model=smdiag
+#model.options= Nf:5, Nfgen:1
+
+regularisation_scheme=cdr
+renorm_beta=False
+renorm_mqwf=False
+renorm_decoupling=False
+renorm_mqse=False
+renorm_logs=False
+renorm_gamma5=False
+
+diagsum=False
+
+extensions=reduze

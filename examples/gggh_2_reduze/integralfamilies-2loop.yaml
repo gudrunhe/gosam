@@ -1,0 +1,48 @@
+integralfamilies:
+
+  - name: ReduzeF1L2 # massive-massive double box
+    loop_momenta:
+      - p1
+      - p2
+    propagators:
+      - ["p1",       "mT^2"]
+      - ["p1+k1",    "mT^2"]
+      - ["p1-k2",    "mT^2"]
+      - ["p1-k2-k3", "mT^2"]
+      - ["p2",       "mT^2"]
+      - ["p2+k1",    "mT^2"]
+      - ["p2-k2",    "mT^2"]
+      - ["p2-k2-k3", "mT^2"]
+      - ["p1-p2",    0]
+    permutation_symmetries:
+      - [[1, 5], [2, 6], [3, 7], [4, 8]]
+
+  - name: ReduzeF2L2 # massless-massive double box + kites
+    loop_momenta:
+      - p1
+      - p2
+    propagators:
+      - ["p2",       0]
+      - ["p2+k1",    0]
+      - ["p2-k2",    0]
+      - ["p2-k2-k3", 0]
+      - ["p1",       "mT^2"]
+      - ["p1+k1",    "mT^2"]
+      - ["p1-k2",    "mT^2"]
+      - ["p1-k2-k3", "mT^2"]
+      - ["p1-p2",    "mT^2"]
+
+  - name: ReduzeF3L2 # NPL from https://arxiv.org/pdf/1610.03747.pdf
+    loop_momenta:
+      - p1
+      - p2
+    propagators:
+      - ["p1",          "mT^2"]
+      - ["p1+k1",       "mT^2"]
+      - ["p1-k2-k3",    "mT^2"]
+      - ["p2",          "mT^2"]
+      - ["p2+k1",       "mT^2"]
+      - ["p2-k3",       "mT^2"]
+      - ["p1-p2",       0]
+      - ["p1-p2-k2",    0]
+      - ["p1-p2-k2-k3", 0]
