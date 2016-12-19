@@ -951,6 +951,10 @@ class Form(Program):
 
          stdout_lines = stdout.splitlines()
 
+         # stdout_lines must contain at least one line (the version string)
+         if len(stdout_lines) == 0:
+           return
+
          firstline=True
          for line in stdout_lines:
             lline = line.lower().strip()
@@ -1050,6 +1054,10 @@ class Reduze(Program):
       (stdout, stderr) = pipe.communicate()
 
       stdout_lines = stdout.splitlines()
+      
+      # stdout_lines must contain at least one line (the version string)
+      if len(stdout_lines) == 0:
+        return False
 
       # first line
       lline = stdout_lines[0].lower().strip()
