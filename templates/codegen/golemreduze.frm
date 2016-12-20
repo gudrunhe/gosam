@@ -185,10 +185,14 @@ Id dZmp =1;
 
 AB TR,NC,NA;
 .sort:abcolor1;
-
 Collect COLORINTERNAL;
-Normalize COLORINTERNAL;
 .sort:abcolor2;
+SplitArg COLORINTERNAL;
+.sort:abcolor3;
+Repeat Id COLORINTERNAL(sDUMMY1?,sDUMMY2?,?a) = COLORINTERNAL(sDUMMY1) + COLORINTERNAL(sDUMMY2,?a);
+.sort
+Normalize COLORINTERNAL;
+.sort:abcolor4;
 
 AB [%@for repeat num_colors shift=1%]c[% $_ %][%@if is_last%];[%@else%],[%@end @if%][%@end @for%]
 .sort:abcolor3;

@@ -55,9 +55,15 @@ G sum =
 Drop;
 NDrop sum;
 .sort
+
 * Simplify coefficients
 PolyRatFun prf;
 .sort:prf;
+* Simplify dimension dependent coefficients
+Id Dim(sDUMMY1?) = prf(sDUMMY1,1);
+.sort
+Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
+.sort
 PolyRatFun;
 .sort:noprf;
 
