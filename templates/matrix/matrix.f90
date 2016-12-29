@@ -403,7 +403,7 @@ contains
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, nlo_prefactors
+         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
       use [% process_name asprefix=\_ %]model
@@ -537,7 +537,22 @@ contains
                @if extension dred %]
                amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)[%
                @end @if %]
-            end if
+            end if[%
+               @for yukawa %][%
+               @if is_yukawa %]
+            if (renorm_yukawa) then
+            ! Renormalization of Yukawa coupling 
+               if ([% $_ %] > 0.0_ki) then  [%
+                @for particles massive quakrs anti-quarks %]
+                   amp(3) = amp(3) -3.0_ki * CF * amp(1)
+                   amp(2) = amp(2) -[%
+               @if extension dred %]5.0[% @else %]4.0[%
+               @end @if %]_ki * CF * amp(1)[%
+               @end @for %]
+               endif[%
+               @end @if %][%
+               @end @for %]
+            endif   
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]
