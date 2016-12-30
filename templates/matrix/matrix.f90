@@ -549,10 +549,10 @@ contains
                @if extension dred %]5.0[% @else %]4.0[%
                @end @if %]_ki * CF * amp(1)[%
                @end @for %]
-               endif[%
+               end if
+            end if[%
                @end @if %][%
-               @end @for %]
-            endif   
+               @end @for %]  
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]
