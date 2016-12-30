@@ -24,7 +24,7 @@ def get_git_revision():
 		assert len(revision) == desired_length
 		return revision
 
-VERSION = "2.0.3"
+VERSION = "2.0.4"
 GIT_REVISION = get_git_revision()
 TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
 
