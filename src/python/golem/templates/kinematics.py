@@ -340,6 +340,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             var=var+'.or.'+mass
       if len(quark_masses)==0:
             var = 'mBMS'
+            #self._heavy_quarks.append('mB')
 
       var_name = self._setup_name("var", "$_", opts)
       props[var_name] = var
@@ -620,9 +621,12 @@ class KinematicsTemplate(golem.util.parser.Template):
       nsc=-1
       
 
+
       color_filter = []
       spin_filter = []
       charge_filter = []
+      
+      
 
       if "white" in args:
          color_filter.extend([1, -1])
@@ -693,6 +697,8 @@ class KinematicsTemplate(golem.util.parser.Template):
 	 charge = self._charge[index]
 	 #if charge not in charge_filter:
 	   #continue
+	   
+	   
 
          props.setProperty(first_name, is_first)
          is_first = False

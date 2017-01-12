@@ -51,7 +51,7 @@ def setup_filter(prop, conf, model):
    for name, prtcl in model.particles.items():
       tsp = prtcl.getSpin()
       clr = prtcl.getColor()
-
+      
       if tsp % 2 == 1:
          fermions.append(name)
       else:
@@ -60,6 +60,7 @@ def setup_filter(prop, conf, model):
          quarks.append(name)
       if abs(tsp) == 1 and abs(clr) == 1:
          leptons.append(name)
+         
 
    golem.topolopy.userlib.QUARKS = quarks
    golem.topolopy.userlib.LEPTONS = leptons

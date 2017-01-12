@@ -206,7 +206,7 @@ class BRIDGE(_CurryFunctor):
 
 class NFGEN(_CurryFunctor):
    def __init__(self, *quarks):
-      self.quarks = quarks
+      self.quarks = quarks  
 
    def __call__(self, d):
       global QUARKS

@@ -544,9 +544,9 @@ contains
             ! Renormalization of Yukawa coupling 
                if ([% $_ %] > 0.0_ki) then  [%
                 @for particles massive quarks anti-quarks %]
-                   amp(3) = amp(3) -3.0_ki * CF * amp(1)
+                   amp(3) = amp(3) -1.5_ki * CF * amp(1)
                    amp(2) = amp(2) -[%
-               @if extension dred %]5.0[% @else %]4.0[%
+               @if extension dred %]2.5[% @else %]2.0[%
                @end @if %]_ki * CF * amp(1)[%
                @end @for %]
                end if
