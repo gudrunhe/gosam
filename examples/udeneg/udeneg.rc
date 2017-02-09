@@ -4,8 +4,8 @@ process_path=virtual
 # PDG codes
 # u: 2, d: 1
 # Gluon: 21
-# Z-Boson: 23
 # e-: 11, \nu_e: 12
+
 in=2, -1
 out=12, -11, 21
 
