@@ -44,7 +44,7 @@ typedef std::vector<secdecutil::Series<secdecutil::SectorContainerWithDeformatio
 // Amplitude
 struct amplitude_term_t {
     integral_coeffs_t coefficient;
-    integral_t integral_sectors;
+//    integral_t integral_sectors; // TODO: include pySecDec integral in amplitude term
 };
 typedef std::vector<amplitude_term_t> amplitude_t;
 
