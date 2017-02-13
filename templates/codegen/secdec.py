@@ -48,7 +48,6 @@ li,
 epsord,
 form_optimization_level=2, form_work_space='[%form.workspace%]M',decomposition_method='iterative',
 contour_deformation=True, # TODO - may not need this
-force_unsafe_deformation=True, # TODO - investigate if this is necessary
 real_parameters=kinematicInvariants+masses
 )
 

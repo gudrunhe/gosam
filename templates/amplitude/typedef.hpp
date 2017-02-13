@@ -39,7 +39,7 @@ typedef double integral_real_t;
 typedef std::complex<double> integral_complex_t;
 typedef std::array<integral_real_t,[% @for mandelstam sym_prefix=es non-zero non-mass%][% @if is_last %][% index %][% @end @if %][% @end @for mandelstam %]+[% @for all_masses %][% @if is_last %][% index %][% @end @if %][% @end @for all_masses %]> integral_real_parameters_t;
 typedef std::array<integral_complex_t,0> integral_complex_parameters_t;
-typedef std::vector<secdecutil::Series<secdecutil::SectorContainerWithDeformation<integral_real_parameters_t,integral_complex_parameters_t,integral_real_t,integral_complex_t>>> integral_t;
+typedef std::vector<secdecutil::Series<secdecutil::SectorContainerWithDeformation<integral_real_parameters_t,integral_complex_parameters_t>>> integral_t;
 
 // Amplitude
 struct amplitude_term_t {
