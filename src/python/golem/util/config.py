@@ -1481,9 +1481,9 @@ def testReduzeCompatibility(executable):
       (stdout, stderr) = p.communicate()
 
       # Check if the diagram was matched and if the name of the diagram was correctly maintained
-      with open("diagrams.match.yaml","r") as f:
-         diagrams_match = load(f)
-      if diagrams_match['diagram']['name'] != 5:
+      with open("diagrams.match.inc","r") as f:
+         diagrams_match = f.readline()
+      if not diagrams_match.startswith('id DiaMatch(5)'):
          return False
 
       # Check sectormappings folder was created by Reduze
