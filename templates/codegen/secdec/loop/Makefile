@@ -6,7 +6,7 @@ FORMHEADERS=$(SRCS:.py=.hh)
 %.hh: %.py
 	@echo Secdec is decomposing integral $(subst .py,,$<)
 	@$(PYTHON) $<
-	@$(MAKE) -C $(subst .py,,$<)
+	@$(MAKE) dynamic -C $(subst .py,,$<)
 
 .PHONY: decompose-stamp
 
