@@ -1,9 +1,9 @@
 #-
 Indices mu,nu,rho,sigma;
-S k,l,s,u,t,es12,es23;
+S k,l,s,u,t,es12,es23,Projlabel1,Projlabel2,Projlabel3;
 CF Pmunu,Rmu,H,A1,A2,A3;
 CF B1,B2,B3,B4,B5,B6;
-CFunctions Projector, ProjLabel;
+CFunctions Projector;
 CFunctions inp, inplorentz, inpcolor;
 Indices iDUMMY1, ..., iDUMMY5;
 Vectors k1, k2, k3, k4;
@@ -21,28 +21,21 @@ nwrite statistics;
 * second projector corresponds to B^1_11
 * third projector corresponds to C_2111
 
-g res= SCREEN(inplorentz(2,iDUMMY1,k1,0))*
-  SCREEN(inplorentz(2,iDUMMY2,k2,0))*
-  SCREEN(inplorentz(2,iDUMMY3,k3,0))*
-  SCREEN(inplorentz(2,iDUMMY4,k4,0));
+g res= inplorentz(2,iDUMMY1,k1,0)*
+  inplorentz(2,iDUMMY2,k2,0)*
+  inplorentz(2,iDUMMY3,k3,0)*
+  inplorentz(2,iDUMMY4,k4,0);
 
-id SCREEN(inplorentz(2,iDUMMY1?,k1,0))*
-SCREEN(inplorentz(2,iDUMMY2?,k2,0))*
-SCREEN(inplorentz(2,iDUMMY3?,k3,0))*
-SCREEN(inplorentz(2,iDUMMY4?,k4,0)) =
-ProjLabel(Proj1)*
-Projector
-  (
+id inplorentz(2,iDUMMY1?,k1,0)*
+inplorentz(2,iDUMMY2?,k2,0)*
+inplorentz(2,iDUMMY3?,k3,0)*
+inplorentz(2,iDUMMY4?,k4,0) =
+ProjLabel1*
    A1(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4)
-   )
-+ ProjLabel(Proj2)*
-Projector
-  (
-   B1(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4,1,1)
-   )
-+ ProjLabel(Proj3)*
-Projector
-  (
++ ProjLabel2*
+   B1(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4,1,1) 
++ ProjLabel3*
+( 
    Rmu(2,iDUMMY1)*Rmu(1,iDUMMY2)*Rmu(1,iDUMMY3)*Rmu(1,iDUMMY4)
    - 2*(
 	+ H(2,1)*B1(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4,1,1)
@@ -57,9 +50,11 @@ Projector
 	+ H(2,1)*H(1,1)*A2(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4)
 	+ H(2,1)*H(1,1)*A3(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4)
 	)
-   );
+ );
 
-argument Projector;
+
+
+*argument Projector;
 id B1(mu?,nu?,rho?,sigma?,k?,l?) = 
   + DenDim(dimS-3)*Pmunu(mu,nu)*Rmu(k,rho)*Rmu(l,sigma)
   - 2*H(k,l)*A1(mu,nu,rho,sigma);
@@ -83,10 +78,10 @@ id B5(mu?,nu?,rho?,sigma?,k?,l?) =
 id B6(mu?,nu?,rho?,sigma?,k?,l?) = 
   + DenDim(dimS-3)*Pmunu(rho,sigma)*Rmu(k,mu)*Rmu(l,nu)
   - 2*H(k,l)*A1(mu,nu,rho,sigma);
-endargument;
+*endargument;
 .sort
 
-argument Projector;
+*argument Projector;
 id A1(mu?,nu?,rho?,sigma?) = 
   DenDim(dimS-1)*DenDim(dimS-3)*
   DenDim(dimS-4)*(
@@ -110,10 +105,10 @@ id A3(mu?,nu?,rho?,sigma?) =
 		  - Pmunu(mu,rho)*Pmunu(nu,sigma) 
 		  + (dimS-2)*Pmunu(mu,sigma)*Pmunu(nu,rho)
 		  );
-endargument;
+*endargument;
 .sort
 
-argument Projector;
+*argument Projector;
 id Pmunu(mu?,nu?) = d_(mu,nu) - (
 			     k1(mu)*k1(nu)*2*H(1,1) +
 			     k2(mu)*k1(nu)*2*H(2,1) +
@@ -125,15 +120,15 @@ id Pmunu(mu?,nu?) = d_(mu,nu) - (
 			     k2(mu)*k3(nu)*2*H(2,3) +
 			     k3(mu)*k3(nu)*2*H(3,3) 
 			     );
-endargument;
+*endargument;
 .sort
 
-argument Projector; 
+*argument Projector; 
 id Rmu(k?,mu?) = 2*(H(k,1)*k1(mu) + H(k,2)*k2(mu) + H(k,3)*k3(mu));
-endargument;
+*endargument;
 .sort
 
-argument Projector; 
+*argument Projector; 
 *id H(1,1) = (1/s+1/u)/2;
 *id H(1,2) = 1/s/2;
 *id H(1,3) = 1/u/2;
@@ -153,7 +148,7 @@ id H(2,3) = 1/es23/2;
 id H(3,1) = -1/2/(es12 + es23);
 id H(3,2) = 1/es23/2;
 id H(3,3) = es12/es23/2/(es12 + es23);
-endargument;
+*endargument;
 .sort
 
 b DenDim,ProjLabel,H;
@@ -161,18 +156,18 @@ b DenDim,ProjLabel,H;
 print res;
 .sort
 
-#write <projectors.hh> "id SCREEN(inplorentz(2,iDUMMY1?,k1,0))*
-SCREEN(inplorentz(2,iDUMMY2?,k2,0))*   SCREEN(inplorentz(2,iDUMMY3?,k3,0))*
-SCREEN(inplorentz(2,iDUMMY4?,k4,0)) = %e",res;
+#write <projectors.hh> "id inplorentz(2,iDUMMY1?,k1,0)*
+inplorentz(2,iDUMMY2?,k2,0)* inplorentz(2,iDUMMY3?,k3,0)*
+inplorentz(2,iDUMMY4?,k4,0) = %e",res;
 
 .end
 
-argument Projector; 
+*argument Projector; 
 id s=es12;
 id 1/s=1/es12;
 id t=es23;
 id 1/t=1/es23;
 id u=-es12-es23;
 id 1/u=-1/(es12+es23);
-endargument;
+*endargument;
 .sort

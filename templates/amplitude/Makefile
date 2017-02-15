@@ -4,6 +4,12 @@ include ../Makefile.conf
 
 HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)
 
+INTS=$(patsubst %.so, %, $(patsubst integrals/lib%, -l%, $(wildcard integrals/*.so)))
+[% @for loops_generated %]
+COEFFS[%loop%]=$(patsubst %.so, %, $(patsubst coefficients/[%loop%]loop/src/lib%, -l%, $(wildcard coefficients/[%loop%]loop/src/*.so)))
+[% @end @for %]
+LDFLAGS=-Lintegrals $(INTS) [% @for loops_generated %] -Lcoefficients/[%loop%]loop/src $(COEFFS[%loop%]) [% @end @for %]
+
 .PHONY: source compile clean very-clean reduction[% @for loops_generated %] reductionl[%loop%] prepare_reductionl[%loop%][% @end @for %] prepare_reduction
 
 compile : source # TODO: recipe to come
@@ -22,6 +28,9 @@ endif
 
 prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end @for %]
 reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
+
+test:
+	$(CXX) $(CXXFLAGS) -Icoefficients/1loop/src -Iintegrals $(LDFLAGS) -o test.exe test.cpp
 
 clean:
 	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \

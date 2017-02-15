@@ -56,6 +56,9 @@ doc:
 		$(MAKE) $(S) -C $${dir} $@; \
 	done
 
+test:
+	$(MAKE) -C amplitude test
+
 clean:
 	@for dir in $(SUBDIRS); \
 	do \

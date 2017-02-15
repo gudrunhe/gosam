@@ -25,4 +25,3 @@ diagsum=False
 
 extensions=dot2tex,reduze
 
-reduze.bin=/home/ttp/sborowka/gosamXL/bin/reduze
