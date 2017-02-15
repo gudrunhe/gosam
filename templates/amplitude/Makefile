@@ -30,7 +30,7 @@ prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end
 reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 
 test:
-	$(CXX) $(CXXFLAGS) -Icoefficients/1loop/src -Iintegrals $(LDFLAGS) -o test.exe test.cpp
+	$(CXX) $(CXXFLAGS) [% @for loops_generated %] -Icoefficients/[%loop%]loop/src [% @end @for %] -Iintegrals $(LDFLAGS) -o test.exe test.cpp
 
 clean:
 	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
