@@ -86,7 +86,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function 
 #Write <`HeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
 
-#Write <`HeaderFile'> "integral_coeffs_t `$IntegralName'#@GoSamInternalNewline@#"
+#Write <`HeaderFile'> "coeffs_func_series_t `$IntegralName'#@GoSamInternalNewline@#"
 #Write <`HeaderFile'> "{#@GoSamInternalNewline@#"
 #Do ProjectorIndex = 1, `NUMPROJ'
   #Write <`HeaderFile'> "{"
@@ -138,7 +138,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function 
     #EndDo
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 
-    #Write <`CoefficientHeaderFile'> "integral_coeff_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
+    #Write <`CoefficientHeaderFile'> "coeff_func_series_t `$IntegralName'_Proj`ProjectorIndex'_c`ColorSymbolIndex'#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "\{#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "`$highestPole', // Minimum epsS order#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "{`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}, // Maximum epsS order#@GoSamInternalNewline@#"
