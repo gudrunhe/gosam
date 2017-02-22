@@ -1454,7 +1454,7 @@ modelfile.write("        sw = sqrt(1.0_ki-(mW*mW-i_*mW*wW)/(mZ*mZ-i_*mZ*wZ))\n")
 modelfile.write("        case(7)\n")
 modelfile.write("      ! mZ, sw --> mW\n")
 modelfile.write("        mW = sqrt(mZ*mZ-i_*mZ*wZ)*sqrt(1.0_ki-sw*sw)\n")
-modelfile.write("  end select\n")\n")
+modelfile.write("  end select\n")
 modelfile.write("  end subroutine\n")[$
 @end @if$]
 modelfile.write("!---#] EW scheme choice:\n")[$
