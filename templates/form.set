@@ -1,1 +1,2 @@
 WorkSpace [% form.workspace %]M
+MaxTermSize 2000000

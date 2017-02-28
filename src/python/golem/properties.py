@@ -409,7 +409,7 @@ form_threads = Property("form.threads",
    form.threads=4
    runs tform, the parallel version of FORM, on 4 cores.
    """,
-   int,2)
+   int,4)
 
 form_workspace = Property("form.workspace",
    """\

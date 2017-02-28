@@ -1,4 +1,7 @@
 #-
+Symbols dimS;
+Dimension dimS;
+
 Indices mu,nu,rho,sigma;
 S k,l,s,u,t,es12,es23,Projlabel1,Projlabel2,Projlabel3;
 CF Pmunu,Rmu,H,A1,A2,A3;
@@ -8,9 +11,11 @@ CFunctions inp, inplorentz, inpcolor;
 Indices iDUMMY1, ..., iDUMMY5;
 Vectors k1, k2, k3, k4;
 CFunction DenDim;
-Symbols dimS,dimD;
+Symbols dimD;
 CFunction SCREEN;
 AutoDeclare Symbols Proj;
+Symbols sDUMMY1;
+CFunction Den, prf;
 
 .global 
 
@@ -170,4 +175,35 @@ id 1/t=1/es23;
 id u=-es12-es23;
 id 1/u=-1/(es12+es23);
 *endargument;
+
+
 .sort
+
+L matrixelementsq = res*res;
+
+id k1.k1=0;
+id k1.k2=es12/2;
+id k1.k3=-(es12+es23)/2;
+id k2.k2=0;
+id k2.k3=es23/2;
+id k3.k3=0;
+
+.sort
+
+Denominators Den;
+.sort
+Repeat Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
+Repeat Id Den(sDUMMY1?) = prf(1,sDUMMY1);
+Repeat Id sDUMMY1?!{ProjLabel1,ProjLabel2,ProjLabel3} = prf(sDUMMY1,1);
+Repeat Id  sDUMMY1?^(-1) = prf(1,sDUMMY1);
+.sort
+
+PolyRatFun prf;
+.sort
+PolyRatFun;
+.sort
+
+B ProjLabel1, ProjLabel2, ProjLabel3;
+
+print;
+.end

@@ -9,6 +9,7 @@
 
 int main()
 {
+    std::cout.precision(15);
     std::cout << "---- Test Program Launched ----" << std::endl;
 
     invariants_t invariants;
