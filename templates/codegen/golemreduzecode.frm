@@ -110,7 +110,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function 
 
 #Write <`HeaderFile'> "#@GoSamInternalNewline@#"
 #Write <`HeaderFile'> "#endif#@GoSamInternalNewline@#"
-
+#Close <`HeaderFile'>
 .sort
 *--#] write header:
 
@@ -167,6 +167,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function 
 
     #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
     #Write <`CoefficientHeaderFile'> "#endif#@GoSamInternalNewline@#"
+    #Close <`CoefficientHeaderFile'>
   #EndDo
 #EndDo
 .sort
@@ -219,6 +220,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Test: Hide COLORINTERNAL function 
       #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
       #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
+      #Close <`CoefficientFile'>
       Drop [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(c`ColorSymbolIndex')];
       UnHide l`LOOPS'; 
       .sort

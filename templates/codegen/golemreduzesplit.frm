@@ -30,7 +30,7 @@ off statistics;
 
 B INT;
 .sort:bracket;
-Collect SCREEN;
+Collect SCREEN; * Error - collect statement could overflow!
 .sort:collect;
 
 * Tag each term ( integral * coefficient ) with TermLabel ^ TermNumber
@@ -55,6 +55,7 @@ Multiply TermLabel ^ $NumberOfTerms;
   #Write <`CoefficientFile'> "* Reduced integral times coefficient of integral `$IntegralName' "
   #Write <`CoefficientFile'> "* "
   #Write <`CoefficientFile'> "L l`LOOPS' = %e", [`TermNumber']
+*  #Close <`CoefficientFile'>
 * Write log of coefficient files
 *  #write <coefficient_log.yaml> "---"
 *  #write <coefficient_log.yaml> "integral:"
