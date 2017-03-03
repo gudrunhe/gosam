@@ -47,10 +47,14 @@ typedef std::vector<integral_complex_t> integral_complex_parameters_t;
 typedef std::vector<secdecutil::Series<secdecutil::IntegrandContainer<integral_complex_t, integral_real_t const * const>>> sector_make_integrands_return_t;
 typedef std::function<sector_make_integrands_return_t(const integral_real_parameters_t&, const integral_complex_parameters_t&,unsigned,integral_real_t,integral_real_t,integral_real_t)> sector_make_integrands_t;
 typedef secdecutil::Series<secdecutil::UncorrelatedDeviation<integral_complex_t>> integral_return_t;
+typedef secdecutil::Series<integral_complex_t> integral_prefactor_t;
+typedef std::function<integral_prefactor_t(integral_real_parameters_t,integral_complex_parameters_t)> integral_prefactor_function_t;
+
 
 // Amplitude
 struct amplitude_term_t {
     coeffs_func_series_t coefficient;
+    integral_prefactor_function_t integral_prefactor;
     sector_make_integrands_t sector_make_integrands;
 };
 typedef std::vector<amplitude_term_t> amplitude_t;

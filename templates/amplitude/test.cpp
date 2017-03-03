@@ -35,6 +35,13 @@ int main()
 
         coeffs_series_t coefficient = secdecutil::deep_apply(amplitude_term.coefficient, evaluate_coefficient);
 
+        // set real_parameters, complex_parameters
+        integral_prefactor_t integral_prefactor = amplitude_term.integral_prefactor(
+        {
+            [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %],[% @end @for %]
+            [% @for prefix=parameters. all_masses %][% mass %],[% @end @for %]
+        },{});
+
         // set real_parameters, complex_parameters, number_of_samples, deformation_parameters_maximum, deformation_parameters_minimum, deformation_parameters_decrease_factor
         sector_make_integrands_return_t sector_integrands =  amplitude_term.sector_make_integrands(
         {
@@ -44,8 +51,9 @@ int main()
 
         auto all_sectors = std::accumulate(++sector_integrands.begin(), sector_integrands.end(), *sector_integrands.begin() ); // TODO: add type box1L::nested_series_t<box1L::integrand_t>
         integral_return_t integral = secdecutil::deep_apply( all_sectors,  integrator.integrate );
+        integral_return_t integral_with_prefactor = integral_prefactor*integral;
 
-        return evaluated_amplitude_term_t {coefficient,integral};
+        return evaluated_amplitude_term_t {coefficient, integral_with_prefactor};
 
     };
 

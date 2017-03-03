@@ -142,7 +142,7 @@ for integral in integrals:
    integral_include_list.append('#include "' + name_cpp + '.hpp"')
 
    # generate amplitude term declaration for amplitude
-   amplitude_term_list.append('{ integral_coefficients::' + name_cpp + ', ' + name_cpp + '::make_integrands }')
+   amplitude_term_list.append('{ integral_coefficients::' + name_cpp + ', ' + name_cpp + '::prefactor' + ', ' + name_cpp + '::make_integrands }')
 
    # generate FORM code
    code_form.append("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = INT(" + name_cpp +  ");")
