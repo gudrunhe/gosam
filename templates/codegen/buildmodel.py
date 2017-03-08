@@ -45,7 +45,7 @@ modelfile.write(', &\n')
 modelfile.write('   & renormalisation, reduction_interoperation, &\n')
 modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
 modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
-@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice')[$
 @end @if$][$
@@ -189,7 +189,7 @@ modelfile.write("   end if\n")
 [$ @if ewchoose $]
 modelfile.write("    write(unit,'(A1,1x,A11,I2)') \"#\", \"ewchoice = \", ewchoice\n")[$
 @end @if$][$
-@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc smdiagehc $]
 modelfile.write("   write(unit,'(A1,1x,A27)') \"#\", \"--- PARAMETERS Overview ---\"\n")
 modelfile.write("   write(unit,'(A1,1x,A22)') \"#\", \"Boson masses & widths:\"\n")
 modelfile.write("   write(unit,'(A1,1x,A5,G23.16)') \"#\", \"mZ = \", mZ\n")
@@ -254,7 +254,7 @@ modelfile.write("   write(unit,'(A1,1x,A11,\"(\",G23.16,G23.16,\")\",\" calc.\")
 [$@end @select type $][$
 @end @for functions $]
 modelfile.write("   end if\n")
-[$@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smehc $]
+[$@select modeltype @case sm smdiag smehc sm_complex smdiag_complex smdiagehc $]
 modelfile.write("   end if\n")
 [$@end @select$]
 modelfile.write("   write(unit,'(A1,1x,A25)') \"#\", \"-------------------------\"\n")
@@ -882,7 +882,7 @@ modelfile.write("      logical :: must_be_real\n")
 modelfile.write("      must_be_real = .false.\n")
 modelfile.write("      ierr = 1 ! OK\n")
 modelfile.write("\n")[$
-@select modeltype @case sm smdiag smehc sm_complex smdiag_complex $][$
+@select modeltype @case sm smdiag smehc smdiagehc sm_complex smdiag_complex $][$
 @if gs_not_one $]
 modelfile.write("      if (name.eq.\"aS\" .or. name.eq.\"alphaS\" .or. name.eq.\"alphas\") then\n")
 modelfile.write("         gs = 2.0_ki*sqrt(pi)*sqrt(re)\n")
@@ -1221,7 +1221,7 @@ modelfile.write("      implicit none\n")
 modelfile.write("      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n")
 modelfile.write("      real(ki), parameter :: pi = 3.14159265358979323846264&\n")
 modelfile.write("     &3383279502884197169399375105820974944592307816406286209_ki\n")[$
-@select modeltype @case sm smdiag sm_complex smdiag_complex smehc $][$
+@select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $]
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @if $][$
@@ -1277,7 +1277,7 @@ modelfile.write("\n")
 modelfile.write("      sort4 = m(n)\n")
 modelfile.write("   end  function sort4\n")
 modelfile.write("!---#] utility functions for model initialization:\n")
-[$ @select modeltype @case sm smdiag smehc $][$
+[$ @select modeltype @case sm smdiag smehc smdiagehc $][$
 @if ewchoose $]
 modelfile.write("!---#[ EW scheme choice:\n")[$
 @if e_not_one $]
