@@ -1,7 +1,7 @@
 program test
 use ggH_config, only: ki, logfile, nlo_prefactors
 use ggH_kinematics, only: dotproduct, boost_to_cms
-use ggH_model, only: parse
+use ggH_model!, only: parse
 use ggH_matrix, only: samplitude, &
 & initgolem, exitgolem, ir_subtraction
 use ggH_color, only: numcs, CA
@@ -37,7 +37,7 @@ nlo_prefactors=0  ! Do not include any NLO prefactors in order to recognize
 
 call cpu_time(t1)
 do ievt = 1, NEVT
-call ramb(5.0E+02_ki**2, vecs)
+call ramb(mH**2, vecs)
 
 call boost_to_cms(vecs)
 
