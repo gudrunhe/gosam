@@ -57,19 +57,62 @@ int main()
 
     };
 
-    auto evaluated_amplitude = secdecutil::deep_apply(amplitude_l1_terms, evaluate_amplitude);
+    evaluated_amplitude_t evaluated_amplitude = secdecutil::deep_apply(amplitude_l1_terms, evaluate_amplitude);
 
-    for (auto term : evaluated_amplitude )
+    for (evaluated_amplitude_term_t term : evaluated_amplitude )
     {
         std::cout << "  + (" << term.integral << ") * " << std::endl << std::endl;
         std::cout << "    (" << std::endl;
-        for (auto projector_coefficient : term.coefficient )
-            for (auto color_projector_coefficient : projector_coefficient )
+        for (std::vector<coeff_series_t> projector_coefficient : term.coefficient )
+            for (coeff_series_t color_projector_coefficient : projector_coefficient )
                 std::cout << "      + (" << color_projector_coefficient  << ")" << std::endl;
         std::cout << "    )" << std::endl;
-        
     };
-    
+
+    int number_of_projectors = evaluated_amplitude.front().coefficient.size();
+    int number_of_color_structures = evaluated_amplitude.front().coefficient.front().size();
+
+    // Initialise empty result matrix
+    std::vector<std::vector<integral_return_t>> result; // TODO: typedef this, inner type should be integral_return_t * coeff_series_t
+    for(int i = 0; i<number_of_projectors; i++)
+    {
+        std::vector<integral_return_t> temp; // TODO: inner type should be integral_return_t * coeff_series_t
+        for(int j = 0; j<number_of_color_structures; j++)
+        {
+            temp.push_back({0,0,{0},false,"eps"});
+        }
+        result.push_back(temp);
+    }
+
+    // Add each term of the amplitude to the result
+    for (evaluated_amplitude_term_t term : evaluated_amplitude )
+    {
+        int p = 0;
+        for (std::vector<coeff_series_t> projector_coefficient : term.coefficient )
+        {
+            int c = 0;
+            for (coeff_series_t color_projector_coefficient : projector_coefficient )
+            {
+                result.at(p).at(c) += color_projector_coefficient * term.integral;
+                ++c;
+            }
+            ++p;
+        }
+    };
+
+    std::cout << "---- Result ----" << std::endl;
+    int p = 0;
+    for(std::vector<integral_return_t> projector_result: result )
+    {
+        int c = 0;
+        for(integral_return_t color_projector_result: projector_result)
+        {
+            std::cout << "c" << c <<"p" << p << ": " << color_projector_result  << ")" << std::endl;
+            ++c;
+        }
+        ++p;
+    }
+
     std::cout << "---- Fin ----" << std::endl;
     
 }

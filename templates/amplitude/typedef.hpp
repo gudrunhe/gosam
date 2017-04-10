@@ -64,5 +64,6 @@ struct evaluated_amplitude_term_t {
     coeffs_series_t coefficient;
     integral_return_t integral;
 };
+typedef std::vector<evaluated_amplitude_term_t> evaluated_amplitude_t;
 
 #endif
