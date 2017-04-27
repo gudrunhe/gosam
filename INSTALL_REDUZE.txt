@@ -1,0 +1,70 @@
+=
+= Instructions to install Reduze 2 on Draco
+= I installed to: /ptmp/sjones/reduze
+= Assume all below commands are issued from this directory
+=
+
+== SETUP ==
+-- ENTER INTO PATH
+vim ~/.bash_profile
+export TMPDIR="/ptmp/sjones/tmp"
+(now logout then login)
+
+module load gcc/5.4 git cmake
+
+== CLN ==
+git clone git://www.ginac.de/cln.git
+cd cln
+autoreconf -i
+export CC=mpicc
+export CXX=mpicxx
+./configure --prefix=`pwd`
+make -j 32
+make check
+make install
+(make install gives an error but all should be ok)
+
+-- ENTER INTO PATH
+vim ~/.bash_profile
+export LD_LIBRARY_PATH="/ptmp/sjones/reduze/cln/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/ptmp/sjones/reduze/cln:$PKG_CONFIG_PATH"
+(now logout then login and run the module commands again)
+
+== GiNaC 1.6.7 (tried 1.7.0 but it does not work with Reduze) ==
+git clone git://www.ginac.de/ginac.git
+cd ginac
+git checkout release_1-6-7
+autoreconf -i
+export CC=mpicc
+export CXX=mpicxx
+./configure --prefix=`pwd`
+make -j 32
+make check -j 32
+make install
+
+-- ENTER INTO PATH
+vim ~/.bash_profile
+export LD_LIBRARY_PATH="/ptmp/sjones/reduze/ginac/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/ptmp/sjones/reduze/ginac:$PKG_CONFIG_PATH"
+(now logout then login and run the module commands again)
+
+== FERMAT ==
+curl -O https://home.bway.net/lewis/fermat64/ferl64.tar.gz
+tar -xzvf ferl64.tar.gz
+
+-- TURN OFF FAST DIVIDE TEST
+vim ferl64/BACKWARD/ferstart.txt
+&(_t=0);
+
+== Reduze (Without DB) ==
+tar -xzvf reduze-2.1.x-291-g1ee0dc5.tar.gz
+cd reduze-2.1.x-291-g1ee0dc5_db
+cmake -DCMAKE_INSTALL_PREFIX=`pwd` -DCMAKE_CXX_COMPILER=mpicxx -DUSE_MPI=ON
+make -j
+make check
+make install
+
+-- ENTER INTO PATH
+vim ~/.bash_profile
+export PATH="/ptmp/sjones/reduze/reduze-2.1.x-297-g01c1202/bin:$PATH"
+(now logout then login and run the module commands again)
