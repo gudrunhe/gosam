@@ -15,7 +15,8 @@ int main()
     invariants_t invariants;
     parameters_t parameters;
 
-    [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %]=1.;
+    [% @for mandelstam sym_prefix=invariants.es non-zero %]
+    [% @if is_non-mass %][% symbol %]=1.;[% @end @if %]
     [% @if is_first %]invariants.factoutscale = [% symbol %];[% @end @if %]
     [% @end @for %]
 
