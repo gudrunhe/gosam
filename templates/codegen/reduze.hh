@@ -20,6 +20,7 @@ CFunction Shift; * container for momentum shifts
 CFunction DiaMatch; * container for diagram number
 CFunctions inversePropagator; * inverse propagator inversePropagator(p1,m^2) = p1.p1 - m^2
 CFunctions INT; * Reduze integral function (stores the inverse powers of the propagators)
+CFunctions INTDIMLESS; * Reduze integral function with mass dimension factored out
 CFunction ProjDen; * function for storing projector denominators ProjDen(x)=1/x;
 CFunction ProjNum; * function for storing projector numerators ProjNum(x)=x;
 CFunction DenDim; * function for storing dimension denominators DenDim(dimS+n) = 1/(dimS+n);
@@ -27,6 +28,7 @@ CFunction Dim; * function for storing dimension numerators Dim(dimS) = dimS;
 CFunction Den;
 CFunctions Projector, ProjLabel; * functions for storing the projector and its label
 Symbols sDUMMY5,[];
+Symbols factoutscale; * Scale factored out of each integral to make it dimensionless
 
 * tag each diagram with DiaMatch(qgraf_digram_index)
 #Procedure DiaMatchTagReduze()

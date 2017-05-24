@@ -122,6 +122,8 @@ for integral in integrals:
 
    graph = name + "pow" + powerlist.replace(',', '_')
 
+   integral_t, integral_id, integral_r, integral_s, = tidrs.split(',')
+
    # check for integral in shifted dimensions
    dim=4
    dimRegex = re.findall('dim(inc|dec)(\d+)',name)
@@ -145,7 +147,7 @@ for integral in integrals:
    amplitude_term_list.append('{ integral_coefficients::' + name_cpp + ', ' + name_cpp + '::prefactor' + ', ' + name_cpp + '::make_integrands }')
 
    # generate FORM code
-   code_form.append("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = INT(" + name_cpp +  ");")
+   code_form.append("Id INT(" + name + ',' + tidrs + ',[],' + powerlist + ") = factoutscale^( (" + str(dim) + "/2) * `LOOPS' - " + str(integral_r) + " + " + str(integral_s) + ") * INTDIMLESS(" + name_cpp +  ");")
 
    # write SecDec kinematics file and run card
    kinematics_outfile = os.path.join(args.outpath, graph + '.m')

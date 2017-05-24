@@ -13,6 +13,7 @@ struct invariants_t
 [% @for mandelstam sym_prefix=es non-zero non-mass %]
     invariant_t [% symbol %];[% @end @for mandelstam %]
 
+    invariant_t factoutscale;
 };
 
 #endif

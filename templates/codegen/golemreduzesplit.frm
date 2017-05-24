@@ -28,7 +28,7 @@ off statistics;
 * Write each integral times coefficient into its own file
 *
 
-B INT;
+B INTDIMLESS;
 .sort:bracket;
 Collect SCREEN; * Error - collect statement could overflow!
 .sort:collect;
@@ -47,7 +47,7 @@ Multiply TermLabel ^ $NumberOfTerms;
   .sort
   Hide l`LOOPS';
   .sort
-  Id INT(ReduzeF?$IntegralName,?a) = INT(ReduzeF,?a); * Get integral name
+  Id INTDIMLESS(ReduzeF?$IntegralName,?a) = INTDIMLESS(ReduzeF,?a); * Get integral name
   .sort
 * Write coefficient to file
   #Define CoefficientFile "coefficients/`LOOPS'loop/codegen/coefficient_`$IntegralName'.coeff"

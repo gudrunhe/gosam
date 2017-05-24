@@ -16,6 +16,7 @@ int main()
     parameters_t parameters;
 
     [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %]=1.;
+    [% @if is_first %]invariants.factoutscale = [% symbol %];[% @end @if %]
     [% @end @for %]
 
     secdecutil::cuba::Vegas<integral_complex_t> integrator;
@@ -45,6 +46,7 @@ int main()
         // set real_parameters, complex_parameters, number_of_samples, deformation_parameters_maximum, deformation_parameters_minimum, deformation_parameters_decrease_factor
         sector_make_integrands_return_t sector_integrands =  amplitude_term.sector_make_integrands(
         {
+            invariants.factoutscale,
             [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %],[% @end @for %]
             [% @for prefix=parameters. all_masses %][% mass %],[% @end @for %]
         },{},100000,1.,1.e-5,0.9);

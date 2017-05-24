@@ -25,7 +25,7 @@ Off Statistics;
 *--#] load result:
 
 *--#[ read integral name, lowest_prefactor_order, lowest_order:
-Id INT(ReduzeF?$IntegralName,sDUMMY1?$LowestPrefactorOrder,sDUMMY2?$LowestOrder) = 1; 
+Id INTDIMLESS(ReduzeF?$IntegralName,sDUMMY1?$LowestPrefactorOrder,sDUMMY2?$LowestOrder) = 1; 
 .sort
 *#Write "IntegralName = `$IntegralName'"
 *#Write "LowestPrefactorOrder = `$LowestPrefactorOrder'"

@@ -1,5 +1,4 @@
 import pySecDec as psd
-prefactor=1 # todo
 
 # these lines are replaced by tosecdec.py
 dim='%(dim)s-2*eps' 
@@ -7,6 +6,12 @@ proplist=[ %(proplist)s ]
 powerlist=[ %(powerlist)s ]
 name='%(graph)s'
 epsord=%(epsord)s
+
+integral_r = sum(x for x in powerlist if x > 0)
+integral_s = sum(-x for x in powerlist if x < 0)
+
+# factor out the mass dimension of the intgral
+prefactor='factoutscale^-( 0.5*(' + str(%(dim)s) + ')*[% loop %] -' + str(integral_r) + '+' + str(integral_s) + ')'
 
 gosamIncoming = [[% @for particles initial %]'k[%index%]'[% @if eval index .lt. num_in %], [% @end @if %][%@end @for %]]
 gosamOutgoing = [[% @for particles final %]'k[%index%]'[% @if eval index .lt. num_out %], [% @end @if %][%@end @for %]]
@@ -48,10 +53,11 @@ li,
 epsord,
 form_optimization_level=2, form_work_space='[%form.workspace%]M',decomposition_method='iterative',
 contour_deformation=True, # TODO - may not need this
-real_parameters=kinematicInvariants+masses
+real_parameters=['factoutscale']+kinematicInvariants+masses,
+additional_prefactor=prefactor
 )
 
 # write FORM file containing information about 'eps' orders appearing in the expansion of the prefactor and integral
 form_outfilename = name + ".hh"
 with open(form_outfilename, 'w') as form_outfile:
-   form_outfile.write("Id INT(" + name + ") = INT(" + name + "," + li_info["lowest_prefactor_orders"] + "," + li_info["lowest_orders"] + ");\n" )
+   form_outfile.write("Id INTDIMLESS(" + name + ") = INTDIMLESS(" + name + "," + li_info["lowest_prefactor_orders"] + "," + li_info["lowest_orders"] + ");\n" )
