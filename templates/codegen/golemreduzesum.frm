@@ -8,26 +8,14 @@ off statistics;
 #Include- projectors.hh
 #Include- spinney.hh
 #Include- model.hh
+#Include- largeprf.hh
 
 * Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
 #Define ProjectorLabels ""
 #Do label = 1, `NUMPROJ'
-#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+  #Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
 #EndDo
 .sort
-
-***** WARNING THE FOLLOWING CODE DOES NOT WORK *****
-* #IfDef `MASSCT'
-* #Do i = `FIRST', `LAST'
-* #include- d`i'h0l`LOOPS'mct.log
-* #EndDo
-* #Else
-* #Do i = `FIRST', `LAST'
-* #include- d`i'h0l`LOOPS'.log
-* #EndDo
-* #EndIf
-***** END WARNING *****
-
 
 [% @for loops_generated %]
 * Process sum
@@ -42,49 +30,73 @@ off statistics;
 G sum =
 #Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
 #If x`i' != x
-   + d`i'l`LOOPS'
+   + diagram`i'
 #EndIf
 #EndDo
 ;
 #EndIf
 
-[% @end @for %]
-
 .sort:sum;
 
-Drop;
-NDrop sum;
+#Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+#If x`i' != x
+  Drop diagram`i';
+#EndIf
+#EndDo
+
+.sort:drop;
+
+[% @end @for %]
+
+
+#call split(sum,list,INT,D,fDUMMY1)
 .sort
 
-* Simplify coefficients
-PolyRatFun prf;
-.sort:prf;
-* Simplify dimension dependent coefficients
-Id Dim(sDUMMY1?) = prf(sDUMMY1,1);
-.sort
-Id DenDim(sDUMMY1?) = prf(1,sDUMMY1);
-.sort
-PolyRatFun;
-.sort:noprf;
+#Do coeff = list
+  #Ifdef `coeff'
+    #call topolyratfun(`coeff',N,D,Den,0 , tmp1,tmp2)
+  #EndIf
+#EndDo
 
-*B INT;
-*.sort:bracket;
-*Collect SCREEN;
-*.sort:collect;
+*
+* Write amplitude
+*
+skip list;
+#Do e = {`activeexprnames_'}
+  #IfDef `e' 
+    #Write <l`LOOPS'.txt>"L `e' = %e" `e'
+  #EndIf
+#EndDo
+.sort
 
-#Write <l`LOOPS'.txt>, "L l`LOOPS' = %e", sum
-.sort:writesum;
+Drop; NDrop sum;
+.sort
+
+#call producelist(sum,list,INT)
+.sort
+
+Drop sum;
+.sort
+
+* Discard prefactors from INT function
+Repeat Id INT(sDUMMY1?,?a,[],?b,[],?c) = INT(?a,[],?b,[],?c);
+Id Once INT([],?a) = INT(?a);
+.sort
+
+* Bring INT to form expected by toreduze.py
+Id INT(sDUMMY1?,?a) = INT(sDUMMY1,[],?a);
+DropCoefficient;
+.sort
 
 *
 * Write list of integrals
 *
-Id SCREEN?!{,INT}(?head)=1;
-Id sDUMMY1?=1;
-.sort:drop screen;
-DropCoefficient;
-.sort:drop coeff;
-Id INT(sDUMMY1?,?tail) = INT(sDUMMY1,[],?tail);
-.sort
+#Write <integralsl`LOOPS'.txt>, "+ %E", list
+print+s;
+.end
+
+
+
 
 ********* TESTING CODE ********
 * Throw away information regarding which INT are crossed (for FIRE/LiteRed)
@@ -100,7 +112,5 @@ DropCoefficient;
 .sort:drop coeff;
 #EndIf
 ********* TESTING CODE ********
-#Write <integralsl`LOOPS'.txt>, "+ %E", sum
-*print+s;
-.end
+
 

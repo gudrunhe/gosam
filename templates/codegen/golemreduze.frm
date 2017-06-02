@@ -7,11 +7,12 @@ off statistics;
 #Include- secdec.hh
 #Include- projectors.hh
 #Include- spinney.hh
+#Include- largeprf.hh
 
 * Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
 #Define ProjectorLabels ""
 #Do label = 1, `NUMPROJ'
-#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+  #Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
 #EndDo
 .sort
 
@@ -255,7 +256,6 @@ Id ZERO = 0;
 #Call TraceReduze
 #Call kinematics
 #Call SPToPropReduze
-*#Call enforceconservation
 #Call kinematics
 #Call MapReduze
 
@@ -283,7 +283,10 @@ Id csqrt(sDUMMY1?^2) = sDUMMY1;
 Id i_ = PREFACTOR(i_);
 Id dimS = Dim(dimS);
 Id dimD = PREFACTOR(dimD);
-Normalize Dim, DenDim;
+.sort
+
+* Normalize all functions
+Normalize Dim, DenDim, ProjNum, ProjDen, PREFACTOR;
 .sort
 
 #Call ExpandProjectors
@@ -294,25 +297,47 @@ Argument ProjNum,ProjDen,Den;
 EndArgument;
 .sort
 
-
-Id PREFACTOR(sDUMMY1?)^sDUMMY2 = PREFACTOR(sDUMMY1^sDUMMY2);
-Repeat Id PREFACTOR(sDUMMY1?)*PREFACTOR(sDUMMY2?) = PREFACTOR(sDUMMY1*sDUMMY2);
-Normalize PREFACTOR;
+* Simplify trivial prefactors
+Id PREFACTOR(1) = 1;
+Id PREFACTOR(i_)^2 = -1;
 .sort
 
-* Simplify coefficients
-#Call FeedPolyRatFun(`ProjectorLabels')
-PolyRatFun prf;
-.sort:prf;
-PolyRatFun;
-.sort:prf;
+* Unwrap dimension prefactors, 
+* an obvious optimization is to leave this as late as possible 
+* this would reduce the number of symbols appearing in gcd by 1
+Id Dim(sDUMMY1?) = sDUMMY1;
+Id DenDim(?args) = Den(?args);
+
+* Push projector labels, prefactor, colorfactor, colorinternal into INT 
+* where they will not be touched
+Id Once sDUMMY1?{,`ProjectorLabels'}*INT(?b) = INT(sDUMMY1,[],?b);
+Repeat Id fDUMMY1?{PREFACTOR,COLORFACTOR,COLORINTERNAL,Dim,DenDim}(?a)*INT(?b) = INT(fDUMMY1(?a),?b);
+.sort
+
+#call split(diagram`DIAG',list,INT,D`DIAG',SCREEN)
+.sort
+
+Id ProjNum(sDUMMY1?) = sDUMMY1;
+Id ProjDen(?args) = Den(?args);
+.sort
+
+* Simplify numerators and denominators
+#Do coeff = list
+  #Ifdef `coeff'
+    #call topolyratfun(`coeff',N,D,Den,1 , tmp1,tmp2)
+  #EndIf
+#EndDo
+
+Drop list;
+.sort
 
 *
 * Write amplitude
 *
-Bracket `ProjectorLabels',PREFACTOR,COLORFACTOR;
-*print+s;
-.sort
-#Write <`OUTFILE'.txt> "L d`DIAG'l`LOOPS' = %e", diagram`DIAG'
+#Do e = {`activeexprnames_'}
+  #IfDef `e' 
+    #Write <`OUTFILE'.txt>"L `e' = %e" `e'
+  #EndIf
+#EndDo
 .end
 

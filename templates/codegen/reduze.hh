@@ -19,7 +19,8 @@ CFunction Tag; * container for momentum/mass of ReduzeN
 CFunction Shift; * container for momentum shifts
 CFunction DiaMatch; * container for diagram number
 CFunctions inversePropagator; * inverse propagator inversePropagator(p1,m^2) = p1.p1 - m^2
-CFunctions INT; * Reduze integral function (stores the inverse powers of the propagators)
+AutoDeclare CFunction INT; * Reduze integral function (stores the inverse powers of the propagators)
+AutoDeclare CFunctions INTD;
 CFunctions INTDIMLESS; * Reduze integral function with mass dimension factored out
 CFunction ProjDen; * function for storing projector denominators ProjDen(x)=1/x;
 CFunction ProjNum; * function for storing projector numerators ProjNum(x)=x;
