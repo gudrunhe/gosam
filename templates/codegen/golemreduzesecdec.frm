@@ -9,6 +9,7 @@ off statistics;
 #Include- symbols.hh
 #Include- spinney.hh
 #Include- model.hh
+#Include- largeprf.hh
 
 * Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
 #Define ProjectorLabels ""
@@ -23,8 +24,26 @@ off statistics;
 G l`LOOPS' = l`LOOPS';
 .sort:sum;
 
-#include- reductionl`LOOPS'.hh
+* Pull prefactors out of INT function
+Repeat Id INT(sDUMMY1?,?a,[],?b,[],?c) = sDUMMY1*INT(?a,[],?b,[],?c);
+Id Once INT([],?a) = INT(?a);
+.sort
+
+* Apply reduction
+#include- integralsl`LOOPS'.hh
 .sort:reduce;
+
+* Push projector labels, prefactor, colorfactor, colorinternal into INT 
+* where they will not be touched
+Id Once sDUMMY1?{,`ProjectorLabels'}*INT(?b) = INT(sDUMMY1,[],?b);
+Repeat Id fDUMMY1?{PREFACTOR,COLORFACTOR,COLORINTERNAL,Dim,DenDim}(?a)*INT(?b) = INT(fDUMMY1(?a),?b);
+.sort
+
+
+**** UP TO HERE
+B INT;
+print+s;
+.end
 
 Denominators Den;
 .sort

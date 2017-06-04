@@ -7,5 +7,5 @@ jobs:
       output_file: "integrals.sol"
   - export:
       input_file: "integrals.sol"
-      output_file: "../../reductionl[% loop %].hh"
+      output_file: "reductionl[% loop %].hh"
       output_format: "form"

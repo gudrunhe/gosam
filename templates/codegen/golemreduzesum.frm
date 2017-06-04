@@ -27,7 +27,7 @@ off statistics;
 #EndIf
 #EndDo
 
-G sum =
+G l`LOOPS' =
 #Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
 #If x`i' != x
    + diagram`i'
@@ -49,7 +49,7 @@ G sum =
 [% @end @for %]
 
 
-#call split(sum,list,INT,D,fDUMMY1)
+#call split(l`LOOPS',list,INT,D,fDUMMY1)
 .sort
 
 #Do coeff = list
@@ -69,13 +69,13 @@ skip list;
 #EndDo
 .sort
 
-Drop; NDrop sum;
+Drop; NDrop l`LOOPS';
 .sort
 
-#call producelist(sum,list,INT)
+#call producelist(l`LOOPS',list,INT)
 .sort
 
-Drop sum;
+Drop l`LOOPS';
 .sort
 
 * Discard prefactors from INT function

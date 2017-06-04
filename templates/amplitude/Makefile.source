@@ -120,6 +120,7 @@ reduze_reduce_l[%loop%]-stamp : integralsl[%loop%].m
 
 reduze_insert_l[%loop%]-stamp : reduze_reduce_l[%loop%]-stamp #reductionl[%loop%]
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_insert.yaml > reduze_insert.log
+	@cd ../codegen && python split_reduction.py --reduction="$(REDUZE_PATH_L[%loop%])/reductionl[%loop%].hh" --coeff="COEFF" --suffix="l[%loop%]"
 	@touch reduze_insert_l[%loop%]-stamp
 
 #

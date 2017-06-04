@@ -276,6 +276,7 @@
             <file src="secdec.py" dest="secdecl%d.py" arguments="loop" class="Integrals"/>
         </foreach>
         <file src="translate_reduze.py"  class="Verbatim"/>
+        <file src="split_reduction.py" class="Verbatim"/>
         <file src="largeprf.hh" class="Verbatim"/>
         <file src="reduze.hh" class="Verbatim"/>
         <file src="secdec.hh" class="Verbatim"/>

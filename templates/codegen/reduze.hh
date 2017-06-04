@@ -30,6 +30,7 @@ CFunction Den;
 CFunctions Projector, ProjLabel; * functions for storing the projector and its label
 Symbols sDUMMY5,[];
 Symbols factoutscale; * Scale factored out of each integral to make it dimensionless
+AutoDeclare Symbols COEFF; * Used as labels for the coefficients of integrals in the reduction
 
 * tag each diagram with DiaMatch(qgraf_digram_index)
 #Procedure DiaMatchTagReduze()
