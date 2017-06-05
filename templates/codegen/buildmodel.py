@@ -561,15 +561,16 @@ modelfile.write("         end if\n")[$
       @for slha_entries index=index1 $]
          [$
          @if is_first $][$ @else $]
-modelfile.write("         else\n")[$
+modelfile.write("         end if\n")[$
          @end @if$]
 modelfile.write("               if(idx1.eq.[$index1$]) then\n")[$
          @for slha_entries index=index2 $]
             [$
-            @if is_first $][$ @else $]
-modelfile.write("         else\n")[$
+            @if is_first $]
+modelfile.write("if(idx2.eq.[$index2$]) then\n")            
+            [$ @else $]
+modelfile.write(" elseif(idx2.eq.[$index2$]) then\n")[$
             @end @if $]
-modelfile.write("if(idx2.eq.[$index2$]) then\n")
 modelfile.write("               [$ $_ $] = parsereal(value, ierr, lnr)\n")[$
             @if is_last $]
 modelfile.write("            end if\n")[$

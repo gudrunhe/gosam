@@ -3,7 +3,7 @@
 off statistics;
 
 #include symbols.hh
-CF sqrt,sin,if,complexconjugate,cos,tan,pi;
+CF sqrt,sin,if,complexconjugate,cos,tan,pi,atan;
 
 * for the SM...
 AutoDeclare S xy;
