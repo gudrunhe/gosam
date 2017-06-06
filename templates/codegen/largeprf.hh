@@ -3,6 +3,80 @@
 * without the limitation that the entire expression must fit into a single term
 *
 
+#procedure add(n1,d1,n2,d2 , gcd,lcm)
+
+*
+* Computes n1/d1 + n2/d2 = (n1*d2 + n2*d1) / (d1 * d2)
+* Stores resulting numerator/denominator in n1/d1
+*
+
+* Step 1: Compute lcm(d1,d2)
+	skip; nskip `gcd',`lcm';
+	Local `lcm' = `d1'*`d2';
+	Local `gcd' = gcd_(`d1',`d2');
+	.sort
+	skip; nskip `lcm';
+	Local `lcm' = div_(`lcm',`gcd');
+	.sort
+
+* Step 2: Divide d1,d2 by gcd(d1,d2)
+	drop `gcd';
+	skip; nskip `d1',`d2';
+	Local `d1' = div_(`d1', `gcd');
+	Local `d2' = div_(`d2', `gcd');
+	.sort
+
+* Step 3: Build result as (n1*d2/gcd(d1,d2) + n2*d1/gcd(d1,d2))/lcm(d1,d2)
+	drop `lcm';
+	skip; nskip `n1',`d1';
+	Local `n1' = `n1' * `d2' + `n2' * `d1';
+	Local `d1' = `lcm';
+	.sort
+
+* Step 4: Divide numerator and denominator by their gcd
+	skip; nskip `gcd';
+	#If ( termsin(`n1') == 0)
+		Local `gcd' = `d1';
+	#Else
+		Local `gcd' = gcd_(`d1',`n1');
+	#EndIf
+	.sort
+	skip; nskip `n1',`d1';
+	drop `gcd';
+	Local `n1' = div_(`n1',`gcd');
+	Local `d1' = div_(`d1',`gcd');
+
+#endprocedure
+
+#procedure multiply(n1,d1,n2,d2,nr,dr , gcd1,gcd2,ntmp,dtmp)
+*
+* Computes n1/d1 * n2/d2 stores result in nr,dr
+* Stores resulting numerator/denominator in n1/d1
+* Assumes gcd(n1,d1) = 1, gcd(n2,d2) = 1
+*
+
+* Step 1: Divide n1,d2 by their gcd, same for n2,d1
+	skip; nskip `gcd1',`gcd2';
+	L `gcd1' = gcd_(`n1',`d2');
+	L `gcd2' = gcd_(`n2',`d1');
+	.sort
+	Drop `gcd1',`gcd2';
+	skip; nskip `nr',`dr',`ntmp',`dtmp';
+	L `nr' = div_(`n1',`gcd1');
+	L `dr' = div_(`d2',`gcd1');
+	L `ntmp' = div_(`n2',`gcd2');
+	L `dtmp' = div_(`d1',`gcd2');
+	.sort
+
+* Step 2: Multiply
+	Drop `ntmp', `dtmp';
+	skip; nskip `nr',`dr';
+	L `nr' = `nr'*`ntmp';
+	L `dr' = `dtmp'*`dr';
+	.sort
+
+#endprocedure
+
 #procedure producelist(expr,list,INT)
 
 *
@@ -30,6 +104,61 @@
 	skip; nskip `list';
 	dropcoefficient;
 	.sort
+
+#endprocedure
+
+#procedure simplifyproduct(expr,list,DINT , current,tmp1,tmp2,tmp3,tmp4)
+*
+* Takes expressions of the form
+* expr = INT(...)*DINT(1,COEFF1) + ...
+* where DINT(1,COEFF1) should be interpreted as
+* DINT(1)*COEFF1
+*
+* Computes all products in the expression and
+* saves results to [N`DINT'(x)], [D`DINT'(x)] where
+* x is an index greater than any index
+* currently appearing in `expr'
+*
+
+	#call producelist(`expr',`list',`DINT')
+
+* Step 1: Get largest index used for `DINT'
+	skip; nskip `list';
+	Id `DINT'(sDUMMY1?) = TermLabel^sDUMMY1*`DINT'(sDUMMY1);
+	.sort
+	skip; nskip `list';
+	#$index = 0;
+	if ( count(TermLabel,1) > $index ) $index = count_(TermLabel,1);
+	ModuleOption,maximum,$index;
+	.sort
+
+* Step 2: Drop term labels and terms from list that are not products
+	skip; nskip `list';
+	Id TermLabel = 1;
+	Id `DINT'(sDUMMY1?) = 0;
+	.sort
+
+* Step 3: Iterate through list of products
+	#Do term = `list'
+
+* Step 3a) Increment index
+		#$index = $index+1;
+
+* Step 3b) Write current product to its own expression
+		skip; nskip `current';
+		L `current' = `term';
+		Id `DINT'(sDUMMY1?$fac1,sDUMMY2?$fac2) = 0;
+		.sort
+
+* Step 3c) Perform multiplication
+		Drop `current';
+		#call multiply([N`DINT'(`$fac1')],[D`DINT'(`$fac1')],N`$fac2',D`$fac2',[N`DINT'(`$index')],[D`DINT'(`$index')],`tmp1',`tmp2',`tmp3',`tmp4')
+
+* Step 3d) Insert new `DINT' into original expression
+		Id `DINT'(`$fac1',`$fac2') = `DINT'(`$index');
+		.sort
+
+	#EndDo
 
 #endprocedure
 
@@ -95,53 +224,6 @@
 	.sort
 
 #endprocedure
-
-
-#procedure add(n1,d1,n2,d2 , gcd,lcm)
-
-*
-* Computes n1/d1 + n2/d2 = (n1*d2 + n2*d1) / (d1 * d2)
-* Stores resulting numerator/denominator in n1/d1
-*
-
-* Step 1: Compute lcm(d1,d2)
-	skip; nskip `gcd',`lcm';
-	Local `lcm' = `d1'*`d2';
-	Local `gcd' = gcd_(`d1',`d2');
-	.sort
-	skip; nskip `lcm';
-	Local `lcm' = div_(`lcm',`gcd');
-	.sort
-
-* Step 2: Divide d1,d2 by gcd(d1,d2)
-	drop `gcd';
-	skip; nskip `d1',`d2';
-	Local `d1' = div_(`d1', `gcd');
-	Local `d2' = div_(`d2', `gcd');
-	.sort
-
-* Step 3: Build result as (n1*d2/gcd(d1,d2) + n2*d1/gcd(d1,d2))/lcm(d1,d2)
-	drop `lcm';
-	skip; nskip `n1',`d1';
-	Local `n1' = `n1' * `d2' + `n2' * `d1';
-	Local `d1' = `lcm';
-	.sort
-
-* Step 4: Divide numerator and denominator by their gcd
-	skip; nskip `gcd';
-	#If ( termsin(`n1') == 0)
-		Local `gcd' = `d1';
-	#Else
-		Local `gcd' = gcd_(`d1',`n1');
-	#EndIf
-	.sort
-	skip; nskip `n1',`d1';
-	drop `gcd';
-	Local `n1' = div_(`n1',`gcd');
-	Local `d1' = div_(`d1',`gcd');
-
-#endprocedure
-
 
 #procedure split(expr,list,INT,PREFIX,collf)
 

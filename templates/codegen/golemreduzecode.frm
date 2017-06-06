@@ -5,16 +5,16 @@ Off Statistics;
 *--#[ include definitions and procedures: 
 #Include- reduze.hh
 #Include- symbols.hh
+#Include- secdec.hh
+#Include- projectors.hh
 #Include- spinney.hh
 #Include- model.hh
-#Include- secdec.hh
-#Include- seriesprocedures.hh
-#Include- projectors.hh
+#Include- largeprf.hh
 
 * Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
 #Define ProjectorLabels ""
 #Do label = 1, `NUMPROJ'
-#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+  #Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
 #EndDo
 .sort
 *--#] include definitions and procedures:
@@ -27,6 +27,14 @@ Off Statistics;
 *--#[ read integral name, lowest_prefactor_order, lowest_order:
 Id INTDIMLESS(ReduzeF?$IntegralName,sDUMMY1?$LowestPrefactorOrder,sDUMMY2?$LowestOrder) = 1; 
 .sort
+
+#Message `$IntegralName'
+#Message `$LowestPrefactorOrder'
+#Message `$LowestOrder'
+
+print;
+.end
+
 *#Write "IntegralName = `$IntegralName'"
 *#Write "LowestPrefactorOrder = `$LowestPrefactorOrder'"
 *#Write "LowestOrder = `$LowestOrder'"

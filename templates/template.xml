@@ -62,6 +62,15 @@
 				</directory>
 			</foreach>
 		</directory>
+		<directory src="analytic">
+			<foreach iterator="loops">
+				<directory src="loop" dest="%dloop" arguments="loop">
+					<directory src="integrals">
+						<file src="Makefile" class="Integrals"/>
+					</directory>
+				</directory>
+			</foreach>
+		</directory>
 		<file src="parameters.hpp" class="Model"/>
 		<file src="invariants.hpp" class="Kinematics"/>
 		<file src="typedef.hpp" class="Integrals"/>
@@ -284,8 +293,10 @@
         <file src="seriesprocedures.hh" class="Verbatim"/>
         <file src="golemreduze.frm" class="Kinematics"/>
         <file src="golemreduzesum.frm" class="Integrals"/>
+        <file src="golemreduzeinsert.frm" class="Verbatim"/>
+        <file src="golemreduzebacksub.frm" class="Verbatim"/>
         <file src="golemreduzesecdec.frm" class="Verbatim"/>
-        <file src="golemreduzesplit.frm" class="Verbatim"/>
+        <file src="golemreduzecoeff.frm" class="Verbatim"/>
         <file src="golemreduzecode.frm" class="Verbatim"/>
     </directory>
     

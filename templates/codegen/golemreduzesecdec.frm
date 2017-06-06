@@ -1,12 +1,11 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 #-
 off statistics;
-*Format 255; * Number of characters per line
 
 #Include- reduze.hh
+#Include- symbols.hh
 #Include- secdec.hh
 #Include- projectors.hh
-#Include- symbols.hh
 #Include- spinney.hh
 #Include- model.hh
 #Include- largeprf.hh
@@ -14,30 +13,62 @@ off statistics;
 * Create list of ProjLabel1,...,ProjLabel`NUMPROJ'
 #Define ProjectorLabels ""
 #Do label = 1, `NUMPROJ'
-#Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
+  #Redefine ProjectorLabels "`ProjectorLabels',ProjLabel`label'"
 #EndDo
+
+* Load integral
+#include- `INTEGRAL'.out
+
+* Insert dimS in terms of epsS
+Id dimS=4-2*epsS;
 .sort
 
-* Load GoSam result
-#include- l`LOOPS'.txt;
+print;
+.end
 
-G l`LOOPS' = l`LOOPS';
-.sort:sum;
+* Count minimum power of epsS in numerator and denominator
+#If termsin(expr) == 0
 
-* Pull prefactors out of INT function
+  #$minnum = 0;
+  #$minden = 0;
+
+#Else
+
+  Skip; Nskip [NINTR(1)];
+  #$minnum = maxpowerof_(epsS);
+  if ( count(epsS,1) < $minnum ) $minnum = count_(epsS,1);
+  ModuleOption,minimum,$minnum;
+  .sort
+
+  Skip; Nskip [DINTR(1)];
+  #$minden = maxpowerof_(epsS);
+  if ( count(epsS,1) < $minden ) $minden = count_(epsS,1);
+  ModuleOption,minimum,$minden;
+  .sort
+
+#EndIf
+
+#message `$minnum'
+#message `$minden'
+
+Id INT(?head) = INT(?head,[],`$minden'-`$minnum'+`ORD')
+.sort
+
+* Discard prefactors from INT function
 Repeat Id INT(sDUMMY1?,?a,[],?b,[],?c) = sDUMMY1*INT(?a,[],?b,[],?c);
 Id Once INT([],?a) = INT(?a);
 .sort
 
-* Apply reduction
-#include- integralsl`LOOPS'.hh
-.sort:reduce;
 
-* Push projector labels, prefactor, colorfactor, colorinternal into INT 
-* where they will not be touched
-Id Once sDUMMY1?{,`ProjectorLabels'}*INT(?b) = INT(sDUMMY1,[],?b);
-Repeat Id fDUMMY1?{PREFACTOR,COLORFACTOR,COLORINTERNAL,Dim,DenDim}(?a)*INT(?b) = INT(fDUMMY1(?a),?b);
-.sort
+
+
+
+
+
+
+
+
+
 
 
 **** UP TO HERE

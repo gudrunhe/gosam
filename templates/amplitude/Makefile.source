@@ -48,9 +48,10 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	integralsl[%loop%].m \
 	reduze_reduce_l[%loop%]-stamp \
 	l[%loop%].txt \
-	reducedl[%loop%].txt \
+	insert_reduction_l[%loop%]-stamp \
+	backsub_reduction_l[%loop%]-stamp \
 	prepare_secdec_l[%loop%]-stamp \
-	secdecnamesl[%loop%].hh \
+	prepare_coeff_l[%loop%]-stamp \
 	prepare_code_l[%loop%]-stamp \
 	compile_code_l[%loop%]-stamp[%
 @end @for %]
@@ -67,7 +68,7 @@ reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 [% @for loops_generated %]
 
 #
-# STAGE 1
+# STAGE 1 - Set up Reduze
 #
 
 # Reduze also creates: reduze_match.yaml and reduzeshiftsl#loop.hh
@@ -84,6 +85,11 @@ reduze_setup_l[%loop%]-stamp:
 		-s reduzesptopl[%loop%].hh
 	@touch reduze_setup_l[%loop%]-stamp
 
+#
+# STAGE 2 - Compute each diagram
+#
+
+
 [% @for elements loop.keep.diagrams %]
 d[%$_%]l[%loop%].txt: ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
 	@echo Form is processing loop diagram [%$_%] @ [%loop%] loop
@@ -95,6 +101,10 @@ d[%$_%]l[%loop%].txt: ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
 	    ../codegen/golemreduze.frm
 [% @end @for %]
 
+#
+# STAGE 3 - Sum diagrams
+#
+
 integralsl[%loop%].txt : l[%loop%].txt
 l[%loop%].txt: $(DIAGRAMS_L[%loop%])
 	@echo Form is summing loop diagrams @ [%loop%] loop
@@ -102,6 +112,10 @@ l[%loop%].txt: $(DIAGRAMS_L[%loop%])
 	    -w$(FORM_THREADS) \
 	    -D LOOPS=[%loop%] \
 	    ../codegen/golemreduzesum.frm
+
+#
+# STAGE 4 - Reduce Integrals
+#
 
 prepare_reductionl[%loop%] : integralsl[%loop%].m
 integralsl[%loop%].m : integralsl[%loop%].txt reduze_setup_l[%loop%]-stamp
@@ -124,47 +138,67 @@ reduze_insert_l[%loop%]-stamp : reduze_reduce_l[%loop%]-stamp #reductionl[%loop%
 	@touch reduze_insert_l[%loop%]-stamp
 
 #
-# STAGE 2
+# STAGE 5 - Insert Reduction
 #
-
-# TODO: calculate ORD
-reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
-	@echo Form is applying the reduction to the loop diagrams @ [%loop%] loop
+insert_reduction_l[%loop%]-stamp: reduze_insert_l[%loop%]-stamp
+	@echo Form is inserting the reduction for the loop diagrams @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D LOOPS=[%loop%] \
 		-D ORD=2 \
-		../codegen/golemreduzesecdec.frm
+		../codegen/golemreduzeinsert.frm
+	@touch insert_reduction_l[%loop%]-stamp
 
-secdecintegralsl[%loop%].txt : reducedl[%loop%].txt
+backsub_reduction_l[%loop%]-stamp: insert_reduction_l[%loop%]-stamp
+	@$(MAKE) -C analytic/[%loop%]loop/integrals backsub
+	@touch backsub_reduction_l[%loop%]-stamp
+
+#reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
+#	@echo Form is applying the reduction to the loop diagrams @ [%loop%] loop
+#	@$(FORM) $(FORM_OPT) \
+#		-w$(FORM_THREADS) \
+#		-D LOOPS=[%loop%] \
+#		-D ORD=2 \
+#		../codegen/golemreduzesecdec.frm
 
 
-# Creates the directory ""
-#TODO: directory name
+#
+# STAGE 6 - Run SecDec on each integral
+#
+
+secdecintegralsl[%loop%].txt : insert_reduction_l[%loop%]-stamp
+
 prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 	@echo Python is preparing integrals for SecDec @ [%loop%] loop
 	@$(PYTHON) ../codegen/tosecdec.py \
-		-i secdecintegralsl[%loop%].txt \
-		-k ../codegen/secdecl[%loop%].m \
 		-r ../codegen/secdecl[%loop%].input \
+		-k ../codegen/secdecl[%loop%].m \
 		-p ../codegen/secdecl[%loop%].py \
-		-o ../codegen/secdec/[%loop%]loop \
-		-a amplitudel[%loop%].hpp
+		-a amplitudel[%loop%].hpp \
+		-i analytic/[%loop%]loop/integrals/secdec_INT \
+		-s .hh \
+		-o ../codegen/secdec/[%loop%]loop
+	@$(MAKE) -C ../codegen/secdec/[%loop%]loop decompose-stamp
 	@touch prepare_secdec_l[%loop%]-stamp
 
-# Run SecDec on integrals
-secdecnamesl[%loop%].hh: prepare_secdec_l[%loop%]-stamp
+prepare_coeff_l[%loop%]-stamp: prepare_secdec_l[%loop%]-stamp
 	@echo SecDec is decomposing integrals @ [%loop%] loop
-	@$(MAKE) -C ../codegen/secdec/[%loop%]loop
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D LOOPS=[%loop%] \
-		../codegen/golemreduzesplit.frm
+	@$(MAKE) -C analytic/[%loop%]loop/integrals coeff
+	@touch prepare_coeff_l[%loop%]-stamp
+
+#
+# STAGE 7 - Generate Fortran/C++/C Code
+#
 
 # Generate Fortran/C++/C
 prepare_code_l[%loop%]-stamp: secdecnamesl[%loop%].hh
 	@$(MAKE) -C coefficients/[%loop%]loop/codegen
 	@touch prepare_code_l[%loop%]-stamp
+
+
+#
+# TODO - move compilation elsewhere
+#
 
 # Compile Fortran/C++/C
 compile_code_l[%loop%]-stamp: prepare_code_l[%loop%]-stamp

@@ -18,40 +18,41 @@ off statistics;
 .sort
 
 [% @for loops_generated %]
-* Process sum
-* Load GoSam result
-#IF (`LOOPS' == [%loop%])
-#Do i = {,[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
-#If x`i' != x
-#include- d`i'l`LOOPS'.txt;
-#EndIf
-#EndDo
 
-G l`LOOPS' =
-#Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
-#If x`i' != x
-   + diagram`i'
-#EndIf
-#EndDo
-;
-#EndIf
+* Load result
+#If (`LOOPS' == [%loop%])
 
-.sort:sum;
+  #Do i = {,[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+    #If x`i' != x
+      #include- d`i'l`LOOPS'.txt;
+    #EndIf
+  #EndDo
+ 
+  G l`LOOPS' =
+  #Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+    #If x`i' != x
+      + diagram`i'
+    #EndIf
+  #EndDo
+  ;
+  .sort:sum;
 
-#Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
-#If x`i' != x
-  Drop diagram`i';
+  #Do i = {,[%@for elements loop.keep.diagrams%][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
+    #If x`i' != x
+      Drop diagram`i';
+    #EndIf
+  #EndDo
+  .sort:drop;
+
 #EndIf
-#EndDo
-
-.sort:drop;
 
 [% @end @for %]
 
-
+* Split expression into separate expressions
 #call split(l`LOOPS',list,INT,D,fDUMMY1)
 .sort
 
+* Split numerators and denominators into separate expressions
 #Do coeff = list
   #Ifdef `coeff'
     #call topolyratfun(`coeff',N,D,Den,0 , tmp1,tmp2)
@@ -64,17 +65,16 @@ G l`LOOPS' =
 skip list;
 #Do e = {`activeexprnames_'}
   #IfDef `e' 
-    #Write <l`LOOPS'.txt>"L `e' = %e" `e'
+    #Write <l`LOOPS'.txt> "L `e' = %e" `e'
   #EndIf
 #EndDo
 .sort
 
+* Produce list of integrals
 Drop; NDrop l`LOOPS';
 .sort
-
 #call producelist(l`LOOPS',list,INT)
 .sort
-
 Drop l`LOOPS';
 .sort
 
@@ -92,25 +92,4 @@ DropCoefficient;
 * Write list of integrals
 *
 #Write <integralsl`LOOPS'.txt>, "+ %E", list
-print+s;
 .end
-
-
-
-
-********* TESTING CODE ********
-* Throw away information regarding which INT are crossed (for FIRE/LiteRed)
-#Define UNCROSS "0"
-#If `UNCROSS'
-#Call UncrossIntReduze
-Id Sector(sDUMMY1?)*INT(sDUMMY2?,?tail) = INT(sDUMMY1,?tail);
-Id Crossing(?tail) = 1;
-Id CrossingShift(?tail)=1;
-Id CrossingInvariants(?tail)=1;
-.sort:uncross;
-DropCoefficient;
-.sort:drop coeff;
-#EndIf
-********* TESTING CODE ********
-
-
