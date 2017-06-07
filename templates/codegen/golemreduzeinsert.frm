@@ -19,7 +19,7 @@ off statistics;
 .sort
 
 * Load GoSam result
-#include- l`LOOPS'.txt;
+#include- analytic/`LOOPS'loop/diagrams/l`LOOPS'.txt;
 
 G l`LOOPS' = l`LOOPS';
 .sort:sum;

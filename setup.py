@@ -75,6 +75,7 @@ DATA_DIRS = [
             "templates/amplitude/analytic",
             "templates/amplitude/analytic/loop",
             "templates/amplitude/analytic/loop/integrals",
+            "templates/amplitude/analytic/loop/diagrams",
 			"templates/codegen",
 			"templates/common",
 			"templates/doc",

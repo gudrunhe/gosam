@@ -18,12 +18,12 @@ FORM_OPT= \
 
 .SUFFIXES:
 
-.PHONY: all_source [% @for loops_generated %] prepare_reductionl[%loop%] reductionl[%loop%][% @end @for %]
+.PHONY: all_source [% @for loops_generated %] setup_reductionl[%loop%] prepare_reductionl[%loop%] reductionl[%loop%] backsubl[%loop%] secdecl[%loop%][% @end @for %]
 
 [% @if generate_lo_diagrams %]
 DIAGRAMS_TREE=[%
 	@for elements topolopy.keep.tree %] \
-		d[%$_%]l0.txt[%
+		analytic/0loop/diagrams/d[%$_%]l0.txt[%
 	@end @for %]
 
 TXT_TREE=$(subst .cc,.txt,$(DIAGRAMS_TREE))
@@ -40,17 +40,21 @@ REDUZE_PATH_L[%loop%]=../codegen/reduze/[%loop%]loop/
 
 DIAGRAMS_L[%loop%]=[%
 	@for elements loop.keep.diagrams %] \
-		d[%$_%]l[%loop%].txt[%
+		analytic/[%loop%]loop/diagrams/d[%$_%]l[%loop%].txt[%
 	@end @for %]	
 
 SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	$(DIAGRAMS_L[%loop%]) \
-	integralsl[%loop%].m \
+	analytic/[%loop%]loop/diagrams/l[%loop%].txt \
+	analytic/[%loop%]loop/integrals/integralsl[%loop%].txt \
+	analytic/[%loop%]loop/integrals/integralsl[%loop%].m \
 	reduze_reduce_l[%loop%]-stamp \
-	l[%loop%].txt \
-	insert_reduction_l[%loop%]-stamp \
+	reduze_insert_l[%loop%]-stamp \
+	python_insert_l[%loop%]-stamp \
+	form_insert_l[%loop%]-stamp \
 	backsub_reduction_l[%loop%]-stamp \
 	prepare_secdec_l[%loop%]-stamp \
+	secdec_decompose_l[%loop%]-stamp \
 	prepare_coeff_l[%loop%]-stamp \
 	prepare_code_l[%loop%]-stamp \
 	compile_code_l[%loop%]-stamp[%
@@ -68,11 +72,13 @@ reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 [% @for loops_generated %]
 
 #
-# STAGE 1 - Set up Reduze
+# Setup Reduze
 #
 
-# Reduze also creates: reduze_match.yaml and reduzeshiftsl#loop.hh
-reduze_setup_l[%loop%]-stamp:
+# PHONY target to stop after setting up reduction
+setup_reductionl[%loop%] : reduze_setup_l[%loop%]-stamp
+
+reduze_setup_l[%loop%]-stamp :
 	@echo Reduze is setting up integral families @ [%loop%] loop
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_setup.yaml > reduze_setup.log
 	@echo Python is processing integral families @ [%loop%] loop
@@ -86,12 +92,11 @@ reduze_setup_l[%loop%]-stamp:
 	@touch reduze_setup_l[%loop%]-stamp
 
 #
-# STAGE 2 - Compute each diagram
+# Compute diagrams
 #
 
-
 [% @for elements loop.keep.diagrams %]
-d[%$_%]l[%loop%].txt: ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
+analytic/[%loop%]loop/diagrams/d[%$_%]l[%loop%].txt : ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
 	@echo Form is processing loop diagram [%$_%] @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
@@ -102,45 +107,54 @@ d[%$_%]l[%loop%].txt: ../diagrams-[%loop%].hh reduze_setup_l[%loop%]-stamp
 [% @end @for %]
 
 #
-# STAGE 3 - Sum diagrams
+# Sum diagrams and produce list of integrals
 #
 
-integralsl[%loop%].txt : l[%loop%].txt
-l[%loop%].txt: $(DIAGRAMS_L[%loop%])
+analytic/[%loop%]loop/integrals/integralsl[%loop%].txt : analytic/[%loop%]loop/diagrams/l[%loop%].txt
+analytic/[%loop%]loop/diagrams/l[%loop%].txt: $(DIAGRAMS_L[%loop%])
 	@echo Form is summing loop diagrams @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 	    -w$(FORM_THREADS) \
 	    -D LOOPS=[%loop%] \
 	    ../codegen/golemreduzesum.frm
 
-#
-# STAGE 4 - Reduce Integrals
-#
-
-prepare_reductionl[%loop%] : integralsl[%loop%].m
-integralsl[%loop%].m : integralsl[%loop%].txt reduze_setup_l[%loop%]-stamp
+analytic/[%loop%]loop/integrals/integralsl[%loop%].m : analytic/[%loop%]loop/integrals/integralsl[%loop%].txt
 	@echo Python is processing the integrals @ [%loop%] loop
 	@$(PYTHON) ../codegen/toreduze.py \
-                    -i integralsl[%loop%].txt \
-                    -t integralsl[%loop%].m \
+                    -i analytic/[%loop%]loop/integrals/integralsl[%loop%].txt \
+                    -t analytic/[%loop%]loop/integrals/integralsl[%loop%].m \
                     -s $(REDUZE_PATH_L[%loop%])/sectormappings/crss.yaml \
                     -y $(REDUZE_PATH_L[%loop%])reduze_reduce.yaml
 
+#
+# Reduce Integrals
+#
+
+# PHONY target to stop before performing reduction
+prepare_reductionl[%loop%] : analytic/[%loop%]loop/integrals/integralsl[%loop%].m
+
+# PHONY target to stop after performing reduction
 reductionl[%loop%] : reduze_reduce_l[%loop%]-stamp
-reduze_reduce_l[%loop%]-stamp : integralsl[%loop%].m
+
+reduze_reduce_l[%loop%]-stamp : analytic/[%loop%]loop/integrals/integralsl[%loop%].m reduze_setup_l[%loop%]-stamp
 	@echo Reduze is reducing the compact recursive sector selection \(CRSS\) @ [%loop%] loop
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_reduce.yaml  > reduze_reduce.log
 	@touch reduze_reduce_l[%loop%]-stamp
 
-reduze_insert_l[%loop%]-stamp : reduze_reduce_l[%loop%]-stamp #reductionl[%loop%]
+#
+# Insert Reduction
+#
+
+reduze_insert_l[%loop%]-stamp : reduze_reduce_l[%loop%]-stamp
 	@cd $(REDUZE_PATH_L[%loop%]) && $(REDUZE) reduze_insert.yaml > reduze_insert.log
-	@cd ../codegen && python split_reduction.py --reduction="$(REDUZE_PATH_L[%loop%])/reductionl[%loop%].hh" --coeff="COEFF" --suffix="l[%loop%]"
 	@touch reduze_insert_l[%loop%]-stamp
 
-#
-# STAGE 5 - Insert Reduction
-#
-insert_reduction_l[%loop%]-stamp: reduze_insert_l[%loop%]-stamp
+python_insert_l[%loop%]-stamp : reduze_insert_l[%loop%]-stamp
+	@echo Python is parsing the output of reduction @ [%loop%] loop
+	@cd ../codegen && python split_reduction.py --reduction="$(REDUZE_PATH_L[%loop%])/reductionl[%loop%].hh" --coeff="COEFF" --suffix="l[%loop%]"
+	@touch python_insert_l[%loop%]-stamp
+
+form_insert_l[%loop%]-stamp : python_insert_l[%loop%]-stamp
 	@echo Form is inserting the reduction for the loop diagrams @ [%loop%] loop
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
@@ -149,26 +163,18 @@ insert_reduction_l[%loop%]-stamp: reduze_insert_l[%loop%]-stamp
 		../codegen/golemreduzeinsert.frm
 	@touch insert_reduction_l[%loop%]-stamp
 
-backsub_reduction_l[%loop%]-stamp: insert_reduction_l[%loop%]-stamp
+#
+# Back substitute reduction and prepare integral for SecDec
+#
+
+# PHONY target to stop after performing backsubstitution
+backsubl[%loop%] : backsub_reduction_l[%loop%]-stamp
+
+backsub_reduction_l[%loop%]-stamp : form_insert_l[%loop%]-stamp
 	@$(MAKE) -C analytic/[%loop%]loop/integrals backsub
 	@touch backsub_reduction_l[%loop%]-stamp
 
-#reducedl[%loop%].txt: reduze_insert_l[%loop%]-stamp
-#	@echo Form is applying the reduction to the loop diagrams @ [%loop%] loop
-#	@$(FORM) $(FORM_OPT) \
-#		-w$(FORM_THREADS) \
-#		-D LOOPS=[%loop%] \
-#		-D ORD=2 \
-#		../codegen/golemreduzesecdec.frm
-
-
-#
-# STAGE 6 - Run SecDec on each integral
-#
-
-secdecintegralsl[%loop%].txt : insert_reduction_l[%loop%]-stamp
-
-prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
+prepare_secdec_l[%loop%]-stamp : backsub_reduction_l[%loop%]-stamp
 	@echo Python is preparing integrals for SecDec @ [%loop%] loop
 	@$(PYTHON) ../codegen/tosecdec.py \
 		-r ../codegen/secdecl[%loop%].input \
@@ -178,24 +184,36 @@ prepare_secdec_l[%loop%]-stamp: secdecintegralsl[%loop%].txt
 		-i analytic/[%loop%]loop/integrals/secdec_INT \
 		-s .hh \
 		-o ../codegen/secdec/[%loop%]loop
-	@$(MAKE) -C ../codegen/secdec/[%loop%]loop decompose-stamp
 	@touch prepare_secdec_l[%loop%]-stamp
 
-prepare_coeff_l[%loop%]-stamp: prepare_secdec_l[%loop%]-stamp
+#
+# Decompose integrals with SecDec
+#
+
+# PHONY target to stop after running SecDec on each integral
+secdecl[%loop%] : secdec_decompose_l[%loop%]-stamp
+
+secdec_decompose_l[%loop%]-stamp : prepare_secdec_l[%loop%]-stamp
+	@$(MAKE) -C ../codegen/secdec/[%loop%]loop decompose-stamp
+	@touch secdec_decompose_l[%loop%]-stamp
+
+#
+# Prepare coefficients for code generation
+#
+
+prepare_coeff_l[%loop%]-stamp : secdec_decompose_l[%loop%]-stamp 
 	@echo SecDec is decomposing integrals @ [%loop%] loop
 	@$(MAKE) -C analytic/[%loop%]loop/integrals coeff
 	@touch prepare_coeff_l[%loop%]-stamp
 
 #
-# STAGE 7 - Generate Fortran/C++/C Code
+# Generate Fortran/C++/C Code
 #
 
 # Generate Fortran/C++/C
-prepare_code_l[%loop%]-stamp: secdecnamesl[%loop%].hh
+prepare_code_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp
 	@$(MAKE) -C coefficients/[%loop%]loop/codegen
 	@touch prepare_code_l[%loop%]-stamp
-
-
 #
 # TODO - move compilation elsewhere
 #

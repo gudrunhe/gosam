@@ -24,7 +24,7 @@ off statistics;
 
   #Do i = {,[%@for elements loop.keep.diagrams %][%@if is_last%][%$_%]}[% @else %][%$_%],[%@end @if%][%@end @for%]
     #If x`i' != x
-      #include- d`i'l`LOOPS'.txt;
+      #include- analytic/`LOOPS'loop/diagrams/d`i'l`LOOPS'.txt;
     #EndIf
   #EndDo
  
@@ -65,7 +65,7 @@ off statistics;
 skip list;
 #Do e = {`activeexprnames_'}
   #IfDef `e' 
-    #Write <l`LOOPS'.txt> "L `e' = %e" `e'
+    #Write <analytic/`LOOPS'loop/diagrams/l`LOOPS'.txt> "L `e' = %e" `e'
   #EndIf
 #EndDo
 .sort
@@ -91,5 +91,5 @@ DropCoefficient;
 *
 * Write list of integrals
 *
-#Write <integralsl`LOOPS'.txt>, "+ %E", list
+#Write <analytic/`LOOPS'loop/integrals/integralsl`LOOPS'.txt>, "+ %E", list
 .end

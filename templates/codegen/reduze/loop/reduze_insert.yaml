@@ -1,6 +1,6 @@
 jobs:
   - select_reductions:
-      input_file: "../../../amplitude/integralsl[% loop %].m"
+      input_file: "../../../amplitude/analytic/[% loop %]loop/integrals/integralsl[% loop %].m"
       output_file: "tmp/integrals"
   - reduce_files:
       equation_files: ["tmp/integrals"]

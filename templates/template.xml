@@ -68,6 +68,9 @@
 					<directory src="integrals">
 						<file src="Makefile" class="Integrals"/>
 					</directory>
+					<directory src="diagrams">
+						<file src="Makefile" class="Verbatim"/>
+					</directory>
 				</directory>
 			</foreach>
 		</directory>

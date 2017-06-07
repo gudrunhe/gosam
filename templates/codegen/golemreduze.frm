@@ -336,7 +336,7 @@ Drop list;
 *
 #Do e = {`activeexprnames_'}
   #IfDef `e' 
-    #Write <`OUTFILE'.txt>"L `e' = %e" `e'
+    #Write <analytic/`LOOPS'loop/diagrams/`OUTFILE'.txt>"L `e' = %e" `e'
   #EndIf
 #EndDo
 .end
