@@ -66,9 +66,11 @@
 			<foreach iterator="loops">
 				<directory src="loop" dest="%dloop" arguments="loop">
 					<directory src="integrals">
+						<file src="../../../../form.set" dest="form.set" class="Kinematics"/>
 						<file src="Makefile" class="Integrals"/>
 					</directory>
 					<directory src="diagrams">
+						<file src="../../../../form.set" dest="form.set" class="Kinematics"/>
 						<file src="Makefile" class="Verbatim"/>
 					</directory>
 				</directory>
