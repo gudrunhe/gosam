@@ -4,7 +4,6 @@ CFunction DenStore;
 
 * dimS = 4 - 2* epsS
 Symbols epsS;
-Symbols sDUMMY6;
 
 #Procedure TagToPropListSecDec()
    Id Tag(sDUMMY1?,vDUMMY1?,sDUMMY2?) = Tag(sDUMMY1,PropVec(vDUMMY1)^2-sDUMMY2^2);

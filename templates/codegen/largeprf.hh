@@ -271,3 +271,184 @@
 	.sort
 
 #endprocedure
+
+#procedure series(N0,D0,numpow,denpow,eps,ORDER,PREFIX)
+
+*
+* Given N0/D0 computes the series expansion in eps
+*
+
+* Copy expressions so that names match what is internally expected
+	L `PREFIX'N0 = `N0';
+	L `PREFIX'D0 = `D0';
+	.sort:copy;
+
+*
+* Step 1: Make leading term in numerator and denominator `eps'^0
+*
+
+* Count minimum power of `eps' in numerator and denominator
+
+	Skip; NSkip `PREFIX'N0;
+	#$minnum = maxpowerof_(`eps');
+	if ( count(`eps',1) < $minnum ) $minnum = count_(`eps',1);
+	ModuleOption,minimum,$minnum;
+	.sort
+
+	Skip; Nskip `PREFIX'D0;
+	#$minden = maxpowerof_(`eps');
+	if ( count(`eps',1) < $minden ) $minden = count_(`eps',1);
+	ModuleOption,minimum,$minden;
+	.sort
+
+	Skip; NSkip `PREFIX'N0;
+	Multiply `eps'^(-`$minnum');
+	.sort
+
+	Skip; NSkip `PREFIX'D0;
+	Multiply `eps'^(-`$minden');
+	.sort
+
+*
+* Step 2: Compute denominator
+*
+	Skip; NSkip numpow, denpow, `PREFIX'DF0d0;
+	L numpow = `$minnum'; * Store power of `eps' in numerator (for returning)
+	L denpow = `$minden'; * Store power of `eps' in denominator (for returning)
+	.sort
+
+	Hide;
+	.sort:hide;
+
+*
+* Step 3: Compute denominator without repeated factors (`PREFIX'DF0)
+*
+	#$d0=`D0';
+	#FactDollar $d0;
+	#$previousterm=0;
+	#$numfactors=0;
+	.sort:fact;
+
+	#Do i = 1, `$d0[0]'
+
+		Skip;
+		L `PREFIX'diff = (`$d0[`i']') - ($previousterm);
+		.sort:DF0;
+		
+		#$previousterm=`$d0[`i']';
+		#If termsin(`PREFIX'diff) != 0
+* factor is new
+			#$numfactors = $numfactors + 1;
+			#$power`$numfactors' = 1;
+			Skip;
+			#If `i' == 1
+				LF `PREFIX'DF0 = (`$d0[`i']');
+			#Else
+				LF `PREFIX'DF0 = `PREFIX'DF0*(`$d0[`i']');
+			#EndIf
+			.sort:DF0;
+		#Else
+			#$power`$numfactors' = $power`$numfactors' + 1;
+		#EndIf
+
+	#EndDo
+
+	Drop `PREFIX'diff;
+	Skip;
+	L `PREFIX'DF0d = 0;
+	.sort:drop;
+
+	#Do i = 1, `$numfactors'
+
+		Skip;
+		L `PREFIX'cd = (`PREFIX'DF0[factor_^(`i')])*replace_(epsS,0);
+		.sort:prod;
+
+		Skip; NSkip `PREFIX'cd;
+		L `PREFIX'cd = (`PREFIX'DF0[factor_^(`i')]) - (`PREFIX'cd);
+		Id `eps'^sDUMMY1?pos_ = sDUMMY1*`eps'^(sDUMMY1-1);
+		.sort:prod;
+
+		Skip;
+		L `PREFIX'prod = sDUMMY`i' * `PREFIX'cd;
+		.sort:prod;
+
+		Skip;
+		#Do j = 1, `$numfactors'
+			#If `i' != `j'
+				L `PREFIX'prod = `PREFIX'prod * ( `PREFIX'DF0[factor_^(`j')]);
+				.sort:prod;
+			#EndIf
+		#EndDo
+
+		Skip;
+		L `PREFIX'DF0d = `PREFIX'DF0d + `PREFIX'prod;
+		.sort:prod;
+
+	#EndDo
+	
+	Skip; 
+	Drop `PREFIX'prod, `PREFIX'cd;
+	LF `PREFIX'D0F = `PREFIX'DF0;
+	.sort:drop;
+
+	Skip; NSkip `PREFIX'DF0;
+	Unfactorize `PREFIX'DF0;
+	.sort:unfact;
+
+*
+* Step 4: Compute numerators
+*
+
+	#Do i = 1, {`ORDER'+`$minden'-`$minnum'+1}
+
+*
+* Step 4a): Generate derivative at 0
+*
+		Skip; NSkip `PREFIX'N{`i'-1}d0;
+		L `PREFIX'N{`i'-1}d0 = `PREFIX'N{`i'-1}*replace_(`eps',0);
+		.sort:zero;
+
+* We have computed everything we need, can exit loop
+		#If `i' == {`ORDER'+`$minden'-`$minnum'+1}
+ 			Drop `PREFIX'N{`i'-1};
+			#BreakDo
+		#EndIf
+
+*
+* Step 4b): Differentiate numerator (N`i')
+*
+		Hide;
+		Skip; NSkip `PREFIX'N`i';
+		L `PREFIX'N`i' = `PREFIX'N{`i'-1} - `PREFIX'N{`i'-1}d0;
+		Id `eps'^sDUMMY1?pos_ = sDUMMY1*`eps'^(sDUMMY1-1);
+		.sort:diff;
+
+*
+* Step 4c) Quotient Rule: Generate derivative of numerator
+*
+		Skip; NSkip `PREFIX'cd;
+		L `PREFIX'cd = `PREFIX'DF0d;
+		#Do j = 1, `$numfactors'
+			Id sDUMMY`j' = `$power`j'' + `i' -1;
+		#EndDo
+		.sort;
+
+		Drop `PREFIX'N{`i'-1}, `PREFIX'cd;
+		Skip; NSkip `PREFIX'N`i';
+		L `PREFIX'N`i'= `PREFIX'DF0*`PREFIX'N`i'/`i' - `PREFIX'N{`i'-1}*`PREFIX'cd/`i';
+		.sort:quot;
+
+	#EndDo
+
+*
+* Step 5: Multiply by eps^minnum/eps^minden to correct Step 1 
+*
+	
+	Drop `PREFIX'DF0, `PREFIX'DF0d;
+	.sort:drop;
+	
+	Unhide;
+	.sort:unhide;
+
+#endprocedure

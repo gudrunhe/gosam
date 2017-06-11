@@ -29,7 +29,7 @@ CFunction DenDim; * function for storing dimension denominators DenDim(dimS+n) =
 CFunction Dim; * function for storing dimension numerators Dim(dimS) = dimS;
 CFunction Den;
 CFunctions Projector, ProjLabel; * functions for storing the projector and its label
-Symbols sDUMMY5,[];
+Symbols [];
 Symbols factoutscale; * Scale factored out of each integral to make it dimensionless
 AutoDeclare Symbols COEFF; * Used as labels for the coefficients of integrals in the reduction
 

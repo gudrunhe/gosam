@@ -1,6 +1,9 @@
 [% ' vim: syntax=golem
 %]* vim[%
    ' %]: syntax=form:expandtab:ts=3:sw=3
+
+AutoDeclare Symbols sDUMMY;
+
 CFunctions out, outlorentz, outcolor;
 CFunctions inp, inplorentz, inpcolor;
 CFunctions proplorentz, propcolor;
