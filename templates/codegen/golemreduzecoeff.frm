@@ -30,13 +30,15 @@ off statistics;
 #If termsin(expr) != 0
 
   Id INTDIMLESS(ReduzeF?$IntegralName,?a) = INTDIMLESS(ReduzeF,?a); * Get integral name
+  Id COLORFACTOR(sDUMMY1?$ColorSymbol) = COLORFACTOR(sDUMMY1);
+  Id sDUMMY1?{`ProjectorLabels'}$ProjectorLabel = sDUMMY1;
   .sort
-  #Define CoefficientFile "../../../coefficients/`LOOPS'loop/codegen/coefficient_`$IntegralName'.coeff"
+  #Define CoefficientFile "../../../coefficients/`LOOPS'loop/codegen/coefficient_`$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'.coeff"
   #Write <`CoefficientFile'> "* "
   #Write <`CoefficientFile'> "* Reduced integral times coefficient of integral `$IntegralName' "
   #Write <`CoefficientFile'> "* "
   #Do e = {`activeexprnames_'}
-    #IfDef `e' 
+    #IfDef `e'
       #Write <`CoefficientFile'> "L `e' = %e" `e'
     #EndIf
   #EndDo
