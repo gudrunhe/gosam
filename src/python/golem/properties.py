@@ -775,9 +775,12 @@ filter_module = Property("filter.module",
    """,
    str,"")
 
-projectors = Property("projectors",
+projectors_file = Property("projectors.file",
    """\
    path to the form file containing projectors """,str,"projectors.hh")
+projectors_number = Property("projectors.number",
+   """\
+   number of projectors in the projectors file """,int)
 integral_families_1loop = Property("integral_families_1loop",
   """\
   path to the yaml file containing the integral families """,str,"integralfamilies-1loop.yaml")
@@ -1297,7 +1300,8 @@ properties = [
    haggies_bin,
    fc_bin,
    python_bin,
-   projectors,
+   projectors_file,
+   projectors_number,
    integral_families_1loop,
    integral_families_2loop,
    reduze_bin,

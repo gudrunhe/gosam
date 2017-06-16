@@ -28,6 +28,27 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 		self._config = conf
 		self._topolopies = topolopies
 
+	def projectors(self, *args, **opts):
+		"""
+        Iterate over the number of projectors
+        """
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		idx_name = self._setup_name("index", "index", opts)
+
+		props = Properties()
+
+		projectors_list = range(1,int(self._config.getProperty("projectors.number"))+1)
+
+		for projector_label in projectors_list:
+			is_first = (True if projector_label == projectors_list[0] else False)
+			is_last = (True if projector_label == projectors_list[-1] else False)
+
+			props.setProperty(first_name, is_first)
+			props.setProperty(last_name, is_last)
+			props.setProperty(idx_name, projector_label)
+			yield props
+
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
 
