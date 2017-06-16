@@ -56,6 +56,7 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	prepare_secdec_l[%loop%]-stamp \
 	secdec_decompose_l[%loop%]-stamp \
 	prepare_coeff_l[%loop%]-stamp \
+	prepare_coeff_headers_l[%loop%]-stamp \
 	prepare_code_l[%loop%]-stamp \
 	compile_code_l[%loop%]-stamp[%
 @end @for %]
@@ -209,6 +210,16 @@ prepare_coeff_l[%loop%]-stamp : secdec_decompose_l[%loop%]-stamp
 #
 # Generate Fortran/C++/C Code
 #
+
+prepare_coeff_headers_l[%loop%]-stamp : backsub_reduction_l[%loop%]-stamp
+	@echo Python is writing coefficient headers @ [%loop%] loop
+	@$(PYTHON) ../codegen/coefficient_headers.py \
+		-i analytic/[%loop%]loop/integrals/secdec_INT \
+		-s .hh \
+		-p [%@for projectors %][% @if eval is_last %][% index %][% @end @if %][% @end @for %] \
+		-c [%@for color_basis index_shift=1 shift=1%][% @if eval is_last %][% index %][% @end @if %][% @end @for %] \
+		-o coefficients/[%loop%]loop/src
+	@touch prepare_coeff_headers_l[%loop%]-stamp
 
 # Generate Fortran/C++/C
 prepare_code_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp

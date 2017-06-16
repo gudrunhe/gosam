@@ -284,6 +284,7 @@
         </directory>
         <file src="toreduze.py" class="Verbatim"/>
         <file src="tosecdec.py" class="Verbatim"/>
+        <file src="coefficient_headers.py" class="Verbatim"/>
         <foreach iterator="loops">
             <file src="secdec.m" dest="secdecl%d.m" arguments="loop" class="Integrals"/>
             <file src="secdec.input" dest="secdecl%d.input" arguments="loop" class="Integrals"/>
