@@ -104,7 +104,7 @@ for integral, epsord in integrals_epsorders.items():
         f.write('')
         for p in range(1, args.number_of_projectors + 1):
             for c in range(1, args.number_of_colors + 1):
-                f.write('#include "' + coefficient_name + '_ProjLabel' + str(p) + '_c' + str(c) + '.hh"\n')
+                f.write('#include "coefficient_' + coefficient_name + '_ProjLabel' + str(p) + '_c' + str(c) + '.hpp"\n')
         f.write('\n')
         f.write('namespace integral_coefficients {\n')
         f.write('\t' + 'coeffs_func_series_t ' + coefficient_name + '\n')

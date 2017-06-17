@@ -30,31 +30,29 @@ Id INTDIMLESS(ReduzeF?$IntegralName,sDUMMY1?$LowestPrefactorOrder,sDUMMY2?$Lowes
 Id sDUMMY1?{,`ProjectorLabels'}$ProjectorLabel = 1;
 Id COLORFACTOR(sDUMMY1?$ColorSymbol) = 1;
 .sort
-#Message `$IntegralName'
-#Message `$LowestPrefactorOrder'
-#Message `$LowestOrder'
-#Message `$ProjectorLabel'
-#Message `$ColorSymbol'
-#Message ExpansionOrder: {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
-print;
-.sort
+*#Message IntegralName: `$IntegralName'
+*#Message LowestPrefactorOrder: `$LowestPrefactorOrder'
+*#Message LowestOrder: `$LowestOrder'
+*#Message ProjectorLabel: `$ProjectorLabel'
+*#Message ColorSymbol: `$ColorSymbol'
+*#Message ExpansionOrder: {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+*.sort
 *--#] read integral information:
+
+*--#[ hide functions for code generation:
+Id PREFACTOR(sDUMMY1?) = dum_(sDUMMY1); * Hide PREFACTOR from code
+Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from code
+Id INTR(1) = 1; * Drop integral label
+*--#] hide functions for code generation:
 
 *--#[ series expand:
 Multiply replace_(dimS,4-2*epsS);
 .sort
 #call series([NINTR(1)],[DINTR(1)],numpow,denpow,epsS,{`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'},p)
-#$highestPole = denpow - numpow;
-print;
-.sort
-#Message `$highestPole'
+#$LowestCoefficientOrder = numpow - denpow;
+*#Message LowestCoefficientOrder: `$LowestCoefficientOrder'
 .sort
 *--#] series expand:
-
-*--#[ hide functions for code generation:
-Id PREFACTOR(sDUMMY1?) = dum_(sDUMMY1); * Hide PREFACTOR from code
-Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from code
-*--#] hide functions for code generation:
 
 *--#[ write coefficient header:
 #Define CoefficientHeaderFile "coefficient_`$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'.hpp.tmp"
@@ -65,7 +63,7 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from c
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
-#Do EpsOrder = `$highestPole', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+#Do EpsOrder = `$LowestCoefficientOrder', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
 * Since we are not allowed to have a "-" in c++ names
 * replace the "-" by an "m" if required   
   #If `EpsOrder' < 0
@@ -76,13 +74,12 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from c
   #Write <`CoefficientHeaderFile'> "coeff_return_t `$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'(invariants_t invariants, parameters_t parameters);#@GoSamInternalNewline@#"
 #EndDo
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
-
 #Write <`CoefficientHeaderFile'> "coeff_func_series_t `$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "\{#@GoSamInternalNewline@#"
-#Write <`CoefficientHeaderFile'> "`$highestPole', // Minimum epsS order#@GoSamInternalNewline@#"
+#Write <`CoefficientHeaderFile'> "`$LowestCoefficientOrder', // Minimum epsS order#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "{`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}, // Maximum epsS order#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "  {#@GoSamInternalNewline@#"
-#Do EpsOrder = `$highestPole', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+#Do EpsOrder = `$LowestCoefficientOrder', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
 * Since we are not allowed to have a "-" in c++ names
 * replace the "-" by an "m" if required
   #If `EpsOrder' < 0
@@ -100,10 +97,8 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from c
 #Write <`CoefficientHeaderFile'> "true, // series is truncated#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalDblquote@#eps#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "};#@GoSamInternalNewline@#"
-
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "};#@GoSamInternalNewline@#"
-
 #Write <`CoefficientHeaderFile'> "#@GoSamInternalNewline@#"
 #Write <`CoefficientHeaderFile'> "#endif#@GoSamInternalNewline@#"
 #Close <`CoefficientHeaderFile'>
@@ -111,55 +106,55 @@ Id COLORINTERNAL(sDUMMY1?) = dum_(sDUMMY1); * Hide COLORINTERNAL function from c
 *--#] write coefficient header:
 
 *--#[ write coefficient files:
-    #Do EpsOrder = `$highestPole', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+#Do EpsOrder = `$LowestCoefficientOrder', {`ORD'-`$LowestPrefactorOrder'-`$LowestOrder'}
+#$NumDenFactors = numfactors_(pD0F);
 * Since we are not allowed to have a "-" in c++ names
 * replace the "-" by an "m" if required
-      #If `EpsOrder' < 0
-        #Redefine cppOrder "m{-`EpsOrder'}"
-      #Else 
-        #Redefine cppOrder "`EpsOrder'"
-      #EndIf
-      B epsS, `ProjectorLabels', COLORFACTOR;
-      .sort
-      L [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(`$ColorSymbol')] = l`LOOPS'[epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(`$ColorSymbol')];
-      .sort
-      Hide l`LOOPS';
-      .sort
+  #If `EpsOrder' < 0
+    #Redefine cppOrder "m{-`EpsOrder'}"
+  #Else 
+    #Redefine cppOrder "`EpsOrder'"
+  #EndIf
 * TODO: Write i_ in a syntax acceptable to C++
-      Format C;
-      #Define CoefficientFile "coefficient_`$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'.cc.tmp"
-      #Write <`CoefficientFile'> "/*#@GoSamInternalNewline@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "Coefficient:#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "  IntegralName: `$IntegralName'#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "  ProjectorLabel: `$ProjectorLabel'#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "  ColorSymbol: `$ColorSymbol'#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "  EpsOrder: `EpsOrder'#@GoSamInternalNewline@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@#"
-      
-      #Write <`CoefficientFile'>"#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#../../../typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
-
-      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
-
-      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'(invariants_t invariants, parameters_t parameters)#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "{#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#parameters_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "  coeff_return_t coeff = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(`$ColorSymbol')](#@no_split_expression@#)
-      #Write <`CoefficientFile'> "  return coeff;#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-      #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
-      #Close <`CoefficientFile'>
-      Drop [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(`$ColorSymbol')];
-      UnHide l`LOOPS'; 
-      .sort
-    #EndDo
+  Format C;
+  #Define CoefficientFile "coefficient_`$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'.cc.tmp"
+  #Write <`CoefficientFile'> "/*#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "Coefficient:#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  IntegralName: `$IntegralName'#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  ProjectorLabel: `$ProjectorLabel'#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  ColorSymbol: `$ColorSymbol'#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  EpsOrder: `EpsOrder'#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "*/#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'>"#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#../../../typedef.hpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "namespace integral_coefficients {#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "coeff_return_t `$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'(invariants_t invariants, parameters_t parameters)#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "{#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#include #@GoSamInternalDblquote@#parameters_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  coeff_return_t numerator = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", pN{`EpsOrder'-`$LowestCoefficientOrder'}d0(#@no_split_expression@#)
+  #Write <`CoefficientFile'> "  coeff_return_t denominator0 = %e#@GoSamInternalNewline@#", pD0(#@no_split_expression@#)
+  #Write <`CoefficientFile'> "  coeff_return_t denominatorf0 = 1;#@GoSamInternalNewline@#"
+  #Do Fac = 1,`$NumDenFactors'
+    L denfactor = pD0F[factor_^`Fac'];
+    .sort
+    #Write <`CoefficientFile'> "  denominatorf0 *= %e#@GoSamInternalNewline@#", denfactor(#@no_split_expression@#)
+    .sort
   #EndDo
+  #Write <`CoefficientFile'> "  coeff_return_t denominator = denominator0*pow(denominatorf0,{`EpsOrder'-`$LowestCoefficientOrder'});#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "  coeff_return_t coeff = numerator/denominator * %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", expr(#@no_split_expression@#)
+  #Write <`CoefficientFile'> "  return coeff;#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
+  #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
+  #Close <`CoefficientFile'>
+*      Drop [epsS^`EpsOrder'*ProjLabel`ProjectorIndex'*COLORFACTOR(`$ColorSymbol')];
+*      UnHide l`LOOPS'; 
+  .sort
 #EndDo
 *--#] write coefficient files:
 

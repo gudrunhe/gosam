@@ -441,14 +441,17 @@
 
 	#EndDo
 
-*
-* Step 5: Multiply by eps^minnum/eps^minden to correct Step 1 
-*
-	
 	Drop `PREFIX'DF0, `PREFIX'DF0d;
 	.sort:drop;
-	
+
+*
+* Step 5) Take `eps' = 0 in denominator
+*
 	Unhide;
 	.sort:unhide;
+
+	Skip; NSkip `PREFIX'D0F, `PREFIX'D0;
+	Id epsS = 0;
+	.sort:den;
 
 #endprocedure
