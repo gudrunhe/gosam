@@ -55,8 +55,8 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	backsub_reduction_l[%loop%]-stamp \
 	prepare_secdec_l[%loop%]-stamp \
 	secdec_decompose_l[%loop%]-stamp \
-	prepare_coeff_l[%loop%]-stamp \
 	prepare_coeff_headers_l[%loop%]-stamp \
+	prepare_coeff_l[%loop%]-stamp \
 	prepare_code_l[%loop%]-stamp \
 	compile_code_l[%loop%]-stamp[%
 @end @for %]
@@ -199,18 +199,8 @@ secdec_decompose_l[%loop%]-stamp : prepare_secdec_l[%loop%]-stamp
 	@touch secdec_decompose_l[%loop%]-stamp
 
 #
-# Prepare coefficients for code generation
+# Generate coefficient headers
 #
-
-prepare_coeff_l[%loop%]-stamp : secdec_decompose_l[%loop%]-stamp 
-	@echo SecDec is decomposing integrals @ [%loop%] loop
-	@$(MAKE) -C analytic/[%loop%]loop/integrals coeff
-	@touch prepare_coeff_l[%loop%]-stamp
-
-#
-# Generate Fortran/C++/C Code
-#
-
 prepare_coeff_headers_l[%loop%]-stamp : backsub_reduction_l[%loop%]-stamp
 	@echo Python is writing coefficient headers @ [%loop%] loop
 	@$(PYTHON) ../codegen/coefficient_headers.py \
@@ -221,8 +211,21 @@ prepare_coeff_headers_l[%loop%]-stamp : backsub_reduction_l[%loop%]-stamp
 		-o coefficients/[%loop%]loop/src
 	@touch prepare_coeff_headers_l[%loop%]-stamp
 
+#
+# Prepare coefficients for code generation
+#
+
+prepare_coeff_l[%loop%]-stamp : secdec_decompose_l[%loop%]-stamp prepare_coeff_headers_l[%loop%]-stamp
+	@echo Form is preparing coefficients @ [%loop%] loop
+	@$(MAKE) -C analytic/[%loop%]loop/integrals coeff
+	@touch prepare_coeff_l[%loop%]-stamp
+
+#
+# Generate Fortran/C++/C Code
+#
+
 # Generate Fortran/C++/C
-prepare_code_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp
+prepare_code_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp prepare_coeff_headers_l[%loop%]-stamp
 	@$(MAKE) -C coefficients/[%loop%]loop/codegen
 	@touch prepare_code_l[%loop%]-stamp
 #

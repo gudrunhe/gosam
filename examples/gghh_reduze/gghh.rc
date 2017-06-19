@@ -16,6 +16,8 @@ zero=mU,mD,mS,mC,mB,wT,wH
 model=smdiag
 #model.options= Nf:5, Nfgen:1
 
+projectors.number=2
+
 regularisation_scheme=cdr
 renorm_beta=False
 renorm_mqwf=False
