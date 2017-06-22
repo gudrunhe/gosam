@@ -295,8 +295,6 @@
         <file src="largeprf.hh" class="Verbatim"/>
         <file src="reduze.hh" class="Verbatim"/>
         <file src="secdec.hh" class="Verbatim"/>
-        <file src="series.hh" class="Verbatim"/>
-        <file src="seriesprocedures.hh" class="Verbatim"/>
         <file src="golemreduze.frm" class="Kinematics"/>
         <file src="golemreduzesum.frm" class="Integrals"/>
         <file src="golemreduzeinsert.frm" class="Verbatim"/>
