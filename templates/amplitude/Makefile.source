@@ -57,8 +57,8 @@ SOURCE_L[%loop%]=reduze_setup_l[%loop%]-stamp \
 	secdec_decompose_l[%loop%]-stamp \
 	prepare_coeff_headers_l[%loop%]-stamp \
 	prepare_coeff_l[%loop%]-stamp \
-	prepare_code_l[%loop%]-stamp \
-	compile_code_l[%loop%]-stamp[%
+	prepare_code_template_l[%loop%]-stamp \
+	prepare_code_l[%loop%]-stamp[%
 @end @for %]
 
 SOURCE_VIRT=[% @for loops_generated %]$(SOURCE_L[%loop%]) [% @end @for %]
@@ -162,7 +162,7 @@ form_insert_l[%loop%]-stamp : python_insert_l[%loop%]-stamp
 		-D LOOPS=[%loop%] \
 		-D ORD=2 \
 		../codegen/golemreduzeinsert.frm
-	@touch insert_reduction_l[%loop%]-stamp
+	@touch form_insert_l[%loop%]-stamp
 
 #
 # Back substitute reduction and prepare integral for SecDec
@@ -225,16 +225,12 @@ prepare_coeff_l[%loop%]-stamp : secdec_decompose_l[%loop%]-stamp prepare_coeff_h
 #
 
 # Generate Fortran/C++/C
-prepare_code_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp prepare_coeff_headers_l[%loop%]-stamp
+prepare_code_template_l[%loop%]-stamp: prepare_coeff_l[%loop%]-stamp prepare_coeff_headers_l[%loop%]-stamp
 	@$(MAKE) -C coefficients/[%loop%]loop/codegen
-	@touch prepare_code_l[%loop%]-stamp
-#
-# TODO - move compilation elsewhere
-#
+	@touch prepare_code_template_l[%loop%]-stamp
 
-# Compile Fortran/C++/C
-compile_code_l[%loop%]-stamp: prepare_code_l[%loop%]-stamp
-	@$(MAKE) -C coefficients/[%loop%]loop/src
-	@touch compile_code_l[%loop%]-stamp
+prepare_code_l[%loop%]-stamp: prepare_code_template_l[%loop%]-stamp
+	@$(MAKE) -C coefficients/[%loop%]loop/src prepare_coeff-stamp
+	@touch prepare_code_l[%loop%]-stamp
 
 [% @end @for %]

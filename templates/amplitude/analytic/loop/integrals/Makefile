@@ -14,7 +14,7 @@ INSERTEDINTS=$(wildcard INT*.in)
 BACKSUBINTS=$(INSERTEDINTS:.in=.backsub)
 COEFFS=$(INSERTEDINTS:%.in=../../../coefficients/[%loop%]loop/codegen/%.coeff)
 
-.PHONY: backsub coeff
+.PHONY: backsub coeff $(INSERTEDINTS)
 
 backsub: $(BACKSUBINTS)
 

@@ -8,13 +8,18 @@ INTS=$(patsubst %.so, %, $(patsubst integrals/lib/lib%, -l%, $(wildcard integral
 [% @for loops_generated %]
 COEFFS[%loop%]=$(patsubst %.so, %, $(patsubst coefficients/[%loop%]loop/src/lib%, -l%, $(wildcard coefficients/[%loop%]loop/src/*.so)))
 [% @end @for %]
-LDFLAGS=-Lintegrals/lib $(INTS) -Wl,-rpath,./integrals/lib [% @for loops_generated %] -Lcoefficients/[%loop%]loop/src $(COEFFS[%loop%]) -Wl,-rpath,./coefficients/[%loop%]loop/src [% @end @for %] -L$(SECDEC_CONTRIB)/lib -lgsl -lgslcblas -lcuba -lm -Wl,-rpath,$(SECDEC_CONTRIB)/lib
+LDFLAGS=-Lintegrals/lib $(INTS) -Wl,-rpath,$(CURDIR)/integrals/lib [% @for loops_generated %] -Lcoefficients/[%loop%]loop/src $(COEFFS[%loop%]) -Wl,-rpath,$(CURDIR)/coefficients/[%loop%]loop/src [% @end @for %] -L$(SECDEC_CONTRIB)/lib -lgsl -lgslcblas -lcuba -lm -Wl,-rpath,$(SECDEC_CONTRIB)/lib
 
-.PHONY: source compile clean very-clean reduction[% @for loops_generated %] reductionl[%loop%] prepare_reductionl[%loop%][% @end @for %] prepare_reduction
+.PHONY: [% @for loops_generated %] setup_reductionl[%loop%] prepare_reductionl[%loop%] reductionl[%loop%] backsubl[%loop%] secdecl[%loop%][% @end @for %]
 
-compile : source # TODO: recipe to come
+.PHONY: source compile [% @for loops_generated %] compilel[%loop%][% @end @for %] clean very-clean
+
+compile: [% @for loops_generated %] compilel[%loop%][% @end @for %]
 
 [% @for loops_generated %]
+compilel[%loop%] : source
+	@$(MAKE) -C coefficients/[%loop%]loop/src compile_coeff-stamp
+
 prepare_reductionl[%loop%]:
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(MAKE) $(S) -f Makefile.source $@

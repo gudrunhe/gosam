@@ -13,7 +13,8 @@ FORM_OPT= \
 COEFFS=$(wildcard *.coeff)
 SOURCES=$(COEFFS:.coeff=.cc)
 
-.PHONY: source
+.PHONY: source $(COEFFS)
+
 source: $(SOURCES)
 
 %.cc : %.coeff
