@@ -124,7 +124,7 @@
 
 * Step 1: Get largest index used for `DINT'
 	skip; nskip `list';
-	Id `DINT'(sDUMMY1?) = TermLabel^sDUMMY1*`DINT'(sDUMMY1);
+	Id `DINT'(sDUMMY1?,?a) = TermLabel^sDUMMY1*`DINT'(sDUMMY1,?a);
 	.sort
 	skip; nskip `list';
 	#$index = 0;
