@@ -5,16 +5,13 @@ GOSAM=gosam.py
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-.PHONY: all gosam test comptest clean very-clean
+.PHONY: all gosam test clean very-clean
 
 all: gosam test
 
-test: comptest
+test:
 	@echo Running test programm
-	$(MAKE) -C test test
-
-comptest: gosam
-	$(MAKE) -C test compile
+	$(MAKE) -C virtual test
 
 gosam: $(PROCESS).log
 	$(MAKE) -C virtual compile
@@ -29,7 +26,6 @@ $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C test clean
 	rm -f virtual/.gosam.dir
 	$(MAKE) -C virtual clean
 
@@ -37,5 +33,3 @@ very-clean:
 	rm -f $(PROCESS).in $(PROCESS).log
 	rm -f virtual/.gosam.dir
 	rm -fr virtual
-	$(MAKE) -C test clean
-
