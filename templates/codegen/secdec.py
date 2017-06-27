@@ -1,3 +1,4 @@
+import shutil
 import pySecDec as psd
 
 # these lines are replaced by tosecdec.py
@@ -46,6 +47,9 @@ li = psd.loop_integral.LoopIntegralFromPropagators(proplist,gosamInternal,gosamE
 
 kinematicInvariants=[[% @for mandelstam sym_prefix=es non-zero non-mass %]'[% symbol %]',[% @end @for %]]
 masses=[[% @for all_masses %]'[% mass %]',[% @end @for %]]
+
+# delete target directory if it exists
+shutil.rmtree(name, ignore_errors=True)
 
 li_info = psd.loop_integral.loop_package(
 name,
