@@ -98,7 +98,7 @@
 
 	skip; nskip `list';
 	collect fDUMMY1,fDUMMY1;
-	Id fDUMMY1(?args) = 1;
+	Id fDUMMY1?!{`INT'}(?args) = 1;
 	.sort
 
 	skip; nskip `list';
