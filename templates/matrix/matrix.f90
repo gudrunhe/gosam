@@ -403,7 +403,7 @@ contains
       use [% process_name asprefix=\_ %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, nlo_prefactors
+         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
       use [% process_name asprefix=\_ %]model
@@ -484,11 +484,19 @@ contains
          @if helsum %]
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
-         @else %]
+         @else %][%
+         @if generate_lo_diagrams %]
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
+         @end @if %][%
          @end @if %]
-      else
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
+      else[%
+         @if generate_lo_diagrams %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
+         @end @if %]
       end if[%
 
          @select r2
@@ -529,7 +537,22 @@ contains
                @if extension dred %]
                amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)[%
                @end @if %]
-            end if
+            end if[%
+               @for yukawa %][%
+               @if is_yukawa %]
+            if (renorm_yukawa) then
+            ! Renormalization of Yukawa coupling 
+               if ([% $_ %] > 0.0_ki) then  [%
+                @for particles massive quarks anti-quarks %]
+                   amp(3) = amp(3) -1.5_ki * CF * amp(1)
+                   amp(2) = amp(2) -[%
+               @if extension dred %]2.5[% @else %]2.0[%
+               @end @if %]_ki * CF * amp(1)[%
+               @end @for %]
+               end if
+            end if[%
+               @end @if %][%
+               @end @for %]  
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]

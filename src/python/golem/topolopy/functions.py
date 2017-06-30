@@ -62,7 +62,7 @@ def setup_filter(prop, conf, model, loop_order=None):
    for name, prtcl in model.particles.items():
       tsp = prtcl.getSpin()
       clr = prtcl.getColor()
-
+      
       if tsp % 2 == 1:
          fermions.append(name)
       else:
@@ -71,6 +71,7 @@ def setup_filter(prop, conf, model, loop_order=None):
          quarks.append(name)
       if abs(tsp) == 1 and abs(clr) == 1:
          leptons.append(name)
+         
 
    golem.topolopy.userlib.QUARKS = quarks
    golem.topolopy.userlib.LEPTONS = leptons
@@ -129,6 +130,9 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
 
       if diagram.EHCfound():
          conf["ehc"]=True
+
+      if diagram.YUKAWAfound():
+         conf["yukawa"]=True
 
       if analyze_diagram(diagram, zero, fltr):
          keep.append(idx)

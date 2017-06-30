@@ -731,7 +731,7 @@ def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
          POSTMORTEM_DO = True
       elif o in ("--version"):
          print("GoSam %s (rev %s)" % (".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION))
-         print("Copyright (C) 2011-2014  The GoSam Collaboration")
+         print("Copyright (C) 2011-2017  The GoSam Collaboration")
          print("This is free software; see the source for copying conditions.  There is NO\n" +
                "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
          sys.exit()

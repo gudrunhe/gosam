@@ -261,8 +261,8 @@ contains
               %]), mu, parameters, res, blha1_mode=.true.)[%
                @end @for %][%
             @end @select %][%
-         @if eval cr.amplitudetype ~ "scTree"
-         %][% @elif eval cr.amplitudetype ~ "ccTree"
+         @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
+         %][% @elif eval ( cr.amplitudetype ~ "ccTree" .or. cr.amplitudetype ~ "ccLoop" )
          %][% @else %]
               res(1:3) = alpha_s * one_over_2pi * res(1:3)[%
          @end @if%][%
@@ -428,9 +428,9 @@ contains
       real(kind=c_double), dimension(60), intent(out) :: res
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
-      real(kind=ki), dimension([% @if eval cr.amplitudetype ~ "scTree"
+      real(kind=ki), dimension([% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
       %][% eval 2 * sp.num_legs * sp.num_legs
-      %][%@elif eval cr.amplitudetype ~ "ccTree" %][%
+      %][%@elif eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop" ) %][%
                 eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
       %]) :: amp
       real(kind=c_double), optional :: acc
@@ -481,11 +481,11 @@ contains
 
       call boost_to_cms(vecs)
 
-      [% @if eval cr.amplitudetype ~ "scTree"
+      [% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
       %]call OLP_spin_correlated_lo2(vecs,amp);
       ok=.true.[%
       @else %][%
-      @if eval cr.amplitudetype ~ "ccTree" %]
+      @if eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop"  ) %]
       call OLP_color_correlated(vecs,amp);
       ok=.true.[%
       @else 
@@ -522,11 +522,11 @@ contains
         ! acc=1E5_ki ! dummy accuracy which is not used
       end if
 
-      [% @if eval cr.amplitudetype ~ "scTree"
+      [% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
       %]do i=1, size(amp)
         res(i) = real(amp(i), c_double)
       end do
-      [%@elif eval cr.amplitudetype ~ "ccTree" %]
+      [%@elif eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop" )%]
       do i=1, size(amp)
         res(i) = real(amp(i), c_double)
       end do[%

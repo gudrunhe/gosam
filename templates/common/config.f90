@@ -169,6 +169,12 @@
              true=.true.
              false=.false. %]
 
+   ! include renormalization of yukawa couplings
+   logical :: renorm_yukawa = [% renorm_yukawa
+              convert=bool
+              true=.true.
+              false=.false. %]
+
    ! Switch mass counter terms for massive quarks on or off
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off

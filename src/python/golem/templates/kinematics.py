@@ -43,6 +43,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._heavy_quarks = heavy_quarks
       self._complex_masses = conf["complex_masses"]
       self._ehc=conf["ehc"]
+      self._yukawa=conf["yukawa"]
 
       self._references = golem.algorithms.helicity.reference_vectors(
             conf, in_particles, out_particles)
@@ -328,6 +329,30 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       yield props
 
+   def yukawa(self,*args,**opts):
+      yukawa = self._setup_name("yukawa", "is_yukawa",opts)
+      props=Properties()
+      props[yukawa]=self._yukawa
+      quark_masses = self._heavy_quarks
+      var=''
+      is_first=True
+      for mass in quark_masses:
+         if is_first:
+            var=mass
+            is_first=False
+         if len(quark_masses)>1:   
+            var=var+'.or.'+mass
+      if len(quark_masses)==0:
+            var = 'mBMS'
+            #self._heavy_quarks.append('mB')
+
+      var_name = self._setup_name("var", "$_", opts)
+      props[var_name] = var
+
+
+      yield props
+        
+
    def quark_loop_masses(self, *args, **opts):
       quark_masses = self._heavy_quarks
       complex_masses=self._complex_masses
@@ -607,9 +632,12 @@ class KinematicsTemplate(golem.util.parser.Template):
       nsc=-1
       
 
+
       color_filter = []
       spin_filter = []
       charge_filter = []
+      
+      
 
       if "white" in args:
          color_filter.extend([1, -1])
@@ -680,6 +708,8 @@ class KinematicsTemplate(golem.util.parser.Template):
 	 charge = self._charge[index]
 	 #if charge not in charge_filter:
 	   #continue
+	   
+	   
 
          props.setProperty(first_name, is_first)
          is_first = False

@@ -56,7 +56,7 @@ LT_INIT
 
 #---#[ TeX stuff:
 AC_PATH_PROG(LATEX, latex, "")
-AC_PATH_PROG(PSTOPDF, pstopdf, "")
+AC_PATH_PROG(PSTOPDF, ps2pdf, "")
 AC_PATH_PROG(DVIPS, dvips, "")
 AC_PATH_PROG(MAKEINDEX, makeindex, "")
 AM_CONDITIONAL(CONFIG_TEX, [test ! -z "$LATEX"])

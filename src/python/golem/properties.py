@@ -990,6 +990,17 @@ config_renorm_gamma5 = Property("renorm_gamma5",
    """,
    bool, True)
 
+config_renorm_yukawa = Property("renorm_yukawa",
+   """\
+   Sets the same variable in config.f90
+
+   Enables renormalization of Yukawa coupling.
+   NOTE: Works only in case overall renormalization is possible
+
+   QCD only, works only with built-in model files.
+   """,
+   bool, True)
+
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
@@ -1268,6 +1279,7 @@ properties = [
    config_renorm_mqse,
    config_renorm_logs,
    config_renorm_gamma5,
+   config_renorm_yukawa,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,

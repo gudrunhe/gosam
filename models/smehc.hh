@@ -292,6 +292,7 @@ Id C([field.ghZbar], [field.ghWp], [field.phim]) = PREFACTOR(e * gGZWP);
 *---#[ effective gg(g)(g)H:
 Id C([field.g], [field.g], [field.H]) = PREFACTOR(e * gs^2 * gH);
 Id C([field.g], [field.g], [field.g], [field.H]) = PREFACTOR(e * gs^3 * gH);
+Id C([field.g], [field.g], [field.H], [field.H]) = PREFACTOR(- e^2 * gs^2 * gH/mW /sw /2 );
 Id C([field.g], [field.g], [field.g], [field.g], [field.H]) =
 	PREFACTOR(e * gs^4 * gH);
 *---#] effective gg(g)(g)H:

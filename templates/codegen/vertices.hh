@@ -247,7 +247,7 @@ id vertex(iv?,
 	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
 		i_ * C(field1, field2, field3);
 *---#] SGG vertex (A.2.28) :
-*---#[ effective gg(g)(g)H:
+*---#[ effective gg(g)(g)H(H):
 id vertex(iv?,
 	field1?, idx1?, 2, vDUMMY1?, iv1L?, 8, iv1C?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
@@ -255,6 +255,14 @@ id vertex(iv?,
 		i_ * C(field1, field2, field3) * dcolor8(iv1C, iv2C) *
       ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
 		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));
+id vertex(iv?,
+	field1?, idx1?, 2, vDUMMY1?, iv1L?, 8, iv1C?,
+	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
+	field3?, idx3?, 0, vDUMMY3?, iv3L?, sign1?{-1,1}, iv3C?
+        field4?, idx4?, 0, vDUMMY4?, iv4L?, sign2?{-1,1}, iv4C?) =
+		i_ * C(field1, field2, field3, field4) * dcolor8(iv1C, iv2C) *
+      ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
+		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));      
 id vertex(iv?,
 	field1?, idx1?, 2, vDUMMY1?, iv1L?, 8, iv1C?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
@@ -274,7 +282,7 @@ id vertex(iv?,
 			+ LorVVVV2(iv1L,iv3L,iv4L,iv2L) * f4(iv1C, iv3C, iv4C, iv2C)
 			+ LorVVVV2(iv1L,iv4L,iv2L,iv3L) * f4(iv1C, iv4C, iv2C, iv3C)
 		);
-*---#] effective gg(g)(g)H:
+*---#] effective gg(g)(g)H(H):
 *---#[ effective AAH:
 id vertex(iv?,
 	field1?, idx1?, 2, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
