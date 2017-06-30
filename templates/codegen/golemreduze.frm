@@ -302,14 +302,14 @@ Id PREFACTOR(1) = 1;
 Id PREFACTOR(i_)^2 = -1;
 .sort
 
-* Rewrap dimension prefactors
-Id Dim(sDUMMY1?) = ProjNum(sDUMMY1);
+* Rewrap factors
+Id fDUMMY1?{Dim,COLORINTERNAL,PREFACTOR}(sDUMMY1?) = ProjNum(sDUMMY1);
 Id DenDim(?args) = Den(?args);
 
 * Push projector labels, prefactor, colorfactor, colorinternal into INT 
 * where they will not be touched
 Id Once sDUMMY1?{,`ProjectorLabels'}*INT(?b) = INT(sDUMMY1,[],?b);
-Repeat Id fDUMMY1?{PREFACTOR,COLORFACTOR,COLORINTERNAL,Dim,DenDim}(?a)*INT(?b) = INT(fDUMMY1(?a),?b);
+Repeat Id COLORFACTOR(?a)*INT(?b) = INT(COLORFACTOR(?a),?b);
 .sort
 
 Id ProjDen(?args) = Den(?args);
