@@ -33,7 +33,7 @@ Id INTD(sDUMMY1?)*sDUMMY2? = INTD(sDUMMY1,sDUMMY2);
 * Split numerators and denominators into separate expressions
 #Do coeff = list
   #Ifdef `coeff'
-    #call topolyratfun(`coeff',N,D,Den,0 , tmp1,tmp2)
+    #call topolyratfun(`coeff',N,D,ProjNum,Den,0 , tmp1,tmp2)
   #EndIf
 #EndDo
 

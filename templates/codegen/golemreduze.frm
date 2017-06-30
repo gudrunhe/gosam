@@ -302,10 +302,8 @@ Id PREFACTOR(1) = 1;
 Id PREFACTOR(i_)^2 = -1;
 .sort
 
-* Unwrap dimension prefactors, 
-* an obvious optimization is to leave this as late as possible 
-* this would reduce the number of symbols appearing in gcd by 1
-Id Dim(sDUMMY1?) = sDUMMY1;
+* Rewrap dimension prefactors
+Id Dim(sDUMMY1?) = ProjNum(sDUMMY1);
 Id DenDim(?args) = Den(?args);
 
 * Push projector labels, prefactor, colorfactor, colorinternal into INT 
@@ -314,22 +312,31 @@ Id Once sDUMMY1?{,`ProjectorLabels'}*INT(?b) = INT(sDUMMY1,[],?b);
 Repeat Id fDUMMY1?{PREFACTOR,COLORFACTOR,COLORINTERNAL,Dim,DenDim}(?a)*INT(?b) = INT(fDUMMY1(?a),?b);
 .sort
 
-#call split(diagram`DIAG',list,INT,D`DIAG',SCREEN)
-.sort
-
-Id ProjNum(sDUMMY1?) = sDUMMY1;
 Id ProjDen(?args) = Den(?args);
-.sort
+B ProjNum,Den,INT;
+.sort:NumDen;
+
+collect ProjNum;
+.sort:collect;
+
+#call split(diagram`DIAG',list,INT,D`DIAG',SCREEN)
+.sort:split;
 
 * Simplify numerators and denominators
 #Do coeff = list
   #Ifdef `coeff'
-    #call topolyratfun(`coeff',N,D,Den,1 , tmp1,tmp2)
+    hide; nhide diagram`DIAG',list,[`coeff'],N,D,tmp1,tmp2;
+    skip;
+    .sort
+    #call topolyratfun(`coeff',N,D,ProjNum,Den,1 , tmp1,tmp2)
+    unhide;
+    skip;
+    .sort
   #EndIf
 #EndDo
 
 Drop list;
-.sort
+.sort:drop;
 
 *
 * Write amplitude

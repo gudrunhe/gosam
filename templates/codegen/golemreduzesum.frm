@@ -55,7 +55,13 @@ off statistics;
 * Split numerators and denominators into separate expressions
 #Do coeff = list
   #Ifdef `coeff'
-    #call topolyratfun(`coeff',N,D,Den,0 , tmp1,tmp2)
+    hide; nhide l`LOOPS',list,[`coeff'],N,D,tmp1,tmp2;
+    skip;
+    .sort
+    #call topolyratfun(`coeff',N,D,ProjNum,Den,0 , tmp1,tmp2)
+    unhide;
+    skip;
+    .sort
   #EndIf
 #EndDo
 

@@ -162,7 +162,7 @@
 
 #endprocedure
 
-#procedure topolyratfun(coeff,N,D,den,separate , tmp1,tmp2)
+#procedure topolyratfun(coeff,N,D,num,den,separate , tmp1,tmp2)
 
 *
 * Processes coefficients of the form a/b + c/d
@@ -170,7 +170,7 @@
 *
 * Example:
 *
-*	[D1INT(1)] = - den(z + x)*c*y*z + den(c + a)*a*b;
+*	[D1INT(1)] = - den(z + x)*c*y*z + den(c + a)*num(a*b);
 *
 *	becomes
 *
@@ -181,7 +181,7 @@
 	skip; nskip [`N'`coeff'], [`D'`coeff'];
 	L [`N'`coeff'] = 0;
 	L [`D'`coeff'] = 1;
-	.sort
+	.sort:topolyratfun;
 
 	#Do term = [`coeff']
 
@@ -190,6 +190,7 @@
 			skip; nskip `N';
 			L `N' = `term';
 			Id `den'(?args) = 1;
+			Id `num'(sDUMMY1?) = sDUMMY1;
 			.sort
 
 * Step 2: Put denominator of current term in `D'
@@ -197,6 +198,7 @@
 			L `D' = `term';
 			dropsymbols;
 			dropcoefficient;
+			Id `num'(?args) = 1;
 			Id `den'(sDUMMY1?) = sDUMMY1;
 			.sort
 
