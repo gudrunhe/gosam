@@ -302,26 +302,21 @@ def AmplitudeType(values, conf, ignore_case):
 	if ret.startswith(__value_OK__) and 'tree' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_leveli"] = True
-                print "Hier1"
 	if ret.startswith(__value_OK__) and ('loopinduced' in conf["olp.amplitudetype"].lower() or 'ccloop' in conf["olp.amplitudetype"].lower() or 'scloop' in conf["olp.amplitudetype"].lower() ):
 		conf["olp.no_tree_level"] = True
 		conf["olp.no_loop_level"] = False
-                print "Hier2"
 	elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in ["loopinterference","lieffinterference"]:
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
 		if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic","polerotation"]:
 			conf.psp_chk_method_last=conf["PSP_chk_method"]
 			conf["PSP_chk_method"]="LoopInduced"
-                print "Hier3"
 	elif ret.startswith(__value_OK__) and ( 'loop' in conf["olp.amplitudetype"].lower() and not 'ccloop' in conf["olp.amplitudetype"].lower()  and not 'scloop' in conf["olp.amplitudetype"].lower()):
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
-                print "Hier4"
-        #if ret.startswith(__value_OK__) and ( 'ccLoop' in conf["olp.amplitudetype"].lower() or 'scLoop' in conf["olp.amplitudetype"].lower() ):
-        #        conf["olp.no_tree_level"] = True
-        #        conf["olp.no_loop_level"] = False
-        #        print "Hier6"
+		#if ret.startswith(__value_OK__) and ( 'ccLoop' in conf["olp.amplitudetype"].lower() or 'scLoop' in conf["olp.amplitudetype"].lower() ):
+    	#        conf["olp.no_tree_level"] = True
+    	#        conf["olp.no_loop_level"] = False
 	return ret
 
 @optional_olp_option

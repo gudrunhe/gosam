@@ -258,7 +258,6 @@ def get_qgraf_power(conf):
 
    qcd_name = "QCD"
    qed_name = "QED"
-   print "Hier", alpha_power, alphas_power, notreelevel, nolooplevel
 
    if alpha_power is None:
       if alphas_power is None:
