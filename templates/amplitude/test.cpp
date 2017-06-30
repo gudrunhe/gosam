@@ -41,16 +41,15 @@ int main()
         // set real_parameters, complex_parameters
         integral_prefactor_t integral_prefactor = amplitude_term.integral_prefactor(
         {
-            [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %],[% @end @for %]
-            [% @for prefix=parameters. all_masses %][% mass %],[% @end @for %]
+            [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %]/invariants.factoutscale,[% @end @for %]
+            [% @for prefix=parameters. all_masses %][% mass %]/std::sqrt(invariants.factoutscale),[% @end @for %]
         },{});
 
         // set real_parameters, complex_parameters, number_of_samples, deformation_parameters_maximum, deformation_parameters_minimum, deformation_parameters_decrease_factor
         sector_make_integrands_return_t sector_integrands =  amplitude_term.sector_make_integrands(
         {
-            invariants.factoutscale,
-            [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %],[% @end @for %]
-            [% @for prefix=parameters. all_masses %][% mass %],[% @end @for %]
+            [% @for mandelstam sym_prefix=invariants.es non-zero non-mass %][% symbol %]/invariants.factoutscale,[% @end @for %]
+            [% @for prefix=parameters. all_masses %][% mass %]/std::sqrt(invariants.factoutscale),[% @end @for %]
         },{},100000,1.,1.e-5,0.9);
 
         auto all_sectors = std::accumulate(++sector_integrands.begin(), sector_integrands.end(), *sector_integrands.begin() ); // TODO: add type box1L::nested_series_t<box1L::integrand_t>

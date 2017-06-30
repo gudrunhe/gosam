@@ -11,9 +11,6 @@ epsord=%(epsord)s
 integral_r = sum(x for x in powerlist if x > 0)
 integral_s = sum(-x for x in powerlist if x < 0)
 
-# factor out the mass dimension of the intgral
-prefactor='factoutscale^-( 0.5*(' + str(%(dim)s) + ')*[% loop %] -' + str(integral_r) + '+' + str(integral_s) + ')'
-
 gosamIncoming = [[% @for particles initial %]'k[%index%]'[% @if eval index .lt. num_in %], [% @end @if %][%@end @for %]]
 gosamOutgoing = [[% @for particles final %]'k[%index%]'[% @if eval index .lt. num_out %], [% @end @if %][%@end @for %]]
 gosamExternal = gosamIncoming+gosamOutgoing
@@ -57,8 +54,7 @@ li,
 epsord,
 form_optimization_level=2, form_work_space='[%form.workspace%]M',decomposition_method='iterative',
 contour_deformation=True, # TODO - may not need this
-real_parameters=['factoutscale']+kinematicInvariants+masses,
-additional_prefactor=prefactor
+real_parameters=kinematicInvariants+masses
 )
 
 # write FORM file containing information about 'eps' orders appearing in the expansion of the prefactor and integral
