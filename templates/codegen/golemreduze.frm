@@ -269,6 +269,13 @@ Id inv(?tail) = Den(?tail);
 
 #Call ToIntReduze
 
+#If `LOOPS' == 0
+  Id INT(sDUMMY1?,0,0,0,0,?args) = 1; * No integral
+#Else
+  Id INT(sDUMMY1?,0,0,0,0,?args) = 0; * Scaleless integral
+#EndIf
+.sort
+
 #call zeroes
 Id csqrt(0) = 0;
 Multiply replace_(Sqrt2, sqrt2);
