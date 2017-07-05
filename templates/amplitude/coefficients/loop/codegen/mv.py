@@ -33,6 +33,7 @@ for src_filename in src_filenames:
     txt = ''.join(txt).replace("#@GoSamInternalNewline@#",'\n')
     txt = txt.replace(';#@no_split_expression@# +=', '+')
     txt = txt.replace('#@GoSamInternalDblquote@#', '"')
+    txt = txt.replace('#@GoSamInternalSpace@#', ' ')
     with open(dest_filepath, 'w') as dest:
         dest.write(txt)
 
