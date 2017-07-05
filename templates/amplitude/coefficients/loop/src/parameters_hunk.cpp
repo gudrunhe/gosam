@@ -1,3 +1,5 @@
+const real_parameter_t pi = parameters.pi;
+
 [% @for parameters %]
 [% @select type
 @case R %]const real_parameter_t [% $_ %]=parameters.[% $_ %];[%

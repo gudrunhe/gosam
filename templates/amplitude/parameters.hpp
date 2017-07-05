@@ -11,6 +11,9 @@
 
 struct parameters_t
 {
+    // Constants
+    const real_parameter_t pi = real_parameter_t(3.1415926535897932384626433832795028841971693993751);
+
     // Input Parameters
     [$ @for parameters $]
     [$ @select type
