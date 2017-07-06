@@ -11,7 +11,7 @@ all: gosam test
 
 test:
 	@echo Running test programm
-	$(MAKE) -C virtual test
+	$(MAKE) -C test test
 
 gosam: $(PROCESS).log
 	$(MAKE) -C virtual compile
