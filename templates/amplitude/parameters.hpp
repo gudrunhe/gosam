@@ -9,6 +9,9 @@
 #ifndef parameters_hpp_included
 #define parameters_hpp_included
 
+#include <iostream>
+#include <iomanip>
+
 struct parameters_t
 {
     // Constants
@@ -25,13 +28,41 @@ struct parameters_t
     @case CP $]const complex_parameter_t [$ $_ $] = {[$ real convert=float format=%24.15f $], [$ imag convert=float format=%24.15f $]};
     [$ @end @select type $][$ @end @for parameters $]
 
-    // Parameters derived from input parameters
+    // Derived Parameters
     [$ @for functions_resolved language=cpp $]
     [$ @select type
     @case R $]real_parameter_t [$ $_ $] = [$ expression $];[$
     @case C $]complex_parameter_t [$ $_ $] = [$ expression $];
     [$ @end @select type $][$ @end @for functions_resolved $]
 
+
+    friend std::ostream& operator<< (std::ostream& os, const parameters_t& parameters)
+    {
+        const char separator = ' ';
+        const int nameWidth = 15;
+        const int numWidth = 40;
+
+        os << "# --- PARAMETER VALUES ---" << std::endl;
+
+        os << "# Constants" << std::endl;
+        os << std::left << std::setw(nameWidth) << std::setfill(separator) << "# pi";
+        os << " = ";
+        os << std::left << std::setw(numWidth) << std::setfill(separator) << parameters.pi << std::endl;
+
+        os << "# Input Parameters" << std::endl;
+        [$ @for parameters $]os << std::left <<  std::setw(nameWidth) << std::setfill(separator) << "# [$ $_ $]";
+        os << " = ";
+        os << std::left << std::setw(numWidth) << std::setfill(separator) << parameters.[$ $_ $] << std::endl;
+        [$ @end @for parameters $]
+
+        os << "# Derived Parameters" << std::endl;
+        [$ @for functions_resolved language=cpp $]os << std::left <<  std::setw(nameWidth) << std::setfill(separator) << "# [$ $_ $]";
+        os << " = ";
+        os << std::left << std::setw(numWidth) << std::setfill(separator) << parameters.[$ $_ $] << std::endl;
+        [$ @end @for functions_resolved $]
+
+        return os;
+    };
 };
 
 #endif
