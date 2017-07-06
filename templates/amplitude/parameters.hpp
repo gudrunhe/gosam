@@ -12,7 +12,9 @@
 struct parameters_t
 {
     // Constants
-    const real_parameter_t pi = real_parameter_t(3.1415926535897932384626433832795028841971693993751);
+    const real_parameter_t pi = real_parameter_t(3.141592653589793238462643383279502884197169399375105820974944592307816406286209L);
+//    const real_parameter_t pi = real_parameter_t("3.141592653589793238462643383279502884197169399375105820974944592307816406286209"); // TODO - implement this multiprecision version
+
 
     // Input Parameters
     [$ @for parameters $]
