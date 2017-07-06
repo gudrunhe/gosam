@@ -10,10 +10,13 @@
 int main()
 {
     std::cout.precision(15);
-    std::cout << "---- Test Program Launched ----" << std::endl;
+    std::cout << std::scientific;
+    std::cout << "# --- Test Program Launched ---" << std::endl;
 
     invariants_t invariants;
     parameters_t parameters;
+
+    std::cout << parameters << std::endl;
 
 //    [% @for mandelstam sym_prefix=invariants.es non-zero %]
 //    [% @if is_non-mass %][% symbol %]=1.;[% @end @if %]
@@ -103,7 +106,7 @@ int main()
         }
     };
 
-    std::cout << "---- Result ----" << std::endl;
+    std::cout << "# --- Raw Result ---" << std::endl;
     int p = 0;
     for(std::vector<integral_return_t> projector_result: result )
     {
@@ -115,7 +118,8 @@ int main()
         }
         ++p;
     }
+    std::cout << std::endl;
 
-    std::cout << "---- Fin ----" << std::endl;
-    
+    std::cout << "# --- Fin ---" << std::endl;
+
 }
