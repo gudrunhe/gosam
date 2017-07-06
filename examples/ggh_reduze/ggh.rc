@@ -10,7 +10,8 @@ order=QCD, NONE, 2
 # require at least one higgs-top coupling
 filter.nlo= lambda d: d.vertices(Tbar, T, H) >= 1
 
-one=gs
+# Note: ewschemechoice not implemented yet => do not get same gHT as standard GoSam
+one=gs,e,gHT
 zero=mU,mD,mS,mC,mB,wT,wH
 
 model=smdiag
