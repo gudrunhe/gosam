@@ -32,7 +32,8 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 		"""
 		props = Properties()
-		loops_to_generate = self._config.getListProperty("loops_to_generate")
+		loops_to_generate_config = self._config.getListProperty("loops_to_generate")
+		loops_to_generate = [loop for loop in loops_to_generate_config if int(loop) != 0]
 
 		for i, loop in enumerate(loops_to_generate):
 			props.setProperty("is_first", True if loop == loops_to_generate[ 0] else False)
