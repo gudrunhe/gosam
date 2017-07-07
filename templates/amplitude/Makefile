@@ -8,7 +8,7 @@ INTS=$(patsubst %.so, %, $(patsubst integrals/lib/lib%, -l%, $(wildcard integral
 [% @for loops_generated %]
 COEFFS[%loop%]=$(patsubst %.so, %, $(patsubst coefficients/[%loop%]loop/src/lib%, -l%, $(wildcard coefficients/[%loop%]loop/src/*.so)))
 [% @end @for %]
-LDFLAGS=-Lintegrals/lib $(INTS) -Wl,-rpath,$(CURDIR)/integrals/lib [% @for loops_generated %] -Lcoefficients/[%loop%]loop/src $(COEFFS[%loop%]) -Wl,-rpath,$(CURDIR)/coefficients/[%loop%]loop/src [% @end @for %] -L$(SECDEC_CONTRIB)/lib -lcuba -lm -Wl,-rpath,$(SECDEC_CONTRIB)/lib
+LDFLAGS=-Lintegrals/lib $(INTS) -Wl,-rpath,$(CURDIR)/integrals/lib [% @for loops_generated %] -Lcoefficients/[%loop%]loop/src $(COEFFS[%loop%]) -Wl,-rpath,$(CURDIR)/coefficients/[%loop%]loop/src [% @end @for %] 
 
 .PHONY: [% @for loops_generated %] setup_reductionl[%loop%] prepare_reductionl[%loop%] reductionl[%loop%] backsubl[%loop%] secdecl[%loop%][% @end @for %]
 
@@ -35,7 +35,7 @@ prepare_reduction : [% @for loops_generated %] prepare_reductionl[%loop%][% @end
 reduction : [% @for loops_generated %] reductionl[%loop%][% @end @for %]
 
 test:
-	$(CXX) $(CXXFLAGS) [% @for loops_generated %] -Icoefficients/[%loop%]loop/src [% @end @for %] -Iintegrals/include -o test.exe test.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) [% @for loops_generated %] -Icoefficients/[%loop%]loop/src [% @end @for %] -Iintegrals/include -o test.exe test.cpp $(LDFLAGS) $(SECDEC_CONTRIB)/lib/libcuba.a
 
 clean:
 	$(Q)$(FIND) $(FIND_OPT) . \( -name '*.o' \
