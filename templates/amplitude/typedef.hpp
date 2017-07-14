@@ -32,7 +32,7 @@ typedef std::complex<double> complex_parameter_t;
 #include "parameters.hpp"
 
 // Coefficients
-typedef double coeff_return_t;
+typedef std::complex<double> coeff_return_t;
 typedef std::function<coeff_return_t(invariants_t, parameters_t)> coeff_func_t;
 typedef secdecutil::Series<coeff_func_t> coeff_func_series_t;
 typedef std::vector<std::vector<coeff_func_series_t>> coeffs_func_series_t;
