@@ -8,6 +8,8 @@
 #ifndef invariants_hpp_included
 #define invariants_hpp_included
 
+#include "typedef.hpp"
+
 struct invariants_t
 {
 [% @for mandelstam sym_prefix=es non-zero non-mass %]
