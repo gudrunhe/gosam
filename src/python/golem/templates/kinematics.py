@@ -1512,6 +1512,9 @@ class KinematicsTemplate(golem.util.parser.Template):
       generated_name = self._setup_name("is_generated",
             prefix + "generated", opts)
       map_index = self._setup_name("map.index", prefix + "map.index", opts)
+      map_perm = self._setup_name("map.permutation", prefix + "map.permutation", opts)
+      map_gauge_set = self._setup_name("map.gauge_set", prefix + "map.gauge_set", opts)
+
 
       largs = [a.lower() for a in args]
 
@@ -1562,7 +1565,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       i = base
       l = len(self._helicity_comb)
       for h, mapping in zip(self._helicity_comb, self._helicity_map):
-         gi, lst, color_basis = mapping
+         gi, lst, color_basis, permutation, gauge_set = mapping
 
          is_generated = (i - base == gi)
 
@@ -1584,6 +1587,8 @@ class KinematicsTemplate(golem.util.parser.Template):
             props.setProperty(var_name, i)
             props.setProperty(generated_name, is_generated)
             props.setProperty(map_index, gi+base)
+            props.setProperty(map_perm, permutation.cycles(1))
+            props.setProperty(map_gauge_set, gauge_set)
             self._helicity_stack.append(h)
             self._mapping_stack.append(lst)
             self._color_stack.append(color_basis)

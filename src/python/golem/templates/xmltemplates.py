@@ -549,7 +549,7 @@ class _TemplateState:
             if "conf" in self.opts:
                for i, heli in enumerate(
                      enumerate_helicities(self.opts["conf"])):
-                  gi, mapping, color_basis = mappings[i]
+                  gi, mapping, color_basis, permutation, gauge_set = mappings[i]
                   if i == gi:
                      values.append({"helicity": i,
                         "helicitysymbol": encode_helicity(heli)})

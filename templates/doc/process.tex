@@ -61,10 +61,10 @@
 
 \begin{longtable}[c]{r|[%
    @for particles %]c[%
-   @end @for particles %]}
+   @end @for particles %]|c|c}
 \bf{Index} [%
    @for particles %]&[%index%][%
-   @end @for particles %]\\
+   @end @for particles %] & Permutation & Set\\
 \hline
 \endfirsthead
 \bf{Index} [%
@@ -76,8 +76,13 @@
 $[%helicity%][%
    @if generated %][%
    @else %]\rightarrow [% map.index %][%
-   @end @if %]$[% @for particles %]& $[%hel%]$[%
-@end @for particles %]\\[% @end @for helicities %]
+   @end @if %]$[% 
+   @for particles %]& $[%hel%]$[%
+   @end @for particles %] & [%
+   @if generated %][%
+   @else %]$[% map.permutation %]$[% 
+   @end @if %] & $[% map.gauge_set%]$ \\[% 
+@end @for helicities %]
 \end{longtable}
 \section{Wave Functions}
 In this section, we use $l_i=k_i$ for massless particles;
