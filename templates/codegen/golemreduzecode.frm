@@ -115,8 +115,8 @@ Multiply replace_(dimS,4-2*epsS);
   #Else 
     #Redefine cppOrder "`EpsOrder'"
   #EndIf
-* TODO: Write i_ in a syntax acceptable to C++
   Format C;
+  Format Normal;
   #Define CoefficientFile "coefficient_`$IntegralName'_`$ProjectorLabel'_`$ColorSymbol'_ord`cppOrder'.cc.tmp"
   #Write <`CoefficientFile'> "/*#@GoSamInternalNewline@##@GoSamInternalNewline@#"
   #Write <`CoefficientFile'> "Coefficient:#@GoSamInternalNewline@#"
@@ -136,17 +136,34 @@ Multiply replace_(dimS,4-2*epsS);
   #Write <`CoefficientFile'> "#include#@GoSamInternalSpace@##@GoSamInternalDblquote@#invariants_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
   #Write <`CoefficientFile'> "#include#@GoSamInternalSpace@##@GoSamInternalDblquote@#parameters_hunk.cpp#@GoSamInternalDblquote@##@GoSamInternalNewline@#"
   #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
-  #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#numerator = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", pN{`EpsOrder'-`$LowestCoefficientOrder'}d0(#@no_split_expression@#)
+  L currentNumerator = pN{`EpsOrder'-`$LowestCoefficientOrder'}d0;
+  .sort
+  Format C;
+  Format float 20;
+  #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#numerator = %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", currentNumerator(#@no_split_expression@#)
   #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#denominator0 = %e#@GoSamInternalNewline@#", pD0(#@no_split_expression@#)
   #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#denominatorf0 = 1;#@GoSamInternalNewline@#"
+  .sort
+  Format C;
+  Format Normal;
   #Do Fac = 1,`$NumDenFactors'
     L denfactor = pD0F[factor_^`Fac'];
     .sort
+    Format C;
+    Format float 20;
     #Write <`CoefficientFile'> "  denominatorf0 *= %e#@GoSamInternalNewline@#", denfactor(#@no_split_expression@#)
     .sort
+    Format C;
+    Format Normal;
   #EndDo
   #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#denominator = denominator0*pow(denominatorf0,{`EpsOrder'-`$LowestCoefficientOrder'});#@GoSamInternalNewline@##@GoSamInternalNewline@#"
+  .sort
+  Format C;
+  Format float 20;
   #Write <`CoefficientFile'> "  coeff_return_t#@GoSamInternalSpace@#coeff = numerator/denominator * %e#@GoSamInternalNewline@##@GoSamInternalNewline@#", expr(#@no_split_expression@#)
+  .sort
+  Format C;
+  Format float 20;
   #Write <`CoefficientFile'> "  return#@GoSamInternalSpace@#coeff;#@GoSamInternalNewline@#"
   #Write <`CoefficientFile'> "};#@GoSamInternalNewline@#"
   #Write <`CoefficientFile'> "#@GoSamInternalNewline@#"
