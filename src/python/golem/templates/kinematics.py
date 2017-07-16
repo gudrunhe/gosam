@@ -16,7 +16,7 @@ class KinematicsTemplate(golem.util.parser.Template):
    """
 
    def init_kinematics(self, conf, in_particles, out_particles,
-         tree_signs, heavy_quarks):
+         tree_signs, heavy_quarks, helicity_map):
       self._mandel_stack = []
       zeroes = golem.util.tools.getZeroes(conf)
       self._zeroes = zeroes
@@ -41,6 +41,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._num_out = num_out
       self._num_legs = num_legs
 
+      self._helicity_map = helicity_map
       self._heavy_quarks = heavy_quarks
       self._complex_masses = conf["complex_masses"]
       self._ehc=conf["ehc"]
@@ -209,8 +210,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._helicity_comb = [h for h in
             golem.util.tools.enumerate_helicities(conf)]
 
-      self._helicity_map = [h for h in 
-            golem.util.tools.enumerate_and_reduce_helicities(conf)]
+      self._helicity_map = helicity_map
 
    def crossed_color(self, *args, **opts):
       cri = [prop.getIntegerProperty("$_") for prop in self.crossing()]

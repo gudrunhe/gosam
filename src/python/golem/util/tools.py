@@ -231,8 +231,7 @@ def enumerate_and_reduce_helicities(conf):
    helicities = [h for h in enumerate_helicities(conf)]
    group = golem.algorithms.helicity.find_gauge_invariant_symmetry_group(helicities,
          conf, in_particles, out_particles, error)
-   for g in group:
-      yield g
+   return group
 
 
 def expand_helicities(patterns):

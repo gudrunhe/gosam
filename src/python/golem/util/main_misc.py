@@ -98,13 +98,16 @@ def generate_process_files(conf, from_scratch=False):
 	in_particles, out_particles = \
 			generate_particle_lists(conf)
 
+	helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
+
 	# Obtain the files required by QGraf from the template file.
 	golem.templates.xmltemplates.transform_templates(templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
 			out_particles = out_particles,
 			user = "qgraf",
-			from_scratch=from_scratch)
+			from_scratch=from_scratch,
+			helicity_map = helicity_map)
 
 	# First thing to be done because the Makefiles
 	# Need to know the number of diagrams.
@@ -153,7 +156,8 @@ def generate_process_files(conf, from_scratch=False):
 			lo_flags = flags[0],
 			nlo_flags = flags[1],
 			massive_bubbles = massive_bubbles,
-			diagram_sum = eprops)
+			diagram_sum = eprops,
+			helicity_map=helicity_map)
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)

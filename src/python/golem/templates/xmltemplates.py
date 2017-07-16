@@ -543,8 +543,7 @@ class _TemplateState:
          itername = attrs["iterator"]
          if itername == "helicity":
             values = []
-            mappings = [m for m in 
-                  enumerate_and_reduce_helicities(self.opts["conf"])]
+            mappings = self.opts["helicity_map"]
 
             if "conf" in self.opts:
                for i, heli in enumerate(

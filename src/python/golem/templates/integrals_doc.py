@@ -10,9 +10,9 @@ import golem.util.tools
 class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map):
 		self.init_kinematics(conf, in_particles, out_particles,
-				tree_signs, heavy_quarks)
+				tree_signs, heavy_quarks, helicity_map)
 		self._loopcache = loopcache
 		self._partitions = loopcache.partition()
 		self._roots = sorted(self._partitions.keys())
