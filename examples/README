@@ -56,6 +56,10 @@ uu_graviton_yy
            dim. reduction. with a custom propagator for the spin-2 particle
            summing all KK modes.
 
+ddzzdd     d(k1) + d~(k2) -> Z(k3) + Z(k4) + d(k5) + d~(k6)
+           Tree-Level only.
+           Demonstrates how the helicity symmetry finder can reduce the number of
+           generated helicities
 
 setup.in.template:
    One can specify options (on top of the usual configuration files)
