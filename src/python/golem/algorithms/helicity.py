@@ -628,7 +628,7 @@ def group_identical_particles(conf, in_particles, out_particles):
    for i, p in enumerate(in_particles):
       name = str(p)
       if numpolvec:
-         if abs(p.getSpin()) != 2 or p.isMassive(zeroes):
+         if abs(p.getSpin()) != 2 or (p.isMassive(zeroes) and p.getSpin() != 0):
             relevant_indices.append(i)
          else:
             continue
@@ -643,7 +643,7 @@ def group_identical_particles(conf, in_particles, out_particles):
    for i, p in enumerate(out_particles):
       name = p.getPartner()
       if numpolvec:
-         if abs(p.getSpin()) != 2 or p.isMassive(zeroes):
+         if abs(p.getSpin()) != 2 or (p.isMassive(zeroes) and p.getSpin() != 0):
             relevant_indices.append(i + ofs)
          else:
             continue
@@ -875,21 +875,21 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
       return result
 
    # Get list of massive/massless in_particles
-   massive_particle_indices = []
-   massless_particle_indices = []
+   relevant_massive_particle_indices = []
+   irrelevant_particle_indices = []
    for index, particle in enumerate(in_particles):
-      if particle.isMassive(zeroes):
-         massive_particle_indices.append(index)
+      if particle.isMassive(zeroes) and particle.getSpin() != 0:
+         relevant_massive_particle_indices.append(index)
       else:
-         massless_particle_indices.append(index)
+         irrelevant_particle_indices.append(index)
    for index, particle in enumerate(out_particles, start=len(in_particles)):
-      if particle.isMassive(zeroes):
-         massive_particle_indices.append(index)
+      if particle.isMassive(zeroes) and particle.getSpin() != 0:
+         relevant_massive_particle_indices.append(index)
       else:
-         massless_particle_indices.append(index)
+         irrelevant_particle_indices.append(index)
 
    # If only massless particles present, each helicity is a gauge invariant quantity => search all permutations
-   if not massive_particle_indices:
+   if not relevant_massive_particle_indices:
       return find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
 
    #
@@ -899,7 +899,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
    # Get list of helicities of massless particles, ignoring massive particle helicities
    massless_helicity_list = deepcopy(helicity_list)
    for helicity in massless_helicity_list:
-      for index in massive_particle_indices:
+      for index in relevant_massive_particle_indices:
          helicity.pop(index)
 
    # Remove duplicates
@@ -912,7 +912,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
       for ih,helicity in enumerate(helicity_list):
          match = True
          for index in helicity:
-               if index not in massive_particle_indices:
+               if index not in relevant_massive_particle_indices:
                   if massless_helicity[index] != helicity[index]:
                      match = False
                      break
@@ -944,7 +944,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
    # Only the reference vectors of massive particles are relevant (each massless helicity is already a gauge set)
    relevant_ref_vectors = {}
    for key, value in ref_vectors.items():
-      if key in massive_particle_indices:
+      if key in relevant_massive_particle_indices:
          relevant_ref_vectors[key] = value
 
    # Sort pemutations, allow trivial permutation for group or individual particles (always ok)
