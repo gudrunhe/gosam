@@ -1009,12 +1009,9 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
             # Search for mapping
             mapping = None
             for i_perm in individual_permutations:
-
-               # List of helicites that will have been generated if this g_perm is considered best
-               possibly_generated_helicities = generated_helicities[:] + helicities_to_generate[:]
                composed_perm = i_perm(g_perm)
                mapping = find_symmetry_mapping(helicity["helicity"], composed_perm, relevant_indices, helicity_list,
-                                               possibly_generated_helicities,
+                                               generated_helicities,
                                                conf, in_particles, out_particles, error
                                                )
                if mapping != None:
