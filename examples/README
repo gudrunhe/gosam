@@ -61,6 +61,10 @@ ddzzdd     d(k1) + d~(k2) -> Z(k3) + Z(k4) + d(k5) + d~(k6)
            Demonstrates how the helicity symmetry finder can reduce the number of
            generated helicities
 
+tttt       t(k1) + t~(k2) -> t(k3) + t~(k4)
+           Tree-Level only.
+           Test calculation with all external particles massive.
+
 setup.in.template:
    One can specify options (on top of the usual configuration files)
    for all examples by creating a file setup.in.
