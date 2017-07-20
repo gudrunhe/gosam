@@ -66,15 +66,15 @@ Id delta(iDUMMY1?, iDUMMY1?) = NC;
 * and may crash due to lack of memory
 .sort
 *
-AutoDeclare S T,C;
+AutoDeclare S TLabel,CLabel;
 #Do I={`COLORED'}
 	#If `I'0 != 0
 		#Do J={`COLORED'}
 			#If `J' >= `I'
 				#Do c1=1,`NUMCS'
 					#Do c2=1,`NUMCS'
-						#$T`I'`J'c`c1'`c2' = TLabel^(`c1' + `c2'*(`NUMCS'+1) + `I'*(`NUMCS'+1)*(`NUMCS'+1) + `J'*([%num_legs%]+1)*(`NUMCS'+1)*(`NUMCS'+1));
-						Id T(`I',`J')*c(`c1',`c2') = $T`I'`J'c`c1'`c2';
+						#$T`I'`J'c`c1'c`c2' = TLabel^(`c1' + `c2'*(`NUMCS'+1) + `I'*(`NUMCS'+1)*(`NUMCS'+1) + `J'*([%num_legs%]+1)*(`NUMCS'+1)*(`NUMCS'+1));
+						Id T(`I',`J')*c(`c1',`c2') = $T`I'`J'c`c1'c`c2';
 					#EndDo
 				#EndDo
 			#EndIf
@@ -83,8 +83,8 @@ AutoDeclare S T,C;
 #EndDo
 #Do c1=1,`NUMCS'
 	#Do c2=1,`NUMCS'
-	#$C`c1'`c2' = CLabel^(`c1' + `c2'*(`NUMCS'+1));
-	Id c(`c1',`c2') = $C`c1'`c2';
+	#$C`c1'C`c2' = CLabel^(`c1' + `c2'*(`NUMCS'+1));
+	Id c(`c1',`c2') = $C`c1'C`c2';
 	#EndDo
 #EndDo
 ;
@@ -146,7 +146,7 @@ Format O[%formopt.level%],stats=off;
 			#If `J' >= `I'
 				#Do c1=1,`NUMCS'
 					#Do c2=1,`NUMCS'
-						#write <`OUTFILE'.tmp> "#Define T`I'`J'c`c1'`c2' \"`$T`I'`J'c`c1'`c2''\""
+						#write <`OUTFILE'.tmp> "#Define T`I'`J'c`c1'c`c2' \"`$T`I'`J'c`c1'c`c2''\""
 					#EndDo
 				#EndDo
 			#EndIf
@@ -155,7 +155,7 @@ Format O[%formopt.level%],stats=off;
 #EndDo
 #Do c1=1,`NUMCS'
 	#Do c2=1,`NUMCS'
-	#write <`OUTFILE'.tmp> "#Define C`c1'`c2' \"`$C`c1'`c2''\""
+	#write <`OUTFILE'.tmp> "#Define C`c1'C`c2' \"`$C`c1'C`c2''\""
 	#EndDo
 #EndDo
 #write <`OUTFILE'.tmp> "*--#] labeltranslation:"
