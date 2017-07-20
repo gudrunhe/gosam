@@ -65,6 +65,10 @@ tttt       t(k1) + t~(k2) -> t(k3) + t~(k4)
            Tree-Level only.
            Test calculation with all external particles massive.
 
+gguudd     g(k1) + g(k2) -> u(k3) + u~(k4) + d(k5) + d~(k6)
+           Tree-Level only. All particles massless.
+           (Test case only) Test calculation with many coloured final states.
+
 setup.in.template:
    One can specify options (on top of the usual configuration files)
    for all examples by creating a file setup.in.
