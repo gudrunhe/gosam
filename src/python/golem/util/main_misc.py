@@ -583,6 +583,9 @@ def workflow(conf):
 	# retrive final extensions from other options
 	ext = golem.properties.getExtensions(conf)
 
+        if "better_num" not in ext:
+            ext.append("better_num")
+
 	if "noformopt" not in ext:
 		ext.append("formopt")
 	if "noderive" not in ext:
