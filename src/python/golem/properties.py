@@ -993,7 +993,7 @@ config_PSP_check = Property("PSP_check",
 
    !!Works only for QCD and with built-in model files!!
    """,
-   bool, False)
+   bool, True)
 
 config_PSP_rescue = Property("PSP_rescue",
    """\
