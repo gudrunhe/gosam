@@ -301,7 +301,7 @@ def AmplitudeType(values, conf, ignore_case):
 		conf["PSP_chk_method"]=conf.psp_chk_method_last if conf.psp_chk_method_last else "Automatic"
 	if ret.startswith(__value_OK__) and 'tree' in conf["olp.amplitudetype"].lower():
 		conf["olp.no_tree_level"] = False
-		conf["olp.no_loop_leveli"] = True
+		conf["olp.no_loop_level"] = True
 	if ret.startswith(__value_OK__) and ('loopinduced' in conf["olp.amplitudetype"].lower() or 'ccloop' in conf["olp.amplitudetype"].lower() or 'scloop' in conf["olp.amplitudetype"].lower() ):
 		conf["olp.no_tree_level"] = True
 		conf["olp.no_loop_level"] = False

@@ -276,7 +276,10 @@ def get_qgraf_power(conf):
             treepower = ipower
 
          if correction_type == "QCD" and not nolooplevel:
-            return [qcd_name, treepower, ipower + 2]
+            if notreelevel:
+              return [qcd_name, treepower, ipower]
+            else:
+              return [qcd_name, treepower, ipower + 2]
          elif correction_type == "EW" and not nolooplevel:
             return [qcd_name, treepower, ipower]
          elif nolooplevel:
@@ -313,7 +316,10 @@ def get_qgraf_power(conf):
             else:
                treepower = icpower
             if not nolooplevel:
-               return [qcd_name, treepower, icpower + 2, qed_name, iepower, iepower]
+               if notreelevel:
+                 return [qcd_name, treepower, icpower, qed_name, iepower, iepower]
+               else:
+                 return [qcd_name, treepower, icpower + 2, qed_name, iepower, iepower]
             else:
                return [qcd_name, treepower, qed_name, alpha_power]
          elif correction_type == "EW" or correction_type == "QED":
