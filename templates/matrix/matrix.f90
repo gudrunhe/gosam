@@ -1334,11 +1334,23 @@ contains
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%][%
    @end @for %][%
+@else %][%
+   @for particles lightlike vector %][%
+      @if is_first %][%
+         @for helicities %]
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
+         @end @for %][%
+      @end @if is_first %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2
+      complex(ki), dimension(4) :: eps[%index%][%
+   @end @for %][%
 @end @if generate_lo_diagrams %]
 
       ampsc(:) = 0.0_ki
       !---#[ Initialize helicity amplitudes :[%
-@if generate_lo_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -1363,8 +1375,17 @@ contains
       call init_event(pvecs[%
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
-      !---#] reinitialize kinematics:
+      !---#] reinitialize kinematics:[%
+             @if generate_lo_diagrams %]
       heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
+             @else %]
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp[%helicity%] = colorvec(:, 0)[%
+             @end @if generate_lo_diagrams %][%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -1402,8 +1423,7 @@ contains
       end if
       if (include_symmetry_factor) then
          ampsc = ampsc / real(symmetry_factor, ki)
-      end if[%
-@end @if generate_lo_diagrams %]
+      end if
    end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :
 
