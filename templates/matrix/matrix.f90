@@ -1341,12 +1341,12 @@ contains
       complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
          @end @for %][%
       @end @if is_first %]
+      complex(ki), dimension(4) :: eps[%index%][%
+   @end @for %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
       integer :: c
       logical :: my_ok
-      real(ki) :: rational2, scale2
-      complex(ki), dimension(4) :: eps[%index%][%
-   @end @for %][%
+      real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
 
       ampsc(:) = 0.0_ki
