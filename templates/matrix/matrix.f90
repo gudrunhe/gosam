@@ -1140,7 +1140,14 @@ contains
       real(ki), dimension(num_legs,num_legs) :: borncc
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli
       real(ki), dimension(num_legs, 4) :: pvecs
-      complex(ki), dimension(numcs) :: color_vector
+      complex(ki), dimension(numcs) :: color_vector[%
+      @if generate_lo_diagrams %][%
+      @else %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2[%
+@end @if generate_lo_diagrams %]
       ampcc(:) = 0.0_ki[%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
@@ -1164,9 +1171,19 @@ contains
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0()
+      !---#] reinitialize kinematics:[%
+         @if generate_lo_diagrams %]
+      color_vector = amplitude[%map.index%]l0()[%
+         @else %]
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)[%
+         @end @if generate_lo_diagrams %]
       call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %]
 
