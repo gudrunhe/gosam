@@ -26,6 +26,16 @@ groups.[%O%]: config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
    @if internal CUSTOM_SPIN2_PROP %]
 custompropagator.[%O%]: config.[%O%] model.[%O%][%
    @end @if %][%
+   @if extension quadruple %]
+accu_qp.[%O%]: config.[%O%]
+model_qp.[%O%]: config.[%O%]
+color_qp.[%O%]: config.[%O%] model_qp.[%O%]
+rambo_qp.[%O%]: config.[%O%] model_qp.[%O%]
+globalsl1_qp.[%O%]: config.[%O%] color_qp.[%O%]
+util_qp.[%O%]: config.[%O%] color_qp.[%O%]
+kinematics_qp.[%O%]: config.[%O%] model_qp.[%O%] scalar_cache.[%O%]
+dipoles_qp.[%O%]: config.[%O%] color_qp.[%O%] model_qp.[%O%] kinematics_qp.[%O%][%
+@end @if %][%
 @end @for %][%
 @for each $(OBJEXTG) var=O %][%
    @if extension pjfry %]
@@ -37,7 +47,6 @@ custompropagator.[%O%]: config.[%O%] model.[%O%][%
 [% process_name asprefix=\_ %]config.mod: config.[%O%]
 [% process_name asprefix=\_ %]version.mod: version.[%O%]
 [% process_name asprefix=\_ %]model.mod: model.[%O%] config.[%O%]
-[% process_name asprefix=\_ %]dipoles.mod: dipoles.[%O%]
 [% process_name asprefix=\_ %]rambo.mod: rambo.[%O%] config.[%O%] model.[%O%]
 [% process_name asprefix=\_ %]globalsl1.mod:  globalsl1.[%O%] config.[%O%] color.[%O%]
 [% process_name asprefix=\_ %]util.mod: util.[%O%] config.[%O%] color.[%O%]
@@ -54,4 +63,14 @@ custompropagator.[%O%]: config.[%O%] model.[%O%][%
    @if internal CUSTOM_SPIN2_PROP %]
 [% process_name asprefix=\_ %]custompropagator.mod: custompropagator.[%O%] config.[%O%] model.[%O%][%
    @end @if %][%
+   @if extension quadruple %]
+[% process_name asprefix=\_ %]accu_qp.mod: accu.[%O%] config.[%O%]
+[% process_name asprefix=\_ %]color_qp.mod: color.[%O%]
+[% process_name asprefix=\_ %]model_qp.mod: model_qp.[%O%] config.[%O%]
+[% process_name asprefix=\_ %]rambo_qp.mod: rambo_qp.[%O%] config.[%O%] model_qp.[%O%]
+[% process_name asprefix=\_ %]globalsl1_qp.mod:  globalsl1_qp.[%O%] config.[%O%] color_qp.[%O%]
+[% process_name asprefix=\_ %]util_qp.mod: util_qp.[%O%] config.[%O%] color_qp.[%O%]
+[% process_name asprefix=\_ %]kinematics_qp.mod: kinematics_qp.[%O%] config.[%O%] model_qp.[%O%] scalar_cache.[%O%]
+[% process_name asprefix=\_ %]dipoles.mod: dipoles_qp.[%O%] config.[%O%] color_qp.[%O%] model_qp.[%O%] kinematics_qp.[%O%][%
+@end @if %][%
 @end @for %]

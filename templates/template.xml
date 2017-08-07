@@ -203,7 +203,7 @@
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
- 	   <file src="../form.set" dest="form.set" class="Kinematics"/>
+ 		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
@@ -224,7 +224,25 @@
 		<file src="custompropagator.f90" class="Model">
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
 			<except if-file="exists" in-mode="normal" />
-	   </file>
+		</file>
+		<file src="dipoles_qp.f90" class="Kinematics" >
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="kinematics_qp.f90" class="Kinematics">
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="rambo_qp.f90" class="Kinematics">
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="util_qp.f90" class="Kinematics">
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="accu_qp.f90" class="Kinematics">
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="globalsl1_qp.f90" class="Kinematics">
+		        <only if-extension="quadruple"/>
+		</file>
 	</directory>
 
 	<directory src="doc">
@@ -268,6 +286,9 @@
 				dest="%s_matrix.f90" arguments="name"
 				class="Kinematics"/>
 		</foreach>
+		<file src="refine_momenta.cpp" class="Kinematics">
+			<only if-extension="quadruple" />
+		</file>
 	</directory>
 
 	<foreach iterator="helicity">
@@ -311,6 +332,20 @@
 			<file src="globals.f90" class="Kinematics" />
 			<file src="diagramsct.f90" class="Multi">
 				<except if-option="genUV" value="false"/>
+			</file>
+			<file src="amplitude_qp.f90" dest="amplitudeh%d_qp.f90"
+				arguments="helicity" class="Integrals" >
+			        <only if-extension="quadruple" />
+			</file>
+			<file src="globals_qp.f90" class="Kinematics">
+			        <only if-extension="quadruple" />
+			</file>
+			<file src="ninja_qp.f90" dest="ninjah%d_qp.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<only if-extension="quadruple" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
 			</file>
 		</directory>
 	</foreach>

@@ -40,6 +40,10 @@ print '----------------------------------'
 txtfile = open(file_name+'.txt','r')
 tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
 f90file = os.fdopen(tmp_handle,"w")
+[% @if extension quadruple %]
+tmp_handle_qp , tmpname_qp = tempfile.mkstemp(suffix="_qp.f90",prefix="gosam_tmp")
+f90file_qp = os.fdopen(tmp_handle_qp,"w")
+[% @end @if extension quadruple %]
 datfilename = file_name + '.dat'
 
 # import txt file
@@ -102,10 +106,74 @@ f90file.write('!      end if\n')
 f90file.write('   end function     amplitude\n')
 f90file.write('!---#] function amplitude:\n')
 f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
-txtfile.close()
 f90file.close()
+[% @if extension quadruple %]
+f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_qp\n')
+f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsl0_qp.f90 \n')
+f90file_qp.write('   ! generator: buildfortranborn.py \n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp\n')[%
+@if internal CUSTOM_SPIN2_PROP %]
+f90file_qp.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
+@end @if %]
+f90file_qp.write('\n')
+f90file_qp.write('   implicit none\n')
+f90file_qp.write('   private\n')
+f90file_qp.write('\n')
+f90file_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
+f90file_qp.write('   complex(ki), dimension(numcs), parameter :: zero_col = 0.0_ki\n')
+f90file_qp.write('   public :: amplitude\n')
+f90file_qp.write('\n')
+f90file_qp.write('contains\n')
+f90file_qp.write('!---#[ function amplitude:\n')
+f90file_qp.write('   function amplitude()\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]config, only: debug_lo_diagrams, &\n')
+f90file_qp.write('        & use_sorted_sum\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]accu_qp, only: sorted_sum\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]util_qp, only: inspect_lo_diagram\n')
+f90file_qp.write('      implicit none\n')
+f90file_qp.write('      complex(ki), dimension(numcs) :: amplitude\n')
+f90file_qp.write('      complex(ki), dimension('+str(abb_max)+') :: abb\n')
+f90file_qp.write('!      complex(ki), dimension(2,numcs) :: diagrams\n')
+f90file_qp.write('      integer :: i\n')
+f90file_qp.write('\n')
+f90file_qp.write('      amplitude(:) = 0.0_ki\n')
+f90file_qp.write('\n')
+f90file_qp.write('\n')
+f90file_qp.write(outdict['Abbreviations'])
+f90file_qp.write('\n')
+f90file_qp.write(outdict['Diagrams'])
+f90file_qp.write('\n')
+f90file_qp.write('      if (debug_lo_diagrams) then\n')
+f90file_qp.write('         write(*,*) "Using Born optimization, debug_lo_diagrams not implemented."\n')
+f90file_qp.write('      end if\n')
+f90file_qp.write('\n')
+f90file_qp.write('!      if (use_sorted_sum) then\n')
+f90file_qp.write('!         do i=1,numcs\n')
+f90file_qp.write('!            amplitude(i) = sorted_sum(diagrams(i))\n')
+f90file_qp.write('!         end do\n')
+f90file_qp.write('!      else\n')
+f90file_qp.write('!         do i=1,numcs\n')
+f90file_qp.write('!            amplitude(i) = sum(diagrams(i))\n')
+f90file_qp.write('!         end do\n')
+f90file_qp.write('!      end if\n')
+f90file_qp.write('   end function     amplitude\n')
+f90file_qp.write('!---#] function amplitude:\n')
+f90file_qp.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_qp\n')
+f90file_qp.close()
+[% @end @if extension quadruple %]
+txtfile.close()
+
 ### additional formatting for output files
 
 postformat(tmpname)
-
+[% @if extension quadruple %]
+postformat(tmpname_qp)
+[% @end @if extension quadruple %]
 shutil.move(tmpname,'diagramsl0.f90')
+[% @if extension quadruple %]
+shutil.move(tmpname_qp,'diagramsl0_qp.f90')
+[% @end @if extension quadruple %]

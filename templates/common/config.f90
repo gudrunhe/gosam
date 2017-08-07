@@ -3,8 +3,12 @@
    implicit none
 
    integer, parameter :: dbl = kind(1.0d0)
-   ! QUADRUPLE PRECISION (ki=16):
-   ! integer, parameter :: ki = selected_real_kind(33, 4931)
+   ! QUADRUPLE PRECISION (ki=16):[%
+   @if extension quadruple %]
+   integer, parameter :: ki_qp = selected_real_kind(33, 4931)[%
+   @else %]
+   ! integer, parameter :: ki = selected_real_kind(33, 4931)[%
+   @end @if extension quadruple %]
    ! INTERMEDIATE PRECISION (ki=10):
    ! integer, parameter :: ki = selected_real_kind(18, 4931)
    ! DOUBLE PRECISION (ki=8):

@@ -47,21 +47,27 @@ libgosam_process[% process_name assuffix=\_ %]_matrix.so: $(OBJECTS)
 	@for helicities generated %]-Wl,-rpath="\$ORIGIN/../helicity[%helicity%]" [%@end @for
         %] -shared -o $@ $+
 [% @else %]
-matrix.a: $(OBJECTS)
+matrix.a: $(OBJECTS)[% @if extension quadruple %] refine_momenta.o[% @end @if extension quadruple %]
 	$(Q) ar rs $@ $+
 [% @end @if %]
 
 $(OBJECTS) test.o:%.o:%.f90
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
+[% @if extension quadruple %]
+
+refine_momenta.o: refine_momenta.cpp
+	$(vecho) "-> Compiling $@ .."
+	$(Q) g++ $(DEBUG) -c -o $@ $<
+[% @end @if extension quadruple %]
 
 ph_test.o:%.o:%.f
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(PROCESS_CFLAGS) $(FCFLAGS) -c -o $@ $<
 
-%.exe: %.o $(OBJECTS) $(PROCESS_DEPS)
+%.exe: %.o[% @if extension quadruple %] refine_momenta.o[% @end @if extension quadruple %] $(OBJECTS) $(PROCESS_DEPS)
 	$(vecho) "-> Creating executable $@ .."
-	$(Q) $(FC) -o $@ $+ $(PROCESS_LDFLAGS) $(LDFLAGS)
+	$(Q) $(FC) -o $@ $+ $(PROCESS_LDFLAGS) $(LDFLAGS)[% @if extension quadruple %] -lquadmath -lstdc++[% @end @if extension quadruple %]
 
 [% @if extension shared %]
 clean:

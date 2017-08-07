@@ -19,7 +19,7 @@ include ../Makefile.conf[%
   @if eval test .eq. helicity %]# @helicity: [%helicity%] [[%
   @for particles%] [% hel%][%@end @for%]]
 # @date: [% time_stamp format=%x~%X %]
-[% 
+[%
    @for particles initial %]
 HELi[%index%]=[%hel%][%
    @end @for%][%
@@ -41,7 +41,7 @@ FORM_OPT=[%
 
 DIAGRAMS_TREE=[%
 @if group %][%
-@else %][% 
+@else %][%
 	@for elements topolopy.keep.tree %] \
 		d[%$_%]h[%helicity%]l0.f90[%
 	@end @for %][%
@@ -49,7 +49,7 @@ DIAGRAMS_TREE=[%
 
 DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
-@else %][% 
+@else %][%
 	@for elements topolopy.keep.tree %] \
 		d[%$_%]h[%helicity%]l0fr5.f90[%
 	@end @for %][%
@@ -89,6 +89,9 @@ SOURCE_TREE= \
 	diagramsl0.f90 $(DIAGRAMS_TREE)[%
    @if internal REQUIRE_FR5 %] \
 	diagramsl0fr5.f90 $(DIAGRAMS_TREE_FR5)[%
+   @end @if %][%
+   @if extension quadruple %] \
+	diagramsl0_qp.f90[%
    @end @if %]
 [% @else %]
 SOURCE_TREE=
@@ -107,14 +110,25 @@ DIAGRAMS_VIRT=[%
 @case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]h[%helicity%]l1.f90[%
+	   @if extension quadruple %] \
+	d[%$_%]h[%helicity%]l1_qp.f90[%
+	   @end @if %][%
 	   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]h[%helicity%]l1d.f90[%
+	   @if extension quadruple %] \
+	d[%$_%]h[%helicity%]l1d_qp.f90[%
+	   @end @if %][%
       @end @if %][%
    @if extension ninja %] \
-    d[%$_%]h[%helicity%]l131.f90 \
-    d[%$_%]h[%helicity%]l132.f90 \
-    d[%$_%]h[%helicity%]l121.f90[%
+        d[%$_%]h[%helicity%]l131.f90 \
+        d[%$_%]h[%helicity%]l132.f90 \
+        d[%$_%]h[%helicity%]l121.f90[%
+      @if extension quadruple %] \
+        d[%$_%]h[%helicity%]l131_qp.f90 \
+        d[%$_%]h[%helicity%]l132_qp.f90 \
+        d[%$_%]h[%helicity%]l121_qp.f90[%
       @end @if %][%
+   @end @if %][%
    @end @for %][%
 @end @select %][%
 @end @if %]
@@ -142,6 +156,19 @@ ABB_VIRT=[%
 	abbrevd[%$_%]h[%helicity%].f90[%
       @end @for %][%
    @end @select %][%
+  @if extension quadruple %][%
+   @select abbrev.level
+   @case helicity %]abbrevh[%helicity%]_qp.f90[%
+   @case group %][%
+      @for groups var=grp %] \
+	abbrevg[%grp%]h[%helicity%]_qp.f90[%
+      @end @for %][%
+   @case diagram %][%
+      @for elements topolopy.keep.virt %] \
+	abbrevd[%$_%]h[%helicity%]_qp.f90[%
+      @end @for %][%
+   @end @select %][%
+ @end @if extension quadruple %][%
 @end @if helsum %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 [% @else %]
@@ -161,7 +188,7 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 .PHONY: source
 .SUFFIXES:
 
-[% 
+[%
 @if extension formopt %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @for elements topolopy.keep.tree %][%
@@ -228,11 +255,11 @@ d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
 @end @for %][%
 @for elements topolopy.keep.tree %][% @if is_last %]
 born-stamp: born.txt
-diagramsl0.f90: born.txt born-stamp
+diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp
 	@echo Python is processing tree diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortranborn.py \
 		-i $< \
-		--HELICITY=[%helicity%][% 
+		--HELICITY=[%helicity%][%
 @end @if %][% @end @for %][%
 @else %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
@@ -284,7 +311,7 @@ d[%$_%]h[%helicity%]l0fr5.f90: d[%$_%]h[%helicity%]l0-fr.txt
       @end @if internal REQUIRE_FR5 %][%
    @end @if %][%
 @end @for %][%
-	
+
 @if group %]
 diagramsl0.f90: $(TXT_TREE)
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
@@ -305,7 +332,7 @@ diagramsl0fr5.f90: $(TXT_TREE_FR5)
 @end @if %][%
 @end @if %]
 
-[% @if extension formopt %][% 
+[% @if extension formopt %][%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
@@ -359,7 +386,7 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 	@touch d[%$_%]h[%helicity%]l1-stamp
 d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt[%
 @if internal GENERATE_DERIVATIVES %]
-d[%$_%]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %] : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
+d[%$_%]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
 	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
@@ -386,7 +413,7 @@ d[%$_%]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %] : d[%$_
 		-D GENERATEDERIVATIVES=1 \
 		../codegen/finaloptimization.frm[%
 	@end @for%]
-d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
+d[%$_%]h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
 	@echo Python is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran.py \
 		-i $< \
@@ -396,10 +423,13 @@ d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-st
 		--QSIGN=[% sign %] \
 		--QSHIFT=[%shift%]
 abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
+@if extension quadruple %]
+abbrevd[%$_%]h[%helicity%]_qp.f90: d[%$_%]h[%helicity%]l1_qp.f90[%
+@end @if %][%
 @end @if %]
 d[%$_%]h[%helicity %]l1d-stamp: d[%$_%]h[%helicity%]l1d.txt
 	@touch d[%$_%]h[%helicity %]l1d-stamp
-d[%$_%]h[%helicity%]l1d.f90 : d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
+d[%$_%]h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
 	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_d.py \
 		-i $< \
@@ -486,7 +516,7 @@ d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]
 
 d[%$_%]h[%helicity %]l13.txt d[%$_%]h[%helicity %]l12.txt : d[%$_%]h[%helicity%]l14-stamp
 d[%$_%]h[%helicity%]l13-stamp d[%$_%]h[%helicity%]l12-stamp  d[%$_%]h[%helicity%]l14-stamp: d[%$_%]h[%helicity %]l14.txt
-d[%$_%]h[%helicity%]l131.f90 : d[%$_%]h[%helicity%]l13.txt d[%$_%]h[%helicity%]l13-stamp
+d[%$_%]h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l13.txt d[%$_%]h[%helicity%]l13-stamp
 	@echo Python is processing ninja triangles expansion [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_tn3.py \
 		-i $< \
@@ -497,7 +527,7 @@ d[%$_%]h[%helicity%]l131.f90 : d[%$_%]h[%helicity%]l13.txt d[%$_%]h[%helicity%]l
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]h[%helicity%]l132.f90 : d[%$_%]h[%helicity%]l12.txt d[%$_%]h[%helicity%]l12-stamp
+d[%$_%]h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l12.txt d[%$_%]h[%helicity%]l12-stamp
 	@echo Python is processing ninja bubbles expansion [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_tn2.py \
 		-i $< \
@@ -508,7 +538,7 @@ d[%$_%]h[%helicity%]l132.f90 : d[%$_%]h[%helicity%]l12.txt d[%$_%]h[%helicity%]l
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l14-stamp
+d[%$_%]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l14-stamp
 	@echo Python is processing ninja mu expansion [%$_%] @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortran_tmu.py \
 		-i $< \
@@ -526,7 +556,7 @@ d[%$_%]h[%helicity%]l121.f90 : d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l
 @end @for groups %][%
 @end @if generate_nlo_virt %]
 
-[% @else %][% 
+[% @else %][%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]

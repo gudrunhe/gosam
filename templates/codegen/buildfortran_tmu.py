@@ -17,7 +17,7 @@ config={'parameters' : parameters,
 
 parser = OptionParser()
 
-parser.add_option("-i", "--input", dest="input",                   
+parser.add_option("-i", "--input", dest="input",
                   action="store", type="string",
                   help="input file", metavar="INPUT")
 
@@ -78,6 +78,10 @@ loopsize=options.loopsize
 txtfile = open(diag_name+'.txt','r')
 tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
 f90file = os.fdopen(tmp_handle,"w")
+[% @if extension quadruple %]
+tmp_handle_qp , tmpname_qp = tempfile.mkstemp(suffix="_qp.f90",prefix="gosam_tmp")
+f90file_qp = os.fdopen(tmp_handle_qp,"w")
+[% @end @if extension quadruple %]
 datfilename = diag_name[:-1] + '.dat'
 # import txt file
 txt_lines=[]
@@ -142,7 +146,7 @@ for lidx in range(0,n_t_terms):
         f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA1\n')
     f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
     f90file.write('      complex(ki), dimension (0:*), intent(inout) :: brack\n')
-    
+
     f90file.write(outdict['NinjaMu2'])
     f90file.write('   end subroutine brack_%s\n' % lidx)
     f90file.write('!---#] subroutine brack_%s: \n' % lidx)
@@ -200,12 +204,117 @@ for lidx in range(0,n_t_terms):
 
 f90file.write('   end subroutine numerator_tmu \n')
 f90file.write('!---#] subroutine numerator_tmu: \n')
-
-
 f90file.write('end module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21\n')
-f90file.close()   
+f90file.close()
+
+[% @if extension quadruple %]
+f90file_qp.write('module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21_qp\n')
+f90file_qp.write('   ! file: '+str(os.getcwd())+diag_name[:-1]+'21_qp.f90 \n')
+f90file_qp.write('   ! generator: buildfortran_n3.py \n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp \n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]util_qp, only: cond_t, d => metric_tensor \n')
+f90file_qp.write('\n')
+f90file_qp.write('   implicit none\n')
+f90file_qp.write('   private\n')
+f90file_qp.write('\n')
+f90file_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
+if (int(rank)>=int(loopsize)+1):
+    f90file_qp.write('   integer, parameter :: ninjaidxt1 = 0\n')
+    f90file_qp.write('   integer, parameter :: ninjaidxt0 = 1\n')
+else:
+    f90file_qp.write('   integer, parameter :: ninjaidxt0 = 0\n')
+f90file_qp.write('   public :: numerator_tmu\n')
+f90file_qp.write(' \n')
+f90file_qp.write('contains \n')
+
+extra_arg = ''
+if (int(rank)>=int(loopsize)+1):
+    extra_arg = ' ninjaA1,'
+
+for lidx in range(0,n_t_terms):
+    f90file_qp.write('!---#[ subroutine brack_%s: \n' % lidx)
+    f90file_qp.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+                  + extra_arg + ' brack)\n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp \n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+    f90file_qp.write('      implicit none \n')
+    f90file_qp.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file_qp.write('      complex(ki), dimension(4), intent(in) :: ninjaA1\n')
+    f90file_qp.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
+    f90file_qp.write('      complex(ki), dimension (0:*), intent(inout) :: brack\n')
+
+    f90file_qp.write(outdict['NinjaMu2'])
+    f90file_qp.write('   end subroutine brack_%s\n' % lidx)
+    f90file_qp.write('!---#] subroutine brack_%s: \n' % lidx)
+
+if (extra_arg):
+    extra_arg = ' vecA1,'
+
+f90file_qp.write('!---#[ subroutine numerator_tmu:\n')
+f90file_qp.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )[%
+@if helsum %]
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_tmu")\n'.format(diag) )[%
+@else %]
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_tmu")\n'.format(diag,heli) )[%
+@end @if %]
+f90file_qp.write('      use iso_c_binding, only: c_int\n')
+f90file_qp.write('      use quadninjago_module, only: ki => ki_nin\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      implicit none \n')
+f90file_qp.write('      integer(c_int), intent(in) :: ncut\n')
+f90file_qp.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')
+f90file_qp.write('      complex(ki), dimension(0:*), intent(out) :: coeffs\n')
+f90file_qp.write('      integer :: t1 \n')
+if qshift=='0':
+    if (int(rank)>=int(loopsize)):
+        f90file_qp.write('      complex(ki), dimension(4) :: vecA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file_qp.write('      complex(ki), dimension(4) :: vecA1\n')
+    if (int(rank)>=int(loopsize)):
+        f90file_qp.write('	     vecA0(1:4) = ' + qsign + ' a(0:3,0)\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file_qp.write('	     vecA1(1:4) = ' + qsign + ' a(0:3,1)\n')
+else:
+    if (int(rank)>=int(loopsize)):
+        f90file_qp.write('      complex(ki), dimension(4) :: qshift\n')
+        f90file_qp.write('      complex(ki), dimension(4) :: vecA0\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file_qp.write('      complex(ki), dimension(4) :: vecA1\n')
+    if (int(rank)>=int(loopsize)):
+        f90file_qp.write('      qshift = %s \n' % qshift)
+        f90file_qp.write('	     vecA0(1:4) = ' + qsign + ' a(0:3,0)\n')
+    if (int(rank)>=int(loopsize)+1):
+        f90file_qp.write('	     vecA1(1:4) = ' + qsign + ' a(0:3,1) - qshift(1:4)\n')
+
+f90file_qp.write('      t1 = 0\n')
+
+# avoids some warnings
+if (n_t_terms==0):
+    f90file_qp.write('      coeffs(0) = 0.0_ki\n')
+
+for lidx in range(0,n_t_terms):
+    f90file_qp.write('      call cond_t(epspow.eq.t1,brack_{0},vecA0,'.format(lidx)
+                  + extra_arg + ' coeffs)\n')
+
+f90file_qp.write('   end subroutine numerator_tmu \n')
+f90file_qp.write('!---#] subroutine numerator_tmu: \n')
+
+
+f90file_qp.write('end module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21_qp\n')
+f90file_qp.close()
+[% @end @if extension quadruple %]
 ### additional formatting for output files
 
 postformat(tmpname)
-
+[% @if extension quadruple %]
+postformat(tmpname_qp)
+[% @end @if extension quadruple %]
 shutil.move(tmpname,diag_name[:-1]+'21.f90')
+[% @if extension quadruple %]
+shutil.move(tmpname_qp,diag_name[:-1]+'21_qp.f90')
+[% @end @if extension quadruple %]

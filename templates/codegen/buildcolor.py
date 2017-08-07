@@ -12,7 +12,7 @@ config={ 'parameters':parameters,
 
 parser = OptionParser()
 
-parser.add_option("-i", "--input", dest="input",                   
+parser.add_option("-i", "--input", dest="input",
                   action="store", type="string",
                   help="input file", metavar="INPUT")
 
@@ -37,11 +37,11 @@ abb_max=getdata('color.dat')['number_abbs'][$
 @end @select $]
 
 
-# Write model.f90 file
+# Write color.f90 file
 colorfile = open('color.f90', 'w')
 
 colorfile.write('module     [$ process_name asprefix=\_ $]color\n')
-colorfile.write('   ! file: '+str(os.getcwd())+'color.f90 \n')
+colorfile.write('   ! file: '+str(os.getcwd())+'/color.f90 \n')
 colorfile.write('   ! generator: buildcolor.py\n')
 colorfile.write('   use [$ process_name asprefix=\_ $]config, only: ki\n')
 colorfile.write('   use [$ process_name asprefix=\_ $]model, only: NC, Nf\n')
@@ -101,7 +101,7 @@ colorfile.write('         , (0.0_ki, i=[$ eval cs + 1$],[$ num_colors $])')[$
          @end @select $][$
       @end @with $]
 colorfile.write('/)\n')[$
-   @end @for repeat num_colors $] 
+   @end @for repeat num_colors $]
 colorfile.write('contains\n')
 colorfile.write('   subroutine     init_color()\n')
 colorfile.write('      implicit none\n')[$
@@ -174,3 +174,144 @@ colorfile.write('   end subroutine inspect_color\n')
 colorfile.write('end module [$ process_name asprefix=\_ $]color\n')
 
 colorfile.close()
+
+[$ @if extension quadruple $]
+colorfile_qp = open('color_qp.f90', 'w')
+
+colorfile_qp.write('module     [$ process_name asprefix=\_ $]color_qp\n')
+colorfile_qp.write('   ! file: '+str(os.getcwd())+'/color.f90 \n')
+colorfile_qp.write('   ! generator: buildcolor.py\n')
+colorfile_qp.write('   use [$ process_name asprefix=\_ $]config, only: ki => ki_qp\n')
+colorfile_qp.write('   use [$ process_name asprefix=\_ $]model_qp, only: NC, Nf\n')
+colorfile_qp.write('   implicit none\n')
+colorfile_qp.write('   private\n')
+colorfile_qp.write('   save\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   public :: init_color\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   real(ki), parameter, public :: TR = 0.5_ki\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
+colorfile_qp.write('   real(ki), parameter :: pi = &\n')
+colorfile_qp.write('   & 3.1415926535897932384626433832795028841971693993751058209749445920_ki\n')
+colorfile_qp.write('   real(ki), parameter :: pi6 = pi*pi/6.0_ki\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   integer, parameter, public :: numcs = [$ num_colors $]\n')
+for item in gc:
+   colorfile_qp.write('   complex(ki), dimension(numcs,numcs), public :: %s\n' % item)
+colorfile_qp.write('   real(ki), public :: incolors\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   real(ki), public :: CA, CF, KA, KF, gammaA, gammaF\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('   real(ki) :: NA\n')[$
+@select abbrev.color @case form$]
+colorfile_qp.write('   real(ki), dimension(%s) :: cabb\n' % abb_max)[$
+@end @select$]
+colorfile_qp.write('\n')
+colorfile_qp.write('   ! Basis vectors\n')[$
+   @if eval num_colors .gt. 3 $]
+colorfile_qp.write('   integer :: i\n')[$
+   @end @if $][$
+   @for repeat num_colors shift=1 var=cs $]
+colorfile_qp.write('   real(ki), dimension(numcs), parameter, public :: c[$ cs $] = &\n')
+colorfile_qp.write('      & (/')[$
+      @with eval cs - 1 result=csm $][$
+         @select csm
+         @case 0 $][$
+         @case 1 $]
+colorfile_qp.write('         0.0_ki, ')[$
+         @case 2 $]
+colorfile_qp.write('         0.0_ki, 0.0_ki, ')[$
+         @else $]
+colorfile_qp.write('         (0.0_ki, i=1,[$ csm $]), ')[$
+         @end @select $]
+colorfile_qp.write('         1.0_ki')[$
+      @end @with $][$
+      @with eval num_colors - cs result=ncs $][$
+         @select ncs
+         @case 0 $][$
+         @case 1 $]
+colorfile_qp.write('         , 0.0_ki')[$
+         @case 2 $]
+colorfile_qp.write('         , 0.0_ki, 0.0_ki')[$
+         @else $]
+colorfile_qp.write('         , (0.0_ki, i=[$ eval cs + 1$],[$ num_colors $])')[$
+         @end @select $][$
+      @end @with $]
+colorfile_qp.write('/)\n')[$
+   @end @for repeat num_colors $]
+colorfile_qp.write('contains\n')
+colorfile_qp.write('   subroutine     init_color()\n')
+colorfile_qp.write('      implicit none\n')[$
+@if eval abbrev.limit > 0 $][$ 'need to split into several subroutines' $]
+abb_chunks = []
+line_counter = 0
+routine_counter = 0
+for abb_line in outdict['Color'].split("\n"):
+	colorfile_qp.write(abb_line + "\n")
+	line_counter += 1
+	if line_counter >= [$ abbrev.limit $]: # abbrev.limit = [$ abbrev.limit $]
+		routine_counter += 1
+		line_counter = 0
+		colorfile_qp.write('      call init_color_%i()\n' % routine_counter)
+		colorfile_qp.write('   end subroutine\n')
+		colorfile_qp.write('   subroutine init_color_%i()\n' % routine_counter)
+		colorfile_qp.write('      implicit none\n')[$
+@else $]
+colorfile_qp.write('%s' % outdict['Color'])[$
+@end @if $]
+colorfile_qp.write('      CA = NC\n')
+colorfile_qp.write('      CF = TR * NA / NC\n')
+colorfile_qp.write('      ! KA = Kg in (C.11) [Catani,Seymour]\n')
+colorfile_qp.write('      KA = (67.0_ki/18.0_ki - pi6) * CA &\n')
+colorfile_qp.write('         & - 10.0_ki/9.0_ki * TR * Nf\n')
+colorfile_qp.write('      ! KF = Kq in (C.11) [Catani,Seymour]\n')
+colorfile_qp.write('      KF = (3.5_ki - pi6) * CF\n')
+colorfile_qp.write('      ! gammaA = \gamma_g in (C.11) [Catani,Seymour]\n')
+colorfile_qp.write('      gammaA = 11.0_ki/6.0_ki * CA - 2.0_ki/3.0_ki * TR * Nf\n')
+colorfile_qp.write('      ! gammaF = \gamma_q in (C.11) [Catani,Seymour]\n')
+colorfile_qp.write('      gammaF = 1.5_ki * CF\n')
+colorfile_qp.write('   end subroutine ! end of "init_color"\n')
+colorfile_qp.write('   subroutine     inspect_color(unit)\n')
+colorfile_qp.write('      implicit none\n')
+colorfile_qp.write('      integer, intent(in) :: unit\n')
+colorfile_qp.write('      integer :: i, j\n')
+colorfile_qp.write('      character :: ch1, ch2, ch3\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('      ch3 = ","\n')
+colorfile_qp.write('      write (unit,\'(A13)\') "gosam_color=["\n')
+colorfile_qp.write('      do i=1,numcs\n')
+colorfile_qp.write('         do j=1,numcs\n')
+colorfile_qp.write('            if (j==1) then\n')
+colorfile_qp.write('               ch1 = "["\n')
+colorfile_qp.write('            else\n')
+colorfile_qp.write('               ch1 = " "\n')
+colorfile_qp.write('            endif\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('            if (j == numcs) then\n')
+colorfile_qp.write('               ch2 = "]"\n')
+colorfile_qp.write('               if (i == numcs) then\n')
+colorfile_qp.write('                  ch3 = "]"\n')
+colorfile_qp.write('               end if\n')
+colorfile_qp.write('            else\n')
+colorfile_qp.write('               ch2 = ","\n')
+colorfile_qp.write('            end if\n')
+colorfile_qp.write('\n')
+colorfile_qp.write('            if (j == numcs) then\n')
+colorfile_qp.write('               write (unit,\'(3x,A1,A8,G23.16,A1,G23.16,A1,A1,A1)\') &\n')
+colorfile_qp.write('               & ch1, "complex(", real(CC(i,j)), ",", aimag(CC(i,j)), ")", &\n')
+colorfile_qp.write('               & ch2, ch3\n')
+colorfile_qp.write('            else\n')
+colorfile_qp.write('               write (unit,\'(3x,A1,A8,G23.16,A1,G23.16,A1,A1)\') &\n')
+colorfile_qp.write('               & ch1, "complex(", real(CC(i,j)), ",", aimag(CC(i,j)), ")", &\n')
+colorfile_qp.write('               & ch2\n')
+colorfile_qp.write('            end if\n')
+colorfile_qp.write('         enddo\n')
+colorfile_qp.write('      enddo\n')
+colorfile_qp.write('   end subroutine inspect_color\n')
+colorfile_qp.write('end module [$ process_name asprefix=\_ $]color_qp\n')
+
+colorfile.close()
+
+[$ @end @if extension quadruple $]
+

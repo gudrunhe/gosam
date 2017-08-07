@@ -574,6 +574,9 @@ extensions = Property("extensions",
                     a limited gauge check (introduces gauge*z variables)
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
+   quadruple    --- make a quadruple precision copy of the code (this
+                    works only with ninja).
+
    """
 #   olp_badpts   --- (OLP interface only): allows to stear the numbering
 #                    of the files containing bad points from the MC
@@ -606,7 +609,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
-      "noformopt","tracify","better_num"])
+      "noformopt","tracify","better_num","quadruple"])
 
 select_lo_diagrams = Property("select.lo",
    """\

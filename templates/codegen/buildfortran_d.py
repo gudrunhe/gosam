@@ -20,7 +20,7 @@ config={'parameters' : parameters,
 
 parser = OptionParser()
 
-parser.add_option("-i", "--input", dest="input",                   
+parser.add_option("-i", "--input", dest="input",
                   action="store", type="string",
                   help="input file", metavar="INPUT")
 
@@ -81,6 +81,10 @@ loopsize=options.loopsize
 txtfile = open(diag_name+'.txt','r')
 tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
 f90file = os.fdopen(tmp_handle,"w")
+[% @if extension quadruple %]
+tmp_handle_qp , tmpname_qp = tempfile.mkstemp(suffix="_qp.f90",prefix="gosam_tmp")
+f90file_qp = os.fdopen(tmp_handle_qp,"w")
+[% @end @if extension quadruple %]
 datfilename = diag_name.rstrip('d') + '.dat'
 # import txt file
 txt_lines=[]
@@ -515,9 +519,432 @@ f90file.write('!---#] subroutine reconstruct_d%s:\n' % str(diagram))[%
 
 
 f90file.write('end module     [% process_name asprefix=\_%]'+diag_name+'\n')
-f90file.close()   
+f90file.close()
+
+[% @if extension quadruple %]
+f90file_qp.write('module     [% process_name asprefix=\_%]'+diag_name+'_qp\n')
+f90file_qp.write('   ! file: '+str(os.getcwd())+diag_name+'_qp.f90 \n')
+f90file_qp.write('   ! generator: buildfortran_d.py \n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp\n')
+f90file_qp.write('   use [% process_name asprefix=\_ %]util_qp, only: cond, d => metric_tensor \n')
+f90file_qp.write('\n')
+f90file_qp.write('   implicit none\n')
+f90file_qp.write('   private\n')
+f90file_qp.write('\n')
+f90file_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
+# ADD MORE
+for irank in range(0,rank+1):
+    f90file_qp.write('   integer, private :: iv' + str(irank) +'\n')
+[%@if extension qshift %][% @else %]
+f90file_qp.write('   real(ki), dimension(4), private :: qshift \n')
+[%@end @if %]
+f90file_qp.write('   public :: derivative [%
+   @if extension golem95 %], reconstruct_d' + str(diagram) + '[%
+   @end @if %]\n')
+f90file_qp.write(' \n')
+f90file_qp.write('contains \n')
+for irank in range(1,rank+2):
+	f90file_qp.write('!---#[ function brack_%s: \n' % irank)
+	f90file_qp.write('   pure function brack_%s(Q' % irank[%
+      @select r2
+      @case implicit explicit %]+ ', mu2'[%
+      @end @select %]+') result(brack)\n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp \n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+	f90file_qp.write('      implicit none \n')
+	f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
+      @select r2
+      @case implicit explicit %]
+	f90file_qp.write('      complex(ki), intent(in) :: mu2\n')[%
+      @end @select %]
+	f90file_qp.write('      complex(ki), dimension('+str(acd_maxl[irank-1])+') :: acd'+diag+'\n')
+	f90file_qp.write('      complex(ki) :: brack\n')
+
+	f90file_qp.write(outdict['Derive%s' % str(irank-1)])
+	f90file_qp.write('   end function brack_%s\n' % irank)
+	f90file_qp.write('!---#] function brack_%s: \n' % irank)
+
+f90file_qp.write('!---#[ function derivative: \n')
+dstring='   function derivative(' + [%
+   @if internal DERIVATIVES_AT_ZERO %][%
+   @else %]'Q_ext,' + [%
+   @end @if %]'mu2,'
+indices=[]
+for irank in range(0,rank):
+	dstring += 'i' + str(irank+1) +','
+	indices.append(str(irank+1))
+
+dstring=dstring.rstrip(',') + ')' + ' result(numerator)\n'
+f90file_qp.write(dstring)
+f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      implicit none \n')[%
+      @if internal DERIVATIVES_AT_ZERO %][%
+      @else %]
+f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q_ext\n')[%
+      @end @if %]
+f90file_qp.write('      complex(ki), intent(in) :: mu2 \n')
+for item in indices:
+	f90file_qp.write('      integer, intent(in), optional :: i%s \n' %item)
+
+f90file_qp.write('      complex(ki) :: numerator \n')
+f90file_qp.write('      complex(ki) :: loc \n')
+# ???
+f90file_qp.write('      integer :: t1 \n')
+# ???
+f90file_qp.write('      integer :: deg \n')
+[%
+      @if internal DERIVATIVES_AT_ZERO %]
+f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
+      @else %]
+f90file_qp.write('      ! The Q that goes into the diagram \n')
+f90file_qp.write('      complex(ki), dimension(4) :: Q\n')[%
+      @end @if %][%
+      @if extension qshift %][%
+      @else %]
+if qshift==0:
+	f90file_qp.write('	     qshift(:) = 0.0_ki \n')
+else:
+	f90file_qp.write('      qshift = %s \n' % qshift)[%
+      @end @if %][%
+      @if internal DERIVATIVES_AT_ZERO %][%
+      @else %][%
+      @if extension qshift %]
+f90file_qp.write('      Q(:) = Q_ext(:)\n')[%
+      @else %]
+if qshift == 0:
+	f90file_qp.write('      Q(:) = %s Q_ext(:)\n' % qsign)
+else:
+	f90file_qp.write('      Q(:) = %s Q_ext(:) - qshift(:)\n' % qsign)[%
+      @end @if %][%
+@end @if %]
+f90file_qp.write('      numerator = 0.0_ki \n')
+f90file_qp.write('      deg = 0 \n')
+for item in indices:
+	f90file_qp.write('      if(present(i%s)) then\n' % item)
+	f90file_qp.write('          iv%s=i%s\n' % (item,item))
+	f90file_qp.write('          deg=%s\n' % item)
+	f90file_qp.write('      else\n')
+	f90file_qp.write('          iv%s=1\n' % item)
+	f90file_qp.write('      end if\n')
+f90file_qp.write('      t1 = 0\n')
+for irank in range(1,rank+2):
+	jtem = str(irank - 1)
+	f90file_qp.write('      if(deg.eq.%s) then\n' % jtem )
+	[%@select r2 @case explicit implicit %]
+	brackstr = 'brack_%s' % str(irank)
+	[%@end @select %]
+	wstr = '         numerator = cond(epspow.eq.t1,%s,Q,mu2)\n' % brackstr
+	f90file_qp.write(wstr)
+	f90file_qp.write('         return\n')
+	f90file_qp.write('      end if\n')
+
+f90file_qp.write('   end function derivative \n')
+f90file_qp.write('!---#] function derivative: \n')[%
+@if extension golem95 %]
+f90file_qp.write('!---#[ subroutine reconstruct_d%s: \n' % str(diagram))
+f90file_qp.write('   subroutine     reconstruct_d%s(coeffs) \n' % str(diagram))
+f90file_qp.write('      use [% process_name asprefix=\_ %]groups_qp, only: tensrec_info_group%s\n' % group)
+f90file_qp.write('      implicit none \n')
+f90file_qp.write('      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki) \n')
+f90file_qp.write('      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki) \n')
+f90file_qp.write('      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki) \n')
+f90file_qp.write('      type(tensrec_info_group%s), intent(out) :: coeffs \n' % group)[%
+	@select r2 @case implicit %]
+if int(loopsize) in [0,1,2,3,4,5]:
+	if int(rank) not in [0,1,2,3] and int(loopsize)<5:
+		f90file_qp.write('      complex(ki) :: x1,x2\n')
+	if int(loopsize)==5 and int(rank)>=6:
+		f90file_qp.write('      complex(ki) :: x1,x2,x3\n')[%
+	@end @select %][%
+	@if internal DERIVATIVES_AT_ZERO %][%
+	@else %]
+f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/czip,czip,czip,czip/)\n')[%
+	@end @if %][%
+   @for repeat max_rank inclusive=true var=rk %][%
+		@if is_first%]
+if int(rank) == [% rk %]:[%
+		@else %]
+elif int(rank) == [% rk %]:[%
+		@end @if %]
+	f90file_qp.write('      ! rank %s case :\n' % rank)
+	f90file_qp.write('      !---[# reconstruct coeffs%%coeffs_%s:\n' % diagram)[%
+      @for tens_rec_info rk shift_args=1 %]
+	f90file_qp.write('      coeffs%%coeffs_%s' % diagram)[%
+         @if eval rk .gt. 0 %]
+	f90file_qp.write('%c[% coeff %]')[%
+            @select coeff @case 0 %][%
+            @else %]
+	f90file_qp.write('([%k%],[%i%])')[%
+            @end @select %][%
+         @end @if %]
+	f90file_qp.write(' = ')[%
+         @select sign @case -1 %]
+	f90file_qp.write('-')[%
+         @end @select %]
+	f90file_qp.write('derivative(')[%
+         @if internal DERIVATIVES_AT_ZERO %][%
+         @else %]
+	f90file_qp.write('Q,')[%
+         @end @if %]
+	f90file_qp.write('czip')[%
+         @for elements args delim=, %]
+	f90file_qp.write(',[% $_ %]')[%
+         @end @for %]
+	f90file_qp.write(')')[%
+         @if eval symmetry .gt. 1 %] 
+	f90file_qp.write('/[% symmetry %].0_ki')[%
+         @end @if %]
+	f90file_qp.write('\n')[%
+      @end @for tens_rec_info rk %]
+	f90file_qp.write('      !---#] reconstruct coeffs%%coeffs_%s:\n' % diagram)[%
+      @select r2 @case implicit %]
+	if int(loopsize) in [0,1,2,3,4,5]:
+		if int(rank) in [2,3] and int(loopsize)<5:
+			f90file_qp.write('      !---#[ reconstruct coeffs%%coeffs_%ss1:\n' % diagram)[%
+            @with eval rk - 2 result=rkk %][%
+               @for tens_rec_info rkk shift_args=1 %]
+			f90file_qp.write('      coeffs%%coeffs_%ss1' %diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %] 
+			f90file_qp.write('=')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('cone')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %] 
+			f90file_qp.write('/ [% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file_qp.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')[%
+               @end @for tens_rec_info rkk %][%
+            @end @with eval rkk %]
+			f90file_qp.write('      !---#] reconstruct coeffs%%coeffs_%ss1:\n' % diagram )
+		elif int(rank) not in [0,1] and int(loopsize)<5:
+			f90file_qp.write('      !---#[ reconstruct coeffs%%coeffs_%ss1 and s2:\n' % diagram)[%
+            @with eval rk - 2 result=rkk %][%
+               @for tens_rec_info rkk shift_args=1 %]
+			f90file_qp.write('      x1 = ')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('cone')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file_qp.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file_qp.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')
+			f90file_qp.write('      x2 = ')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('-cone')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file_qp.write('/ [% symmetry %].0_ki')[%
+                  @end @if %] 
+			f90file_qp.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')
+			f90file_qp.write('      coeffs%%coeffs_%ss1' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file_qp.write('= 0.5_ki * (x1 - x2)')
+			f90file_qp.write('\n')
+			f90file_qp.write('      coeffs%%coeffs_%ss2' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file_qp.write('= 0.5_ki * (x1 + x2)')
+			f90file_qp.write('\n')[%
+               @end @for tens_rec_info %][%
+            @end @with eval rkk %]
+			f90file_qp.write('      !---#] reconstruct coeffs%%coeffs_%ss1 and s2:\n' % diagram)
+		elif int(loopsize)==5 and int(rank)>=6:
+			f90file_qp.write('      !---#[ reconstruct coeffs%%coeffs_%ss1, s2 and s3:\n' % diagram)[%
+            @with eval rk - 2 result=rkk %][%
+               @for tens_rec_info rkk shift_args=1 %]
+			f90file_qp.write('      x1 =')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('cone')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file_qp.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file_qp.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')
+			f90file_qp.write('      x2 = ')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('-cone')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file_qp.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file_qp.write(' - coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')
+			f90file_qp.write('      x3 = ')[%
+                  @select sign @case -1 %]
+			f90file_qp.write('-')[%
+                  @end @select %]
+			f90file_qp.write('derivative(')[%
+                  @if internal DERIVATIVES_AT_ZERO %][%
+                  @else %]
+			f90file_qp.write('Q,')[%
+                  @end @if %]
+			f90file_qp.write('ctwo')[%
+                  @for elements args delim=, %]
+			f90file_qp.write(',[% $_ %]')[%
+                  @end @for %]
+			f90file_qp.write(')')[%
+                  @if eval symmetry .gt. 1 %]
+			f90file_qp.write('/[% symmetry %].0_ki')[%
+                  @end @if %]
+			f90file_qp.write('- coeffs%%coeffs_%s%%c[% coeff %]' % diagram)[%
+                  @select coeff @case 0 %][%
+                  @else %]
+			f90file_qp.write('([%kmap%],[%imap%])')[%
+                  @end @select %]
+			f90file_qp.write('\n')
+
+			f90file_qp.write('      coeffs%%coeffs_%ss1' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file_qp.write('= x1 - x2/3._ki - x3/6._ki')
+			f90file_qp.write('\n')
+			f90file_qp.write('      coeffs%%coeffs_%ss2' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file_qp.write('= 0.5_ki * (x1 + x2)')
+			f90file_qp.write('\n')
+			f90file_qp.write('      coeffs%%coeffs_%ss3' % diagram)[%
+                  @if eval rkk .gt. 0 %]
+			f90file_qp.write('%c[% coeff %]')[%
+                     @select coeff @case 0 %][%
+                     @else %]
+			f90file_qp.write('([%k%],[%i%])')[%
+                     @end @select %][%
+                  @end @if %]
+			f90file_qp.write('= (x3 - x2)/6._ki - 0.5_ki * x1')
+			f90file_qp.write('\n')[%
+               @end @for tens_rec_info %][%
+            @end @with eval rkk %]
+			f90file_qp.write('      !---#] reconstruct coeffs%%coeffs_%ss1, s2 and s3:\n' % diagram)[%
+      @end @select r2 %][%
+   @end @for repeat max_rank %]
+
+
+
+f90file_qp.write('   end subroutine reconstruct_d%s\n' % str(diagram))
+f90file_qp.write('!---#] subroutine reconstruct_d%s:\n' % str(diagram))[%
+@end @if %]
+
+
+
+
+f90file_qp.write('end module     [% process_name asprefix=\_%]'+diag_name+'_qp\n')
+f90file_qp.close()
+[% @end @if extension quadruple %]
+
 ### additional formatting for output files
 
 postformat(tmpname)
 
 shutil.move(tmpname,diag_name+'.f90')
+
+[% @if extension quadruple %]
+postformat(tmpname_qp)
+
+shutil.move(tmpname_qp,diag_name+'_qp.f90')
+[% @end @if extension quadruple %]

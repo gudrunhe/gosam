@@ -17,6 +17,8 @@ OBJECTS=config.o kinematics.o dipoles.o model.o rambo.o util.o \
 @if extension pjfry %] \
 		  precision_pjfry.o pjfry95pg.o pjfry_comb.o[%
 @end @if %][% @if internal CUSTOM_SPIN2_PROP %] custompropagator.o[%
+@end @if %][% @if extension quadruple %] kinematics_qp.o dipoles_qp.o model_qp.o rambo_qp.o util_qp.o \
+		  color_qp.o accu_qp.o globalsl1_qp.o[%
 @end @if %]
 
 .PHONY: compile source clean very-clean doc
@@ -57,7 +59,11 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(FIND) $(FIND_OPT) . \( \
 		-name 'color.f90' \
 		-or -name 'model.f90' \
-		-or -name 'version.f90' \
+		-or -name 'version.f90'[%
+@if extension quadruple %] \
+		-or -name 'color_qp.f90' \
+		-or -name 'model_qp.f90'[%
+@end @if extension quadruple %] \
 		\) -exec rm \{} \;
 endif
 

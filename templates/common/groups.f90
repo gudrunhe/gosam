@@ -161,6 +161,9 @@
 @end @if %][%
 @if extension ninja %]
    public :: ninja_exit[%
+@if extension quadruple %]
+   public :: quadninja_exit[%
+@end @if %][%
 @end @if %]
 contains[%
 
@@ -921,6 +924,17 @@ subroutine ninja_exit()
   !------#] call ninja_clear_integral_cache():
 end subroutine ninja_exit
 !---#] subroutine ninja_exit:[%
+   @if extension quadruple %]
+!---#[ subroutine quadninja_exit:
+subroutine quadninja_exit()
+  use quadninjago_module, only: quadninja_clear_integral_cache
+  implicit none
+  !------#[ call quadninja_clear_integral_cache():
+  call quadninja_clear_integral_cache()
+  !------#] call quadninja_clear_integral_cache():
+end subroutine quadninja_exit
+!---#] subroutine quadninja_exit:[%
+   @end @if extension quadruple %][%
    @end @if extension ninja %][%
 @if extension pjfry %]
 function pga10(b_set, ep)

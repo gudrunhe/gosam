@@ -15,13 +15,15 @@ FORM_OPT=\
 	-D OUTFILE=color \
 	-D CREATETT=1
 
-source: color.f90 model.f90 version.f90
+source: color.f90 model.f90 version.f90 [%
+@if extension quadruple %] color_qp.f90 model_qp.f90 [%
+@end @if extension quadruple %]
 
 
-[% 
+[%
 @select abbrev.color @case form none%]
-color.f90: color.txt
-	@echo Python is generating color.f90 
+color.f90[% @if extension quadruple %] color_qp.f90[% @end @if %]: color.txt
+	@echo Python is generating color.f90
 	@$(PYTHON) ../codegen/buildcolor.py -i color.txt
 [%@case haggies%]
 color.f90 color.dat: color.txt ../codegen/color.in ../codegen/color.out
@@ -31,12 +33,12 @@ color.f90 color.dat: color.txt ../codegen/color.in ../codegen/color.out
 		-t ../codegen/color.out \
 		-o $@ $<
 [%@end @select %]
-[% 
+[%
 @if extension formopt %]
 model.txt:  ../codegen/func.txt
 	@echo Form is generating $@
 	@$(FORM) $(FORM_OPT) ../codegen/modelopt.frm
-model.f90:  model.txt
+model.f90[% @if extension quadruple %] model_qp.f90[% @end @if %]:  model.txt
 	@echo Python is generating model.f90
 	@$(PYTHON) ../codegen/buildmodel.py -i model.txt
 [%@else%]
@@ -67,7 +69,7 @@ version.f90: ../codegen/info.frm
 
 color.txt: ../codegen/color.frm
 	@echo FORM is generating color.txt
-	@$(FORM) $(FORM_OPT) ../codegen/color.frm[% 
+	@$(FORM) $(FORM_OPT) ../codegen/color.frm[%
 @select abbrev.color @case form %]
 	@echo FORM is optimizing color.txt
 	@$(FORM) $(FORM_OPT) ../codegen/coloropt.frm[%
