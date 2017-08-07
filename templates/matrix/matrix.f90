@@ -1142,7 +1142,6 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       complex(ki), dimension(numcs) :: color_vector
       ampcc(:) = 0.0_ki[%
-  @if generate_lo_diagrams %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1180,8 +1179,7 @@ contains
       end if
       if (include_symmetry_factor) then
          ampcc = ampcc / real(symmetry_factor, ki)
-      end if[%
-   @end @if %]
+      end if
 
 
    end subroutine OLP_color_correlated
