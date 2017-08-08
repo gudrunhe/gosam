@@ -242,7 +242,7 @@ contains
       real(ki_qp), dimension(1:4) :: amp_qp
       real(ki_qp), dimension(2:3) :: irp_qp
       real(ki_qp) :: scale2_qp, rat2_qp
-      real(ki), dimension([% count particles fundamental massive %]) :: scales2[%
+      real(ki), dimension(0:[% count particles massive %]) :: scales2[%
 @end @if extension quadruple %]
       real(ki), dimension(1:4) :: ampdef, amprot, ampres, ampresrot
       real(ki) :: rat2, kfac, zero, angle
@@ -261,7 +261,7 @@ contains
       fpprec1 = 18
       fpprec2 = 18
       scales2(0) = 0.0_ki[%
-@for particles massive quarks anti-quarks %]
+@for particles massive %]
       scales2([%index%]) = [%mass%][%
 @end @for %]
       if(reduction_interoperation.eq.reduction_interoperation_rescue) &
