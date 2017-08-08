@@ -623,6 +623,20 @@ def workflow(conf):
 			"The ninja reduction method is only supported with formopt.\n" +
 			"Please either remove noformopt or ninja in the input card\n")
 
+        # Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
+        if 'quadruple' in ext:
+                if ('ninja' not in ext) or ('samurai' in ext) or ('golem95' in ext):
+                        raise GolemConfigError(
+                                "The quadruple precision copy of the code can be generated only\n" +
+                                "in association with ninja. The gosam-contrib has to be compiled with the flag\n"+
+                                "'--enable-quadninja'. Please select only ninja as reduction program by setting:\n"+
+                                "'reduction_programs=ninja' in the input card.\n")
+                if conf.getBooleanProperty("helsum"):
+                        raise GolemConfigError(
+                                "The option 'helsum' is not implemented in association\n" +
+                                "with the quadruple precision copy of the code.\n")
+
+
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 

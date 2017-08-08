@@ -466,7 +466,7 @@ sum_diagrams = Property("diagsum",
 sum_helicities = Property("helsum",
    """\
    Flag whether or not 1-loop diagrams should be analytically
-   summed over all helicities 
+   summed over all helicities
    """,
    bool,
    False, experimental=True)
