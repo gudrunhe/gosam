@@ -387,9 +387,9 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
          @end @if %]
       ok = .true.[%
-      @end @if %][%      
+      @end @if %][%
       @if extension ninja %]
-   case(2) ! use Ninja only
+   case(4) ! use QuadNinja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
          @if generate_lo_diagrams %]
       samplitude(:) = 2.0_ki * real(tot(:), ki)[%

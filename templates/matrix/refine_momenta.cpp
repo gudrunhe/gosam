@@ -221,7 +221,7 @@ extern "C" {
     refineMomenta(nn,in,out,nsc,sc2);
 
     for(int i=0; i<nn*4; i++){
-      out_gs[i] = out[i/4+nn*(i%4)];
+      out_gs[i] = out[i/nn+4*(i%nn)];
     }
   }
 }

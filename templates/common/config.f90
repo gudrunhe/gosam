@@ -16,10 +16,11 @@
 
    ! Options to control the interoperation between different
    ! Reduction libraries:
-   integer, parameter :: SAMURAI = 0
-   integer, parameter :: GOLEM95 = 1
-   integer, parameter :: NINJA   = 2
-   integer, parameter :: PJFRY   = 3 ! experimental
+   integer, parameter :: SAMURAI   = 0
+   integer, parameter :: GOLEM95   = 1
+   integer, parameter :: NINJA     = 2
+   integer, parameter :: PJFRY     = 3 ! experimental
+   integer, parameter :: QUADNINJA = 4 ! experimental
    ! Reduction methods
    integer :: reduction_interoperation = [%
    @select reduction_interoperation default="-1"
@@ -43,6 +44,8 @@
    @case -1 %][%
       @if extension golem95 %]GOLEM95[%
       @else %][%
+           @if extension quadruple %]QUADNINJA[%
+           @else %][%
            @select reduction_interoperation default="-1"
            @case -1 %][%
               @if extension ninja %]NINJA[%
@@ -57,6 +60,7 @@
               @end @if %][%
            @else %]-1[%
            @end @select %][%
+           @end @if %][%
       @end @if %][%
    @else %][% reduction_interoperation_rescue %][%
    @end @select %]

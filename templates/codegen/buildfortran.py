@@ -526,7 +526,7 @@ f90file_qp.write('   !------#] function numerator_golem95:\n')[%
 @if extension ninja %]
 f90file_qp.write('   !------#[ subroutine numerator_ninja:\n')
 f90file_qp.write('   subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &\n')
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]'+diag_name+'_ninja")\n')
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]'+diag_name+'_qp_ninja")\n')
 f90file_qp.write('      use iso_c_binding, only: c_int\n')
 f90file_qp.write('      use quadninjago_module, only: ki_nin\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow\n')

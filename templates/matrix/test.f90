@@ -56,21 +56,20 @@
              &    amp(2)/amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, double pole:", &
              &    amp(3)/amp(0)
-      [% @else %]
+[% @else %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, finite part:", amp(1)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, single pole:", amp(2)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, double pole:", amp(3)
-      [% @end @if %]
-      [%
-      @if generate_lo_diagrams %]
+[% @end @if %]
+[% @if generate_lo_diagrams %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  single pole:", &
             & irp(2)/amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  double pole:", &
             & irp(3)/amp(0)
-      [% @else %]
+[% @else %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  single pole:", irp(2)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  double pole:", irp(3)
-      [% @end @if %]
+[% @end @if %]
       end if
    end do
    call cpu_time(t2)
@@ -83,8 +82,8 @@
  contains
 
 subroutine  print_parameters(scale2)
-   use [% process_name asprefix=\_ %]config, only: renormalisation, & 
-        convert_to_cdr, reduction_interoperation, & 
+   use [% process_name asprefix=\_ %]config, only: renormalisation, &
+        convert_to_cdr, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
    use [% process_name asprefix=\_ %]model
    implicit none
@@ -95,7 +94,7 @@ subroutine  print_parameters(scale2)
    write(*,'(A1,1x,A26)') "#", "--------- SETUP ---------"
    write(*,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
 
-   if(convert_to_cdr) then 
+   if(convert_to_cdr) then
       write(*,'(A1,1x,A9,A3)') "#", "scheme = ", "CDR"
    else
       write(*,'(A1,1x,A9,A4)') "#", "scheme = ", "DRED"
@@ -107,6 +106,8 @@ subroutine  print_parameters(scale2)
       write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
       write(*,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
+   else if(reduction_interoperation.eq.4) then
+      write(*,'(A1,1x,A15,A9)') "#", "reduction with ", "QUADNINJA"
    end if
 
    if (reduction_interoperation_rescue.ne.reduction_interoperation.and.&
@@ -117,6 +118,8 @@ subroutine  print_parameters(scale2)
          write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "GOLEM95"
       else if(reduction_interoperation_rescue.eq.2) then
          write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"
+      else if(reduction_interoperation_rescue.eq.4) then
+         write(*,'(A1,1x,A12,A9)') "#", "rescue with ", "QUADNINJA"
       end if
    end if
 
