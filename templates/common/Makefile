@@ -71,7 +71,7 @@ $(OBJECTS):%.o:%.f90
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o $@ $<
 
-version.f90 color.f90 model.f90: source
+version.f90 color.f90 model.f90 version_qp.f90 color_qp.f90 model_qp.f90: source
 
 filelist-source: source
 	echo Makefile > $@
