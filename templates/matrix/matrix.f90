@@ -364,9 +364,10 @@ contains
 
          if(icheck.eq.3.and.PSP_rescue) then[%
             @if extension quadruple %]
+            reduction_interoperation = reduction_interoperation_rescue
             scale2_qp = real(scale2,ki_qp)
             call refine_momenta_to_qp([%num_legs%],vecs,vecs_qp,[% count particles massive %]+1,scales2)
-            call adjust_kinematics_qp(vecs_qp)
+            ! call adjust_kinematics_qp(vecs_qp)
             call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
             call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)
             ampres = real(amp_qp,ki)
@@ -1504,9 +1505,9 @@ contains
          do c=1,numcs
             colorvec(c,:) = samplitudel1summed(real(scale2,ki_qp),my_ok,rational2,c)
          end do
-         heli_amp( 0) = square(colorvec(:, 0))
-         heli_amp(-1) = square(colorvec(:,-1))
-         heli_amp(-2) = square(colorvec(:,-2))[%
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if %]
          ok = ok .and. my_ok
          amp = amp + heli_amp
@@ -1591,9 +1592,9 @@ contains
          do c=1,numcs
             colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
-         heli_amp( 0) = square(colorvec(:, 0))
-         heli_amp(-1) = square(colorvec(:,-1))
-         heli_amp(-2) = square(colorvec(:,-2))
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
       [%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then
