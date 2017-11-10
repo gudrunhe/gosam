@@ -24,6 +24,8 @@ HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && head -n 100 ../d
 
 OBJECTS= \
 	globals.o amplitude.o[%
+@if extension quadruple %] globals_qp.o amplitude_qp.o[%
+@end @if %][%
 @select r2
 @case implicit explicit off %][%
    @if extension golem95 %] golem95.o[%
@@ -31,12 +33,16 @@ OBJECTS= \
    @if extension samurai %] samurai.o[%
    @end @if %][%
    @if extension ninja %] ninja.o[%
+     @if extension quadruple %] ninja_qp.o[%
+     @end @if %][%
    @end @if %][%
 @end @select %][%
 @if generate_lo_diagrams %] \
 	diagramsl0.o[%
+   @if extension quadruple %] diagramsl0_qp.o [%
+   @end @if %][%
    @if group %][%
-   @else %][% 
+   @else %][%
       @for elements topolopy.keep.tree %] \
 	d[%$_%]l0.o[%
       @end @for %][%
@@ -55,18 +61,43 @@ OBJECTS= \
 	abbrevd[%$_%].o[%
       @end @for %][%
    @end @select %][%
+   @if extension quadruple %][%
+   @select abbrev.level
+   @case helicity %] \
+	abbrev_qp.o[%
+   @case group %][%
+      @for groups var=grp %] \
+	abbrevg[%grp%]_qp.o[%
+      @end @for %][%
+   @case diagram %][%
+      @for elements topolopy.keep.virt %] \
+	abbrevd[%$_%]_qp.o[%
+      @end @for %][%
+   @end @select %][%
+   @end @if %][%
 	@select r2
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.o[%
+                   @if extension quadruple %] \
+	d[%$_%]l1_qp.o[%
+                   @end @if %][%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]l1d.o[%
-			@end @if %][%
+                      @if extension quadruple %] \
+	d[%$_%]l1d_qp.o[%
+                      @end @if %][%
+		   @end @if %][%
 		   @if extension ninja %] \
 	d[%$_%]l131.o \
 	d[%$_%]l132.o \
 	d[%$_%]l121.o[%
-			@end @if %][%
+                       @if extension quadruple %] \
+	d[%$_%]l131_qp.o \
+	d[%$_%]l132_qp.o \
+	d[%$_%]l121_qp.o[%
+                       @end @if %][%
+		   @end @if %][%
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
@@ -90,18 +121,43 @@ GENERATED_SRC=[%
 	abbrevd[%$_%].f90[%
       @end @for %][%
    @end @select %][%
+   @if extension quadruple %][%
+   @select abbrev.level
+   @case helicity %] \
+	abbrev_qp.f90[%
+   @case group %][%
+      @for groups var=grp %] \
+	abbrevg[%grp%]_qp.f90[%
+      @end @for %][%
+   @case diagram %][%
+      @for elements topolopy.keep.virt %] \
+	abbrevd[%$_%]_qp.f90[%
+      @end @for %][%
+   @end @select %][%
+   @end @if %][%
 	@select r2
 	@case implicit explicit off %][%
       @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.f90[%
+           @if extension quadruple %] \
+	d[%$_%]l1_qp.f90[%
+           @end @if %][%
 		   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]l1d.f90[%
-			@end @if %][%
+                     @if extension quadruple %] \
+	d[%$_%]l1d_qp.f90[%
+                     @end @if %][%
+		   @end @if %][%
 		   @if extension ninja %] \
 	d[%$_%]l131.f90 \
 	d[%$_%]l132.f90 \
 	d[%$_%]l121.f90[%
-			@end @if %][%
+                       @if extension quadruple %] \
+	d[%$_%]l131_qp.f90 \
+	d[%$_%]l132_qp.f90 \
+	d[%$_%]l121_qp.f90[%
+                       @end @if %][%
+		   @end @if %][%
 	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
@@ -141,6 +197,8 @@ endif
 [% @for elements topolopy.keep.virt %]
 
 d[%$_%]l1: d[%$_%]l1.f90 abbrevd[%$_%].f90 globals.o[%
+@if extension quadruple %] d[%$_%]l1_qp.f90 abbrevd[%$_%]_qp.f90 globals_qp.o[%
+@end @if %][%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
 	$(shell sed -e "s/Local diagram/Id diag/g" ../diagrams-1.hh > $(TEMPFILE))
@@ -150,10 +208,18 @@ endif[%
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(MAKE) $(S) -f Makefile.source d[%$_%]l1.txt
 	$(MAKE) $(S) -f Makefile.source d[%$_%]l1.f90
-	$(MAKE) $(S) -f Makefile.source abbrevd[%$_%].f90
+	$(MAKE) $(S) -f Makefile.source abbrevd[%$_%].f90[%
+	@if extension quadruple %]
+	$(MAKE) $(S) -f Makefile.source d[%$_%]l1_qp.f90
+	$(MAKE) $(S) -f Makefile.source abbrevd[%$_%]_qp.f90[%
+	@end @if %]
 	$(vecho) "-> Compiling $@ .."
 	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%].o -I../common abbrevd[%$_%].f90
-	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]l1.o -I../common d[%$_%]l1.f90
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]l1.o -I../common d[%$_%]l1.f90[%
+	@if extension quadruple %]
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o abbrevd[%$_%]_qp.o -I../common abbrevd[%$_%]_qp.f90
+	$(Q) $(FC) $(FC_OPTS) $(FCFLAGS) -c -o d[%$_%]l1_qp.o -I../common d[%$_%]l1_qp.f90[%
+	@end @if %]
 endif
 
 [% @end @for %]
@@ -182,7 +248,10 @@ very-clean: clean
 	$(Q)rm -f filelist-source
 ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 	$(Q)$(FIND) $(FIND_OPT) . \( \
-		-name 'd*l1.f90' \
+		-name 'd*l1.f90' [%
+@if extension quadruple %] \
+		-or -name 'd*l[01]_qp.f90'[%
+@end @if %] \
 		-or -name 'd*l[01]fr5.f90' \
 		-or -name 'd*l[014]*.txt' \
 		-or -name 'd*l1[123dmu]*.txt' \
@@ -198,7 +267,10 @@ ifeq ($(HAVE_MAKEFILE_SOURCE),1)
 		-or -name 'd*l[01].dat' \
 		-or -name 'd*l[01].abb'[%
 @if extension formopt %] \
-		-or -name 'abbrevd*.f90' \
+		-or -name 'abbrevd*.f90'[%
+@if extension quadruple %] \
+		-or -name 'abbrevd*_qp.f90'[%
+@end @if %] \
 		-or -name 'd*l[01].prc' \
 		-or -name 'borndiag.prc' \
 		-or -name 'born.txt' \

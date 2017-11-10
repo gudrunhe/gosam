@@ -37,10 +37,17 @@
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+            @if extension quadruple %]
+          diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude_qp[%
+            @end @if %][%
       @end @if %][%
    @end @for %]
    use [% process_name asprefix=\_
       %]amplitude, only: samplitudel1summed => samplitude[%
+        @if extension quadruple %]
+   use [% process_name asprefix=\_
+      %]amplitude_qp, only: samplitudel1summed_qp => samplitude[%
+      @end @if %][%
 @else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %]
@@ -1500,10 +1507,10 @@ contains
       end if
       call init_event(vecs)[%
       @if generate_lo_diagrams %]
-         heli_amp = samplitudel1summed(real(scale2,ki_qp),my_ok,rational2)[%
+         heli_amp = samplitudel1summed_qp(real(scale2,ki_qp),my_ok,rational2)[%
       @else %]
          do c=1,numcs
-            colorvec(c,:) = samplitudel1summed(real(scale2,ki_qp),my_ok,rational2,c)
+            colorvec(c,:) = samplitudel1summed_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
          heli_amp( 0) = square_qp(colorvec(:, 0))
          heli_amp(-1) = square_qp(colorvec(:,-1))

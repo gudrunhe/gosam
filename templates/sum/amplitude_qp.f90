@@ -1,85 +1,33 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %]_qp
+ %]module    [% process_name asprefix=\_ %]amplitude_qp
    use [% process_name asprefix=\_ %]config, only: ki => ki_qp, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color_qp, only: numcs[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
    @select r2
    @case implicit explicit off %]
    use [% process_name asprefix=\_ %]groups[%
       @if extension samurai %]
    use precision, only: ki_sam => ki
-   use [% process_name asprefix=\_ %]samuraih[% helicity %][%
+   use [% process_name asprefix=\_ %]samurai[%
       @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]golem95h[% helicity %][%
+   use [% process_name asprefix=\_ %]golem95[%
       @end @if %][%
       @if extension ninja %]
    use quadninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]ninjah[% helicity %]_qp[%
+   use [% process_name asprefix=\_ %]ninja_qp[%
       @end @if %][%
    @end @select %][%
-@end @if %][%
 @end @if %]
    [% @if internal CUSTOM_SPIN2_PROP
    %]use [% process_name asprefix=\_ %]custompropagator[% @end @if %]
    implicit none
    private
 
-   public :: finite_renormalisation, samplitude
+   public :: samplitude
 contains
-!---#[ function finite_renormalisation:
-   function     finite_renormalisation(scale2) result(amp)
-      use [% process_name asprefix=\_ %]util_qp, only: square
-      use [% process_name asprefix=\_ %]color_qp, only: CF, CA
-      use [% process_name asprefix=\_ %]kinematics_qp, only: &
-      & num_light_quarks, num_gluons[%
-@if generate_lo_diagrams %]
-      use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0_qp, only: amplitudel0 => amplitude[%
-   @if internal REQUIRE_FR5 %]
-      use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0fr5, only: amplitudel0fr5 => amplitude[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-      implicit none
-      real(ki), intent(in) :: scale2
-      real(ki) :: amp[%
-@if generate_lo_diagrams %][%
-   @if internal REQUIRE_FR5 %]
-      complex(ki),  dimension(numcs) :: amp0, amp5
-      real(ki) :: deltaZ5[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-      amp = 0.0_ki[%
-@if generate_lo_diagrams %][%
-   @if internal REQUIRE_FR5 %]
-      amp0 = amplitudel0()
-      !---#[ finite renormalisation of gamma5:
-      ! We need to replace gamma5 by
-      ! (1 + alpha_s/2pi deltaZ5) gamma5, where deltaZ5 is scheme
-      ! dependend. See for example
-      !    S. Weinzierl, ``Equivariant dimensional regularization,''
-      !    arXiv:hep-ph/9903380
-      ![%
-      @if extension dred %]
-      deltaZ5 = 0.0_ki * CF[%
-      @else %]
-      ! There's a factor of 2 in the square routine already.
-      deltaZ5 = -1.0_ki * CF[%
-      @end @if %]
-
-      amp5 = amplitudel0fr5()
-      amp = amp + deltaZ5 * square(amp0, amp5)
-      !---#] finite renormalisation of gamma5:[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-   end function finite_renormalisation
-   !---#] function finite_renormalisation:
-
    !---#[ function samplitude:
    function     samplitude(scale2,ok,rational2,[%
 @if generate_lo_diagrams %]opt_amp0,[%
@@ -93,11 +41,9 @@ contains
 @if generate_lo_diagrams %] amp0,[%
 @else %] col0,[%
 @end @if %]perm, use_perm, epspow
-      use [% process_name asprefix=\_ %]globalsh[%helicity%]_qp, &
+      use [% process_name asprefix=\_ %]globals_qp, &
      & only: init_lo, rat2[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
    @select abbrev.level
    @case helicity %]
       use [% process_name asprefix=\_
@@ -106,20 +52,21 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%]h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%
       @for groups var=grp %]
       use [% process_name asprefix=\_
-      %]abbrevg[%grp%]h[%helicity%]_qp, only: init_abbrevg[%grp%] => init_abbrev[%
+      %]abbrevg[%grp%]_qp, only: init_abbrevg[%grp%] => init_abbrev[%
       @end @for %][%
    @end @select %][%
 @end @if %][%
-@end @if %][%
-@if generate_lo_diagrams %]
+@if generate_lo_diagrams %][%
+   @for helicities generated %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0_qp, only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0_qp, only: amplitudeh[%helicity%]l0 => amplitude[%
+   @end @for %][%
 @end @if %][%
 @select r2 @case only %][%
 @else %]
@@ -127,14 +74,14 @@ contains
 @end @select %][%
       @if generate_uv_counterterms %]
       use [% process_name asprefix=\_
-      %]diagramscth[%helicity%], only: samplitudect => samplitudect[%
+      %]diagramsct, only: samplitudect => samplitudect[%
       @end @if %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
       real(ki), intent(out) :: rational2[%
 @if generate_lo_diagrams %]
-      complex(ki), dimension(numcs), intent(in), optional :: opt_amp0[%
+      complex(ki), dimension(numcs,0:max(0,[%@for helicities generated%][%@if is_first%][%@else%],[%@end @if%][%helicity%][%@end @for%])), intent(in), optional :: opt_amp0[%
 @else %]
       integer, intent(in) :: the_col0[%
 @end @if %]
@@ -158,9 +105,11 @@ contains
       samplitude(:) = 0.0_ki[%
 @if generate_lo_diagrams %]
       if (present(opt_amp0)) then
-         amp0[% @if helsum %](:,[%helicity%])[%@end @if%] = opt_amp0
-      else
-         amp0[% @if helsum %](:,[%helicity%])[%@end @if%] = amplitudel0()
+         amp0 = opt_amp0
+      else[%
+         @for helicities generated %]
+         amp0(:,[%helicity%]) = amplitudeh[%helicity%]l0()[%
+         @end @for %]
       end if[%
 @else %]
       col0 = the_col0[%
@@ -175,8 +124,6 @@ contains
       rat2 = (0.0_ki, 0.0_ki)
       call init_lo()[%
 @if generate_nlo_virt %][%
-@if helsum %][%
-@else %][%
 
    @select abbrev.level
    @case helicity %]
@@ -294,15 +241,12 @@ contains
    @end @if %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
-@end @if helsum %][%
 @end @if generate_nlo_virt %]
    end function samplitude
    !---#] function samplitude:[%
 @select r2
 @case implicit explicit off %][%
-   @for groups var=grp %][%
-@if helsum %][%
-@else %][% 'evaluate group only for sum' %]
+   @for groups var=grp %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]config, only: &
@@ -311,8 +255,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    use parametre, only: mu2_scale_par
    use form_factor_type, only: form_factor
-   use [% process_name asprefix=\_ %]golem95h[% helicity
-       %], only: reconstruct_golem95 => reconstruct_group
+   use [% process_name asprefix=\_ %]golem95, only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
          @if extension pjfry %], contract_pjfry[%
          @end @if %][%
@@ -325,13 +268,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @end @if %][%
       @end @if %][%
       @if extension samurai %]
-   use [% process_name asprefix=\_ %]samuraih[% helicity
-      %], only: samurai_reduce => reduce_group[% grp %]
+   use [% process_name asprefix=\_ %]samurai, only: samurai_reduce => reduce_group[% grp %]
    use options, only: samurai_out => iout[%
       @end @if %][%
       @if extension ninja %]
-   use [% process_name asprefix=\_ %]ninjah[% helicity
-      %]_qp, only: ninja_reduce => ninja_reduce_group[% grp %][%
+   use [% process_name asprefix=\_ %]ninja_qp, only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
    real(ki), intent(in) :: scale2
@@ -387,7 +328,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
          @end @if %]
       ok = .true.[%
-      @end @if %][%
+      @end @if %][%      
       @if extension ninja %]
    case(4) ! use QuadNinja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
@@ -587,7 +528,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    end if
 end subroutine evaluate_group[% grp %]
 !---#] subroutine evaluate_group[% grp %]:[%
-@end @if %][%
    @end @for groups %][%
 @end @select %]
-end module [% process_name asprefix=\_ %]amplitudeh[% helicity %]_qp
+end module [% process_name asprefix=\_ %]amplitude_qp

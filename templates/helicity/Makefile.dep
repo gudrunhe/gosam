@@ -193,7 +193,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
    	   @end @if %][%
 		@end @select %][%
 	   @if generate_lo_diagrams %] \
-			diagramsl0.[%O%][%
+			diagramsl0_qp.[%O%][%
 		   @if internal REQUIRE_FR5 %] diagramsl0fr5_qp.[%O%][%
 			@end @if %][%
 		@end @if %][%

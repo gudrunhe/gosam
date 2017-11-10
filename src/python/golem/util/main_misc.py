@@ -631,11 +631,6 @@ def workflow(conf):
                                 "in association with ninja. The gosam-contrib has to be compiled with the flag\n"+
                                 "'--enable-quadninja'. Please select only ninja as reduction program by setting:\n"+
                                 "'reduction_programs=ninja' in the input card.\n")
-                if conf.getBooleanProperty("helsum"):
-                        raise GolemConfigError(
-                                "The option 'helsum' is not implemented in association\n" +
-                                "with the quadruple precision copy of the code.\n")
-
 
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()

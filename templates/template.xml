@@ -361,13 +361,13 @@
 			<only if-extension="autotools" />
 		</file>
 		<file src="globals.f90" class="Kinematics"/>
-      <file src="../form.set" dest="form.set" class="Kinematics"/>
-      <file src="amplitude.f90" class="Integrals" />
-      <file src="samurai.f90"	class="Integrals" >
-            <only if-extension="samurai" />
-            <except if-option="r2" value="only" />
-            <filter name="Fortran90" width="80"/>
-      </file>
+		<file src="../form.set" dest="form.set" class="Kinematics"/>
+		<file src="amplitude.f90" class="Integrals" />
+		<file src="samurai.f90"	class="Integrals" >
+		  <only if-extension="samurai" />
+		  <except if-option="r2" value="only" />
+		  <filter name="Fortran90" width="80"/>
+		</file>
 		<file src="golem95.f90"	class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
@@ -379,5 +379,20 @@
 				<filter name="Fortran90" width="80"/>
 		</file>
 		<file src="diagramsl0.f90" class="Integrals" />
+		<file src="diagramsl0_qp.f90" class="Integrals" >
+		  <only if-extension="quadruple" />
+		</file>
+		<file src="amplitude_qp.f90" class="Integrals" >
+		  <only if-extension="quadruple" />
+		</file>
+		<file src="globals_qp.f90" class="Kinematics">
+		  <only if-extension="quadruple" />
+		</file>
+		<file src="ninja_qp.f90" class="Integrals">
+		  <only if-extension="ninja" />
+		  <only if-extension="quadruple" />
+		  <except if-option="r2" value="only" />
+		  <filter name="Fortran90" width="80"/>
+		</file>
 	</directory>
 </template>

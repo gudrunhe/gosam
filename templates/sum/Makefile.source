@@ -31,13 +31,24 @@ DIAGRAMS_VIRT=[%
 @case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.f90[%
+	   @if extension quadruple %] \
+	d[%$_%]l1_qp.f90[%
+	   @end @if %][%
 	   @if internal GENERATE_DERIVATIVES %] \
 	d[%$_%]l1d.f90[%
+	   @if extension quadruple %] \
+	d[%$_%]l1d_qp.f90[%
+	   @end @if %][%
       @end @if %][%
    @if extension ninja %] \
     d[%$_%]l131.f90 \
     d[%$_%]l132.f90 \
     d[%$_%]l121.f90[%
+      @if extension quadruple %] \
+        d[%$_%]l131_qp.f90 \
+        d[%$_%]l132_qp.f90 \
+        d[%$_%]l121_qp.f90[%
+      @end @if %][%
       @end @if %][%
    @end @for %][%
 @end @select %]
@@ -57,8 +68,15 @@ ABB_VIRT=[%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%].f90[%
       @end @for %][%
-   @end @select %]
-
+   @end @select %][%
+  @if extension quadruple %][%
+   @select abbrev.level
+   @case diagram %][%
+      @for elements topolopy.keep.virt %] \
+	abbrevd[%$_%]_qp.f90[%
+      @end @for %][%
+   @end @select %][%
+@end @if extension quadruple %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 [% @else %]
 DIAGRAMS_VIRT=
@@ -238,7 +256,7 @@ d[%$_%]l14.txt : d[%$_%]l1.txt
 
 d[%$_%]l13.txt d[%$_%]l12.txt : d[%$_%]l14-stamp
 d[%$_%]l13-stamp d[%$_%]l12-stamp  d[%$_%]l14-stamp: d[%$_%]l14.txt
-d[%$_%]l131.f90 : d[%$_%]l13.txt
+d[%$_%]l131.f90[% @if extension quadruple %] d[%$_%]l131_qp.f90[% @end @if %]: d[%$_%]l13.txt
 	@echo Python is processing ninja triangles expansion [%$_%] @ Helicity sum
 	@$(PYTHON) ../codegen/buildfortran_tn3.py \
 		-i $< \
@@ -250,7 +268,7 @@ d[%$_%]l131.f90 : d[%$_%]l13.txt
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
 
-d[%$_%]l132.f90 : d[%$_%]l12.txt
+d[%$_%]l132.f90[% @if extension quadruple %] d[%$_%]l132_qp.f90[% @end @if %] : d[%$_%]l12.txt
 	@echo Python is processing ninja bubbles expansion [%$_%] @ Helicity sum
 	@$(PYTHON) ../codegen/buildfortran_tn2.py \
 		-i $< \
@@ -261,7 +279,7 @@ d[%$_%]l132.f90 : d[%$_%]l12.txt
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]l121.f90 : d[%$_%]l14.txt
+d[%$_%]l121.f90[% @if extension quadruple %] d[%$_%]l121_qp.f90[% @end @if %]: d[%$_%]l14.txt
 	@echo Python is processing ninja mu expansion [%$_%] @ Helicity sum
 	@$(PYTHON) ../codegen/buildfortran_tmu.py \
 		-i $< \
@@ -278,7 +296,7 @@ d[%$_%]l121.f90 : d[%$_%]l14.txt
 @end @for groups %][%
 @end @if generate_nlo_virt %]
 
-[% @else %][% 
+[% @else %][%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
