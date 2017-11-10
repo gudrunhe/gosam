@@ -38,7 +38,8 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
             @if extension quadruple %]
-          diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude_qp[%
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
             @end @if %][%
       @end @if %][%
    @end @for %]

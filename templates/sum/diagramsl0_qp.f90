@@ -11,7 +11,7 @@
 contains
 
 !---#[ function amplitude:
-   function amplitude_qp()
+   function amplitude()
       use [% process_name asprefix=\_ %]model_qp
       use [% process_name asprefix=\_ %]kinematics_qp
       use [% process_name asprefix=\_ %]color_qp
