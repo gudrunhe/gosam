@@ -865,28 +865,28 @@ contains
       end if
       call init_event(vecs)[%
       @if generate_lo_diagrams %]
-         heli_amp = samplitudel1summed(real(scale2,ki),my_ok,rational2)[%
+      heli_amp = samplitudel1summed(real(scale2,ki),my_ok,rational2)[%
       @else %]
-         do c=1,numcs
-            colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
-         end do
-         heli_amp( 0) = square(colorvec(:, 0))
-         heli_amp(-1) = square(colorvec(:,-1))
-         heli_amp(-2) = square(colorvec(:,-2))[%
+      do c=1,numcs
+         colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp( 0) = square(colorvec(:, 0))
+      heli_amp(-1) = square(colorvec(:,-1))
+      heli_amp(-2) = square(colorvec(:,-2))[%
       @end @if %]
-         ok = ok .and. my_ok
-         amp = amp + heli_amp
-         rat2 = rat2 + rational2
+      ok = ok .and. my_ok
+      amp = amp + heli_amp
+      rat2 = rat2 + rational2
 
-         if(debug_nlo_diagrams) then
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-            if(my_ok) then
-               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+      if(debug_nlo_diagrams) then
+         write(logfile,'(A33,E24.16,A3)') &
+              & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+              & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+              & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+         if(my_ok) then
+            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
             else
                write(logfile,'(A29)') "<flag name='ok' status='no'/>"
             end if
@@ -899,9 +899,7 @@ contains
          eval_heli(h) = .true.
       else
          eval_heli(:) = .true.
-      end if
-
-[%
+      end if[%
    @for helicities%]
       if (eval_heli([%helicity%])) then
          if(debug_nlo_diagrams) then
@@ -1888,6 +1886,46 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
       ampcc(:) = 0.0_ki[%
+   @if helsum %][%
+   @if generate_lo_diagrams %][%
+  @for helicities %]
+      !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+      call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+      !---#] reinitialize kinematics:
+      color_vector = amplitude[%map.index%]l0()
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)[%
+  @end @for helicities %][%
+  @else %][% 'if loop induced' %]
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc)[%
+  @end @if %][% 
+  @else %][% 'if not helsum' %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1924,8 +1962,8 @@ contains
       call OLP_color_correlated_lo(color_vector,ampcc_heli)
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
-  @end @for helicities %]
-
+  @end @for helicities %][%
+  @end @if helsum %]
       [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]ampcc = ampcc*get_formfactor_lo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
          ampcc = ampcc / real(in_helicities, ki)
@@ -1936,7 +1974,6 @@ contains
       if (include_symmetry_factor) then
          ampcc = ampcc / real(symmetry_factor, ki)
       end if
-
 
    end subroutine OLP_color_correlated
 
@@ -1962,7 +1999,12 @@ contains
    @end @for %][%
 @end @if generate_lo_diagrams %]
 
-      bornsc(:,:,:) = 0.0_ki
+      bornsc(:,:,:) = 0.0_ki[%
+   @if helsum %]
+      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
+      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
+      write(*,*) "without the 'helsum' option"[%
+   @else %]
       !---#[ Initialize helicity amplitudes :[%
 @if generate_lo_diagrams %][%
    @for particles lightlike vector %][%
@@ -2065,7 +2107,8 @@ contains
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
       end if[%
-@end @if generate_lo_diagrams %]
+@end @if generate_lo_diagrams %][%
+@end @if helsum %]
    end subroutine spin_correlated_lo2
 
 
@@ -2103,7 +2146,12 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
 
-      ampsc(:) = 0.0_ki
+      ampsc(:) = 0.0_ki[%
+   @if helsum %]
+      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
+      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
+      write(*,*) "without the 'helsum' option"[%
+   @else %]
       !---#[ Initialize helicity amplitudes :[%
    @for particles lightlike vector %][%
       @if is_first %][%
@@ -2159,7 +2207,6 @@ contains
          @end @for modified_helicity %][%
       @end @for helicities %]
 
-
       ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+1)   = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs +1) + real(mp, ki)
       ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+2) = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs + 2)  + real(aimag(mp),ki)
 
@@ -2177,7 +2224,8 @@ contains
       end if
       if (include_symmetry_factor) then
          ampsc = ampsc / real(symmetry_factor, ki)
-      end if
+      end if[%
+   @end @if helsum %]
    end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :
 

@@ -871,7 +871,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
    if noreduce:
       result = []
       for ih, helicity in enumerate(helicity_list):
-         result.append( (ih, None, range(len(color_basis))) )
+         result.append( (ih, None, range(len(color_basis)), Permutation(), ih) )
       return result
 
    # Get list of massive/massless in_particles
