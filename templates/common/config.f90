@@ -221,9 +221,9 @@
    ! Determines the maximum allowed difference among the abs of the
    ! single pole evaluations obtained with the amplitude vs the one
    ! obtained through the IR subroutine relative to the leading order.
-   ! 
-   ! Note: at the moment it only works for virtual corrections
-   ! to Tree level processes.
+   ! Alternatively, the rescue system can be modified to compute all
+   ! phase space points twice to asses their stability.
+
    logical :: PSP_check = [% PSP_check
              convert=bool
              true=.true.
@@ -235,7 +235,10 @@
    logical :: PSP_rescue = [% PSP_rescue
              convert=bool
              true=.true.
-             false=.false. %][% @if generate_lo_diagrams %][% @else %]
+             false=.false. %]
+
+   ! Number of good digits in virtual amplitude:[%
+   @if generate_lo_diagrams %][% @else %]
    ! not used (tree-level not available):[% @end @if %]
    integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
    integer :: PSP_chk_th2 = [% PSP_chk_th2 %]

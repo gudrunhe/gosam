@@ -1026,9 +1026,9 @@ contains
       ! Put particles onshell.[%
 @for particles %][%
    @if eval index .lt. ( num_legs - 1 ) %]
-      vecs([%index%],1) = sqrt(vecs([%index%],2)**2 + vecs([%index
+      vecs([%index%],1) = sign(sqrt(vecs([%index%],2)**2 + vecs([%index
         %],3)**2 + vecs([%index%],4)**2[% @if is_massive
-        %] + [%mass%]**2[% @end @if %])[%
+        %] + [%mass%]**2[% @end @if %]),vecs([%index%],1))[%
    @else %][%
       @if eval index .eq. ( num_legs - 1 ) %]
       s0[%

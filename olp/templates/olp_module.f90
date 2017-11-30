@@ -23,11 +23,18 @@ contains
       @for subprocesses %]
       use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem
       use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
-           & [%$_%]_PSP_verbosity => PSP_verbosity, &
+           & [%$_%]_PSP_verbosity => PSP_verbosity, &[%
+      @if generate_lo_diagrams %]
            & [%$_%]_PSP_chk_th1 => PSP_chk_th1, &
            & [%$_%]_PSP_chk_th2 => PSP_chk_th2, &
            & [%$_%]_PSP_chk_th3 => PSP_chk_th3, &
            & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
+      @else %]
+           & [%$_%]_PSP_chk_li1 => PSP_chk_li1, &
+           & [%$_%]_PSP_chk_li2 => PSP_chk_li2, &
+           & [%$_%]_PSP_chk_li3 => PSP_chk_li3, &
+           & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
+      @end @if %][%
       @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
@@ -97,10 +104,16 @@ contains
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
-      ! [%$_%]_PSP_verbosity =  PSP_verbosity
+      ! [%$_%]_PSP_verbosity =  PSP_verbosity[%
+      @if generate_lo_diagrams %]
       ! [%$_%]_PSP_chk_th1 = PSP_chk_th1
       ! [%$_%]_PSP_chk_th2 = PSP_chk_th2
-      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3
+      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3[%
+      @else %]
+      ! [%$_%]_PSP_chk_th1 = PSP_chk_li1
+      ! [%$_%]_PSP_chk_th2 = PSP_chk_li2
+      ! [%$_%]_PSP_chk_th3 = PSP_chk_li3[%
+      @end @if %]
       ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
       @end @for %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
@@ -351,6 +364,9 @@ contains
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
       use [%$_%]_model, only: [%$_%]_parseline => parseline[%
+      @if extension quadruple %]
+      use [%$_%]_model_qp, only: [%$_%]_parseline_qp => parseline[%
+      @end @if %][%
       @end @for %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: line
@@ -368,7 +384,10 @@ contains
 
       l = strlen(line)[%
       @for subprocesses %]
-      call [%$_%]_parseline(line(1:l),ios)
+      call [%$_%]_parseline(line(1:l),ios)[%
+      @if extension quadruple %]
+      call [%$_%]_parseline_qp(line(1:l),ios)[%
+      @end @if %]
       if (ios .ne. 0) then
          stat = 0
          return
@@ -500,6 +519,9 @@ contains
       @end @if %][%
       @if extension ninja %]
       call ninja_exit()[%
+      @if extension quadruple %]
+      call quadninja_exit()[%
+      @end @if %][%
       @end @if %]
       if (ok) then
          !
@@ -509,7 +531,7 @@ contains
       if(present(acc)) then
          acc=10.0_ki**(-prec) ! point accuracy
       else
-         if(prec.lt.PSP_chk_th3 .and. PSP_check) then
+         if(prec.lt.[% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %] .and. PSP_check) then
             ! Give back a Nan so that point is discarded
             zero = log(1.0_ki)
             amp(2)= 1.0_ki/zero[% 
@@ -643,6 +665,9 @@ contains
    subroutine     read_slha_file(line)[%
    @for subprocesses %]
       use [%$_%]_model, only: [%$_%]_read_slha => read_slha[%
+      @if extension quadruple %]
+      use [%$_%]_model_qp, only: [%$_%]_read_slha_qp => read_slha[%
+      @end @if %][%
    @end @for %]
       implicit none
       character(len=*), intent(in) :: line
@@ -660,6 +685,9 @@ contains
          rewind(unit=27)[%
          @end @if %]
          call [%$_%]_read_slha(27)[%
+         @if extension quadruple %]
+         call [%$_%]_read_slha_qp(27)[%
+         @end @if %][%
       @end @for %]
          close(27)
       end if

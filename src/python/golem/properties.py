@@ -1078,7 +1078,6 @@ config_PSP_chk_li1 = Property("PSP_chk_li1",
    be reduced to 8.
 
    The number has to be an integer.
-   !!Works only for QCD and with built-in model files!!
    """,
    int, 16)
 
@@ -1097,8 +1096,6 @@ config_PSP_chk_li2 = Property("PSP_chk_li2",
 
    If Samurai is used as default reduction program, this needs to
    be reduced to 6.
-
-   !!Works only for QCD and with built-in model files!!
    """,
    int, 7)
 
@@ -1114,7 +1111,6 @@ config_PSP_chk_li3 = Property("PSP_chk_li3",
    to the verbosity level set, such points are written to a file
    and not used when the code is interfaced to an external Monte
    Carlo using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
    """,
    int, 6)
 
@@ -1128,8 +1124,6 @@ config_PSP_chk_li4 = Property("PSP_chk_li4",
    finite part. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
-
-   !!Works only for QCD and with built-in model files!!
    """,
    int, 19)
 
