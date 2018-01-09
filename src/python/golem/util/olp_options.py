@@ -415,6 +415,7 @@ def InterfaceVersion(values, conf, ignore_case):
 		conf["__OLP_BLHA2__"]=False
 		if not conf["extensions"] or not "olp_blha1" in conf["extensions"]:
 			conf["extensions"]=(conf["extensions"] + "," if conf["extensions"]  else "") + "olp_blha1"
+                return __value_OK__
 	elif version=="BLHA2":
 		conf["__OLP_BLHA1__"]=False
 		conf["__OLP_BLHA2__"]=True

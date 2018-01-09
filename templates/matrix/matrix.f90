@@ -313,7 +313,9 @@ contains
          @if extension quadruple %]
          if(spprec1.lt.PSP_chk_th1) then                                       ! RESCUE
             icheck=3
-         endif[%
+         endif
+	 prec = min(spprec1,fpprec1)
+	 endif ! end if(icheck.eq.1)[%
          @else %]
          if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
               .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
@@ -324,7 +326,10 @@ contains
          @end @if extension quadruple %][%
          @elif anymember Rotation PSP_chk_method ignore_case=true %]
          icheck=2 ! do rotation in all cases (PSP_chk_method=Rotation)[%
-         @else %]
+         @else %][%
+         @if extension quadruple %]
+         if(icheck.eq.1) then[%
+         @end @if %]
          ! CHECK ON THE POLE:
          ! poles should be zero for loop-induced processes
          if(ampdef(2) .ne. 0.0_ki .and. ampdef(3) .ne. 0.0_ki) then
@@ -357,7 +362,9 @@ contains
          ! if(fpprec1.lt.PSP_chk_li2) then      ! RESCUE
          !    icheck=3
          !    fpprec1=-10        ! Set -10 as finite part precision
-         ! endif[%
+         ! endif
+         prec = min(spprec1,fpprec1)
+	 endif ! end if(icheck.eq.1)[%
          @else %]
          if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
             icheck=2 ! ROTATION
@@ -369,8 +376,7 @@ contains
          @end @if extension quadruple %][%
          @end @if %][%
          @if extension quadruple %]
-         prec = min(spprec1,fpprec1)[%
-         @else %]
+         [% @else %]
          if(icheck.eq.2) then
             do irot = 1,[%num_legs%]
                vecsrot(irot,1) = vecs(irot,1)
