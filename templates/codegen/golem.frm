@@ -407,6 +407,9 @@ EndArgument;
 * terms for n matrices, many of which become zero
 * later on. To avoid this as far as possible we
 * replace here all matrices contracted to external momenta.
+* We use already d4 and Sm4 although this is an abuse of
+* notation here since the dimension splitting happens only
+* later, after the call to tHooftAlgebra.
 #If `LOOPS' == 1
    #IfDef `DRED'
       Id d(iDUMMY1?, iDUMMY2?) = d4(iDUMMY1, iDUMMY2);
@@ -440,7 +443,7 @@ EndArgument;
         Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
         
             Id SmQt * Sm4(iDUMMY1?) = - Sm4(iDUMMY1) * SmQt;
-    Endrepeat
+    Endrepeat;
         Id p1.p1 = p1.p1 - Qt2;
         Id d4(p1, p1) = p1.p1;
         Id SmQt * SmQt = -Qt2;
