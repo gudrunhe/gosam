@@ -422,7 +422,7 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki, PSP_chk_th3, nlo_prefactors, PSP_check
+      use [% sp.$_ %]_config, only: ki, [% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
       use [% sp.$_ %]_model, only: parseline[% 
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
@@ -432,6 +432,8 @@ contains
       @end @if %][%
       @if extension ninja %]
       use [% sp.$_%]_groups, only: ninja_exit[%
+      @if extension quadruple %], quadninja_exit[%
+      @end @if %][%
       @end @if %]
 
       implicit none[%

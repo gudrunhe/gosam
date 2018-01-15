@@ -269,7 +269,7 @@ contains
       icheck = 1
       angle = 1.234_ki
       spprec1 = 18
-      spprec1 = 18
+      spprec2 = 18
       fpprec1 = 18
       fpprec2 = 18[%
 @if extension quadruple %]
