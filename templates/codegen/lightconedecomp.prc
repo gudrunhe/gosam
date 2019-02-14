@@ -11,7 +11,7 @@
       %]#call LightConeDecomposition(k[%index1%],l[%index1%],l[%
           index2%],[%mass1%])
    #call LightConeDecomposition(k[%index2%],l[%index2%],l[%
-          index1%],[%mass1%])[%
+          index1%],[%mass2%])[%
       @end @select%][%
   @end @for %]
 #endprocedure
