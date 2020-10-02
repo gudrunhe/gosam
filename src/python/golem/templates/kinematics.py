@@ -366,7 +366,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       for term in complex_masses.split(','):
         complex_mass_list.append(term)
-      N = len(complex_mass_list)/2
+      N = len(complex_mass_list)//2
       
       if N>0:
         for i, mass in enumerate(complex_mass_list[::2]):
@@ -1112,7 +1112,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       vecs = self._mandel[symbol]
       
       is_first_term = True
-      count_terms = (len(vecs) * (len(vecs) + 1)) / 2
+      count_terms = (len(vecs) * (len(vecs) + 1)) // 2
       props = Properties()
       for i in range(len(vecs)):
          # i == j term
