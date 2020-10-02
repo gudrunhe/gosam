@@ -188,7 +188,7 @@ class Model:
 
 		is_first = True
 		f.write("mnemonics = {")
-		for key, value in mnemonics.items():
+		for key, value in list(mnemonics.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -200,7 +200,7 @@ class Model:
 
 		is_first = True
 		f.write("latex_names = {")
-		for key, value in latex_names.items():
+		for key, value in list(latex_names.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -212,7 +212,7 @@ class Model:
 
 		is_first = True
 		f.write("line_styles = {")
-		for key, value in line_types.items():
+		for key, value in list(line_types.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -261,7 +261,7 @@ class Model:
 		types['Nfrat'] = 'R'
 
 
-		for key, value in self.model_options.items():
+		for key, value in list(self.model_options.items()):
 			if key in parameters or self.prefix+key in parameters:
 				if key in parameters:
 					real_key=key
@@ -292,7 +292,7 @@ class Model:
 		fcounter = [0]
 		fsubs = {}
 		is_first = True
-		for name, value in functions.items():
+		for name, value in list(functions.items()):
 			expr = parser.compile(value)
 			for fn in cmath_functions:
 				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
@@ -361,7 +361,7 @@ class Model:
 		f.write("parameters = {")
 		is_first = True
 
-		for name, value in fsubs.items():
+		for name, value in list(fsubs.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -369,7 +369,7 @@ class Model:
 				f.write(",\n")
 			f.write("\t%r: %r" % (name, str(value)))
 
-		for name, value in parameters.items():
+		for name, value in list(parameters.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -395,7 +395,7 @@ class Model:
 		f.write("types = {")
 		is_first = True
 
-		for name in fsubs.keys():
+		for name in list(fsubs.keys()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -403,7 +403,7 @@ class Model:
 				f.write(",\n")
 			f.write("\t%r: 'RP'" % name)
 
-		for name, value in types.items():
+		for name, value in list(types.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -415,7 +415,7 @@ class Model:
 		f.write("slha_locations = {")
 		is_first = True
 
-		for name, value in slha_locations.items():
+		for name, value in list(slha_locations.items()):
 			if is_first:
 				is_first = False
 				f.write("\n")
@@ -426,9 +426,9 @@ class Model:
 
 		# new for modified UFO files
 		for p in particlect:
-			print p.counterterm
+			print(p.counterterm)
 		for p in parameterct:
-			print p.counterterm
+			print(p.counterterm)
 
 	def write_qgraf_file(self, f):
 		trunc_model = [self.model_orig]
@@ -519,13 +519,13 @@ class Model:
 		lwf = LimitedWidthOutputStream(f, 70)
 
 		for c in self.all_couplings:
-			keys = filter(lambda key: key[0:1].isdigit(), c.order.keys())
+			keys = [key for key in list(c.order.keys()) if key[0:1].isdigit()]
 			for k in keys:
 				c.order["O%s" % k] = c.order[k]
 				del c.order[k]
 		orders = set()
 		for c in self.all_couplings:
-			orders.update(c.order.keys())
+			orders.update(list(c.order.keys()))
 
 		for v in self.all_vertices:
 			particles = v.particles
@@ -549,7 +549,7 @@ class Model:
 			flip = spins[0] == 1 and spins[2] == 1
 
 			vrank = 0
-			for coord, coupling in v.couplings.items():
+			for coord, coupling in list(v.couplings.items()):
 				ic, il = coord
 				lrank = v.lorentz[il].rank
 				if lrank > vrank:
@@ -557,7 +557,7 @@ class Model:
 
 			vfunctions = {}
 			vfunctions["RK"] = vrank
-			for c in v.couplings.values():
+			for c in list(v.couplings.values()):
 				for name in orders:
 					if name in c.order:
 						power = c.order[name]
@@ -590,7 +590,7 @@ class Model:
 				lwf.write(field)
 			lwf.write(";")
 			is_first = True
-			for name, power in vfunctions.items():
+			for name, power in list(vfunctions.items()):
 				if is_first:
 					is_first = False
 				else:
@@ -687,7 +687,7 @@ class Model:
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
-		max_deg = max(map(lambda v: len(v.particles), self.all_vertices))
+		max_deg = max([len(v.particles) for v in self.all_vertices])
 		f.write("*---#[ Auxilliary Symbols:\n")
 		f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
 		f.write("*---#] Auxilliary Symbols:\n")
@@ -717,7 +717,7 @@ class Model:
 			flip = spins[0] == 1 and spins[2] == 1
 			deg = len(particles)
 
-			xidx = range(deg)
+			xidx = list(range(deg))
 			if flip:
 				xidx[0] = 1
 				xidx[1] = 0
@@ -759,7 +759,7 @@ class Model:
 				f.write(" (")
 
 
-			for coord, coupling in v.couplings.items():
+			for coord, coupling in list(v.couplings.items()):
 				ic, il = coord
 				lorentz = lorex[v.lorentz[il].name]
 				scolor = v.color[ic]
@@ -783,7 +783,7 @@ class Model:
 					expr.write(lwf)
 					f.write("\n   )")
 			
-				for ind in lsubs.values():
+				for ind in list(lsubs.values()):
 					s = str(ind)
 					if expr.dependsOn(s):
 						if s not in dummies:
@@ -793,7 +793,7 @@ class Model:
 				f.write(")")
 			f.write(";\n")
 
-			for idx in dummy_found.values():
+			for idx in list(dummy_found.values()):
 				dummies.append(str(idx))
 
 			if len(dummies) > 0:
@@ -802,7 +802,7 @@ class Model:
 		f.write("#EndProcedure\n")
 		f.write("*---#] Procedure ReplaceVertices :\n")
 		f.write("*---#[ Dummy Indices:\n")
-		for ind in lsubs.values():
+		for ind in list(lsubs.values()):
 			f.write("Index %s;\n" % ind)
 		f.write("*---#] Dummy Indices:\n")
 		f.write("""\
@@ -894,7 +894,7 @@ class Model:
 
 			deg = len(particles)
 
-			xidx = range(deg)
+			xidx = list(range(deg))
 
 			fold_name = "(%s) %s CT" % ( v.name, " -- ".join(names))
 			f.write("*---#[ %s:\n" % fold_name)
@@ -905,11 +905,11 @@ class Model:
 				f.write(",\n   [field.%s]" % field)
 			f.write(") =")
 
-			for coord, coupling in v.couplings.items():
+			for coord, coupling in list(v.couplings.items()):
 				ic, il = coord
 				f.write("\n   + %s"
 						% (self.prefix + coupling.name.replace("_", "")))
-				for ind in lsubs.values():
+				for ind in list(lsubs.values()):
 					s = str(ind)
 
 			f.write(";\n")

@@ -31,7 +31,7 @@ def setup_list(prop, conf):
             c = int(boundaries[2])
          else:
             error("Invalid range: %r" % r)
-         result.extend(range(a,b,c))
+         result.extend(list(range(a,b,c)))
       else:
          result.append(int(r))
    return result
@@ -48,7 +48,7 @@ def setup_filter(prop, conf, model):
    fermions = []
    bosons = []
 
-   for name, prtcl in model.particles.items():
+   for name, prtcl in list(model.particles.items()):
       tsp = prtcl.getSpin()
       clr = prtcl.getColor()
       
@@ -76,7 +76,7 @@ def setup_filter(prop, conf, model):
    if fltr_mod_file:
       try:
          fltr_mod_file=os.path.expanduser(os.path.expandvars(fltr_mod_file))
-         execfile(fltr_mod_file, globs, globs)
+         exec(compile(open(fltr_mod_file, "rb").read(), fltr_mod_file, 'exec'), globs, globs)
       except IOError as ex:
          error("Problems reading filter module %r: %s" %
                (fltr_mod_file, str(ex)))
@@ -103,7 +103,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    signs = {}
    # flows = {}
 
-   for idx, diagram in diagrams.items():
+   for idx, diagram in list(diagrams.items()):
       if lst:
          if idx not in lst:
             lose.append(idx)
@@ -147,7 +147,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    loopcache     = LoopCache()
    loopcache_tot = LoopCache()
 
-   for idx, diagram in diagrams.items():
+   for idx, diagram in list(diagrams.items()):
       if lst:
          if idx not in lst:
             lose.append(idx)
@@ -196,7 +196,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    props=[]
    eprops = {}
    for idx in keep:
-	props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+      props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
 
    if conf.getProperty(golem.properties.sum_diagrams):   
       for i,item in props:
@@ -211,7 +211,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
                      eprops[i].append(j)
    for idx in keep:
       loopcache.add(diagrams[idx], idx)
-      if idx not in eprops.keys():
+      if idx not in list(eprops.keys()):
          eprops[idx]=[idx]
       else:
          eprops[idx].append(idx)
@@ -235,7 +235,7 @@ def analyze_ct_diagrams(diagrams, model, conf, onshell,
 
    loopcache = LoopCache()
 
-   for idx, diagram in diagrams.items():
+   for idx, diagram in list(diagrams.items()):
       if lst:
          if idx not in lst:
             lose.append(idx)
@@ -293,7 +293,7 @@ def analyze_diagram(diagram, zero, fltr):
    elif isinstance(fltr, dict):
       flags = []
       result = False
-      for key, predicate in fltr.items():
+      for key, predicate in list(fltr.items()):
          if predicate(diagram):
             flags.append(key)
             result = True

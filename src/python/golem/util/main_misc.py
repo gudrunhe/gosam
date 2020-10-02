@@ -3,7 +3,7 @@ import sys
 import os
 import os.path
 import imp
-import StringIO
+import io
 import hashlib
 
 from time import gmtime, strftime
@@ -137,7 +137,7 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
 
-	for key, value in golem.util.tools.derive_coupling_names(conf).items():
+	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 
 	# Create and populate subdirectories
@@ -151,8 +151,7 @@ def generate_process_files(conf, from_scratch=False):
 			loopcache_tot=loopcache_tot,
 			tree_signs=tree_signs,
 			# tree_flows=tree_flows,
-			heavy_quarks=filter(lambda p: len(p.strip()) > 0,
-				conf.getListProperty("__heavy_quarks__")),
+			heavy_quarks=[p for p in conf.getListProperty("__heavy_quarks__") if len(p.strip()) > 0],
 			lo_flags = flags[0],
 			nlo_flags = flags[1],
 			massive_bubbles = massive_bubbles,
@@ -234,7 +233,7 @@ def write_template_file(fname, defaults, format=None):
 	script = sys.argv[0]
 	f = open(fname, "w")
 	if format is None:
-		f.write("#!/bin/env " + script + "\n")
+		f.write("#!/usr/bin/env " + script + "\n")
 	elif format == "LaTeX":
 		f.write("\\begin{description}\n")
 	else:
@@ -351,7 +350,7 @@ def read_golem_dir_file(path):
 		result.load(f)
 		f.close()
 
-		ver = map(int,result["golem-version"].split("."))
+		ver = list(map(int,result["golem-version"].split(".")))
 
 		# be compatible between internal 1.99 releases and 2.0.*
 		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
@@ -400,7 +399,7 @@ def write_golem_dir_file(path, fname, conf):
 	dir_info = golem.util.config.Properties()
 	dir_info["setup-file"] = os.path.abspath(fname)
 	if os.path.exists(os.path.abspath(fname)):
-		dir_info["setup-file-sha1"] = hashlib.sha1(open(os.path.abspath(fname)).read()).hexdigest()
+		dir_info["setup-file-sha1"] = hashlib.sha1(open(os.path.abspath(fname), "rb").read()).hexdigest()
 	dir_info["golem-version"] = ".".join(map(str, GOLEM_VERSION))
 	dir_info["golem-revision"] =  str(GOLEM_REVISION)
 	dir_info["process-name"] = conf.getProperty(golem.properties.process_name)
@@ -465,7 +464,7 @@ def workflow(conf):
 	r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
 #	formopt = conf.getProperty(golem.properties.formopt)
 	# Prepare a copy of the setup file in the property [% user.setup %]
-	buf = StringIO.StringIO()
+	buf = io.StringIO()
 	conf.store(buf, properties=golem.properties.properties,
 			info= [
             "golem.full-name", "golem.name", "golem.version",
@@ -476,8 +475,8 @@ def workflow(conf):
 	# properties will be filled later:
 	props = golem.util.config.Properties()
 
-	experimentals = map(str,
-			filter(lambda p: p.isExperimental(), golem.properties.properties))
+	experimentals = list(map(str,
+			[p for p in golem.properties.properties if p.isExperimental()]))
 	for name in conf:
 		if name in experimentals:
 			warning(
@@ -511,7 +510,7 @@ def workflow(conf):
 			if not os.path.sep in rp:
 				os.mkdir(rp)
 				warning("Process path %r created." % path)
-		except OSError,err:
+		except OSError as err:
 			raise GolemConfigError("Could not create process path: %r\r%s" % (path,err))
 
 	if not os.path.exists(path):
@@ -587,8 +586,8 @@ def workflow(conf):
 	# retrive final extensions from other options
 	ext = golem.properties.getExtensions(conf)
 
-        if "better_num" not in ext:
-            ext.append("better_num")
+	if "better_num" not in ext:
+		ext.append("better_num")
 
 	if "noformopt" not in ext:
 		ext.append("formopt")
@@ -627,14 +626,14 @@ def workflow(conf):
 			"The ninja reduction method is only supported with formopt.\n" +
 			"Please either remove noformopt or ninja in the input card\n")
 
-        # Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
-        if 'quadruple' in ext:
-                if ('ninja' not in ext) or ('samurai' in ext) or ('golem95' in ext):
-                        raise GolemConfigError(
-                                "The quadruple precision copy of the code can be generated only\n" +
-                                "in association with ninja. The gosam-contrib has to be compiled with the flag\n"+
-                                "'--enable-quadninja'. Please select only ninja as reduction program by setting:\n"+
-                                "'reduction_programs=ninja' in the input card.\n")
+	# Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
+	if 'quadruple' in ext:
+		if ('ninja' not in ext) or ('samurai' in ext) or ('golem95' in ext):
+			raise GolemConfigError(
+					"The quadruple precision copy of the code can be generated only\n" +
+					"in association with ninja. The gosam-contrib has to be compiled with the flag\n"+
+					"'--enable-quadninja'. Please select only ninja as reduction program by setting:\n"+
+					"'reduction_programs=ninja' in the input card.\n")
 
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()

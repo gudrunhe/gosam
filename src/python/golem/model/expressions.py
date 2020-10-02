@@ -325,7 +325,7 @@ class Expression:
 				self.__class__.__name__)
 
 	def __int__(self):
-		print type(self.__class__.__name__),self.__class__.__name__ 
+		print(type(self.__class__.__name__),self.__class__.__name__) 
 		raise NotImplementedError(
 				"Expression.__int__() needs to be overwritten in %s." % \
 				self.__class__.__name__)
@@ -436,7 +436,7 @@ class FloatExpression(ConstantExpression):
 		return str(self._float) 
 
 	def replaceFloats(self, prefix, subs, counter=[0]):
-		for name, value in subs.items():
+		for name, value in list(subs.items()):
 			if str(value) == str(self._float):
 				return SymbolExpression(name)
 
@@ -584,26 +584,25 @@ class FunctionExpression(Expression):
 
 	def prefixSymbolsWith(self, prefix):
 		return FunctionExpression(self._head.prefixSymbolsWith(prefix),
-				map(lambda arg: arg.prefixSymbolsWith(prefix), self._arguments))
+				[arg.prefixSymbolsWith(prefix) for arg in self._arguments])
 
 	def replaceNegativeIndices(self, lvl, pattern, found):
 		return FunctionExpression(
 				self._head.replaceNegativeIndices(lvl, pattern, found),
-				map(lambda arg: arg.replaceNegativeIndices(lvl+1, pattern, found),
-					self._arguments))
+				[arg.replaceNegativeIndices(lvl+1, pattern, found) for arg in self._arguments])
 		return self
 
 
 	def subs(self, aDict):
 		return FunctionExpression(self._head.subs(aDict),
-				map(lambda arg: arg.subs(aDict), self._arguments))
+				[arg.subs(aDict) for arg in self._arguments])
 
 	def algsubs(self, orig, image):
 		if self == orig:
 			return image
 		else:
 			return FunctionExpression(self._head.algsubs(orig, image),
-				map(lambda arg: arg.algsubs(orig, image), self._arguments))
+				[arg.algsubs(orig, image) for arg in self._arguments])
 
 	def write(self, out):
 		if self._head.getPrecedence() >= self.getPrecedence():
@@ -655,27 +654,22 @@ class FunctionExpression(Expression):
 				if isinstance(self[1], IntegerExpression):
 					return self[0]**self[1]
 		new_head = self._head.replaceIntegerPowers(pow_fun)
-		new_args = map(lambda x: x.replaceIntegerPowers(pow_fun),
-			self._arguments)
+		new_args = [x.replaceIntegerPowers(pow_fun) for x in self._arguments]
 		return new_head(*new_args)
 
 	def replaceFloats(self, prefix, subs, counter=[0]):
 		new_head = self._head.replaceFloats(prefix, subs, counter)
-		new_args = map(lambda x: x.replaceFloats(prefix, subs, counter),
-				self._arguments)
+		new_args = [x.replaceFloats(prefix, subs, counter) for x in self._arguments]
 		return FunctionExpression(new_head, new_args)
 
 	def replaceStrings(self, prefix, subs, counter=[0]):
 		new_head = self._head.replaceStrings(prefix, subs, counter)
-		new_args = map(lambda x: x.replaceStrings(prefix, subs, counter),
-				self._arguments)
+		new_args = [x.replaceStrings(prefix, subs, counter) for x in self._arguments]
 		return FunctionExpression(new_head, new_args)
 
 	def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
 		new_head = self._head.replaceDotProducts(idx_prefixes, metric, dotproduct)
-		new_args = map(lambda x:
-				x.replaceDotProducts(idx_prefixes, metric, dotproduct),
-				self._arguments)
+		new_args = [x.replaceDotProducts(idx_prefixes, metric, dotproduct) for x in self._arguments]
 		return FunctionExpression(new_head, new_args)
 
 	def __len__(self):
@@ -1199,7 +1193,7 @@ class SumExpression(Expression):
 		for term in self._terms:
 			p = term.countSymbolPowers()
 			all_p.append(p)
-			names.update(p.keys())
+			names.update(list(p.keys()))
 
 		result = {}
 		for name in names:
@@ -1224,23 +1218,20 @@ class SumExpression(Expression):
 			return dep
 
 	def prefixSymbolsWith(self, prefix):
-		return SumExpression( map(lambda term: term.prefixSymbolsWith(prefix),
-			self._terms))
+		return SumExpression( [term.prefixSymbolsWith(prefix) for term in self._terms])
 
 	def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
-		return SumExpression( map(lambda term:
-			term.replaceDotProducts(idx_prefixes, metric, dotproduct),
-			self._terms))
+		return SumExpression( [term.replaceDotProducts(idx_prefixes, metric, dotproduct) for term in self._terms])
 
 	def subs(self, aDict):
-		return SumExpression( map(lambda term: term.subs(aDict), self._terms))
+		return SumExpression( [term.subs(aDict) for term in self._terms])
 
 	def algsubs(self, orig, image):
 		if self == orig:
 			return image
 		else:
 			return SumExpression(
-					map(lambda term: term.algsubs(orig, image), self._terms))
+					[term.algsubs(orig, image) for term in self._terms])
 
 	def write(self, out):
 		first = self._terms[0]
@@ -1453,7 +1444,7 @@ class StringExpression(ConstantExpression):
 		return expr
 
 def addSymbolPowers(p1, p2):
-	names = set(p1.keys() + p2.keys())
+	names = set(list(p1.keys()) + list(p2.keys()))
 	result = {}
 	for name in names:
 		p = 0
@@ -1466,7 +1457,7 @@ def addSymbolPowers(p1, p2):
 
 def mulSymbolPowers(p1, factor):
 	result = {}
-	for name, p in p1.items():
+	for name, p in list(p1.items()):
 		result[name] = factor * p
 	return result
 
@@ -1475,12 +1466,12 @@ def resolve_dependencies(functions):
 	Bring a list of expressions into an order in which they
 	can be computed
 	"""
-	all_names = functions.keys()
+	all_names = list(functions.keys())
 	nfunctions = len(all_names)
 	graph = {}
 	golem.util.tools.message("      * Building call graph")
 	i = 0
-	for name, expr in functions.items():
+	for name, expr in list(functions.items()):
 		i += 1
 		if i % 100 == 0:
 			golem.util.tools.message("         (%5d/%5d)" % (i, nfunctions))
@@ -1500,7 +1491,7 @@ def resolve_dependencies(functions):
 	program = []
 	while len(graph) > 0:
 		found = None
-		for name, edges in graph.items():
+		for name, edges in list(graph.items()):
 			if len(edges) == 0:
 				found = name
 				break
@@ -1512,9 +1503,9 @@ def resolve_dependencies(functions):
 			while flag:
 				flag = False
 				bottom_expression = None
-				for name in graph.keys():
+				for name in list(graph.keys()):
 					bottom = True
-					for edges in graph.values():
+					for edges in list(graph.values()):
 						if name in edges:
 							bottom = False
 							break
@@ -1525,7 +1516,7 @@ def resolve_dependencies(functions):
 					flag = True
 					del graph[bottom_expression]
 
-			problem_set = ", ".join(graph.keys())
+			problem_set = ", ".join(list(graph.keys()))
 
 			golem.util.tools.error(
 					"Cannot resolve dependencies between functions: %s." %
@@ -1537,7 +1528,7 @@ def resolve_dependencies(functions):
 		if nedges % 100 == 0:
 			golem.util.tools.message("         %5d edges left" % nedges)
 
-		for edges in graph.values():
+		for edges in list(graph.values()):
 			if name in edges:
 				edges.remove(name)
 

@@ -24,7 +24,7 @@ class diagram:
 		self.vertices = vertices
 		self.propagators = propagators
 
-		for leg in self.ini.values():
+		for leg in list(self.ini.values()):
 			leg.setInitial()
 
 	def layout(self, *args, **opts):
@@ -41,7 +41,7 @@ class diagram:
 	
 		if len(L) == 1:
 			loop = L.copy().pop()
-			chords.update(loop.keys())
+			chords.update(list(loop.keys()))
 
 		if len(chords) == 0:
 			loop_vertices = [1]
@@ -57,7 +57,7 @@ class diagram:
 		else:
 			loop_vertices = []
 			while len(loop_vertices) < len(loop):
-				for i, s in loop.items():
+				for i, s in list(loop.items()):
 					if len(loop_vertices) >= len(loop):
 						break
 
@@ -119,7 +119,7 @@ class diagram:
 			self.fin[-1] = lg
 		else:
 			self.ref_point = (width/2.0, height/2.0)
-		for p in self.propagators.values():
+		for p in list(self.propagators.values()):
 				if p.field1.name == 'RENO':
 					p.setInvisible()
 				#print p.field1.linestyle()
@@ -127,7 +127,7 @@ class diagram:
 		eqs = self.setup_equations()
 		eqs.solve()
 
-		for i, v in self.vertices.items():
+		for i, v in list(self.vertices.items()):
 			x, y = eqs.rhs[i - 1]
 			v.set_coord(x, y)
 
@@ -150,7 +150,7 @@ class diagram:
 		n = len(self.vertices)
 		eqs = equationsystem(n)
 
-		for prop in self.propagators.values():
+		for prop in list(self.propagators.values()):
 			t = prop.force()
 			i = prop.vertex1 - 1
 			j = prop.vertex2 - 1
@@ -161,7 +161,7 @@ class diagram:
 				eqs[(j, j)] = eqs[(j, j)] + t
 
 		for legs in [self.ini, self.fin]:
-			for leg in legs.values():
+			for leg in list(legs.values()):
 				l = leg.force()
 				lx, ly = leg.get_coord()
 				i = leg.vertex - 1
@@ -179,11 +179,11 @@ class diagram:
 		result = []
 		direct_legs = []
 
-		for leg in self.ini.values():
+		for leg in list(self.ini.values()):
 			if leg.vertex == vertex:
 				direct_legs.append(leg)
 
-		for leg in self.fin.values():
+		for leg in list(self.fin.values()):
 			if leg.vertex == vertex:
 				direct_legs.append(leg)
 
@@ -219,10 +219,10 @@ class diagram:
 		F = {}
 		R = {}
 
-		for i, p in self.propagators.items():
+		for i, p in list(self.propagators.items()):
 			G.append( (p.vertex1, p.vertex2, i) )
 
-		for i in self.vertices.keys():
+		for i in list(self.vertices.keys()):
 			F[i] = i
 			R[i] = z3chain()
 
@@ -246,7 +246,7 @@ class diagram:
 		f.write("\\begin{picture}(%d,%d)(%d,%d)\n" %
 			(opts['width']+2*frame, opts['height']+2*frame,-frame,-frame))
 		for dic in [self.ini, self.fin, self.vertices, self.propagators]:
-			for obj in dic.values():
+			for obj in list(dic.values()):
 				obj.draw(f, self, lookup, *args, **opts)
 		f.write("\\end{picture}\n")
 
@@ -694,7 +694,7 @@ class z3chain:
 
 	def canonical(self):
 		z = []
-		for i, v in self.items():
+		for i, v in list(self.items()):
 			if v == 0:
 				z.append(i)
 
@@ -720,7 +720,7 @@ class z3chain:
 
 	def __neg__(self):
 		result = z3chain()
-		for i in self.keys():
+		for i in list(self.keys()):
 			result[i] = - self[i]
 		return result
 
@@ -737,7 +737,7 @@ class z3chain:
 		else:
 			self._values[idx] = value
 
-	def __nonzero__(self):
+	def __bool__(self):
 		self.canonical()
 		return len(self._values) > 0
 
@@ -749,7 +749,7 @@ class z3chain:
 
 	def __hash__(self):
 		hash = "z3chain".__hash__()
-		for i, s in self.items():
+		for i, s in list(self.items()):
 			hash += s * i
 		return hash
 
@@ -759,7 +759,7 @@ class z3chain:
 	def __str__(self):
 		st = "<"
 		flag = True
-		for i, s in self.items():
+		for i, s in list(self.items()):
 			if s == 1:
 				if flag:
 					st += "%d" % i

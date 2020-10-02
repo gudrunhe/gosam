@@ -53,7 +53,7 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
    suggstr = conf.getProperty(golem.properties.reference_vectors)
    if suggstr==[""]:
       suggstr=[]
-   suggestions = dict(map(lambda s: map(int, s.split(":")), suggstr))
+   suggestions = dict([list(map(int, s.split(":"))) for s in suggstr])
    num_legs = len(in_particles) + len(out_particles)
    assert num_legs > 1, "Seriously, you need at least two particles!"
 
@@ -110,7 +110,7 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
    available_massless = external_massless[:]
 
    # Work through list of suggestions first
-   for vec, ref in suggestions.items():
+   for vec, ref in list(suggestions.items()):
       kref = by_index[ref-1]
       kvec = by_index[vec-1]
       if vec - 1 in reference_required:
@@ -215,7 +215,7 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
          references[particle] = k2
          references[particle2] = k1
       else:
-         my_externals = filter(lambda x: x != k1, external_massless)
+         my_externals = [x for x in external_massless if x != k1]
          if len(my_externals) > 0:
 
             if return_particle_ids:
@@ -233,7 +233,7 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
                else:
                   references[particle] = my_externals[0]
          else:
-            my_available = filter(lambda x: x != k1, available_massless)
+            my_available = [x for x in available_massless if x != k1]
             # If it's a proper process we will find another particle:
             assert len(my_available) > 0
             references[particle] = my_available[0]
@@ -251,7 +251,7 @@ def parse_helicity(string, symbols=symbol_to_heli):
    symbols -- a dictionary of symbols
 
    EXAMPLE
-      >>> print parse_helicity("+-0k")
+      >>> print(parse_helicity("+-0k"))
       {0: 1, 1: -1, 2: 0, 3: 2}
    """
    result = {}
@@ -427,7 +427,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
             if pdg in pdg_fixed:
                if heli[linp+i] not in pdg_fixed[pdg]:
                   return False
-         for k, h_set in fixed.items():
+         for k, h_set in list(fixed.items()):
             if heli[k] not in h_set:
                return False
 
@@ -491,7 +491,7 @@ def parse_cycles(s, error):
 class Permutation:
    def __init__(self, a_map={}):
       self._map = {}
-      for k, v in a_map.items():
+      for k, v in list(a_map.items()):
          if k == v:
             continue
          else:
@@ -500,7 +500,7 @@ class Permutation:
    def __call__(self, arg):
       if isinstance(arg, Permutation):
          result = {}
-         keys = set(self._map.keys()).union(arg._map.keys())
+         keys = set(self._map.keys()).union(list(arg._map.keys()))
          for k in keys:
             kk = arg(k)
             v = self(kk)
@@ -515,11 +515,11 @@ class Permutation:
          else:
             return arg
       else:
-         return map(self, arg)
+         return list(map(self, arg))
 
    def inverse(self):
       result = {}
-      for k, v in self._map.items():
+      for k, v in list(self._map.items()):
          result[v] = k
 
       return Permutation(result)
@@ -533,7 +533,7 @@ class Permutation:
       """
       # Get largest value mapped by permutation
       max_entry = 0
-      for key, value in self._map.items():
+      for key, value in list(self._map.items()):
          if key > max_entry:
             max_entry = key
          if value > max_entry:
@@ -679,11 +679,11 @@ def generate_all_permutations(conf, groups, error):
 
    permutation_group_factors = [ set(user_permutations) ]
    identical_particles = []
-   for lst in groups.values():
+   for lst in list(groups.values()):
       if len(lst) > 1:
          identical_particles.append(lst)
          permutation_group_factors.append(set(
-               [ Permutation(dict(zip(lst, p)))
+               [ Permutation(dict(list(zip(lst, p))))
                   for p in itertools.permutations(lst)]))
 
    while len(permutation_group_factors) > 1:
@@ -731,10 +731,10 @@ def find_symmetry_mapping(helicity, perm, relevant_indices, helicity_list, gener
 
    li = len(in_particles)
    lo = len(out_particles)
-   in_indices = range(li)
-   out_indices = range(li,li+lo)
+   in_indices = list(range(li))
+   out_indices = list(range(li,li+lo))
 
-   color_basis = map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles))
+   color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
 
    # compute permuted color basis:
    pcb = [color_sort(([perm(line) for line in lines],
@@ -807,13 +807,13 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
    """
    noreduce = conf["__REDUCE_HELICITIES__"].lower() == "false"
 
-   color_basis = map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles))
+   color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
 
    # If requested, do not attempt to reduce the number of helicities
    if noreduce:
       result = []
       for ih, helicity in enumerate(helicity_list):
-         result.append( (ih, None, range(len(color_basis))) )
+         result.append( (ih, None, list(range(len(color_basis)))) )
       return result
 
    groups, relevant_indices = group_identical_particles(conf, in_particles, out_particles)
@@ -833,7 +833,7 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
 
       if mapping is None:
          generated_helicities.append(ih)
-         result.append( (ih, None, range(len(color_basis)), Permutation()) )
+         result.append( (ih, None, list(range(len(color_basis))), Permutation()) )
       else:
          result.append( mapping )
 
@@ -865,13 +865,13 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
    zeroes = golem.util.tools.getZeroes(conf)
    noreduce = conf["__REDUCE_HELICITIES__"].lower() == "false"
 
-   color_basis = map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles))
+   color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
 
    # If requested, do not attempt to reduce the number of helicities
    if noreduce:
       result = []
       for ih, helicity in enumerate(helicity_list):
-         result.append( (ih, None, range(len(color_basis)), Permutation(), ih) )
+         result.append( (ih, None, list(range(len(color_basis))), Permutation(), ih) )
       return result
 
    # Get list of massive/massless in_particles
@@ -903,7 +903,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
          helicity.pop(index)
 
    # Remove duplicates
-   massless_helicity_list = sorted([dict(t) for t in set([tuple(d.items()) for d in massless_helicity_list])])
+   massless_helicity_list = [dict(t) for t in sorted(set(tuple(sorted(d.items())) for d in massless_helicity_list))]
 
    # Look through helicity_list and group the parts of each gauge invariant set requested by the user
    gauge_invariant_sets = []
@@ -943,7 +943,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
 
    # Only the reference vectors of massive particles are relevant (each massless helicity is already a gauge set)
    relevant_ref_vectors = {}
-   for key, value in ref_vectors.items():
+   for key, value in list(ref_vectors.items()):
       if key in relevant_massive_particle_indices:
          relevant_ref_vectors[key] = value
 
@@ -953,7 +953,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
    for perm in all_permutations:
       # Apply permutation to reference vectors dictionary
       p_relevant_ref_vectors = {}
-      for key, value in ref_vectors.items():
+      for key, value in list(ref_vectors.items()):
          p_relevant_ref_vectors[perm(key)] = perm(value)
       if p_relevant_ref_vectors != relevant_ref_vectors:
          # Permutation alters reference vectors dictionary, must be applied to gauge invariant group
@@ -1030,7 +1030,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
       mappings.extend(best_mappings)
 
    # Begin generating result
-   result = [(ih, None, range(len(color_basis)), Permutation()) for ih in range(0,len(helicity_list))]
+   result = [(ih, None, list(range(len(color_basis))), Permutation()) for ih in range(0,len(helicity_list))]
    for mapping in mappings:
       result[mapping[0]["index"]] = mapping[1]
 

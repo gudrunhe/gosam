@@ -73,12 +73,12 @@ class OLPSubprocess:
       #subproc_conf.cache["model"] = conf.cache["model"]
       subproc_conf[golem.properties.process_name] = self.process_name
       subproc_conf[golem.properties.process_path] = self.getPath(path)
-      subproc_conf[golem.properties.qgraf_in] = map(str, self.p_ini)
-      subproc_conf[golem.properties.qgraf_out] = map(str, self.p_fin)
+      subproc_conf[golem.properties.qgraf_in] = list(map(str, self.p_ini))
+      subproc_conf[golem.properties.qgraf_out] = list(map(str, self.p_fin))
       if len(self.crossings) > 0:
          subproc_conf[golem.properties.crossings] = [
             "%s: %s" % (name, process)
-            for name, process in self.crossings.items()]
+            for name, process in list(self.crossings.items())]
 
       return subproc_conf
 
@@ -88,11 +88,11 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    def getparticle(name):
       return golem.util.tools.interpret_particle_name(name, model)
 
-   p_ini = map(getparticle, inp)
-   p_fin = map(getparticle, out)
+   p_ini = list(map(getparticle, inp))
+   p_fin = list(map(getparticle, out))
 
-   s_ini = map(str,p_ini)
-   s_fin = map(str,p_fin)
+   s_ini = list(map(str,p_ini))
+   s_fin = list(map(str,p_fin))
 
    if len(olpname) > 0:
       process_name = "%s_p%d_%s_%s" \
@@ -205,7 +205,7 @@ def derive_coupling_names(model_path, conf):
    weak_couplings_found   = {}
    candidates = []
 
-   for param in mod.types.iterkeys():
+   for param in mod.types.keys():
       if param.startswith('mdl'):
          canonical_name = param[3:].upper()
       else:
@@ -237,8 +237,8 @@ def derive_coupling_names(model_path, conf):
             qed_name = weak_couplings_found[name]
             break
 
-   all_couplings = strong_couplings_found.values() \
-         + weak_couplings_found.values()
+   all_couplings = list(strong_couplings_found.values()) \
+         + list(weak_couplings_found.values())
 
    return qcd_name, qed_name, all_couplings
 
@@ -341,7 +341,7 @@ def derive_zero_masses(model_path, slha_file, conf):
    #---#] Load model file as module:
 
    result = []
-   for name, part in mod.particles.iteritems():
+   for name, part in mod.particles.items():
       mass = part.getMass().strip()
       if mass in mod.slha_locations:
          block, coords = mod.slha_locations[mass]
@@ -501,7 +501,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          lconf["__excludedParticles__"]=None
 
          # TODO: check if massless list is complete
-         possible_massless_particles = set( range(1,6) + [11,13])
+         possible_massless_particles = set( list(range(1,6)) + [11,13])
          set_massiveParticles=set()
          list_zero_values=[];
          if lconf["__OLP_BLHA2__"]=="True": # only supported in BLHA2
@@ -567,7 +567,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for lconf in [conf] + subprocesses_conf:
          ir_scheme = lconf["olp.irregularisation"]
          ext = lconf.getListProperty(golem.properties.extensions)
-         uext = map(lambda s: s.upper(), ext)
+         uext = [s.upper() for s in ext]
          if ir_scheme == "DRED":
             if "DRED" not in uext:
                lconf["olp."+str(golem.properties.extensions)] = "DRED"
@@ -618,15 +618,15 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       start_symmetries = conf["symmetries"]
 
       # handle case that first subprocess does not initalize samurai (LO process)
-      for subprocess in subprocesses.values():
+      for subprocess in list(subprocesses.values()):
          sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
          if sp_conf["reduction_programs"] and  "samurai" in sp_conf["reduction_programs"] and sp_conf["olp.no_loop_level"]=="False":
             # add samurai to first subprocess, which is called by "initgolem(true)"
-            first_subprocess = int(subprocesses.values()[0])
+            first_subprocess = int(list(subprocesses.values())[0])
             subprocesses_conf[first_subprocess]["initialization-auto.extensions"]="samurai"
             break
 
-      for subprocess in subprocesses.values():
+      for subprocess in list(subprocesses.values()):
          process_path = subprocess.getPath(path)
          subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
          subprocess_conf["golem.name"] = "GoSam"
@@ -649,8 +649,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                   golem.util.tools.enumerate_and_reduce_helicities(
                      subprocess_conf))
 
-            generated_helicities = map(lambda t: t[0],
-                  filter(lambda t: t[1] is None, helicities))
+            generated_helicities = [t[0] for t in [t for t in helicities if t[1] is None]]
 
             for id in subprocess.getIDs():
                chelis[id] = len(helicities)
@@ -659,7 +658,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                   min_channel = max_occupied_channel + 1
                   max_channel = min_channel + num_channels - 1
                   max_occupied_channel += num_channels
-                  channels[id] = range(min_channel, max_channel + 1)
+                  channels[id] = list(range(min_channel, max_channel + 1))
                else:
                   max_occupied_channel += 1
                   channel = max_occupied_channel
@@ -684,7 +683,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    f_contract.write("#@IgnoreUnknown %s\n" % ignore_unknown)
    f_contract.write("#@IgnoreCase %s\n" % ignore_case)
    f_contract.write("#@SyntaxExtensions %s\n" % " ".join(
-      filter(lambda i: extensions[i], extensions.keys())))
+      [i for i in list(extensions.keys()) if extensions[i]]))
    try:
       contract_file.store(f_contract)
    except IOError as err:
@@ -706,8 +705,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    # This fills in the defaults where no option is given:
    for p in golem.properties.properties:
-		if conf.getProperty(p):
-			conf.setProperty(str(p), conf.getProperty(p))
+      if conf.getProperty(p):
+         conf.setProperty(str(p), conf.getProperty(p))
 
    golem.properties.setInternals(conf)
 
@@ -735,7 +734,7 @@ def mc_specials(conf, order_file):
    try:
       s = conf.getProperty("olp.mc.version", default="").strip()
       if len(s) > 0:
-         mc_version = map(int, s.split("."))
+         mc_version = list(map(int, s.split(".")))
    except ValueError as ex:
       pass
 

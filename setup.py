@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: ts=3:sw=3
 
 from distutils.core import setup
@@ -20,7 +20,7 @@ def get_git_revision():
 		# hard-coded git commit id when creating a release.
 		from subprocess import check_output
 		desired_length = 7
-		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).replace('\n','')
+		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).decode('utf-8').replace('\n','')
 		assert len(revision) == desired_length
 		return revision
 
@@ -127,7 +127,7 @@ class build_py(_build_py):
 			f.write("%r: %r" % (name, value))
 		f.write("\n}\n\n")
 		f.write("GOLEM_VERSION = [%s]\n" %
-				",".join(map(lambda s: s.strip(), VERSION.split("."))))
+				",".join([s.strip() for s in VERSION.split(".")]))
 		f.write("GOLEM_REVISION = '%s'\n" % GIT_REVISION)
 		f.close()
 
@@ -182,7 +182,7 @@ class install(_install):
 			if line.startswith("### [line replaced by setup.py"):
 				logs.append("Patching " + fileinput.filename())
 				line=replace_text
-			print line, # redirected to fileinput
+			print(line, end='') # redirected to fileinput
 		for message in logs:
 			log.info(message)
 	def change_roots (self, *names):

@@ -108,8 +108,8 @@ class TableReader:
 			raise CalcHEPImportError("Format line must end with a '|'.")
 
 		column_names = format.split("|")
-		widths = map(len, column_names)
-		column_names = map(lambda s: s.strip(), column_names)
+		widths = list(map(len, column_names))
+		column_names = [s.strip() for s in column_names]
 		table = []
 
 		num_columns = len(column_names)
@@ -274,7 +274,7 @@ class Model:
 		for header in required_headers:
 			idx = tbl.index(header)
 			if idx < 0:
-				missing.append(" or ".join(map(lambda s: "'%s'" % s, header)))
+				missing.append(" or ".join(["'%s'" % s for s in header]))
 
 		if len(missing) > 0:
 			raise CalcHEPImportError(
@@ -657,7 +657,7 @@ class Model:
 			prefactor = parser.compile(row[4])
 			powers = prefactor.countSymbolPowers()
 
-			for name, expo in powers.iteritems():
+			for name, expo in powers.items():
 				if expo != 0 or name in ['GG', 'EE']:
 					if name in coupl_freq:
 						coupl_freq[name] += 1
@@ -704,7 +704,7 @@ class Model:
 			if 'GG' in pwrs:
 				pwrs['QCD'] = pwrs['GG']
 
-			for name, expo in pwrs.iteritems():
+			for name, expo in pwrs.items():
 				if comma:
 					line += ","
 					if len(line) > WIDTH:
@@ -863,7 +863,7 @@ mnemonics = {
 		f.write("\t\t'Nf': '5.0',")
 		f.write("\t\t'Nfgen': '-1.0'")
 
-		for name, value in self.fsubs.items():
+		for name, value in list(self.fsubs.items()):
 			f.write(",\n")
 			f.write("\t\t%r: " % name)
 			f.write("'")
@@ -881,7 +881,7 @@ mnemonics = {
 		f.write("\t\t'Nf': 'N_f',\n")
 		f.write("\t\t'Nfgen': 'N_f^{gen}'")
 
-		for name, value in self.fsubs.items():
+		for name, value in list(self.fsubs.items()):
 			f.write(",\n")
 			f.write("\t\t%r: %r" % (name, "\\text{" + name + "}"))
 			
@@ -891,7 +891,7 @@ mnemonics = {
 
 		f.write("types = {\n")
 		f.write("\t\t'NC': 'R', 'Nf': 'R', 'Nfgen': 'R', 'Nfrat': 'R'")
-		for name in self.fsubs.iterkeys():
+		for name in self.fsubs.keys():
 			f.write(",\n")
 			f.write("\t\t%r: 'RP'" % name)
 		for row in self.var_list(vars, prtcls, prefix):
@@ -1221,7 +1221,7 @@ mnemonics = {
 						SpecialExpression(indices[1]))
 
 		elif len(reps) == 3:
-			r = map(abs, reps)
+			r = list(map(abs, reps))
 			r.sort()
 
 			if r == [3, 3, 8]:

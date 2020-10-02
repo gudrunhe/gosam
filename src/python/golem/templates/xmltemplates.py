@@ -54,7 +54,7 @@ class _TemplateState:
       for conf in props:
          lst = golem.properties.getExtensions(conf)
          if lst is not None:
-            ext.extend(map(lambda x: x.lower(), lst))
+            ext.extend([x.lower() for x in lst])
 
       self.extensions = ext
 
@@ -135,16 +135,16 @@ class _TemplateState:
       GOLEM_VERSION = golem.util.main_misc.GOLEM_VERSION
 
       if "golem-version-min" in attrs:
-         golem_version_min = map(int,
-               attrs["golem-version-min"].split("."))
+         golem_version_min = list(map(int,
+               attrs["golem-version-min"].split(".")))
          if compare_version(GOLEM_VERSION, golem_version_min) < 0:
             raise TemplateXMLError(
                   "GoSam too old: template requires version %s or above."
                   % attrs["golem-version-min"])
 
       if "golem-version-max" in attrs:
-         golem_version_max = map(int,
-               attrs["golem-version-max"].split("."))
+         golem_version_max = list(map(int,
+               attrs["golem-version-max"].split(".")))
          if compare_version(GOLEM_VERSION, golem_version_max) > 0:
             raise TemplateXMLError(
                   "GoSam too recent: template requires version %s or below." \
@@ -235,8 +235,8 @@ class _TemplateState:
          else:
             tpl_dir = self.template_dir
 
-         in_file = os.path.join(tpl_dir, env["template file name"].encode(sys.getfilesystemencoding()))
-         out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
+         in_file = os.path.join(tpl_dir, env["template file name"])
+         out_file = os.path.join(out_dir, env["output file name"])
          class_name = env["class name"]
          filter = env.get("filter", None)
          executable = env.get("executable", False)
@@ -303,8 +303,8 @@ class _TemplateState:
       else:
          tpl_dir = self.template_dir
 
-      result["current output directory"] = os.path.join(out_dir, dest.encode(sys.getfilesystemencoding()))
-      result["current template directory"] = os.path.join(tpl_dir, src.encode(sys.getfilesystemencoding()))
+      result["current output directory"] = os.path.join(out_dir, dest)
+      result["current template directory"] = os.path.join(tpl_dir, src)
 
       return result
 
@@ -346,7 +346,7 @@ class _TemplateState:
          else:
             out_dir = self.output_dir
 
-         out_file = os.path.join(out_dir, env["output file name"].encode(sys.getfilesystemencoding()))
+         out_file = os.path.join(out_dir, env["output file name"])
 
          if value == "exists":
             return os.path.exists(out_file)
@@ -359,7 +359,7 @@ class _TemplateState:
 
       if "if-extension" in attrs:
          tmpext = attrs["if-extension"].split(",")
-         extensions = map(lambda s: s.lower(), tmpext)
+         extensions = [s.lower() for s in tmpext]
 
          if "required" in attrs:
             required = attrs["required"]
@@ -417,7 +417,7 @@ class _TemplateState:
             return False
          else:
             true_values = ["1", "true", ".true.", "t", ".t.", "yes", "y"]
-            lvalues = map(lambda s: s.lower(), values)
+            lvalues = [s.lower() for s in values]
 
             if "true" in lvalues:
                return option_value.strip().lower() in true_values \
@@ -520,7 +520,7 @@ class _TemplateState:
             opts = attrs.copy()
             del opts["name"]
 
-            opts = dict([(str(k), v) for k, v in opts.iteritems()])
+            opts = dict([(str(k), v) for k, v in opts.items()])
 
             new_filter = golem.templates.filter.FilterFactory(
                   attrs["name"], old_filter, **opts)
@@ -565,8 +565,7 @@ class _TemplateState:
                      name = crossing[:pos].strip()
                      process = crossing[pos+1:]
                      if ">" in process:
-                        ini, fin = map(lambda x: map(lambda y: y.strip(),
-                           x.split()), process.split(">", 1))
+                        ini, fin = [[y.strip() for y in x.split()] for x in process.split(">", 1)]
                         values.append({"index": i, "name": name,
                            "initial": ini, "final": fin})
             self.shuffle_push(values)

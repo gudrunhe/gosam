@@ -716,7 +716,7 @@ def init_ew(e_one=False,**options):
    else:
       raise Exception("Invalid EW Scheme.")
    if e_one:
-      if "e" in functions.keys():
+      if "e" in list(functions.keys()):
          del functions["e"]
 #---#] def init_ew:
 #---#[ def ckmcalc:
@@ -868,7 +868,7 @@ def init():
    keys = MODEL_OPTIONS
 
    icount = 0
-   for key, value in MODEL_OPTIONS.items():
+   for key, value in list(MODEL_OPTIONS.items()):
       if key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
          ew_input[key] = value
          icount += 1
@@ -887,7 +887,7 @@ def init():
    golem.util.tools.debug("user: %r" % user_choice)
    golem.util.tools.debug("ewchoose: %r" % ewchoose)
 
-   for item in DEFAULT.keys():
+   for item in list(DEFAULT.keys()):
       if item in ones:
          if item != "e":
             raise Exception("%s is set to one: GoSam cannot handle this EW Scheme" % item)
@@ -897,7 +897,7 @@ def init():
    if ewchoose:
       # Substitute parameters from user and fill gaps with defaults once
       for key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
-         if key in MODEL_OPTIONS.keys():
+         if key in list(MODEL_OPTIONS.keys()):
             ew_input[key] = MODEL_OPTIONS[key]
             param+= "%s = %s\n"  % (key, MODEL_OPTIONS[key])
          else:
@@ -917,7 +917,7 @@ def init():
       elif gosam_choice == -1:
          # Substitute parameters from user and fill gaps with defaults once
          for key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
-            if key in MODEL_OPTIONS.keys():
+            if key in list(MODEL_OPTIONS.keys()):
                ew_input[key] = MODEL_OPTIONS[key]
                param+= "%s = %s\n"  % (key, MODEL_OPTIONS[key])
             else:
@@ -935,7 +935,7 @@ def init():
       elif gosam_choice == -2:
          # Substitute parameters from user and fill gaps with defaults once
          for key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
-            if key in MODEL_OPTIONS.keys():
+            if key in list(MODEL_OPTIONS.keys()):
                ew_input[key] = MODEL_OPTIONS[key]
                param+= "%s = %s\n"  % (key, MODEL_OPTIONS[key])
             else:
@@ -951,7 +951,7 @@ def init():
          warn+= "This can be changed editing ewchoice in common/config.f90.\n"
          golem.util.tools.warning(warn)
 
-   for key, value in MODEL_OPTIONS.items():
+   for key, value in list(MODEL_OPTIONS.items()):
       if key in parameters:
          try:
             sval = str(value)

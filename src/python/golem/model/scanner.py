@@ -11,7 +11,7 @@ class Scanner(object):
 		patterns = []
 		actions = {}
 
-		for name, func in cls.__dict__.items():
+		for name, func in list(cls.__dict__.items()):
 			doc = func.__doc__
 			if doc is not None:
 				errmsg = ("In doc-string of %s.%s: " % (cls.__name__, name)) + \
@@ -67,7 +67,7 @@ class Scanner(object):
 
 	def parse(self, text):
 		for match in self._REGEX.finditer(text):
-			for name, image in match.groupdict().items():
+			for name, image in list(match.groupdict().items()):
 				if image is None:
 					continue
 				token = self._ACTIONS[name].__call__(self, image)
@@ -123,7 +123,7 @@ def flags_to_string(flags):
 	if flags == 0:
 		return ""
 	res = "(?"
-	for num, ch in FS.items():
+	for num, ch in list(FS.items()):
 		if flags & num == num:
 			res += ch
 	res += ")"

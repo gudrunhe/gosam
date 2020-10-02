@@ -3,11 +3,11 @@
 # Date: Mon 14 Apr 2014 18:20:07
 
 
-from __future__ import division
-from object_library import all_particles, Particle
-import parameters as Param
 
-import propagators as Prop
+from .object_library import all_particles, Particle
+from . import parameters as Param
+
+from . import propagators as Prop
 
 ve = Particle(pdg_code = 12,
               name = 've',

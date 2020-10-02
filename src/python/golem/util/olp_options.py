@@ -76,7 +76,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
 
 	if NoTreeLevel in checked_values:
 		no_tree = True
-		checked_values = filter(lambda x: x != NoTreeLevel, checked_values)
+		checked_values = [x for x in checked_values if x != NoTreeLevel]
 
 	if "CHsummed" in checked_values:
 		if len(checked_values) > 1:
@@ -315,8 +315,8 @@ def AmplitudeType(values, conf, ignore_case):
 		conf["olp.no_tree_level"] = False
 		conf["olp.no_loop_level"] = False
 		#if ret.startswith(__value_OK__) and ( 'ccLoop' in conf["olp.amplitudetype"].lower() or 'scLoop' in conf["olp.amplitudetype"].lower() ):
-    	#        conf["olp.no_tree_level"] = True
-    	#        conf["olp.no_loop_level"] = False
+		#        conf["olp.no_tree_level"] = True
+		#        conf["olp.no_loop_level"] = False
 	return ret
 
 @optional_olp_option
@@ -361,14 +361,13 @@ def DebugUnstable(values, conf, ignore_case):
 
 @optional_olp_option
 def PrecisionCheck(values, conf, ignore_case):
-   supported_values = ["disabled","off"] + golem.properties.config_PSP_chk_method._options
-   ret=expect_one_keyword(values, conf, True,
-                  "PSP_chk_method", supported_values)
-   if ret==__value_OK__:
-      if conf["PSP_chk_method"].lower() in ["disabled","off"]:
-         conf["PSP_chk_method"]="Automatic"
-         conf["PSP_check"]="False"
-   return ret
+	supported_values = ["disabled","off"] + golem.properties.config_PSP_chk_method._options
+	ret=expect_one_keyword(values, conf, True, "PSP_chk_method", supported_values)
+	if ret==__value_OK__:
+		if conf["PSP_chk_method"].lower() in ["disabled","off"]:
+			conf["PSP_chk_method"]="Automatic"
+			conf["PSP_check"]="False"
+	return ret
 
 @optional_olp_option
 def ExcludedParticles(values, conf, ignore_case):
@@ -415,7 +414,7 @@ def InterfaceVersion(values, conf, ignore_case):
 		conf["__OLP_BLHA2__"]=False
 		if not conf["extensions"] or not "olp_blha1" in conf["extensions"]:
 			conf["extensions"]=(conf["extensions"] + "," if conf["extensions"]  else "") + "olp_blha1"
-                return __value_OK__
+			return __value_OK__
 	elif version=="BLHA2":
 		conf["__OLP_BLHA1__"]=False
 		conf["__OLP_BLHA2__"]=True
@@ -444,17 +443,17 @@ def Parameters(values, conf, ignore_case):
 	NOT YET PART OF THE STANDARD
 	"""
 	#conf["olp.parameters"] = values
-        parameters = list(values)
-        if len(values) > 0:
-                if parameters[0] == "alpha_s":
-                        #parameters.remove("alpha_s")
-                        conf["olp.alphas"] = 1
-                        conf["olp.parameters"] = parameters
-                else:
-                        conf["olp.alphas"] = 0
-                        conf["olp.parameters"] = parameters
-                        warning("WARNING: by convention the first parameter should be 'alpha_s.'")
-                        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
+	parameters = list(values)
+	if len(values) > 0:
+		if parameters[0] == "alpha_s":
+			#parameters.remove("alpha_s")
+			conf["olp.alphas"] = 1
+			conf["olp.parameters"] = parameters
+	else:
+		conf["olp.alphas"] = 0
+		conf["olp.parameters"] = parameters
+		warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+		return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
 
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
@@ -557,7 +556,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 
 		if key in missing:
 			missing.remove(key)
-		if key in __required_olp_options_default__.keys():
+		if key in list(__required_olp_options_default__.keys()):
 			del __required_olp_options_default__[key]
 
 		handler = __all_olp_options__[key]

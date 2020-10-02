@@ -1,6 +1,6 @@
 # vim: ts=3:sw=3
 
-import StringIO
+import io
 from golem.util.config import Properties
 from golem.util.parser import Template
 import golem.util.tools
@@ -37,7 +37,7 @@ class ModelTemplate(Template):
 		self._floats = {}
 		self._functions_fortran = {}
 		
-		for name, value in self._mod.parameters.items():
+		for name, value in list(self._mod.parameters.items()):
 			t = self._mod.types[name]
 			if len(name) > name_length:
 				name_length = len(name)
@@ -57,7 +57,7 @@ class ModelTemplate(Template):
 					param = (name, t, [value, "0.0"])
 			self._parameters[name] = param		
 		
-		for name, expression in self._mod.functions.items():
+		for name, expression in list(self._mod.functions.items()):
 			t = self._mod.types[name]
 			#if len(name) > name_length:
 			#	name_length = len(name)
@@ -79,7 +79,7 @@ class ModelTemplate(Template):
 		self._slha_blocks = {}
 		self._slha_locations = {}
 
-		for name, value in self._mod.slha_locations.items():
+		for name, value in list(self._mod.slha_locations.items()):
 			n, t, v = self._parameters[name]
 			if t == "RP" or t == "CP":
 				continue
@@ -161,7 +161,7 @@ class ModelTemplate(Template):
 		parser = golem.model.expressions.ExpressionParser()
 		functions = {}
 		i = 0
-		for name, value in model_mod.functions.items():
+		for name, value in list(model_mod.functions.items()):
 			i += 1
 			if i % 100 == 0:
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
@@ -179,7 +179,7 @@ class ModelTemplate(Template):
 				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
-			buf = StringIO.StringIO()
+			buf = io.StringIO()
 			try:
 				ast.write(buf)
 
@@ -209,7 +209,7 @@ class ModelTemplate(Template):
 		parser = golem.model.expressions.ExpressionParser()
 		functions = {}
 		i = 0
-		for name, value in model_mod.functions.items():
+		for name, value in list(model_mod.functions.items()):
 			i += 1
 			if i % 100 == 0:
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
@@ -229,7 +229,7 @@ class ModelTemplate(Template):
 				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
-			buf = StringIO.StringIO()
+			buf = io.StringIO()
 			try:
 				ast.write(buf)
 
@@ -259,12 +259,12 @@ class ModelTemplate(Template):
 		lst = []
 		if "dimension" in opts:
 			d = int(opts["dimension"])
-			for name, value in self._slha_blocks.items():
+			for name, value in list(self._slha_blocks.items()):
 				if value == d:
 					lst.append( (i, name) )
 				i += 1
 		else:
-			for name, value in self._slha_blocks.items():
+			for name, value in list(self._slha_blocks.items()):
 				lst.append( (i, name) )
 				i += 1
 
@@ -293,7 +293,7 @@ class ModelTemplate(Template):
 			is_first = False
 
 			entries = {}
-			for varname, value in self._slha_locations.items():
+			for varname, value in list(self._slha_locations.items()):
 				block, coords = value
 
 				if block == name:
@@ -315,7 +315,7 @@ class ModelTemplate(Template):
 
 		classes = {}
 		yield_list = {}
-		for varname, coords in entries.items():
+		for varname, coords in list(entries.items()):
 			if len(coords) == 1:
 				yield_list[coords[0]] = varname
 			else:
@@ -332,7 +332,7 @@ class ModelTemplate(Template):
 			count = 0
 			goal = len(classes)
 			is_first = True
-			for index, entries in classes.items():
+			for index, entries in list(classes.items()):
 				count += 1
 				is_last = count == goal
 				props.setProperty(first_name, is_first)
@@ -347,7 +347,7 @@ class ModelTemplate(Template):
 			count = 0
 			goal = len(yield_list)
 			is_first = True
-			for index, varname in yield_list.items():
+			for index, varname in list(yield_list.items()):
 				count += 1
 				is_last = count == goal
 				props.setProperty(first_name, is_first)
@@ -367,7 +367,7 @@ class ModelTemplate(Template):
 	def count(self, *args, **opts):
 		type_filter = self._setup_filter(["R", "C", "RP", "CP"], args)
 		counter = 0
-		for name, param in self._parameters.items():
+		for name, param in list(self._parameters.items()):
 			(the_name, type, value) = param
 			if type in type_filter:
 				counter += 1
@@ -391,7 +391,7 @@ class ModelTemplate(Template):
 			base = 1
 
 		lst = []
-		names = sorted(self._parameters.keys(), key=lambda s: s.lower())
+		names = sorted(list(self._parameters.keys()), key=lambda s: s.lower())
 		for name in names:
 			param = self._parameters[name]
 			(the_name, type, value) = param
@@ -437,7 +437,7 @@ class ModelTemplate(Template):
 			base = 1
 
 		lst = []
-		for name, type in self._functions.items():
+		for name, type in list(self._functions.items()):
 			if type in type_filter:
 				lst.append(name)
 
@@ -535,7 +535,7 @@ class ModelTemplate(Template):
 			i = 0
 			tmp=open('tmp','w')
 
-			for name, value in model_mod.functions.items():
+			for name, value in list(model_mod.functions.items()):
 				i += 1
 				if i % 100 == 0:
 					golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
@@ -610,7 +610,7 @@ class ModelTemplate(Template):
 		params["mdlGf"] = [( "GF", "{re}")]
 
 		props = Properties()
-		for k in params.keys():
+		for k in list(params.keys()):
 			if k in self._parameters and not "P" in self._parameters[k][1]:
 				for (alias, expr_unf) in params[k]:
 					expr = expr_unf.format(re=re,im=im)

@@ -3,9 +3,9 @@
 # Date: Mon 7 Apr 2014 16:44:54
 
 
-from object_library import all_lorentz, Lorentz
+from .object_library import all_lorentz, Lorentz
 
-from function_library import complexconjugate, re, im, csc, sec, acsc, asec, cot
+from .function_library import complexconjugate, re, im, csc, sec, acsc, asec, cot
 
 
 UUS1 = Lorentz(name = 'UUS1',

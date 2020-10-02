@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # vim: ts=3:sw=3:expandtab
 
 import sys
@@ -32,10 +32,10 @@ if not options.input:
 file_name= options.input.split('.')[0]
 heli=options.helicity
 
-print '----------------------------------'
-print 'Input file is:      %s' % file_name+'.txt'
-print 'Diagram written in: %s' % 'diagramsl0.f90'
-print '----------------------------------'
+print('----------------------------------')
+print('Input file is:      %s' % file_name+'.txt')
+print('Diagram written in: %s' % 'diagramsl0.f90')
+print('----------------------------------')
 
 txtfile = open(file_name+'.txt','r')
 tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")

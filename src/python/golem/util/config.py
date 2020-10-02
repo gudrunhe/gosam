@@ -182,7 +182,7 @@ class Properties:
    def __init__(self, defaults=None, **values):
       self._defaults = defaults
       self._map = {}
-      for key, value in values.items():
+      for key, value in list(values.items()):
          self.setProperty(key, str(value))
 
       self._decode = False
@@ -246,7 +246,7 @@ class Properties:
       name = str(key)
       if name in self:
          value = self[name].split(delimiter)
-         return list(map(lambda x: x.strip(), value))
+         return list([x.strip() for x in value])
       else:
          if default:
             return default.split(delimiter)
@@ -304,7 +304,7 @@ class Properties:
          return False
          
    def propertyNames(self):
-      for key in self._map.keys():
+      for key in list(self._map.keys()):
          yield key
       if self._defaults is not None:
          for key in self._defaults:
@@ -481,7 +481,7 @@ class Properties:
            continue
         pos=key.index("[")
         if no in extractRange(key[pos+1:-1]):
-           if key[:pos] in changed.keys() and changed[key[:pos]]!=self[key]:
+           if key[:pos] in list(changed.keys()) and changed[key[:pos]]!=self[key]:
               raise GolemConfigError("multiple values for option '%s' in subprocess %s: '%s' or '%s'?" \
                     % (key[:pos],no, changed[key[:pos]],self[key]))
            self[key[:pos]]=self[key]
@@ -516,10 +516,10 @@ def escape(s, isKey=False):
    escapes = {"\n": "\\n", "\r": "\\r", "\f": "\\f", "\t": "\\t"}
    keyescapes = {"=": "\\=", ":": "\\:", " ": "\\ "}
    buf = s.replace("\\", "\\\\")
-   for ch, esc in escapes.items():
+   for ch, esc in list(escapes.items()):
       buf = buf.replace(ch, esc)
    if isKey:
-      for ch, esc in keyescapes.items():
+      for ch, esc in list(keyescapes.items()):
          buf = buf.replace(ch, esc)
       if buf[0] in ['#', '!']:
          buf = "\\" + buf
@@ -906,7 +906,8 @@ class Form(Program):
       try:
          pipe = subprocess.Popen(executable,
                shell=True,
-               bufsize=500, stdout=subprocess.PIPE).stdout
+               bufsize=500, stdout=subprocess.PIPE,
+               encoding="utf-8").stdout
 
          firstline=True
          for line in pipe.readlines():
@@ -994,12 +995,12 @@ class Fortran(Program):
    def getInstance(self,conf=None):
       if conf:
          for p in self.locations:
-            print "# ~~~ " + p + " usable with installed Golem95/Samurai? ... ",
+            print("# ~~~ " + p + " usable with installed Golem95/Samurai? ... ", end=' ')
             if self.checkCompatibility(p,conf):
-               print "Yes"
+               print("Yes")
                return p
             else:
-              print "No"
+              print("No")
          print("==> Configuration failed:")
          print("    Libraries not with examined compiler created.")
          sys.exit(1)
@@ -1034,7 +1035,7 @@ class Configurator:
 
       not_found = []
 
-      items=components.items()
+      items=list(components.items())
 
       def preferLibKey(x):
          if x[0]=="Golem95":
@@ -1140,7 +1141,7 @@ def levenshtein(str1, str2, case_sensitive=False):
 			s2 = str2.lower()
 
 
-	previous_row = xrange(len(s2) + 1)
+	previous_row = range(len(s2) + 1)
 	for i, c1 in enumerate(s1):
 		current_row = [i + 1]
 		for j, c2 in enumerate(s2):
@@ -1173,7 +1174,7 @@ def testCompilerLibCompatibility (compiler,lib,flags):
       os.chdir(cur_path)
       try:
          shutil.rmtree(tmp_dir) # delete directory
-      except OSError, e:
+      except OSError as e:
          if e.errno != 2: # no such file or directory
             raise
 
@@ -1217,12 +1218,12 @@ def extractRange(s,minval=0,maxval=999):
          start = minval if r[0]=='' else int(r[0])
          end = maxval if r[1]=='' else int(r[1])
          if remove:
-            res=set(filter(lambda x: x<start or x>end ,res))
+            res=set([x for x in res if x<start or x>end])
          else:
-            res.update(range(start,end+1))
+            res.update(list(range(start,end+1)))
       else: # len(r)>2
          raise ValueError("Invalid range: %s in '%s'" % (r,s))
-   res=set(filter(lambda x: x>=minval and x<=maxval,res))
+   res=set([x for x in res if x>=minval and x<=maxval])
    return res
 
 def split_qgrafPower(power):

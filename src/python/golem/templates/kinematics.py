@@ -83,21 +83,18 @@ class KinematicsTemplate(golem.util.parser.Template):
             self._crossings.append(crossing[:pos].strip())
             
       def get_qed_sign(pdg,sign):
-	if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
-	  qed_sign=1
-	elif (pdg>0 and pdg<20 and sign <0) or (pdg<0 and pdg>-20 and sign>0):
-	  qed_sign=-1
-	elif pdg==24:
-	  qed_sign=-1
-	elif pdg==-24:
-	  qed_sign=1
-	else:
-	  qed_sign=0
-	
-	return qed_sign
-	  
-	
-	
+         if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
+            qed_sign=1
+         elif (pdg>0 and pdg<20 and sign <0) or (pdg<0 and pdg>-20 and sign>0):
+            qed_sign=-1
+         elif pdg==24:
+            qed_sign=-1
+         elif pdg==-24:
+            qed_sign=1
+         else:
+            qed_sign=0
+         
+         return qed_sign
 
       def examine_particle(p, sign):
          mass    = p.getMass(zeroes)
@@ -160,7 +157,7 @@ class KinematicsTemplate(golem.util.parser.Template):
          else:
             identical_particles[str(fin)] = 1
       symmetry_factor = 1
-      for multi in identical_particles.values():
+      for multi in list(identical_particles.values()):
          fact = golem.util.tools.factorial(multi)
          symmetry_factor *= fact
 
@@ -168,9 +165,9 @@ class KinematicsTemplate(golem.util.parser.Template):
       props.setProperty("num_out", num_out)
       props.setProperty("num_legs", num_legs)
       props.setProperty("num_helicities",
-            golem.util.tools.product(map(len,self._helicities)))
+            golem.util.tools.product(list(map(len,self._helicities))))
       props.setProperty("in_helicities",
-            golem.util.tools.product(map(len,self._helicities[:num_in])))
+            golem.util.tools.product(list(map(len,self._helicities[:num_in]))))
       props.setProperty("symmetry_factor", symmetry_factor)
       props.setProperty("charge", self._charge)
 
@@ -216,8 +213,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       cri = [prop.getIntegerProperty("$_") for prop in self.crossing()]
       crs = [int(prop.getProperty("sign") + "1") for prop in self.crossing()]
 
-      ini_indices = range(self._num_in)
-      fin_indices = range(self._num_in, self._num_in + self._num_out)
+      ini_indices = list(range(self._num_in))
+      fin_indices = list(range(self._num_in, self._num_in + self._num_out))
 
       use_indices = ini_indices + fin_indices
       sel_indices = []
@@ -252,8 +249,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       cri = [prop.getIntegerProperty("$_") for prop in self.crossing()]
       crs = [int(prop.getProperty("sign") + "1") for prop in self.crossing()]
 
-      ini_indices = range(self._num_in)
-      fin_indices = range(self._num_in, self._num_in + self._num_out)
+      ini_indices = list(range(self._num_in))
+      fin_indices = list(range(self._num_in, self._num_in + self._num_out))
 
       use_indices = ini_indices + fin_indices
       sel_indices = []
@@ -289,7 +286,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       crs = [int(prop.getProperty("sign") + "1") for prop in self.crossing()]
       fields = self._field_info
 
-      fin =  range(self._num_in, self._num_in + self._num_out)
+      fin =  list(range(self._num_in, self._num_in + self._num_out))
       fin_indices = [cri[i] for i in fin]
       fin_signs = [crs[i] for i in fin]
 
@@ -307,7 +304,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             particles[prtcl] = 1
 
       symmetry_factor = 1
-      for multi in particles.values():
+      for multi in list(particles.values()):
          fact = golem.util.tools.factorial(multi)
          symmetry_factor *= fact
 
@@ -459,14 +456,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       var_name = self._setup_name("var", "$_", opts)
       sign_name = self._setup_name("sign", "sign", opts)
 
-      initial = map(
-         lambda n:
-            str(golem.util.tools.interpret_particle_name(n, self._model)),
-            self.initial().split(","))
-      final = map(
-         lambda n:
-            str(golem.util.tools.interpret_particle_name(n, self._model)),
-            self.final().split(","))
+      initial = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.initial().split(",")]
+      final = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.final().split(",")]
       field_info = self._field_info
 
       avail = set(range(1, len(field_info)+1))
@@ -511,7 +502,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       l = len(mapping)
       i = 0
-      for new_vec, old_vec in mapping.items():
+      for new_vec, old_vec in list(mapping.items()):
          props.setProperty(first_name, i == 0)
          props.setProperty(last_name, i >= l - 1)
          i += 1
@@ -660,7 +651,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       if "fermion" in args:
          spin_filter.extend([-3,-1,3,1])
       if "charged" in args:
-	 charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+         charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
 
       if len(spin_filter) == 0:
          spin_filter = [-4,-3,-2,-1,0,1,2,3,4]
@@ -693,12 +684,12 @@ class KinematicsTemplate(golem.util.parser.Template):
          tspin = self._twospin[index]
          if tspin not in spin_filter:
             continue
-	  
-	 charge = self._charge[index]
-	 #if charge not in charge_filter:
-	   #continue
-	   
-	   
+
+         charge = self._charge[index]
+         #if charge not in charge_filter:
+            #continue
+
+
 
          props.setProperty(first_name, is_first)
          is_first = False
@@ -838,15 +829,15 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       charge1_filter = []
       if "charged1" in args:
-	charge1_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
-		     
+         charge1_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+
       charge2_filter = []
       if "charged2" in args:
-	charge2_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])	
-	
+         charge2_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+
       photon1_filter = []
       if "photon1" in args:
-	photon1_filter.extend(["A"])
+         photon1_filter.extend(["A"])
 
 
       props = Properties()
@@ -882,14 +873,14 @@ class KinematicsTemplate(golem.util.parser.Template):
          color1 = self._color[index1]
          if color1 not in color1_filter:
             continue
-	  
+
          charge1= self._charge[index1]
          #if charge1 not in charge1_filter:
-	   #continue
-	 
-	 photon1= self._field_info[index1][0]	  
-	 #if photon1 not in photon1_filter:
-	   #continue
+            #continue
+
+         photon1= self._field_info[index1][0]
+         #if photon1 not in photon1_filter:
+            #continue
 
          props.setProperty(index1_name, index1 + base)
          props.setProperty(mass1_name, self._masses[index1])
@@ -947,10 +938,10 @@ class KinematicsTemplate(golem.util.parser.Template):
             color2 = self._color[index2]
             if color2 not in color2_filter:
                continue
-	     
+
             charge2= self._charge[index2]
             #if charge2 not in charge2_filter:
-	      #continue
+               #continue
 
             if index2 >= self._num_in:
                props.setProperty(out_index2_name,
@@ -1065,7 +1056,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       idx = 0
       gidx = 0
-      for parts, vecs in self._mandel_parts.items():
+      for parts, vecs in list(self._mandel_parts.items()):
          gidx += 1
          default_name = "s" + "".join(parts.split())
          name = sym_prefix + sym_infix.join(parts.split()) + sym_suffix
@@ -1271,11 +1262,11 @@ class KinematicsTemplate(golem.util.parser.Template):
       last_name = self._setup_name("last", prefix + "is_last", opts)
 
       prefix, suffix, subs = self._msubs_stack[-1]
-      mandel1 = dict(zip([ prefix + str(i) + suffix
-            for i in range(1, self._num_legs + 1) ], self._masses))
+      mandel1 = dict(list(zip([ prefix + str(i) + suffix
+            for i in range(1, self._num_legs + 1) ], self._masses)))
 
       terms = []
-      for v, c in subs.items():
+      for v, c in list(subs.items()):
          if v in mandel1:
             mv = str(mandel1[v]).strip()
             if mv == "0":
@@ -1529,7 +1520,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             }
 
       isymbols = {}
-      for s,v in symbols.items():
+      for s,v in list(symbols.items()):
          isymbols[v] = s
 
       isymbols.setdefault(100)
@@ -1575,7 +1566,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
          h = golem.util.tools.encode_helicity(h, symbols)
          skip = False
-         for idx, sym in h.items():
+         for idx, sym in list(h.items()):
             if idx in pfilter:
                isym = isymbols[sym]
                if isym not in pfilter[idx]:
@@ -1656,7 +1647,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       #  1: set(['l1']),
       #  2: set(['l2'])}
 
-      for i in dependencies.keys():
+      for i in list(dependencies.keys()):
          d = dependencies[i]
          new_d = set(d)
          flag = True
@@ -1679,8 +1670,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       available = set()
       while len(dependencies) > 0:
          success = False
-         indep = list(filter(lambda i: len(dependencies[i]) == 0,
-               dependencies.keys()))
+         indep = list([i for i in list(dependencies.keys()) if len(dependencies[i]) == 0])
          for i in indep:
             program.append([i])
             success = True
@@ -1689,9 +1679,9 @@ class KinematicsTemplate(golem.util.parser.Template):
             available.update(indep)
          else:
             # try splittings
-            for i, depi in dependencies.items():
+            for i, depi in list(dependencies.items()):
                li = "l%d" % (i+1)
-               for j, depj in dependencies.items():
+               for j, depj in list(dependencies.items()):
                   if j <= i:
                      continue
                   lj = "l%d" % (j+1)
@@ -1704,7 +1694,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             for i in available:
                if i in dependencies:
                   del dependencies[i]
-            for i in dependencies.keys():
+            for i in list(dependencies.keys()):
                dependencies[i].difference_update(available)
          else:
             raise golem.util.parser.TemplateError(
@@ -2089,7 +2079,7 @@ class KinematicsTemplate(golem.util.parser.Template):
        
        for i in range(len(crossed_particles)):
           if not crossed_particles[i] in gluons:
-	     continue
+             continue
           orig_pos_ii = orig_particles[i]-1
           cros_pos_ii = crossed_particles[i]-1
           for j in range(len(crossed_particles)):
@@ -2131,16 +2121,16 @@ class KinematicsTemplate(golem.util.parser.Template):
       colored = [prop.getIntegerProperty("index") for prop in self.particles("colored")]
       #crossed_colored = list(crossed_particles)
       #for i in crossed_particles:
-	#if i not in colored:
-	 # del crossed_colored[crossed_colored.index(i)]
+      #if i not in colored:
+         # del crossed_colored[crossed_colored.index(i)]
      
       #for i in range(len(colored)-1):
-	#for j in range(i+1,len(colored)):
-	 # if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
-	  #  props=Properties()
-	   # props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
-	    #props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
-	    #yield props
+      #for j in range(i+1,len(colored)):
+       # if not ( colored[i]== crossed_colored[i] and colored[j]==crossed_colored[j]):
+        #  props=Properties()
+         # props.setProperty(var_name, str(calcpos(colored[i],colored[j])))
+          #props.setProperty(index_name, str(calcpos(crossed_colored[i],crossed_colored[j])))
+          #yield props
 
       for i in range(len(crossed_particles)):
           if not crossed_particles[i] in colored:

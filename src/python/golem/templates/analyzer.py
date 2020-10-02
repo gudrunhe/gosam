@@ -22,7 +22,7 @@ class LightConeTemplate(Template):
 		self._ref = ref
 		self._onshell = {}
 		bindex = len("es")
-		for s, m in onshell.iteritems():
+		for s, m in onshell.items():
 			i = int(s[bindex:])
 			if m.endswith("**2"):
 				self._onshell[i] = m[:-3]
@@ -88,7 +88,7 @@ class LightConeTemplate(Template):
 		#  2: set(['l1']),
 		#  3: set(['l2'])}
 
-		for i in dependencies.iterkeys():
+		for i in dependencies.keys():
 			d = dependencies[i]
 			new_d = set(d)
 			flag = True
@@ -111,8 +111,7 @@ class LightConeTemplate(Template):
 		available = set()
 		while len(dependencies) > 0:
 			success = False
-			indep = filter(lambda i: dependencies[i] == set(),
-					dependencies.keys())
+			indep = [i for i in list(dependencies.keys()) if dependencies[i] == set()]
 			for i in indep:
 				program.append([i])
 				success = True
@@ -121,9 +120,9 @@ class LightConeTemplate(Template):
 				available.update(indep)
 			else:
 				# try splittings
-				for i, depi in dependencies.iteritems():
+				for i, depi in dependencies.items():
 					li = "l%d" % i
-					for j, depj in dependencies.iteritems():
+					for j, depj in dependencies.items():
 						if j <= i:
 							continue
 						lj = "l%d" % j
@@ -136,7 +135,7 @@ class LightConeTemplate(Template):
 				for i in available:
 					if i in dependencies:
 						del dependencies[i]
-				for i in dependencies.iterkeys():
+				for i in dependencies.keys():
 					dependencies[i].difference_update(available)
 			else:
 				raise "Cannot create initialization for kinematics"

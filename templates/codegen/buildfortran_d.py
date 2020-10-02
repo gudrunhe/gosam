@@ -1,7 +1,7 @@
 [%
  ' vim: ts=3:sw=3:syntax=golem
 %]
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 
 import sys
@@ -66,17 +66,17 @@ rank=options.rank
 diagram=options.diagram
 group=options.group
 loopsize=options.loopsize
-# print '----------------------------------'
-# print 'Input file is:      %s' % diag_name+'.txt'
-# print 'Diagram written in: %s' % diag_name+'.f90'
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'.f90'
-# print 'Diagram information:'
-# print 'diag:  %s' % options.diagram
-# print 'group: %s' % options.group
-# print 'heli:  %s' % options.helicity
-# print 'qsign: %s' % options.qsign
-# print 'qshif: %s' % options.qshift
-# print '----------------------------------'
+# print('----------------------------------')
+# print('Input file is:      %s' % diag_name+'.txt')
+# print('Diagram written in: %s' % diag_name+'.f90')
+# print('Abbrev. written in: %s' % 'abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'.f90')
+# print('Diagram information:')
+# print('diag:  %s' % options.diagram)
+# print('group: %s' % options.group)
+# print('heli:  %s' % options.helicity)
+# print('qsign: %s' % options.qsign)
+# print('qshif: %s' % options.qshift)
+# print('----------------------------------')
 
 txtfile = open(diag_name+'.txt','r')
 tmp_handle , tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import sys
 import os
@@ -50,21 +50,21 @@ heli=str(options.helicity)
 qsign=options.qsign
 qshift=options.qshift
 
-# print '----------------------------------'
-# print 'Input file is:      %s' % diag_name+'.txt'
-# print 'Diagram written in: %s' % diag_name+'.f90'[%
+# print('----------------------------------')
+# print('Input file is:      %s' % diag_name+'.txt')
+# print('Diagram written in: %s' % diag_name+'.f90')[%
 @if helsum %]
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'.f90'[%
+# print('Abbrev. written in: %s' % 'abbrevd'+diag+'.f90')[%
 @else %]
-# print 'Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90'[%
+# print('Abbrev. written in: %s' % 'abbrevd'+diag+'h'+heli+'.f90')[%
 @end @if %]
-# print 'Diagram information:'
-# print 'diag:  %s' % options.diagram
-# print 'group: %s' % options.group
-# print 'heli:  %s' % options.helicity
-# print 'qsign: %s' % options.qsign
-# print 'qshif: %s' % options.qshift
-# print '----------------------------------'
+# print('Diagram information:')
+# print('diag:  %s' % options.diagram)
+# print('group: %s' % options.group)
+# print('heli:  %s' % options.helicity)
+# print('qsign: %s' % options.qsign)
+# print('qshif: %s' % options.qshift)
+# print('----------------------------------')
 
 txtfile = open(diag_name+'.txt','r')
 tmp_abb_handle , abb_tmpname = tempfile.mkstemp(suffix=".f90",prefix="gosam_tmp")
@@ -93,7 +93,7 @@ if acc_max == '0':
 	acc_max = 1
 
 
-#print "--------------------"
+#print("--------------------")
 
 outdict=translatefile(diag_name+'.txt',config)
 

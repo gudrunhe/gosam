@@ -44,15 +44,15 @@ class FormFactorPrinter:
 		self.arg_format = fmt
 
 	def a(self, n, r, *args):
-		sargs = ", ".join(map(lambda i: self.p_format % i, args))
+		sargs = ", ".join([self.p_format % i for i in args])
 		return (self.a_format % (n, r)) + (self.arg_format % sargs)
 
 	def b(self, n, r, *args):
-		sargs = ", ".join(map(lambda i: self.p_format % i, args))
+		sargs = ", ".join([self.p_format % i for i in args])
 		return (self.b_format % (n, r)) + (self.arg_format % sargs)
 
 	def c(self, n, r, *args):
-		sargs = ", ".join(map(lambda i: self.p_format % i, args))
+		sargs = ", ".join([self.p_format % i for i in args])
 		return (self.c_format % (n, r)) + (self.arg_format % sargs)
 
 	def set_format_g(self, fmt):
@@ -88,29 +88,29 @@ class FormFactorPrinter:
 				symmetries[self.c_format % (n, r)] = r - 4;
 
 		self.f.write("#Procedure TI%dr%d(%s)\n" %
-				(n, r, ",".join(map(lambda i: "r%d" % i, range(1, n + 1)))))
+				(n, r, ",".join(["r%d" % i for i in range(1, n + 1)])))
 		self.f.write("\tId ptens(%s) = \n" %
-				", ".join(map(lambda i: self.i(i, True), range(1, r + 1))))
+				", ".join([self.i(i, True) for i in range(1, r + 1)]))
 		self.generateFF(n, r, 0)
 		if n < 6:
 			self.generateFF(n, r, 2)
 			self.generateFF(n, r, 4)
 
 		self.f.write("\t;\n")
-		for name, args in symmetries.iteritems():
+		for name, args in symmetries.items():
 			if args > 0:
 				self.f.write("\tSymmetrize %s 1, ..., %d;\n" % (name, args))
 		self.f.write("#EndProcedure\n\n")
 
-		for name in symmetries.keys():
+		for name in list(symmetries.keys()):
 			self.f.write("CFunction %s;\n" % name)
 
-		return symmetries.keys()
+		return list(symmetries.keys())
 
 	def generateFF(self, n, r, g):
 		for gset, rset in selections(r, g):
-			g_indices = map(lambda i: self.i(i), gset)
-			r_indices = map(lambda i: self.i(i), rset)
+			g_indices = [self.i(i) for i in gset]
+			r_indices = [self.i(i) for i in rset]
 
 
 			for args in combinations(n-1, r - g):
@@ -169,8 +169,8 @@ def selections(n, m):
 	if n < m:
 		return
 
-	marker = range(1, m + 1)
-	dual = range(m + 1, n + 1)
+	marker = list(range(1, m + 1))
+	dual = list(range(m + 1, n + 1))
 
 	yield (marker[:], dual[:])
 	hasMoreElements = True

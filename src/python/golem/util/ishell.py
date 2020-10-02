@@ -103,10 +103,10 @@ class InteractiveShell:
       while not exit_loop:
          try:
             buf = ""
-            line = raw_input(self._prompt)
+            line = input(self._prompt)
             while line.rstrip().endswith("\\"):
                buf += line.rstrip()[:-1]
-               line = raw_input("... ")
+               line = input("... ")
             buf += line
             exit_loop = not self.event(buf)
          except EOFError:

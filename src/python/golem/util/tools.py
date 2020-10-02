@@ -273,7 +273,7 @@ def expand_helicities(patterns):
 
 
 def encode_helicity(h, sym=golem.algorithms.helicity.heli_to_symbol):
-   return dict([(k, sym[v]) for k, v in h.items()])
+   return dict([(k, sym[v]) for k, v in list(h.items())])
 
 def prepare_model_files(conf, output_path=None):
    if output_path is None:
@@ -312,7 +312,7 @@ def prepare_model_files(conf, output_path=None):
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
       if genUV == 'true':
-         print 'Generating UV terms'
+         print('Generating UV terms')
          for ext in [".py", ".hh"]:
             copy_file(os.path.join(src_path, model + 'ct' + ext),
                   os.path.join(path, MODEL_LOCAL + 'ct' + ext))
@@ -422,16 +422,16 @@ def getModel(conf, extra_path=None):
          error("EWScheme tag in orderfile incompatible with model.")
 
    # Modify EW setting for model file:
-   if ew_supp and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+   if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
       if golem.model.MODEL_OPTIONS["ewchoose"] == True:
          golem.model.MODEL_OPTIONS["users_choice"] = '0'
       else:
          golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
          golem.model.MODEL_OPTIONS["ewchoose"] = True
-   elif ew_supp and "ewchoose" not in golem.model.MODEL_OPTIONS.keys():
+   elif ew_supp and "ewchoose" not in list(golem.model.MODEL_OPTIONS.keys()):
       golem.model.MODEL_OPTIONS["ewchoose"] = False
       golem.model.MODEL_OPTIONS["users_choice"] = '0'
-   elif ew_supp == False and "ewchoose" in golem.model.MODEL_OPTIONS.keys():
+   elif ew_supp == False and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
       del golem.model.MODEL_OPTIONS["ewchoose"]
       #error("ewchoose option in model.options is not supported with the chosen model.")
 
@@ -446,33 +446,33 @@ def select_olp_EWScheme(conf):
    ewparameters = ['mW','mZ','alpha','GF','sw','e','vev','ewchoose']
    ewscheme = conf["olp.ewscheme"]
    raisewarn = False
-   for key, value in golem.model.MODEL_OPTIONS.items():
+   for key, value in list(golem.model.MODEL_OPTIONS.items()):
       if any(item.startswith(str(key)) for item in ewparameters):
          raisewarn = True
 #  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
    if ewscheme == "alphaGF":
       golem.model.MODEL_OPTIONS["ewchoose"]='1'
-      print "OLP EWScheme --> alphaGF (Gmu scheme)"
+      print("OLP EWScheme --> alphaGF (Gmu scheme)")
 
    if ewscheme == "alpha0":
       golem.model.MODEL_OPTIONS["ewchoose"]='2'
       golem.model.MODEL_OPTIONS["alpha"]='0.007297352536480967'
-      print "OLP EWScheme --> alpha0"
+      print("OLP EWScheme --> alpha0")
 
    if ewscheme == "alphaMZ":
       golem.model.MODEL_OPTIONS["ewchoose"]='2'
       # Value of alpha(Mz)^-1=128.944 from Nucl.Phys.Proc.Suppl. 225-227 (2012) 282-287
       golem.model.MODEL_OPTIONS["alpha"]='0.007755305'
-      print "OLP EWScheme --> alphaMZ"
+      print("OLP EWScheme --> alphaMZ")
 
    if ewscheme == "alphaRUN":
-      print "OLP EWScheme --> alphaRUN"
-      print "EW not supported yet!"
+      print("OLP EWScheme --> alphaRUN")
+      print("EW not supported yet!")
    if ewscheme == "alphaMSbar":
-      print "OLP EWScheme --> alphaMSbar"
-      print "EW not supported yet!"
+      print("OLP EWScheme --> alphaMSbar")
+      print("EW not supported yet!")
    if ewscheme == "OLPDefined":
-      print "OLP EWScheme --> OLPDefined: GoSam default taken"
+      print("OLP EWScheme --> OLPDefined: GoSam default taken")
       golem.model.MODEL_OPTIONS["ewchoose"]=2
       
    if raisewarn == True:
@@ -591,7 +591,7 @@ def interpret_particle_name(p, mod):
       found = False
       try:
          pdg_code = int(name)
-         for pname, p in mod.particles.items():
+         for pname, p in list(mod.particles.items()):
             if p.getPDGCode() == pdg_code:
                name = pname
                result = p
@@ -786,7 +786,7 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
    authors = golem.util.constants.AUTHORS
    former_authors = golem.util.constants.FORMER_AUTHORS
    asciiart = golem.util.constants.ASCIIART
-   asciiwidth = max(map(len, asciiart))
+   asciiwidth = max(list(map(len, asciiart)))
    clines = golem.util.constants.CLINES
 
    llines = [
@@ -794,9 +794,9 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
    ]
 
 
-   lauthor = max(map(len, authors.keys()))
+   lauthor = max(list(map(len, list(authors.keys()))))
    author_format = "* %" + str(-lauthor) + "s"
-   for author in sorted(authors.keys(), key=lambda n: n.rsplit(" ", 1)[-1]):
+   for author in sorted(list(authors.keys()), key=lambda n: n.rsplit(" ", 1)[-1]):
       values = authors[author]
       if len(values) >= 1 and len(values[0]) > 0:
          email = " <" + values[0] + ">"
@@ -807,7 +807,7 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
 
    llines.append("")
    llines.append("FORMER AUTHORS:")
-   for author in sorted(former_authors.keys(), key=lambda n: n.rsplit(" ", 1)[-1]):
+   for author in sorted(list(former_authors.keys()), key=lambda n: n.rsplit(" ", 1)[-1]):
       values = former_authors[author]
       if len(values) >= 1 and len(values[0]) > 0:
          email = " <" + values[0] + ">"
@@ -815,7 +815,7 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
          email = ""
 
       llines.append((author_format % author) + email)
-   maxauthorlen = max(map(len,llines))
+   maxauthorlen = max(list(map(len,llines)))
 
    cl = WIDTH - len(PREFIX) - len(SUFFIX) - 1 - asciiwidth
    for lnr, line in enumerate(clines):
@@ -869,8 +869,8 @@ class LimitedWidthOutputStream:
 
 def getZeroes(conf):
    model_mod = getModel(conf)
-   zeroes = list(filter(None, conf.getListProperty(golem.properties.zero)))
-   for name, value in model_mod.parameters.items():
+   zeroes = list([_f for _f in conf.getListProperty(golem.properties.zero) if _f])
+   for name, value in list(model_mod.parameters.items()):
       if name in zeroes:
          continue
       t = model_mod.types[name]
@@ -884,8 +884,8 @@ def getZeroes(conf):
 
 def getOnes(conf):
    model_mod = getModel(conf)
-   ones = list(filter(None, conf.getListProperty(golem.properties.one)))
-   for name, value in model_mod.parameters.items():
+   ones = list([_f for _f in conf.getListProperty(golem.properties.one) if _f])
+   for name, value in list(model_mod.parameters.items()):
       if name in ones:
          continue
       t = model_mod.types[name]
@@ -904,7 +904,7 @@ def product(lst):
    return r
 
 def factorial(n):
-   return product(range(2, n+1))
+   return product(list(range(2, n+1)))
 
 def derive_coupling_names(conf):
    """
@@ -924,7 +924,7 @@ def derive_coupling_names(conf):
    ones = getOnes(conf)
    zeroes = getZeroes(conf)
 
-   for t, lst in candidates.items():
+   for t, lst in list(candidates.items()):
       flag = False
       for c in lst:
          if c in symbols:
