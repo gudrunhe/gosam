@@ -106,8 +106,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
 
    emit("XML Parser (Expat)",
          version = ".".join(map(str,expat.version_info)),
-         encoding = expat.native_encoding,
-         returns_unicode = xmlp.returns_unicode
+         encoding = expat.native_encoding
       )
 
    emit("GoSam",
