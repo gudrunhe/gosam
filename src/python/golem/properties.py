@@ -506,7 +506,7 @@ python_bin = Property("python.bin",
    Denotes the executable file of Python
    """,
    str,
-   "python")
+   "python3")
 
 formopt_level = Property("formopt.level",
    """\
