@@ -235,14 +235,14 @@ class ExpressionScanner(golem.model.scanner.Scanner):
 		r'@TOKEN /[A-Za-z_][A-Za-z0-9_]*/'
 		return image
 
-	def integer(self, image):
-		r'@TOKEN /[0-9]+/'
-		return int(image)
-
 	def float(self, image):
 		'@TOKEN \
 /([0-9]*\\.[0-9]+|[0-9]+\\.[0-9]*)([EeDd][-+]?[0-9]+)?|[0-9]+[EeDd][-+][0-9]+/'
 		return image
+
+	def integer(self, image):
+		r'@TOKEN /[0-9]+(?![.0-9])/'
+		return int(image)
 
 	def plus_op(self, image):
 		'@TOKEN :\+|-:'
