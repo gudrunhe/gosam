@@ -47,10 +47,10 @@ INFO = {
 				GoSam is a matrix element generator for one-loop
 				amplitudes in quantum field theories.
 				""",
-		'license': "License :: OSI Approved :: GNU General Public License (GPL)",
-		'platforms': "POSIX",
+		'license': "GPLv3+",
+		'platforms': ["POSIX"],
 		'classifiers': [
-			"License :: OSI Approved :: GNU General Public License (GPL)",
+			"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 			"Development Status :: 5 - Production/Stable",
 			"Environment :: Console",
 			"Intended Audience :: Developers",
@@ -58,7 +58,8 @@ INFO = {
 			"Natural Language :: English",
 			"Operating System :: POSIX",
 			"Programming Language :: Fortran",
-			"Programming Language :: Python 2.6",
+			"Programming Language :: Python",
+			"Programming Language :: Python :: 3",
 			"Topic :: Scientific/Engineering :: Physics"
 		],
 		'provides': ["gosam (%s)" % VERSION]
