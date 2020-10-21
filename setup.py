@@ -18,6 +18,8 @@ import fileinput
 def get_git_revision():
 		# Replace this function such that it just returns the
 		# hard-coded git commit id when creating a release.
+		# The revision string must be a hexadecimal integer
+		# smaller than 2**31.
 		from subprocess import check_output
 		desired_length = 7
 		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).decode('utf-8').replace('\n','')
