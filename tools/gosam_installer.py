@@ -1,46 +1,50 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # GoSam Installation script
-# Copyright 2013-2014 GoSam Collaboration 
+# Copyright 2013-2020 GoSam Collaboration
 # Small parts of this file are based on the Rivet bootstrap script
 # License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
 
 # -*- coding: utf8 -*-
 
-## $Date$
-## $Revision$
-
-import os;
+import os
 
 # defaults:
-CONFIG_URL=r"https://gosam.hepforge.org/gosam_install.cfg"
+CONFIG_URL=r"https://raw.githubusercontent.com/gudrunhe/gosam/master/tools/gosam_install.cfg"
 DEFAULTPREFIX=os.path.join(os.getcwd(),"local")
-INSTALLER_VERSION="20150217-1"
+INSTALLER_VERSION="20201126"
 
 INSTALLOG_DEFAULT="installer-log.ini"
 
+CONTACT="https://github.com/gudrunhe/gosam"
 
 #first of all: check version
 import sys
 
 def check_py_version():
-    ver=sys.version_info
-    if ver[0]<2 or (ver[0]==2 and ver[1]<6):
-        print("This installation script and GoSam needs Python 2.6 or 2.7.")
-        sys.exit(1)
-    if ver[0]>2:
-        print("Python 3 is not fully supported yet. Please make sure your default python is 2.6 or 2.7")
+    ver = sys.version_info
+    if not(ver.major >= 3 and ver.minor >= 6):
+        print("This installation script and GoSam need Python 3.6 or newer.")
         sys.exit(1)
 
 check_py_version() # real main is at the end of the file
 
+import configparser
+import glob
+import hashlib
+import io
+import logging
 import os
-import urllib2, socket
-import logging, re, subprocess
-import StringIO, shlex
-import readline, glob, hashlib,stat,tempfile
-
-import ConfigParser
+import re
+import readline
+import shlex
+import socket
+import stat
+import subprocess
+import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from optparse import OptionParser, OptionGroup
 
@@ -63,12 +67,12 @@ def handle_args():
     global parser,args,opts
 
     def intel_option_callback(option, opt, value, parser):
-        parser.values.FC="ifort"
-        parser.values.CC="icc"
-        parser.values.CXX="icpc"
+        parser.values.FC = "ifort"
+        parser.values.CC = "icc"
+        parser.values.CXX = "icpc"
 
     def prefix_callback(option, opt, value, parser, *args, **kwargs):
-        parser.values.prefix=value
+        parser.values.prefix = value
         parser.values.prefix_changed = True
 
 
@@ -97,7 +101,7 @@ def handle_args():
                   help="Fortran compiler [%default]")
     group.add_option("--cc", metavar="CCOMPILER", default="gcc", dest="CC",
                   help="C compiler [%default]")
-    group.add_option("--cxx", metavar="CXXCOMPILER",  default="g++", dest="CXX",
+    group.add_option("--cxx", metavar="CXXCOMPILER", default="g++", dest="CXX",
                   help="C++ compiler [%default]")
     group.add_option("--quadruple", action="store_true", default=False, dest="QUADRUPLE",
                   help="Compile GoSam-Contrib in quadruple precision [%default]")
@@ -109,9 +113,9 @@ def handle_args():
     opts, args = parser.parse_args()
 
     if opts.QUADRUPLE:
-        opts.GOSAM_CONTRIB_OPTIONS="--with-precision=quadruple"
+        opts.GOSAM_CONTRIB_OPTIONS = "--with-precision=quadruple"
     else:
-        opts.GOSAM_CONTRIB_OPTIONS=""
+        opts.GOSAM_CONTRIB_OPTIONS = ""
 
 def setup_logging():
     ## Configure logging
@@ -129,13 +133,13 @@ def setup_logging():
 
 def replace_environment_variables(text):
         for e in os.environ:
-                text=text.replace("$"+e,os.environ[e])
-                text=text.replace("${"+e+"}",os.environ[e])
+                text = text.replace("$"+e,os.environ[e])
+                text = text.replace("${"+e+"}",os.environ[e])
         return text
 
 def setup_autocompleter():
     def complete(text, state):
-        text=replace_environment_variables(text)
+        text = replace_environment_variables(text)
         return (glob.glob(text+'*')+[None])[state]
 
     readline.set_completer_delims(' \t\n;')
@@ -159,13 +163,15 @@ def version_compare(ver1,ver2):
       >>> version_compare("a-5","a-03")
       -1
     """
-    if ver1==ver2:
+    def cmp(a, b):
+        return (a > b) - (a < b)
+    if ver1 == ver2:
         return 0
     def split_parts(ver):
-       res=re.compile(r"-|\.").split(ver)
+       res = re.compile(r"-|\.").split(ver)
        for i in range(len(res)):
           try:
-                  res[i] = int(res[i])
+              res[i] = int(res[i])
           except ValueError: pass
        return res
     return -cmp(split_parts(ver1),split_parts(ver2))
@@ -181,18 +187,18 @@ def get_free_diskspace(path):
 
 class InstallTracker(object):
     def __init__(self,pkg_name,official_name,version,broken=False):
-        self.pkg_name=pkg_name
-        self.section="pkg_"+pkg_name
+        self.pkg_name = pkg_name
+        self.section = "pkg_"+pkg_name
         self.official_name = official_name
         self.version = version
-        self.install_dirs=[]
-        self.install_files=[]
-        self.modified_files=[]
-        self.build_variables=dict()
-        self.broken=broken
+        self.install_dirs = []
+        self.install_files = []
+        self.modified_files = []
+        self.build_variables = dict()
+        self.broken = broken
 
-        self.removed_dirs=[]
-        self.removed_files=[]
+        self.removed_dirs = []
+        self.removed_files = []
 
     def store_build_variables(self,opts):
         self.build_variables["fc"] = opts.FC
@@ -221,50 +227,50 @@ class InstallTracker(object):
         return sha1sum.hexdigest()
 
     def extract_automake_install(self, all_lines):
-        expr_install=re.compile(r'.*install(?:\.sh)?\s+-c\s+(?:-m\s+\d*\s+)?(.*)',re.IGNORECASE)
-        expr_makedir=re.compile(r'.*mkdir\s+(?:-p\s+)?(.*)',re.IGNORECASE)
+        expr_install = re.compile(r'.*install(?:\.sh)?\s+-c\s+(?:-m\s+\d*\s+)?(.*)',re.IGNORECASE)
+        expr_makedir = re.compile(r'.*mkdir\s+(?:-p\s+)?(.*)',re.IGNORECASE)
 
         for line in all_lines:
-            res=expr_makedir.match(line)
+            res = expr_makedir.match(line)
             if res:
                 dirs = shlex.split(res.group(1))
                 dirs = [d for d in dirs if os.path.isdir(d)]
                 self.install_dirs = self.install_dirs + dirs
                 continue
-            res=expr_install.match(line)
+            res = expr_install.match(line)
             if not res:
                 continue
-            arguments=shlex.split(res.group(1))
-            arguments =[a for a in arguments if len(a)>=1 and a[1]!="-"]
+            arguments = shlex.split(res.group(1))
+            arguments = [a for a in arguments if len(a) >= 1 and a[1] != "-"]
             if len(arguments)<2:
                 continue
-            target=arguments[-1]
+            target = arguments[-1]
             if os.path.isdir(target):
                 for f in arguments[:-1]:
-                    fdir=os.path.join(target,os.path.basename(f))
+                    fdir = os.path.join(target,os.path.basename(f))
                     if os.path.isfile(fdir) or os.path.islink(fdir):
                         self.install_files.append(fdir)
             elif os.path.isfile(target) or os.path.islink(target):
                 self.install_files.append(target)
 
     def extract_setup_py(self, all_lines):
-        expr_copying=re.compile(r'^copying (.*) -> (.*)',re.IGNORECASE)
-        expr_writing=re.compile(r'^Writing (.*)',re.IGNORECASE)
-        expr_makedir=re.compile(r'^creating (.*)',re.IGNORECASE)
+        expr_copying = re.compile(r'^copying (.*) -> (.*)',re.IGNORECASE)
+        expr_writing = re.compile(r'^Writing (.*)',re.IGNORECASE)
+        expr_makedir = re.compile(r'^creating (.*)',re.IGNORECASE)
 
         for line in all_lines:
-            res=expr_makedir.match(line)
+            res = expr_makedir.match(line)
             if res and os.path.isdir(res.group(1)) and not res.group(1).startswith("build" + os.path.sep):
                 self.install_dirs.append(res.group(1))
                 continue
-            res=expr_writing.match(line)
+            res = expr_writing.match(line)
             if res and os.path.isfile(res.group(1)) and not res.group(1).startswith("build" + os.path.sep):
                 self.install_files.append(res.group(1))
                 continue
-            res=expr_copying.match(line)
+            res = expr_copying.match(line)
             if not res:
                 continue
-            if  "build" + os.path.sep in res.group(2):
+            if "build" + os.path.sep in res.group(2):
                 continue
             target = os.path.join(res.group(2),os.path.basename(res.group(1)))
             if os.path.isfile(target) or os.path.islink(target):
@@ -279,13 +285,13 @@ class InstallTracker(object):
         """ find links like libgolem.so.0->libgolem.so.0.0.0 """
         for f in self.install_files:
             if ".so" in f:
-                d=os.path.dirname(f)
-                fname=os.path.basename(f)
-                fname_split=fname.split(".")
+                d = os.path.dirname(f)
+                fname = os.path.basename(f)
+                fname_split = fname.split(".")
                 for i in range(len(fname_split)-1,1,-1):
                     if not fname_split[i].isdigit():
                         break
-                    new_f=os.path.join(d,".".join(fname_split[0:i]))
+                    new_f = os.path.join(d,".".join(fname_split[0:i]))
                     if os.path.exists(new_f) and os.path.islink(new_f) and \
                       not new_f in self.install_files:
                         self.install_files.append(new_f)
@@ -302,33 +308,33 @@ class InstallTracker(object):
         #print self.install_dirs
 
     def store_to_ini_file(self, ini_file, uninstall_mode=False):
-        db =  ConfigParser.SafeConfigParser()
+        db = configparser.ConfigParser()
         if os.path.exists(ini_file):
             db.read([ini_file])
         if not db.has_section("generic"):
             db.add_section("generic")
             db.set("generic","prefix",opts.prefix)
-        section="pkg_"+ self.pkg_name
+        section = "pkg_"+ self.pkg_name
         if not db.has_section(section):
             db.add_section(section)
 
         if not uninstall_mode:
-            new_files_name=set(self.install_files)
+            new_files_name = set(self.install_files)
         else:
-            new_files_name=set()
-        new_install_files_hashes={}
+            new_files_name = set()
+        new_install_files_hashes = {}
 
-        to_be_removed=[]
+        to_be_removed = []
         for i in new_files_name:
             new_install_files_hashes[i] = self.sha1sum_file(i)
-            if new_install_files_hashes[i]  == "NOTEXIST":
+            if new_install_files_hashes[i] == "NOTEXIST":
                 to_be_removed.append(i)
 
         for i in to_be_removed:
             new_files_name.remove(i)
 
-        old_install_files_name=set()
-        old_install_files_hashes={}
+        old_install_files_name = set()
+        old_install_files_hashes = {}
         if db.has_option(section,"install_files"):
             old_install_files = db.get(section,"install_files").split("\n")
             for i in old_install_files:
@@ -340,7 +346,7 @@ class InstallTracker(object):
                     if (name in self.removed_files) or (not os.path.exists(i)):
                         continue
                     old_install_files_name.add(name)
-                    old_install_files_hashes[name]=hash_value
+                    old_install_files_hashes[name] = hash_value
                 except IndexError:
                     pass
 
@@ -348,19 +354,19 @@ class InstallTracker(object):
             if i not in new_files_name and os.path.exists(i):
                 new_files_name.add(i)
                 new_install_files_hashes[i] = old_install_files_hashes[i]
-        new_install_files=[]
+        new_install_files = []
         for i in new_files_name:
             new_install_files.append(new_install_files_hashes[i]+" " + i)
         db.set(section,"install_files","\n".join(new_install_files))
 
         if db.has_option(section,"install_dirs"):
-            old_dirs=db.get(section,"install_dirs").split("\n")
-            old_dirs=[i for i in old_dirs if os.path.exists(i)]
-            new_dirs="\n".join(list(set(old_dirs).union(self.install_dirs).difference(set(self.removed_dirs))))
+            old_dirs = db.get(section,"install_dirs").split("\n")
+            old_dirs = [i for i in old_dirs if os.path.exists(i)]
+            new_dirs = "\n".join(list(set(old_dirs).union(self.install_dirs).difference(set(self.removed_dirs))))
         else:
-            new_dirs="\n".join(list(self.install_dirs))
+            new_dirs = "\n".join(list(self.install_dirs))
 
-        for n,v in self.build_variables.iteritems():
+        for n,v in self.build_variables.items():
             db.set(section,"build_"+n,v)
 
         db.set(section,"install_dirs",new_dirs)
@@ -374,22 +380,22 @@ class InstallTracker(object):
 
 
         if uninstall_mode:
-            removable= len(new_install_files)==0
+            removable = len(new_install_files) == 0
             #ignore directories used in other packages:
-            other_pkg_dirs=[]
+            other_pkg_dirs = []
             for sec in db.sections():
-                if sec==section:
+                if sec == section:
                     continue
                 if db.has_option(sec,"install_dirs"):
                     other_pkg_dirs.extend(db.get(sec,"install_dirs").split("\n"))
 
-            removable=removable and (all([i in other_pkg_dirs for i in new_dirs.split("\n") ]) or not new_dirs)
+            removable = removable and (all([i in other_pkg_dirs for i in new_dirs.split("\n") ]) or not new_dirs)
 
             if removable:
                 db.remove_section(section)
 
         # check if tracker is empty
-        if len(db.sections())==1: # only "generic" section left
+        if len(db.sections()) == 1: # only "generic" section left
             try:
                 os.unlink(ini_file)
             except OSError as err:
@@ -406,13 +412,13 @@ class InstallTracker(object):
         return True
 
     def read_from_ini_file(self,ini_file):
-        db =  ConfigParser.SafeConfigParser()
-        self.install_files=[]
-        self.modified_files=[]
-        self.install_dirs=[]
+        db = configparser.ConfigParser()
+        self.install_files = []
+        self.modified_files = []
+        self.install_dirs = []
         if os.path.exists(ini_file):
             db.read([ini_file])
-        section="pkg_"+ self.pkg_name
+        section = "pkg_"+ self.pkg_name
 
         def db_get(s,o,d):
             if db.has_option(s,o):
@@ -425,24 +431,24 @@ class InstallTracker(object):
 
         self.broken = db_get(section,"broken",False)
 
-        section="pkg_"+ self.pkg_name
+        section = "pkg_"+ self.pkg_name
         if not db.has_section(section):
             db.add_section(section)
-        list_install_files=db_get(section,"install_files","")
+        list_install_files = db_get(section,"install_files","")
         for f in list_install_files.split("\n"):
-            pos=f.find(" ")
-            checksum=""
-            if pos>=0:
-                checksum=f[:pos]
-                filename=f[pos+1:]
+            pos = f.find(" ")
+            checksum = ""
+            if pos >= 0:
+                checksum = f[:pos]
+                filename = f[pos+1:]
             else:
-                filename=f
+                filename = f
             if os.path.exists(filename):
                     if checksum:
                         if checksum != self.sha1sum_file(filename):
                             self.modified_files.append(filename)
                     self.install_files.append(filename)
-        list_install_dirs=db_get(section,"install_dirs","")
+        list_install_dirs = db_get(section,"install_dirs","")
         for d in list_install_dirs.split("\n"):
             if os.path.exists(d) and os.path.isdir(d):
                 self.install_dirs.append(d)
@@ -466,7 +472,7 @@ class InstallTracker(object):
         for f in self.install_files:
             if force or (f not in self.modified_files):
                 if not quiet:
-                    print("delete " + f)
+                    print("delete ", f)
                 try:
                     os.unlink(f)
                     self.removed_files.append(f)
@@ -474,11 +480,12 @@ class InstallTracker(object):
                     logging.error("Could not remove file %s: %s" % (f, str(err)))
 
         directories = self.install_dirs
-        directories.sort(lambda a,b : b.count(os.sep) - a.count(os.sep))
+        # Innermost directories first
+        directories.sort(key=lambda d: d.count(os.sep), reverse=True)
         for i in directories:
             if os.path.isdir(i) and not (os.listdir(i)):
                 if not quiet:
-                    print("delete directory " + i)
+                    print("delete directory ", i)
                 try:
                     os.rmdir(i)
                     self.removed_dirs.append(i)
@@ -491,12 +498,11 @@ class InstallTracker(object):
 def download(url,outdir=None,outname=None, toMem=False, username="",password=""):
     if not toMem:
         if not outname:
-            import urlparse
-            outname = os.path.basename(urlparse.urlparse(url)[2])
+            outname = os.path.basename(urllib.parse.urlparse(url)[2])
         if outdir:
             outpath = os.path.join(outdir, outname)
         else:
-            outpath=outname
+            outpath = outname
         if outdir and not os.path.exists(outdir):
             os.makedirs(outdir)
         if os.path.exists(outpath):
@@ -511,17 +517,17 @@ def download(url,outdir=None,outname=None, toMem=False, username="",password="")
     try:
         logging.info("Downloading %s" % url)
         if username or password:
-            password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
             password_mgr.add_password(None, url, username, password)
-            handler = urllib2.HTTPBasicAuthHandler(password_mgr)
-            opener = urllib2.build_opener(handler)
-            urllib2.install_opener(opener)
+            handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+            opener = urllib.request.build_opener(handler)
+            urllib.request.install_opener(opener)
 
-        hreq = urllib2.urlopen(url)
+        hreq = urllib.request.urlopen(url)
         if not toMem:
-            out = open(outpath, "w")
+            out = open(outpath, "wb")
         else:
-            out= StringIO.StringIO()
+            out = io.StringIO()
         out.write(hreq.read())
         hreq.close()
         if not toMem:
@@ -529,9 +535,9 @@ def download(url,outdir=None,outname=None, toMem=False, username="",password="")
             return outpath
         else:
             return out
-    except urllib2.URLError as err:
+    except urllib.error.URLError as err:
         logging.error("Problem downloading file from %s: %s" % (url, str(err)))
-    except urllib2.HTTPError as e:
+    except urllib.error.HTTPError as e:
         logging.error("Problem downloading file from %s: Error code %s" % (url, e.code))
     except IOError as e:
         logging.error("Problem while writing file %s: %s" % (outpath, str (e)))
@@ -546,10 +552,10 @@ def download(url,outdir=None,outname=None, toMem=False, username="",password="")
 def unpack_tarball(path,targetdir,prune=False,overwrite=True):
     import tarfile
     tar = tarfile.open(path,errorlevel=2)
-    targetdir=os.path.abspath(targetdir)
+    targetdir = os.path.abspath(targetdir)
     try:
         if prune:
-            prefix=os.path.commonprefix(tar.getnames())
+            prefix = os.path.commonprefix(tar.getnames())
         for i in tar.getnames():
             if "../" in i or os.path.isabs(i) or "\n" in i:
                 logging.fatal("Not allowed filename %s in tarball %s." % (repr(i), repr(path)))
@@ -558,36 +564,35 @@ def unpack_tarball(path,targetdir,prune=False,overwrite=True):
                 if not os.path.exists(os.path.join(targetdir, i)) or overwrite:
                     tar.extract(i, path=targetdir)
             else:
-                target=i
-                if i==prefix:
+                target = i
+                if i == prefix:
                     continue
                 if len(i)>len(prefix) and prune and prefix:
-                     target=target[len(prefix):]
+                     target = target[len(prefix):]
                 if target and os.path.sep == target[0]:
-                    target=target[1:]
+                    target = target[1:]
                 if not target:
                     continue
                 f = tar.getmember(i)
                 if not f:
                     continue
-                target=os.path.join(targetdir, target)
+                target = os.path.join(targetdir, target)
                 logging.debug("Extract file -> %s" % target)
                 if f.isdir():
                     if target and (not os.path.exists(target)):
                         os.makedirs(target)
                 if f.isfile():
-                    out_dir=os.path.dirname(target)
-                    inf=tar.extractfile(i)
+                    out_dir = os.path.dirname(target)
+                    inf = tar.extractfile(i)
                     if out_dir and (not os.path.exists(out_dir)):
                         os.makedirs(out_dir)
-                    outf = open(target,"w")
-                    outf.write(inf.read())
-                    outf.close()
+                    with open(target, "wb") as outf:
+                        outf.write(inf.read())
                     inf.close()
                     os.chmod(target,f.mode)
                     os.utime(target, (f.mtime, f.mtime))
                 elif f.islnk() or f.issym():
-                    true_link_target=os.path.abspath(os.path.join(os.path.dirname(target),f.linkname))
+                    true_link_target = os.path.abspath(os.path.join(os.path.dirname(target),f.linkname))
                     if not targetdir in os.commonprefix(true_link_target, targetdir):
                         logging.error("Not allowed link target %s of filename %s in tarball %s." % (repr(f.linkname),repr(i), repr(path)))
                         continue
@@ -627,8 +632,9 @@ def get_keypress():
     try:
         while 1:
             try:
-                c = sys.stdin.read(1)
-                return c
+                #c = sys.stdin.read(1)
+                c = os.read(sys.stdin.fileno(), 1)
+                return chr(ord(c))
             except IOError: pass
     finally:
         termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
@@ -640,15 +646,15 @@ def ask_yesno(message,default=False):
         logging.info(message + " -> " + (default and "Yes" or "No") + " (batch mode)")
         return default
     if not default:
-        message =message + " -- (N)o (y)es)? "
+        message = message + " -- (N)o (y)es)? "
     else:
-        message =message + " -- (Y)es (n)o)? "
+        message = message + " -- (Y)es (n)o)? "
     while 1:
         sys.stdout.write(message)
         sys.stdout.flush()
-        c=get_keypress()
+        c = get_keypress()
         sys.stdout.write("\n")
-        if c=="\n":
+        if c == "\n":
             logging.debug(message + " -> " + (default and "Yes" or "No") + " (default)")
             return default
         if c in "YyJjOo":
@@ -667,10 +673,10 @@ def ask(message,default=None):
     if opts.BATCH:
         logging.info(message + " -> " + str(default) + " (batch mode)")
         return default
-    c=raw_input(message)
+    c = input(message)
     sys.stdout.write("\n")
     if not c:
-        c=default
+        c = default
     logging.debug(message + " -> " + default)
     return c
 
@@ -732,8 +738,8 @@ def generatePossibleDirs(suffix, **opts):
   return result
 
 def find_executables(prognames, dirs):
-    assert type(prognames)==list
-    locations=[]
+    assert type(prognames) == list
+    locations = []
     for progname in prognames:
         for dir in dirs:
            fname = os.path.join(dir, progname)
@@ -743,11 +749,14 @@ def find_executables(prognames, dirs):
     return locations
 
 def get_form_version(executable):
-    version_string=""
+    version_string = ""
     try:
         pipe = subprocess.Popen(executable,
            shell=True,
-           bufsize=500, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+           encoding="utf8",
+           bufsize=500,
+           stdout=subprocess.PIPE,
+           stderr=subprocess.PIPE).stdout
         for line in pipe.readlines():
            lline = line.lower().strip()
            if "version" in lline:
@@ -756,7 +765,7 @@ def get_form_version(executable):
               lline = lline[i+len("version"):j]
               #version = [int(re.sub("[^0-9]", "", s))
               #      for s in lline.split(".")]
-              version_string=lline
+              version_string = lline
            elif lline.startswith("form") or lline.startswith("tform"):
               # form version 4.0 prints
               # "FORM 4.0 (Jun 11 2012) 64-bits"
@@ -764,71 +773,72 @@ def get_form_version(executable):
                  lline = lline.split(" ")[1]
               except IndexError:
                  pass
-              version_string=lline
+              version_string = lline
               #version = [int(re.sub("[^0-9]", "", s))
               #      for s in lline.split(".")]
     except OSError:
-        logging.warning("Could not execute %s." %  executable)
+        logging.warning("Could not execute %s." % executable)
     return version_string
 
 def get_qgraf_version(executable):
     try:
         pipe = subprocess.Popen(executable,
            shell=True,
-           bufsize=500, stdout=subprocess.PIPE).stdout
-
+           encoding="utf8",
+           bufsize=500,
+           stdout=subprocess.PIPE).stdout
         for line in pipe.readlines():
            lline = line.lower().strip()
            if "qgraf-" in lline:
-               match=re.match(r".*qgraf-([^ ]*)\s*",line)
+               match = re.match(r".*qgraf-([^ ]*)\s*",line)
                if match and match.group(1):
                    return match.group(1).strip()
     except OSError:
-        logging.warning("Could not execute %s." %  executable)
+        logging.warning("Could not execute %s." % executable)
 
 def prepare_pkg(pkgname):
-    section="pkg_"+pkgname
-    settings=dict(config.items(section))
-    name=settings.get("official_name",pkgname)
-    install=True
-    final_path=""
+    section = "pkg_"+pkgname
+    settings = dict(config.items(section))
+    name = settings.get("official_name",pkgname)
+    install = True
+    final_path = ""
     if "check_if_existing" in settings and config.getboolean(section,"check_if_existing"):
         logging.info("Searching for existing " + name + " installations...")
-        binaries=settings.get("binary","").split()
-        answer=False
+        binaries = settings.get("binary","").split()
+        answer = False
         if binaries:
-            hints=find_executables(binaries,generatePossibleDirs("bin"))
-            ver_parser=settings.get("version_parser","")
-            found=""
-            newest_found_ver=""
+            hints = find_executables(binaries,generatePossibleDirs("bin"))
+            ver_parser = settings.get("version_parser","")
+            found = ""
+            newest_found_ver = ""
             if hints and ver_parser:
                     for p in hints:
                          ver = eval(ver_parser + '(' +repr(p)+")")
                          if not found or version_compare(ver,newest_found_ver)>0:
-                             found=p
-                             newest_found_ver=ver
+                             found = p
+                             newest_found_ver = ver
             if newest_found_ver:
                 logging.info("Found %s %s at %s" % (name,newest_found_ver,found))
-                want_version=settings.get("version","")
-                recent=version_compare(want_version,newest_found_ver)
+                want_version = settings.get("version","")
+                recent = version_compare(want_version,newest_found_ver)
                 if recent<0:
-                    answer=ask_yesno(("The version of %s on the system is outdated (%s, current >= %s).\n"+
+                    answer = ask_yesno(("The version of %s on the system is outdated (%s, current >= %s).\n"+
                       "Should GoSam use %s nevertheless at %s") % (name, newest_found_ver, want_version, name, found) ,False)
-                if recent==0:
-                    answer=ask_yesno(("The version of %s on the system seems up to date (%s).\n"+
+                if recent == 0:
+                    answer = ask_yesno(("The version of %s on the system seems up to date (%s).\n"+
                       "Should GoSam use %s at %s") % (name, newest_found_ver, name, found) ,True)
-                if recent>0:
-                    answer=ask_yesno(("The version of %s on the system is newer than expected (%s > %s). This could cause incompabilities.\n"+
+                if recent > 0:
+                    answer = ask_yesno(("The version of %s on the system is newer than expected (%s > %s). This could cause incompabilities.\n"+
                       "Should GoSam use %s at %s") % (name, newest_found_ver, want_version, name, found) ,True)
                 if answer:
-                    final_path=newest_found_ver
-                    install=False
+                    final_path = newest_found_ver
+                    install = False
             else:
                 logging.debug("%s not found on the system." % name)
 
             if not answer:
                 while 1:
-                    answer=ask("Press ENTER if %s should be installed or provide a custom path to the directory with the %s binary: " % ( name, name ),"")
+                    answer = ask("Press ENTER if %s should be installed or provide a custom path to the directory with the %s binary: " % ( name, name ),"")
                     if answer and os.path.exists(answer) and os.path.isdir(answer):
                             for i in binaries:
                                 tmp_path = os.path.join(answer,i)
@@ -840,21 +850,21 @@ def prepare_pkg(pkgname):
                     else:
                         break
                 if answer:
-                    final_path=answer
+                    final_path = answer
                     logging.debug("Using %s from %s." % (name,final_path))
-                    install=False
+                    install = False
     return install, final_path
 
 def install_pkg(pkgname):
-    retval=True
-    section="pkg_"+pkgname
-    settings=dict(config.items(section))
-    if pkgname=="gosam_setup_env":
+    retval = True
+    section = "pkg_"+pkgname
+    settings = dict(config.items(section))
+    if pkgname == "gosam_setup_env":
         write_gosam_env(update_mode=True)
         return retval
-    name=settings.get("official_name",pkgname)
+    name = settings.get("official_name",pkgname)
     logging.info("Installing %s." % name)
-    download_dir=config.get("general","download_unpack_subdir")
+    download_dir = config.get("general","download_unpack_subdir")
     if not os.path.isdir(download_dir):
         try:
             download_dir = os.path.join(os.getcwd(),download_dir)
@@ -866,16 +876,16 @@ def install_pkg(pkgname):
         logging.error("Can't write to download directory, %s. Exiting." % download_dir)
         return False
 
-    target_file=pkgname+".tar.gz"
+    target_file = pkgname+".tar.gz"
     settings_url = settings["url"]
     if "user" in settings and "password" in settings:
-        target_file=download(settings_url,download_dir,target_file,username=settings["user"],password=settings["password"])
+        target_file = download(settings_url,download_dir,target_file,username=settings["user"],password=settings["password"])
     else:
-        target_file=download(settings_url,download_dir,target_file)
+        target_file = download(settings_url,download_dir,target_file)
     if not target_file and "backup_url" in settings:
         logging.error("Could not download %s from %s, trying %s" % (name , settings["url"],settings["backup_url"]))
         settings_url = settings["backup_url"]
-        target_file=download(settings_url,download_dir,target_file)
+        target_file = download(settings_url,download_dir,target_file)
     if not target_file:
             logging.fatal("Could not download %s from %s" % (name , settings_url))
             #TODO backup solution
@@ -883,7 +893,7 @@ def install_pkg(pkgname):
     unpack_dir= os.path.join(download_dir,pkgname)
     unpack_tarball(target_file,unpack_dir,prune=True)
 
-    tracker=InstallTracker(pkgname,name,settings.get("version",""))
+    tracker = InstallTracker(pkgname,name,settings.get("version",""))
     tracker.store_build_variables(opts)
 
     ## Install to the PREFIX location
@@ -911,44 +921,44 @@ def install_pkg(pkgname):
     my_config.paths.add(bindir)
     my_config.ldpaths.add(libdir)
 
-    build_variables =dict()
+    build_variables = dict()
 
-    build_variables["prefix"]=prefix
-    build_variables["incdir"]=incdir
-    build_variables["libdir"]=libdir
-    build_variables["bindir"]=bindir
-    build_variables["fc"]=opts.FC
-    build_variables["cc"]=opts.CC
-    build_variables["cxx"]=opts.CXX
-    build_variables["jmake"]=opts.JMAKE
-    build_variables["gosam_contrib_options"]=opts.GOSAM_CONTRIB_OPTIONS
+    build_variables["prefix"] = prefix
+    build_variables["incdir"] = incdir
+    build_variables["libdir"] = libdir
+    build_variables["bindir"] = bindir
+    build_variables["fc"] = opts.FC
+    build_variables["cc"] = opts.CC
+    build_variables["cxx"] = opts.CXX
+    build_variables["jmake"] = opts.JMAKE
+    build_variables["gosam_contrib_options"] = opts.GOSAM_CONTRIB_OPTIONS
 
     if settings.get("use_backup_if_no_autotools",False):
         #TODO, but not here
         pass
-    last_dir=os.getcwd()
+    last_dir = os.getcwd()
     os.chdir(unpack_dir)
 
 
-    if opts.LOGLEVEL==logging.INFO:
+    if opts.LOGLEVEL == logging.INFO:
         sys.stdout.write("\n")
 
-    steps=0
+    steps = 0
     for no in range(99):
         if "setup_command"+str(no) in settings:
-            steps=steps+1
+            steps = steps+1
 
-    cur_step=0;
+    cur_step = 0
     try:
-        tracker.broken=True
+        tracker.broken = True
         tracker.store_to_ini_file( os.path.join(last_dir,opts.INSTALLLOG))
         for no in range(99):
             if "setup_command"+str(no) in settings:
-                cur_step=cur_step+1
-                command=settings["setup_command"+str(no)].format(**build_variables)
-                if opts.LOGLEVEL==logging.INFO:
+                cur_step = cur_step+1
+                command = settings["setup_command"+str(no)].format(**build_variables)
+                if opts.LOGLEVEL == logging.INFO:
                     if "setup_comment"+str(no) in settings:
-                        comment=settings["setup_comment"+str(no)].format(**build_variables)
+                        comment = settings["setup_comment"+str(no)].format(**build_variables)
                         sys.stdout.write("\r"+" "*80)
                         sys.stdout.write("\rBuilding and Installing %s: step [%s / %s - %s] ..." % (name, cur_step,steps,comment) )
                         sys.stdout.flush()
@@ -956,9 +966,10 @@ def install_pkg(pkgname):
                         sys.stdout.write("\r"+" "*80)
                         sys.stdout.write("\rBuilding and Installing %s: step [%s / %s] ... "% (name, cur_step,steps) )
                         sys.stdout.flush()
-                logging.debug("Execute %s",repr(command));
+                logging.debug("Execute %s",repr(command))
                 process = subprocess.Popen(command,
                    shell=True,
+                   encoding="utf8",
                    stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE)
                 output_stdout,output_stderr= process.communicate()
@@ -966,7 +977,7 @@ def install_pkg(pkgname):
                 if retcode != 0:
                     logging.error("\n%s step [%s / %s] failed." % (name, cur_step,steps))
                     if retcode < 0:
-                        logging.error("Program was terminated by signal %s" %  -retcode)
+                        logging.error("Program was terminated by signal %s" % -retcode)
                     else:
                         logging.error("Program returned %s" % retcode)
                     sys.stdout.flush()
@@ -981,14 +992,14 @@ def install_pkg(pkgname):
                 tracker.analyse_output(output_stdout)
                 tracker.analyse_output(output_stderr)
                 if retcode != 0:
-                    retval=False
+                    retval = False
                     break
-                tracker.broken=not retval
+                tracker.broken = not retval
                 tracker.store_to_ini_file( os.path.join(last_dir,opts.INSTALLLOG))
-        tracker.broken=not retval
+        tracker.broken = not retval
         tracker.store_to_ini_file( os.path.join(last_dir,opts.INSTALLLOG))
     except OSError as err:
-        retval=False
+        retval = False
         logging.error(str(err))
         logging.error("Installation failed.")
     finally:
@@ -997,7 +1008,7 @@ def install_pkg(pkgname):
     if not retval:
         logging.error("Installation failed.")
 
-    if opts.LOGLEVEL==logging.INFO:
+    if opts.LOGLEVEL == logging.INFO:
         sys.stdout.write(" finished.\n")
     return retval
 
@@ -1006,12 +1017,12 @@ def write_gosam_env(update_mode=False,successful_before=True):
 
     output_path = my_config.output_path
     paths = [ os.path.abspath(i) for i in my_config.paths ]
-    ldpaths = [ os.path.abspath(i) for i in  my_config.ldpaths ]
+    ldpaths = [ os.path.abspath(i) for i in my_config.ldpaths ]
     basepath = os.path.abspath(opts.prefix)
 
-    env_file=os.path.join(opts.prefix,"bin","gosam_setup_env.sh")
+    env_file = os.path.join(opts.prefix,"bin","gosam_setup_env.sh")
 
-    tracker=InstallTracker("gosam_setup_env","gosam_setup_env.sh script","3")
+    tracker = InstallTracker("gosam_setup_env","gosam_setup_env.sh script","3")
     if not os.path.exists(os.path.join(opts.prefix,"bin")):
             os.makedirs(os.path.join(opts.prefix,"bin"))
             tracker.analyse_output("Creating %s" % os.path.join(opts.prefix,"bin"))
@@ -1029,7 +1040,7 @@ def write_gosam_env(update_mode=False,successful_before=True):
 test "$?BASH_VERSION" = "0BASH_VERSION" || eval 'alias return true'
 test "$?BASH_VERSION" = "0" || eval 'setenv() { export "$1=$2"; }'
 (return 2>/dev/null) || ( echo "To setup the environment variables, please do not call this file, but source it:" && echo "  source $0" )
-""");
+""")
     if paths:
         fh.write('setenv PATH ' + os.path.pathsep.join(['"'+i+'"' for i in paths]) + os.path.pathsep + "\"$PATH\"\n")
     if ldpaths:
@@ -1052,20 +1063,20 @@ test "$?BASH_VERSION" = "0" || eval 'setenv() { export "$1=$2"; }'
     else:
         logging.info("%s updated." % env_file)
 
-    rcfile="~/profile"
+    rcfile = "~/profile"
     shell = ""
     try:
-        shell=os.environ["SHELL"]
+        shell = os.environ["SHELL"]
     except KeyError:
         pass
     if "bash" in shell:
-        rcfile="~/.bashrc"
+        rcfile = "~/.bashrc"
     elif "zsh" in shell:
-        rcfile="~/.zshrc"
+        rcfile = "~/.zshrc"
     elif "tcsh" in shell:
-        rcfile="~/.tcshrc"
+        rcfile = "~/.tcshrc"
     elif "csh" in shell:
-        rcfile="~/.cshrc"
+        rcfile = "~/.cshrc"
 
     if not update_mode:
         logging.info("Add it to your %s to automate this after the re-login." % rcfile)
@@ -1074,31 +1085,31 @@ test "$?BASH_VERSION" = "0" || eval 'setenv() { export "$1=$2"; }'
 def general_check_environment():
     # find fortran compiler
     if opts.FC == "gfortran":
-        fcs=[opts.FC] + config.get("general","supported_fortran_compilers").split()
-        fcs=find_executables(fcs,generatePossibleDirs("bin"))
+        fcs = [opts.FC] + config.get("general","supported_fortran_compilers").split()
+        fcs = find_executables(fcs,generatePossibleDirs("bin"))
         if not fcs:
            logging.fatal("No fortran compiler found on the system. GoSam cannot be installed.")
            return False
-        opts.FC=fcs[0]
-    autoreconf=find_executables(["autoreconf"],generatePossibleDirs("bin"))
+        opts.FC = fcs[0]
+    autoreconf = find_executables(["autoreconf"],generatePossibleDirs("bin"))
     if not autoreconf:
         logging.warning("autoreconf not found on the system. Autotools is needed for some applications of GoSam.")
     if not opts.uninstall:
         # check for free disk space
-        build_space  = int(config.get("general","minimal_build_diskspace","0"))
-        install_space= int(config.get("general","minimal_install_diskspace","0"))
+        build_space = int(config.get("general","minimal_build_diskspace",fallback="0"))
+        install_space= int(config.get("general","minimal_install_diskspace",fallback="0"))
 
-        install_path=os.path.abspath(opts.prefix)
+        install_path = os.path.abspath(opts.prefix)
         while not os.path.isdir(install_path):
-            install_path=os.path.normpath(os.path.join(install_path,os.path.pardir))
+            install_path = os.path.normpath(os.path.join(install_path,os.path.pardir))
         free_install = get_free_diskspace(install_path)
         if free_install >=0 and install_space and free_install<install_space:
             logging.warning("Not enough space for %s. About %s MB needed." % (os.path.abspath(opts.prefix),install_space) )
 
-        build_path = config.get("general","download_unpack_subdir","")
-        build_path_tmp=build_path
+        build_path = config.get("general","download_unpack_subdir",fallback="")
+        build_path_tmp = build_path
         while not os.path.isdir(build_path_tmp):
-            build_path_tmp=os.path.normpath(os.path.join(build_path_tmp,os.path.pardir))
+            build_path_tmp = os.path.normpath(os.path.join(build_path_tmp,os.path.pardir))
         free_build = get_free_diskspace(build_path_tmp)
         if free_build >=0 and build_space and free_build<build_space:
             logging.warning("Not enough space for %s. About %s MB needed." % (os.path.abspath(build_path), build_space) )
@@ -1109,18 +1120,18 @@ def read_config_file():
     global config
     bn = os.path.basename(CONFIG_URL)
     if os.path.exists(bn):
-        cfg_file=open(bn,"r")
+        cfg_file = open(bn,"r")
         logging.warning(("Use local config file (%s). This file could be outdated.\nTo let the installer try to get " +
                 "the most up-to-date file, delete this file.") % bn )
     else:
-        cfg_file=download(CONFIG_URL,toMem=True)
+        cfg_file = download(CONFIG_URL,toMem=True)
     if not cfg_file:
         if os.path.exists(bn):
             logging.error("Could not read %s." % bn)
         else:
             logging.error("Could not download %s" % CONFIG_URL)
         sys.exit(1)
-    config=ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     cfg_file.seek(0)
     config.readfp(cfg_file)
     assert config.has_option("general","pkg_install")
@@ -1129,33 +1140,33 @@ def read_config_file():
 def check_self_update():
     global config
 
-    if version_compare(config.get("gosam-installer","version",""),INSTALLER_VERSION)<0:
+    if version_compare(config.get("gosam-installer","version",fallback=""),INSTALLER_VERSION)<0:
         if not os.path.exists(sys.argv[0]):
             logging.error("Cannot find myself: %s" % sys.argv[0])
             return True
         myself, ext = os.path.splitext(sys.argv[0])
         tmp_file = myself + "-new" + ext
 
-        answer=ask_yesno("There is a new version of the installer available. Should I download and call it",default=True)
+        answer = ask_yesno("There is a new version of the installer available. Should I download and call it",default=True)
         if answer:
-            url=config.get("gosam-installer","url","")
-            success=False
+            url = config.get("gosam-installer","url",fallback="")
+            success = False
             if url:
-                success=download(url, outname=tmp_file)
+                success = download(url, outname=tmp_file)
             if not success:
-                url=config.get("gosam-installer","backup_url","")
+                url = config.get("gosam-installer","backup_url",fallback="")
                 if url:
-                    success=download(url, outname=tmp_file)
+                    success = download(url, outname=tmp_file)
             if not success:
                 os.error("Could not download new version.")
                 return False
             os.chmod(tmp_file, os.stat(sys.argv[0])[stat.ST_MODE])
             import py_compile
-            handle,tmp_bin_path=tempfile.mkstemp()
+            handle,tmp_bin_path = tempfile.mkstemp()
             try:
                 py_compile.compile(tmp_file,doraise=True,cfile=tmp_bin_path)
             except py_compile.PyCompileError:
-                os.error("Syntax error in downloaded file. Please contact gosam@projects.hepforge.org.")
+                os.error("Syntax error in downloaded file. Please contact " + CONTACT + ".")
                 return False
             finally:
                 os.unlink(tmp_bin_path)
@@ -1166,12 +1177,12 @@ def check_self_update():
 
 def handle_pkgs(packages=None):
     global config
-    install_pkgs=[]
-    ask_for_install=[]
-    available=config.get("general","pkg_install","").split()
-    extra_packages=[]
+    install_pkgs = []
+    ask_for_install = []
+    available = config.get("general","pkg_install",fallback="").split()
+    extra_packages = []
     if not packages:
-        ask_for_install=available
+        ask_for_install = available
     else:
         for p in packages :
             if p == "all":
@@ -1195,20 +1206,20 @@ def handle_pkgs(packages=None):
             if path:
                 my_config.paths.add(os.path.abspath(os.path.dirname(path)))
 
-    retval=True
+    retval = True
     for p in install_pkgs:
         if not install_pkg(p):
             logging.error("Installation is not complete")
             logging.error("Run the installation script with the -u flag to remove all installed files.")
-            retval=False
+            retval = False
             break
     return retval
 
 
 
 def uninstall(pkgs=None,updated_mode=False,second_run=False):
-    ini_file=opts.INSTALLLOG
-    db = ConfigParser.SafeConfigParser()
+    ini_file = opts.INSTALLLOG
+    db = configparser.ConfigParser()
     if os.path.exists(ini_file):
         db.read([ini_file])
     else:
@@ -1216,7 +1227,7 @@ def uninstall(pkgs=None,updated_mode=False,second_run=False):
             logging.fatal("No installation found. Please run from the directory with %s or use the -l option" % INSTALLOG_DEFAULT)
         else:
             return
-    secs=db.sections()
+    secs = db.sections()
     packages = []
     if pkgs:
         for i in pkgs:
@@ -1230,22 +1241,22 @@ def uninstall(pkgs=None,updated_mode=False,second_run=False):
         packages = [x[4:] for x in secs if x.startswith("pkg_")]
     packages.reverse()
     for p in packages:
-         tracker=InstallTracker(p,"","")
+         tracker = InstallTracker(p,"","")
          tracker.read_from_ini_file(ini_file)
          tracker.uninstall(force=updated_mode,quiet=updated_mode)
          tracker.store_to_ini_file(ini_file,True)
 
 
 def check_installation(pkg_name=None):
-    ini_file=opts.INSTALLLOG
-    pkg_list=[]
+    ini_file = opts.INSTALLLOG
+    pkg_list = []
     if pkg_name:
-        pkg_list=[pkg_name]
+        pkg_list = [pkg_name]
     else:
-        db = ConfigParser.SafeConfigParser()
+        db = configparser.ConfigParser()
         if os.path.exists(ini_file):
             db.read([ini_file])
-            secs=db.sections()
+            secs = db.sections()
             pkg_list = [x[4:] for x in secs if x.startswith("pkg_")]
         else:
             logging.fatal("No installation found.")
@@ -1256,7 +1267,7 @@ def check_installation(pkg_name=None):
     mod_files = []
     trackers = {}
     for p in pkg_list:
-        trackers[p]=InstallTracker(p,"","")
+        trackers[p] = InstallTracker(p,"","")
         trackers[p].read_from_ini_file(ini_file)
         mod_files = mod_files + trackers[p].list_modified_files()
     if mod_files:
@@ -1272,10 +1283,10 @@ def check_installation(pkg_name=None):
 def is_already_installed():
     ini_file = opts.INSTALLLOG
     if os.path.exists(ini_file):
-        db = ConfigParser.SafeConfigParser()
+        db = configparser.ConfigParser()
         db.read([ini_file])
         if db.has_option("generic","prefix"):
-            if os.path.abspath(db.get("generic","prefix")) !=  os.path.abspath(opts.prefix):
+            if os.path.abspath(db.get("generic","prefix")) != os.path.abspath(opts.prefix):
                 logging.fatal(("Prefix '%s' is different to prefix '%s' in %s\nPlease start the installation script from "+
                     "another directory if you want to install to a different location or use the `-l` option.") % (opts.prefix,db.get("generic","prefix"),ini_file))
                 sys.exit(1)
@@ -1294,16 +1305,16 @@ def check_is_complete():
     return True
 
 def check_update(pkgs=None,new_packages=[]):
-    ini_file=opts.INSTALLLOG
-    update_list=[]
-    db = ConfigParser.SafeConfigParser()
+    ini_file = opts.INSTALLLOG
+    update_list = []
+    db = configparser.ConfigParser()
     if os.path.exists(ini_file):
         db.read([ini_file])
-        secs=db.sections()
+        secs = db.sections()
         if not pkgs:
             packages = [x[4:] for x in secs if x.startswith("pkg_")]
         else:
-            packages=pkgs
+            packages = pkgs
     else:
         logging.fatal("No installation found.")
         return
@@ -1315,7 +1326,7 @@ def check_update(pkgs=None,new_packages=[]):
              continue
          if db.has_option(sec,"version") and config.has_section(sec):
              broken = db.has_option(sec,"broken") and db.get(sec,"broken")
-             if version_compare(db.get(sec,"version"), config.get(sec,"version",""))>0 or broken:
+             if version_compare(db.get(sec,"version"), config.get(sec,"version",fallback=""))>0 or broken:
                  if broken:
                     m = m + "\t%s %s (broken) -> %s\n" % ( config.get(sec,"official_name"),
                          db.get(sec,"version") , config.get(sec,"version") )
@@ -1328,13 +1339,13 @@ def check_update(pkgs=None,new_packages=[]):
         logging.info("All installed files are up-to-date.")
         return
     if len(update_list)>0:
-        answer=ask_yesno(m,default=True)
+        answer = ask_yesno(m,default=True)
         if not answer:
             return
     mod_files = []
     trackers = {}
     for p in update_list:
-        trackers[p]=InstallTracker(p,"","")
+        trackers[p] = InstallTracker(p,"","")
         trackers[p].read_from_ini_file(ini_file)
         mod_files = mod_files + trackers[p].list_modified_files()
     if mod_files:
@@ -1342,7 +1353,7 @@ def check_update(pkgs=None,new_packages=[]):
         for f in mod_files:
             m = m+ "\t%s\n" % f
         m = m + "This files are overwritten by the update. Continue?"
-        answer=ask_yesno(m,default=(not opts.FORCE))
+        answer = ask_yesno(m,default=(not opts.FORCE))
         if not answer:
             return
     for p in update_list:
@@ -1358,11 +1369,11 @@ def init_settings():
     socket.setdefaulttimeout(10)
     my_config.paths = set()
     my_config.ldpaths = set()
-    my_config.output_path =  os.getcwd()
+    my_config.output_path = os.getcwd()
 
 def save_settings():
-    db =  ConfigParser.SafeConfigParser()
-    ini_file=opts.INSTALLLOG
+    db = configparser.ConfigParser()
+    ini_file = opts.INSTALLLOG
     if os.path.exists(ini_file):
         db.read([ini_file])
     if not db.has_section("generic"):
@@ -1381,20 +1392,20 @@ def save_settings():
 
 
 def load_settings():
-    db =  ConfigParser.SafeConfigParser()
-    ini_file=opts.INSTALLLOG
+    db = configparser.ConfigParser()
+    ini_file = opts.INSTALLLOG
     if os.path.exists(ini_file):
         db.read([ini_file])
     if not db.has_section("generic"):
         return
     if db.has_option("generic","paths"):
-        my_config.paths=set(db.get("generic", "paths").split("\n"))
+        my_config.paths = set(db.get("generic", "paths").split("\n"))
     else:
-        my_config.paths=set([os.path.join(opts.prefix,"bin")])
+        my_config.paths = set([os.path.join(opts.prefix,"bin")])
     if db.has_option("generic","ldpaths"):
-        my_config.ldpaths=set(db.get("generic", "ldpaths").split("\n"))
+        my_config.ldpaths = set(db.get("generic", "ldpaths").split("\n"))
     else:
-        my_config.ldpaths=set([os.path.join(opts.prefix,"lib")])
+        my_config.ldpaths = set([os.path.join(opts.prefix,"lib")])
     try:
         f = open(ini_file,"w")
         db.write(f)
@@ -1427,7 +1438,7 @@ if __name__=="__main__":
                  "For re-installation, you first need to uninstall existing files. Use the '-u' command-line flag for this.")
             load_settings()
             # check for updates:
-            new_packages=[]
+            new_packages = []
             if args:
                 check_update(args,new_packages)
             else:
@@ -1435,23 +1446,23 @@ if __name__=="__main__":
                 check_update()
             if new_packages: # install missing
                 general_check_environment()
-                ret=handle_pkgs(new_packages)
+                ret = handle_pkgs(new_packages)
                 write_gosam_env(successful_before=ret)
             save_settings()
         else:
             general_check_environment()
-            ret=handle_pkgs(args)
+            ret = handle_pkgs(args)
             write_gosam_env(successful_before=ret)
             save_settings()
 
     except Exception as e:
         import platform
-        logging.info("\nSystem info: Python %s %s %s\n %s\n",platform.python_version(), platform.machine(), platform.system(),  platform.platform())
+        logging.info("\nSystem info: Python %s %s %s\n %s\n",platform.python_version(), platform.machine(), platform.system(), platform.platform())
         import traceback
         traceback.print_exc()
         logging.error("\n\n")
         logging.error("An error has occurred while installing/upgrading/removing GoSam or one of its dependencies. Sorry!")
-        logging.error("Please contact the GoSam developers at gosam@projects.hepforge.org, with a \n\
+        logging.error("Please contact the GoSam developers at " + CONTACT + " with a \n\
 description of your problem, a copy of this script if you did not get it directly from the GoSam webpage, \n\
 and any error trace that may have appeared and we'll try to get it fixed as soon as possible. \n\
 Thanks for your help!")
