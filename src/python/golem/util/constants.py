@@ -33,8 +33,8 @@ FORMER_AUTHORS = {
       "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
       "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
       "Joscha Reichel": ["joscha@mpp.mpg.de"],
-      "Thomas Reiter": ["reiterth@mpp.mpg.de"]
-      "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"],
+      "Thomas Reiter": ["reiterth@mpp.mpg.de"],
+      "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"]
 }
 
 
