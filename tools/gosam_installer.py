@@ -526,7 +526,7 @@ def download(url,outdir=None,outname=None, toMem=False, username="",password="")
         if not toMem:
             out = open(outpath, "wb")
         else:
-            out = io.StringIO()
+            out = io.BytesIO()
         out.write(hreq.read())
         hreq.close()
         if not toMem:
@@ -1119,7 +1119,7 @@ def read_config_file():
     global config
     bn = os.path.basename(CONFIG_URL)
     if os.path.exists(bn):
-        cfg_file = open(bn,"r")
+        cfg_file = open(bn,"rb")
         logging.warning(("Use local config file (%s). This file could be outdated.\nTo let the installer try to get " +
                 "the most up-to-date file, delete this file.") % bn )
     else:
@@ -1132,7 +1132,7 @@ def read_config_file():
         sys.exit(1)
     config = configparser.ConfigParser()
     cfg_file.seek(0)
-    config.readfp(cfg_file)
+    config.read_string(cfg_file.read().decode("utf8"))
     assert config.has_option("general","pkg_install")
     assert config.has_option("general","download_unpack_subdir")
 
