@@ -1,24 +1,27 @@
     GoSam -- An automated One-Loop matrix element generator.
-    Copyright (C) 2011 - 2017 The GoSam Collaboration
+    Copyright (C) 2011 - 2020 The GoSam Collaboration
 
-    AUTHORS:
-    * Nicolas Greiner                   <greiner@mpp.mpg.de>
-    * Gudrun Heinrich                   <gudrun@mpp.mpg.de>
-    * Stephan Jahn                      <sjahn@mpp.mpg.de>
-    * Gionata Luisoni                   <luisonig@mpp.mpg.de>
-    * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>
-    * Giovanni Ossola                   <gossola@citytech.cuny.edu>
-    * Tiziano Peraro                    <peraro@mpp.mpg.de>
-    * Johannes Schlenk                  <jschlenk@mpp.mpg.de>
-    * Francesco Tramontano              <Francesco.Tramontano@cern.ch>
-
-    FORMER AUTHORS:
-    * Gavin Cullen                      <gavin.cullen@desy.de>
-    * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>
-    * Edoardo Mirabella                 <mirabell@mpp.mpg.de>
-    * Joscha Reichel                    <joscha@mpp.mpg.de>
-    * Thomas Reiter                     <reiterth@mpp.mpg.de>
-    * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>
+      AUTHORS:                                                              
+      * Gudrun Heinrich                   <gudrun.heinrich@kit.edu>         
+      * Stephen Jones                     <s.jones@cern.ch>                 
+      * Matthias Kerner                   <mkerner@physik.uzh.ch>           
+      * Vitaly Magerya                    <vitaly.magerya@tx97.net>         
+      * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>     
+      * Giovanni Ossola                   <gossola@citytech.cuny.edu>       
+      * Tiziano Peraro                    <peraro@mpp.mpg.de>               
+      * Johannes Schlenk                  <johannes.schlenk@psi.ch>         
+      * Francesco Tramontano              <Francesco.Tramontano@cern.ch>    
+                                                                              
+      FORMER AUTHORS:                                                       
+      * Gavin Cullen                      <gavin.cullen@desy.de>            
+      * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>             
+      * Nicolas Greiner                   <greiner@mpp.mpg.de>              
+      * Stephan Jahn                      <sjahn@mpp.mpg.de>                
+      * Gionata Luisoni                   <luisonig@mpp.mpg.de>             
+      * Edoardo Mirabella                 <mirabell@mpp.mpg.de>             
+      * Joscha Reichel                    <joscha@mpp.mpg.de>               
+      * Thomas Reiter                     <reiterth@mpp.mpg.de>             
+      * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>              
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +34,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 
     Scientific publications prepared using the present version of
     GoSam or any modified version of it or any code linking to GoSam
