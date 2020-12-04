@@ -14,24 +14,27 @@ PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
 
 AUTHORS = {
-      "Nicolas Greiner": ["greiner@mpp.mpg.de"],
       "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
-      "Stephan Jahn": ["sjahn@mpp.mpg.de"],
-      "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
+      "Stephen Jones": ["s.jones@cern.ch"],                 
+      "Matthias Kerner": ["mkerner@physik.uzh.ch"],           
+      "Vitaly Magerya": ["vitaly.magerya@tx97.net"],         
       "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
       "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
       "Tiziano Peraro": ["peraro@mpp.mpg.de"],
-      "Johannes Schlenk": ["jschlenk@mpp.mpg.de"],
-      "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"],
-      "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"]
+      "Johannes Schlenk": ["johannes.schlenk@psi.ch"],
+      "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"],
 }
 
 FORMER_AUTHORS = {
       "Gavin Cullen": ["gavin.cullen@desy.de"],
       "Hans van Deurzen": ["hdeurzen@mpp.mpg.de"],
+      "Nicolas Greiner": ["greiner@mpp.mpg.de"],
+      "Stephan Jahn": ["sjahn@mpp.mpg.de"],
+      "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
       "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
       "Joscha Reichel": ["joscha@mpp.mpg.de"],
       "Thomas Reiter": ["reiterth@mpp.mpg.de"]
+      "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"],
 }
 
 
