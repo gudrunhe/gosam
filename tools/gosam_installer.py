@@ -7,6 +7,16 @@
 
 # -*- coding: utf8 -*-
 
+import sys
+
+def check_py_version():
+    ver = sys.version_info
+    if not(ver.major >= 3 and ver.minor >= 6):
+        print("This installation script and GoSam need Python 3.6 or newer.")
+        sys.exit(1)
+
+check_py_version()
+
 import os
 
 # defaults:
@@ -17,17 +27,6 @@ INSTALLER_VERSION="20201126"
 INSTALLOG_DEFAULT="installer-log.ini"
 
 CONTACT="https://github.com/gudrunhe/gosam"
-
-#first of all: check version
-import sys
-
-def check_py_version():
-    ver = sys.version_info
-    if not(ver.major >= 3 and ver.minor >= 6):
-        print("This installation script and GoSam need Python 3.6 or newer.")
-        sys.exit(1)
-
-check_py_version() # real main is at the end of the file
 
 import configparser
 import glob
