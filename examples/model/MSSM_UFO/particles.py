@@ -3,7 +3,7 @@
 # Date: Wed 30 Mar 2011 22:26:15
 
 
-from __future__ import division
+
 from .object_library import all_particles, Particle
 from . import parameters as Param
 

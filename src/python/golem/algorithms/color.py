@@ -52,7 +52,7 @@ def colorbasis(quarks, aquarks, gluons):
             traces.append(line)
          # check for tadpoles
          if len(traces) > 0:
-            if min(map(len, traces)) <= 1:
+            if min(list(map(len, traces))) <= 1:
                continue
          yield lines, traces
    except IndexError:
@@ -103,7 +103,7 @@ def permutations(lst):
    if N <= 1:
       return
 
-   a = range(N)
+   a = list(range(N))
    face_left = [True for i in a]
 
    def index_of_max_mobile():

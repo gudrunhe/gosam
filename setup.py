@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: ts=3:sw=3
 
 from distutils.core import setup
@@ -18,9 +18,11 @@ import fileinput
 def get_git_revision():
 		# Replace this function such that it just returns the
 		# hard-coded git commit id when creating a release.
+		# The revision string must be a hexadecimal integer
+		# smaller than 2**31.
 		from subprocess import check_output
 		desired_length = 7
-		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).replace('\n','')
+		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).decode('utf-8').replace('\n','')
 		assert len(revision) == desired_length
 		return revision
 
@@ -45,10 +47,10 @@ INFO = {
 				GoSam is a matrix element generator for one-loop
 				amplitudes in quantum field theories.
 				""",
-		'license': "License :: OSI Approved :: GNU General Public License (GPL)",
-		'platforms': "POSIX",
+		'license': "GPLv3+",
+		'platforms': ["POSIX"],
 		'classifiers': [
-			"License :: OSI Approved :: GNU General Public License (GPL)",
+			"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 			"Development Status :: 5 - Production/Stable",
 			"Environment :: Console",
 			"Intended Audience :: Developers",
@@ -56,7 +58,8 @@ INFO = {
 			"Natural Language :: English",
 			"Operating System :: POSIX",
 			"Programming Language :: Fortran",
-			"Programming Language :: Python 2.6",
+			"Programming Language :: Python",
+			"Programming Language :: Python :: 3",
 			"Topic :: Scientific/Engineering :: Physics"
 		],
 		'provides': ["gosam (%s)" % VERSION]
@@ -127,7 +130,7 @@ class build_py(_build_py):
 			f.write("%r: %r" % (name, value))
 		f.write("\n}\n\n")
 		f.write("GOLEM_VERSION = [%s]\n" %
-				",".join(map(lambda s: s.strip(), VERSION.split("."))))
+				",".join([s.strip() for s in VERSION.split(".")]))
 		f.write("GOLEM_REVISION = '%s'\n" % GIT_REVISION)
 		f.close()
 
@@ -182,7 +185,7 @@ class install(_install):
 			if line.startswith("### [line replaced by setup.py"):
 				logs.append("Patching " + fileinput.filename())
 				line=replace_text
-			print line, # redirected to fileinput
+			print(line, end='') # redirected to fileinput
 		for message in logs:
 			log.info(message)
 	def change_roots (self, *names):

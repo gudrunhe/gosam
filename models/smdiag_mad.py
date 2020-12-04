@@ -679,7 +679,7 @@ def init_ew(e_one=False,**options):
    else:
       raise Exception("Invalid EW Scheme.")
    if e_one:
-      if "e" in functions.keys():
+      if "e" in list(functions.keys()):
          functions["e"] = "1"
 #---#] def init_ew:
 #---#[ def ew_gosam_choice:
@@ -762,7 +762,7 @@ def init():
    keys = MODEL_OPTIONS
 
    icount = 0
-   for key, value in MODEL_OPTIONS.items():
+   for key, value in list(MODEL_OPTIONS.items()):
       if key in ["mZ", "mW", "alpha_m1", "GF", "e", "sw"]:
          ew_input[key] = value
          icount += 1
@@ -779,7 +779,7 @@ def init():
    #golem.util.tools.debug("user: %r" % user_choice)
    #golem.util.tools.debug("ewchoose: %r" % ewchoose)
 
-   for item in DEFAULT.keys():
+   for item in list(DEFAULT.keys()):
       if item in ones:
          if item != "e":
             raise Exception("%s is set to one: GoSam cannot handle this EW Scheme" % item)
@@ -787,14 +787,14 @@ def init():
             eone = True
 
    for key in ["mZ", "alpha_m1", "GF"]:
-      if key in MODEL_OPTIONS.keys():
+      if key in list(MODEL_OPTIONS.keys()):
          ew_input[key] = MODEL_OPTIONS[key]
          param+= "%s = %s\n"  % (key, MODEL_OPTIONS[key])
       else:
          ew_input[key] = DEFAULT[key]
    keys["ewchoose"] = False
 
-   for key, value in MODEL_OPTIONS.items():
+   for key, value in list(MODEL_OPTIONS.items()):
       if key in parameters:
          try:
             sval = str(value)

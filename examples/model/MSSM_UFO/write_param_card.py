@@ -15,7 +15,7 @@ class ParamCardWriter(object):
         """write a valid param_card.dat"""
         
         if not list_of_parameters:
-            from parameters import all_parameters
+            from .parameters import all_parameters
             list_of_parameters = [param for param in all_parameters if \
                                                        param.nature=='external']
         
@@ -32,7 +32,7 @@ class ParamCardWriter(object):
     def define_not_dep_param(self, list_of_parameters):
         """define self.dep_mass and self.dep_width in case that they are 
         requested in the param_card.dat"""
-        from particles import all_particles
+        from .particles import all_particles
         
         self.dep_mass = [(part, part.mass) for part in all_particles \
                             if part.pdg_code > 0 and \
@@ -87,7 +87,7 @@ class ParamCardWriter(object):
     
     def write_dep_param_block(self, lhablock):
         import cmath
-        from parameters import all_parameters
+        from .parameters import all_parameters
         for parameter in all_parameters:
             exec("%s = %s" % (parameter.name, parameter.value))
         text = "##  Not dependent paramater.\n"
@@ -114,7 +114,7 @@ class ParamCardWriter(object):
     
     def write_qnumber(self):
         """ write qnumber """
-        from particles import all_particles
+        from .particles import all_particles
 
         text="""#===========================================================\n"""
         text += """# QUANTUM NUMBERS OF NEW STATE(S) (NON SM PDG CODE)\n"""

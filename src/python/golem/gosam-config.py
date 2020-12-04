@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim:ts=3:sw=3:expandtab
 import sys
 

@@ -25,7 +25,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
       f.write("---#[ %s:\n" % topic)
       msg = "\n".join(map(str, args))
       if len(opts) > 0:
-         ml = max(map(len, opts.keys()))
+         ml = max(list(map(len, list(opts.keys()))))
          fmt = "\n * %%%ds: %%s" % ml
          for key in sorted(opts.keys()):
             msg += fmt % (key, opts[key])
@@ -47,7 +47,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
       f.write("---#] LAST WORDS:\n")
    if stack is not None:
       f.write("---#[ STACK:\n")
-      for idx, line in enumerate(traceback.format_tb(sys.exc_traceback)):
+      for idx, line in enumerate(traceback.format_tb(sys.exc_info()[2])):
          f.write("[%3d] %s" % (idx, line))
       f.write("---#] STACK:\n")
    if POSTMORTEM_CFG is not None:
@@ -68,7 +68,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
          version=platform.version(),
 
          maxunicode=sys.maxunicode,
-         maxint=int(log(sys.maxint)/log(2))+1,
+         maxint=int(log(sys.maxsize)/log(2))+1,
          maxsize=int(log(sys.maxsize)/log(2))+1
       )
 
@@ -106,8 +106,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
 
    emit("XML Parser (Expat)",
          version = ".".join(map(str,expat.version_info)),
-         encoding = expat.native_encoding,
-         returns_unicode = xmlp.returns_unicode
+         encoding = expat.native_encoding
       )
 
    emit("GoSam",
@@ -139,12 +138,12 @@ if __name__ == "__main__":
          main.main(argv)
    except SystemExit as ex:
       if len(ex.args) > 0:
-         report_crash(ex, sys.exc_traceback)
+         report_crash(ex, sys.exc_info()[2])
          EXIT_CODE = 1
    except BaseException as ex:
       print("===> Unexpected error: %s" % ex)
-      print(traceback.format_tb(sys.exc_traceback)[-1])
-      report_crash(ex, sys.exc_traceback)
+      print(traceback.format_tb(sys.exc_info()[2])[-1])
+      report_crash(ex, sys.exc_info()[2])
       EXIT_CODE = 1
 
    if golem.util.tools.POSTMORTEM_DO:

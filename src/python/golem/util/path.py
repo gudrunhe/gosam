@@ -34,7 +34,7 @@ def gosam_contrib_path(*dir):
 		if not os.path.exists(path):
 			# guess from LD_LIBRARY_PATH
 			ldp = os.getenv("LD_LIBRARY_PATH") or ""
-		        for path in ldp.split(os.path.pathsep):
+			for path in ldp.split(os.path.pathsep):
 				guess_path= os.path.abspath(os.path.join(path,os.path.pardir,"share","gosam-contrib"))
 				if os.path.exists(guess_path):
 					path=os.path.abspath(guess_path)

@@ -123,7 +123,7 @@ class Particle:
 	  return self._field
 
 def simplify_model(particles, parameters, types, functions, masses, widths):
-	for p in particles.values():
+	for p in list(particles.values()):
 		m = p.getMass()
 		w = p.getWidth()
 

@@ -21,7 +21,7 @@ class UFOBaseClass(object):
         for i, name in enumerate(self.require_args):
             setattr(self, name, args[i])
     
-        for (option, value) in options.items():
+        for (option, value) in list(options.items()):
             setattr(self, option, value)
 
     def get(self, name):
@@ -39,7 +39,7 @@ class UFOBaseClass(object):
 
     def nice_string(self):
         """ return string with the full information """
-        return '\n'.join(['%s \t: %s' %(name, value) for name, value in self.__dict__.items()])
+        return '\n'.join(['%s \t: %s' %(name, value) for name, value in list(self.__dict__.items())])
 
     def __repr__(self):
         replacements = [
@@ -127,7 +127,7 @@ class Particle(UFOBaseClass):
         if self.selfconjugate:
             raise Exception('%s has no anti particle.' % self.name) 
         outdic = {}
-        for k,v in self.__dict__.items():
+        for k,v in list(self.__dict__.items()):
             if k not in self.require_args_all:                
                 outdic[k] = -v
         if self.color in [1,8]:

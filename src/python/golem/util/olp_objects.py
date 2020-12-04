@@ -2,21 +2,16 @@
 
 import golem
 
-try:
-	from bytes import maketrans
-except ImportError:
-	from string import maketrans
-
 from golem.util.config import GolemConfigError
 
 WHITESPACE = \
-	b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0c\x0d\x0e\x0f" + \
-	b"\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1b\x1c\x1d\x1e\x1f" + \
-	b"\x20"
+	"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0c\x0d\x0e\x0f" + \
+	"\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1b\x1c\x1d\x1e\x1f" + \
+	"\x20"
 
-PROBLEM_TO_SPACE = maketrans(
-		WHITESPACE + b"\\\"\'#|&",
-		b" " * (len(WHITESPACE) + 6))
+PROBLEM_TO_SPACE = str.maketrans(
+		WHITESPACE + "\\\"\'#|&",
+		" " * (len(WHITESPACE) + 6))
 
 class OLPOrderFile:
 	"""
@@ -419,7 +414,7 @@ class OLPOrderFile:
 			yield token
 
 	def options(self):
-		for name, value in self._options.iteritems():
+		for name, value in self._options.items():
 			yield (name, value)
 
 	def options_ordered(self):
@@ -600,7 +595,7 @@ class OLPContractFile(OLPOrderFile):
 				else:
 					response = " ".join(response[2])
 				f.write("%s %s | %s\n" % (name,
-					" ".join(map(lambda s: self._escape(s), value)), response))
+					" ".join([self._escape(s) for s in value]), response))
 
 			try:
 				response = self.getProcessResponse(i)

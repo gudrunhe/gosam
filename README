@@ -4,26 +4,29 @@
 # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
 #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 2.x.x                     #
 #                                                                              #
-#                                    (c) The GoSam Collaboration 2011-2016     #
+#                                    (c) The GoSam Collaboration 2011-2020     #
 #                                                                              #
 #        AUTHORS:                                                              #
-#        * Nicolas Greiner                   <greiner@mpp.mpg.de>              #
-#        * Gudrun Heinrich                   <gudrun@mpp.mpg.de>               #
-#        * Stephan Jahn                      <sjahn@mpp.mpg.de>                #
-#        * Gionata Luisoni                   <luisonig@mpp.mpg.de>             #
+#        * Gudrun Heinrich                   <gudrun.heinrich@kit.edu>         #
+#        * Stephen Jones                     <s.jones@cern.ch>                 #
+#        * Matthias Kerner                   <mkerner@physik.uzh.ch>           #
+#        * Vitaly Magerya                    <vitaly.magerya@tx97.net>         #
 #        * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>     #
 #        * Giovanni Ossola                   <gossola@citytech.cuny.edu>       #
 #        * Tiziano Peraro                    <peraro@mpp.mpg.de>               #
-#        * Johannes Schlenk                  <jschlenk@mpp.mpg.de>             #
-#        * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>              #
+#        * Johannes Schlenk                  <johannes.schlenk@psi.ch>         #
 #        * Francesco Tramontano              <Francesco.Tramontano@cern.ch>    #
 #                                                                              #
 #        FORMER AUTHORS:                                                       #
 #        * Gavin Cullen                      <gavin.cullen@desy.de>            #
 #        * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>             #
+#        * Nicolas Greiner                   <greiner@mpp.mpg.de>              #
+#        * Stephan Jahn                      <sjahn@mpp.mpg.de>                #
+#        * Gionata Luisoni                   <luisonig@mpp.mpg.de>             #
 #        * Edoardo Mirabella                 <mirabell@mpp.mpg.de>             #
 #        * Joscha Reichel                    <joscha@mpp.mpg.de>               #
 #        * Thomas Reiter                     <reiterth@mpp.mpg.de>             #
+#        * Johann Felix von Soden-Fraunhofen <jfsoden@mpp.mpg.de>              #
 #                                                                              #
 #  This program is free software: you can redistribute it and/or modify        #
 #  it under the terms of the GNU General Public License either                 #
@@ -48,13 +51,13 @@ GoSam is a general one-loop evaluator for matrix elements.
 The program produces Fortran 90 code from a given process
 description by evaluating Feynman diagrams and translating
 the associated one-loop diagrams into code suitable for the
-evaluation with Samurai, Golem95 and/or PJFry.
+evaluation with Ninja, Golem95 and/or Samurai.
 
 Download
 --------
 
 GoSam can be downloaded from:
-http://projects.hepforge.org/gosam/
+https://github.com/gudrunhe/gosam
 
 Installation
 ------------

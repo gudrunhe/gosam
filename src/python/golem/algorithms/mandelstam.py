@@ -79,7 +79,7 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
 			sys.exit("Should never happen: Invalid cut: %r!" % lst)
 
 	names = list(
-			map(lambda l: mandelstam_name(prefix, suffix, infix, l), cuts))
+			[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
 
 	substitutions = []
 

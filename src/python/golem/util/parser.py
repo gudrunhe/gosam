@@ -86,7 +86,7 @@ class Template:
             self._parse(source.splitlines())
          elif "xreadlines" in dir(source):
             # read template from a file
-            self._parse(source.xreadlines())
+            self._parse(source)
          else:
             self._parse(source)
       except TemplateError as ex:
@@ -774,10 +774,10 @@ class Template:
 
       props = Properties()
 
-      for key, value in m_opts.items():
+      for key, value in list(m_opts.items()):
          props[key] = value
 
-      for key, value in opts.items():
+      for key, value in list(opts.items()):
          props[key] = value
 
       if len(m_args) == len(args):
@@ -911,7 +911,7 @@ class Template:
          
          substs = {}
          max = 0
-         for name, value in opts.items():
+         for name, value in list(opts.items()):
             if name.startswith("$"):
                idx = int(name[1:])
                if idx > max:
@@ -980,7 +980,7 @@ class Template:
 
    def env(self, *args, **opts):
       props = Properties()
-      for key, value in opts.items():
+      for key, value in list(opts.items()):
          props.setProperty(key, value)
 
       return props
@@ -1223,7 +1223,7 @@ class Template:
          conf = self._stack[-i]
          lst = golem.properties.getExtensions(conf)
          if lst is not None:
-            ext.extend(map(lambda x: x.lower(), lst))
+            ext.extend([x.lower() for x in lst])
          if ext and hasattr(conf,"final_extensions"):
                break
 
@@ -1283,7 +1283,7 @@ class Template:
          conf = self._stack[-i]
          lst = golem.properties.getExtensions(conf)
          if lst is not None:
-            ext.extend(map(lambda x: x.lower(), lst))
+            ext.extend([x.lower() for x in lst])
 
       for the_ext in ext:
          for pattern in args:
@@ -1699,9 +1699,9 @@ class Template:
          lst = args[1:]
       else:
          slst = self._eval_string(args[1])
-         lst = map(lambda s: s.strip(), slst.split(","))
+         lst = [s.strip() for s in slst.split(",")]
          if ignore_case:
-            lst = map(lambda s: s.lower(), lst)
+            lst = [s.lower() for s in lst]
 
       if numeric:
          src_lst = lst[:]
@@ -1712,12 +1712,12 @@ class Template:
                if len(boundaries) == 2:
                   a = self._eval_int(boundaries[0])
                   b = self._eval_int(boundaries[1])
-                  lst.extend(range(a,b+1))
+                  lst.extend(list(range(a,b+1)))
                elif len(boundaries) == 3:
                   a = self._eval_int(boundaries[0])
                   b = self._eval_int(boundaries[1])
                   c = self._eval_int(boundaries[2])
-                  lst.extend(range(a,b+1,c))
+                  lst.extend(list(range(a,b+1,c)))
                else:
                   raise TemplateError("Too many ':' in [% member %]")
             else:
@@ -1748,11 +1748,11 @@ class Template:
       lst2 = self._evaluate_command(args[-1], [], opts)
 
       if not isinstance(lst2, list):
-         lst2 = map(lambda s: s.strip(), str(lst2).split(","))
+         lst2 = [s.strip() for s in str(lst2).split(",")]
          
       if ignore_case:
-         lst1 = map(lambda s: s.lower(), lst1)
-         lst2 = map(lambda s: s.lower(), lst2)
+         lst1 = [s.lower() for s in lst1]
+         lst2 = [s.lower() for s in lst2]
 
       return any(element in lst2 for element in lst1)
 
@@ -1767,9 +1767,9 @@ class Template:
          lst = args[:]
       else:
          slst = self._eval_string(args[0])
-         lst = map(lambda s: s.strip(), slst.split(","))
+         lst = [s.strip() for s in slst.split(",")]
 
-      lst = filter(lambda s: len(s) > 0, lst)
+      lst = [s for s in lst if len(s) > 0]
 
       return len(lst) == 0
 
@@ -1809,7 +1809,7 @@ class Template:
       else:
          prefix = ""
       props = Properties()
-      for key, value in os.environ.items():
+      for key, value in list(os.environ.items()):
          props.setProperty(prefix + key, value)
       return props
 
@@ -1899,7 +1899,7 @@ class Template:
          lst, dic = generate_mapping(R, k)
          dim = len(lst)
          lab = 0
-         for indices in select(range(d), k):
+         for indices in select(list(range(d)), k):
             lab += 1
             for i in range(dim):
                sign = 1

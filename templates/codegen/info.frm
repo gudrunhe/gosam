@@ -24,10 +24,10 @@
    @case 1 $], [$ $_ $][$
    @end @select $][$
 @end @for $]/)"
-#Write <`OUTPUT'> "   ! The SVN revision of [$ golem.name
+#Write <`OUTPUT'> "   ! The revision of [$ golem.name
                          $] used for code generation"
 #Write <`OUTPUT'> "   integer, parameter :: gosamrevision %"
-#Write <`OUTPUT'> "= z\'[$ golem.revision $]\'"
+#Write <`OUTPUT'> "= int(z\'[$ golem.revision $]\')"
 #Write <`OUTPUT'> "end module [$ process_name asprefix=\_ $]version"
 #Close <`OUTPUT'>
 off statistics;

@@ -2,10 +2,7 @@
 
 import os
 import subprocess
-try:
-   import StringIO as io
-except ImportError:
-   import io
+import io
 import signal
 import sys
 
@@ -183,8 +180,8 @@ class GolemShell(golem.util.ishell.InteractiveShell):
 
       particle_names = set([])
       
-      particle_names.update(self.model["particles"].keys())
-      particle_names.update(self.model["mnemonics"].keys())
+      particle_names.update(list(self.model["particles"].keys()))
+      particle_names.update(list(self.model["mnemonics"].keys()))
 
       particle_names = list(particle_names)
 
@@ -254,7 +251,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                lh /= 10
 
             for i, h in enumerate(hist):
-               print(("%" + str(digits) + "d: %s") % (i, h))
+               print("%" + str(digits) + "d: %s") % (i, h)
             return True
          else:
             sargs = ("".join(args)).strip()
@@ -293,7 +290,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
 
             if len(self.recommendations) > 0:
                print("Your last command recommends the following settings:")
-               for key,value in self.recommendations.items():
+               for key,value in list(self.recommendations.items()):
                   print("   %s: %s" % (key, value))
 
                print("Type 'accept' to accept the recommendations.")
@@ -342,7 +339,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
    def afterevent(self):
       if len(self.recommendations) > 0:
          print("Your last command recommends the following settings:")
-         for key,value in self.recommendations.items():
+         for key,value in list(self.recommendations.items()):
             print("   %s: %s" % (key, value))
 
          print("Type 'accept' to accept the recommendations.")
@@ -498,7 +495,7 @@ class ACCEPT(Command):
          if arg not in [" ", ":", "="]:
             accept_list.append(arg)
       if len(accept_list) == 0:
-         accept_list.extend(shell.recommendations.keys())
+         accept_list.extend(list(shell.recommendations.keys()))
 
       for key in accept_list:
          shell.update(key, shell.recommendations[key])
@@ -519,13 +516,13 @@ class TOPDG(Command):
       if "particles" in shell.model:
          particles = shell.model["particles"]
 
-         for p in particles.values():
+         for p in list(particles.values()):
             pdgs[str(p)] = p.getPDGCode()
 
       if "mnemonics" in shell.model:
          mnemonics = shell.model["mnemonics"]
 
-         for name, p in mnemonics.items():
+         for name, p in list(mnemonics.items()):
             pdgs[name] = p.getPDGCode()
 
       lst = shell.conf.getProperty(golem.properties.qgraf_in)
@@ -562,11 +559,11 @@ class SAVE(Command):
 
       if len(fname) == 0:
          try:
-            import Tkinter
-            import tkFileDialog
-            root = Tkinter.Tk()
+            import tkinter
+            import tkinter.filedialog
+            root = tkinter.Tk()
             root.withdraw()
-            fname = tkFileDialog.asksaveasfilename(parent=root)
+            fname = tkinter.filedialog.asksaveasfilename(parent=root)
             root.destroy()
          except ImportError:
             print("Could not open dialog window.")
@@ -606,11 +603,11 @@ class LOAD(Command):
 
       if len(fname) == 0:
          try:
-            import Tkinter
-            import tkFileDialog
-            root = Tkinter.Tk()
+            import tkinter
+            import tkinter.filedialog
+            root = tkinter.Tk()
             root.withdraw()
-            fname = tkFileDialog.askopenfilename(parent=root)
+            fname = tkinter.filedialog.askopenfilename(parent=root)
             root.destroy()
          except ImportError:
             print("Could not open dialog window.")
@@ -730,7 +727,7 @@ class GENERATE(Command):
             print("Directory %r does not exist." % ap)
             ans = ""
             while not (ans.startswith("y") or ans.startswith("n")):
-               ans = raw_input("Create it now (yes/no)? ").strip().lower()
+               ans = input("Create it now (yes/no)? ").strip().lower()
             if ans.startswith("y"):
                try:
                   os.makedirs(ap)
@@ -846,7 +843,7 @@ class LIST(Command):
 
       keys = [str(key) for key in shell.conf]
       keys.sort(key=sortkey)
-      width = max(map(len, keys) + [0])
+      width = max(list(map(len, keys)) + [0])
       fmt = "%-" + str(width) + "s %s"
       for key in keys:
          value = shell.conf[key]
@@ -903,13 +900,13 @@ class HELP(Command):
       if "particles" in shell.model:
          particles = shell.model["particles"]
 
-         for p in particles.values():
+         for p in list(particles.values()):
             particle_dict[str(p)] = p
 
       if "mnemonics" in shell.model:
          mnemonics = shell.model["mnemonics"]
 
-         for name, p in mnemonics.items():
+         for name, p in list(mnemonics.items()):
             particle_dict[name] = p
 
       if len(args) == 0:
@@ -979,7 +976,7 @@ class HELP(Command):
                print(prop.getDescription())
                return True
 
-         for name, particle in particle_dict.items():
+         for name, particle in list(particle_dict.items()):
             if help_topic == name:
                field = str(particle)
                if field in shell.model["latex_names"]:

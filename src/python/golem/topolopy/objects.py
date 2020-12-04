@@ -32,7 +32,7 @@ class Diagram:
       for p in self._nonprops:
          self._merge(p)
 
-      for p in self._propagators.values():
+      for p in list(self._propagators.values()):
          p.passZeroMomentum(self._zerosum)
 
       v_start = -1
@@ -51,19 +51,19 @@ class Diagram:
    def debug_diagram(self):
       print("debug_diagram:")
       print(" === IN LEGS:")
-      for key, value in self._in_legs.items():
+      for key, value in list(self._in_legs.items()):
          print("      %2d: %r" % (key, value))
       print(" === OUT LEGS:")
-      for key, value in self._out_legs.items():
+      for key, value in list(self._out_legs.items()):
          print("      %2d: %r" % (key, value))
       print(" === PROPAGATORS:")
-      for key, value in self._propagators.items():
+      for key, value in list(self._propagators.items()):
          print("      %2d: %r" % (key, value))
       print(" === VERTICES:")
-      for key, value in self._vertices.items():
+      for key, value in list(self._vertices.items()):
          print("      %2d: %r" % (key, value))
       print(" === ADJACENCY:")
-      for key, value in self._adjacency_list.items():
+      for key, value in list(self._adjacency_list.items()):
          print("      %2d: %r" % (key, value))
      
       
@@ -109,12 +109,12 @@ class Diagram:
             r_map[r] = d_keep + ofs
          v_keep.fields[r_map[r]-1] = f
 
-      for leg in self._in_legs.values():
+      for leg in list(self._in_legs.values()):
          if leg.v == nkill:
             leg.v = nkeep
             leg.r = r_map[leg.r]
 
-      for leg in self._out_legs.values():
+      for leg in list(self._out_legs.values()):
          if leg.v == nkill:
             leg.v = nkeep
             leg.r = r_map[leg.r]
@@ -133,7 +133,7 @@ class Diagram:
             self._adjacent_out[nkeep] = self._adjacent_out[nkill]
          del self._adjacent_out[nkill]
 
-      for prop in self._propagators.values():
+      for prop in list(self._propagators.values()):
          if prop.v1 == nkill:
             prop.v1 = nkeep
             prop.r1 = r_map[prop.r1]
@@ -157,19 +157,19 @@ class Diagram:
    def colorforbidden(self):
       reps = []
 
-      for l in self._in_legs.values():
+      for l in list(self._in_legs.values()):
          if l.v in self._loop_vertices:
             c = abs(l.color)
             if c != 1:
                reps.append(c)
-      for l in self._out_legs.values():
+      for l in list(self._out_legs.values()):
          if l.v in self._loop_vertices:
             c = abs(l.color)
             if c != 1:
                reps.append(c)
 
-      lp = map(abs, self._loop)
-      for idx, p in self._propagators.items():
+      lp = list(map(abs, self._loop))
+      for idx, p in list(self._propagators.items()):
          if idx in lp:
             continue
          if p.v1 in self._loop_vertices or p.v2 in self._loop_vertices:
@@ -213,7 +213,7 @@ class Diagram:
          return False
       loop_props = [self._propagators[abs(p)] for p in self._loop]
       in_out_props =[]
-      for indx,p in self._propagators.items():
+      for indx,p in list(self._propagators.items()):
          if p not in loop_props:
             # add to in_out_props if the vertex is connected
             if p.v1 in self._loop_vertices or p.v2 in self._loop_vertices:
@@ -259,7 +259,7 @@ class Diagram:
       li = self.getLoopIntegral()
       onshell = {}
 
-      for l in self._in_legs.values():
+      for l in list(self._in_legs.values()):
          mom = l.mom
          mass = l.mass
 
@@ -269,7 +269,7 @@ class Diagram:
             onshell[prefix + str(imom)] = powfmt % (mass, 2)
          else:
             onshell[prefix + str(imom)] = "0"
-      for l in self._out_legs.values():
+      for l in list(self._out_legs.values()):
          mom = l.mom
          mass = l.mass
 
@@ -283,7 +283,7 @@ class Diagram:
       return li.is_scaleless(onshell, powfmt, prefix)
 
    def vertices(self, *fields):
-      return sum([v.match(fields) for v in self._vertices.values()])
+      return sum([v.match(fields) for v in list(self._vertices.values())])
 
    def loopvertices(self, *fields):
       return sum([self._vertices[v].match(fields)
@@ -292,7 +292,7 @@ class Diagram:
    def iprop(self, *args, **opts):
       opts["zero"] = self._zerosum
       return sum([p.match(args, **opts)
-         for p in self._propagators.values()])
+         for p in list(self._propagators.values())])
 
    def chord(self, *args, **opts):
       opts["zero"] = self._zerosum
@@ -313,11 +313,11 @@ class Diagram:
       ])
 
    def substituteZero(self, symbols):
-      for p in self._propagators.values():
+      for p in list(self._propagators.values()):
          p.substituteZero(symbols)
-      for l in self._in_legs.values():
+      for l in list(self._in_legs.values()):
          l.substituteZero(symbols)
-      for l in self._out_legs.values():
+      for l in list(self._out_legs.values()):
          l.substituteZero(symbols)
 
    def _calculate_fermion_sign(self):
@@ -351,7 +351,7 @@ class Diagram:
       #---#[ Extract the fermionic part of the diagram:
       direction = {}
 
-      for p in self._propagators.values():
+      for p in list(self._propagators.values()):
          if p.sign != "-":
             continue
 
@@ -361,7 +361,7 @@ class Diagram:
          direction[(p.v1, p.v2)] = set([1])
          direction[(p.v2, p.v1)] = set([-1])
 
-      for l in self._in_legs.values():
+      for l in list(self._in_legs.values()):
          if abs(l.twospin) % 2 == 1:
             legcount += 1
 
@@ -371,7 +371,7 @@ class Diagram:
 
             legs[-legcount] = (-sgn(l.twospin), l.self_conjugate)
 
-      for l in self._out_legs.values():
+      for l in list(self._out_legs.values()):
          if abs(l.twospin) % 2 == 1:
             legcount += 1
 
@@ -384,7 +384,7 @@ class Diagram:
 
       #---#[ remove open fermion lines:
       leg_stock = set(legs.keys())
-      dk = direction.keys()
+      dk = list(direction.keys())
 
       while len(leg_stock) > 0:
          start_leg = leg_stock.pop()
@@ -397,8 +397,7 @@ class Diagram:
             if cursor > 0:
                vertices.remove(cursor)
 
-            adj_keys = list(filter(
-                  lambda pair: pair[0] == cursor and not pair[1] in seen, dk))
+            adj_keys = list([pair for pair in dk if pair[0] == cursor and not pair[1] in seen])
             assert len(adj_keys) == 1
             adj_key = adj_keys.pop()
             dir_sign.update(direction[adj_key])
@@ -416,10 +415,8 @@ class Diagram:
          while flag:
             seen.append(cursor)
 
-            adj_keys = list(filter(
-                  lambda pair: pair[0] == cursor and pair[1] not in seen, dk))
-            ret_keys = list(filter(
-                  lambda pair: pair[0] == cursor and pair[1] == start_v, dk))
+            adj_keys = list([pair for pair in dk if pair[0] == cursor and pair[1] not in seen])
+            ret_keys = list([pair for pair in dk if pair[0] == cursor and pair[1] == start_v])
             if len(adj_keys) > 0:
                adj_key = adj_keys.pop()
             else:
@@ -469,7 +466,7 @@ class Diagram:
       #adjacency = {}
       direction = {}
 
-      for p in self._propagators.values():
+      for p in list(self._propagators.values()):
          if p.sign != "-":
             continue
 
@@ -489,7 +486,7 @@ class Diagram:
          #else:
          #   adjacency[p.v2] = set([p.v1])
 
-      for l in self._in_legs.values():
+      for l in list(self._in_legs.values()):
          if abs(l.twospin) % 2 == 1:
             legcount += 1
 
@@ -503,7 +500,7 @@ class Diagram:
             #else:
             #   adjacency[l.v] = set([-legcount])
 
-      for l in self._out_legs.values():
+      for l in list(self._out_legs.values()):
          if abs(l.twospin) % 2 == 1:
             legcount += 1
 
@@ -568,7 +565,7 @@ class Diagram:
       #---#[ new ordering:
       leg_stock = set(legs.keys())
       leg_pairs = []
-      dk = direction.keys()
+      dk = list(direction.keys())
 
       flow = {}
       permutation = []
@@ -583,8 +580,7 @@ class Diagram:
             if cursor > 0:
                vertices.remove(cursor)
 
-            adj_keys = filter(
-                  lambda pair: pair[0] == cursor and not pair[1] in seen, dk)
+            adj_keys = [pair for pair in dk if pair[0] == cursor and not pair[1] in seen]
             assert len(adj_keys) == 1
             adj_key = adj_keys.pop()
             dir_sign.update(direction[adj_key])
@@ -651,10 +647,8 @@ class Diagram:
          while flag:
             seen.append(cursor)
 
-            adj_keys = filter(
-                  lambda pair: pair[0] == cursor and pair[1] not in seen, dk)
-            ret_keys = filter(
-                  lambda pair: pair[0] == cursor and pair[1] == start_v, dk)
+            adj_keys = [pair for pair in dk if pair[0] == cursor and pair[1] not in seen]
+            ret_keys = [pair for pair in dk if pair[0] == cursor and pair[1] == start_v]
             if len(adj_keys) > 0:
                adj_key = adj_keys.pop()
             else:
@@ -756,7 +750,7 @@ class Diagram:
       self._vertices[index] = vertex
 
    def __str__(self):
-      return "D(%s)" % (",".join(map(str, self._propagators.values())))
+      return "D(%s)" % (",".join(map(str, list(self._propagators.values()))))
 
    def isNf(self):
       return self.loopsize() == self.chord(
@@ -858,7 +852,7 @@ class Vertex(DiagramComponent):
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
-         "rank=%s" % self.rank] + map(str, self.fields))) + ")"
+         "rank=%s" % self.rank] + list(map(str, self.fields)))) + ")"
 
 
 class Propagator(DiagramComponent):
@@ -1070,8 +1064,8 @@ class LoopIntegral:
       suffix = ""
 
       zerosum = self._propagators[0].momentum.getZeroMomentum()
-      num_in = len(filter(lambda x: x==1, zerosum.values()))
-      num_out = len(filter(lambda x: x==-1, zerosum.values()))
+      num_in = len([x for x in list(zerosum.values()) if x==1])
+      num_out = len([x for x in list(zerosum.values()) if x==-1])
       mandel_names, mandel_subst = \
          golem.algorithms.mandelstam.generate_mandelstam_set(
             num_in, num_out, prefix, suffix, infix)
@@ -1092,12 +1086,12 @@ class LoopIntegral:
 
             #Delta = add_momenta(1, ri, -1, rj)
             Delta = ri - rj
-            for v1, c1 in Delta.items():
+            for v1, c1 in list(Delta.items()):
                i1 = int(v1[1:])
-               for v2, c2 in Delta.items():
+               for v2, c2 in list(Delta.items()):
                   i2 = int(v2[1:])
                   terms = mandel_subst[i1-1][i2-1]
-                  for symbol, coeff in terms.items():
+                  for symbol, coeff in list(terms.items()):
                      new_entry = c1 * c2 * coeff
 
                      if symbol in onshell:
@@ -1140,11 +1134,11 @@ class LoopIntegral:
                   else:
                      twoImS[sym] = -2
 
-            keys = twoReS.keys()
+            keys = list(twoReS.keys())
             for sym in keys:
                if twoReS[sym] == 0:
                   del twoReS[sym]
-            keys = twoImS.keys()
+            keys = list(twoImS.keys())
             for sym in keys:
                if twoImS[sym] == 0:
                   del twoImS[sym]
@@ -1168,7 +1162,7 @@ class LoopIntegral:
       zerosum = self._propagators[0].momentum.getZeroMomentum()
       num_in = 0
       num_out = 0
-      for x in zerosum.values():
+      for x in list(zerosum.values()):
          if x == 1:
             num_in += 1
          elif x == -1:
@@ -1194,12 +1188,12 @@ class LoopIntegral:
 
             #Delta = add_momenta(1, ri, -1, rj)
             Delta = ri - rj
-            for v1, c1 in Delta.items():
+            for v1, c1 in list(Delta.items()):
                i1 = int(v1[1:])
-               for v2, c2 in Delta.items():
+               for v2, c2 in list(Delta.items()):
                   i2 = int(v2[1:])
                   terms = mandel_subst[i1-1][i2-1]
-                  for symbol, coeff in terms.items():
+                  for symbol, coeff in list(terms.items()):
                      new_entry = c1 * c2 * coeff
 
                      if symbol in onshell:
@@ -1482,7 +1476,7 @@ class LoopCache:
 
       # classify by loopsize
       cli_by_size = [[] for i in range(self.maxloopsize + 1)]
-      for cli in self.topologies.keys():
+      for cli in list(self.topologies.keys()):
          ls = cli.size()
          cli_by_size[ls].append(cli)
 
@@ -1506,7 +1500,7 @@ class LoopCache:
                   cli_by_size[pls].remove(cpli)
             pinches[cli] = cli_pinches
 
-      for master_li, cli_list in pinches.items():
+      for master_li, cli_list in list(pinches.items()):
          lst = []
          for cli, kept_indices, pinched_indices in cli_list:
             pli = master_li.pinched(pinched_indices)
@@ -1546,7 +1540,7 @@ class LoopCache:
                )
          roots[master_li] = lst
 
-      for root, lst in roots.items():
+      for root, lst in list(roots.items()):
          rk = 0
          lst.sort(key=lambda tpl: tpl[0])
          for diagram_index, kept_indices, pinched_indices, transform in lst:
@@ -1579,7 +1573,7 @@ class Momentum:
       self._normalize()
 
    def items(self):
-      return self._dict.items()
+      return list(self._dict.items())
 
    def _normalize(self):
       # bring into standard form:
@@ -1592,7 +1586,7 @@ class Momentum:
          if k0 in self._dict:
             m0 = v0 * self._dict[k0]
 
-            for k, z in self._zdict.items():
+            for k, z in list(self._zdict.items()):
                if k in self._dict:
                   new_val = self._dict[k] - m0 * z
                else:
@@ -1639,7 +1633,7 @@ class Momentum:
 
    def __hash__(self):
       result = 8950312
-      for vec, coeff in self._dict.items():
+      for vec, coeff in list(self._dict.items()):
          result += 7 * (hash(vec) + coeff)
       return result
 
@@ -1787,7 +1781,7 @@ class Momentum:
       if len(momentum) == 0:
          return "0"
 
-      for vec, coeff in momentum.items():
+      for vec, coeff in list(momentum.items()):
          if vec == LOOPMOMENTUM:
             continue
          svec = prefix + vec[1:] + suffix
@@ -1823,13 +1817,13 @@ class Momentum:
    def _add_momenta(self, f1, m1, f2, m2):
       result = {}
       if m1 is not None:
-         for vec, coeff in m1.items():
+         for vec, coeff in list(m1.items()):
             new_val = f1 * coeff
             if new_val != 0:
                result[vec] = new_val
 
       if m2 is not None:
-         for vec, coeff in m2.items():
+         for vec, coeff in list(m2.items()):
             if vec in result:
                new_val = result[vec] + f2 * coeff
                if new_val == 0:

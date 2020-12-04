@@ -20,18 +20,18 @@ class OLPClient:
 			af, socktype, proto, canonname, sa = res
 			try:
 			  	s = socket.socket(af, socktype, proto)
-			except socket.error, msg:
+			except socket.error as msg:
 				s = None
 				continue
 			try:
 			 	s.connect(sa)
-			except socket.error, msg:
+			except socket.error as msg:
 				s.close()
 				s = None
 				continue
 			break
 		if s is None:
-			raise OLPClientException, 'could not open socket'
+			raise OLPClientException('could not open socket')
 
 		self._socket = s
 
@@ -75,13 +75,12 @@ class OLPClient:
 
 	def EvalSubProcess(self, label, momenta, mu, parameter):
 		if len(momenta) % 5 != 0:
-			raise OLPClientException, \
-				"list of momenta must be of length which is a multiple of five."
+			raise OLPClientException("list of momenta must be of length which is a multiple of five.")
 		num_legs  = len(momenta) / 5
 		num_param = len(parameter)
 		self.send("EVENT %d %d\n" % (num_legs, num_param), True)
 		for i in range(num_legs):
-			mom = " ".join(map(lambda x: "%24.16e" % x, momenta[5*i:5*(i+1)]))
+			mom = " ".join(["%24.16e" % x for x in momenta[5*i:5*(i+1)]])
 			self.send("MOMENTUM %d %s\n" % (i, mom), True)
 
 		for i, p in enumerate(parameter):
@@ -89,17 +88,17 @@ class OLPClient:
 
 		code, msg = self.send("SUBPROCESS %d %24.16e\n" % (label, mu), True)
 
-		return map(float, filter(lambda s: len(s) > 0, msg.split(" ")))
+		return list(map(float, [s for s in msg.split(" ") if len(s) > 0]))
 
 	def send(self, line, check_error=False):
 		if self._socket is None:
-			raise OLPClientException, 'tried to send after socket has been closed'
+			raise OLPClientException('tried to send after socket has been closed')
 		self._socket.send(line)
 		data = self._socket.recv(1024)
 		code, msg = data.split(" ", 1)
 		if check_error:
 			if int(code) != 200:
-				raise OLPClientException, msg
+				raise OLPClientException(msg)
 
 		return int(code), msg.strip()
 
@@ -107,7 +106,7 @@ class OLPClient:
 if __name__ == "__main__":
 
 	olp = OLPClient()
-	print olp.who()
+	print(olp.who())
 	olp["samurai_scalar"] = 2
 	res = olp.EvalSubProcess(0,
 			[7.0,  0.0,  0.0,  7.0, 0.0,
@@ -117,13 +116,13 @@ if __name__ == "__main__":
 			2.7,
 			[0.1183])
 
-	print res[0]
-	print res[1]
-	print res[2]
-	print res[3]
+	print(res[0])
+	print(res[1])
+	print(res[2])
+	print(res[3])
 
 	olp.bye()
 	#olp.shutdown()
 	olp.close()
-	print "Done"
+	print("Done")
 

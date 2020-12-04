@@ -78,7 +78,7 @@ class _CurryFunctor:
       return _CurryUnOp(self, lambda a: int(a))
 
    def __long__(self):
-      return _CurryUnOp(self, lambda a: long(a))
+      return _CurryUnOp(self, lambda a: int(a))
 
    def __float__(self):
       return _CurryUnOp(self, lambda a: float(a))

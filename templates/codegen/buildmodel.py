@@ -1,4 +1,4 @@
-%=$#! /usr/bin/env python
+%=$#! /usr/bin/env python3
 # vim: ts=3:sw=3:expandtab
 
 import sys
@@ -25,11 +25,11 @@ parser.add_option("-i", "--input", dest="input",
 if not options.input:
     sys.exit("Error: no input file was found! Please specify one with the -i options.")
 
-# print '----------------------------------'
+# print('----------------------------------')
 
 modelfile = open('model.f90', 'w')
 
-#print "--------------------"
+#print("--------------------")
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file
@@ -1105,7 +1105,7 @@ modelfile.write("            choosen_ew_parameters_count = choosen_ew_parameters
 modelfile.write("            choosen_ew_parameters = ibset(choosen_ew_parameters, nidx)\n")
 [$ ' python program to calculate numbers below:\n")
  '   p=['mW','mZ','alpha','GF','sw','e']\n")
- '   print sum([2**(p.index(i.strip())+1) for i in \"GF,mW,mZ\".split(\",\")])\n")
+ '   print(sum([2**(p.index(i.strip())+1) for i in \"GF,mW,mZ\".split(\",\")]))\n")
  '   from itertools import combinations\n")
  '   ([sum([2**(p.index(i.strip())+1) for i in j]) for j in combinations(\"GF,mW,mZ\".split(\",\"),2)]) $]
 modelfile.write("            if (choosen_ew_parameters_count == 1) then\n")
@@ -1473,7 +1473,7 @@ postformat('model.f90')
 
 modelfile_qp = open('model_qp.f90', 'w')
 
-#print "--------------------"
+#print("--------------------")
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file

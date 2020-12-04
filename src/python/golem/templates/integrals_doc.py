@@ -38,7 +38,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			nopts = opts.copy()
 			del nopts["diagram"]
 			d = self._eval_int(opts["diagram"], **nopts)
-			if d in self._loopcache.diagrams.keys():
+			if d in list(self._loopcache.diagrams.keys()):
 				ls = self._loopcache.diagrams[d].loopsize()
 				return self._format_value(ls, **nopts)
 			else:
@@ -124,9 +124,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 		if "select" in opts:
 			lst = self._eval_string(opts["select"])
-			selection = map(int, lst.split(","))
+			selection = list(map(int, lst.split(",")))
 		else:
-			selection = range(1, size+1)
+			selection = list(range(1, size+1))
 
 		if "shift" in opts:
 			shift = int(opts["shift"])
@@ -275,13 +275,13 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			rng = []
 			if "upper" in args or "lower" in args or "diagonal" in args:
 				if "lower" in args:
-					rng.extend(range(1, i))
+					rng.extend(list(range(1, i)))
 				if "diagonal" in args:
 					rng.append(i)
 				if "upper" in args:
-					rng.extend(range(i+1, size+1))
+					rng.extend(list(range(i+1, size+1)))
 			else:
-				rng.extend(range(1, size+1))
+				rng.extend(list(range(1, size+1)))
 
 			for j in rng:
 				reSij, imSij = smatrix[(i,j)]
@@ -318,9 +318,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			reSij, imSij = smatrix[(i,j)]
 
 			sre = ";".join(["%s:%s" % (coeff,sym)
-				for sym, coeff in reSij.items()])
+				for sym, coeff in list(reSij.items())])
 			sim = ";".join(["%s:%s" % (coeff,sym)
-				for sym, coeff in imSij.items()])
+				for sym, coeff in list(imSij.items())])
 
 			props.setProperty(row_name, i+shift)
 			props.setProperty(col_name, j+shift)
@@ -404,12 +404,12 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			del nopts["diagram"]
 			d = self._eval_int(opts["diagram"], **nopts)
 			result = []
-			for key, value in self._diagram_flags_0.items():
+			for key, value in list(self._diagram_flags_0.items()):
 				if d in value:
 					result.append(str(key))
 			return " ".join(result)
 		else:
-			return " ".join(map(str,self._diagram_flags_0.keys()))
+			return " ".join(map(str,list(self._diagram_flags_0.keys())))
 
 	def nlo_flags(self, *args, **opts):
 		if "group" in opts:
@@ -423,20 +423,20 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 					for idx, keep, pinch, shift in self._partitions[root]])
 				result = []
 
-				for key, lst in self._diagram_flags_1.items():
+				for key, lst in list(self._diagram_flags_1.items()):
 					if len(diagrams.intersection(lst)) > 0:
 						result.append(str(key))
 				return " ".join(result)
 			else:
 				raise TemplateError("Unknown group in [% diagrams %]")
 		else:
-			return " ".join(map(str,self._diagram_flags_1.keys()))
+			return " ".join(map(str,list(self._diagram_flags_1.keys())))
 
 	def use_flags_0(self, *args, **opts):
-		return len(self._diagram_flags_0.keys()) > 1
+		return len(list(self._diagram_flags_0.keys())) > 1
 
 	def use_flags_1(self, *args, **opts):
-		return len(self._diagram_flags_1.keys()) > 1
+		return len(list(self._diagram_flags_1.keys())) > 1
 
 	def min_diagram_1(self, *args, **opts):
 		return str(min(self._loopcache.diagrams.keys()))
@@ -494,7 +494,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 		if "loopsize" in opts:
 			ls = self._eval_int(opts["loopsize"], **nopts)
-			fltr = list(filter(lambda d: diagrams[d].size() == ls, fltr))
+			fltr = list([d for d in fltr if diagrams[d].size() == ls])
 
 		first_name = self._setup_name("first", "is_first", opts)
 		last_name = self._setup_name("last", "is_last", opts)
@@ -519,7 +519,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 		if "unpinched" in opts:
 			if len(opts["unpinched"].strip()) > 0:
-				unpinched = map(int, str(self._eval_int(opts["unpinched"])))
+				unpinched = list(map(int, str(self._eval_int(opts["unpinched"]))))
 			else:
 				unpinched = []
 		else:
@@ -569,11 +569,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			props.setProperty(value_name, diagram_index)
 			props.setProperty(idx_name, idx)
 			props.setProperty(keep_name,
-					",".join(map(str,map(lambda x: x+idxshift,
-						keep_lst[diagram_index]))))
+					",".join(map(str,[x+idxshift for x in keep_lst[diagram_index]])))
 			props.setProperty(pinch_name,
-					",".join(map(str,map(lambda x: x+idxshift,
-						pinch_lst[diagram_index]))))
+					",".join(map(str,[x+idxshift for x in pinch_lst[diagram_index]])))
 			props.setProperty(shift_name, shift_vec)
 			props.setProperty(sign_name, qsign)
 			props.setProperty(rank_name, rank_lst[diagram_index])
