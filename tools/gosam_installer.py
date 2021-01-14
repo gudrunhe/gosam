@@ -22,7 +22,7 @@ import os
 # defaults:
 CONFIG_URL=r"https://raw.githubusercontent.com/gudrunhe/gosam/master/tools/gosam_install.cfg"
 DEFAULTPREFIX=os.path.join(os.getcwd(),"local")
-INSTALLER_VERSION="20201126"
+INSTALLER_VERSION="20210114"
 
 INSTALLOG_DEFAULT="installer-log.ini"
 
@@ -148,32 +148,47 @@ def setup_autocompleter():
 def version_compare(ver1,ver2):
     """
     Compare versions
-
-      -1: ver1<ver2
-       1: ver1>ver2
-       0: ver1=ver2
-
-      >>> version_compare("1.0","1.0")
-      0
-      >>> version_compare("1.0","1.1beta")
-      1
-      >>> version_compare("1.8","1.09")
-      1
-      >>> version_compare("a-5","a-03")
-      -1
+      -1: ver1 is older (lower) ver2
+       1: ver1 is newer than (higher) ver2
+       0: ver1 is the same ver2
+    Here we interpret verion strings in the FreeBSD style [1]:
+    - a version is a sequence of [number][letters][number] segments
+      delimited by dots or any non-alphanumeric sequences;
+    - a missing segment is considered to be just 0;
+    - a missing initial number is considered to be -1;
+    - a missing final number is 0.
+    [1] https://github.com/freebsd/pkg/blob/release-1.13/libpkg/pkg_version.c
+    >>> version_compare("1","2")
+    -1
+    >>> version_compare("1.0","1.0")
+    0
+    >>> version_compare("1.1","1.1patch1")
+    -1
+    >>> version_compare("1.2","1.1patch1")
+    1
+    >>> version_compare("1.8","1.09")
+    -1
+    >>> version_compare("a-5","a-03")
+    1
+    >>> version_compare("1.2", "1.2.0")
+    0
+    >>> version_compare("1.2", "1.2.rc1")
+    1
+    >>> version_compare("1.2", "1.2patch1")
+    -1
+    >>> version_compare("1.2.b1", "1.2.a2")
+    1
     """
-    def cmp(a, b):
-        return (a > b) - (a < b)
-    if ver1 == ver2:
-        return 0
-    def split_parts(ver):
-       res = re.compile(r"-|\.").split(ver)
-       for i in range(len(res)):
-          try:
-              res[i] = int(res[i])
-          except ValueError: pass
-       return res
-    return -cmp(split_parts(ver1),split_parts(ver2))
+    rx = re.compile("([0-9]*)([a-zA-Z]*)([0-9]*)[^0-9a-zA-Z]*")
+    ver1 = [(int(n1 or ("-1" if l else "0")), l, int(n2 or "0")) for n1,l,n2 in rx.findall(ver1)]
+    ver2 = [(int(n1 or ("-1" if l else "0")), l, int(n2 or "0")) for n1,l,n2 in rx.findall(ver2)]
+    while len(ver1) < len(ver2): ver1.append((0, "", 0))
+    while len(ver2) < len(ver1): ver2.append((0, "", 0))
+    for i in range(max(len(ver1), len(ver2))):
+        c = (ver1[i] > ver2[i]) - (ver1[i] < ver2[i])
+        if c:
+            return c
+    return 0
 
 def get_free_diskspace(path):
     """ return the free disk space in MB """
@@ -819,15 +834,15 @@ def prepare_pkg(pkgname):
             if newest_found_ver:
                 logging.info("Found %s %s at %s" % (name,newest_found_ver,found))
                 want_version = settings.get("version","")
-                recent = version_compare(want_version,newest_found_ver)
-                if recent<0:
-                    answer = ask_yesno(("The version of %s on the system is outdated (%s, current >= %s).\n"+
+                recent = version_compare(newest_found_ver, want_version)
+                if recent < 0:
+                    answer = ask_yesno(("The version of %s on the system is outdated (%s, ours is %s).\n"+
                       "Should GoSam use %s nevertheless at %s") % (name, newest_found_ver, want_version, name, found) ,False)
                 if recent == 0:
                     answer = ask_yesno(("The version of %s on the system seems up to date (%s).\n"+
                       "Should GoSam use %s at %s") % (name, newest_found_ver, name, found) ,True)
                 if recent > 0:
-                    answer = ask_yesno(("The version of %s on the system is newer than expected (%s > %s). This could cause incompabilities.\n"+
+                    answer = ask_yesno(("The version of %s on the system is newer than expected (%s, ours is %s). This could cause incompabilities.\n"+
                       "Should GoSam use %s at %s") % (name, newest_found_ver, want_version, name, found) ,True)
                 if answer:
                     final_path = newest_found_ver
@@ -1139,7 +1154,7 @@ def read_config_file():
 def check_self_update():
     global config
 
-    if version_compare(config.get("gosam-installer","version",fallback=""),INSTALLER_VERSION)<0:
+    if version_compare(config.get("gosam-installer","version",fallback=""),INSTALLER_VERSION)>0:
         if not os.path.exists(sys.argv[0]):
             logging.error("Cannot find myself: %s" % sys.argv[0])
             return True
@@ -1325,7 +1340,7 @@ def check_update(pkgs=None,new_packages=[]):
              continue
          if db.has_option(sec,"version") and config.has_section(sec):
              broken = db.has_option(sec,"broken") and db.get(sec,"broken")
-             if version_compare(db.get(sec,"version"), config.get(sec,"version",fallback=""))>0 or broken:
+             if version_compare(config.get(sec,"version"), db.get(sec,"version",fallback=""))>0 or broken:
                  if broken:
                     m = m + "\t%s %s (broken) -> %s\n" % ( config.get(sec,"official_name"),
                          db.get(sec,"version") , config.get(sec,"version") )
