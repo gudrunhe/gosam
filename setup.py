@@ -16,17 +16,29 @@ import fnmatch
 import fileinput
 
 def get_git_revision():
-		# Replace this function such that it just returns the
-		# hard-coded git commit id when creating a release.
-		# The revision string must be a hexadecimal integer
-		# smaller than 2**31.
-		from subprocess import check_output
-		desired_length = 7
-		revision = check_output(["git", "rev-parse", "--short=%d" % desired_length, "HEAD"]).decode('utf-8').replace('\n','')
+	# The revision string must be a hexadecimal integer smaller than 2**31.
+	# GOLEM_REVISION will be defined as this number later on.
+	import subprocess
+	desired_length = 7
+	try:
+		revision = subprocess.check_output([
+			"git", "--git-dir=.git", "rev-parse", "--short=%d" % desired_length, "HEAD"
+		]).decode("utf-8").strip()
 		assert len(revision) == desired_length
 		return revision
+	except (FileNotFoundError, subprocess.CalledProcessError):
+		# No git or no .git; we must be in a release tarball;
+		# lets try to extract the revision from PKG-INFO.
+		try:
+			with open("PKG-INFO", "r") as f:
+				for line in f:
+					if line.startswith("Version: "):
+						return line.split("-", 1)[1].strip()
+			raise Exception("The git repository is missing and PKG-INFO has no version")
+		except FileNotFoundError:
+			raise Exception("Neither the git repository nor the PKG-INFO file exist")
 
-VERSION = "2.0.4"
+VERSION = "2.1.0"
 GIT_REVISION = get_git_revision()
 TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
 
