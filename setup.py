@@ -33,6 +33,8 @@ def get_git_revision():
 			with open("PKG-INFO", "r") as f:
 				for line in f:
 					if line.startswith("Version: "):
+						if "-" not in line:
+							raise Exception("No git repository, and no revision number found in PKG-INFO " + line.strip())
 						return line.split("-", 1)[1].strip()
 			raise Exception("The git repository is missing and PKG-INFO has no version")
 		except FileNotFoundError:
