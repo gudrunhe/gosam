@@ -7,20 +7,52 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
    @if generate_lo_diagrams %][%
       @if group %][%
       @else %]
-diagramsl0.[%O%]:[%
+diagramsl0_0.[%O%]:[%
          @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0.[%O%][%
+	d[%$_%]_0h[%helicity%]l0.[%O%][%
          @end @for %][%
          @if extension quadruple %]
-diagramsl0_qp.[%O%]:[%
+diagramsl0_0_qp.[%O%]:[%
          @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0_qp.[%O%][%
+	d[%$_%]_0h[%helicity%]l0_qp.[%O%][%
          @end @for %][%
 	 @end @if %][%
          @if internal REQUIRE_FR5 %]
-diagramsl0fr5.[%O%]:[%
+diagramsl0_0fr5.[%O%]:[%
             @for elements topolopy.keep.tree %] \
-	d[%$_%]h[%helicity%]l0fr5.[%O%][%
+	d[%$_%]_0h[%helicity%]l0fr5.[%O%][%
+            @end @for %][%
+	  @end @if %]
+diagramsl0_1.[%O%]:[%
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]_1h[%helicity%]l0.[%O%][%
+         @end @for %][%
+         @if extension quadruple %]
+diagramsl0_1_qp.[%O%]:[%
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]_1h[%helicity%]l0_qp.[%O%][%
+         @end @for %][%
+	 @end @if %][%
+         @if internal REQUIRE_FR5 %]
+diagramsl0_1fr5.[%O%]:[%
+            @for elements topolopy.keep.tree %] \
+	d[%$_%]_1h[%helicity%]l0fr5.[%O%][%
+            @end @for %][%
+	  @end @if %]
+diagramsl0_2.[%O%]:[%
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]_2h[%helicity%]l0.[%O%][%
+         @end @for %][%
+         @if extension quadruple %]
+diagramsl0_2_qp.[%O%]:[%
+         @for elements topolopy.keep.tree %] \
+	d[%$_%]_2h[%helicity%]l0_qp.[%O%][%
+         @end @for %][%
+	 @end @if %][%
+         @if internal REQUIRE_FR5 %]
+diagramsl0_2fr5.[%O%]:[%
+            @for elements topolopy.keep.tree %] \
+	d[%$_%]_2h[%helicity%]l0fr5.[%O%][%
             @end @for %][%
 	  @end @if %][%
 	 @end @if %][%
@@ -34,7 +66,7 @@ abbrevh[%helicity%].[%O%]: globals.[%O%][%
 	      @select r2
 			@case implicit explicit off %][%
             @for elements topolopy.keep.virt %]
-d[%$_%]h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][%
+d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][%
             @end @for %][%
 			@end @select %][%
       @case group %][%
@@ -43,18 +75,34 @@ abbrevg[%grp%]h[%helicity%].[%O%]: globals.[%O%][%
 	         @select r2
    			@case implicit explicit off %][%
                @for diagrams group=grp%]
-d[%$_%]h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
+d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
                @end @for %][%
 				@end @select %][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %]
-abbrevd[%$_%]h[%helicity%].[%O%]: globals.[%O%][%
+abbrevd[%$_%]_0h[%helicity%].[%O%]: globals.[%O%][%
 	         @select r2
    			@case implicit explicit off %]
-d[%$_%]h[%helicity%]l1.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevd[%$_%]_0h[%helicity%].[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
-d[%$_%]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+d[%$_%]_0h[%helicity%]l1d.[%O%]: abbrevd[%$_%]_0h[%helicity%].[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+abbrevd[%$_%]_1h[%helicity%].[%O%]: globals.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+d[%$_%]_1h[%helicity%]l1.[%O%]: abbrevd[%$_%]_1h[%helicity%].[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]_1h[%helicity%]l1d.[%O%]: abbrevd[%$_%]_1h[%helicity%].[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+abbrevd[%$_%]_2h[%helicity%].[%O%]: globals.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+d[%$_%]_2h[%helicity%]l1.[%O%]: abbrevd[%$_%]_2h[%helicity%].[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]_2h[%helicity%]l1d.[%O%]: abbrevd[%$_%]_2h[%helicity%].[%O%][%
 	           @end @if %][%
 	      	@end @select %][%
          @end @for %][%
@@ -66,7 +114,7 @@ abbrevh[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
 	      @select r2
 			@case implicit explicit off %][%
             @for elements topolopy.keep.virt %]
-d[%$_%]h[%helicity%]l1_qp.[%O%]: abbrevh[%helicity%]_qp.[%O%][%
+d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevh[%helicity%]_qp.[%O%][%
             @end @for %][%
 			@end @select %][%
       @case group %][%
@@ -75,18 +123,34 @@ abbrevg[%grp%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
 	         @select r2
    			@case implicit explicit off %][%
                @for diagrams group=grp%]
-d[%$_%]h[%helicity%]l1_qp.[%O%]: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
+d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
                @end @for %][%
 				@end @select %][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %]
-abbrevd[%$_%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
+abbrevd[%$_%]_0h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
 	         @select r2
    			@case implicit explicit off %]
-d[%$_%]h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
+d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
-d[%$_%]h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
+d[%$_%]_0h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+abbrevd[%$_%]_1h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+d[%$_%]_1h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]_1h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+abbrevd[%$_%]_2h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+d[%$_%]_2h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]_2h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%][%
 	           @end @if %][%
 	      	@end @select %][%
          @end @for %][%
@@ -112,24 +176,60 @@ golem95h[%helicity%].[%O%]: [%
 	      @end @if extension golem95 %][%
 
       	@if extension ninja %]
-ninjah[%helicity%].[%O%]: [%
+ninja_0h[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.[%O%] d[%$_%]h[%helicity%]l131.[%O%] d[%$_%]h[%helicity%]l132.[%O%] d[%$_%]h[%helicity%]l121.[%O%][%
+	d[%$_%]_0h[%helicity%]l1.[%O%] d[%$_%]_0h[%helicity%]l131.[%O%] d[%$_%]_0h[%helicity%]l132.[%O%] d[%$_%]_0h[%helicity%]l121.[%O%][%
 		@end @for %][%
 @for elements topolopy.keep.virt %]
-d[%$_%]h[%helicity%]l131.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%]
-d[%$_%]h[%helicity%]l132.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%]
-d[%$_%]h[%helicity%]l121.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
+d[%$_%]_0h[%helicity%]l131.[%O%]: abbrevd[%$_%]_0h[%helicity%].[%O%]
+d[%$_%]_0h[%helicity%]l132.[%O%]: abbrevd[%$_%]_0h[%helicity%].[%O%]
+d[%$_%]_0h[%helicity%]l121.[%O%]: abbrevd[%$_%]_0h[%helicity%].[%O%][%
+	@end @for %]
+ninja_1h[%helicity%].[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_1h[%helicity%]l1.[%O%] d[%$_%]_1h[%helicity%]l131.[%O%] d[%$_%]_1h[%helicity%]l132.[%O%] d[%$_%]_1h[%helicity%]l121.[%O%][%
+		@end @for %][%
+@for elements topolopy.keep.virt %]
+d[%$_%]_1h[%helicity%]l131.[%O%]: abbrevd[%$_%]_1h[%helicity%].[%O%]
+d[%$_%]_1h[%helicity%]l132.[%O%]: abbrevd[%$_%]_1h[%helicity%].[%O%]
+d[%$_%]_1h[%helicity%]l121.[%O%]: abbrevd[%$_%]_1h[%helicity%].[%O%][%
+	@end @for %]
+ninja_2h[%helicity%].[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_2h[%helicity%]l1.[%O%] d[%$_%]_2h[%helicity%]l131.[%O%] d[%$_%]_2h[%helicity%]l132.[%O%] d[%$_%]_2h[%helicity%]l121.[%O%][%
+		@end @for %][%
+@for elements topolopy.keep.virt %]
+d[%$_%]_2h[%helicity%]l131.[%O%]: abbrevd[%$_%]_2h[%helicity%].[%O%]
+d[%$_%]_2h[%helicity%]l132.[%O%]: abbrevd[%$_%]_2h[%helicity%].[%O%]
+d[%$_%]_2h[%helicity%]l121.[%O%]: abbrevd[%$_%]_2h[%helicity%].[%O%][%
 	@end @for %][%
         @if extension quadruple %]
-ninjah[%helicity%]_qp.[%O%]: [%
+ninja_0h[%helicity%]_qp.[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1_qp.[%O%] d[%$_%]h[%helicity%]l131_qp.[%O%] d[%$_%]h[%helicity%]l132_qp.[%O%] d[%$_%]h[%helicity%]l121_qp.[%O%][%
+	d[%$_%]_0h[%helicity%]l1_qp.[%O%] d[%$_%]_0h[%helicity%]l131_qp.[%O%] d[%$_%]_0h[%helicity%]l132_qp.[%O%] d[%$_%]_0h[%helicity%]l121_qp.[%O%][%
 		@end @for %][%
 @for elements topolopy.keep.virt %]
-d[%$_%]h[%helicity%]l131_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%]
-d[%$_%]h[%helicity%]l132_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%]
-d[%$_%]h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
+d[%$_%]_0h[%helicity%]l131_qp.[%O%]: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%]
+d[%$_%]_0h[%helicity%]l132_qp.[%O%]: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%]
+d[%$_%]_0h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%][%
+	@end @for %]
+ninja_1h[%helicity%]_qp.[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_1h[%helicity%]l1_qp.[%O%] d[%$_%]_1h[%helicity%]l131_qp.[%O%] d[%$_%]_1h[%helicity%]l132_qp.[%O%] d[%$_%]_1h[%helicity%]l121_qp.[%O%][%
+		@end @for %][%
+@for elements topolopy.keep.virt %]
+d[%$_%]_1h[%helicity%]l131_qp.[%O%]: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%]
+d[%$_%]_1h[%helicity%]l132_qp.[%O%]: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%]
+d[%$_%]_1h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%][%
+	@end @for %]
+ninja_2h[%helicity%]_qp.[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_2h[%helicity%]l1_qp.[%O%] d[%$_%]_2h[%helicity%]l131_qp.[%O%] d[%$_%]_2h[%helicity%]l132_qp.[%O%] d[%$_%]_2h[%helicity%]l121_qp.[%O%][%
+		@end @for %][%
+@for elements topolopy.keep.virt %]
+d[%$_%]_2h[%helicity%]l131_qp.[%O%]: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%]
+d[%$_%]_2h[%helicity%]l132_qp.[%O%]: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%]
+d[%$_%]_2h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%][%
 	@end @for %][%
         @end @if extension quadruple %][%
 	@end @if extension ninja %][%
@@ -142,7 +242,7 @@ diagramsct.[%O%]:[%
 	d[%$_%]h[%helicity%]l1c.[%O%][%
 		@end @for %][%
 	@end @if generate_uv_counterterms %]
-amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0.[%O%][% @end @if %][%
+amplitudeh[%helicity%]_0.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_0.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	   @select r2
@@ -151,14 +251,14 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
    	   @end @if %][%
 	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
    	   @end @if %][%
-	      @if extension ninja %] ninjah[%helicity%].[%O%][%
-                 @if extension quadruple %] ninjah[%helicity%]_qp.[%O%][%
+	      @if extension ninja %] ninja_0h[%helicity%].[%O%][%
+                 @if extension quadruple %] ninja_0h[%helicity%]_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
 		@end @select %][%
 	   @if generate_lo_diagrams %] \
-			diagramsl0.[%O%][%
-		   @if internal REQUIRE_FR5 %] diagramsl0fr5.[%O%][%
+			diagramsl0_0.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_0fr5.[%O%][%
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
@@ -171,7 +271,81 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
             @end @for %][%
          @case diagram %][%
             @for elements topolopy.keep.virt %] \
-			abbrevd[%$_%]h[%helicity%].[%O%][%
+			abbrevd[%$_%]_0h[%helicity%].[%O%][%
+            @end @for %][%
+         @end @select %][%
+      @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct.[%O%][%
+			@end @if %][%
+@end @if helsum %]
+amplitudeh[%helicity%]_1.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_1.[%O%][% @end @if %][%
+@if helsum %][%
+@else %][%
+	   @select r2
+		@case implicit explicit off %][%
+	      @if extension samurai %] samuraih[%helicity%].[%O%][%
+   	   @end @if %][%
+	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+   	   @end @if %][%
+	      @if extension ninja %] ninja_1h[%helicity%].[%O%][%
+                 @if extension quadruple %] ninja_1h[%helicity%]_qp.[%O%][%
+		 @end @if %][%
+   	   @end @if %][%
+		@end @select %][%
+	   @if generate_lo_diagrams %] \
+			diagramsl0_1.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_1fr5.[%O%][%
+			@end @if %][%
+		@end @if %][%
+		@if generate_nlo_virt %][%
+         @select abbrev.level
+         @case helicity %] \
+			abbrevh[%helicity%].[%O%][%
+         @case group %][%
+            @for groups var=grp %] \
+			abbrevg[%grp%]h[%helicity%].[%O%][%
+            @end @for %][%
+         @case diagram %][%
+            @for elements topolopy.keep.virt %] \
+			abbrevd[%$_%]_1h[%helicity%].[%O%][%
+            @end @for %][%
+         @end @select %][%
+      @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct.[%O%][%
+			@end @if %][%
+@end @if helsum %]
+amplitudeh[%helicity%]_2.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_2.[%O%][% @end @if %][%
+@if helsum %][%
+@else %][%
+	   @select r2
+		@case implicit explicit off %][%
+	      @if extension samurai %] samuraih[%helicity%].[%O%][%
+   	   @end @if %][%
+	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+   	   @end @if %][%
+	      @if extension ninja %] ninja_2h[%helicity%].[%O%][%
+                 @if extension quadruple %] ninja_2h[%helicity%]_qp.[%O%][%
+		 @end @if %][%
+   	   @end @if %][%
+		@end @select %][%
+	   @if generate_lo_diagrams %] \
+			diagramsl0_2.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_2fr5.[%O%][%
+			@end @if %][%
+		@end @if %][%
+		@if generate_nlo_virt %][%
+         @select abbrev.level
+         @case helicity %] \
+			abbrevh[%helicity%].[%O%][%
+         @case group %][%
+            @for groups var=grp %] \
+			abbrevg[%grp%]h[%helicity%].[%O%][%
+            @end @for %][%
+         @case diagram %][%
+            @for elements topolopy.keep.virt %] \
+			abbrevd[%$_%]_2h[%helicity%].[%O%][%
             @end @for %][%
          @end @select %][%
       @end @if %][%
@@ -180,7 +354,7 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
 			@end @if %][%
 @end @if helsum %][%
 @if extension quadruple %]
-amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
+amplitudeh[%helicity%]_0_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_0_qp.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	   @select r2
@@ -189,12 +363,12 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
    	   @end @if %][%
 	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	      @if extension ninja %] ninjah[%helicity%]_qp.[%O%][%
+	      @if extension ninja %] ninja_0h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 		@end @select %][%
 	   @if generate_lo_diagrams %] \
-			diagramsl0_qp.[%O%][%
-		   @if internal REQUIRE_FR5 %] diagramsl0fr5_qp.[%O%][%
+			diagramsl0_0_qp.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_0fr5_qp.[%O%][%
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
@@ -207,7 +381,77 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
             @end @for %][%
          @case diagram %][%
             @for elements topolopy.keep.virt %] \
-			abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
+			abbrevd[%$_%]_0h[%helicity%]_qp.[%O%][%
+            @end @for %][%
+         @end @select %][%
+      @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct_qp.[%O%][%
+			@end @if %][%
+@end @if helsum %]
+amplitudeh[%helicity%]_1_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_1_qp.[%O%][% @end @if %][%
+@if helsum %][%
+@else %][%
+	   @select r2
+		@case implicit explicit off %][%
+	      @if extension samurai %] samuraih[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+	      @if extension ninja %] ninja_1h[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+		@end @select %][%
+	   @if generate_lo_diagrams %] \
+			diagramsl0_1_qp.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_1fr5_qp.[%O%][%
+			@end @if %][%
+		@end @if %][%
+		@if generate_nlo_virt %][%
+         @select abbrev.level
+         @case helicity %] \
+			abbrevh[%helicity%]_qp.[%O%][%
+         @case group %][%
+            @for groups var=grp %] \
+			abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
+            @end @for %][%
+         @case diagram %][%
+            @for elements topolopy.keep.virt %] \
+			abbrevd[%$_%]_1h[%helicity%]_qp.[%O%][%
+            @end @for %][%
+         @end @select %][%
+      @end @if %][%
+			@if generate_uv_counterterms %] \
+			diagramsct_qp.[%O%][%
+			@end @if %][%
+@end @if helsum %]
+amplitudeh[%helicity%]_2_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_2_qp.[%O%][% @end @if %][%
+@if helsum %][%
+@else %][%
+	   @select r2
+		@case implicit explicit off %][%
+	      @if extension samurai %] samuraih[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+	      @if extension ninja %] ninja_2h[%helicity%]_qp.[%O%][%
+   	   @end @if %][%
+		@end @select %][%
+	   @if generate_lo_diagrams %] \
+			diagramsl0_2_qp.[%O%][%
+		   @if internal REQUIRE_FR5 %] diagramsl0_2fr5_qp.[%O%][%
+			@end @if %][%
+		@end @if %][%
+		@if generate_nlo_virt %][%
+         @select abbrev.level
+         @case helicity %] \
+			abbrevh[%helicity%]_qp.[%O%][%
+         @case group %][%
+            @for groups var=grp %] \
+			abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
+            @end @for %][%
+         @case diagram %][%
+            @for elements topolopy.keep.virt %] \
+			abbrevd[%$_%]_2h[%helicity%]_qp.[%O%][%
             @end @for %][%
          @end @select %][%
       @end @if %][%
@@ -220,17 +464,43 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 
 @for each $(OBJEXTG) var=O %][%
    @if generate_lo_diagrams %]
-[% process_name asprefix=\_ %]diagramsh[% helicity %]l0.mod: diagramsl0.[%O%][%
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_0.mod: diagramsl0_0.[%O%][%
    @for elements topolopy.keep.tree %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0.mod: d[%$_%]h[%helicity%]l0.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l0.mod: d[%$_%]_0h[%helicity%]l0.[%O%][%
    @end @for %][%
        @if internal REQUIRE_FR5 %]
-[% process_name asprefix=\_ %]diagramsh[% helicity %]l0fr5.mod: diagramsl0fr5.[%O%][%
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_0fr5.mod: diagramsl0_0fr5.[%O%][%
 	@end @if %][%
    @if extension quadruple %]
-[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_qp.mod: diagramsl0_qp.[%O%][%
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_0_qp.mod: diagramsl0_0_qp.[%O%][%
    @for elements topolopy.keep.tree %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l0_qp.mod: d[%$_%]h[%helicity%]l0_qp.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l0_0_qp.mod: d[%$_%]_0h[%helicity%]l0_qp.[%O%][%
+   @end @for %][%
+   @end @if extension quadruple %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_1.mod: diagramsl0_1.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l0.mod: d[%$_%]_1h[%helicity%]l0.[%O%][%
+   @end @for %][%
+       @if internal REQUIRE_FR5 %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_1fr5.mod: diagramsl0_1fr5.[%O%][%
+	@end @if %][%
+   @if extension quadruple %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_1_qp.mod: diagramsl0_1_qp.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l0_1_qp.mod: d[%$_%]_1h[%helicity%]l0_qp.[%O%][%
+   @end @for %][%
+   @end @if extension quadruple %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_2.mod: diagramsl0_2.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l0.mod: d[%$_%]_2h[%helicity%]l0.[%O%][%
+   @end @for %][%
+       @if internal REQUIRE_FR5 %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_2fr5.mod: diagramsl0_2fr5.[%O%][%
+	@end @if %][%
+   @if extension quadruple %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_2_qp.mod: diagramsl0_2_qp.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l0_2_qp.mod: d[%$_%]_2h[%helicity%]l0_qp.[%O%][%
    @end @for %][%
    @end @if extension quadruple %][%
    @end @if generate_lo_diagrams %][%
@@ -247,18 +517,46 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 			@end @if extension golem95 %][%
 
 		@if extension ninja %]
-[% process_name asprefix=\_ %]ninjah[%helicity%].mod: ninjah[%helicity%].[%O%] [%
+[% process_name asprefix=\_ %]ninja_0h[%helicity%].mod: ninja_0h[%helicity%].[%O%] [%
 			@for elements topolopy.keep.virt %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l131.mod: d[%$_%]h[%helicity%]l131.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l132.mod: d[%$_%]h[%helicity%]l132.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l121.mod: d[%$_%]h[%helicity%]l121.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l131.mod: d[%$_%]_0h[%helicity%]l131.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l132.mod: d[%$_%]_0h[%helicity%]l132.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l121.mod: d[%$_%]_0h[%helicity%]l121.[%O%][%
 			@end @for %][%
                 @if extension quadruple %]
-[% process_name asprefix=\_ %]ninjah[%helicity%]_qp.mod: ninjah[%helicity%]_qp.[%O%] [%
+[% process_name asprefix=\_ %]ninja_0h[%helicity%]_qp.mod: ninja_0h[%helicity%]_qp.[%O%] [%
 			@for elements topolopy.keep.virt %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l131_qp.mod: d[%$_%]h[%helicity%]l131_qp.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l132_qp.mod: d[%$_%]h[%helicity%]l132_qp.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l121_qp.mod: d[%$_%]h[%helicity%]l121_qp.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l131_qp.mod: d[%$_%]_0h[%helicity%]l131_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l132_qp.mod: d[%$_%]_0h[%helicity%]l132_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l121_qp.mod: d[%$_%]_0h[%helicity%]l121_qp.[%O%][%
+			@end @for %][%
+		@end @if extension quadruple %]
+[% process_name asprefix=\_ %]ninja_1h[%helicity%].mod: ninja_1h[%helicity%].[%O%] [%
+			@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l131.mod: d[%$_%]_1h[%helicity%]l131.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l132.mod: d[%$_%]_1h[%helicity%]l132.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l121.mod: d[%$_%]_1h[%helicity%]l121.[%O%][%
+			@end @for %][%
+                @if extension quadruple %]
+[% process_name asprefix=\_ %]ninja_1h[%helicity%]_qp.mod: ninja_1h[%helicity%]_qp.[%O%] [%
+			@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l131_qp.mod: d[%$_%]_1h[%helicity%]l131_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l132_qp.mod: d[%$_%]_1h[%helicity%]l132_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l121_qp.mod: d[%$_%]_1h[%helicity%]l121_qp.[%O%][%
+			@end @for %][%
+		@end @if extension quadruple %]
+[% process_name asprefix=\_ %]ninja_2h[%helicity%].mod: ninja_2h[%helicity%].[%O%] [%
+			@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l131.mod: d[%$_%]_2h[%helicity%]l131.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l132.mod: d[%$_%]_2h[%helicity%]l132.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l121.mod: d[%$_%]_2h[%helicity%]l121.[%O%][%
+			@end @for %][%
+                @if extension quadruple %]
+[% process_name asprefix=\_ %]ninja_2h[%helicity%]_qp.mod: ninja_2h[%helicity%]_qp.[%O%] [%
+			@for elements topolopy.keep.virt %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l131_qp.mod: d[%$_%]_2h[%helicity%]l131_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l132_qp.mod: d[%$_%]_2h[%helicity%]l132_qp.[%O%]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l121_qp.mod: d[%$_%]_2h[%helicity%]l121_qp.[%O%][%
 			@end @for %][%
 		@end @if extension quadruple %][%
 		@end @if extension ninja %][%
@@ -273,12 +571,28 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod: abbrevd[%$_%]h[%helicity%].[%O%][%
+[% process_name asprefix=\_ %]abbrevd[%$_%]_0h[%helicity%].mod: abbrevd[%$_%]_0h[%helicity%].[%O%][%
 	         @select r2
    			@case implicit explicit off %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod: d[%$_%]h[%helicity%]l1.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1.mod: d[%$_%]_0h[%helicity%]l1.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1d.mod: d[%$_%]h[%helicity%]l1d.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1d.mod: d[%$_%]_0h[%helicity%]l1d.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_1h[%helicity%].mod: abbrevd[%$_%]_1h[%helicity%].[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l1.mod: d[%$_%]_1h[%helicity%]l1.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l1d.mod: d[%$_%]_1h[%helicity%]l1d.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_2h[%helicity%].mod: abbrevd[%$_%]_2h[%helicity%].[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l1.mod: d[%$_%]_2h[%helicity%]l1.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l1d.mod: d[%$_%]_2h[%helicity%]l1d.[%O%][%
 	           @end @if %][%
 	      	@end @select %][%
          @end @for %][%
@@ -293,12 +607,28 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%]_qp.mod: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
+[% process_name asprefix=\_ %]abbrevd[%$_%]_0h[%helicity%]_qp.mod: abbrevd[%$_%]_0h[%helicity%]_qp.[%O%][%
 	         @select r2
    			@case implicit explicit off %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1_qp.mod: d[%$_%]h[%helicity%]l1_qp.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1_qp.mod: d[%$_%]_0h[%helicity%]l1_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1d_qp.mod: d[%$_%]h[%helicity%]l1d_qp.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1d_qp.mod: d[%$_%]_0h[%helicity%]l1d_qp.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_1h[%helicity%]_qp.mod: abbrevd[%$_%]_1h[%helicity%]_qp.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l1_qp.mod: d[%$_%]_1h[%helicity%]l1_qp.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]_1h[%helicity%]l1d_qp.mod: d[%$_%]_1h[%helicity%]l1d_qp.[%O%][%
+	           @end @if %][%
+	      	@end @select %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_2h[%helicity%]_qp.mod: abbrevd[%$_%]_2h[%helicity%]_qp.[%O%][%
+	         @select r2
+   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l1_qp.mod: d[%$_%]_2h[%helicity%]l1_qp.[%O%][%
+            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l1d_qp.mod: d[%$_%]_2h[%helicity%]l1d_qp.[%O%][%
 	           @end @if %][%
 	      	@end @select %][%
          @end @for %][%
@@ -308,13 +638,17 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 	@if generate_uv_counterterms %]
 [% process_name asprefix=\_ %]diagramscth[% helicity %].mod: diagramsct.[%O%][%
      	@for elements topolopy.keep.ct %]
-[% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1c.mod: d[%$_%]h[%helicity%]l1c.[%O%][%
+[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1c.mod: d[%$_%]_0h[%helicity%]l1c.[%O%][%
 		@end @for %][%
 	@end @if generate_uv_counterterms %]
-[% process_name asprefix=\_ %]amplitudeh[% helicity %].mod: amplitudeh[%helicity%].[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_0.mod: amplitudeh[%helicity%]_0.[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_1.mod: amplitudeh[%helicity%]_1.[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_2.mod: amplitudeh[%helicity%]_2.[%O%]
 [% process_name asprefix=\_ %]globalsh[% helicity %].mod: globals.[%O%][%
 @if extension quadruple %]
-[% process_name asprefix=\_ %]amplitudeh[% helicity %]_qp.mod: amplitudeh[%helicity%]_qp.[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_0_qp.mod: amplitudeh[%helicity%]_0_qp.[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_1_qp.mod: amplitudeh[%helicity%]_1_qp.[%O%]
+[% process_name asprefix=\_ %]amplitudeh[% helicity %]_2_qp.mod: amplitudeh[%helicity%]_2_qp.[%O%]
 [% process_name asprefix=\_ %]globalsh[% helicity %]_qp.mod: globals_qp.[%O%][%
 @end @if %][%
 @end @if helsum %][%

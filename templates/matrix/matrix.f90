@@ -21,9 +21,9 @@
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
-   use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions[%
+   use [% process_name asprefix=\_ %]model, only: mdlEFTcount, Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use [% process_name asprefix=\_ %]model_qp, only: mdlEFTcount, Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -36,39 +36,87 @@
    @for helicities generated %][%
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+        %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1, only: amplitude[%helicity%]l0_1 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2, only: amplitude[%helicity%]l0_2 => amplitude[%
             @if extension quadruple %]
    use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
+        %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]l0_0_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]l0_1_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]l0_2_qp => amplitude[%
             @end @if %][%
       @end @if %][%
    @end @for %]
    use [% process_name asprefix=\_
-      %]amplitude, only: samplitudel1summed => samplitude[%
+      %]amplitude_0, only: samplitudel1_0summed => samplitude[%
         @if extension quadruple %]
    use [% process_name asprefix=\_
-      %]amplitude_qp, only: samplitudel1summed_qp => samplitude[%
+      %]amplitude_0_qp, only: samplitudel1_0summed_qp => samplitude[%
+      @end @if %]
+   use [% process_name asprefix=\_
+      %]amplitude_1, only: samplitudel1_1summed => samplitude[%
+        @if extension quadruple %]
+   use [% process_name asprefix=\_
+      %]amplitude_1_qp, only: samplitudel1_1summed_qp => samplitude[%
+      @end @if %]
+   use [% process_name asprefix=\_
+      %]amplitude_2, only: samplitudel1_2summed => samplitude[%
+        @if extension quadruple %]
+   use [% process_name asprefix=\_
+      %]amplitude_2_qp, only: samplitudel1_2summed_qp => samplitude[%
       @end @if %][%
 @else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %]
    use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]l0 => amplitude[%
+        %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1, only: amplitude[%helicity%]l0_1 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2, only: amplitude[%helicity%]l0_2 => amplitude[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
+        %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]l0_0_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]l0_1_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]l0_2_qp => amplitude[%
       @end @if extension quadruple %][%
       @end @if %][%
       @if generate_nlo_virt %]
    use [% process_name asprefix=\_
-        %]amplitudeh[%helicity%], [% ' '
-        %]only: samplitudeh[%helicity%]l1 => samplitude, &
-     &   finite_renormalisation[%helicity%] => finite_renormalisation[%
+        %]amplitudeh[%helicity%]_0, [% ' '
+        %]only: samplitudeh[%helicity%]l1_0 => samplitude, &
+     &   finite_renormalisation[%helicity%]_0 => finite_renormalisation[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
-        %]amplitudeh[%helicity%]_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_qp => finite_renormalisation[%
+        %]amplitudeh[%helicity%]_0_qp, [% ' '
+        %]only: samplitudeh[%helicity%]l1_0_qp => samplitude, &
+     &   finite_renormalisation[%helicity%]_0_qp => finite_renormalisation[%
+      @end @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]amplitudeh[%helicity%]_1, [% ' '
+        %]only: samplitudeh[%helicity%]l1_1 => samplitude, &
+     &   finite_renormalisation[%helicity%]_1 => finite_renormalisation[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]amplitudeh[%helicity%]_1_qp, [% ' '
+        %]only: samplitudeh[%helicity%]l1_1_qp => samplitude, &
+     &   finite_renormalisation[%helicity%]_1_qp => finite_renormalisation[%
+      @end @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]amplitudeh[%helicity%]_2, [% ' '
+        %]only: samplitudeh[%helicity%]l1_2 => samplitude, &
+     &   finite_renormalisation[%helicity%]_2 => finite_renormalisation[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]amplitudeh[%helicity%]_2_qp, [% ' '
+        %]only: samplitudeh[%helicity%]l1_2_qp => samplitude, &
+     &   finite_renormalisation[%helicity%]_2_qp => finite_renormalisation[%
       @end @if extension quadruple %][%
       @end @if %][%
    @end @for %][%
@@ -801,7 +849,7 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: color_vector
+      complex(ki), dimension(numcs) :: color_vector_0, color_vector_1, color_vector_2
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki), dimension([%num_legs%], 4) :: pvecs
 
@@ -841,8 +889,23 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         color_vector = amplitude[% map.index %]l0()
-         heli_amp = square(color_vector)
+         color_vector_0 = amplitude[% map.index %]l0_0()
+         color_vector_1 = amplitude[% map.index %]l0_1()
+         color_vector_2 = amplitude[% map.index %]l0_2()
+         heli_amp = square(color_vector_0) &
+         &        + square(color_vector_0,color_vector_1)
+         if (mdlEFTcount > 0) then
+            heli_amp = heli_amp + square(color_vector_1)
+         endif
+         if (mdlEFTcount > 1) then
+            heli_amp = heli_amp + square(color_vector_0,color_vector_2)
+         endif
+         if (mdlEFTcount > 2) then
+            heli_amp = heli_amp &
+            &        + square(color_vector_1,color_vector_2) &
+            &        + square(color_vector_2)
+         endif
+
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
                 & "<result kind='lo' value='", heli_amp, "'/>"
@@ -879,9 +942,10 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_lo_diagrams %]
+      complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @else %]
-      complex(ki), dimension(numcs,-2:0) :: colorvec
+      complex(ki), dimension(numcs,-2:0) :: colorvec_0, colorvec_1, colorvec_2
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -961,7 +1025,26 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
+         amp0_0 = amplitude[% map.index %]l0_0()
+         amp0_1 = amplitude[% map.index %]l0_1()
+         amp0_2 = amplitude[% map.index %]l0_2()
+         heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0) &
+         &        + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1) &
+         &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
+         if (mdlEFTcount>0) then
+            heli_amp = heli_amp + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
+         endif
+         if (mdlEFTcount>1) then
+            heli_amp = heli_amp &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0) &
+            &        + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2)
+         endif
+         if (mdlEFTcount>2) then
+            heli_amp = heli_amp &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_2)
+         endif[%
       @else %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -986,11 +1069,28 @@ contains
          @end @for %])
             !---#] reinitialize kinematics:
          do c=1,numcs
-            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+            colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+            colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
          end do
-         heli_amp( 0) = square(colorvec(:, 0))
-         heli_amp(-1) = square(colorvec(:,-1))
-         heli_amp(-2) = square(colorvec(:,-2))
+         heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0),colorvec_1(:, 0))
+         heli_amp(-1) = square(colorvec_0(:,-1)) + square(colorvec_0(:, -1),colorvec_1(:, -1))
+         heli_amp(-2) = square(colorvec_0(:,-2)) + square(colorvec_0(:, -2),colorvec_1(:, -2))
+         if (mdlEFTcount>0) then
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_1(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_1(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_1(:,-2))
+         endif
+         if (mdlEFTcount>1) then
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_0(:, 0),colorvec_2(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_0(:,-1),colorvec_2(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_0(:,-2),colorvec_2(:,-2))
+         endif
+         if (mdlEFTcount>2) then
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_1(:, 0),colorvec_2(:, 0)) + square(colorvec_2(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_1(:,-1),colorvec_2(:,-1)) + square(colorvec_2(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_1(:,-2),colorvec_2(:,-2)) + square(colorvec_2(:,-2))
+         endif
       [%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then
@@ -1016,7 +1116,7 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
             !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%](real(scale2,ki))
+            fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -1130,7 +1230,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0()[%
+         pcolor = amplitude[%map.index%]l0_0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -1442,7 +1542,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki_qp) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: color_vector
+      complex(ki_qp), dimension(numcs) :: color_vector_0, color_vector_1, color_vector_2
       logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
@@ -1482,8 +1582,22 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         color_vector = amplitude[% map.index %]l0_qp()
-         heli_amp = square_qp(color_vector)
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_1 = amplitude[% map.index %]l0_1_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_0) &
+         &        + square_qp(color_vector_0,color_vector_1)
+         if (mdlEFTcount > 0) then
+            heli_amp = heli_amp + square_qp(color_vector_1)
+         endif
+         if (mdlEFTcount > 1) then
+            heli_amp = heli_amp + square_qp(color_vector_0,color_vector_2)
+         endif
+         if (mdlEFTcount > 2) then
+            heli_amp = heli_amp &
+            &        + square_qp(color_vector_1,color_vector_2) &
+            &        + square_qp(color_vector_2)
+         endif
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
                 & "<result kind='lo' value='", heli_amp, "'/>"
@@ -1520,9 +1634,10 @@ contains
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_lo_diagrams %]
+      complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @else %]
-      complex(ki_qp), dimension(numcs,-2:0) :: colorvec
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec_0, colorvec_1, colorvec_2
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -1604,7 +1719,26 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
+     amp0_0 = amplitude[% map.index %]l0_0_qp()
+     amp0_1 = amplitude[% map.index %]l0_1_qp()
+     amp0_2 = amplitude[% map.index %]l0_2_qp()
+     heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+     &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
+     &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+     if (mdlEFTcount>0) then
+        heli_amp = heli_amp + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
+     endif
+     if (mdlEFTcount>1) then
+        heli_amp = heli_amp &
+        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+        &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+     endif
+     if (mdlEFTcount>2) then
+        heli_amp = heli_amp &
+        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
+        &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2) &
+        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+     endif[%
       @else %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -1629,11 +1763,28 @@ contains
          @end @for %])
             !---#] reinitialize kinematics:
          do c=1,numcs
-            colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
-         heli_amp( 0) = square_qp(colorvec(:, 0))
-         heli_amp(-1) = square_qp(colorvec(:,-1))
-         heli_amp(-2) = square_qp(colorvec(:,-2))
+         heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_1(:, 0))
+         heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:, -1),colorvec_1(:, -1))
+         heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:, -2),colorvec_1(:, -2))
+         if (mdlEFTcount>0) then
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2))
+         endif
+         if (mdlEFTcount>1) then
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),colorvec_2(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),colorvec_2(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),colorvec_2(:,-2))
+         endif
+         if (mdlEFTcount>2) then
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),colorvec_2(:, 0)) + square_qp(colorvec_2(:, 0))
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),colorvec_2(:,-1)) + square_qp(colorvec_2(:,-1))
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),colorvec_2(:,-2)) + square_qp(colorvec_2(:,-2))
+         endif
       [%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then
@@ -1659,7 +1810,7 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
             !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%]_qp(real(scale2,ki_qp))
+            fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -1773,7 +1924,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0_qp()[%
+         pcolor = amplitude[%map.index%]l0_0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -1862,7 +2013,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0()
+      color_vector = amplitude[%map.index%]l0_0()
       call color_correlated_lo(color_vector,borncc_heli)[%
       @if is_first %]
       ! The minus is part in the definition according to PowHEG Box.
@@ -1944,7 +2095,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0()
+      color_vector = amplitude[%map.index%]l0_0()
       call OLP_color_correlated_lo(color_vector,ampcc_heli)
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
@@ -1983,12 +2134,12 @@ contains
      @end @for %])
       !---#] reinitialize kinematics:[%
          @if generate_lo_diagrams %]
-      color_vector = amplitude[%map.index%]l0()[%
+      color_vector = amplitude[%map.index%]l0_0()[%
          @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)[%
          @end @if generate_lo_diagrams %]
@@ -2065,7 +2216,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0_0()[%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -2212,7 +2363,7 @@ contains
             @end @for %])
       !---#] reinitialize kinematics:[%
              @if generate_lo_diagrams %]
-      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0_0()[%
              @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
