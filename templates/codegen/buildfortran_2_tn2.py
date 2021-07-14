@@ -130,33 +130,33 @@ f90file.write('   public :: numerator_t2\n')
 f90file.write(' \n')
 f90file.write('contains \n')
 for lidx in expids:
-	f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
-        # T.P. removed the explicit-implicit mu^2 stuff
-	f90file.write('   pure subroutine brack_%s(ninjaA0, ninjaA1, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
-	f90file.write('      use [% process_name asprefix=\_ %]model \n')
-	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'_2'[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
-	f90file.write('      implicit none \n')
-	f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninjaE4\n')
-#	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
-	f90file.write('      complex(ki), dimension(0:2), intent(in) :: ninjaP\n')
-	f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
-	f90file.write('      complex(ki), dimension (0:*), intent(inout) :: brack\n')
-        f90file.write('      complex(ki) :: ninjaP0, ninjaP1, ninjaP2\n')
-        f90file.write('      ninjaP0 = ninjaP(0)\n')
-        f90file.write('      ninjaP1 = ninjaP(1)\n')
-        f90file.write('      ninjaP2 = ninjaP(2)\n')
-	f90file.write(outdict['Ninja%s' % str(lidx)])
-	f90file.write('   end subroutine brack_%s\n' % lidx)
-	f90file.write('!---#] subroutine brack_%s: \n' % lidx)
+    f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
+    # T.P. removed the explicit-implicit mu^2 stuff
+    f90file.write('   pure subroutine brack_%s(ninjaA0, ninjaA1, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
+    f90file.write('      use [% process_name asprefix=\_ %]model \n')
+    f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
+    f90file.write('      use [% process_name asprefix=\_ %]color \n')
+    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag+'_2'[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+    f90file.write('      implicit none \n')
+    f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninjaE4\n')
+#   f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
+    f90file.write('      complex(ki), dimension(0:2), intent(in) :: ninjaP\n')
+    f90file.write('      complex(ki), dimension('+str(acd_maxl[lidx])+') :: acd'+diag+'\n')
+    f90file.write('      complex(ki), dimension (0:*), intent(inout) :: brack\n')
+    f90file.write('      complex(ki) :: ninjaP0, ninjaP1, ninjaP2\n')
+    f90file.write('      ninjaP0 = ninjaP(0)\n')
+    f90file.write('      ninjaP1 = ninjaP(1)\n')
+    f90file.write('      ninjaP2 = ninjaP(2)\n')
+    f90file.write(outdict['Ninja%s' % str(lidx)])
+    f90file.write('   end subroutine brack_%s\n' % lidx)
+    f90file.write('!---#] subroutine brack_%s: \n' % lidx)
 
 f90file.write('!---#[ subroutine numerator_t2:\n')
 f90file.write('   subroutine numerator_t2(ncut, a0, a1, b, c, param, deg, coeffs) &\n' )[%
 @if helsum %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_t2")\n'.format(diag) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_t2")\n'.format(diag+'_2') )[%
 @else %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t2")\n'.format(diag,heli) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t2")\n'.format(diag+'_2',heli) )[%
 @end @if %]
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki => ki_nin\n')
@@ -251,9 +251,9 @@ for lidx in expids:
 f90file_qp.write('!---#[ subroutine numerator_t2:\n')
 f90file_qp.write('   subroutine numerator_t2(ncut, a0, a1, b, c, param, deg, coeffs) &\n' )[%
 @if helsum %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_t2")\n'.format(diag) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_t2")\n'.format(diag+'_2') )[%
 @else %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_t2")\n'.format(diag,heli) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_t2")\n'.format(diag+'_2',heli) )[%
 @end @if %]
 f90file_qp.write('      use iso_c_binding, only: c_int\n')
 f90file_qp.write('      use quadninjago_module, only: ki => ki_nin\n')

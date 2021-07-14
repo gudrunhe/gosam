@@ -151,9 +151,9 @@ for lidx in expids:
 f90file.write('!---#[ subroutine numerator_t3:\n')
 f90file.write('   subroutine numerator_t3(ncut, a, b, c, param, deg, coeffs) &\n' )[%
 @if helsum %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_t3")\n'.format(diag) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_t3")\n'.format(diag+'_2') )[%
 @else %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t3")\n'.format(diag,heli) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_t3")\n'.format(diag+'_2',heli) )[%
 @end @if %]
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki => ki_nin\n')
@@ -241,9 +241,9 @@ for lidx in expids:
 f90file_qp.write('!---#[ subroutine numerator_t3:\n')
 f90file_qp.write('   subroutine numerator_t3(ncut, a, b, c, param, deg, coeffs) &\n' )[%
 @if helsum %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_t3")\n'.format(diag) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_t3")\n'.format(diag+'_2') )[%
 @else %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_t3")\n'.format(diag,heli) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_t3")\n'.format(diag+'_2',heli) )[%
 @end @if %]
 f90file_qp.write('      use iso_c_binding, only: c_int\n')
 f90file_qp.write('      use quadninjago_module, only: ki => ki_nin\n')

@@ -1,0 +1,26 @@
+process_name=pb0_gghh
+process_path=pb0_gghh
+
+in=g,g
+out=h,h
+order=QQ, 4, 4
+
+# one quark flavour [t] running in the loops:
+qgraf.verbatim=true=chord[part22,part23,part24,part5000000,0,0];
+qgraf.options=onshell,notadpole,nosnail
+
+one=mdlaS
+zero=mdlMU,mdlMD,mdlMS,mdlMC,mdlMB,mdlWT,mdlWh,mdlWW,mdlWZ
+
+reduction_programs=ninja
+extensions=
+#better_num,olp_badpts
+
+model=FeynRules, ../model/UFO_modHEFT
+#model.options= mdlEFTcount:3
+#model.options= mdlcgg:0,mdlcgghh:0,mdlctt:0,mdlct:0,mdlchhh:0
+
+
+r2=explicit
+
+filter.nlo= lambda d: d.vertices(part5,anti5,part5000000) == 0 and  d.vertices(part15,anti15,part5000000) == 0

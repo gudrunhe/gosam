@@ -2108,7 +2108,7 @@ contains
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,ampcc)[%
-  @end @if %][% 
+  @end @if %][%
   @else %][% 'if not helsum' %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
@@ -2368,7 +2368,7 @@ contains
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[%
              @end @if generate_lo_diagrams %][%
@@ -2481,6 +2481,6 @@ contains
 
       factor = [% form_factor_nlo %]
    end function
-   [% @end @if %] 
+   [% @end @if %]
 
 end module [% process_name asprefix=\_ %]matrix
