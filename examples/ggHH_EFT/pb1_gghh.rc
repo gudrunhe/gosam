@@ -23,4 +23,6 @@ model=FeynRules, ../model/UFO_modHEFT
 
 r2=explicit
 
+PSP_chk_method=LoopInduced
+
 filter.nlo= lambda d: d.vertices(part5,anti5,part5000000) == 0 and  d.vertices(part15,anti15,part5000000) == 0

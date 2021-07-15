@@ -8,8 +8,7 @@ fCONFIG=pb0_gghh/common/config.f90
 fKINEMATICS=pb1_gghh/common/kinematics.f90
 
 
-# GOSAM=gosam.py
-GOSAM=/home/jankins/PhD/GoSam/1loop/local2/bin/gosam.py
+GOSAM=gosam.py
 
 GOSAM_RC0=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS0).rc
