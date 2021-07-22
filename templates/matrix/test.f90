@@ -2,7 +2,10 @@
  %]program test
    use [% process_name asprefix=\_ %]config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
-   use [% process_name asprefix=\_ %]model, only: parse
+   use [% process_name asprefix=\_ %]model, only: parse[%
+   @if extension quadruple %]
+   use [% process_name asprefix=\_ %]model_qp, only: parse_qp => parse[%
+   @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
      & initgolem, exitgolem, ir_subtraction
    use [% process_name asprefix=\_ %]color, only: numcs, CA
@@ -27,7 +30,16 @@
       close(unit=10)
    else
       print*, "No file 'param.dat' found. Using defaults"
-   end if
+   end if[%
+   @if extension quadruple %]
+   open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
+   if(ierr .eq. 0) then
+      call parse_qp(10)
+      close(unit=10)
+   else
+      print*, "No file 'param.dat' found. Using defaults"
+   end if[%
+   @end @if extension quadruple %]
 
    call initgolem()
 
