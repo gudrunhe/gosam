@@ -106,7 +106,7 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%]h[%helicity%]_2_qp, only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%]_2h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%

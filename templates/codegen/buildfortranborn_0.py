@@ -109,7 +109,7 @@ f90file.write('!---#] function amplitude:\n')
 f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_0\n')
 f90file.close()
 [% @if extension quadruple %]
-f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_qp\n')
+f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_0_qp\n')
 f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsl0_0_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortranborn_0.py \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')

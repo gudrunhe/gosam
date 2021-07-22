@@ -106,7 +106,7 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%]h[%helicity%]_0_qp, only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%]_0h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%
@@ -590,4 +590,4 @@ end subroutine evaluate_group[% grp %]
 @end @if %][%
    @end @for groups %][%
 @end @select %]
-end module [% process_name asprefix=\_ %]amplitudeh[% helicity %]0_qp
+end module [% process_name asprefix=\_ %]amplitudeh[% helicity %]_0_qp

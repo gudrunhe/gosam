@@ -23,7 +23,7 @@
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
    use [% process_name asprefix=\_ %]model, only: mdlEFTcount, Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: mdlEFTcount, Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use [% process_name asprefix=\_ %]model_qp, only: mdlEFTcount_qp => mdlEFTcount, Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -1587,13 +1587,13 @@ contains
          color_vector_2 = amplitude[% map.index %]l0_2_qp()
          heli_amp = square_qp(color_vector_0) &
          &        + square_qp(color_vector_0,color_vector_1)
-         if (mdlEFTcount > 0) then
+         if (mdlEFTcount_qp > 0) then
             heli_amp = heli_amp + square_qp(color_vector_1)
          endif
-         if (mdlEFTcount > 1) then
+         if (mdlEFTcount_qp > 1) then
             heli_amp = heli_amp + square_qp(color_vector_0,color_vector_2)
          endif
-         if (mdlEFTcount > 2) then
+         if (mdlEFTcount_qp > 2) then
             heli_amp = heli_amp &
             &        + square_qp(color_vector_1,color_vector_2) &
             &        + square_qp(color_vector_2)
@@ -1725,15 +1725,15 @@ contains
      heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
      &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
      &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-     if (mdlEFTcount>0) then
+     if (mdlEFTcount_qp>0) then
         heli_amp = heli_amp + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
      endif
-     if (mdlEFTcount>1) then
+     if (mdlEFTcount_qp>1) then
         heli_amp = heli_amp &
         &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
         &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
      endif
-     if (mdlEFTcount>2) then
+     if (mdlEFTcount_qp>2) then
         heli_amp = heli_amp &
         &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
         &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2) &
@@ -1770,17 +1770,17 @@ contains
          heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_1(:, 0))
          heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:, -1),colorvec_1(:, -1))
          heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:, -2),colorvec_1(:, -2))
-         if (mdlEFTcount>0) then
+         if (mdlEFTcount_qp>0) then
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0))
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1))
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2))
          endif
-         if (mdlEFTcount>1) then
+         if (mdlEFTcount_qp>1) then
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),colorvec_2(:, 0))
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),colorvec_2(:,-1))
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),colorvec_2(:,-2))
          endif
-         if (mdlEFTcount>2) then
+         if (mdlEFTcount_qp>2) then
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),colorvec_2(:, 0)) + square_qp(colorvec_2(:, 0))
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),colorvec_2(:,-1)) + square_qp(colorvec_2(:,-1))
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),colorvec_2(:,-2)) + square_qp(colorvec_2(:,-2))
