@@ -675,7 +675,11 @@ contains
                    amp(3) = amp(3) -1.5_ki * CF * amp(1)
                    amp(2) = amp(2) -[%
                @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki * CF * amp(1)[%
+               @end @if %]_ki * CF * amp(1)
+                   if (renorm_logs) then
+                      amp(2) = amp(2) &
+                     &   - (1.5_ki*log(scale2/[%mass%]/[%mass%])) * CF * amp(1)
+                   end if[%
                @end @for %]
                end if
             end if[%
@@ -1313,10 +1317,14 @@ contains
             ! Renormalization of Yukawa coupling
                if ([% $_ %] > 0.0_ki_qp) then  [%
                 @for particles massive quarks anti-quarks %]
-                   amp(3) = amp(3) -1.5_ki_qp * CF_qp * amp(1)
-                   amp(2) = amp(2) -[%
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * amp(1)
+                  amp(2) = amp(2) -[%
                @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki_qp * CF_qp * amp(1)[%
+               @end @if %]_ki_qp * CF_qp * amp(1)
+                  if (renorm_logs) then
+                     amp(2) = amp(2) &
+                    &   - (1.5_ki_qp*log(scale2/[%mass%]/[%mass%])) * CF_qp * amp(1)
+                  end if[%
                @end @for %]
                end if
             end if[%
