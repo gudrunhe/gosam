@@ -17,11 +17,13 @@ AUTHORS = {
       "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
       "Stephen Jones": ["s.jones@cern.ch"],                 
       "Matthias Kerner": ["mkerner@physik.uzh.ch"],           
+      "Jannis Lang": ["jannis.lang@kit.edu"],
       "Vitaly Magerya": ["vitaly.magerya@tx97.net"],         
       "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
       "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
       "Tiziano Peraro": ["peraro@mpp.mpg.de"],
       "Johannes Schlenk": ["johannes.schlenk@psi.ch"],
+      "Ludovic Scyboz": ["ludovic.scyboz@physics.ox.ac.uk"],
       "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"],
 }
 

@@ -40,7 +40,7 @@ def get_git_revision():
 		except FileNotFoundError:
 			raise Exception("Neither the git repository nor the PKG-INFO file exist")
 
-VERSION = "2.0.4"
+VERSION = "2.1.1"
 GIT_REVISION = get_git_revision()
 TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
 
