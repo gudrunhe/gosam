@@ -14,7 +14,8 @@
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor, reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
-     & reduction_interoperation_rescue, convert_to_cdr[%
+     & reduction_interoperation_rescue, convert_to_cdr, &
+     & EFTcount[%
 @if extension samurai %], &
      & samurai_verbosity, samurai_test, samurai_scalar[%
 @end @if %]
@@ -723,7 +724,11 @@ contains
                    amp(3) = amp(3) -1.5_ki * CF * amp(1)
                    amp(2) = amp(2) -[%
                @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki * CF * amp(1)[%
+               @end @if %]_ki * CF * amp(1)
+                   if (renorm_logs) then
+                      amp(2) = amp(2) &
+                     &   - (1.5_ki*log(scale2/[%mass%]/[%mass%])) * CF * amp(1)
+                   end if[%
                @end @for %]
                end if
             end if[%
@@ -861,59 +866,179 @@ contains
       end if
 
       amp = 0.0_ki[%
-  @if generate_lo_diagrams %][%
+  @if generate_lo_diagrams %]
+      select case (EFTcount)
+      case (0)
+         ! sigma(SM X SM) + sigma(SM X dim6)[%
   @for helicities %]
-      if (eval_heli([%helicity%])) then
-         if (debug_lo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]' >"
-         end if
-         !---#[ reinitialize kinematics:[%
-     @for helicity_mapping shift=1 %][%
-        @if parity %][%
-           @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-           @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-           @end @select %][%
-        @else %][%
-           @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
-           @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
-           @end @select %][%
-        @end @if %][%
-     @end @for %]
-         call init_event(pvecs[%
-     @for particles lightlike vector %], [%hel%]1[%
-     @end @for %])
-         !---#] reinitialize kinematics:
-         color_vector_0 = amplitude[% map.index %]l0_0()
-         color_vector_1 = amplitude[% map.index %]l0_1()
-         color_vector_2 = amplitude[% map.index %]l0_2()
-         heli_amp = square(color_vector_0) &
-         &        + square(color_vector_0,color_vector_1)
-         if (mdlEFTcount > 0) then
-            heli_amp = heli_amp + square(color_vector_1)
-         endif
-         if (mdlEFTcount > 1) then
-            heli_amp = heli_amp + square(color_vector_0,color_vector_2)
-         endif
-         if (mdlEFTcount > 2) then
-            heli_amp = heli_amp &
-            &        + square(color_vector_1,color_vector_2) &
-            &        + square(color_vector_2)
-         endif
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+         !   color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0) &
+                   & + square(color_vector_0,color_vector_1)
 
-         if (debug_lo_diagrams) then
-            write(logfile,'(A25,E24.16,A3)') &
-                & "<result kind='lo' value='", heli_amp, "'/>"
-            write(logfile,*) "</helicity>"
-         end if
-         amp = amp + heli_amp
-      end if[%
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
   @end @for helicities %]
+      case (1)
+         ! sigma(SM + dim6 X SM + dim6)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+         !   color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0 + color_vector_1)
+
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      case (2)
+         ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0 + color_vector_1) &
+                   & + square(color_vector_0, color_vector_2)
+
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      case (3)
+         ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0 + color_vector_1 + color_vector_2)
+
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      end select
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -996,153 +1121,479 @@ contains
          eval_heli(h) = .true.
       else
          eval_heli(:) = .true.
-      end if[%
+      end if
+      select case (EFTcount)
+      case(0)
+         ! sigma(SM X SM) X sigma(SM X dim6)[%
    @for helicities%]
-      if (eval_heli([%helicity%])) then
-         if(debug_nlo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]'>"
-         end if[%
-      @if generate_lo_diagrams %]
-         !---#[ reinitialize kinematics:[%
-     @for helicity_mapping shift=1 %][%
-        @if parity %][%
-           @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-           @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-           @end @select %][%
-        @else %][%
-           @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
-           @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
-           @end @select %][%
-        @end @if %][%
-     @end @for %]
-         call init_event(pvecs[%
-     @for particles lightlike vector %], [%hel%]1[%
-     @end @for %])
-         !---#] reinitialize kinematics:
-         amp0_0 = amplitude[% map.index %]l0_0()
-         amp0_1 = amplitude[% map.index %]l0_1()
-         amp0_2 = amplitude[% map.index %]l0_2()
-         heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0) &
-         &        + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1) &
-         &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
-         if (mdlEFTcount>0) then
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
-         endif
-         if (mdlEFTcount>1) then
-            heli_amp = heli_amp &
-            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0) &
-            &        + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2)
-         endif
-         if (mdlEFTcount>2) then
-            heli_amp = heli_amp &
-            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_2) &
-            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_2)
-         endif[%
-      @else %]
-         !---#[ reinitialize kinematics:[%
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            ! amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_1(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1)) + square(colorvec_0(:,-1), colorvec_1(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2)) + square(colorvec_0(:,-2), colorvec_1(:,-2))[%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
                @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
                @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
                @end @select %][%
             @else %][%
                @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
+               pvecs([%index%],:) = vecs([%$_%],:)[%
                @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
                @end @select %][%
             @end @if %][%
          @end @for %]
-         call init_event(pvecs[%
-         @for particles lightlike vector %], [%hel%]1[%
-         @end @for %])
-            !---#] reinitialize kinematics:
-         do c=1,numcs
-            colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
-            colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
-            colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
-         end do
-         heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0),colorvec_1(:, 0))
-         heli_amp(-1) = square(colorvec_0(:,-1)) + square(colorvec_0(:, -1),colorvec_1(:, -1))
-         heli_amp(-2) = square(colorvec_0(:,-2)) + square(colorvec_0(:, -2),colorvec_1(:, -2))
-         if (mdlEFTcount>0) then
-            heli_amp( 0) = heli_amp( 0) + square(colorvec_1(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square(colorvec_1(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square(colorvec_1(:,-2))
-         endif
-         if (mdlEFTcount>1) then
-            heli_amp( 0) = heli_amp( 0) + square(colorvec_0(:, 0),colorvec_2(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square(colorvec_0(:,-1),colorvec_2(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square(colorvec_0(:,-2),colorvec_2(:,-2))
-         endif
-         if (mdlEFTcount>2) then
-            heli_amp( 0) = heli_amp( 0) + square(colorvec_1(:, 0),colorvec_2(:, 0)) + square(colorvec_2(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square(colorvec_1(:,-1),colorvec_2(:,-1)) + square(colorvec_2(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square(colorvec_1(:,-2),colorvec_2(:,-2)) + square(colorvec_2(:,-2))
-         endif
-      [%
-      @end @if %]
-         if (corrections_are_qcd .and. renorm_gamma5) then
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+   @end @for helicities%]
+      case(1)
+         ! sigma(SM + dim6 X SM + dim6)[%
+      @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
             !---#[ reinitialize kinematics:[%
-      @for helicity_mapping shift=1 %][%
-         @if parity %][%
-            @select sign @case 1 %]
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
             pvecs([%index%],1) = vecs([%$_%],1)
             pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-            @else %]
+              @else %]
             pvecs([%index%],1) = -vecs([%$_%],1)
             pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-            @end @select %][%
-         @else %][%
-            @select sign @case 1 %]
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
             pvecs([%index%],:) = vecs([%$_%],:)[%
-            @else %]
+              @else %]
             pvecs([%index%],:) = -vecs([%$_%],:)[%
-            @end @select %][%
-         @end @if %][%
-      @end @for %]
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
             call init_event(pvecs[%
-         @for particles lightlike vector %], [%hel%]1[%
-         @end @for %])
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
             !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
-            heli_amp(0) = heli_amp(0) + fr
-         end if
-         ok = ok .and. my_ok
-         amp = amp + heli_amp
-         rat2 = rat2 + rational2
-
-         if(debug_nlo_diagrams) then
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            ! amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2))[%
+         @end @if %]
             if (corrections_are_qcd .and. renorm_gamma5) then
-               write(logfile,'(A30,E24.16,A3)') &
-                   & "<result kind='fin-ren' value='", fr, "'/>"
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
+               heli_amp(0) = heli_amp(0) + fr
             end if
-            if(my_ok) then
-               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
-            else
-               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
             end if
-            write(logfile,*) "</helicity>"
-         end if
-      end if[%
-   @end @for helicities%][%
+         end if[%
+      @end @for helicities%]
+      case(2)
+         ! sigma(SM + dim6 X SM + dim6) + sigma(SM X SM + dim6^2)[%
+      @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1)) + square(colorvec_0(:,-1), colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2)) + square(colorvec_0(:,-2), colorvec_2(:,-2))[%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+      @end @for helicities%]
+      case(3)
+         ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)[%
+      @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2))[%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0(real(scale2,ki))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+      @end @for helicities%]
+   end select[%
    @end @if %][%
    @end @if helsum %]
       if (include_helicity_avg_factor) then
@@ -1413,10 +1864,14 @@ contains
             ! Renormalization of Yukawa coupling
                if ([% $_ %] > 0.0_ki_qp) then  [%
                 @for particles massive quarks anti-quarks %]
-                   amp(3) = amp(3) -1.5_ki_qp * CF_qp * amp(1)
-                   amp(2) = amp(2) -[%
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * amp(1)
+                  amp(2) = amp(2) -[%
                @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki_qp * CF_qp * amp(1)[%
+               @end @if %]_ki_qp * CF_qp * amp(1)
+                  if (renorm_logs) then
+                     amp(2) = amp(2) &
+                    &   - (1.5_ki_qp*log(scale2/[%mass%]/[%mass%])) * CF_qp * amp(1)
+                  end if[%
                @end @for %]
                end if
             end if[%
@@ -1554,58 +2009,173 @@ contains
       end if
 
       amp = 0.0_ki_qp[%
-  @if generate_lo_diagrams %][%
+  @if generate_lo_diagrams %]
+      select case (EFTcount)
+      case (0)
+         ! sigma(SM X SM) + sigma(SM X dim6)[%
   @for helicities %]
-      if (eval_heli([%helicity%])) then
-         if (debug_lo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]' >"
-         end if
-         !---#[ reinitialize kinematics:[%
-     @for helicity_mapping shift=1 %][%
-        @if parity %][%
-           @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-           @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-           @end @select %][%
-        @else %][%
-           @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
-           @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
-           @end @select %][%
-        @end @if %][%
-     @end @for %]
-         call init_event(pvecs[%
-     @for particles lightlike vector %], [%hel%]1[%
-     @end @for %])
-         !---#] reinitialize kinematics:
-         color_vector_0 = amplitude[% map.index %]l0_0_qp()
-         color_vector_1 = amplitude[% map.index %]l0_1_qp()
-         color_vector_2 = amplitude[% map.index %]l0_2_qp()
-         heli_amp = square_qp(color_vector_0) &
-         &        + square_qp(color_vector_0,color_vector_1)
-         if (mdlEFTcount_qp > 0) then
-            heli_amp = heli_amp + square_qp(color_vector_1)
-         endif
-         if (mdlEFTcount_qp > 1) then
-            heli_amp = heli_amp + square_qp(color_vector_0,color_vector_2)
-         endif
-         if (mdlEFTcount_qp > 2) then
-            heli_amp = heli_amp &
-            &        + square_qp(color_vector_1,color_vector_2) &
-            &        + square_qp(color_vector_2)
-         endif
-         if (debug_lo_diagrams) then
-            write(logfile,'(A25,E24.16,A3)') &
-                & "<result kind='lo' value='", heli_amp, "'/>"
-            write(logfile,*) "</helicity>"
-         end if
-         amp = amp + heli_amp
-      end if[%
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            ! color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_0) + square_qp(color_vector_0, color_vector_1)
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
   @end @for helicities %]
+      case (1)
+         ! sigma(SM + dim6 X SM + dim6)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            ! color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_0 + color_vector_1)
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      case (2)
+         ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_0 + color_vector_1) + square_qp(color_vector_0, color_vector_2)
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      case (3)
+         ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)[%
+  @for helicities %]
+         if (eval_heli([%helicity%])) then
+            if (debug_lo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]' >"
+            end if
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+            color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_0 + color_vector_1 + color_vector_2)
+            if (debug_lo_diagrams) then
+               write(logfile,'(A25,E24.16,A3)') &
+                   & "<result kind='lo' value='", heli_amp, "'/>"
+               write(logfile,*) "</helicity>"
+            end if
+            amp = amp + heli_amp
+         end if[%
+  @end @for helicities %]
+      end select
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki_qp)
       end if
@@ -1690,153 +2260,482 @@ contains
          eval_heli(:) = .true.
       end if
 
-[%
+      select case (EFTcount)
+      case(0)
+         ! sigma(SM X SM) + sigma(SM X dim6)[%
    @for helicities%]
-      if (eval_heli([%helicity%])) then
-         if(debug_nlo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]'>"
-         end if[%
-      @if generate_lo_diagrams %]
-         !---#[ reinitialize kinematics:[%
-     @for helicity_mapping shift=1 %][%
-        @if parity %][%
-           @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-           @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-           @end @select %][%
-        @else %][%
-           @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
-           @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
-           @end @select %][%
-        @end @if %][%
-     @end @for %]
-         call init_event(pvecs[%
-     @for particles lightlike vector %], [%hel%]1[%
-     @end @for %])
-         !---#] reinitialize kinematics:
-     amp0_0 = amplitude[% map.index %]l0_0_qp()
-     amp0_1 = amplitude[% map.index %]l0_1_qp()
-     amp0_2 = amplitude[% map.index %]l0_2_qp()
-     heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
-     &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
-     &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-     if (mdlEFTcount_qp>0) then
-        heli_amp = heli_amp + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
-     endif
-     if (mdlEFTcount_qp>1) then
-        heli_amp = heli_amp &
-        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
-        &        + samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
-     endif
-     if (mdlEFTcount_qp>2) then
-        heli_amp = heli_amp &
-        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
-        &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2) &
-        &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
-     endif[%
-      @else %]
-         !---#[ reinitialize kinematics:[%
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+         amp0_0 = amplitude[% map.index %]l0_0_qp()
+         amp0_1 = amplitude[% map.index %]l0_1_qp()
+         ! amp0_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
+         &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0))
+            heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_1(:,-2))
+         [%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
                @select sign @case 1 %]
-         pvecs([%index%],1) = vecs([%$_%],1)
-         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
                @else %]
-         pvecs([%index%],1) = -vecs([%$_%],1)
-         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
                @end @select %][%
             @else %][%
                @select sign @case 1 %]
-         pvecs([%index%],:) = vecs([%$_%],:)[%
+               pvecs([%index%],:) = vecs([%$_%],:)[%
                @else %]
-         pvecs([%index%],:) = -vecs([%$_%],:)[%
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
                @end @select %][%
             @end @if %][%
          @end @for %]
-         call init_event(pvecs[%
-         @for particles lightlike vector %], [%hel%]1[%
-         @end @for %])
-            !---#] reinitialize kinematics:
-         do c=1,numcs
-            colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-         end do
-         heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_1(:, 0))
-         heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:, -1),colorvec_1(:, -1))
-         heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:, -2),colorvec_1(:, -2))
-         if (mdlEFTcount_qp>0) then
-            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2))
-         endif
-         if (mdlEFTcount_qp>1) then
-            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),colorvec_2(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),colorvec_2(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),colorvec_2(:,-2))
-         endif
-         if (mdlEFTcount_qp>2) then
-            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),colorvec_2(:, 0)) + square_qp(colorvec_2(:, 0))
-            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),colorvec_2(:,-1)) + square_qp(colorvec_2(:,-1))
-            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),colorvec_2(:,-2)) + square_qp(colorvec_2(:,-2))
-         endif
-      [%
-      @end @if %]
-         if (corrections_are_qcd .and. renorm_gamma5) then
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+   @end @for helicities%]
+      case(1)
+         ! sigma(SM + dim6 X SM + dim6)[%
+   @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
             !---#[ reinitialize kinematics:[%
-      @for helicity_mapping shift=1 %][%
-         @if parity %][%
-            @select sign @case 1 %]
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
             pvecs([%index%],1) = vecs([%$_%],1)
             pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-            @else %]
+              @else %]
             pvecs([%index%],1) = -vecs([%$_%],1)
             pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-            @end @select %][%
-         @else %][%
-            @select sign @case 1 %]
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
             pvecs([%index%],:) = vecs([%$_%],:)[%
-            @else %]
+              @else %]
             pvecs([%index%],:) = -vecs([%$_%],:)[%
-            @end @select %][%
-         @end @if %][%
-      @end @for %]
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
             call init_event(pvecs[%
-         @for particles lightlike vector %], [%hel%]1[%
-         @end @for %])
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
             !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
-            heli_amp(0) = heli_amp(0) + fr
-         end if
-         ok = ok .and. my_ok
-         amp = amp + heli_amp
-         rat2 = rat2 + rational2
-
-         if(debug_nlo_diagrams) then
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
-            write(logfile,'(A33,E24.16,A3)') &
-                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+         amp0_0 = amplitude[% map.index %]l0_0_qp()
+         amp0_1 = amplitude[% map.index %]l0_1_qp()
+         ! amp0_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
+         &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0))
+            heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2))
+         [%
+         @end @if %]
             if (corrections_are_qcd .and. renorm_gamma5) then
-               write(logfile,'(A30,E24.16,A3)') &
-                   & "<result kind='fin-ren' value='", fr, "'/>"
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
+               heli_amp(0) = heli_amp(0) + fr
             end if
-            if(my_ok) then
-               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
-            else
-               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
             end if
-            write(logfile,*) "</helicity>"
-         end if
-      end if[%
-   @end @for helicities%][%
+         end if[%
+   @end @for helicities%]
+      case(2)
+         ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)[%
+   @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+         amp0_0 = amplitude[% map.index %]l0_0_qp()
+         amp0_1 = amplitude[% map.index %]l0_1_qp()
+         amp0_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+         &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
+         &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0)) 
+            heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_2(:,-2))
+         [%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+   @end @for helicities%]
+      case(3)
+         ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)[%
+   @for helicities%]
+         if (eval_heli([%helicity%])) then
+            if(debug_nlo_diagrams) then
+               write(logfile,*) "<helicity index='[% helicity %]'>"
+            end if[%
+         @if generate_lo_diagrams %]
+            !---#[ reinitialize kinematics:[%
+        @for helicity_mapping shift=1 %][%
+           @if parity %][%
+              @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+              @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+              @end @select %][%
+           @else %][%
+              @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+              @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+              @end @select %][%
+           @end @if %][%
+        @end @for %]
+            call init_event(pvecs[%
+        @for particles lightlike vector %], [%hel%]1[%
+        @end @for %])
+            !---#] reinitialize kinematics:
+         amp0_0 = amplitude[% map.index %]l0_0_qp()
+         amp0_1 = amplitude[% map.index %]l0_1_qp()
+         amp0_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+         &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
+         &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2)[%
+         @else %]
+            !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],1) = vecs([%$_%],1)
+            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+            pvecs([%index%],1) = -vecs([%$_%],1)
+            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+            pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+            pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+            call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
+            heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2))
+         [%
+         @end @if %]
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+               pvecs([%index%],1) = vecs([%$_%],1)
+               pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+               pvecs([%index%],1) = -vecs([%$_%],1)
+               pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+               pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+               pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+               call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+               !---#] reinitialize kinematics:
+               fr = finite_renormalisation[%map.index%]_0_qp(real(scale2,ki_qp))
+               heli_amp(0) = heli_amp(0) + fr
+            end if
+            ok = ok .and. my_ok
+            amp = amp + heli_amp
+            rat2 = rat2 + rational2
+         
+            if(debug_nlo_diagrams) then
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+               write(logfile,'(A33,E24.16,A3)') &
+                   & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+               if (corrections_are_qcd .and. renorm_gamma5) then
+                  write(logfile,'(A30,E24.16,A3)') &
+                      & "<result kind='fin-ren' value='", fr, "'/>"
+               end if
+               if(my_ok) then
+                  write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+               else
+                  write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+               end if
+               write(logfile,*) "</helicity>"
+            end if
+         end if[%
+   @end @for helicities%]
+      end select[%
    @end @if %][%
    @end @if helsum %]
       if (include_helicity_avg_factor) then

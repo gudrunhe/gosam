@@ -134,6 +134,9 @@
 
    integer :: logfile = 19
 
+   ! Parameter determining the SMEFT counting
+   integer :: EFTcount = 3
+
    !---#[ Renormalisation:
    ! Parameter to switch UV-Counterterms on or off
    integer :: renormalisation = [%
