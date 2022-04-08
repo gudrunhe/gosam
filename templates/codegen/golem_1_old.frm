@@ -1,6 +1,6 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 *
-* This version of golem_2.frm generates expressions for the numerator
+* This version of golem_1.frm generates expressions for the numerator
 * only.
 *
 #-
@@ -59,7 +59,7 @@ CTensor epstensor;[%
    #Include- abbreviate.hh
    Symbol CC, R2;
 #Else
-   #Include- optimizeborn_2.hh
+   #Include- optimizeborn_1.hh
 #EndIf[%
 @else %]
 #If `LOOPS' == 1
@@ -138,6 +138,7 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
       #call ReplaceVertices
    EndRepeat;
 #endif
+
 .sort
 
 Id mdlGC9 = mdlGC9SM + mdlGC9DIM6*mdlLambdam2;
@@ -151,7 +152,17 @@ Id mdlGC39 = mdlGC39SM + mdlGC39DIM6*mdlLambdam2;
 Id mdlGC40 = mdlGC40DIM6*mdlLambdam2;
 Id mdlGC41 = mdlGC41SM + mdlGC41DIM6*mdlLambdam2;
 .sort
-Id mdlLambdam2 = 1;
+Hide diagram`DIAG';
+L Dummy = diagram`DIAG';
+Id mdlLambdam2 = 0;
+.sort
+Unhide;
+Hide Dummy;
+L diagram`DIAG' = diagram`DIAG' - Dummy;
+.sort
+Drop Dummy;
+Id mdlLambdam2^2 = 0;
+
 
 
 #call VertexConstants
@@ -788,21 +799,21 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag2"
+        #write <`OUTFILE'.txt> "#Procedure borndiag1"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag2.prc>
-	#write <borndiag2.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag2.prc> "#EndProcedure"
+        #Append <borndiag1.prc>
+	#write <borndiag1.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag1.prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag2.prc>
-        #write <borndiag2.prc> "#Procedure borndiag2"
-	#write <borndiag2.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag2.prc> "#EndProcedure"
+	#Create <borndiag1.prc>
+        #write <borndiag1.prc> "#Procedure borndiag1"
+	#write <borndiag1.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag1.prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf
@@ -821,21 +832,21 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag2"
+        #write <`OUTFILE'.txt> "#Procedure borndiag1"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag2.prc>
-	#write <borndiag2.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag2.prc> "#EndProcedure"
+        #Append <borndiag1.prc>
+	#write <borndiag1.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag1.prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag2.prc>
-        #write <borndiag2.prc> "#Procedure borndiag2"
-	#write <borndiag2.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag2.prc> "#EndProcedure"
+	#Create <borndiag1.prc>
+        #write <borndiag1.prc> "#Procedure borndiag1"
+	#write <borndiag1.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag1.prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf

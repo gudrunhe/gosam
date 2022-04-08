@@ -152,17 +152,9 @@ Id mdlGC39 = mdlGC39SM + mdlGC39DIM6*mdlLambdam2;
 Id mdlGC40 = mdlGC40DIM6*mdlLambdam2;
 Id mdlGC41 = mdlGC41SM + mdlGC41DIM6*mdlLambdam2;
 .sort
-Hide diagram`DIAG';
-L Dummy = diagram`DIAG';
-Id mdlLambdam2 = 0;
-.sort
-Unhide;
-Hide Dummy;
-L diagram`DIAG' = diagram`DIAG' - Dummy;
-.sort
-Drop Dummy;
 Id mdlLambdam2^2 = 0;
-
+.sort
+Id mdlLambdam2 = 1;
 
 
 #call VertexConstants
