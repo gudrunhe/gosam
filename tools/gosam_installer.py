@@ -104,6 +104,9 @@ def handle_args():
                   help="C++ compiler [%default]")
     group.add_option("--quadruple", action="store_true", default=False, dest="QUADRUPLE",
                   help="Compile GoSam-Contrib in quadruple precision [%default]")
+    group.add_option("--enable-quadninja", action="store_true", default=False, dest="QUADNINJA",
+                  help="Build quadninja, a copy of ninja in quadruple precision (requires GCC libquadmath) alongside "
+                  "ninja, specifying the corresponding flags for the linker [%default]")
     group.add_option("-l","--install-log",metavar="INSTALLOG", default=os.path.join(os.getcwd(),INSTALLOG_DEFAULT), dest="INSTALLLOG",
                   help="Path to log file for upgrade/uninstall info [%default]")
     parser.add_option_group(group)
@@ -111,10 +114,11 @@ def handle_args():
 
     opts, args = parser.parse_args()
 
+    opts.GOSAM_CONTRIB_OPTIONS = ""
     if opts.QUADRUPLE:
-        opts.GOSAM_CONTRIB_OPTIONS = "--with-precision=quadruple"
-    else:
-        opts.GOSAM_CONTRIB_OPTIONS = ""
+        opts.GOSAM_CONTRIB_OPTIONS += " --with-precision=quadruple"
+    if opts.QUADNINJA:
+        opts.GOSAM_CONTRIB_OPTIONS += " --enable-quadninja"
 
 def setup_logging():
     ## Configure logging
