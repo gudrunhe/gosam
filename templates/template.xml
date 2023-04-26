@@ -414,7 +414,25 @@
 				<except if-option="r2" value="only" />
 				<filter name="Fortran90" width="80"/>
 			</file>
-			<file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
+			<!-- <file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+			</file> -->
+			<file src="golem95_0.f90" dest="golem95_0h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="golem95_1.f90" dest="golem95_1h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="golem95_2.f90" dest="golem95_2h%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />

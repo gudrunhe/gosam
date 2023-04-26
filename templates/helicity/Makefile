@@ -30,7 +30,7 @@ OBJECTS_0= \
 @else %][%
 @select r2
 @case implicit explicit off %][%
-   @if extension golem95 %] golem95h[%helicity%].o[%
+   @if extension golem95 %] golem95_0h[%helicity%].o[%
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].o[%
    @end @if %][%
@@ -216,7 +216,7 @@ OBJECTS_1= \
 @else %][%
 @select r2
 @case implicit explicit off %][%
-   @if extension golem95 %] golem95h[%helicity%].o[%
+   @if extension golem95 %] golem95_1h[%helicity%].o[%
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].o[%
    @end @if %][%
@@ -402,7 +402,7 @@ OBJECTS_2= \
 @else %][%
 @select r2
 @case implicit explicit off %][%
-   @if extension golem95 %] golem95h[%helicity%].o[%
+   @if extension golem95 %] golem95_2h[%helicity%].o[%
    @end @if %][%
    @if extension samurai %] samuraih[%helicity%].o[%
    @end @if %][%

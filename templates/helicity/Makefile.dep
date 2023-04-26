@@ -166,11 +166,25 @@ samuraih[%helicity%].[%O%]: [%
    	   @end @if extension samurai %][%
 
       	@if extension golem95 %]
-golem95h[%helicity%].[%O%]: [%
+golem95_0h[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]h[%helicity%]l1.[%O%][%
+	d[%$_%]_0h[%helicity%]l1.[%O%][%
 					@if internal GENERATE_DERIVATIVES
-						%] d[%$_%]h[%helicity%]l1d.[%O%][%
+						%] d[%$_%]_0h[%helicity%]l1d.[%O%][%
+					@end @if %][%
+         	@end @for %]
+golem95_1h[%helicity%].[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_1h[%helicity%]l1.[%O%][%
+					@if internal GENERATE_DERIVATIVES
+						%] d[%$_%]_1h[%helicity%]l1d.[%O%][%
+					@end @if %][%
+         	@end @for %]
+golem95_2h[%helicity%].[%O%]: [%
+         	@for elements topolopy.keep.virt %] \
+	d[%$_%]_2h[%helicity%]l1.[%O%][%
+					@if internal GENERATE_DERIVATIVES
+						%] d[%$_%]_2h[%helicity%]l1d.[%O%][%
 					@end @if %][%
          	@end @for %][%
 	      @end @if extension golem95 %][%
@@ -249,7 +263,7 @@ amplitudeh[%helicity%]_0.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diag
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%].[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+	      @if extension golem95 %] golem95_0h[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_0h[%helicity%].[%O%][%
                  @if extension quadruple %] ninja_0h[%helicity%]_qp.[%O%][%
@@ -286,7 +300,7 @@ amplitudeh[%helicity%]_1.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diag
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%].[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+	      @if extension golem95 %] golem95_1h[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_1h[%helicity%].[%O%][%
                  @if extension quadruple %] ninja_1h[%helicity%]_qp.[%O%][%
@@ -323,7 +337,7 @@ amplitudeh[%helicity%]_2.[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diag
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%].[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
+	      @if extension golem95 %] golem95_2h[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_2h[%helicity%].[%O%][%
                  @if extension quadruple %] ninja_2h[%helicity%]_qp.[%O%][%
@@ -361,7 +375,7 @@ amplitudeh[%helicity%]_0_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
+	      @if extension golem95 %] golem95_0h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_0h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
@@ -396,7 +410,7 @@ amplitudeh[%helicity%]_1_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
+	      @if extension golem95 %] golem95_1h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_1h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
@@ -431,7 +445,7 @@ amplitudeh[%helicity%]_2_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %
 		@case implicit explicit off %][%
 	      @if extension samurai %] samuraih[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
+	      @if extension golem95 %] golem95_2h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_2h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
@@ -513,7 +527,9 @@ amplitudeh[%helicity%]_2_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %
 			@end @if extension samurai %][%
 
 		@if extension golem95 %]
-[% process_name asprefix=\_ %]golem95h[%helicity%].mod: golem95h[%helicity%].[%O%][%
+[% process_name asprefix=\_ %]golem95_0h[%helicity%].mod: golem95_0h[%helicity%].[%O%]
+[% process_name asprefix=\_ %]golem95_1h[%helicity%].mod: golem95_1h[%helicity%].[%O%]
+[% process_name asprefix=\_ %]golem95_2h[%helicity%].mod: golem95_2h[%helicity%].[%O%][%
 			@end @if extension golem95 %][%
 
 		@if extension ninja %]

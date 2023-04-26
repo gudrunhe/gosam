@@ -1169,6 +1169,17 @@ form_factor_nlo=Property("form_factor_nlo",
    str, "", experimental=True)
 
 
+order_names = Property("order_names",
+   """\
+   A list of additional coupling order that should be 
+   tracked throughout the amplitude generation. Relevant for
+   correct EFT treatment!
+
+   Example:
+   order_names=QCD,NP,QL
+   """,
+   list,default="QCD,NP",experimental=True)
+
 properties = [
    process_name,
    process_path,
@@ -1256,7 +1267,9 @@ properties = [
    pyxodraw,
 
    form_factor_lo,
-   form_factor_nlo
+   form_factor_nlo,
+
+   order_names
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

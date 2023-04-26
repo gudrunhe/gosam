@@ -1,0 +1,14 @@
+# vim: ts=3:sw=3
+
+SUBDIRS=doc common helicity0 matrix
+
+
+include Makefile.conf
+
+
+source:
+	@for dir in $(SUBDIRS); \
+	do \
+		$(MAKE) -C $${dir} -f Makefile $@; \
+	done
+

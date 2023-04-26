@@ -1,0 +1,8 @@
+
+.PHONY: source clean very-clean
+
+source:
+
+clean:
+
+very-clean:

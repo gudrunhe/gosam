@@ -326,7 +326,10 @@ def prepare_model_files(conf, output_path=None):
          message("Importing FeynRules model files ...")
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
-         mdl.store(path, MODEL_LOCAL)
+            
+         order_names = sorted(conf.getProperty(golem.properties.order_names))
+
+         mdl.store(path, MODEL_LOCAL, order_names)
          message("Done with model import.")
       else:
          model_path = model_lst[0]

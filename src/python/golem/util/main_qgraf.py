@@ -235,6 +235,30 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty    = "form.sty"
 	topo_sty    = "topolopy.sty"
 
+	order_names = sorted(conf.getProperty(golem.properties.order_names))
+
+	topo_sty_name = os.path.join(path, topo_sty)
+	topo_sty_tmp = open(topo_sty_name,'r').readlines()
+	topo_sty_out = open(topo_sty_name,'w')
+	for i in range(len(topo_sty_tmp)):
+		if i==33:
+			if len(order_names)>0:
+				for el in order_names:
+					topo_sty_out.write("<back> '%s' : [%s],\n" % (el,el))
+		topo_sty_out.write(topo_sty_tmp[i])
+	topo_sty_out.close()
+
+	form_sty_name = os.path.join(path, form_sty)
+	form_sty_tmp = open(form_sty_name,'r').readlines()
+	form_sty_out = open(form_sty_name,'w')
+	for i in range(len(form_sty_tmp)):
+		if i==34:
+			if len(order_names)>0:
+				for el in order_names:
+					form_sty_out.write("<back> %s[%s],\n" % (el,el))
+		form_sty_out.write(form_sty_tmp[i])
+	form_sty_out.close()
+
 	form_ext    = ".hh"
 	python_ext  = ".py"
 	pyo_ext     = ".pyo"

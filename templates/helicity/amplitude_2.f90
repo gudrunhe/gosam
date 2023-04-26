@@ -15,7 +15,7 @@
       @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]golem95h[% helicity %][%
+   use [% process_name asprefix=\_ %]golem95_2h[% helicity %][%
       @end @if %][%
       @if extension ninja %]
    use ninjago_module, only: ki_nin
@@ -311,7 +311,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    use parametre, only: mu2_scale_par
    use form_factor_type, only: form_factor
-   use [% process_name asprefix=\_ %]golem95h[% helicity
+   use [% process_name asprefix=\_ %]golem95_2h[% helicity
        %], only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
          @if extension pjfry %], contract_pjfry[%

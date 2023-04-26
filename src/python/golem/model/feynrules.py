@@ -430,7 +430,7 @@ class Model:
 		for p in parameterct:
 			print(p.counterterm)
 
-	def write_qgraf_file(self, f):
+	def write_qgraf_file(self, f, order_names):
 		trunc_model = [self.model_orig]
 		while len(trunc_model[-1]) > 70:
 			s = trunc_model[-1]
@@ -526,6 +526,11 @@ class Model:
 		orders = set()
 		for c in self.all_couplings:
 			orders.update(list(c.order.keys()))
+		
+		for el in order_names:
+			if not(el in orders):
+				warning(("Specified order name %s is not present in UFO model and, hence, has no effect." %  (el)))
+		orders.update(order_names)
 
 		for v in self.all_vertices:
 			particles = v.particles
@@ -601,7 +606,7 @@ class Model:
 
 		f.write("%---#] Vertices:\n\n")
 
-	def write_form_file(self, f):
+	def write_form_file(self, f, order_names):
 		parser = ex.ExpressionParser()
 		lorex = {}
 		lsubs = {}
@@ -625,6 +630,14 @@ class Model:
 		f.write("* in %s\n\n" % self.model_orig)
 
 		f.write("*---#[ Symbol Definitions:\n")
+		f.write("*---#[ Coupling Orders:\n")
+		f.write("AutoDeclare Symbols RK,")
+		for el in order_names:
+			f.write("%s," % el)
+		f.write(";\n")
+		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
+		f.write("\n")
+		f.write("*---#] Coupling Orders:\n")
 		f.write("*---#[ Fields:\n")
 
 		fields = []
@@ -701,6 +714,11 @@ class Model:
 		f.write("*---#[ Procedure ReplaceVertices :\n")
 		f.write("#Procedure ReplaceVertices\n")
 
+		orders = set()
+		# for c in self.all_couplings:
+		# 	orders.update(list(c.order.keys()))
+		orders.update(list(order_names))
+
 		for v in self.all_vertices:
 			particles = v.particles
 			names = []
@@ -714,6 +732,30 @@ class Model:
 				afields.append(cn[1])
 				spins.append(p.spin - 1)
 
+			vrank = 0
+			for coord, coupling in list(v.couplings.items()):
+				ic, il = coord
+				lrank = v.lorentz[il].rank
+				if lrank > vrank:
+					vrank = lrank
+
+			vorders = {}
+			# vfunctions["RK"] = vrank
+			for c in list(v.couplings.values()):
+				for name in orders:
+					if name in c.order:
+						power = c.order[name]
+					else:
+						power = 0
+
+					if name in vorders:
+						if vorders[name] != power:
+							warning(("Vertex %s has ambiguous powers in %s (%d,%d). "
+								% (v.name, name, vorders[name], power))
+									+ "I will use %d." % vorders[name])
+					else:
+						vorders[name] = power
+
 			flip = spins[0] == 1 and spins[2] == 1
 			deg = len(particles)
 
@@ -724,7 +766,10 @@ class Model:
 
 			fold_name = "(%s) %s Vertex" % ( v.name, " -- ".join(names))
 			f.write("*---#[ %s:\n" % fold_name)
-			f.write("Identify Once vertex(iv?")
+			f.write("Identify Once vertex(iv?, RK%d" % vrank)
+			for el in order_names:
+				f.write(", %s%d"
+					% (el,vorders[el]))
 			colors = []
 			for i in xidx:
 				p = particles[i]
@@ -741,6 +786,15 @@ class Model:
 						% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
 							abs(color)))
 			f.write(") =")
+			
+			if 'NP' in vorders.keys():
+				if 'QL' in vorders.keys():
+					f.write("\n  Lambdam1^%d * Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
+				else:
+					f.write("\n  Lambdam1^%d * (" % (vorders['NP']))
+			elif 'QL' in vorders.keys():
+				f.write("\n  Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
+
 
 			dummies = []
 
@@ -791,6 +845,8 @@ class Model:
 
 			if brack_flag:
 				f.write(")")
+			if 'NP' in vorders.keys():
+				f.write("\n)")
 			f.write(";\n")
 
 			for idx in list(dummy_found.values()):
@@ -927,7 +983,7 @@ class Model:
 				return True
 		return False
 
-	def store(self, path, local_name):
+	def store(self, path, local_name, order_names):
 		message("  Writing Python file ...")
 		f = open(os.path.join(path, "%s.py" % local_name), 'w')
 		self.write_python_file(f)
@@ -936,12 +992,12 @@ class Model:
 
 		message("  Writing QGraf file ...")
 		f = open(os.path.join(path, local_name), 'w')
-		self.write_qgraf_file(f)
+		self.write_qgraf_file(f, order_names)
 		f.close()
 
 		message("  Writing Form file ...")
 		f = open(os.path.join(path, "%s.hh" % local_name), 'w')
-		self.write_form_file(f)
+		self.write_form_file(f, order_names)
 		f.close()
 
 #		message("  Writing Form CT file ...")

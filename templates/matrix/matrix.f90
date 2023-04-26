@@ -22,9 +22,9 @@
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
-   use [% process_name asprefix=\_ %]model, only: mdlEFTcount, Nf, NC, sqrt2, init_functions[%
+   use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: mdlEFTcount_qp => mdlEFTcount, Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use [% process_name asprefix=\_ %]model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -896,35 +896,32 @@ contains
          !---#] reinitialize kinematics:
          select case (EFTcount)
          case (0)
-            ! sigma(SM X SM) + sigma(SM X dim6)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0()
-            color_vector_1 = amplitude[% map.index %]l0_1()
-            ! color_vector_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = square(color_vector_0) &
-            !        & + square(color_vector_0,color_vector_1)
-            heli_amp = square(color_vector_0) &
-            & + square(color_vector_0, color_vector_1 - color_vector_0)
-         case (1)
-            ! sigma(SM + dim6 X SM + dim6)
-            ! color_vector_0 = amplitude[% map.index %]l0_0()
-            color_vector_1 = amplitude[% map.index %]l0_1()
-            ! color_vector_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = square(color_vector_0 + color_vector_1)
-            heli_amp = square(color_vector_1)
-         case (2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)
-            color_vector_0 = amplitude[% map.index %]l0_0()
-            color_vector_1 = amplitude[% map.index %]l0_1()
+            ! color_vector_1 = amplitude[% map.index %]l0_1()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            heli_amp = square(color_vector_1) &
-                   & + square(color_vector_0, color_vector_2 - color_vector_1)
-         case (3)
-            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+            heli_amp = square(color_vector_0) &
+            & + square(color_vector_0, color_vector_2 - color_vector_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
             ! color_vector_0 = amplitude[% map.index %]l0_0()
             ! color_vector_1 = amplitude[% map.index %]l0_1()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = square(color_vector_0 + color_vector_1 + color_vector_2)
             heli_amp = square(color_vector_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            ! color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0) &
+            & + square(color_vector_0, color_vector_2 - color_vector_0)
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            ! color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_1) &
+            & + square(color_vector_1, color_vector_2 - color_vector_1)
          end select
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
@@ -1047,42 +1044,31 @@ contains
          !---#] reinitialize kinematics:
          select case (EFTcount)
          case(0)
-            ! sigma(SM X SM) X sigma(SM X dim6)
+            ! sigma(SM X SM) X sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
-            amp0_1 = amplitude[% map.index %]l0_1()
-            ! amp0_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
-            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
-            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
-         case(1)
-            ! sigma(SM + dim6 X SM + dim6)
-            ! amp0_0 = amplitude[% map.index %]l0_0()
-            amp0_1 = amplitude[% map.index %]l0_1()
-            ! amp0_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1)
-            heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
-         case(2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X SM + dim6^2)
-            amp0_0 = amplitude[% map.index %]l0_0()
-            amp0_1 = amplitude[% map.index %]l0_1()
+            ! amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0)
-            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_0) &
             &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0)
-         case(3)
-            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
             ! amp0_0 = amplitude[% map.index %]l0_0()
             ! amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ! heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0+amp0_1+amp0_2)
             heli_amp = samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_2)
+         case(2)
+            ! sigma(SM X SM) X sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            ! amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            ! amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            ! amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
          end select[%
       @else %]
          !---#[ reinitialize kinematics:[%
@@ -1109,57 +1095,48 @@ contains
             !---#] reinitialize kinematics:
          select case (EFTcount)
          case(0)
-            ! sigma(SM X SM) X sigma(SM X dim6)
+            ! sigma(SM X SM) X sigma(SM X dim6) with loopcounting
             do c=1,numcs
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
-               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
             end do
-            ! heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_1(:, 0))
-            ! heli_amp(-1) = square(colorvec_0(:,-1)) + square(colorvec_0(:,-1), colorvec_1(:,-1))
-            ! heli_amp(-2) = square(colorvec_0(:,-2)) + square(colorvec_0(:,-2), colorvec_1(:,-2))
-            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_1(:, 0) - colorvec_0(:, 0))
-            heli_amp(-1) = square(colorvec_0(:,-1)) + square(colorvec_0(:,-1), colorvec_1(:,-1) - colorvec_0(:,-1))
-            heli_amp(-2) = square(colorvec_0(:,-2)) + square(colorvec_0(:,-2), colorvec_1(:,-2) - colorvec_0(:,-2))
+            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            & + square(colorvec_0(:,-1)) + square(colorvec_0(:,-1),colorvec_2(:,-1) - colorvec_0(:,-1))
          case(1)
-            ! sigma(SM + dim6 X SM + dim6)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
             do c=1,numcs
                ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
-               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
-            end do
-            ! heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0))
-            ! heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1))
-            ! heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2))
-            heli_amp( 0) = square(colorvec_1(:, 0))
-            heli_amp(-1) = square(colorvec_1(:,-1))
-            heli_amp(-2) = square(colorvec_1(:,-2))
-         case(2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X SM + dim6^2)
-            do c=1,numcs
-               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
                colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
             end do
-            ! heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0))
-            ! heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1)) + square(colorvec_0(:,-1), colorvec_2(:,-1))
-            ! heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2)) + square(colorvec_0(:,-2), colorvec_2(:,-2))
-            heli_amp( 0) = square(colorvec_1(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_1(:, 0))
-            heli_amp(-1) = square(colorvec_1(:,-1)) + square(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_1(:,-1))
-            heli_amp(-2) = square(colorvec_1(:,-2)) + square(colorvec_0(:,-2), colorvec_2(:,-2) - colorvec_1(:,-2))
+            heli_amp( 0) = square(colorvec_1(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:, 0) - colorvec_1(:, 0))
+            heli_amp(-1) = square(colorvec_1(:,-1),colorvec_2(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_1(:,-2),colorvec_2(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:,-2)) &
+            &  + square(colorvec_1(:,-1)) + square(colorvec_1(:,-1),colorvec_2(:,-1) - colorvec_1(:,-1))
+         case(2)
+            ! sigma(SM X SM) X sigma(SM X dim6) without loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-1)) 
+            heli_amp(-2) = square(colorvec_0(:,-1)) + square(colorvec_0(:,-2),colorvec_0(:, 0)) &
+            & + square(colorvec_0(:,-1)) + square(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
          case(3)
-            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
             do c=1,numcs
                ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
                ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
                colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
             end do
-            ! heli_amp( 0) = square(colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
-            ! heli_amp(-1) = square(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))
-            ! heli_amp(-2) = square(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2))
             heli_amp( 0) = square(colorvec_2(:, 0))
-            heli_amp(-1) = square(colorvec_2(:,-1))
-            heli_amp(-2) = square(colorvec_2(:,-2))
+            heli_amp(-1) = square(colorvec_2(:,-1),colorvec_2(:, 0))
+            heli_amp(-2) = square(colorvec_2(:,-1)) + square(colorvec_2(:,-2),colorvec_2(:,0))
          end select[%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then
@@ -1657,33 +1634,29 @@ contains
          !---#] reinitialize kinematics:
          select case (EFTcount)
          case (0)
-         ! sigma(SM X SM) + sigma(SM X dim6)
+         ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0_qp()
-            color_vector_1 = amplitude[% map.index %]l0_1_qp()
-            ! color_vector_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = square_qp(color_vector_0) + square_qp(color_vector_0, color_vector_1)
-            heli_amp = square_qp(color_vector_0) + square_qp(color_vector_0, color_vector_1 - color_vector_0)
-         case (1)
-            ! sigma(SM + dim6 X SM + dim6)
-            ! color_vector_0 = amplitude[% map.index %]l0_0_qp()
-            color_vector_1 = amplitude[% map.index %]l0_1_qp()
-            ! color_vector_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = square_qp(color_vector_0 + color_vector_1)
-            heli_amp = square_qp(color_vector_1)
-         case (2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)
-            color_vector_0 = amplitude[% map.index %]l0_0_qp()
-            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            ! color_vector_1 = amplitude[% map.index %]l0_1_qp()
             color_vector_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = square_qp(color_vector_0 + color_vector_1) + square_qp(color_vector_0, color_vector_2)
-            heli_amp = square_qp(color_vector_1) + square_qp(color_vector_0, color_vector_2 - color_vector_1)
-         case (3)
-            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+            heli_amp = square_qp(color_vector_0) + square_qp(color_vector_0, color_vector_2 - color_vector_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
             ! color_vector_0 = amplitude[% map.index %]l0_0_qp()
             ! color_vector_1 = amplitude[% map.index %]l0_1_qp()
             color_vector_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = square_qp(color_vector_0 + color_vector_1 + color_vector_2)
             heli_amp = square_qp(color_vector_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            ! color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_0) + square_qp(color_vector_0, color_vector_2 - color_vector_0)
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            ! color_vector_0 = amplitude[% map.index %]l0_0_qp()
+            color_vector_1 = amplitude[% map.index %]l0_1_qp()
+            color_vector_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = square_qp(color_vector_1) + square_qp(color_vector_1, color_vector_2 - color_vector_1)
          end select
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
@@ -1807,42 +1780,31 @@ contains
          !---#] reinitialize kinematics:
          select case (EFTcount)
          case(0)
-            ! sigma(SM X SM) + sigma(SM X dim6)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
-            amp0_1 = amplitude[% map.index %]l0_1_qp()
-            ! amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-         case(1)
-            ! sigma(SM + dim6 X SM + dim6)
-            ! amp0_0 = amplitude[% map.index %]l0_0_qp()
-            amp0_1 = amplitude[% map.index %]l0_1_qp()
-            ! amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1)
-            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
-         case(2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)
-            amp0_0 = amplitude[% map.index %]l0_0_qp()
-            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            ! amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1) &
-            ! &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_0) &
             &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-         case(3)
-            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
             ! amp0_0 = amplitude[% map.index %]l0_0_qp()
             ! amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ! heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2) &
-            ! &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0+amp0_1+amp0_2)
             heli_amp = samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            ! amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            ! amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            ! amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
          end select[%
       @else %]
          !---#[ reinitialize kinematics:[%
@@ -1869,44 +1831,38 @@ contains
          !---#] reinitialize kinematics:
          select case (EFTcount)
          case(0)
-            ! sigma(SM X SM) + sigma(SM X dim6)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             do c=1,numcs
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            ! heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0))
-            ! heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
-            ! heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_1(:,-2))
-            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0) - colorvec_0(:, 0))
-            heli_amp(-1) = square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_1(:,-1) - colorvec_0(:,-1))
-            heli_amp(-2) = square_qp(colorvec_0(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_1(:,-2) - colorvec_0(:,-2))
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square_qp(colorvec_0(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
          case(1)
-            ! sigma(SM + dim6 X SM + dim6)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
             do c=1,numcs
                ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               ! colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            end do
-            ! heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0))
-            ! heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
-            ! heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2))
-            heli_amp( 0) = square_qp(colorvec_1(:, 0))
-            heli_amp(-1) = square_qp(colorvec_1(:,-1))
-            heli_amp(-2) = square_qp(colorvec_1(:,-2))
-         case(2)
-            ! sigma(SM + dim6 X SM + dim6) + sigma(SM X dim6^2)
-            do c=1,numcs
-               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            ! heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0)) 
-            ! heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1))
-            ! heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_2(:,-2))
-            heli_amp( 0) = square_qp(colorvec_1(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_1(:, 0)) 
-            heli_amp(-1) = square_qp(colorvec_1(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_1(:,-1))
-            heli_amp(-2) = square_qp(colorvec_1(:,-2)) + square_qp(colorvec_0(:,-2), colorvec_2(:,-2) - colorvec_1(:,-2))
+            heli_amp( 0) = square_qp(colorvec_1(:, 0)) + square_qp(colorvec_1(:, 0), colorvec_2(:, 0) - colorvec_1(:, 0))
+            heli_amp(-1) = square_qp(colorvec_1(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_1(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_1(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_1(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_1(:,-1)) + square_qp(colorvec_1(:,-1), colorvec_2(:,-1) - colorvec_1(:,-1))
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0)) 
+            heli_amp(-1) = square_qp(colorvec_0(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
          case(3)
             ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
             do c=1,numcs
@@ -1918,8 +1874,8 @@ contains
             ! heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))
             ! heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2))
             heli_amp( 0) = square_qp(colorvec_2(:, 0))
-            heli_amp(-1) = square_qp(colorvec_2(:,-1))
-            heli_amp(-2) = square_qp(colorvec_2(:,-2))
+            heli_amp(-1) = square_qp(colorvec_2(:,-1),colorvec_2(:, 0))
+            heli_amp(-2) = square_qp(colorvec_2(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_2(:,-1))
          end select[%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then

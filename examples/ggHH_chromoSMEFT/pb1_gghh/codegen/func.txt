@@ -1,0 +1,205 @@
+
+
+mdlZERO = mdlfloat1;
+
+mdlaEW = 1/mdlaEWM1;
+
+mdlG = 2*sqrt(mdlaS)*sqrt(pi);
+
+mdlCKM1x1 = 1;
+
+mdlCKM1x2 = 0;
+
+mdlCKM1x3 = 0;
+
+mdlCKM2x1 = 0;
+
+mdlCKM2x2 = 1;
+
+mdlCKM2x3 = 0;
+
+mdlCKM3x1 = 0;
+
+mdlCKM3x2 = 0;
+
+mdlCKM3x3 = 1;
+
+mdlloop = 16*pi^2;
+
+mdlMh = mdlfloat2;
+
+mdlMW = sqrt(mdlMZ^2/mdlfloat3+sqrt(mdlMZ^4/mdlfloat4-mdlaEW*pi*mdlMZ^2/(mdlGf*sqrt(2))));
+
+mdlee = 2*sqrt(mdlaEW)*sqrt(pi);
+
+mdlsw2 = 1-mdlMW^2/mdlMZ^2;
+
+mdlcw = sqrt(1-mdlsw2);
+
+mdlsw = sqrt(mdlsw2);
+
+mdlg1 = mdlee/mdlcw;
+
+mdlgw = mdlee/mdlsw;
+
+mdlvev = 2*mdlMW*mdlsw/mdlee;
+
+mdlv = 2*mdlMW*mdlsw/mdlee;
+
+mdlyb = mdlymb*sqrt(2)/mdlvev;
+
+mdlyc = mdlymc*sqrt(2)/mdlvev;
+
+mdlydo = mdlymdo*sqrt(2)/mdlvev;
+
+mdlye = mdlyme*sqrt(2)/mdlvev;
+
+mdlym = mdlymm*sqrt(2)/mdlvev;
+
+mdlys = mdlyms*sqrt(2)/mdlvev;
+
+mdlyt = mdlymt*sqrt(2)/mdlvev;
+
+mdlytau = mdlymtau*sqrt(2)/mdlvev;
+
+mdlyup = mdlymup*sqrt(2)/mdlvev;
+
+mdlnormh3 = mdlMh^2/(mdlfloat3*mdlv^2);
+
+mdlnormh4 = mdlMh^2/(mdlfloat5*mdlv^2);
+
+mdlyyb = mdlymb/mdlv;
+
+mdlyyt = mdlymt/mdlv;
+
+mdlyytau = mdlymtau/mdlv;
+
+Nfrat = if(Nfgen,Nf/Nfgen,1);
+
+mdlGC1 = (-mdlee)*i_/mdlfloat6;
+
+mdlGC2 = 2*mdlee*i_/mdlfloat6;
+
+mdlGC3 = (-mdlee)*i_;
+
+mdlGC4 = mdlee*i_;
+
+mdlGC5 = mdlee^2*i_;
+
+mdlGC6 = -mdlG;
+
+mdlGC7 = i_*mdlG;
+
+mdlGC8 = i_*mdlG^2;
+
+mdlGC9SM = (-24)*i_*mdlnormh4;
+
+mdlGC9DIM6 = (-24)*mdlchhhh*i_*mdlnormh4;
+
+mdlGC9 = mdlGC9SM+mdlGC9DIM6*mdlLambdam2;
+
+mdlGC10 = (-mdlee^2)*i_/mdlsw^2;
+
+mdlGC11 = mdlcw^2*mdlee^2*i_/mdlsw^2;
+
+mdlGC12 = mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC13 = mdlCKM1x1*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC14 = mdlCKM1x2*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC15 = mdlCKM1x3*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC16 = mdlCKM2x1*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC17 = mdlCKM2x2*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC18 = mdlCKM2x3*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC19 = mdlCKM3x1*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC20 = mdlCKM3x2*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC21 = mdlCKM3x3*mdlee*i_/(mdlsw*sqrt(2));
+
+mdlGC22 = mdlcw*mdlee*i_/mdlsw;
+
+mdlGC23 = (-2)*mdlcw*mdlee^2*i_/mdlsw;
+
+mdlGC24 = mdlee*i_*mdlsw/(mdlfloat6*mdlcw);
+
+mdlGC25 = (-2)*mdlee*i_*mdlsw/(mdlfloat6*mdlcw);
+
+mdlGC26 = mdlee*i_*mdlsw/mdlcw;
+
+mdlGC27 = (-mdlcw)*mdlee*i_/(mdlfloat3*mdlsw)-mdlee*i_*mdlsw/(mdlfloat7*mdlcw);
+
+mdlGC28 = mdlcw*mdlee*i_/(mdlfloat3*mdlsw)-mdlee*i_*mdlsw/(mdlfloat7*mdlcw);
+
+mdlGC29 = (-mdlcw)*mdlee*i_/(mdlfloat3*mdlsw)+mdlee*i_*mdlsw/(mdlfloat3*mdlcw);
+
+mdlGC30 = mdlcw*mdlee*i_/(mdlfloat3*mdlsw)+mdlee*i_*mdlsw/(mdlfloat3*mdlcw);
+
+mdlGC31DIM6 = 4*mdlcgghh*i_*mdlG^2/(mdlloop*mdlv^2);
+
+mdlGC31 = mdlGC31DIM6*mdlLambdam2;
+
+mdlGC32DIM6 = 4*mdlcgghh*mdlG^3/(mdlloop*mdlv^2);
+
+mdlGC32 = mdlGC32DIM6*mdlLambdam2;
+
+mdlGC33DIM6 = (-4)*mdlcgghh*i_*mdlG^4/(mdlloop*mdlv^2);
+
+mdlGC33 = mdlGC33DIM6*mdlLambdam2;
+
+mdlGC34DIM6 = 2*mdlcgg*i_*mdlG^2/(mdlloop*mdlv);
+
+mdlGC34 = mdlGC34DIM6*mdlLambdam2;
+
+mdlGC35DIM6 = 2*mdlcgg*mdlG^3/(mdlloop*mdlv);
+
+mdlGC35 = mdlGC35DIM6*mdlLambdam2;
+
+mdlGC36DIM6 = (-2)*mdlcgg*i_*mdlG^4/(mdlloop*mdlv);
+
+mdlGC36 = mdlGC36DIM6*mdlLambdam2;
+
+mdlGC37 = 2*mdlcV*i_*mdlMW^2/mdlv;
+
+mdlGC38 = 2*mdlcV*i_*mdlMZ^2/mdlv;
+
+mdlGC39SM = (-6)*i_*mdlnormh3*mdlv;
+
+mdlGC39DIM6 = (-6)*mdlchhh*i_*mdlnormh3*mdlv;
+
+mdlGC39 = mdlGC39SM+mdlGC39DIM6*mdlLambdam2;
+
+mdlGC40DIM6 = (-2)*mdlcthh*i_*mdlyyt/mdlv;
+
+mdlGC40 = mdlGC40DIM6*mdlLambdam2;
+
+mdlGC41SM = (-i_)*mdlyyt;
+
+mdlGC41DIM6 = (-mdlct)*i_*mdlyyt;
+
+mdlGC41 = mdlGC41SM+mdlGC41DIM6*mdlLambdam2;
+
+mdlGC42 = mdlee*i_*complexconjugate(mdlCKM1x1)/(mdlsw*sqrt(2));
+
+mdlGC43 = mdlee*i_*complexconjugate(mdlCKM1x2)/(mdlsw*sqrt(2));
+
+mdlGC44 = mdlee*i_*complexconjugate(mdlCKM1x3)/(mdlsw*sqrt(2));
+
+mdlGC45 = mdlee*i_*complexconjugate(mdlCKM2x1)/(mdlsw*sqrt(2));
+
+mdlGC46 = mdlee*i_*complexconjugate(mdlCKM2x2)/(mdlsw*sqrt(2));
+
+mdlGC47 = mdlee*i_*complexconjugate(mdlCKM2x3)/(mdlsw*sqrt(2));
+
+mdlGC48 = mdlee*i_*complexconjugate(mdlCKM3x1)/(mdlsw*sqrt(2));
+
+mdlGC49 = mdlee*i_*complexconjugate(mdlCKM3x2)/(mdlsw*sqrt(2));
+
+mdlGC50 = mdlee*i_*complexconjugate(mdlCKM3x3)/(mdlsw*sqrt(2));
+
+

@@ -79,12 +79,18 @@ class Diagram:
       # Eliminate vertex nkill
       v_kill = self._vertices[nkill]
       r_kill = v_kill.rank
+      o_kill = v_kill.orders
       f_kill = v_kill.fields
       d_kill = len(f_kill)
       del self._vertices[nkill]
       v_keep = self._vertices[nkeep]
       d_keep = len(v_keep.fields)
       v_keep.rank += v_kill.rank
+      for key in v_kill.orders():
+         if key in v_keep.orders:
+            v_keep.orders[key] += v_kill.orders[key]
+         else:
+            v_keep.orders[key] = v_kill.orders[key]
       f_keep = v_keep.fields
 
       i_keep = f_keep.index(field)
@@ -192,6 +198,32 @@ class Diagram:
          return 2
 
       return rk
+
+   # def orders(self):
+   #    tmporders = dict()
+   #    for v in self._vertices:
+   #       for key in self._vertices[v].orders.keys():
+   #          if key in tmporders:
+   #             tmporders[key] += self._vertices[v].orders[key]
+   #          else:
+   #             tmporders[key] = self._vertices[v].orders[key]
+
+   #    return tmporders
+
+   def order(self,okey):
+      tmporders = dict()
+      for v in self._vertices:
+         for key in self._vertices[v].orders.keys():
+            if key in tmporders:
+               tmporders[key] += self._vertices[v].orders[key]
+            else:
+               tmporders[key] = self._vertices[v].orders[key]
+      if okey is None:
+         return 0
+      elif isinstance(okey, str):
+         return tmporders[okey]
+      else:
+         return tmporders[str(okey)]
 
    def loopsize(self):
       return len(self._loop)
@@ -823,9 +855,10 @@ class DiagramComponent:
       return False
 
 class Vertex(DiagramComponent):
-   def __init__(self, index, rank, *fields):
+   def __init__(self, index, rank, orders, *fields):
       self.index = index
       self.rank = rank
+      self.orders = orders
       self.fields = list(fields)
 
    def addToDiagram(self, diagram):
@@ -852,7 +885,7 @@ class Vertex(DiagramComponent):
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
-         "rank=%s" % self.rank] + list(map(str, self.fields)))) + ")"
+         "rank=%s" % self.rank,"orders=%s" % self.orders] + list(map(str, self.fields)))) + ")"
 
 
 class Propagator(DiagramComponent):

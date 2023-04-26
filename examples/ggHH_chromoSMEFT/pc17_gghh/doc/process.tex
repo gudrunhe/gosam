@@ -1,0 +1,1420 @@
+\documentclass[a4paper]{article}
+\usepackage{axodraw}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{makeidx}
+\usepackage{hyperref}
+
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\brb}[1]{[ #1 \vert}
+\newcommand{\kea}[1]{\vert #1 \rangle}
+\newcommand{\keb}[1]{\vert #1 ]}
+\newcommand{\Spaa}[1]{\langle #1 \rangle}
+\newcommand{\Spab}[1]{\langle #1]}
+\newcommand{\Spba}[1]{[ #1 \rangle}
+\newcommand{\Spbb}[1]{[ #1 ]}
+
+\allowdisplaybreaks[1]
+
+\title{\texttt{GoSam 2.1.0}: ${g}{g}\rightarrow{h}{h}$}
+\author{jannisl}
+\date{2023-04-26 (13:44:35)}
+
+\renewcommand{\indexname}{Index of all Loop Diagrams}
+
+\makeindex
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent This process consists of 2 tree-level diagrams and 28 NLO diagrams. GoSam has identified 3 groups  of NLO diagrams by analyzing their one-loop integrals.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Helicities}
+
+\begin{longtable}[c]{r|cccc|c|c}
+\bf{Index} &1&2&3&4 & Permutation & Set\\
+\hline
+\endfirsthead
+\bf{Index} &1&2&3&4\\
+\hline
+\endhead 
+$0$& $-$& $-$& $0$& $0$ &  & $0$ \\
+$1\rightarrow 0$& $+$& $-$& $0$& $0$ & $(34)$ & $1$ \\
+$2\rightarrow 0$& $-$& $+$& $0$& $0$ & $(34)$ & $2$ \\
+$3\rightarrow 0$& $+$& $+$& $0$& $0$ & $(34)$ & $3$ \\
+\end{longtable}
+\section{Wave Functions}
+In this section, we use $l_i=k_i$ for massless particles;
+in spinors $\kea{i}$ (resp. $\keb{i}$) denote $\kea{l_i}$ (resp. $\keb{l_i}$).
+For the massive particles we have:
+\begin{align}
+l_{3} &= k_{3} - \frac{mdlMh^2}{%
+      2 k_{3}\cdot k_{2}}k_{2}\\
+l_{4} &= k_{4} - \frac{mdlMh^2}{%
+      2 k_{4}\cdot k_{2}}k_{2}
+\end{align}
+
+All helicity amplitudes are defined in terms of the following wave functions:
+\begin{itemize}
+\item $g(k_{1})$ 
+% incoming vector particle
+\begin{align}
+\varepsilon^\mu_+(k_{1}) &=
+   \frac{\Spab{2\vert\gamma^\mu\vert 1}}{%
+   \sqrt{2}\Spaa{2\vert 1}}\\
+\varepsilon^\mu_-(k_{1}) &=
+   \frac{\Spba{2\vert\gamma^\mu\vert 1}}{%
+   \sqrt{2}\Spbb{1\vert 2}}
+\end{align}
+\item $g(k_{2})$ 
+% incoming vector particle
+\begin{align}
+\varepsilon^\mu_+(k_{2}) &=
+   \frac{\Spab{1\vert\gamma^\mu\vert 2}}{%
+   \sqrt{2}\Spaa{1\vert 2}}\\
+\varepsilon^\mu_-(k_{2}) &=
+   \frac{\Spba{1\vert\gamma^\mu\vert 2}}{%
+   \sqrt{2}\Spbb{2\vert 1}}
+\end{align}
+\item $h(k_3)$ 
+\begin{align}
+% outgoing scalar particle
+\epsilon(k_{3}) &= 1
+\end{align}
+\item $h(k_4)$ 
+\begin{align}
+% outgoing scalar particle
+\epsilon(k_{4}) &= 1
+\end{align}
+\end{itemize}
+
+%------------------------------------------------------------------------
+\section{Colour Basis}
+\begin{align}
+\vert c_{1}\rangle &=g^{A_{1}}_{(1)}g^{A_{2}}_{(2)}\textrm{tr}\left\{T^{A_{2}}T^{A_{1}}\right\}
+\end{align}
+
+
+\section{Tree Diagrams}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-0.log}
+
+\begin{longtable}{cc}
+\endfirsthead
+\endhead
+%---#[ tree diagram1:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 1:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(62.1,54.2){3}{10} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{1})$}
+   \Gluon(109.9,22.2)(62.1,54.2){3}{12} % part21-propagator
+   \Text(108.2,24.7)[lt]{$g(k_{2})$}
+   \DashLine(62.1,54.2)(37.0,3.8){5} % part5000000-propagator
+   \Text(39.7,5.1)[rt]{$h(k_{3})$}
+   \DashLine(62.1,54.2)(1.2,59.8){5} % part5000000-propagator
+   \Text(0.9,62.7)[rb]{$h(k_{4})$}
+   \Vertex(62.1,54.2){3} % part21-part21-part5000000-part5000000 vertex
+\end{picture}
+\\
+{\sl Diagram~1}
+\end{center}
+\end{minipage}}
+%---#] tree diagram1:
+&
+%---#[ tree diagram2:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 2:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(58.0,69.2){3}{9} % part21-propagator
+   \Text(103.5,88.2)[lb]{$g(k_{1})$}
+   \Gluon(1.2,59.8)(58.0,69.2){3}{12} % part21-propagator
+   \Text(0.7,56.8)[rt]{$g(k_{2})$}
+   \DashLine(68.3,31.7)(109.9,22.2){5} % part5000000-propagator
+   \Text(110.6,19.3)[lt]{$h(k_{3})$}
+   \DashLine(68.3,31.7)(37.0,3.8){5} % part5000000-propagator
+   \Text(39.0,6.0)[rt]{$h(k_{4})$}
+   \Vertex(58.0,69.2){3} % part21-part21-part5000000 vertex
+   \Vertex(68.3,31.7){3} % part5000000-part5000000-part5000000 vertex
+   \DashLine(68.3,31.7)(58.0,69.2){5} % part5000000-propagator
+   \Text(60.2,49.7)[rt]{$h$}
+\end{picture}
+\\
+{\sl Diagram~2}
+\end{center}
+\end{minipage}}
+%---#] tree diagram2:
+\end{longtable}
+
+
+
+\section{One-Loop Diagrams}
+\subsection*{General Information}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-1.log}
+
+Loop diagrams are grouped into sets of diagrams which share
+loop-propagators. A loop integral can be written as
+\begin{equation}
+\int\!\frac{\mathrm{d}^nk}{i\pi^{\frac{n}{2}}}%
+\frac{\mathcal{N}(q)}{\prod_{j=1}{N}\left[(k+r_j)^2-(m_j^2
+   -i m_j\Gamma_j) + i\delta\right]}.
+\end{equation}
+For each group we list $r_j$, $m_j$ and $\Gamma_j$.
+For $m_j$ and $\Gamma_j$ only non-vanishing symbols are listed.
+Furthermore, we give the matrix $S$ which is defined as
+\begin{equation}
+S_{\alpha\beta} = (r_\alpha-r_\beta)^2
+-(m_\alpha^2-im_\alpha\Gamma_\alpha)
+-(m_\beta^2-im_\beta\Gamma_\beta).
+\end{equation}
+For each diagram we denote how the matrix $S^\prime$ for the specific diagram
+is obtained from the original~$S$. The notation
+\begin{equation}
+S^\prime=S_{Q\to q^\prime}^{\{l_1,l_2,\ldots\}}
+\end{equation}
+means, that the rows and columns labeled by $l_1,l_2,\ldots$ should be
+removed from $S$ (likewise $r_{l_1}, r_{l_2}, \ldots$ are removed from the
+list of propagators) and $\mathcal{N}(q)$ has to be replaced by
+$\mathcal{N}(q^\prime)$.
+The maximum effective rank of a group is the rank that has to be passed
+to \textsc{Samurai} if the whole group is reduced at once; this number
+is calculated as
+\begin{equation}
+\max_{\text{diagrams}}\left\{(\text{rank of diagram})+
+(\text{number of pinches})\right\}.
+\end{equation}
+Diagrams with massless closed quark lines are multiplied by a factor
+$\mathtt{Nfrat}=\mathtt{Nf}/\mathtt{Nfgen}$. This multiplication is indicated
+by the symbol $N_f$ following the rank. By default $\mathtt{Nfrat}$ evaluates
+to one but can be changed by modifying $\mathtt{Nf}$ or $\mathtt{Nfgen}$ in the
+model~file.
+
+
+\subsection{Group~0 (4-Point)}
+\subsubsection*{General Information}
+The maximum effective rank in this group is~6.
+
+\begin{subequations}
+\begin{align}
+r_{1} &= -k_{2}+k_{4},\quad m_{1} = \text{MT}\\
+r_{2} &= -k_{2},\quad m_{2} = \text{MT}\\
+r_{3} &= 0,\quad m_{3} = \text{MT}\\
+r_{4} &= -k_{3},\quad m_{4} = \text{MT}
+\end{align}
+\end{subequations}
+
+\begin{equation}
+S=\left(\begin{array}{cccc}
+   S_{1,1}&
+   S_{1,2}&
+   S_{1,3}&
+   S_{1,4}\\
+   S_{2,1}&
+   S_{2,2}&
+   S_{2,3}&
+   S_{2,4}\\
+   S_{3,1}&
+   S_{3,2}&
+   S_{3,3}&
+   S_{3,4}\\
+   S_{4,1}&
+   S_{4,2}&
+   S_{4,3}&
+   S_{4,4}\end{array}\right)
+\end{equation}
+\begin{subequations}
+\begin{align}
+   S_{1,1}&=-2\text{MT}^2\\
+   S_{1,2}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{1,3}&=2\text{Mh}^2-s_{23}-s_{12}-2\text{MT}^2\\
+   S_{1,4}&=-2\text{MT}^2\\
+   S_{2,2}&=-2\text{MT}^2\\
+   S_{2,3}&=-2\text{MT}^2\\
+   S_{2,4}&=s_{23}-2\text{MT}^2\\
+   S_{3,3}&=-2\text{MT}^2\\
+   S_{3,4}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{4,4}&=-2\text{MT}^2
+\end{align}
+\end{subequations}
+
+\subsubsection{Diagrams (2)}\begin{longtable}{cc}
+\endfirsthead
+\endhead
+%---#[ loop diagram33:
+\index{Diagram0000000033=Diagram 33 (Group 0)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 33:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(77.7,35.3){3}{6} % part21-propagator
+   \Text(100.5,16.9)[lt]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(42.3,64.7){3}{6} % part21-propagator
+   \Text(19.5,83.1)[rb]{$g(k_{2})$}
+   \DashLine(77.7,64.7)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.5,83.1)[lb]{$h(k_{3})$}
+   \DashLine(42.3,35.3)(17.6,14.6){5} % part5000000-propagator
+   \Text(19.5,16.9)[rt]{$h(k_{4})$}
+   \Vertex(77.7,35.3){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,64.7){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part21 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~33}\\
+$S^\prime=S_{Q\to -q-(-k3)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram33:
+
+%---#[ loop diagram34:
+\index{Diagram0000000034=Diagram 34 (Group 0)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 34:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(77.7,64.7){3}{6} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(42.3,35.3){3}{6} % part21-propagator
+   \Text(15.7,12.3)[rt]{$g(k_{2})$}
+   \DashLine(77.7,35.3)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.3,12.3)[lt]{$h(k_{3})$}
+   \DashLine(42.3,64.7)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.7,87.7)[rb]{$h(k_{4})$}
+   \Vertex(77.7,64.7){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,35.3){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part21 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~34}\\
+$S^\prime=S_{Q\to -q-(-k3)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+
+\end{longtable}
+
+%---#] loop diagram34:
+
+\subsection{Group~1 (4-Point)}
+\subsubsection*{General Information}
+The maximum effective rank in this group is~6.
+
+\begin{subequations}
+\begin{align}
+r_{1} &= -k_{3}-k_{4},\quad m_{1} = \text{MT}\\
+r_{2} &= -k_{3},\quad m_{2} = \text{MT}\\
+r_{3} &= 0,\quad m_{3} = \text{MT}\\
+r_{4} &= -k_{2},\quad m_{4} = \text{MT}
+\end{align}
+\end{subequations}
+
+\begin{equation}
+S=\left(\begin{array}{cccc}
+   S_{1,1}&
+   S_{1,2}&
+   S_{1,3}&
+   S_{1,4}\\
+   S_{2,1}&
+   S_{2,2}&
+   S_{2,3}&
+   S_{2,4}\\
+   S_{3,1}&
+   S_{3,2}&
+   S_{3,3}&
+   S_{3,4}\\
+   S_{4,1}&
+   S_{4,2}&
+   S_{4,3}&
+   S_{4,4}\end{array}\right)
+\end{equation}
+\begin{subequations}
+\begin{align}
+   S_{1,1}&=-2\text{MT}^2\\
+   S_{1,2}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{1,3}&=s_{12}-2\text{MT}^2\\
+   S_{1,4}&=-2\text{MT}^2\\
+   S_{2,2}&=-2\text{MT}^2\\
+   S_{2,3}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{2,4}&=s_{23}-2\text{MT}^2\\
+   S_{3,3}&=-2\text{MT}^2\\
+   S_{3,4}&=-2\text{MT}^2\\
+   S_{4,4}&=-2\text{MT}^2
+\end{align}
+\end{subequations}
+
+\subsubsection{Diagrams (7)}\begin{longtable}{cc}
+\endfirsthead
+\endhead
+%---#[ loop diagram5:
+\index{Diagram0000000005=Diagram 5 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 5:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(33.5,50.0){3}{8} % part21-propagator
+   \Text(14.8,13.4)[rt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(86.5,50.0){3}{8} % part21-propagator
+   \Text(105.2,86.6)[lb]{$g(k_{2})$}
+   \DashLine(86.5,50.0)(102.4,14.6){5} % part5000000-propagator
+   \Text(105.2,13.4)[lt]{$h(k_{3})$}
+   \DashLine(33.5,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(14.8,86.6)[rb]{$h(k_{4})$}
+   \Vertex(33.5,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \Vertex(86.5,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowArc(59,50)(26,0,180) % anti6-propagator
+   \Text(60.0,79.5)[rb]{$t$}
+   \ArrowArc(59,50)(26,180,360) % anti6-propagator
+   \Text(60.0,20.5)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~5}\\
+$S^\prime=S^{\{1,3\}}_{Q\to -q-(-k3)}$, $\mathrm{rk}=4$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram5:
+
+%---#[ loop diagram12:
+\index{Diagram0000000012=Diagram 12 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 12:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{3})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~12}\\
+$S^\prime=S^{\{3\}}_{Q\to -q-(-k4-k3)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram12:
+
+%---#[ loop diagram13:
+\index{Diagram0000000013=Diagram 13 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 13:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{3})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~13}\\
+$S^\prime=S^{\{3\}}_{Q\to -q-(-k4-k3)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram13:
+
+%---#[ loop diagram14:
+\index{Diagram0000000014=Diagram 14 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 14:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{2})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~14}\\
+$S^\prime=S^{\{1\}}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram14:
+
+%---#[ loop diagram15:
+\index{Diagram0000000015=Diagram 15 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 15:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{2})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~15}\\
+$S^\prime=S^{\{1\}}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram15:
+
+%---#[ loop diagram31:
+\index{Diagram0000000031=Diagram 31 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 31:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(77.7,35.3){3}{6} % part21-propagator
+   \Text(100.5,16.9)[lt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(77.7,64.7){3}{6} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{2})$}
+   \DashLine(42.3,64.7)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.7,87.7)[rb]{$h(k_{3})$}
+   \DashLine(42.3,35.3)(17.6,14.6){5} % part5000000-propagator
+   \Text(19.5,16.9)[rt]{$h(k_{4})$}
+   \Vertex(77.7,35.3){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,64.7){3} % part6-anti6-part21 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part5000000 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~31}\\
+$S^\prime=S_{Q\to q-(k2)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram31:
+
+%---#[ loop diagram32:
+\index{Diagram0000000032=Diagram 32 (Group 1)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 32:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(77.7,64.7){3}{6} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(77.7,35.3){3}{6} % part21-propagator
+   \Text(100.5,16.9)[lt]{$g(k_{2})$}
+   \DashLine(42.3,35.3)(17.6,14.6){5} % part5000000-propagator
+   \Text(19.5,16.9)[rt]{$h(k_{3})$}
+   \DashLine(42.3,64.7)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.7,87.7)[rb]{$h(k_{4})$}
+   \Vertex(77.7,64.7){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,35.3){3} % part6-anti6-part21 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part5000000 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~32}\\
+$S^\prime=S_{Q\to q-(k2)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+
+\end{longtable}
+
+%---#] loop diagram32:
+
+\subsection{Group~2 (4-Point)}
+\subsubsection*{General Information}
+The maximum effective rank in this group is~6.
+
+\begin{subequations}
+\begin{align}
+r_{1} &= -k_{3}-k_{4},\quad m_{1} = \text{MT}\\
+r_{2} &= -k_{4},\quad m_{2} = \text{MT}\\
+r_{3} &= 0,\quad m_{3} = \text{MT}\\
+r_{4} &= -k_{2},\quad m_{4} = \text{MT}
+\end{align}
+\end{subequations}
+
+\begin{equation}
+S=\left(\begin{array}{cccc}
+   S_{1,1}&
+   S_{1,2}&
+   S_{1,3}&
+   S_{1,4}\\
+   S_{2,1}&
+   S_{2,2}&
+   S_{2,3}&
+   S_{2,4}\\
+   S_{3,1}&
+   S_{3,2}&
+   S_{3,3}&
+   S_{3,4}\\
+   S_{4,1}&
+   S_{4,2}&
+   S_{4,3}&
+   S_{4,4}\end{array}\right)
+\end{equation}
+\begin{subequations}
+\begin{align}
+   S_{1,1}&=-2\text{MT}^2\\
+   S_{1,2}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{1,3}&=s_{12}-2\text{MT}^2\\
+   S_{1,4}&=-2\text{MT}^2\\
+   S_{2,2}&=-2\text{MT}^2\\
+   S_{2,3}&=\text{Mh}^2-2\text{MT}^2\\
+   S_{2,4}&=2\text{Mh}^2-s_{23}-s_{12}-2\text{MT}^2\\
+   S_{3,3}&=-2\text{MT}^2\\
+   S_{3,4}&=-2\text{MT}^2\\
+   S_{4,4}&=-2\text{MT}^2
+\end{align}
+\end{subequations}
+
+\subsubsection{Diagrams (19)}\begin{longtable}{cc}
+\endfirsthead
+\endhead
+%---#[ loop diagram1:
+\index{Diagram0000000001=Diagram 1 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 1:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(52.1,43.5){3}{12} % part21-propagator
+   \Text(100.9,17.2)[lt]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(52.1,43.5){3}{9} % part21-propagator
+   \Text(15.7,12.3)[rt]{$g(k_{2})$}
+   \DashLine(83.6,69.6)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.5,83.1)[lb]{$h(k_{3})$}
+   \DashLine(52.1,43.5)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.3,87.3)[rb]{$h(k_{4})$}
+   \Vertex(83.6,69.6){3} % part6-anti6-part5000000 vertex
+   \Vertex(52.1,43.5){3} % part6-anti6-part21-part21-part5000000 vertex
+   \ArrowArc(67,56)(20,39,219) % anti6-propagator
+   \Text(52.8,74.6)[rb]{$t$}
+   \ArrowArc(67,56)(20,-140,39) % anti6-propagator
+   \Text(82.9,38.5)[lt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~1}\\
+$S^\prime=S^{\{3,4\}}_{Q\to q-(k3+k4)}$, $\mathrm{rk}=2$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram1:
+
+%---#[ loop diagram2:
+\index{Diagram0000000002=Diagram 2 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 2:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(52.1,43.5){3}{12} % part21-propagator
+   \Text(100.9,17.2)[lt]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(52.1,43.5){3}{9} % part21-propagator
+   \Text(15.7,12.3)[rt]{$g(k_{2})$}
+   \DashLine(52.1,43.5)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.3,87.3)[rb]{$h(k_{3})$}
+   \DashLine(83.6,69.6)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.5,83.1)[lb]{$h(k_{4})$}
+   \Vertex(83.6,69.6){3} % part6-anti6-part5000000 vertex
+   \Vertex(52.1,43.5){3} % part6-anti6-part21-part21-part5000000 vertex
+   \ArrowArc(67,56)(20,39,219) % anti6-propagator
+   \Text(52.8,74.6)[rb]{$t$}
+   \ArrowArc(67,56)(20,-140,39) % anti6-propagator
+   \Text(82.9,38.5)[lt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~2}\\
+$S^\prime=S^{\{1,4\}}_{Q\to q-(k4)}$, $\mathrm{rk}=2$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram2:
+
+%---#[ loop diagram3:
+\index{Diagram0000000003=Diagram 3 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 3:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(33.5,50.0){3}{8} % part21-propagator
+   \Text(14.8,13.4)[rt]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(33.5,50.0){3}{8} % part21-propagator
+   \Text(20.3,84.1)[rb]{$g(k_{2})$}
+   \DashLine(86.5,50.0)(102.4,85.4){5} % part5000000-propagator
+   \Text(99.7,84.1)[lb]{$h(k_{3})$}
+   \DashLine(86.5,50.0)(102.4,14.6){5} % part5000000-propagator
+   \Text(105.2,13.4)[lt]{$h(k_{4})$}
+   \Vertex(33.5,50.0){3} % part6-anti6-part21-part21 vertex
+   \Vertex(86.5,50.0){3} % part6-anti6-part5000000-part5000000 vertex
+   \ArrowArc(59,50)(26,0,180) % anti6-propagator
+   \Text(60.0,79.5)[rb]{$t$}
+   \ArrowArc(59,50)(26,180,360) % anti6-propagator
+   \Text(60.0,20.5)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~3}\\
+$S^\prime=S^{\{2,4\}}_{Q\to -q-(-k3-k4)}$, $\mathrm{rk}=2$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram3:
+
+%---#[ loop diagram4:
+\index{Diagram0000000004=Diagram 4 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 4:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(33.5,50.0){3}{8} % part21-propagator
+   \Text(14.8,13.4)[rt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(86.5,50.0){3}{8} % part21-propagator
+   \Text(105.2,86.6)[lb]{$g(k_{2})$}
+   \DashLine(33.5,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(14.8,86.6)[rb]{$h(k_{3})$}
+   \DashLine(86.5,50.0)(102.4,14.6){5} % part5000000-propagator
+   \Text(105.2,13.4)[lt]{$h(k_{4})$}
+   \Vertex(33.5,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \Vertex(86.5,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowArc(59,50)(26,0,180) % anti6-propagator
+   \Text(60.0,79.5)[rb]{$t$}
+   \ArrowArc(59,50)(26,180,360) % anti6-propagator
+   \Text(60.0,20.5)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~4}\\
+$S^\prime=S^{\{1,3\}}_{Q\to -q-(-k4)}$, $\mathrm{rk}=4$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram4:
+
+%---#[ loop diagram7:
+\index{Diagram0000000007=Diagram 7 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 7:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(29.1,50.0){3}{7} % part21-propagator
+   \Text(14.7,13.7)[rt]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(29.1,50.0){3}{7} % part21-propagator
+   \Text(20.4,84.4)[rb]{$g(k_{2})$}
+   \DashLine(90.9,50.0)(102.4,85.4){5} % part5000000-propagator
+   \Text(99.6,84.4)[lb]{$h(k_{3})$}
+   \DashLine(90.9,50.0)(102.4,14.6){5} % part5000000-propagator
+   \Text(105.3,13.7)[lt]{$h(k_{4})$}
+   \Vertex(90.9,50.0){3} % part5000000-part5000000-part5000000 vertex
+   \Vertex(67.7,50.0){3} % part6-anti6-part5000000 vertex
+   \Vertex(29.1,50.0){3} % part6-anti6-part21-part21 vertex
+   \DashLine(67.7,50.0)(90.9,50.0){5} % part5000000-propagator
+   \Text(79.3,53.0)[rb]{$h$}
+   \ArrowArc(48,49)(19,0,180) % anti6-propagator
+   \Text(48.4,72.3)[rb]{$t$}
+   \ArrowArc(48,49)(19,180,360) % anti6-propagator
+   \Text(48.4,27.7)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~7}\\
+$S^\prime=S^{\{2,4\}}_{Q\to q-(k3+k4)}$, $\mathrm{rk}=2$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram7:
+
+%---#[ loop diagram8:
+\index{Diagram0000000008=Diagram 8 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 8:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,14.6){5} % part5000000-propagator
+   \Text(20.1,16.2)[rt]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part5000000-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~8}\\
+$S^\prime=S^{\{2\}}_{Q\to q-(k2)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram8:
+
+%---#[ loop diagram9:
+\index{Diagram0000000009=Diagram 9 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 9:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,14.6){5} % part5000000-propagator
+   \Text(20.1,16.2)[rt]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part5000000-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~9}\\
+$S^\prime=S^{\{2\}}_{Q\to q-(k2)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram9:
+
+%---#[ loop diagram10:
+\index{Diagram0000000010=Diagram 10 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 10:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{2})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~10}\\
+$S^\prime=S^{\{3\}}_{Q\to -q-(-k3-k4)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram10:
+
+%---#[ loop diagram11:
+\index{Diagram0000000011=Diagram 11 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 11:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{1})$}
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{2})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{3})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~11}\\
+$S^\prime=S^{\{3\}}_{Q\to -q-(-k3-k4)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram11:
+
+%---#[ loop diagram16:
+\index{Diagram0000000016=Diagram 16 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 16:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(81.2,35.9){3}{6} % part21-propagator
+   \Text(100.3,16.8)[lt]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{3})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~16}\\
+$S^\prime=S^{\{1\}}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram16:
+
+%---#[ loop diagram17:
+\index{Diagram0000000017=Diagram 17 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 17:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(81.2,64.1){3}{6} % part21-propagator
+   \Text(104.5,87.5)[lb]{$g(k_{2})$}
+   \DashLine(38.8,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.0,86.9)[rb]{$h(k_{3})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part5000000 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~17}\\
+$S^\prime=S^{\{1\}}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram17:
+
+%---#[ loop diagram18:
+\index{Diagram0000000018=Diagram 18 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 18:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(38.8,50.0){3}{8} % part21-propagator
+   \Text(20.1,83.8)[rb]{$g(k_{2})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{3})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{4})$}
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part21 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~18}\\
+$S^\prime=S^{\{4\}}_{Q\to -q-(-k4)}$, $\mathrm{rk}=3$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram18:
+
+%---#[ loop diagram19:
+\index{Diagram0000000019=Diagram 19 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 19:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,14.6)(38.8,50.0){3}{8} % part21-propagator
+   \Text(15.0,13.1)[rt]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(38.8,50.0){3}{8} % part21-propagator
+   \Text(20.1,83.8)[rb]{$g(k_{2})$}
+   \DashLine(81.2,64.1)(102.4,85.4){5} % part5000000-propagator
+   \Text(100.3,83.2)[lb]{$h(k_{3})$}
+   \DashLine(81.2,35.9)(102.4,14.6){5} % part5000000-propagator
+   \Text(104.5,12.5)[lt]{$h(k_{4})$}
+   \Vertex(81.2,64.1){3} % part6-anti6-part5000000 vertex
+   \Vertex(81.2,35.9){3} % part6-anti6-part5000000 vertex
+   \Vertex(38.8,50.0){3} % part6-anti6-part21-part21 vertex
+   \ArrowLine(81.2,64.1)(81.2,35.9) % anti6-propagator
+   \Text(84.2,50.0)[lt]{$t$}
+   \ArrowLine(38.8,50.0)(81.2,64.1) % anti6-propagator
+   \Text(59.1,59.9)[rb]{$t$}
+   \ArrowLine(81.2,35.9)(38.8,50.0) % anti6-propagator
+   \Text(59.1,40.1)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~19}\\
+$S^\prime=S^{\{4\}}_{Q\to -q-(-k4)}$, $\mathrm{rk}=3$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram19:
+
+%---#[ loop diagram22:
+\index{Diagram0000000022=Diagram 22 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 22:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(81.6,76.7){3}{5} % part21-propagator
+   \Text(103.6,88.1)[lb]{$g(k_{1})$}
+   \Gluon(17.6,85.4)(47.0,62.3){3}{7} % part21-propagator
+   \Text(19.4,83.0)[rb]{$g(k_{2})$}
+   \DashLine(55.7,30.5)(102.4,14.6){5} % part5000000-propagator
+   \Text(103.4,11.8)[lt]{$h(k_{3})$}
+   \DashLine(55.7,30.5)(17.6,14.6){5} % part5000000-propagator
+   \Text(18.7,17.4)[rt]{$h(k_{4})$}
+   \Vertex(55.7,30.5){3} % part5000000-part5000000-part5000000 vertex
+   \Vertex(81.6,76.7){3} % part6-anti6-part21 vertex
+   \Vertex(47.0,62.3){3} % part6-anti6-part21-part5000000 vertex
+   \DashLine(47.0,62.3)(55.7,30.5){5} % part5000000-propagator
+   \Text(54.2,47.2)[lb]{$h$}
+   \ArrowArc(64,69)(18,22,202) % anti6-propagator
+   \Text(56.0,89.6)[rb]{$t$}
+   \ArrowArc(64,69)(18,-157,22) % anti6-propagator
+   \Text(72.7,49.4)[lt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~22}\\
+$S^\prime=S^{\{2,3\}}_{Q\to -q-(-k3-k4)}$, $\mathrm{rk}=4$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram22:
+
+%---#[ loop diagram23:
+\index{Diagram0000000023=Diagram 23 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 23:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(17.6,85.4)(47.0,62.3){3}{7} % part21-propagator
+   \Text(19.4,83.0)[rb]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(81.6,76.7){3}{5} % part21-propagator
+   \Text(103.6,88.1)[lb]{$g(k_{2})$}
+   \DashLine(55.7,30.5)(102.4,14.6){5} % part5000000-propagator
+   \Text(103.4,11.8)[lt]{$h(k_{3})$}
+   \DashLine(55.7,30.5)(17.6,14.6){5} % part5000000-propagator
+   \Text(18.7,17.4)[rt]{$h(k_{4})$}
+   \Vertex(55.7,30.5){3} % part5000000-part5000000-part5000000 vertex
+   \Vertex(81.6,76.7){3} % part6-anti6-part21 vertex
+   \Vertex(47.0,62.3){3} % part6-anti6-part21-part5000000 vertex
+   \DashLine(47.0,62.3)(55.7,30.5){5} % part5000000-propagator
+   \Text(54.2,47.2)[lb]{$h$}
+   \ArrowArc(64,69)(18,22,202) % anti6-propagator
+   \Text(56.0,89.6)[rb]{$t$}
+   \ArrowArc(64,69)(18,-157,22) % anti6-propagator
+   \Text(72.7,49.4)[lt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~23}\\
+$S^\prime=S^{\{1,2\}}$, $\mathrm{rk}=4$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram23:
+
+%---#[ loop diagram27:
+\index{Diagram0000000027=Diagram 27 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 27:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(88.3,35.9){3}{5} % part21-propagator
+   \Text(99.9,16.3)[lt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(88.3,64.1){3}{5} % part21-propagator
+   \Text(104.9,87.0)[lb]{$g(k_{2})$}
+   \DashLine(31.7,50.0)(17.6,14.6){5} % part5000000-propagator
+   \Text(20.4,15.8)[rt]{$h(k_{3})$}
+   \DashLine(31.7,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(14.8,86.5)[rb]{$h(k_{4})$}
+   \Vertex(31.7,50.0){3} % part5000000-part5000000-part5000000 vertex
+   \Vertex(88.3,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(88.3,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(60.0,50.0){3} % part6-anti6-part5000000 vertex
+   \DashLine(60.0,50.0)(31.7,50.0){5} % part5000000-propagator
+   \Text(45.9,47.0)[rt]{$h$}
+   \ArrowLine(88.3,64.1)(88.3,35.9) % anti6-propagator
+   \Text(91.3,50.0)[lt]{$t$}
+   \ArrowLine(88.3,35.9)(60.0,50.0) % anti6-propagator
+   \Text(72.8,40.2)[rt]{$t$}
+   \ArrowLine(60.0,50.0)(88.3,64.1) % anti6-propagator
+   \Text(72.8,59.8)[rb]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~27}\\
+$S^\prime=S^{\{2\}}_{Q\to q-(k2)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram27:
+
+%---#[ loop diagram28:
+\index{Diagram0000000028=Diagram 28 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 28:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(88.3,64.1){3}{5} % part21-propagator
+   \Text(104.9,87.0)[lb]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(88.3,35.9){3}{5} % part21-propagator
+   \Text(99.9,16.3)[lt]{$g(k_{2})$}
+   \DashLine(31.7,50.0)(17.6,14.6){5} % part5000000-propagator
+   \Text(20.4,15.8)[rt]{$h(k_{3})$}
+   \DashLine(31.7,50.0)(17.6,85.4){5} % part5000000-propagator
+   \Text(14.8,86.5)[rb]{$h(k_{4})$}
+   \Vertex(31.7,50.0){3} % part5000000-part5000000-part5000000 vertex
+   \Vertex(88.3,64.1){3} % part6-anti6-part21 vertex
+   \Vertex(88.3,35.9){3} % part6-anti6-part21 vertex
+   \Vertex(60.0,50.0){3} % part6-anti6-part5000000 vertex
+   \DashLine(60.0,50.0)(31.7,50.0){5} % part5000000-propagator
+   \Text(45.9,47.0)[rt]{$h$}
+   \ArrowLine(88.3,64.1)(88.3,35.9) % anti6-propagator
+   \Text(91.3,50.0)[lt]{$t$}
+   \ArrowLine(60.0,50.0)(88.3,64.1) % anti6-propagator
+   \Text(72.8,59.8)[rb]{$t$}
+   \ArrowLine(88.3,35.9)(60.0,50.0) % anti6-propagator
+   \Text(72.8,40.2)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~28}\\
+$S^\prime=S^{\{2\}}_{Q\to q-(k2)}$, $\mathrm{rk}=5$
+\end{center}
+\end{minipage}}
+&
+%---#] loop diagram28:
+
+%---#[ loop diagram29:
+\index{Diagram0000000029=Diagram 29 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 29:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,14.6)(77.7,35.3){3}{6} % part21-propagator
+   \Text(100.5,16.9)[lt]{$g(k_{1})$}
+   \Gluon(102.4,85.4)(77.7,64.7){3}{6} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{2})$}
+   \DashLine(42.3,35.3)(17.6,14.6){5} % part5000000-propagator
+   \Text(19.5,16.9)[rt]{$h(k_{3})$}
+   \DashLine(42.3,64.7)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.7,87.7)[rb]{$h(k_{4})$}
+   \Vertex(77.7,35.3){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,64.7){3} % part6-anti6-part21 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part5000000 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~29}\\
+$S^\prime=S_{Q\to q-(k2)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+\\
+%---#] loop diagram29:
+
+%---#[ loop diagram30:
+\index{Diagram0000000030=Diagram 30 (Group 2)}
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+% Diagram 30:
+\begin{picture}(140,120)(-10,-10)
+   \Gluon(102.4,85.4)(77.7,64.7){3}{6} % part21-propagator
+   \Text(104.3,87.7)[lb]{$g(k_{1})$}
+   \Gluon(102.4,14.6)(77.7,35.3){3}{6} % part21-propagator
+   \Text(100.5,16.9)[lt]{$g(k_{2})$}
+   \DashLine(42.3,64.7)(17.6,85.4){5} % part5000000-propagator
+   \Text(15.7,87.7)[rb]{$h(k_{3})$}
+   \DashLine(42.3,35.3)(17.6,14.6){5} % part5000000-propagator
+   \Text(19.5,16.9)[rt]{$h(k_{4})$}
+   \Vertex(77.7,64.7){3} % part6-anti6-part21 vertex
+   \Vertex(77.7,35.3){3} % part6-anti6-part21 vertex
+   \Vertex(42.3,64.7){3} % part6-anti6-part5000000 vertex
+   \Vertex(42.3,35.3){3} % part6-anti6-part5000000 vertex
+   \ArrowLine(77.7,64.7)(77.7,35.3) % anti6-propagator
+   \Text(80.7,50.0)[lt]{$t$}
+   \ArrowLine(42.3,64.7)(77.7,64.7) % anti6-propagator
+   \Text(60.0,67.7)[rb]{$t$}
+   \ArrowLine(77.7,35.3)(42.3,35.3) % anti6-propagator
+   \Text(60.0,32.3)[rt]{$t$}
+   \ArrowLine(42.3,35.3)(42.3,64.7) % anti6-propagator
+   \Text(39.3,50.0)[rt]{$t$}
+\end{picture}
+\\
+{\sl -Diagram~30}\\
+$S^\prime=S_{Q\to q-(k2)}$, $\mathrm{rk}=6$
+\end{center}
+\end{minipage}}
+
+\end{longtable}
+
+%---#] loop diagram30:
+
+
+\printindex
+
+\section{Related Work}
+If you publish results obtained by using this matrix element code
+please cite the appropriate papers in the bibliography of this document.
+
+Scientific publications prepared using the present version of
+\textsc{GoSam} or any modified version of it or any code linking to
+\textsc{GoSam} or parts of it should make a clear
+reference to the publications~\cite{Cullen:2014yla,Cullen:2011ac}.
+
+For graph generation we use QGraf~\cite{Nogueira:1991ex}.
+The Feynman diagrams are further processed with the symbolic manipulation
+program FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd} using the FORM library
+SPINNEY~\cite{Cullen:2010jv}.
+The Fortran~90 code is generated using
+FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd}.
+
+For
+the reduction of the tensor integrals, the code uses the
+package GOLEM95~\cite{Guillet:2013msa,Binoth:2008uq,Cullen:2011kv}.
+The tensor coefficients are
+obtained using tensorial reconstruction at the integrand
+level~\cite{Heinrich:2010ax}.
+
+Please, make sure, you also give credit to the authors of the scalar
+loop libraries, if you configured the amplitude code such that it calls
+other libraries than the ones mentioned so far. Depending on your
+configuration you might use one or more of the following programs for
+the evaluation of the scalar integrals:
+\begin{itemize}
+\item OneLOop~\cite{vanHameren:2010cp},
+\item QCDLoop~\cite{Ellis:2007qk}, which uses FF~\cite{vanOldenborgh:1990yc},
+\item LoopTools~\cite{Hahn:1998yk}, which uses FF~\cite{vanOldenborgh:1990yc}.
+\item GOLEM95~\cite{Binoth:2008uq,Guillet:2013msa} which uses OneLOop~\cite{vanHameren:2010cp}
+   and may be configured such that it uses
+   LoopTools~\cite{Hahn:1998yk,vanOldenborgh:1990yc}.
+\end{itemize}
+
+\begin{thebibliography}{ABC}
+%\cite{Cullen:2014yla}
+\bibitem{Cullen:2014yla}
+  G.~Cullen, H.~van Deurzen, N.~Greiner, G.~Heinrich, G.~Luisoni, P.~Mastrolia, E.~Mirabella and G.~Ossola {\it et al.},
+  ``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and beyond,''
+  Eur.\ Phys.\ J.\ C {\bf 74} (2014) 8,  3001
+  [\href{http://arxiv.org/abs/1404.7096}{arXiv:1404.7096 [hep-ph]}].
+  %%CITATION = ARXIV:1404.7096;%%
+%\cite{Cullen:2011ac}
+\bibitem{Cullen:2011ac}
+  G.~Cullen, N.~Greiner, G.~Heinrich, G.~Luisoni, P.~Mastrolia, G.~Ossola, T.~Reiter and F.~Tramontano,
+  ``Automated One-Loop Calculations with GoSam,''
+  Eur.\ Phys.\ J.\ C {\bf 72} (2012) 1889
+  [\href{http://arxiv.org/abs/1111.2034}{arXiv:1111.2034 [hep-ph]}].
+  %%CITATION = ARXIV:1111.2034;%%
+%\cite{Nogueira:1991ex}
+\bibitem{Nogueira:1991ex}
+  P.~Nogueira,
+  ``Automatic Feynman graph generation,''
+  J.\ Comput.\ Phys.\  {\bf 105} (1993) 279.
+  %%CITATION = JCTPA,105,279;%%
+%\cite{Kuipers:2012rf}
+\bibitem{Kuipers:2012rf}
+  J.~Kuipers, T.~Ueda, J.~A.~M.~Vermaseren and J.~Vollinga,
+  ``FORM version 4.0,''
+  Comput.\ Phys.\ Commun.\  {\bf 184} (2013) 1453
+  [\href{http://arxiv.org/abs/1203.6543}{arXiv:1203.6543 [cs.SC]}].
+  %%CITATION = ARXIV:1203.6543;%%
+%\cite{Vermaseren:2000nd}
+\bibitem{Vermaseren:2000nd}
+  J.~A.~M.~Vermaseren,
+  ``New features of FORM,''
+  arXiv:math-ph/0010025.
+  %%CITATION = MATH-PH/0010025;%%
+%\cite{Cullen:2010jv}
+\bibitem{Cullen:2010jv}
+  G.~Cullen, M.~Koch-Janusz and T.~Reiter,
+  ``spinney: A Form Library for Helicity Spinors,''
+  \href{http://arxiv.org/abs/1008.0803}{arXiv:1008.0803 [hep-ph]}.
+  %%CITATION = ARXIV:1008.0803;%%
+%\cite{Reiter:2009ts}
+%\cite{Guillet:2013msa}
+\bibitem{Guillet:2013msa}
+  J.~P.~Guillet, G.~Heinrich and J.~F.~von Soden-Fraunhofen,
+  ``Tools for NLO automation: extension of the golem95C integral library,''
+  Comput.\ Phys.\ Commun.\  {\bf 185} (2014) 1828
+  [\href{http://arxiv.org/abs/1312.3887}{arXiv:1312.3887 [hep-ph]}].
+  %%CITATION = ARXIV:1312.3887;%%
+%\cite{Binoth:2008uq}
+\bibitem{Binoth:2008uq}
+  T.~Binoth, J.~P.~Guillet, G.~Heinrich, E.~Pilon and T.~Reiter,
+  ``Golem95: a numerical program to calculate one-loop tensor integrals with up
+  to six external legs,''
+  Comput.\ Phys.\ Commun.\  {\bf 180} (2009) 2317
+  [\href{http://arxiv.org/abs/0810.0992}{arXiv:0810.0992 [hep-ph]}].
+  %%CITATION = CPHCB,180,2317;%%
+%\cite{Cullen:2011kv}
+\bibitem{Cullen:2011kv}
+  G.~Cullen, J.~P.~.Guillet, G.~Heinrich, T.~Kleinschmidt, E.~Pilon, T.~Reiter, M.~Rodgers,
+  ``Golem95C: A library for one-loop integrals with complex masses,''
+  Comput.\ Phys.\ Commun.\  {\bf 182 } (2011)  2276-2284.
+  [\href{http://arxiv.org/abs/1101.5595}{arXiv:1101.5595 [hep-ph]}].
+%\cite{vanHameren:2010cp}
+\bibitem{vanHameren:2010cp}
+  A.~van Hameren,
+  ``OneLOop: For the evaluation of one-loop scalar functions,''
+  [\href{http://arxiv.org/abs/1007.4716}{arXiv:1007.4716 [hep-ph]}].
+%\cite{Ellis:2007qk}
+\bibitem{Ellis:2007qk}
+  R.~K.~Ellis, G.~Zanderighi,
+  ``Scalar one-loop integrals for QCD,''
+  JHEP {\bf 0802 } (2008)  002.
+  [\href{http://arxiv.org/abs/0712.1851}{arXiv:0712.1851 [hep-ph]}].
+%\cite{vanOldenborgh:1990yc}
+\bibitem{vanOldenborgh:1990yc}
+  G.~J.~van Oldenborgh,
+  ``FF: A Package to evaluate one loop Feynman diagrams,''
+  Comput.\ Phys.\ Commun.\  {\bf 66 } (1991)  1-15.
+%\cite{Hahn:1998yk}
+\bibitem{Hahn:1998yk}
+  T.~Hahn, M.~Perez-Victoria,
+  ``Automatized one loop calculations in four-dimensions and D-dimensions,''
+  Comput.\ Phys.\ Commun.\  {\bf 118 } (1999)  153-165.
+  [hep-ph/9807565].
+%\cite{Heinrich:2010ax}
+\bibitem{Heinrich:2010ax}
+  G.~Heinrich, G.~Ossola, T.~Reiter, F.~Tramontano,
+  ``Tensorial Reconstruction at the Integrand Level,''
+  JHEP {\bf 1010 } (2010)  105.
+  [\href{http://arxiv.org/abs/1008.2441}{arXiv:1008.2441 [hep-ph]}].
+\end{thebibliography}
+\end{document}

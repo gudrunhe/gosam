@@ -140,18 +140,13 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 #endif
 .sort
 
-Id mdlGC9 = mdlGC9SM + mdlGC9DIM6*mdlLambdam2;
-Id mdlGC31 = mdlGC31DIM6*mdlLambdam2;
-Id mdlGC32 = mdlGC32DIM6*mdlLambdam2;
-Id mdlGC33 = mdlGC33DIM6*mdlLambdam2;
-Id mdlGC34 = mdlGC34DIM6*mdlLambdam2;
-Id mdlGC35 = mdlGC35DIM6*mdlLambdam2;
-Id mdlGC36 = mdlGC36DIM6*mdlLambdam2;
-Id mdlGC39 = mdlGC39SM + mdlGC39DIM6*mdlLambdam2;
-Id mdlGC40 = mdlGC40DIM6*mdlLambdam2;
-Id mdlGC41 = mdlGC41SM + mdlGC41DIM6*mdlLambdam2;
+Repeat Id Lambdam1^2 = Lambdam2;
 .sort
-Id mdlLambdam2 = 1;
+Id Lambdam2^2 = 0;
+Id Loopfac^2 = 0;
+.sort
+Id Lambdam2 = 1;
+Id Loopfac = 1;
 
 
 #call VertexConstants
