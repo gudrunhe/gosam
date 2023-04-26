@@ -19,7 +19,7 @@ QL = CouplingOrder(name = 'QL',
                    hierarchy = 2)
 
 NP = CouplingOrder(name = 'NP',
-                   expansion_order = 2,
+                   expansion_order = 1,
                    hierarchy = 1)
 
 QQ = CouplingOrder(name = 'QQ',

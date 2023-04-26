@@ -789,11 +789,11 @@ class Model:
 			
 			if 'NP' in vorders.keys():
 				if 'QL' in vorders.keys():
-					f.write("\n  Lambdam1^%d * Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
+					f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
 				else:
-					f.write("\n  Lambdam1^%d * (" % (vorders['NP']))
+					f.write("\n  Lambdam2^%d * (" % (vorders['NP']))
 			elif 'QL' in vorders.keys():
-				f.write("\n  Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
+				f.write("\n  Loopfac^%d * (" % (vorders['QL']))
 
 
 			dummies = []
@@ -845,7 +845,7 @@ class Model:
 
 			if brack_flag:
 				f.write(")")
-			if 'NP' in vorders.keys():
+			if 'NP' in vorders.keys() or 'QL' in vorders.keys():
 				f.write("\n)")
 			f.write(";\n")
 

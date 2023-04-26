@@ -142,7 +142,7 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 .sort
 
 Id Loopfac = 0;
-Repeat Id Lambdam1^2 = Lambdam2;
+* Repeat Id Lambdam1^2 = Lambdam2;
 .sort
 
 Id Lambdam2 = 0;
