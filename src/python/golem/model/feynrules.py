@@ -6,7 +6,9 @@ Python interface.
 
 import os
 import os.path
+import sys
 import imp
+import copy
 import golem.model.expressions as ex
 
 from golem.util.tools import error, warning, message, debug, \
@@ -81,6 +83,7 @@ class Model:
 		self.model_options = model_options or dict()
 
 		try:
+			sys.path.append(model_path)
 			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
 			norm_path = os.path.normpath(model_path)
 			if norm_path.startswith(parent_path):
@@ -109,6 +112,8 @@ class Model:
 		self.model_name = mname
 		self.prefix = "mdl"
 		self.floats = []
+		self.floatsd = {}
+		self.floatsc = []
 
 		parser = ex.ExpressionParser()
 		ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
@@ -235,7 +240,7 @@ class Model:
 				parameterct[p] = p.counterterm
 			except AttributeError:
 				pass
-			name = self.prefix + p.name
+			name = self.prefix + p.name.replace("_","undrscr")
 			if p.nature == 'external':
 				parameters[name] = p.value
 				slha_locations[name] = (p.lhablock, p.lhacode)
@@ -357,6 +362,8 @@ class Model:
 #		f.write("\n}\n\n")
 
 		self.floats = list(fsubs.keys())
+		self.floatsd = fsubs
+		self.floatsc = fcounter
 
 		f.write("parameters = {")
 		is_first = True
@@ -384,7 +391,7 @@ class Model:
 		f.write("latex_parameters = {")
 		is_first = True
 		for p in self.all_parameters:
-			name = self.prefix + p.name
+			name = self.prefix + p.name.replace("_","undrscr")
 			if is_first:
 				is_first = False
 			else:
@@ -562,47 +569,51 @@ class Model:
 
 			vfunctions = {}
 			vfunctions["RK"] = vrank
-			for c in list(v.couplings.values()):
+			vertorders = []
+			for c in sorted(list(v.couplings.values()),key=lambda x: x.name):
 				for name in orders:
 					if name in c.order:
-						power = c.order[name]
+						vfunctions[name] = c.order[name]
 					else:
-						power = 0
+						vfunctions[name] = 0
 
-					if name in vfunctions:
-						if vfunctions[name] != power:
-							warning(("Vertex %s has ambiguous powers in %s (%d,%d). "
-								% (v.name, name, vfunctions[name], power))
-									+ "I will use %d." % vfunctions[name])
+				if not vfunctions in vertorders:
+					if len(vertorders) > 0:
+						warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+									% (v.name, vertorders, vfunctions))
+										+ "I will split it up.")
+					vfcp = copy.deepcopy(vfunctions)
+					vertorders.append(vfcp)
+
+
+			for ivo in range(len(vertorders)):
+				f.write("%% %s: %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names)))
+				lwf.nl()
+				lwf.write("[")
+				is_first = True
+
+				xfields = afields[:]
+				if flip:
+					xfields[0] = afields[1]
+					xfields[1] = afields[0]
+
+				for field in xfields:
+					if is_first:
+						is_first = False
 					else:
-						vfunctions[name] = power
-
-			f.write("%% %s: %s Vertex" % ( v.name, " -- ".join(names)))
-			lwf.nl()
-			lwf.write("[")
-			is_first = True
-
-			xfields = afields[:]
-			if flip:
-				xfields[0] = afields[1]
-				xfields[1] = afields[0]
-
-			for field in xfields:
-				if is_first:
-					is_first = False
-				else:
-					lwf.write(",")
-				lwf.write(field)
-			lwf.write(";")
-			is_first = True
-			for name, power in list(vfunctions.items()):
-				if is_first:
-					is_first = False
-				else:
-					lwf.write(",")
-				lwf.write("%s='%-d'" % (name, power))
-			lwf.write("]")
-			lwf.nl()
+						lwf.write(",")
+					lwf.write(field)
+				lwf.write(";")
+				is_first = True
+				for name, power in list(vertorders[ivo].items()):
+					if is_first:
+						is_first = False
+					else:
+						lwf.write(",")
+					lwf.write("%s='%-d'" % (name, power))
+				lwf.write(",VL='%s'" % (v.name+"_"+str(ivo)))
+				lwf.write("]")
+				lwf.nl()
 
 		f.write("%---#] Vertices:\n\n")
 
@@ -619,6 +630,7 @@ class Model:
 					"ModelDummyIndex", lsubs, lcounter)
 			structure = structure.replaceNegativeIndices(0, "MDLIndex%d",
 					dummy_found)
+			structure = structure.replaceFloats(self.prefix + "float", self.floatsd, self.floatsc)
 			for i in [2]:
 				structure = structure.algsubs(
 					ex.FloatExpression("%d." % i),
@@ -668,7 +680,7 @@ class Model:
 
 		params = []
 		for p in self.all_parameters:
-			params.append(self.prefix + p.name)
+			params.append(self.prefix + p.name.replace("_","undrscr"))
 
 		for c in self.all_couplings:
 			params.append(self.prefix + c.name.replace("_", ""))
@@ -741,120 +753,129 @@ class Model:
 
 			vorders = {}
 			# vfunctions["RK"] = vrank
-			for c in list(v.couplings.values()):
+			vertorders = []
+			cplnames = []
+			for c in sorted(list(v.couplings.values()),key=lambda x: x.name):
 				for name in orders:
 					if name in c.order:
-						power = c.order[name]
+						vorders[name] = c.order[name]
 					else:
-						power = 0
+						vorders[name] = 0
 
-					if name in vorders:
-						if vorders[name] != power:
-							warning(("Vertex %s has ambiguous powers in %s (%d,%d). "
-								% (v.name, name, vorders[name], power))
-									+ "I will use %d." % vorders[name])
-					else:
-						vorders[name] = power
-
-			flip = spins[0] == 1 and spins[2] == 1
-			deg = len(particles)
-
-			xidx = list(range(deg))
-			if flip:
-				xidx[0] = 1
-				xidx[1] = 0
-
-			fold_name = "(%s) %s Vertex" % ( v.name, " -- ".join(names))
-			f.write("*---#[ %s:\n" % fold_name)
-			f.write("Identify Once vertex(iv?, RK%d" % vrank)
-			for el in order_names:
-				f.write(", %s%d"
-					% (el,vorders[el]))
-			colors = []
-			for i in xidx:
-				p = particles[i]
-				field = afields[i]
-				anti = fields[i]
-				color = abs(p.color)
-				spin = abs(p.spin) - 1
-				if field.startswith("anti") and not p.pdg_code in [24,-24]:
-					spin = - spin
-					color = - color
-				colors.append(color)
-
-				f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
-						% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
-							abs(color)))
-			f.write(") =")
-			
-			if 'NP' in vorders.keys():
-				if 'QL' in vorders.keys():
-					f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vorders['NP'],vorders['QL']))
+				if vorders in vertorders:
+					cplnames[vertorders.index(vorders)].append(c.name)
 				else:
-					f.write("\n  Lambdam2^%d * (" % (vorders['NP']))
-			elif 'QL' in vorders.keys():
-				f.write("\n  Loopfac^%d * (" % (vorders['QL']))
+					if len(vertorders) > 0:
+						warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+									% (v.name, vertorders, vorders))
+										+ "I will split it up.")
+					vocp = copy.deepcopy(vorders)
+					vertorders.append(vocp)
+					cplnames.append([c.name])
 
+			for ivo in range(len(vertorders)):
 
-			dummies = []
+				flip = spins[0] == 1 and spins[2] == 1
+				deg = len(particles)
 
-			brack_flag = False
-			for i, s in enumerate(spins):
-				if s == 3 or s == 4:
-					brack_flag = True
-					idx = "idx%dL%d" % (i+1, s)
-					idxa = "idx%dL%da" % (i+1, s)
-					idxb = "idx%dL%db" % (i+1, s)
-					f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
-					dummies.append(idxa)
-					dummies.append(idxb)
+				xidx = list(range(deg))
+				if flip:
+					xidx[0] = 1
+					xidx[1] = 0
 
-			if brack_flag:
-				f.write(" (")
+				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
+				f.write("*---#[ %s:\n" % fold_name)
+				f.write("Identify Once vertex(iv?, RK%d" % vrank)
+				for el in order_names:
+					f.write(", %s%d"
+						% (el,vertorders[ivo][el]))
+				colors = []
+				for i in xidx:
+					p = particles[i]
+					field = afields[i]
+					anti = fields[i]
+					color = abs(p.color)
+					spin = abs(p.spin) - 1
+					if field.startswith("anti") and not p.pdg_code in [24,-24]:
+						spin = - spin
+						color = - color
+					colors.append(color)
 
-
-			for coord, coupling in list(v.couplings.items()):
-				ic, il = coord
-				lorentz = lorex[v.lorentz[il].name]
-				scolor = v.color[ic]
-				f.write("\n   + %s"
-						% (self.prefix + coupling.name.replace("_", "")))
-				if scolor != "1":
-					color = parser.compile(scolor)
-					color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
-					color = color.replaceNegativeIndices(0, "MDLIndex%d",
-							dummy_found)
-					color = transform_color(color, colors, xidx)
-					if lorentz == ex.IntegerExpression(1):
-						expr = color
-					else:
-						expr = color * lorentz
-				else:
-					expr = lorentz
-				if not expr == ex.IntegerExpression(1):
-					f.write(" * (")
-					lwf.nl()
-					expr.write(lwf)
-					f.write("\n   )")
+					f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+							% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
+								abs(color)))
+				f.write(") =")
 			
-				for ind in list(lsubs.values()):
-					s = str(ind)
-					if expr.dependsOn(s):
-						if s not in dummies:
-							dummies.append(s)
+				if 'NP' in vertorders[ivo].keys():
+					if 'QL' in vertorders[ivo].keys():
+						f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vertorders[ivo]['NP'],vertorders[ivo]['QL']))
+					else:
+						f.write("\n  Lambdam2^%d * (" % (vertorders[ivo]['NP']))
+				elif 'QL' in vertorders[ivo].keys():
+					f.write("\n  Loopfac^%d * (" % (vertorders[ivo]['QL']))
 
-			if brack_flag:
-				f.write(")")
-			if 'NP' in vorders.keys() or 'QL' in vorders.keys():
-				f.write("\n)")
-			f.write(";\n")
 
-			for idx in list(dummy_found.values()):
-				dummies.append(str(idx))
+				dummies = []
 
-			if len(dummies) > 0:
-				f.write("Sum %s;\n" % ", ".join(dummies))
-			f.write("*---#] %s:\n" % fold_name)
+				brack_flag = False
+				for i, s in enumerate(spins):
+					if s == 3 or s == 4:
+						brack_flag = True
+						idx = "idx%dL%d" % (i+1, s)
+						idxa = "idx%dL%da" % (i+1, s)
+						idxb = "idx%dL%db" % (i+1, s)
+						f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+						dummies.append(idxa)
+						dummies.append(idxb)
+
+				if brack_flag:
+					f.write(" (")
+
+
+				for coord, coupling in list(v.couplings.items()):
+					if not coupling.name in cplnames[ivo]:
+						continue
+					ic, il = coord
+					lorentz = lorex[v.lorentz[il].name]
+					scolor = v.color[ic]
+					f.write("\n   + %s"
+							% (self.prefix + coupling.name.replace("_", "")))
+					if scolor != "1":
+						color = parser.compile(scolor)
+						color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+						color = color.replaceNegativeIndices(0, "MDLIndex%d",
+								dummy_found)
+						color = transform_color(color, colors, xidx)
+						if lorentz == ex.IntegerExpression(1):
+							expr = color
+						else:
+							expr = color * lorentz
+					else:
+						expr = lorentz
+					if not expr == ex.IntegerExpression(1):
+						f.write(" * (")
+						lwf.nl()
+						expr.write(lwf)
+						f.write("\n   )")
+			
+					for ind in list(lsubs.values()):
+						s = str(ind)
+						if expr.dependsOn(s):
+							if s not in dummies:
+								dummies.append(s)
+
+				if brack_flag:
+					f.write(")")
+				if 'NP' in vertorders[ivo].keys() or 'QL' in vertorders[ivo].keys():
+					f.write("\n)")
+				f.write(";\n")
+
+				for idx in list(dummy_found.values()):
+					dummies.append(str(idx))
+
+				if len(dummies) > 0:
+					f.write("Sum %s;\n" % ", ".join(dummies))
+				f.write("*---#] %s:\n" % fold_name)
 		f.write("#EndProcedure\n")
 		f.write("*---#] Procedure ReplaceVertices :\n")
 		f.write("*---#[ Dummy Indices:\n")

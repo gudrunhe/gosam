@@ -10,16 +10,37 @@ import golem.util.tools
 class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map, treecache):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks, helicity_map)
 		self._loopcache = loopcache
 		self._partitions = loopcache.partition()
+		self._treecache = treecache
 		self._roots = sorted(self._partitions.keys())
 		self._latex_names = golem.util.tools.getModel(conf).latex_parameters
 		self._diagram_flags_0 = lo_flags
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
+
+	def getVertexInfo(self, *args, **opts):
+		level = self._eval_string(args[0])
+		idx = self._eval_int(args[1])
+		if level == "tree":
+			VI = self._treecache.diagrams[idx].VertexInfo()
+		elif level == "loop":
+			VI = self._loopcache.diagrams[idx].VertexInfo()
+		else:
+			raise TemplateError("Unknown level in [% getVertexInfo %]")
+		VIstr = ""
+		for vidx, v in VI.items():
+			if VIstr != "": VIstr = VIstr + ",\\\\"
+			VIstr = VIstr + str(v["multiplicity"]) + " of " + str(vidx).replace("_", "\\_") + " ("
+			ostr = ""
+			for oidx, o in v.items():
+				if ostr != "": ostr = ostr + ", "
+				if oidx != "multiplicity": ostr = ostr + str(oidx) + "$=$" + str(o)
+			VIstr = VIstr + ostr + ")"
+		return VIstr
 
 	def maxloopsize(self, *args, **opts):
 		return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -189,7 +210,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 				factors.append("%s^%s" % (lname, expo[1]))
 			else:
 				factors.append(lname)
-
 		return "\\cdot{}".join(factors)
 
 	def smat(self, *args, **opts):

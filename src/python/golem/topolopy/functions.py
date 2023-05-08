@@ -5,7 +5,7 @@ import os.path
 
 import golem.properties
 
-from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache
+from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache, TreeCache
 import golem.topolopy.userlib
 from golem.util.config import GolemConfigError
 from golem.util.tools import error, warning, debug
@@ -103,6 +103,8 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
    signs = {}
    # flows = {}
 
+   treecache = TreeCache()
+
    for idx, diagram in list(diagrams.items()):
       if lst:
          if idx not in lst:
@@ -132,7 +134,11 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
 
    debug("After analyzing tree diagrams: keeping %d, purging %d" % 
          (len(keep), len(lose)))
-   return keep, signs #, flows
+
+   for idx in keep:
+      treecache.add(diagrams[idx], idx)
+
+   return keep, signs, treecache #, flows
 
 def analyze_loop_diagrams(diagrams, model, conf, onshell,
       quark_masses = None, complex_masses=None, filter_flags = None, massive_bubbles = {}):

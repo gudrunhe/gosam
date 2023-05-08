@@ -225,6 +225,20 @@ class Diagram:
       else:
          return tmporders[str(okey)]
 
+   def VertexInfo(self):
+      VInfo = dict()
+      for v in self._vertices:
+         tmporders = dict()
+         vlabel = self._vertices[v].label
+         if vlabel in VInfo:
+             tmporders['multiplicity'] = VInfo[vlabel]['multiplicity'] + 1
+         else:
+             tmporders['multiplicity'] = 1
+         for key in self._vertices[v].orders.keys():
+            tmporders[key] = self._vertices[v].orders[key]
+         VInfo[vlabel] = tmporders
+      return VInfo
+
    def loopsize(self):
       return len(self._loop)
 
@@ -855,8 +869,9 @@ class DiagramComponent:
       return False
 
 class Vertex(DiagramComponent):
-   def __init__(self, index, rank, orders, *fields):
+   def __init__(self, index, label, rank, orders, *fields):
       self.index = index
+      self.label = label
       self.rank = rank
       self.orders = orders
       self.fields = list(fields)
@@ -1471,6 +1486,13 @@ class IntegralTransformation(BaseIntegralTransformation):
 
       BaseIntegralTransformation.__init__(self, sign,
             loopintegral.rvector(index))
+
+class TreeCache:
+   def __init__(self):
+      self.diagrams = {}
+
+   def add(self, diagram, diagram_index):
+      self.diagrams[diagram_index] = diagram
 
 class LoopCache:
    def __init__(self):

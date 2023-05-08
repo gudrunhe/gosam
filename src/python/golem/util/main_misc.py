@@ -115,7 +115,7 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles = \
+	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache = \
 			run_analyzer(path, conf, in_particles, out_particles)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
 #			run_analyzer(path, conf, in_particles, out_particles)
@@ -147,6 +147,7 @@ def generate_process_files(conf, from_scratch=False):
 			out_particles = out_particles,
 			user = "main",
 			from_scratch=from_scratch,
+			treecache=treecache,
 			loopcache=loopcache,
 			loopcache_tot=loopcache_tot,
 			tree_signs=tree_signs,
@@ -693,13 +694,14 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		mod_diag_lo = imp.load_source(modname, fname)
 		conf["ehc"]=False
 		# keep_tree, tree_signs, tree_flows =
-		keep_tree, tree_signs = \
+		keep_tree, tree_signs, treecache = \
 				golem.topolopy.functions.analyze_tree_diagrams(
 					mod_diag_lo.diagrams, model, conf,
 					filter_flags = lo_flags)
 	else:
 		keep_tree = []
 		tree_signs = {}
+		treecache = golem.topolopy.objects.TreeCache()
 		# tree_flows = {}
 
 	quark_masses = []
@@ -762,7 +764,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles
+	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache
 
 
 
