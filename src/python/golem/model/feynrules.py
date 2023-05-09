@@ -115,6 +115,17 @@ class Model:
 		self.floatsd = {}
 		self.floatsc = []
 
+		# the following code block splits all_couplings into
+		# two separate lists of CT and non-CT couplings
+		if hasattr(mod,"CT_vertices"):
+			self.all_CTcouplings = []
+			for a in dir(mod.CT_vertices.C):
+				b = getattr(mod.CT_vertices.C,a)
+				if type(b).__name__ == "Coupling":
+					self.all_CTcouplings.append(b)
+					if b in self.all_couplings:
+						self.all_couplings.remove(b)
+
 		parser = ex.ExpressionParser()
 		ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
 		for l in self.all_lorentz:
