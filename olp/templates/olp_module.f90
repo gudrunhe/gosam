@@ -28,11 +28,16 @@ contains
            & [%$_%]_PSP_chk_th1 => PSP_chk_th1, &
            & [%$_%]_PSP_chk_th2 => PSP_chk_th2, &
            & [%$_%]_PSP_chk_th3 => PSP_chk_th3, &
+           & [%$_%]_PSP_chk_th5 => PSP_chk_th5, &
+           & [%$_%]_PSP_chk_th6 => PSP_chk_th6, &
            & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @else %]
            & [%$_%]_PSP_chk_li1 => PSP_chk_li1, &
            & [%$_%]_PSP_chk_li2 => PSP_chk_li2, &
            & [%$_%]_PSP_chk_li3 => PSP_chk_li3, &
+           & [%$_%]_PSP_chk_li4 => PSP_chk_li4, &
+           & [%$_%]_PSP_chk_li5 => PSP_chk_li5, &
+           & [%$_%]_PSP_chk_li6 => PSP_chk_li6, &
            & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @if %][%
       @end @for %]
@@ -55,7 +60,8 @@ contains
       character(len=128) :: line_buf
       character(len=9) :: kw[%
       @if extension golem95 %]
-      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor
+      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_th3
+      integer :: PSP_chk_th5, PSP_chk_th6, PSP_chk_kfactor
       logical :: PSP_rescue[%
       @end @if %]
 
@@ -101,6 +107,8 @@ contains
       ! PSP_chk_th1 = [% PSP_chk_th1 default=8 %]
       ! PSP_chk_th2 = [% PSP_chk_th2 default=3 %]
       ! PSP_chk_th3 = [% PSP_chk_th3 default=5 %]
+      ! PSP_chk_th5 = [% PSP_chk_th5 default=10 %]
+      ! PSP_chk_th6 = [% PSP_chk_th6 default=7 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @for subprocesses %]
       ! [%$_%]_PSP_rescue = PSP_rescue
@@ -108,11 +116,16 @@ contains
       @if generate_lo_diagrams %]
       ! [%$_%]_PSP_chk_th1 = PSP_chk_th1
       ! [%$_%]_PSP_chk_th2 = PSP_chk_th2
-      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3[%
+      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3
+      ! [%$_%]_PSP_chk_th5 = PSP_chk_th5
+      ! [%$_%]_PSP_chk_th6 = PSP_chk_th6[%
       @else %]
-      ! [%$_%]_PSP_chk_th1 = PSP_chk_li1
-      ! [%$_%]_PSP_chk_th2 = PSP_chk_li2
-      ! [%$_%]_PSP_chk_th3 = PSP_chk_li3[%
+      ! [%$_%]_PSP_chk_li1 = PSP_chk_li1
+      ! [%$_%]_PSP_chk_li2 = PSP_chk_li2
+      ! [%$_%]_PSP_chk_li3 = PSP_chk_li3
+      ! [%$_%]_PSP_chk_li4 = PSP_chk_li4
+      ! [%$_%]_PSP_chk_li5 = PSP_chk_li5
+      ! [%$_%]_PSP_chk_li6 = PSP_chk_li6[%
       @end @if %]
       ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
       @end @for %][%
