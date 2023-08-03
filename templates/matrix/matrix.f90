@@ -91,6 +91,7 @@
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
+   public :: spin_correlated_lo2_whizard
    public :: OLP_color_correlated, OLP_spin_correlated_lo2
 
 [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0  %]   private:: get_formfactor_lo [% @end @if %]
@@ -2153,6 +2154,155 @@ contains
    end subroutine spin_correlated_lo2
 
 
+   subroutine spin_correlated_lo2_whizard(vecs, bornsc)
+     ! This is a version of the original spin_correlated_lo2, but using
+     ! the OpenLoops (HELAS) convention for the polarization vectors.
+     ! This is required by Whizard.
+      use [% process_name asprefix=\_ %]kinematics
+      implicit none
+      real(ki), dimension(num_legs, 4), intent(in) :: vecs
+      real(ki), dimension(num_legs,4,4) :: bornsc
+      real(ki), dimension(num_legs, 4) :: pvecs
+      complex(ki), dimension(4,4) :: tens
+      complex(ki) :: pp, pm, mp, mm[%
+@if generate_lo_diagrams %][%
+   @for particles lightlike vector %][%
+      @if is_first %][%
+         @for helicities %]
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
+         @end @for %][%
+      @end @if is_first %]
+      complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
+      complex(ki) :: phasefac[%index%][%
+   @end @for %][%
+@end @if generate_lo_diagrams %]
+
+      bornsc(:,:,:) = 0.0_ki[%
+   @if helsum %]
+      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
+      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
+      write(*,*) "without the 'helsum' option"[%
+   @else %]
+      !---#[ Initialize helicity amplitudes :[%
+@if generate_lo_diagrams %][%
+   @for particles lightlike vector %][%
+      @if is_first %][%
+         @for helicities %]
+      !---#[ reinitialize kinematics:[%
+            @for helicity_mapping shift=1 %][%
+               @if parity %][%
+                  @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+                  @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+                  @end @select %][%
+               @else %][%
+                  @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+                  @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+                  @end @select %][%
+               @end @if %][%
+            @end @for %]
+      call init_event(pvecs[%
+            @for particles lightlike vector %], [%hel%]1[%
+            @end @for %])
+      !---#] reinitialize kinematics:
+      heli_amp[%helicity%] = amplitude[% map.index %]l0()
+      ! print *, "heli_amp[%helicity%] = ", heli_amp[%helicity%][%
+         @end @for helicities %][%
+      @end @if is_first %][%
+   @end @for %]
+      !---#] Initialize helicity amplitudes :
+      !---#[ Initialize polarization vectors :
+      ! Initializing the polarization vectors according to the OpenLoops
+      ! convention as used by Whizard. Calculating the relative phasefactor
+      ! accounting for the different conventions used for the helicity amplitudes.[%
+   @for particles lightlike vector initial %]
+      eps[%index%] = spva[% @if eval reference > 0 %]k[%reference
+		%][% @else %]l[% eval - reference %][% @end @if
+                %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
+		%][% @else %]l[% eval - reference %][% @end @if
+                %],k[%index%])/sqrt2
+      call eps_MG(k[%index%], 0.0_ki, -1, epsm[%index%])
+      call eps_MG(k[%index%], 0.0_ki, 1, epsp[%index%])
+      phasefac[%index%] = (eps[%index%](2)-vecs([%index%],2)/vecs([%index%],1)*eps[%index%](1))/epsm[%index%](2)
+      phasefac[%index%] = -phasefac[%index%]**2[%
+   @end @for %][%
+   @for particles lightlike vector final %]
+      eps[%index%] = conjg(spva[%
+      @if eval reference > 0 %]k[%reference
+		%][% @else %]l[% eval - reference %][% @end @if
+                %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
+		%][% @else %]l[% eval - reference %][% @end @if
+                %],k[%index%])/sqrt2)
+      call eps_MG(k[%index%], 0.0_ki, -1, epsm[%index%])
+      call eps_MG(k[%index%], 0.0_ki, 1, epsp[%index%])
+      phasefac[%index%] = (eps[%index%](2)-vecs([%index%],2)/vecs([%index%],1)*eps[%index%](1))/epsm[%index%](2)
+      phasefac[%index%] = -phasefac[%index%]**2[%
+   @end @for %]
+      !---#] Initialize polarization vectors :
+      ! Note: By omitting the imaginary parts we lose a term:
+      !   Imag(B_j(mu,nu)) = i_ * e_(k_j, mu, q_j, nu) * |Born|^2
+      ! where q_j is the reference momentum chosen for the paticle
+      ! of momentum k_j. This term should, however not be phenomenologically
+      ! relevant.[%
+   @for particles lightlike vector %]
+      !---#[ particle [%index%] :
+      pp  = 0.0_ki[%
+      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+      &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
+      @end @for helicities %]
+      pm  = 0.0_ki[%
+      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+              symbol_plus=X symbol_minus=L var=mhelicity%] &
+      &          + square_0l_0l_sc(heli_amp[%
+                         helicity%],heli_amp[%mhelicity%])[%
+         @end @for modified_helicity %][%
+      @end @for helicities %]
+      mp  = 0.0_ki[%
+      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+                symbol_plus=X symbol_minus=L var=mhelicity%] &
+      &          + square_0l_0l_sc(heli_amp[%
+                          mhelicity%],heli_amp[%helicity%])[%
+         @end @for modified_helicity %][%
+      @end @for helicities %]
+      mm  = 0.0_ki[%
+      @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+      &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
+      @end @for helicities %]
+
+      pm = phasefac[%index%]*pm
+      mp = conjg(phasefac[%index%])*mp
+      
+      call construct_polarization_tensor(conjg(epsp[%index%]),epsp[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pp, ki)
+      call construct_polarization_tensor(conjg(epsp[%index%]),epsm[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pm, ki)
+      call construct_polarization_tensor(conjg(epsm[%index%]),epsp[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mp, ki)
+      call construct_polarization_tensor(conjg(epsm[%index%]),epsm[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)
+      !---#] particle [%index%] :[%
+   @end @for %]
+
+      [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]bornsc = bornsc*get_formfactor_lo(vecs)[%@end @if %]
+      if (include_helicity_avg_factor) then
+         bornsc = bornsc / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         bornsc = bornsc / incolors
+      end if
+      if (include_symmetry_factor) then
+         bornsc = bornsc / real(symmetry_factor, ki)
+      end if[%
+@end @if generate_lo_diagrams %][%
+@end @if helsum %]
+   end subroutine spin_correlated_lo2_whizard
 
 
    subroutine OLP_spin_correlated_lo2(vecs, ampsc)
@@ -2287,6 +2437,96 @@ contains
    end  subroutine construct_polarization_tensor
    !---#] construct polarisation tensor :
 
+   
+   !---#[ polarisation vectors in HELAS/MadGraph Konvention :
+   ! Note: this subroutine is a copy of wfIn_V_MG from OpenLoops2
+   ! See Appendix A.2 of KEK-91-11 (HELAS)
+  pure subroutine eps_MG(P, M, POL, EPS)
+     implicit none
+     real(ki), intent(in)  :: P(0:3), M
+     integer, intent(in)  :: POL
+     complex(ki), intent(out) :: EPS(4)
+     real(ki) :: P2_T, P_T, P_MOD
+     complex(ki) :: ea(4), eb(4), epss(4)
+     real(ki) :: small_real
+     complex(ki) :: CI
+     real(ki) :: sqrt05
+
+     small_real = 1e-44_ki
+     CI = (0.0_ki,1.0_ki)
+     sqrt05 = 1.0_ki/sqrt(2.0_ki)
+     
+     P2_T  = P(1)*P(1) + P(2)*P(2)
+     P_T   = sqrt(P2_T)
+     P_MOD = sqrt(P2_T + P(3)*P(3))
+    
+     if (POL == -1 .or. POL == 1) then
+       
+       if (P_MOD == 0) then
+          
+          ea(1)   = 0
+          ea(2)   = 1
+          ea(3:4) = 0
+          
+          eb(1:2) = 0
+          eb(3)   = 1
+          eb(4)   = 0
+          
+       else if (P2_T == 0) then
+          
+          ea(1)   = 0
+          ea(2)   = 1
+          ea(3:4) = 0
+          
+          eb(1:2) = 0
+          eb(3)   = P(3)/P_MOD
+          eb(4)   = 0
+          
+       else
+          
+          ea(1)   =   0
+          ea(2:3) =   P(1:2)*P(3)/(P_MOD*P_T)
+          ea(4)   = - P_T/P_MOD
+          
+          eb(1) =   0
+          eb(2) = - P(2)/P_T
+          eb(3) =   P(1)/P_T
+          eb(4) =   0
+          
+       end if
+       
+       if (POL == -1) then
+          epss = - (ea + CI * eb) * sqrt05
+       else if (POL == 1) then
+          epss =   (ea - CI * eb) * sqrt05
+       end if
+       
+     else if (POL == 0) then
+       if (P_MOD == 0) then
+          epss(1) =     0
+          epss(2) =     0
+          epss(3) =     0
+          epss(4) =     1
+       else
+          epss(1) =     P_MOD / M
+          epss(2) = P(1)*P(0) / (M*P_MOD)
+          epss(3) = P(2)*P(0) / (M*P_MOD)
+          epss(4) = P(3)*P(0) / (M*P_MOD)
+       end if
+     end if
+
+     EPS(1) = epss(1)
+     EPS(2) = epss(2)
+     EPS(3) = epss(3)
+     EPS(4) = epss(4)
+
+     ! workaround
+     EPS = EPS + small_real
+     
+   end subroutine eps_MG
+   !---#] polarisation vectors in HELAS/MadGraph Konvention :
+
+   
    pure function square_0l_0l_sc(color_vector1, color_vector2) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
       implicit none

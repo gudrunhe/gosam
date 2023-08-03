@@ -293,7 +293,7 @@ def AmplitudeType(values, conf, ignore_case):
 	# Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2
 	if len(values) > 1:
 		return __value_ERR__ + "too many values."
-	supported_values = ["Loop","Tree","ccTree","scTree","LoopInduced","LoopInterference","LIEffInterference","ccLoop","scLoop"]
+	supported_values = ["Loop","Tree","ccTree","scTree","scTree2","LoopInduced","LoopInterference","LIEffInterference","ccLoop","scLoop"]
 	ret=expect_one_keyword(values, conf, True,
 		"olp.amplitudetype", supported_values)
 	if hasattr(conf,"psp_chk_method_last"):
