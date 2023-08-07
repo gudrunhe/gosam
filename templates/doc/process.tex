@@ -322,8 +322,10 @@ For the definition of tensor states, please refer to the document
 {\sl [%
          @select tree_sign DIAG
          @case -1 %]-[%
-         @end @select %]Diagram~[%DIAG%]}\\
-[% getVertexInfo tree DIAG %]
+         @end @select %]Diagram~[%DIAG%]}[%
+@if use_vertex_labels %]\\
+[% getVertexInfo tree DIAG %][%
+@end @if %]
 \end{center}
 \end{minipage}}
 %---#] tree diagram[% DIAG %]:[%
@@ -511,8 +513,10 @@ $S^\prime=S[%
       @end @select %]}[%
    @end @select %]$, $\mathrm{rk}=[%rank%][%
    @if is_nf %], N_f[% 
-   @end @if %]$\\
-[% getVertexInfo loop DIAG %]
+   @end @if %]$[%
+@if use_vertex_labels %]\\
+[% getVertexInfo loop DIAG %][%
+@end @if %]
 \end{center}
 \end{minipage}}
 [%   @if is_last %]

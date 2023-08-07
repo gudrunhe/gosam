@@ -1178,7 +1178,23 @@ order_names = Property("order_names",
    Example:
    order_names=QCD,NP,QL
    """,
-   list,default="QCD,NP",experimental=True)
+   list,default="",experimental=True)
+
+use_order_names = Property("use_order_names",
+   """\
+   Whether or not to use the order_names property. Can only
+   be activated when using a UFO model file.
+   """,
+   bool,
+   False, experimental=True)
+
+use_vertex_labels = Property("use_vertex_labels",
+   """\
+   Whether or not to print the vertex label in the process.pdf. Can only
+   be activated when using a UFO model file.
+   """,
+   bool,
+   False, experimental=True)
 
 properties = [
    process_name,
@@ -1269,7 +1285,9 @@ properties = [
    form_factor_lo,
    form_factor_nlo,
 
-   order_names
+   order_names,
+   use_order_names,
+   use_vertex_labels
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

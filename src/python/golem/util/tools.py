@@ -316,6 +316,12 @@ def prepare_model_files(conf, output_path=None):
          for ext in [".py", ".hh"]:
             copy_file(os.path.join(src_path, model + 'ct' + ext),
                   os.path.join(path, MODEL_LOCAL + 'ct' + ext))
+      if conf.getProperty(golem.properties.use_order_names):
+         warning("Property order_names can only be used when using a UFO model. Switching them off now.")
+         conf.setProperty(golem.properties.use_order_names,False)
+      if conf.getProperty(golem.properties.use_vertex_labels):
+         warning("Property vertex labels can only be used when using a UFO model. Switching them off now.")
+         conf.setProperty(golem.properties.use_vertex_labels,False)
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
          model_path = model_lst[1]
@@ -338,6 +344,12 @@ def prepare_model_files(conf, output_path=None):
          if not os.path.isabs(model_path):
             model_path = os.path.join(rel_path, model_path)
          model_name = model_lst[1]
+         if conf.getProperty(golem.properties.use_order_names):
+            warning("Property order_names can only be used when using a UFO model. Switching them off now.")
+            conf.setProperty(golem.properties.use_order_names,False)
+         if conf.getProperty(golem.properties.use_vertex_labels):
+            warning("Property vertex labels can only be used when using a UFO model. Switching them off now.")
+            conf.setProperty(golem.properties.use_vertex_labels,False)
          if model_name.isdigit():
             # This is a CalcHEP model, needs to be converted.
             message("Importing CalcHep model files ...")

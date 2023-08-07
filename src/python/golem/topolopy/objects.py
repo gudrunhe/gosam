@@ -869,7 +869,7 @@ class DiagramComponent:
       return False
 
 class Vertex(DiagramComponent):
-   def __init__(self, index, label, rank, orders, *fields):
+   def __init__(self, index, rank, orders, label, *fields):
       self.index = index
       self.label = label
       self.rank = rank
