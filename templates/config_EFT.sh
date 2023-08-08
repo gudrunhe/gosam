@@ -43,7 +43,9 @@ PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
 -L$PWD/common -Wl,-rpath=$PWD/common \
 -lgosam_process[% process_name assuffix=\_ %]_matrix[%
 	@for helicities generated %] \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][%
+-lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_0 \
+-lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_1 \
+-lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_2[%
 	@end @for helicities %][%
 	@if helsum%] \
 -lgosam_process[% process_name assuffix=\_ %]_amplitude[%
@@ -52,7 +54,9 @@ PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
 [% @else %]
 PROCESS_LDFLAGS="$PWD/matrix/matrix.a[%
 	@for helicities generated %] \
-$PWD/helicity[%helicity%]/amplitude[%helicity%].a[%
+$PWD/helicity[%helicity%]/amplitude[%helicity%]_0.a \
+$PWD/helicity[%helicity%]/amplitude[%helicity%]_1.a \
+$PWD/helicity[%helicity%]/amplitude[%helicity%]_2.a[%
 	@end @for helicities %][%
 @if helsum %] \
 $PWD/sum/amplitude.a[%

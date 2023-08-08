@@ -43,9 +43,9 @@ DIAGRAMS_TREE=[%
 @if group %][%
 @else %][%
 	@for elements topolopy.keep.tree %] \
-		d[%$_%]_0h[%helicity%]l0.f90 \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]l0.f90 \
 		d[%$_%]_1h[%helicity%]l0.f90 \
-		d[%$_%]_2h[%helicity%]l0.f90[%
+		d[%$_%]_2[% @end @if %]h[%helicity%]l0.f90[%
 	@end @for %][%
 @end @if %]
 
@@ -53,72 +53,61 @@ DIAGRAMS_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
 @else %][%
 	@for elements topolopy.keep.tree %] \
-		d[%$_%]_0h[%helicity%]l0fr5.f90 \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]l0fr5.f90 \
 		d[%$_%]_1h[%helicity%]l0fr5.f90 \
-		d[%$_%]_2h[%helicity%]l0fr5.f90[%
+		d[%$_%]_2[% @end @if %]h[%helicity%]l0fr5.f90[%
 	@end @for %][%
 @end @if %][%
 @end @if %]
 
-TXT_TREE0=[%
+[% @if use_order_names %][%
+@for each 0 1 2 var=efto
+%]TXT_TREE[% efto %]=[%
 @if group %][%
    @for elements topolopy.keep.tree %] \
-		d[%$_%]_0h[%helicity%]l0.txt[%
-   @end @for %][%
-@else %] \
-   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
-@end @if %]
-TXT_TREE1=[%
-@if group %][%
-   @for elements topolopy.keep.tree %]\
-		d[%$_%]_1h[%helicity%]l0.txt[%
-   @end @for %][%
-@else %] \
-   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
-@end @if %]
-TXT_TREE2=[%
-@if group %][%
-   @for elements topolopy.keep.tree %]\
-		d[%$_%]_2h[%helicity%]l0.txt[%
+		d[%$_%]_[% efto %]h[%helicity%]l0.txt[%
    @end @for %][%
 @else %] \
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %]
 
-TXT_TREE0_FR5=[% @if internal REQUIRE_FR5 %][%
+TXT_TREE[% efto %]_FR5=[% @if internal REQUIRE_FR5 %][%
 @if group %][%
    @for elements topolopy.keep.tree %] \
-		d[%$_%]_0h[%helicity%]l0-fr.txt[%
+		d[%$_%]_[% efto %]h[%helicity%]l0-fr.txt[%
    @end @for %][%
 @else %] \
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %][%
 @end @if %]
-TXT_TREE1_FR5=[% @if internal REQUIRE_FR5 %][%
+
+[% @end @for %][%
+@else %]TXT_TREE=[%
 @if group %][%
-   @for elements topolopy.keep.tree %]\
-		d[%$_%]_1h[%helicity%]l0-fr.txt[%
+   @for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
+@end @if %]
+
+TXT_TREE_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+   @for elements topolopy.keep.tree %] \
+		d[%$_%]h[%helicity%]l0-fr.txt[%
    @end @for %][%
 @else %] \
    $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %][%
-@end @if %]
-TXT_TREE2_FR5=[% @if internal REQUIRE_FR5 %][%
-@if group %][%
-   @for elements topolopy.keep.tree %]\
-		d[%$_%]_2h[%helicity%]l0-fr.txt[%
-   @end @for %][%
-@else %] \
-   $(subst .f90,.txt,$(DIAGRAMS_TREE))[%
 @end @if %][%
 @end @if %]
 
 TXT_TREE_STAMP=[%
 @if group %][%
    @for elements topolopy.keep.tree %] \
-		d[%$_%]_0h[%helicity%]l0-stamp \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]l0-stamp \
 		d[%$_%]_1h[%helicity%]l0-stamp \
-		d[%$_%]_2h[%helicity%]l0-stamp[%
+		d[%$_%]_2[% @end @if %]h[%helicity%]l0-stamp[%
    @end @for %][%
 @else %] \
    $(subst .f90,-stamp,$(DIAGRAMS_TREE))[%
@@ -126,14 +115,14 @@ TXT_TREE_STAMP=[%
 
 [% @if generate_lo_diagrams %]
 SOURCE_TREE= \
-	diagramsl0_0.f90 diagramsl0_1.f90 diagramsl0_2.f90 $(DIAGRAMS_TREE)[%
+	diagramsl0[% @if use_order_names %]_0.f90 diagramsl0_1.f90 diagramsl0_2[% @end @if %].f90 $(DIAGRAMS_TREE)[%
    @if internal REQUIRE_FR5 %] \
-	diagramsl0_0fr5.f90 diagramsl0_1fr5.f90 diagramsl0_2fr5.f90 $(DIAGRAMS_TREE_FR5)[%
+	diagramsl0[% @if use_order_names %]_0fr5.f90 diagramsl0_1fr5.f90 diagramsl0_2fr5[% @end @if %].f90 $(DIAGRAMS_TREE_FR5)[%
    @end @if %][%
    @if extension quadruple %] \
-	diagramsl0_0_qp.f90 \
+	diagramsl0[% @if use_order_names %]_0_qp.f90 \
 	diagramsl0_1_qp.f90 \
-	diagramsl0_2_qp.f90[%
+	diagramsl0_2_qp[% @end @if %].f90[%
    @end @if %]
 [% @else %]
 SOURCE_TREE=
@@ -142,78 +131,63 @@ SOURCE_TREE=
 DIAGRAMS_VIRT=[%
 @if helsum %][%
    @for elements topolopy.keep.virt %] \
-	d[%$_%]_0h[%helicity%]l1.prc \
+	d[%$_%][% @if use_order_names %]_0h[%helicity%]l1.prc \
 	d[%$_%]_1h[%helicity%]l1.prc \
-	d[%$_%]_2h[%helicity%]l1.prc[%
+	d[%$_%]_2[% @end @if %]h[%helicity%]l1.prc[%
 	   @if internal GENERATE_DERIVATIVES %] \
-	d[%$_%]_0h[%helicity%]l1d.prc \
+	d[%$_%][% @if use_order_names %]_0h[%helicity%]l1d.prc \
 	d[%$_%]_1h[%helicity%]l1d.prc \
-	d[%$_%]_2h[%helicity%]l1d.prc[%
+	d[%$_%]_2[% @end @if %]h[%helicity%]l1d.prc[%
       @end @if %][%
    @end @for %][%
 @else %][%
 @select r2
 @case implicit explicit off %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]_0h[%helicity%]l1.f90[%
+   @for elements topolopy.keep.virt %][%
+   @if use_order_names %][%
+   @for each 0 1 2 var=efto %] \
+	d[%$_%]_[% efto %]h[%helicity%]l1.f90[%
 	   @if extension quadruple %] \
-	d[%$_%]_0h[%helicity%]l1_qp.f90[%
+	d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90[%
 	   @end @if %][%
 	   @if internal GENERATE_DERIVATIVES %] \
-	d[%$_%]_0h[%helicity%]l1d.f90[%
+	d[%$_%]_[% efto %]h[%helicity%]l1d.f90[%
 	   @if extension quadruple %] \
-	d[%$_%]_0h[%helicity%]l1d_qp.f90[%
+	d[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90[%
 	   @end @if %][%
       @end @if %][%
    @if extension ninja %] \
-        d[%$_%]_0h[%helicity%]l131.f90 \
-        d[%$_%]_0h[%helicity%]l132.f90 \
-        d[%$_%]_0h[%helicity%]l121.f90[%
+        d[%$_%]_[% efto %]h[%helicity%]l131.f90 \
+        d[%$_%]_[% efto %]h[%helicity%]l132.f90 \
+        d[%$_%]_[% efto %]h[%helicity%]l121.f90[%
       @if extension quadruple %] \
-        d[%$_%]_0h[%helicity%]l131_qp.f90 \
-        d[%$_%]_0h[%helicity%]l132_qp.f90 \
-        d[%$_%]_0h[%helicity%]l121_qp.f90[%
+        d[%$_%]_[% efto %]h[%helicity%]l131_qp.f90 \
+        d[%$_%]_[% efto %]h[%helicity%]l132_qp.f90 \
+        d[%$_%]_[% efto %]h[%helicity%]l121_qp.f90[%
       @end @if %][%
-   @end @if %] \
-	d[%$_%]_1h[%helicity%]l1.f90[%
+   @end @if %][%
+   @end @for %][%
+   @else %] \
+	d[%$_%]h[%helicity%]l1.f90[%
 	   @if extension quadruple %] \
-	d[%$_%]_1h[%helicity%]l1_qp.f90[%
+	d[%$_%]h[%helicity%]l1_qp.f90[%
 	   @end @if %][%
 	   @if internal GENERATE_DERIVATIVES %] \
-	d[%$_%]_1h[%helicity%]l1d.f90[%
+	d[%$_%]h[%helicity%]l1d.f90[%
 	   @if extension quadruple %] \
-	d[%$_%]_1h[%helicity%]l1d_qp.f90[%
+	d[%$_%]h[%helicity%]l1d_qp.f90[%
 	   @end @if %][%
       @end @if %][%
    @if extension ninja %] \
-        d[%$_%]_1h[%helicity%]l131.f90 \
-        d[%$_%]_1h[%helicity%]l132.f90 \
-        d[%$_%]_1h[%helicity%]l121.f90[%
+        d[%$_%]h[%helicity%]l131.f90 \
+        d[%$_%]h[%helicity%]l132.f90 \
+        d[%$_%]h[%helicity%]l121.f90[%
       @if extension quadruple %] \
-        d[%$_%]_1h[%helicity%]l131_qp.f90 \
-        d[%$_%]_1h[%helicity%]l132_qp.f90 \
-        d[%$_%]_1h[%helicity%]l121_qp.f90[%
+        d[%$_%]h[%helicity%]l131_qp.f90 \
+        d[%$_%]h[%helicity%]l132_qp.f90 \
+        d[%$_%]h[%helicity%]l121_qp.f90[%
       @end @if %][%
-   @end @if %] \
-	d[%$_%]_2h[%helicity%]l1.f90[%
-	   @if extension quadruple %] \
-	d[%$_%]_2h[%helicity%]l1_qp.f90[%
-	   @end @if %][%
-	   @if internal GENERATE_DERIVATIVES %] \
-	d[%$_%]_2h[%helicity%]l1d.f90[%
-	   @if extension quadruple %] \
-	d[%$_%]_2h[%helicity%]l1d_qp.f90[%
-	   @end @if %][%
-      @end @if %][%
-   @if extension ninja %] \
-        d[%$_%]_2h[%helicity%]l131.f90 \
-        d[%$_%]_2h[%helicity%]l132.f90 \
-        d[%$_%]_2h[%helicity%]l121.f90[%
-      @if extension quadruple %] \
-        d[%$_%]_2h[%helicity%]l131_qp.f90 \
-        d[%$_%]_2h[%helicity%]l132_qp.f90 \
-        d[%$_%]_2h[%helicity%]l121_qp.f90[%
-      @end @if %][%
+   @end @if %][%
    @end @if %][%
    @end @for %][%
 @end @select %][%
@@ -224,9 +198,9 @@ TXT_VIRT=[%
 @case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
 @case only %][%
    @for elements topolopy.keep.virt %] \
-	d[%$_%]_0h[%helicity%]l1.abb \
+	d[%$_%][% @if use_order_names %]_0h[%helicity%]l1.abb \
 	d[%$_%]_1h[%helicity%]l1.abb \
-	d[%$_%]_2h[%helicity%]l1.abb[%
+	d[%$_%]_2[% @end @if %]h[%helicity%]l1.abb[%
    @end @for %][%
 @end @select %]
 
@@ -234,26 +208,26 @@ ABB_VIRT=[%
 @if helsum %][%
 @else %][%
    @select abbrev.level
-   @case helicity %]abbrevh[%helicity%]_0.f90 abbrevh[%helicity%]_1.f90 abbrevh[%helicity%]_2.f90[%
+   @case helicity %]abbrevh[%helicity%][% @if use_order_names %]_0.f90 abbrevh[%helicity%]_1.f90 abbrevh[%helicity%]_2[% @end @if %].f90[%
    @case group %][%
       @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%]_0.f90 abbrevg[%grp%]h[%helicity%]_1.f90 abbrevg[%grp%]h[%helicity%]_2.f90[%
+	abbrevg[%grp%]h[%helicity%][% @if use_order_names %]_0.f90 abbrevg[%grp%]h[%helicity%]_1.f90 abbrevg[%grp%]h[%helicity%]_2[% @end @if %].f90[%
       @end @for %][%
    @case diagram %][%
       @for elements topolopy.keep.virt %] \
-	abbrevd[%$_%]_0h[%helicity%].f90 abbrevd[%$_%]_1h[%helicity%].f90 abbrevd[%$_%]_2h[%helicity%].f90[%
+	abbrevd[%$_%][% @if use_order_names %]_0h[%helicity%].f90 abbrevd[%$_%]_1h[%helicity%].f90 abbrevd[%$_%]_2[% @end @if %]h[%helicity%].f90[%
       @end @for %][%
    @end @select %][%
   @if extension quadruple %][%
    @select abbrev.level
-   @case helicity %]abbrevh[%helicity%]_0_qp.f90 abbrevh[%helicity%]_1_qp.f90 abbrevh[%helicity%]_2_qp.f90[%
+   @case helicity %]abbrevh[%helicity%][% @if use_order_names %]_0_qp.f90 abbrevh[%helicity%]_1_qp.f90 abbrevh[%helicity%]_2[% @end @if %]_qp.f90[%
    @case group %][%
       @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%]_0_qp.f90 abbrevg[%grp%]h[%helicity%]_2_qp.f90 abbrevg[%grp%]h[%helicity%]_2_qp.f90[%
+	abbrevg[%grp%]h[%helicity%][% @if use_order_names %]_0_qp.f90 abbrevg[%grp%]h[%helicity%]_2_qp.f90 abbrevg[%grp%]h[%helicity%]_2[% @end @if %]_qp.f90[%
       @end @for %][%
    @case diagram %][%
       @for elements topolopy.keep.virt %] \
-	abbrevd[%$_%]_0h[%helicity%]_qp.f90 abbrevd[%$_%]_1h[%helicity%]_qp.f90 abbrevd[%$_%]_2h[%helicity%]_qp.f90[%
+	abbrevd[%$_%][% @if use_order_names %]_0h[%helicity%]_qp.f90 abbrevd[%$_%]_1h[%helicity%]_qp.f90 abbrevd[%$_%]_2[% @end @if %]h[%helicity%]_qp.f90[%
       @end @for %][%
    @end @select %][%
  @end @if extension quadruple %][%
@@ -267,7 +241,7 @@ SOURCE_VIRT=
 [% @if generate_uv_counterterms %]
 DIAGRAMS_CT=[%
    @for elements topolopy.keep.ct %] \
-	d[%$_%]_0h[%helicity%]l1c.f90 d[%$_%]_2h[%helicity%]l1c.f90 d[%$_%]_2h[%helicity%]l1c.f90[%
+	d[%$_%][% @if use_order_names %]_0h[%helicity%]l1c.f90 d[%$_%]_2h[%helicity%]l1c.f90 d[%$_%]_2[% @end @if %]h[%helicity%]l1c.f90[%
    @end @for %]
 TXT_CT=$(subst .f90,.txt,$(DIAGRAMS_CT))
 SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
@@ -280,192 +254,158 @@ SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
 @if extension formopt %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
 @for elements topolopy.keep.tree %][%
-@if is_first %][% @if is_last %]
-d[%$_%]_0h[%helicity%]l0.txt:
+@if is_first %][% @if is_last %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l0.txt:
 	   @echo "* dummy file" > $@
-born_0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_0 @ Helicity [%helicity%]
+born_[% efto %].txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
 		-D BORNFLG=2 \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l0 \
-		../codegen/golem_0.frm
-	@touch born_0-stamp
-d[%$_%]_1h[%helicity%]l0.txt:
-	   @echo "* dummy file" > $@
-born_1.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=2 \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l0 \
-		../codegen/golem_1.frm
-	@touch born_1-stamp
-d[%$_%]_2[%helicity%]l0.txt:
-	   @echo "* dummy file" > $@
-born_2.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=2 \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l0 \
-		../codegen/golem_2.frm
-	@touch born_2-stamp[%
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
+		../codegen/golem_[% efto %].frm
+	@touch born_[% efto %]-stamp[%
+@end @for %][%
 @else %]
-d[%$_%]_0h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_0 @ Helicity [%helicity%]
+d[%$_%]h[%helicity%]l0.txt:
+	   @echo "* dummy file" > $@
+born.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=1 \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l0 \
-		../codegen/golem_0.frm
-	@touch d[%$_%]_0h[%helicity%]l0-stamp
-d[%$_%]_0h[%helicity%]l0-stamp: d[%$_%]_0h[%helicity%]l0.txt
-d[%$_%]_1h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=1 \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l0 \
-		../codegen/golem_1.frm
-	@touch d[%$_%]_1h[%helicity%]l0-stamp
-d[%$_%]_1h[%helicity%]l0-stamp: d[%$_%]_1h[%helicity%]l0.txt
-d[%$_%]_2h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=1 \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l0 \
-		../codegen/golem_2.frm
-	@touch d[%$_%]_2h[%helicity%]l0-stamp
-d[%$_%]_2h[%helicity%]l0-stamp: d[%$_%]_2h[%helicity%]l0.txt
-[%@end @if%][%
+		-D BORNFLG=2 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch born-stamp[%
+@end @if %][%
 @else %][%
-@if is_last %]
-d[%$_%]_0h[%helicity%]l0.txt:
-	@echo "* dummy file" > $@
-	@touch d[%$_%]_0h[%helicity%]l0-stamp
-d[%$_%]_0h[%helicity%]l0-stamp: d[%$_%]_0h[%helicity%]l0.txt
-born_0.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
-	@cat $(TXT_TREE0) > borndiag0.prc
-	@echo Form is processing tree diagram [%$_%]_0 @ Helicity [%helicity%]
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D BORNFLG=-1 \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l0 \
-		../codegen/golem_0.frm
-	@touch born_0-stamp
-d[%$_%]_1h[%helicity%]l0.txt:
-	@echo "* dummy file" > $@
-	@touch d[%$_%]_1h[%helicity%]l0-stamp
-d[%$_%]_1h[%helicity%]l0-stamp: d[%$_%]_1h[%helicity%]l0.txt
-born_1.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
-	@cat $(TXT_TREE1) > borndiag1.prc
-	@echo Form is processing tree diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=-1 \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l0 \
-		../codegen/golem_1.frm
-	@touch born_1-stamp
-d[%$_%]_2h[%helicity%]l0.txt:
-	@echo "* dummy file" > $@
-	@touch d[%$_%]_2h[%helicity%]l0-stamp
-d[%$_%]_2h[%helicity%]l0-stamp: d[%$_%]_2h[%helicity%]l0.txt
-born_2.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
-	@cat $(TXT_TREE2) > borndiag2.prc
-	@echo Form is processing tree diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=-1 \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l0 \
-		../codegen/golem_2.frm
-	@touch born_2-stamp[%
+		-D BORNFLG=1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
+		../codegen/golem_[% efto %].frm
+	@touch d[%$_%]_[% efto %]h[%helicity%]l0-stamp
+d[%$_%]_[% efto %]h[%helicity%]l0-stamp: d[%$_%]_[% efto %]h[%helicity%]l0.txt[%
+@end @for %][%
 @else %]
-d[%$_%]_0h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_0 @ Helicity [%helicity%]
+d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
+@end @if %][%
+@end @if %][%
+@else %][%
+@if is_last %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l0.txt:
+	@echo "* dummy file" > $@
+	@touch d[%$_%]_[% efto %]h[%helicity%]l0-stamp
+d[%$_%]_[% efto %]h[%helicity%]l0-stamp: d[%$_%]_[% efto %]h[%helicity%]l0.txt
+born_[% efto %].txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
+	@cat $(TXT_TREE[% efto %]) > borndiag[% efto %].prc
+	@echo Form is processing tree diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=-1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
+		../codegen/golem_[% efto %].frm
+	@touch born_[% efto %]-stamp[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]l0.txt:
+	@echo "* dummy file" > $@
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt
+born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
+	@cat $(TXT_TREE) > borndiag.prc
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D BORNFLG=-1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch born-stamp[%
+@end @if %][%
+@else %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
 		-D BORNFLG=0 \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l0 \
-		../codegen/golem_0.frm
-	@touch d[%$_%]_0h[%helicity%]l0-stamp
-d[%$_%]_0h[%helicity%]l0-stamp: d[%$_%]_0h[%helicity%]l0.txt
-d[%$_%]_1h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_1 @ Helicity [%helicity%]
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
+		../codegen/golem_[% efto %].frm
+	@touch d[%$_%]_[% efto %]h[%helicity%]l0-stamp
+d[%$_%]_[% efto %]h[%helicity%]l0-stamp: d[%$_%]_[% efto %]h[%helicity%]l0.txt[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
+	@echo Form is processing tree diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
 		-D BORNFLG=0 \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l0 \
-		../codegen/golem_1.frm
-	@touch d[%$_%]_1h[%helicity%]l0-stamp
-d[%$_%]_1h[%helicity%]l0-stamp: d[%$_%]_1h[%helicity%]l0.txt
-d[%$_%]_2h[%helicity%]l0.txt: ../diagrams-0.hh
-	@echo Form is processing tree diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D BORNFLG=0 \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l0 \
-		../codegen/golem_2.frm
-	@touch d[%$_%]_2h[%helicity%]l0-stamp
-d[%$_%]_2h[%helicity%]l0-stamp: d[%$_%]_2h[%helicity%]l0.txt[%
+		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]l0-stamp
+d[%$_%]h[%helicity%]l0-stamp: d[%$_%]h[%helicity%]l0.txt[%
+@end @if %][%
 @end @if %][% @end @if %][%
 @end @for %][%
-@for elements topolopy.keep.tree %][% @if is_last %]
-born_0-stamp: born_0.txt
-diagramsl0_0.f90[% @if extension quadruple %] diagramsl0_0_qp.f90[% @end @if %]: born_0.txt born_0-stamp
+@for elements topolopy.keep.tree %][% @if is_last %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+born_[% efto %]-stamp: born_[% efto %].txt
+diagramsl0_[% efto %].f90[% @if extension quadruple %] diagramsl0_[% efto %]_qp.f90[% @end @if %]: born_[% efto %].txt born_[% efto %]-stamp
 	@echo Python is processing tree diagrams @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortranborn_0.py \
-		-i $< \
-		--HELICITY=[%helicity%]
-born_1-stamp: born_1.txt
-diagramsl0_1.f90[% @if extension quadruple %] diagramsl0_1_qp.f90[% @end @if %]: born_1.txt born_1-stamp
-	@echo Python is processing tree diagrams @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortranborn_1.py \
-		-i $< \
-		--HELICITY=[%helicity%]
-born_2-stamp: born_2.txt
-diagramsl0_2.f90[% @if extension quadruple %] diagramsl0_2_qp.f90[% @end @if %]: born_2.txt born_2-stamp
-	@echo Python is processing tree diagrams @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortranborn_2.py \
+	@$(PYTHON) ../codegen/buildfortranborn_[% efto %].py \
 		-i $< \
 		--HELICITY=[%helicity%][%
+@end @for %][%
+@else %]
+born-stamp: born.txt
+diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp
+	@echo Python is processing tree diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortranborn.py \
+		-i $< \
+		--HELICITY=[%helicity%][%
+@end @if %][%
 @end @if %][% @end @for %][%
 @else %]
 all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
@@ -518,8 +458,10 @@ d[%$_%]_0h[%helicity%]l0fr5.f90: d[%$_%]_0h[%helicity%]l0-fr.txt
    @end @if %][%
 @end @for %][%
 
-@if group %]
-diagramsl0_0.f90: $(TXT_TREE0)
+@if group %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+diagramsl0_[% efto %].f90: $(TXT_TREE[% efto %])
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
 		-c ../codegen/haggies-l0.in \
@@ -527,15 +469,17 @@ diagramsl0_0.f90: $(TXT_TREE0)
 		-D helicity=[%helicity%] -D "modsuffix=" \
 		-o $@ $+[%
    @if internal REQUIRE_FR5 %]
-diagramsl0_0fr5.f90: $(TXT_TREE0_FR5)
+diagramsl0_[% efto %]fr5.f90: $(TXT_TREE[% efto %]_FR5)
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
 		-c ../codegen/haggies-l0.in \
 		-t ../codegen/haggies-l0.out \
 		-D helicity=[%helicity%] -D modsuffix=fr5 \
 		-o $@ $+[%
-   @end @if %]
-diagramsl0_1.f90: $(TXT_TREE1)
+   @end @if %][%
+@end @for %][%
+@else %]
+diagramsl0.f90: $(TXT_TREE)
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
 		-c ../codegen/haggies-l0.in \
@@ -543,23 +487,7 @@ diagramsl0_1.f90: $(TXT_TREE1)
 		-D helicity=[%helicity%] -D "modsuffix=" \
 		-o $@ $+[%
    @if internal REQUIRE_FR5 %]
-diagramsl0_1fr5.f90: $(TXT_TREE1_FR5)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-l0.in \
-		-t ../codegen/haggies-l0.out \
-		-D helicity=[%helicity%] -D modsuffix=fr5 \
-		-o $@ $+[%
-   @end @if %]
-diagramsl0_2.f90: $(TXT_TREE2)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-l0.in \
-		-t ../codegen/haggies-l0.out \
-		-D helicity=[%helicity%] -D "modsuffix=" \
-		-o $@ $+[%
-   @if internal REQUIRE_FR5 %]
-diagramsl0_0fr5.f90: $(TXT_TREE0_FR5)
+diagramsl0fr5.f90: $(TXT_TREE_FR5)
 	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
 		-c ../codegen/haggies-l0.in \
@@ -568,16 +496,18 @@ diagramsl0_0fr5.f90: $(TXT_TREE0_FR5)
 		-o $@ $+[%
    @end @if %][%
 @end @if %][%
+@end @if %][%
 @end @if %]
 
 [% @if extension formopt %][%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
-
-d[%$_%]_0h[%helicity%]l1.prc : d[%$_%]_0h[%helicity%]l1.txt
-d[%$_%]_0h[%helicity%]l1.txt: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_0 @ Helicity [%helicity%]
+[% @if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l1.prc : d[%$_%]_[% efto %]h[%helicity%]l1.txt
+d[%$_%]_[% efto %]h[%helicity%]l1.txt: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
@@ -590,7 +520,7 @@ d[%$_%]_0h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1[%
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1[%
 			@if internal GENERATE_DERIVATIVES %] \
 		-D GENERATEDERIVATIVES=1[%
 			@end @if %][%
@@ -601,7 +531,7 @@ d[%$_%]_0h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
 			@end @if %][%
                 @if helsum %] \
-		../codegen/golem_0.frm[%
+		../codegen/golem_[% efto %].frm[%
                 @else %][%
 			@if internal GENERATE_NINJA_TRIPLE %] \
 		-D GENERATENINJATRIPLE=1[%
@@ -609,10 +539,10 @@ d[%$_%]_0h[%helicity%]l1.txt: ../diagrams-1.hh
 			@if internal GENERATE_NINJA_DOUBLE %] \
 		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
-		../codegen/golem_0.frm
-	@echo Form is optimizing loop diagram [%$_%]_0 @ Helicity [%helicity%]
+		../codegen/golem_[% efto %].frm
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
 			@if internal DERIVATIVES_AT_ZERO %] \
@@ -621,14 +551,14 @@ d[%$_%]_0h[%helicity%]l1.txt: ../diagrams-1.hh
 		../codegen/finaloptimization.frm[%
                 @end @if helsum %][%
 	   @select abbrev.level @case diagram %]
-	@touch d[%$_%]_0h[%helicity%]l1-stamp
-d[%$_%]_0h[%helicity%]l1-stamp: d[%$_%]_0h[%helicity%]l1.txt[%
+	@touch d[%$_%]_[% efto %]h[%helicity%]l1-stamp
+d[%$_%]_[% efto %]h[%helicity%]l1-stamp: d[%$_%]_[% efto %]h[%helicity%]l1.txt[%
 @if internal GENERATE_DERIVATIVES %]
-d[%$_%]_0h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helicity%]l1-stamp
-	@echo Form is generating loop diagram derivatives [%$_%]_0 @ Helicity [%helicity%]
+d[%$_%]_[% efto %]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]_[% efto %]h[%helicity %]l1.txt d[%$_%]_[% efto %]h[%helicity%]l1-stamp
+	@echo Form is generating loop diagram derivatives [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
 			@if internal DERIVATIVES_AT_ZERO %] \
@@ -643,33 +573,33 @@ d[%$_%]_0h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$
 @if helsum %][%
 @else %][%
    @for repeat rank inclusive=true var=rk %]
-	@echo Form is optimizing loop diagram [%$_%]_0 rank [%rk%] @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] rank [%rk%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rk %] \
 		-D GENERATEDERIVATIVES=1 \
 		../codegen/finaloptimization.frm[%
 	@end @for%]
-d[%$_%]_0h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]_0h[%helicity%]l1.txt d[%$_%]_0h[%helicity%]l1-stamp
-	@echo Python is processing loop diagram [%$_%]_0 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_0.py \
+d[%$_%]_[% efto %]h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]_[% efto %]h[%helicity%]l1.txt d[%$_%]_[% efto %]h[%helicity%]l1-stamp
+	@echo Python is processing loop diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_[% efto %].py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
 		--HELICITY=[%helicity%] \
 		--QSIGN=[% sign %] \
 		--QSHIFT=[%shift%]
-abbrevd[%$_%]_0h[%helicity%].f90: d[%$_%]_0h[%helicity%]l1.f90[%
+abbrevd[%$_%]_[% efto %]h[%helicity%].f90: d[%$_%]_[% efto %]h[%helicity%]l1.f90[%
 @if extension quadruple %]
-abbrevd[%$_%]_0h[%helicity%]_qp.f90: d[%$_%]_0h[%helicity%]l1_qp.f90[%
+abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.f90: d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90[%
 @end @if %][%
 @end @if %]
-d[%$_%]_0h[%helicity %]l1d-stamp: d[%$_%]_0h[%helicity%]l1d.txt
-	@touch d[%$_%]_0h[%helicity %]l1d-stamp
-d[%$_%]_0h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]_0h[%helicity%]l1d.txt d[%$_%]_0h[%helicity %]l1d-stamp
-	@echo Python is processing derivative [%$_%]_0 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_0_d.py \
+d[%$_%]_[% efto %]h[%helicity %]l1d-stamp: d[%$_%]_[% efto %]h[%helicity%]l1d.txt
+	@touch d[%$_%]_[% efto %]h[%helicity %]l1d-stamp
+d[%$_%]_[% efto %]h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]_[% efto %]h[%helicity%]l1d.txt d[%$_%]_[% efto %]h[%helicity %]l1d-stamp
+	@echo Python is processing derivative [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_[% efto %]_d.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -682,22 +612,22 @@ d[%$_%]_0h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%
 @if extension ninja %][%
 @if helsum %][%
 @else %]
-d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helicity %]l1d-stamp
-	@echo Form is optimizing loop diagram [%$_%]_0 for ninja @ Helicity [%helicity%]
+d[%$_%]_[% efto %]h[%helicity %]l14.txt : d[%$_%]_[% efto %]h[%helicity %]l1.txt d[%$_%]_[% efto %]h[%helicity %]l1d-stamp
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] for ninja @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
 		../codegen/ninja.frm
-	@: > d[%$_%]_0h[%helicity%]l13.txt # makes sure the file is always created
-	@: > d[%$_%]_0h[%helicity%]l12.txt # makes sure the file is always created
-	@: > d[%$_%]_0h[%helicity%]l1mu2.txt # makes sure the file is always created
-	@echo Form is optimizing loop diagram [%$_%]_0 laurent index 31 for triangles @ Helicity [%helicity%]
+	@: > d[%$_%]_[% efto %]h[%helicity%]l13.txt # makes sure the file is always created
+	@: > d[%$_%]_[% efto %]h[%helicity%]l12.txt # makes sure the file is always created
+	@: > d[%$_%]_[% efto %]h[%helicity%]l1mu2.txt # makes sure the file is always created
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] laurent index 31 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -706,9 +636,9 @@ d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helic
 		-D EXPANSIONCUT=3 \
 		-D EXPANSIONID=31 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_0 laurent index 32 for triangles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] laurent index 32 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -717,9 +647,9 @@ d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helic
 		-D EXPANSIONCUT=3 \
 		-D EXPANSIONID=32 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_0 laurent index 21 for bubbles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] laurent index 21 for bubbles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -728,9 +658,9 @@ d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helic
 		-D EXPANSIONCUT=2 \
 		-D EXPANSIONID=21 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_0 laurent index 22 for bubbles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] laurent index 22 for bubbles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -739,9 +669,9 @@ d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helic
 		-D EXPANSIONCUT=2 \
 		-D EXPANSIONID=22 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_0 mu expansion for boxes @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%]_[% efto %] mu expansion for boxes @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -750,13 +680,13 @@ d[%$_%]_0h[%helicity %]l14.txt : d[%$_%]_0h[%helicity %]l1.txt d[%$_%]_0h[%helic
 		-D EXPANSIONCUT=4 \
 		-D EXPANSIONID=Mu2 \
 		../codegen/ninjafinalopt.frm
-		@touch d[%$_%]_0h[%helicity%]l13-stamp d[%$_%]_0h[%helicity%]l12-stamp  d[%$_%]_0h[%helicity%]l14-stamp
+		@touch d[%$_%]_[% efto %]h[%helicity%]l13-stamp d[%$_%]_[% efto %]h[%helicity%]l12-stamp  d[%$_%]_[% efto %]h[%helicity%]l14-stamp
 
-d[%$_%]_0h[%helicity %]l13.txt d[%$_%]_0h[%helicity %]l12.txt : d[%$_%]_0h[%helicity%]l14-stamp
-d[%$_%]_0h[%helicity%]l13-stamp d[%$_%]_0h[%helicity%]l12-stamp  d[%$_%]_0h[%helicity%]l14-stamp: d[%$_%]_0h[%helicity %]l14.txt
-d[%$_%]_0h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]_0h[%helicity%]l13.txt d[%$_%]_0h[%helicity%]l13-stamp
-	@echo Python is processing ninja triangles expansion [%$_%]_0 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_0_tn3.py \
+d[%$_%]_[% efto %]h[%helicity %]l13.txt d[%$_%]_[% efto %]h[%helicity %]l12.txt : d[%$_%]_[% efto %]h[%helicity%]l14-stamp
+d[%$_%]_[% efto %]h[%helicity%]l13-stamp d[%$_%]_[% efto %]h[%helicity%]l12-stamp  d[%$_%]_[% efto %]h[%helicity%]l14-stamp: d[%$_%]_[% efto %]h[%helicity %]l14.txt
+d[%$_%]_[% efto %]h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]_[% efto %]h[%helicity%]l13.txt d[%$_%]_[% efto %]h[%helicity%]l13-stamp
+	@echo Python is processing ninja triangles expansion [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_[% efto %]_tn3.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -765,9 +695,9 @@ d[%$_%]_0h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_0h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]_0h[%helicity%]l12.txt d[%$_%]_0h[%helicity%]l12-stamp
-	@echo Python is processing ninja bubbles expansion [%$_%]_0 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_0_tn2.py \
+d[%$_%]_[% efto %]h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]_[% efto %]h[%helicity%]l12.txt d[%$_%]_[% efto %]h[%helicity%]l12-stamp
+	@echo Python is processing ninja bubbles expansion [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_[% efto %]_tn2.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -776,9 +706,9 @@ d[%$_%]_0h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_0h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]_0h[%helicity%]l14.txt d[%$_%]_0h[%helicity%]l14-stamp
-	@echo Python is processing ninja mu expansion [%$_%]_0 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_0_tmu.py \
+d[%$_%]_[% efto %]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]_[% efto %]h[%helicity%]l14.txt d[%$_%]_[% efto %]h[%helicity%]l14-stamp
+	@echo Python is processing ninja mu expansion [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_[% efto %]_tmu.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -790,11 +720,12 @@ d[%$_%]_0h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_0h[%helicity
 		@end @if %][%
                 @end @if helsum %][%
 		@end @select %]
+[% @end @for %]
+[% @else %]
 
-
-d[%$_%]_1h[%helicity%]l1.prc : d[%$_%]_1h[%helicity%]l1.txt
-d[%$_%]_1h[%helicity%]l1.txt: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_1 @ Helicity [%helicity%]
+d[%$_%]h[%helicity%]l1.prc : d[%$_%]h[%helicity%]l1.txt
+d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
@@ -807,7 +738,7 @@ d[%$_%]_1h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1[%
+		-D OUTFILE=d[%$_%]h[%helicity%]l1[%
 			@if internal GENERATE_DERIVATIVES %] \
 		-D GENERATEDERIVATIVES=1[%
 			@end @if %][%
@@ -818,7 +749,7 @@ d[%$_%]_1h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
 			@end @if %][%
                 @if helsum %] \
-		../codegen/golem_1.frm[%
+		../codegen/golem.frm[%
                 @else %][%
 			@if internal GENERATE_NINJA_TRIPLE %] \
 		-D GENERATENINJATRIPLE=1[%
@@ -826,10 +757,10 @@ d[%$_%]_1h[%helicity%]l1.txt: ../diagrams-1.hh
 			@if internal GENERATE_NINJA_DOUBLE %] \
 		-D GENERATENINJADOUBLE=1[%
 			@end @if %] \
-		../codegen/golem_1.frm
-	@echo Form is optimizing loop diagram [%$_%]_1 @ Helicity [%helicity%]
+		../codegen/golem.frm
+	@echo Form is optimizing loop diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
 			@if internal DERIVATIVES_AT_ZERO %] \
@@ -838,14 +769,14 @@ d[%$_%]_1h[%helicity%]l1.txt: ../diagrams-1.hh
 		../codegen/finaloptimization.frm[%
                 @end @if helsum %][%
 	   @select abbrev.level @case diagram %]
-	@touch d[%$_%]_1h[%helicity%]l1-stamp
-d[%$_%]_1h[%helicity%]l1-stamp: d[%$_%]_1h[%helicity%]l1.txt[%
+	@touch d[%$_%]h[%helicity%]l1-stamp
+d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt[%
 @if internal GENERATE_DERIVATIVES %]
-d[%$_%]_1h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helicity%]l1-stamp
-	@echo Form is generating loop diagram derivatives [%$_%]_1 @ Helicity [%helicity%]
+d[%$_%]h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity%]l1-stamp
+	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rank %][%
 			@if internal DERIVATIVES_AT_ZERO %] \
@@ -860,33 +791,33 @@ d[%$_%]_1h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$
 @if helsum %][%
 @else %][%
    @for repeat rank inclusive=true var=rk %]
-	@echo Form is optimizing loop diagram [%$_%]_1 rank [%rk%] @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%] rank [%rk%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D RANK=[% rk %] \
 		-D GENERATEDERIVATIVES=1 \
 		../codegen/finaloptimization.frm[%
 	@end @for%]
-d[%$_%]_1h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]_1h[%helicity%]l1.txt d[%$_%]_1h[%helicity%]l1-stamp
-	@echo Python is processing loop diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_1.py \
+d[%$_%]h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l1.txt d[%$_%]h[%helicity%]l1-stamp
+	@echo Python is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
 		--HELICITY=[%helicity%] \
 		--QSIGN=[% sign %] \
 		--QSHIFT=[%shift%]
-abbrevd[%$_%]_1h[%helicity%].f90: d[%$_%]_1h[%helicity%]l1.f90[%
+abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.f90[%
 @if extension quadruple %]
-abbrevd[%$_%]_1h[%helicity%]_qp.f90: d[%$_%]_1h[%helicity%]l1_qp.f90[%
+abbrevd[%$_%]h[%helicity%]_qp.f90: d[%$_%]h[%helicity%]l1_qp.f90[%
 @end @if %][%
 @end @if %]
-d[%$_%]_1h[%helicity %]l1d-stamp: d[%$_%]_1h[%helicity%]l1d.txt
-	@touch d[%$_%]_1h[%helicity %]l1d-stamp
-d[%$_%]_1h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]_1h[%helicity%]l1d.txt d[%$_%]_1h[%helicity %]l1d-stamp
-	@echo Python is processing derivative [%$_%]_1 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_1_d.py \
+d[%$_%]h[%helicity %]l1d-stamp: d[%$_%]h[%helicity%]l1d.txt
+	@touch d[%$_%]h[%helicity %]l1d-stamp
+d[%$_%]h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l1d.txt d[%$_%]h[%helicity %]l1d-stamp
+	@echo Python is processing derivative [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_d.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -899,22 +830,22 @@ d[%$_%]_1h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%
 @if extension ninja %][%
 @if helsum %][%
 @else %]
-d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helicity %]l1d-stamp
-	@echo Form is optimizing loop diagram [%$_%]_1 for ninja @ Helicity [%helicity%]
+d[%$_%]h[%helicity %]l14.txt : d[%$_%]h[%helicity %]l1.txt d[%$_%]h[%helicity %]l1d-stamp
+	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
 		../codegen/ninja.frm
-	@: > d[%$_%]_1h[%helicity%]l13.txt # makes sure the file is always created
-	@: > d[%$_%]_1h[%helicity%]l12.txt # makes sure the file is always created
-	@: > d[%$_%]_1h[%helicity%]l1mu2.txt # makes sure the file is always created
-	@echo Form is optimizing loop diagram [%$_%]_1 laurent index 31 for triangles @ Helicity [%helicity%]
+	@: > d[%$_%]h[%helicity%]l13.txt # makes sure the file is always created
+	@: > d[%$_%]h[%helicity%]l12.txt # makes sure the file is always created
+	@: > d[%$_%]h[%helicity%]l1mu2.txt # makes sure the file is always created
+	@echo Form is optimizing loop diagram [%$_%] laurent index 31 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -923,9 +854,9 @@ d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helic
 		-D EXPANSIONCUT=3 \
 		-D EXPANSIONID=31 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_1 laurent index 32 for triangles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%] laurent index 32 for triangles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -934,9 +865,9 @@ d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helic
 		-D EXPANSIONCUT=3 \
 		-D EXPANSIONID=32 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_1 laurent index 21 for bubbles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%] laurent index 21 for bubbles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -945,9 +876,9 @@ d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helic
 		-D EXPANSIONCUT=2 \
 		-D EXPANSIONID=21 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_1 laurent index 22 for bubbles @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%] laurent index 22 for bubbles @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -956,9 +887,9 @@ d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helic
 		-D EXPANSIONCUT=2 \
 		-D EXPANSIONID=22 \
 		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_1 mu expansion for boxes @ Helicity [%helicity%]
+	@echo Form is optimizing loop diagram [%$_%] mu expansion for boxes @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
 		-D RANK=[% rank %] \
@@ -967,13 +898,13 @@ d[%$_%]_1h[%helicity %]l14.txt : d[%$_%]_1h[%helicity %]l1.txt d[%$_%]_1h[%helic
 		-D EXPANSIONCUT=4 \
 		-D EXPANSIONID=Mu2 \
 		../codegen/ninjafinalopt.frm
-		@touch d[%$_%]_1h[%helicity%]l13-stamp d[%$_%]_1h[%helicity%]l12-stamp  d[%$_%]_1h[%helicity%]l14-stamp
+		@touch d[%$_%]h[%helicity%]l13-stamp d[%$_%]h[%helicity%]l12-stamp  d[%$_%]h[%helicity%]l14-stamp
 
-d[%$_%]_1h[%helicity %]l13.txt d[%$_%]_1h[%helicity %]l12.txt : d[%$_%]_1h[%helicity%]l14-stamp
-d[%$_%]_1h[%helicity%]l13-stamp d[%$_%]_1h[%helicity%]l12-stamp  d[%$_%]_1h[%helicity%]l14-stamp: d[%$_%]_1h[%helicity %]l14.txt
-d[%$_%]_1h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]_1h[%helicity%]l13.txt d[%$_%]_1h[%helicity%]l13-stamp
-	@echo Python is processing ninja triangles expansion [%$_%]_1 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_1_tn3.py \
+d[%$_%]h[%helicity %]l13.txt d[%$_%]h[%helicity %]l12.txt : d[%$_%]h[%helicity%]l14-stamp
+d[%$_%]h[%helicity%]l13-stamp d[%$_%]h[%helicity%]l12-stamp  d[%$_%]h[%helicity%]l14-stamp: d[%$_%]h[%helicity %]l14.txt
+d[%$_%]h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l13.txt d[%$_%]h[%helicity%]l13-stamp
+	@echo Python is processing ninja triangles expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_tn3.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -982,9 +913,9 @@ d[%$_%]_1h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_1h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]_1h[%helicity%]l12.txt d[%$_%]_1h[%helicity%]l12-stamp
-	@echo Python is processing ninja bubbles expansion [%$_%]_1 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_1_tn2.py \
+d[%$_%]h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l12.txt d[%$_%]h[%helicity%]l12-stamp
+	@echo Python is processing ninja bubbles expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_tn2.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -993,9 +924,9 @@ d[%$_%]_1h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_1h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]_1h[%helicity%]l14.txt d[%$_%]_1h[%helicity%]l14-stamp
-	@echo Python is processing ninja mu expansion [%$_%]_1 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_1_tmu.py \
+d[%$_%]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]h[%helicity%]l14.txt d[%$_%]h[%helicity%]l14-stamp
+	@echo Python is processing ninja mu expansion [%$_%] @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortran_tmu.py \
 		-i $< \
 		--DIAGRAM=[%$_%] \
 		--GROUP=[%grp%]  \
@@ -1007,224 +938,7 @@ d[%$_%]_1h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_1h[%helicity
 		@end @if %][%
                 @end @if helsum %][%
 		@end @select %]
-
-
-
-d[%$_%]_2h[%helicity%]l1.prc : d[%$_%]_2h[%helicity%]l1.txt
-d[%$_%]_2h[%helicity%]l1.txt: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)[%
-	      @if is_mqse %] \
-		-D MQSE=1[%
-			@end @if %] \
-		-D LOOPS=1 \
-		-D GROUP=0 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1[%
-			@if internal GENERATE_DERIVATIVES %] \
-		-D GENERATEDERIVATIVES=1[%
-			@end @if %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %][%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %][%
-                @if helsum %] \
-		../codegen/golem_2.frm[%
-                @else %][%
-			@if internal GENERATE_NINJA_TRIPLE %] \
-		-D GENERATENINJATRIPLE=1[%
-			@end @if %][%
-			@if internal GENERATE_NINJA_DOUBLE %] \
-		-D GENERATENINJADOUBLE=1[%
-			@end @if %] \
-		../codegen/golem_2.frm
-	@echo Form is optimizing loop diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
-		../codegen/finaloptimization.frm[%
-                @end @if helsum %][%
-	   @select abbrev.level @case diagram %]
-	@touch d[%$_%]_2h[%helicity%]l1-stamp
-d[%$_%]_2h[%helicity%]l1-stamp: d[%$_%]_2h[%helicity%]l1.txt[%
-@if internal GENERATE_DERIVATIVES %]
-d[%$_%]_2h[%helicity %]l1d.[% @if helsum %]prc[% @else %]txt[% @end @if %]: d[%$_%]_2h[%helicity %]l1.txt d[%$_%]_2h[%helicity%]l1-stamp
-	@echo Form is generating loop diagram derivatives [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %][%
-                        @if helsum %] \
-                -D OUTSUFFIX=prc[%
-                        @else %] \
-                -D OUTSUFFIX=hh[%
-                        @end @if %]\
-		../codegen/derive.frm[%
-@if helsum %][%
-@else %][%
-   @for repeat rank inclusive=true var=rk %]
-	@echo Form is optimizing loop diagram [%$_%]_2 rank [%rk%] @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D RANK=[% rk %] \
-		-D GENERATEDERIVATIVES=1 \
-		../codegen/finaloptimization.frm[%
-	@end @for%]
-d[%$_%]_2h[%helicity%]l1.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity%]l1_qp.f90[% @end @if %]: d[%$_%]_2h[%helicity%]l1.txt d[%$_%]_2h[%helicity%]l1-stamp
-	@echo Python is processing loop diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_2.py \
-		-i $< \
-		--DIAGRAM=[%$_%] \
-		--GROUP=[%grp%]  \
-		--HELICITY=[%helicity%] \
-		--QSIGN=[% sign %] \
-		--QSHIFT=[%shift%]
-abbrevd[%$_%]_2h[%helicity%].f90: d[%$_%]_2h[%helicity%]l1.f90[%
-@if extension quadruple %]
-abbrevd[%$_%]_2h[%helicity%]_qp.f90: d[%$_%]_2h[%helicity%]l1_qp.f90[%
-@end @if %][%
-@end @if %]
-d[%$_%]_2h[%helicity %]l1d-stamp: d[%$_%]_2h[%helicity%]l1d.txt
-	@touch d[%$_%]_2h[%helicity %]l1d-stamp
-d[%$_%]_2h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity%]l1d_qp.f90[% @end @if %]: d[%$_%]_2h[%helicity%]l1d.txt d[%$_%]_2h[%helicity %]l1d-stamp
-	@echo Python is processing derivative [%$_%]_2 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_2_d.py \
-		-i $< \
-		--DIAGRAM=[%$_%] \
-		--GROUP=[%grp%]  \
-		--HELICITY=[%helicity%] \
-		--QSIGN=[%sign%] \
-		--QSHIFT=[%shift%] \
-		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%
-		@end @if %][%
-@if extension ninja %][%
-@if helsum %][%
-@else %]
-d[%$_%]_2h[%helicity %]l14.txt : d[%$_%]_2h[%helicity %]l1.txt d[%$_%]_2h[%helicity %]l1d-stamp
-	@echo Form is optimizing loop diagram [%$_%]_2 for ninja @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		../codegen/ninja.frm
-	@: > d[%$_%]_2h[%helicity%]l13.txt # makes sure the file is always created
-	@: > d[%$_%]_2h[%helicity%]l12.txt # makes sure the file is always created
-	@: > d[%$_%]_2h[%helicity%]l1mu2.txt # makes sure the file is always created
-	@echo Form is optimizing loop diagram [%$_%]_2 laurent index 31 for triangles @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D EXPANSIONCUT=3 \
-		-D EXPANSIONID=31 \
-		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_2 laurent index 32 for triangles @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D EXPANSIONCUT=3 \
-		-D EXPANSIONID=32 \
-		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_2 laurent index 21 for bubbles @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D EXPANSIONCUT=2 \
-		-D EXPANSIONID=21 \
-		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_2 laurent index 22 for bubbles @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D EXPANSIONCUT=2 \
-		-D EXPANSIONID=22 \
-		../codegen/ninjafinalopt.frm
-	@echo Form is optimizing loop diagram [%$_%]_2 mu expansion for boxes @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D EXPANSIONCUT=4 \
-		-D EXPANSIONID=Mu2 \
-		../codegen/ninjafinalopt.frm
-		@touch d[%$_%]_2h[%helicity%]l13-stamp d[%$_%]_2h[%helicity%]l12-stamp  d[%$_%]_2h[%helicity%]l14-stamp
-
-d[%$_%]_2h[%helicity %]l13.txt d[%$_%]_2h[%helicity %]l12.txt : d[%$_%]_2h[%helicity%]l14-stamp
-d[%$_%]_2h[%helicity%]l13-stamp d[%$_%]_2h[%helicity%]l12-stamp  d[%$_%]_2h[%helicity%]l14-stamp: d[%$_%]_2h[%helicity %]l14.txt
-d[%$_%]_2h[%helicity%]l131.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity%]l131_qp.f90[% @end @if %]: d[%$_%]_2h[%helicity%]l13.txt d[%$_%]_2h[%helicity%]l13-stamp
-	@echo Python is processing ninja triangles expansion [%$_%]_2 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_2_tn3.py \
-		-i $< \
-		--DIAGRAM=[%$_%] \
-		--GROUP=[%grp%]  \
-		--HELICITY=[%helicity%] \
-		--QSIGN=[%sign%] \
-		--QSHIFT=[%shift%] \
-		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_2h[%helicity%]l132.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity%]l132_qp.f90[% @end @if %]: d[%$_%]_2h[%helicity%]l12.txt d[%$_%]_2h[%helicity%]l12-stamp
-	@echo Python is processing ninja bubbles expansion [%$_%]_2 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_2_tn2.py \
-		-i $< \
-		--DIAGRAM=[%$_%] \
-		--GROUP=[%grp%]  \
-		--HELICITY=[%helicity%] \
-		--QSIGN=[%sign%] \
-		--QSHIFT=[%shift%] \
-		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %]
-d[%$_%]_2h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity%]l121_qp.f90[% @end @if %]: d[%$_%]_2h[%helicity%]l14.txt d[%$_%]_2h[%helicity%]l14-stamp
-	@echo Python is processing ninja mu expansion [%$_%]_2 @ Helicity [%helicity%]
-	@$(PYTHON) ../codegen/buildfortran_2_tmu.py \
-		-i $< \
-		--DIAGRAM=[%$_%] \
-		--GROUP=[%grp%]  \
-		--HELICITY=[%helicity%] \
-		--QSIGN=[%sign%] \
-		--QSHIFT=[%shift%] \
-		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%
-		@end @if %][%
-                @end @if helsum %][%
-		@end @select %][%
+[% @end @if %][%
 	@end @for diagrams %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %]
@@ -1232,9 +946,11 @@ d[%$_%]_2h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_2h[%helicity
 [% @else %][%
 @if generate_nlo_virt %][%
    @for groups var=grp rank=grank %][%
-	   @for diagrams group=grp %]
-d[%$_%]_0h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_0h[%helicity%]l1d.txt [% @end @if %]d[%$_%]_0h[%helicity %]l1.abb: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_0 @ Helicity [%helicity%]
+	   @for diagrams group=grp %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_[% efto %]h[%helicity%]l1d.txt [% @end @if %]d[%$_%]_[% efto %]h[%helicity %]l1.abb: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)[%
 	      @if is_mqse %] \
@@ -1247,7 +963,7 @@ d[%$_%]_0h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_0h[
 		-D RANK=[% rank %] \
 		-D GLOOPSIZE=[% loopsize group=grp %] \
 		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1[%
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1[%
 			@if internal GENERATE_DERIVATIVES %] \
 		-D GENERATEDERIVATIVES=1[%
 			@end @if %][%
@@ -1257,21 +973,21 @@ d[%$_%]_0h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_0h[
 			@if is_massive_bubble diagram=$_ %] \
 		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
 			@end @if %] \
-		../codegen/golem_0.frm
-d[%$_%]_0h[%helicity%]l1.f90: d[%$_%]_0h[%helicity%]l1.txt
-	@echo Haggies is processing loop diagram [%$_%]_0 @ Helicity [%helicity%]
+		../codegen/golem_[% efto %].frm
+d[%$_%]_[% efto %]h[%helicity%]l1.f90: d[%$_%]_[% efto %]h[%helicity%]l1.txt
+	@echo Haggies is processing loop diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) \
 		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
 		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
 		-c ../codegen/haggies-l1.in \
 		-t ../codegen/haggies-l1.out \
 		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_0h[%helicity%]l1.dat \
+			d[%$_%]_[% efto %]h[%helicity%]l1.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ $<[%
 		@if internal GENERATE_DERIVATIVES %]
-d[%$_%]_0h[%helicity%]l1d.f90: d[%$_%]_0h[%helicity%]l1d.txt
-	@echo Haggies is processing derivatives [%$_%]_0 @ Helicity [%helicity%]
+d[%$_%]_[% efto %]h[%helicity%]l1d.f90: d[%$_%]_[% efto %]h[%helicity%]l1d.txt
+	@echo Haggies is processing derivatives [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) \
 		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
 		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
@@ -1279,136 +995,12 @@ d[%$_%]_0h[%helicity%]l1d.f90: d[%$_%]_0h[%helicity%]l1d.txt
 		-c ../codegen/haggies-l1.in \
 		-t ../codegen/haggies-l1d.out \
 		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_0h[%helicity%]l1.dat \
+			d[%$_%]_[% efto %]h[%helicity%]l1.dat \
 			| sed 's/extrasymbols=//')) \
 		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
 		@end @if %][%
 	   @select abbrev.level @case diagram %]
-abbrevd[%$_%]_0h[%helicity%].f90: d[%$_%]_0h[%helicity%]l1.abb
-	@echo Haggies is processing abbreviations for loop diagram [%$_
-	%] @ Helicity [% helicity %]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-t ../codegen/abbrevloc.out \
-		-c ../codegen/abbrev.in \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D RANK=[%rank%] \
-		-o $@ $<[%
-	   @end @select %]
-
-d[%$_%]_1h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_1h[%helicity%]l1d.txt [% @end @if %]d[%$_%]_1h[%helicity %]l1.abb: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)[%
-	      @if is_mqse %] \
-		-D MQSE=1[%
-			@end @if %] \
-		-D LOOPS=1 \
-		-D GROUP=0 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1[%
-			@if internal GENERATE_DERIVATIVES %] \
-		-D GENERATEDERIVATIVES=1[%
-			@end @if %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %][%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %] \
-		../codegen/golem_1.frm
-d[%$_%]_1h[%helicity%]l1.f90: d[%$_%]_1h[%helicity%]l1.txt
-	@echo Haggies is processing loop diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_1h[%helicity%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ $<[%
-		@if internal GENERATE_DERIVATIVES %]
-d[%$_%]_1h[%helicity%]l1d.f90: d[%$_%]_1h[%helicity%]l1d.txt
-	@echo Haggies is processing derivatives [%$_%]_1 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1d.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_1h[%helicity%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-		@end @if %][%
-	   @select abbrev.level @case diagram %]
-abbrevd[%$_%]_1h[%helicity%].f90: d[%$_%]_1h[%helicity%]l1.abb
-	@echo Haggies is processing abbreviations for loop diagram [%$_
-	%] @ Helicity [% helicity %]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-t ../codegen/abbrevloc.out \
-		-c ../codegen/abbrev.in \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D RANK=[%rank%] \
-		-o $@ $<[%
-	   @end @select %]
-
-d[%$_%]_2h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]_2h[%helicity%]l1d.txt [% @end @if %]d[%$_%]_2h[%helicity %]l1.abb: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)[%
-	      @if is_mqse %] \
-		-D MQSE=1[%
-			@end @if %] \
-		-D LOOPS=1 \
-		-D GROUP=0 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1[%
-			@if internal GENERATE_DERIVATIVES %] \
-		-D GENERATEDERIVATIVES=1[%
-			@end @if %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %][%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %] \
-		../codegen/golem_2.frm
-d[%$_%]_2h[%helicity%]l1.f90: d[%$_%]_2h[%helicity%]l1.txt
-	@echo Haggies is processing loop diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_2h[%helicity%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ $<[%
-		@if internal GENERATE_DERIVATIVES %]
-d[%$_%]_2h[%helicity%]l1d.f90: d[%$_%]_2h[%helicity%]l1d.txt
-	@echo Haggies is processing derivatives [%$_%]_2 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1d.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_2h[%helicity%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-		@end @if %][%
-	   @select abbrev.level @case diagram %]
-abbrevd[%$_%]_2h[%helicity%].f90: d[%$_%]_2h[%helicity%]l1.abb
+abbrevd[%$_%]_[% efto %]h[%helicity%].f90: d[%$_%]_[% efto %]h[%helicity%]l1.abb
 	@echo Haggies is processing abbreviations for loop diagram [%$_
 	%] @ Helicity [% helicity %]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
@@ -1418,13 +1010,78 @@ abbrevd[%$_%]_2h[%helicity%].f90: d[%$_%]_2h[%helicity%]l1.abb
 		-D RANK=[%rank%] \
 		-o $@ $<[%
 	   @end @select %][%
+@end @for %][%
+@else %]
+
+d[%$_%]h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%helicity%]l1d.txt [% @end @if %]d[%$_%]h[%helicity %]l1.abb: ../diagrams-1.hh
+	@echo Form is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)[%
+	      @if is_mqse %] \
+		-D MQSE=1[%
+			@end @if %] \
+		-D LOOPS=1 \
+		-D GROUP=0 \
+		-D DIAG=[%$_%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-D RANK=[% rank %] \
+		-D GLOOPSIZE=[% loopsize group=grp %] \
+		-D GRANK=[% grank %] \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1[%
+			@if internal GENERATE_DERIVATIVES %] \
+		-D GENERATEDERIVATIVES=1[%
+			@end @if %][%
+			@if internal DERIVATIVES_AT_ZERO %] \
+		-D DERIVATIVESATZERO=1[%
+			@end @if %][%
+			@if is_massive_bubble diagram=$_ %] \
+		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
+			@end @if %] \
+		../codegen/golem.frm
+d[%$_%]h[%helicity%]l1.f90: d[%$_%]h[%helicity%]l1.txt
+	@echo Haggies is processing loop diagram [%$_%] @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
+		-c ../codegen/haggies-l1.in \
+		-t ../codegen/haggies-l1.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]h[%helicity%]l1.dat \
+			| sed 's/extrasymbols=//')) \
+		-o $@ $<[%
+		@if internal GENERATE_DERIVATIVES %]
+d[%$_%]h[%helicity%]l1d.f90: d[%$_%]h[%helicity%]l1d.txt
+	@echo Haggies is processing derivatives [%$_%] @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
+		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-c ../codegen/haggies-l1.in \
+		-t ../codegen/haggies-l1d.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]h[%helicity%]l1.dat \
+			| sed 's/extrasymbols=//')) \
+		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
+		@end @if %][%
+	   @select abbrev.level @case diagram %]
+abbrevd[%$_%]h[%helicity%].f90: d[%$_%]h[%helicity%]l1.abb
+	@echo Haggies is processing abbreviations for loop diagram [%$_
+	%] @ Helicity [% helicity %]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-t ../codegen/abbrevloc.out \
+		-c ../codegen/abbrev.in \
+		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D RANK=[%rank%] \
+		-o $@ $<[%
+	   @end @select %][%
+@end @if %][%
 	@end @for diagrams %][%
         @select abbrev.level @case group %]
 abbrevg[%grp%]h[%helicity%].f90:[%
 	   @for diagrams group=grp %] \
-		   d[%$_%]_0h[%helicity%]l1.abb \
+		   d[%$_%][% @if use order_names %]_0h[%helicity%]l1.abb \
 		   d[%$_%]_1h[%helicity%]l1.abb \
-		   d[%$_%]_2h[%helicity%]l1.abb[%
+		   d[%$_%]_2[% @end @if %]h[%helicity%]l1.abb[%
 	   @end @for %]
 	@echo Haggies is processing abbreviations for group [%grp%]
 	@$(HAGGIES) $(HAGGIES_OPT) -F \
@@ -1436,9 +1093,11 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 @end @for groups %][%
 @end @if generate_nlo_virt %][%
 @if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %]
-d[%$_%]_0h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%]_0 @ Helicity [%helicity%]
+	@for elements topolopy.keep.ct %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]l1c.txt: ../diagrams-ct.hh
+	@echo Form is processing counter term diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS)
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
@@ -1446,50 +1105,10 @@ d[%$_%]_0h[%helicity%]l1c.txt: ../diagrams-ct.hh
 		-D LOOPSIZE=1 \
 		-D CT=1 \
 		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]l1c \
-		../codegen/golem_0.frm
-d[%$_%]_0h[%helicity%]l1c.f90: d[%$_%]_0h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%]_0 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')
-d[%$_%]_1h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
-		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]_1h[%helicity%]l1c \
-		../codegen/golem_1.frm
-d[%$_%]_1h[%helicity%]l1c.f90: d[%$_%]_1h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%]_1 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')
-d[%$_%]_2h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%]_2 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
-		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]_2h[%helicity%]l1c \
-		../codegen/golem_2.frm
-d[%$_%]_2h[%helicity%]l1c.f90: d[%$_%]_2h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%]_2 @ Helicity [%helicity%]
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1c \
+		../codegen/golem_[% efto %].frm
+d[%$_%]_[% efto %]h[%helicity%]l1c.f90: d[%$_%]_[% efto %]h[%helicity%]l1c.txt
+	@echo Haggies is processing counter term for diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(HAGGIES) $(HAGGIES_OPT) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
@@ -1497,6 +1116,29 @@ d[%$_%]_2h[%helicity%]l1c.f90: d[%$_%]_2h[%helicity%]l1c.txt
 		-c ../codegen/haggies-l1c.in \
 		-t ../codegen/haggies-l1c.out \
 		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]l1c.txt: ../diagrams-ct.hh
+	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS)
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=ct	\
+		-D LOOPSIZE=1 \
+		-D CT=1 \
+		-D DIAG=[%$_%] \
+		-D OUTFILE=d[%$_%]h[%helicity%]l1c \
+		../codegen/golem.frm
+d[%$_%]h[%helicity%]l1c.f90: d[%$_%]h[%helicity%]l1c.txt
+	@echo Haggies is processing counter term for diagram [%$_%] @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
+		-D LOOPSIZE=[% loopsize diagram=$_ %] \
+		-c ../codegen/haggies-l1c.in \
+		-t ../codegen/haggies-l1c.out \
+		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
+@end @if %][%
 	@end @for %][%
 @end @if %][%
 @end @if %]

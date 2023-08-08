@@ -168,8 +168,8 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 
 	output_name = os.path.join(path, output_short_name)
 
-	if os.path.exists(output_name):
-		os.remove(output_name)
+	#if os.path.exists(output_name):
+		#os.remove(output_name)
 
 	message("QGraf is generating %s" % output_short_name)
 
@@ -257,6 +257,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty_out = open(form_sty_name,'w')
 	for i in range(len(form_sty_tmp)):
 		if i==34 and use_order_names:
+			form_sty_out.write("<back> RK[RK],\n")
 			if len(order_names)>0:
 				for el in order_names:
 					form_sty_out.write("<back> %s[%s],\n" % (el,el))
@@ -382,8 +383,8 @@ def run_qgraf(conf, in_particles, out_particles):
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")
 	for filename in cleanup_files:
 		full_name = os.path.join(path, filename)
-		if os.path.exists(full_name):
-			os.remove(full_name)
+		#if os.path.exists(full_name):
+			#os.remove(full_name)
 
 	if flag_generate_lo_diagrams and diagram_count(conf, 0) == 0 \
 				and flag_generate_nlo_virt:
