@@ -25,8 +25,8 @@ HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && head -n 100 ../d
 [% @if use_order_names %][%
 @for each 0 1 2 var=efto %]
 OBJECTS_[% efto %]= \
-	globals.o amplitudeh[%helicity%]_[% efto %].o[%
-@if extension quadruple %] globals_qp.o amplitudeh[%helicity%]_[% efto %]_qp.o[%
+	[% @if eval efto .eq. 0 %]globals.o [% @end @if %]amplitudeh[%helicity%]_[% efto %].o[%
+@if extension quadruple %] [% @if eval efto .eq. 0 %]globals_qp.o [% @end @if %]amplitudeh[%helicity%]_[% efto %]_qp.o[%
 @end @if %][%
 @if helsum %][%
 @else %][%
@@ -420,8 +420,8 @@ endif
 
 [% @if use_order_names %][%
 @for each 0 1 2 var=efto%]
-d[%$_%]_[% efto %]h[%helicity%]l1: d[%$_%]_[% efto %]h[%helicity%]l1.f90 abbrevd[%$_%]_[% efto %]h[%helicity%].f90 globals.o[%
-@if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90 abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.f90 globals_qp.o[%
+d[%$_%]_[% efto %]h[%helicity%]l1: d[%$_%]_[% efto %]h[%helicity%]l1.f90 abbrevd[%$_%]_[% efto %]h[%helicity%].f90[% @if eval efto .eq. 0 %] globals.o[% @end @if %][%
+@if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90 abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.f90[% @if eval efto .eq. 0 %] globals_qp.o[% @end @if %][%
 @end @if %][%
 @if diagsum %]
 ifeq ($(HAVE_ORIG_DIAGRAM_FILE),1)
