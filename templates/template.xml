@@ -111,7 +111,18 @@
 			<only if-extension="ninja" />
 		</file>
 		<file src="info.frm" class="Kinematics" />
-		<file src="golem.frm" class="Kinematics" />
+		<file src="golem.frm" class="Kinematics">
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="golem_0.frm" class="Kinematics">
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="golem_1.frm" class="Kinematics">
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="golem_2.frm" class="Kinematics">
+			<only if-option="use_order_names" value="true" />
+		</file>
 		<file src="color.frm" class="Kinematics"/>
 		<file src="coloropt.frm" class="Kinematics">
 			<only if-option="abbrev.color" value="form" />
@@ -122,6 +133,19 @@
 		<file src="abbreviate.hh" class="Kinematics"/>
 		<file src="optimizeborn.hh" class="Integrals">
 			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="optimizeborn_0.hh" class="Integrals">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="optimizeborn_1.hh" class="Integrals">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="optimizeborn_2.hh" class="Integrals">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="finaloptimization.frm" class="Kinematics">
 			<only if-extension="formopt" />
@@ -135,25 +159,113 @@
 		</file>
 		<file src="buildfortran.py" class="Kinematics">
 			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_0.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_1.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="buildfortran_d.py" class="Kinematics">
 			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_0_d.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_1_d.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_2_d.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="buildfortran_tn2.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_0_tn2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_1_tn2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_2_tn2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="buildfortran_tn3.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_0_tn3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_1_tn3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_2_tn3.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="buildfortran_tmu.py" class="Kinematics">
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_0_tmu.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_1_tmu.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortran_2_tmu.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-extension="ninja" />
+			<only if-option="use_order_names" value="true" />
 		</file>
 		<file src="buildfortranborn.py" class="Kinematics">
 			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
 		</file>
+		<file src="buildfortranborn_0.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortranborn_1.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+		<file src="buildfortranborn_2.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<only if-option="use_order_names" value="true" />
+		</file>
+
 		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />
@@ -319,16 +431,74 @@
 				class="Integrals">
 				<only if-extension="ninja" />
 				<except if-option="r2" value="only" />
+				<except if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_0.f90" dest="ninja_0h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_1.f90" dest="ninja_1h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_2.f90" dest="ninja_2h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
 			<file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
+				<except if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="golem95_0.f90" dest="golem95_0h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="golem95_1.f90" dest="golem95_1h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="golem95_2.f90" dest="golem95_2h%d.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="golem95" />
+				<except if-option="r2" value="only" />
+				<only if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
 			<file src="amplitude.f90" dest="amplitudeh%d.f90"
-				arguments="helicity" class="Integrals" />
+				arguments="helicity" class="Integrals">
+				<except if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_0.f90" dest="amplitudeh%d_0.f90"
+				arguments="helicity" class="Integrals">
+				<only if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_1.f90" dest="amplitudeh%d_1.f90"
+				arguments="helicity" class="Integrals">
+				<only if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_2.f90" dest="amplitudeh%d_2.f90"
+				arguments="helicity" class="Integrals">
+				<only if-option="use_order_names" value="true" />
+			</file>
 			<file src="globals.f90" class="Kinematics" />
 			<file src="diagramsct.f90" class="Multi">
 				<except if-option="genUV" value="false"/>
@@ -336,6 +506,22 @@
 			<file src="amplitude_qp.f90" dest="amplitudeh%d_qp.f90"
 				arguments="helicity" class="Integrals" >
 			        <only if-extension="quadruple" />
+				<except if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_0_qp.f90" dest="amplitudeh%d_0_qp.f90"
+				arguments="helicity" class="Integrals" >
+			        <only if-extension="quadruple" />
+				<only if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_1_qp.f90" dest="amplitudeh%d_1_qp.f90"
+				arguments="helicity" class="Integrals" >
+			        <only if-extension="quadruple" />
+				<only if-option="use_order_names" value="true" />
+			</file>
+			<file src="amplitude_2_qp.f90" dest="amplitudeh%d_2_qp.f90"
+				arguments="helicity" class="Integrals" >
+			        <only if-extension="quadruple" />
+				<only if-option="use_order_names" value="true" />
 			</file>
 			<file src="globals_qp.f90" class="Kinematics">
 			        <only if-extension="quadruple" />
@@ -345,6 +531,31 @@
 				<only if-extension="ninja" />
 				<only if-extension="quadruple" />
 				<except if-option="r2" value="only" />
+				<except if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_0_qp.f90" dest="ninja_0h%d_qp.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<only if-extension="quadruple" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_1_qp.f90" dest="ninja_1h%d_qp.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<only if-extension="quadruple" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+			</file>
+			<file src="ninja_2_qp.f90" dest="ninja_2h%d_qp.f90" arguments="helicity"
+				class="Integrals">
+				<only if-extension="ninja" />
+				<only if-extension="quadruple" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
 		</directory>
@@ -376,6 +587,25 @@
 		<file src="ninja.f90" class="Integrals">
 				<only if-extension="ninja" />
 				<except if-option="r2" value="only" />
+				<except if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_0.f90" class="Integrals">
+				<only if-extension="ninja" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_1.f90" class="Integrals">
+				<only if-extension="ninja" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
+				<filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_2.f90" class="Integrals">
+				<only if-extension="ninja" />
+				<!-- <except if-option="r2" value="only" /> -->
+				<only if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 		</file>
 		<file src="diagramsl0.f90" class="Integrals" />
@@ -392,6 +622,28 @@
 		  <only if-extension="ninja" />
 		  <only if-extension="quadruple" />
 		  <except if-option="r2" value="only" />
+		  <except if-option="use_order_names" value="true" />
+		  <filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_0_qp.f90" class="Integrals">
+		  <only if-extension="ninja" />
+		  <only if-extension="quadruple" />
+		  <!-- <except if-option="r2" value="only" /> -->
+		  <only if-option="use_order_names" value="true" />
+		  <filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_1_qp.f90" class="Integrals">
+		  <only if-extension="ninja" />
+		  <only if-extension="quadruple" />
+		  <!-- <except if-option="r2" value="only" /> -->
+		  <only if-option="use_order_names" value="true" />
+		  <filter name="Fortran90" width="80"/>
+		</file>
+		<file src="ninja_2_qp.f90" class="Integrals">
+		  <only if-extension="ninja" />
+		  <only if-extension="quadruple" />
+		  <!-- <except if-option="r2" value="only" /> -->
+
 		  <filter name="Fortran90" width="80"/>
 		</file>
 	</directory>

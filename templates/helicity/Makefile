@@ -12,7 +12,7 @@ include ../Makefile.conf[%
 [% @if extension shared %]
 compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][% @if use_order_names %]_0.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_1.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_2.so[% @end @if %]
 [% @else %]
-compile: source amplitude[%helicity%][% @if use_order_names %]_0.a amplitude[%helicity%]_1.a amplitude[%helicity%]_2.a[% @end @if %]
+compile: source amplitude[%helicity%][% @if use_order_names %]_0.a amplitude[%helicity%]_1.a amplitude[%helicity%]_2[% @end @if %].a
 [% @end @if %]
 
 -include Makefile.source

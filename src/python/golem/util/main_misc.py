@@ -101,7 +101,6 @@ def generate_process_files(conf, from_scratch=False):
 	helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
 	# Obtain the files required by QGraf from the template file.
-	print("first call: templates = ",templates)
 	golem.templates.xmltemplates.transform_templates(templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
@@ -142,7 +141,6 @@ def generate_process_files(conf, from_scratch=False):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 
 	# Create and populate subdirectories
-	print("second call: templates = ",templates)
 	golem.templates.xmltemplates.transform_templates(templates, path, props,
 			conf = conf,
 			in_particles = in_particles,
@@ -179,8 +177,8 @@ def cleanup(path):
 
 	for filename in cleanup_files:
 		full_name = os.path.join(path, filename)
-		#if os.path.exists(full_name):
-			#os.remove(full_name)
+		if os.path.exists(full_name):
+			os.remove(full_name)
 
 def find_config_files():
 	"""
