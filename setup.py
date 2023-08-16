@@ -1,17 +1,46 @@
 #!/usr/bin/env python3
 # vim: ts=3:sw=3
+import os
+try:
+  from distutils.core import setup
+  from distutils.sysconfig import get_config_vars
+  from distutils.command.build_py import build_py as _build_py
+  from distutils.command.install_scripts import install_scripts as _install_scripts
+  from distutils.command.install import install as _install
+  from distutils.command.install_data import install_data as _install_data
+  from distutils.util import change_root as _change_root
+  from distutils import log
+except:
+  from setuptools import setup
+  from sysconfig import get_config_vars
+  from setuptools.command.build_py import build_py as _build_py
+  from setuptools.command.install_scripts import install_scripts as _install_scripts
+  from setuptools.command.install import install as _install
+  from setuptools._distutils.command.install_data import install_data as _install_data
+  import logging as log
+#From https://github.com/pypa/distutils/blob/main/distutils/util.py
+  def _change_root(new_root, pathname):
+    """Return 'pathname' with 'new_root' prepended.  If 'pathname' is
+    relative, this is equivalent to "os.path.join(new_root,pathname)".
+    Otherwise, it requires making 'pathname' relative and then joining the
+    two, which is tricky on DOS/Windows and Mac OS.
+    """
+    if os.name == 'posix':
+        if not os.path.isabs(pathname):
+            return os.path.join(new_root, pathname)
+        else:
+            return os.path.join(new_root, pathname[1:])
 
-from distutils.core import setup
-from distutils.sysconfig import get_config_vars
-from distutils.command.build_py import build_py as _build_py
-from distutils.command.install_scripts import install_scripts as _install_scripts
-from distutils.command.install import install as _install
-from distutils.command.install_data import install_data as _install_data
-from distutils.util import change_root as _change_root
-from distutils import log
+    elif os.name == 'nt':
+        (drive, path) = os.path.splitdrive(pathname)
+        if path[0] == '\\':
+            path = path[1:]
+        return os.path.join(new_root, path)
+
 
 import os.path
 import os
+import re
 import fnmatch
 import fileinput
 
@@ -33,9 +62,11 @@ def get_git_revision():
 			with open("PKG-INFO", "r") as f:
 				for line in f:
 					if line.startswith("Version: "):
-						if "-" not in line:
-							raise Exception("No git repository, and no revision number found in PKG-INFO " + line.strip())
-						return line.split("-", 1)[1].strip()
+						if "-" in line:
+							return re.search('gosam-([0-9.]*)-([a-z,0-9]*)',line).group(2)
+					if line.startswith("Download-URL: "):
+						if "-" in line:
+							return re.search('gosam-([0-9.]*)-([a-z,0-9]*)',line).group(2)
 			raise Exception("The git repository is missing and PKG-INFO has no version")
 		except FileNotFoundError:
 			raise Exception("Neither the git repository nor the PKG-INFO file exist")
@@ -47,7 +78,7 @@ TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
 
 INFO = {
 		'name': 'gosam',
-		'version': TAR_VERSION,
+		'version': VERSION,
 		'author': 'The GoSam (Golem and Samurai) Collaboration',
 		'author_email': 'gosam@hepforge.org',
 		'maintainer': 'The GoSam Collaboration',
