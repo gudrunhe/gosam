@@ -2527,7 +2527,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0()
+      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()
       ! print *, "heli_amp[%helicity%] = ", heli_amp[%helicity%][%
          @end @for helicities %][%
       @end @if is_first %][%
