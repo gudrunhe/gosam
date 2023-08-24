@@ -274,8 +274,8 @@ contains
               %]), mu, parameters, res, blha1_mode=.true.)[%
                @end @for %][%
             @end @select %][%
-         @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
-         %][% @elif eval ( cr.amplitudetype ~ "ccTree" .or. cr.amplitudetype ~ "ccLoop" )
+         @if eval ( cr.amplitudetype .eq. "scTree" .or. cr.amplitudetype .eq. "scLoop" )
+         %][% @elif eval ( cr.amplitudetype .eq. "ccTree" .or. cr.amplitudetype .eq. "ccLoop" )
          %][% @else %]
               res(1:3) = alpha_s * one_over_2pi * res(1:3)[%
          @end @if%][%
@@ -426,7 +426,8 @@ contains
       use [% sp.$_ %]_model, only: parseline[% 
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
-      use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated[%
+      use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated, &
+           & spin_correlated_lo2_whizard [%
       @if extension golem95 %]
       use [% sp.$_%]_groups, only: tear_down_golem95[%
       @end @if %][%
@@ -449,10 +450,13 @@ contains
       real(kind=c_double), dimension(60), intent(out) :: res
 
       real(kind=ki), dimension([% sp.num_legs %],4) :: vecs
-      real(kind=ki), dimension([% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
+      real(kind=ki), dimension([% @if eval ( cr.amplitudetype .eq. "scTree" .or. cr.amplitudetype .eq. "scLoop" )
       %][% eval 2 * sp.num_legs * sp.num_legs
-      %][%@elif eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop" ) %][%
-                eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2 %][%@else%]4[%@end @if
+      %][%@elif eval ( cr.amplitudetype .eq. "ccTree"  .or. cr.amplitudetype .eq. "ccLoop" )
+      %][% eval ( sp.num_legs * ( sp.num_legs - 1 ) ) // 2
+      %][%@elif eval ( cr.amplitudetype .eq. "scTree2" )
+      %][% sp.num_legs %],4,4[%
+      @else%]4[%@end @if
       %]) :: amp
       real(kind=c_double), optional :: acc
       logical, optional :: blha1_mode
@@ -461,7 +465,10 @@ contains
       real(kind=ki), parameter :: pi = 3.14159265358979323846264&
            &3383279502884197169399375105820974944592307816406286209_ki[% 
       @end @if %]
-      integer :: i, prec, orig_nlo_prefactors
+      integer :: i, prec, orig_nlo_prefactors[%
+      @if eval ( cr.amplitudetype .eq. "scTree2" )
+      %], iem[% @end @if
+      %]
       logical :: ok[%
       @select olp.parameters default=NONE
       @case NONE %]
@@ -500,14 +507,21 @@ contains
       vecs(:,3) = real(momenta(3::5),ki)
       vecs(:,4) = real(momenta(4::5),ki)
 
-      call boost_to_cms(vecs)
+      [% @if eval ( cr.amplitudetype .ne. "scTree2" )
+      %]call boost_to_cms(vecs)[%
+      @else
+      %]! For whizard we need the spin correlated tree in the lab frame,
+      ! hence no boost to cms[%
+      @end @if %]
 
-      [% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
-      %]call OLP_spin_correlated_lo2(vecs,amp);
+      [% @if eval ( cr.amplitudetype .eq. "scTree" .or. cr.amplitudetype .eq. "scLoop" ) %]
+      call OLP_spin_correlated_lo2(vecs,amp);
       ok=.true.[%
-      @else %][%
-      @if eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop"  ) %]
+      @elif eval ( cr.amplitudetype .eq. "ccTree"  .or. cr.amplitudetype .eq. "ccLoop"  ) %]
       call OLP_color_correlated(vecs,amp);
+      ok=.true.[%
+      @elif eval ( cr.amplitudetype .eq. "scTree2"  ) %]
+      call spin_correlated_lo2_whizard(vecs,amp);
       ok=.true.[%
       @else 
       %]call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok[%
@@ -517,7 +531,6 @@ contains
       @end @select %])[%@end @if %][%
       @if extension golem95 %]
       call tear_down_golem95()[%
-      @end @if %][%
       @end @if %][%
       @if extension ninja %]
       call ninja_exit()[%
@@ -535,26 +548,53 @@ contains
       else
          if(prec.lt.[% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %] .and. PSP_check) then
             ! Give back a Nan so that point is discarded
-            zero = log(1.0_ki)
+            zero = log(1.0_ki)[%
+            @if eval ( cr.amplitudetype .eq. "scTree2" )%]
+            ! TODO: How to handle this case for scTree2?[%
+            @else%]
             amp(2)= 1.0_ki/zero[% 
             @if eval olp.mc.name ~ "amcatnlo" %]
             ! aMC@NLO cannot handle Nan's
             amp(2)= 0.0_ki[%
+            @end @if %][%
             @end @if %]
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
       end if
 
-      [% @if eval ( cr.amplitudetype ~ "scTree" .or. cr.amplitudetype ~ "scLoop" )
-      %]do i=1, size(amp)
-        res(i) = real(amp(i), c_double)
-      end do
-      [%@elif eval ( cr.amplitudetype ~ "ccTree"  .or. cr.amplitudetype ~ "ccLoop" )%]
+      [% @if eval ( cr.amplitudetype .eq. "scTree" .or. cr.amplitudetype .eq. "scLoop" )%]
       do i=1, size(amp)
         res(i) = real(amp(i), c_double)
-      end do[%
-      @else%]
+      end do
+      [%@elif eval ( cr.amplitudetype .eq. "ccTree"  .or. cr.amplitudetype .eq. "ccLoop" )%]
+      do i=1, size(amp)
+        res(i) = real(amp(i), c_double)
+      end do
+      [%@elif eval ( cr.amplitudetype .eq. "scTree2" )%]
+      ! TODO:
+      ! How to deal with the different emitters?
+      ! Is it necessary to pass a large array with mostly vanishing entries?
+      do iem=1,[% sp.num_legs %]
+         if (iem.gt.10) then
+            print *, "WARNING: scTree2 supports only up to 10 emitters!"
+            print *, "ToDo: Make this an proper exception..."
+         end if
+         ! Whizard convention
+         res(6*(iem-1)+1) = real(amp(iem,2,2), c_double)
+         res(6*(iem-1)+3) = real(amp(iem,3,3), c_double)
+         res(6*(iem-1)+6) = real(amp(iem,4,4), c_double)
+         if (iem.le.2) then
+            res(6*(iem-1)+2) = -real(amp(iem,2,3), c_double)
+            res(6*(iem-1)+4) = -real(amp(iem,2,4), c_double)
+            res(6*(iem-1)+5) = -real(amp(iem,3,4), c_double)
+         else
+            res(6*(iem-1)+2) = real(amp(iem,2,3), c_double)
+            res(6*(iem-1)+4) = real(amp(iem,2,4), c_double)
+            res(6*(iem-1)+5) = real(amp(iem,3,4), c_double)
+         end if
+      end do
+      [%@else%]
       res(1) = real(amp(4), c_double)
       res(2) = real(amp(3), c_double)
       res(3) = real(amp(2), c_double)
