@@ -324,6 +324,7 @@ def prepare_model_files(conf, output_path=None):
          conf.setProperty(golem.properties.use_vertex_labels,False)
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
+         conf["is_ufo"] = True
          model_path = model_lst[1]
          model_path = os.path.expandvars(model_path)
          model_path = os.path.expanduser(model_path)
@@ -332,9 +333,7 @@ def prepare_model_files(conf, output_path=None):
          message("Importing FeynRules model files ...")
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
-            
          order_names = sorted(conf.getProperty(golem.properties.order_names))
-
          mdl.store(path, MODEL_LOCAL, order_names)
          message("Done with model import.")
       else:

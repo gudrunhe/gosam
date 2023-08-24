@@ -256,11 +256,12 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty_tmp = open(form_sty_name,'r').readlines()
 	form_sty_out = open(form_sty_name,'w')
 	for i in range(len(form_sty_tmp)):
-		if i==34 and use_order_names:
+		if i==34 and conf["is_ufo"]:
 			form_sty_out.write("<back> RK[RK],\n")
-			if len(order_names)>0:
-				for el in order_names:
-					form_sty_out.write("<back> %s[%s],\n" % (el,el))
+			if use_order_names:
+				if len(order_names)>0:
+					for el in order_names:
+						form_sty_out.write("<back> %s[%s],\n" % (el,el))
 		form_sty_out.write(form_sty_tmp[i])
 	form_sty_out.close()
 
