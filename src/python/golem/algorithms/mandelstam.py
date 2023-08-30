@@ -78,8 +78,16 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
 		else:
 			sys.exit("Should never happen: Invalid cut: %r!" % lst)
 
-	names = list(
-			[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
+	#names = list(
+			#[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
+
+	names = []
+	for i in range(1, num_legs + 1):
+		for j in range(i, num_legs +1):
+			if i==j:
+				names.append(mandelstam_name(prefix, suffix, infix,[i]))
+			else:
+				names.append(mandelstam_name(prefix, suffix, infix,[i,j]))
 
 	substitutions = []
 
@@ -100,11 +108,15 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
 				else:
 					sign = 1
 
-				s_pp = mandelstam_name(prefix, suffix, infix, find(i, j))
-				s_mm = mandelstam_name(prefix, suffix, infix, find(i+1, j-1))
-				s_pm = mandelstam_name(prefix, suffix, infix, find(i, j-1))
-				s_mp = mandelstam_name(prefix, suffix, infix, find(i+1, j))
-				row.append({s_pp: sign, s_mm: sign, s_pm: -sign, s_mp: -sign})
+				#s_pp = mandelstam_name(prefix, suffix, infix, find(i, j))
+				#s_mm = mandelstam_name(prefix, suffix, infix, find(i+1, j-1))
+				#s_pm = mandelstam_name(prefix, suffix, infix, find(i, j-1))
+				#s_mp = mandelstam_name(prefix, suffix, infix, find(i+1, j))
+				#row.append({s_pp: sign, s_mm: sign, s_pm: -sign, s_mp: -sign})
+				s_ij = mandelstam_name(prefix, suffix, infix, [i, j])
+				s_ii = mandelstam_name(prefix, suffix, infix, [i])
+				s_jj = mandelstam_name(prefix, suffix, infix, [j])
+				row.append({s_ij: sign, s_ii: -sign, s_jj: -sign})
 		substitutions.append(row)
 
 	return (names, substitutions)
@@ -128,14 +140,22 @@ def mandelstam_calc(num_in, num_out, prefix='s', suffix='', infix=''):
 
 	result = {}
 	num_legs = num_in + num_out
-	cuts = sections(num_legs)
-	for cut in cuts:
-		name = mandelstam_name(prefix, suffix, infix, cut)
-		if len(cut) > 1:
-			vecs = list(map(invert, cut))
-		else:
-			vecs = cut
-		result[name] = vecs
+	#cuts = sections(num_legs)
+	#for cut in cuts:
+		#name = mandelstam_name(prefix, suffix, infix, cut)
+		#if len(cut) > 1:
+			#vecs = list(map(invert, cut))
+		#else:
+			#vecs = cut
+		#result[name] = vecs
+	for i in range(1, num_legs + 1):
+		for j in range(i, num_legs + 1):
+			if i==j:
+				name = mandelstam_name(prefix, suffix, infix, [i])
+				result[name] = [i]
+			else:
+				name = mandelstam_name(prefix, suffix, infix, [i,j])
+				result[name] = [i,j]
 	return result
 
 
