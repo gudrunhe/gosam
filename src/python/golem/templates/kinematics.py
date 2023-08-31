@@ -41,6 +41,10 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._num_out = num_out
       self._num_legs = num_legs
 
+      all_mndlst = conf.getProperty(golem.properties.all_mandelstam)
+
+      self._all_mndlst = all_mndlst
+
       self._helicity_map = helicity_map
       self._heavy_quarks = heavy_quarks
       self._complex_masses = conf["complex_masses"]
@@ -195,10 +199,10 @@ class KinematicsTemplate(golem.util.parser.Template):
 
       self._properties = props
       self._mandel = \
-            golem.algorithms.mandelstam.mandelstam_calc(num_in, num_out)
+            golem.algorithms.mandelstam.mandelstam_calc(num_in, num_out, all_inv=all_mndlst)
       self._mandel_parts = \
             golem.algorithms.mandelstam.mandelstam_calc(num_in, num_out,
-                  prefix="", infix=" ", suffix="")
+                  prefix="", infix=" ", suffix="", all_inv=all_mndlst)
 
       helic = {}
       for i in range(num_legs):
@@ -1199,12 +1203,15 @@ class KinematicsTemplate(golem.util.parser.Template):
       fmt_suffix = self._setup_name("fmt_suffix", "", opts)
       fmt_infix = self._setup_name("fmt_infix", "", opts)
 
+      all_mndlst = self._all_mndlst
+
       m_vars, m_subs = \
          golem.algorithms.mandelstam.generate_mandelstam_set(
                self._num_in, self._num_out,
                prefix=fmt_prefix,
                infix=fmt_infix,
-               suffix=fmt_suffix)
+               suffix=fmt_suffix,
+               all_inv=all_mndlst)
 
       num_legs = self._num_legs
       props = Properties()

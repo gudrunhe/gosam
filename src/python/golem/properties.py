@@ -1196,6 +1196,19 @@ use_vertex_labels = Property("use_vertex_labels",
    bool,
    False, experimental=True)
 
+all_mandelstam = Property("all_mandelstam",
+   """\
+   If 'false' momentum conservation is used to reduce the set of independent
+   Mandelstam invariants in the construction of the amplitude. This option
+   can cause problems with numeric stability of the real radiation ampli-
+   tudes when the accuracy of the phase space point is bad, i.e. momentum
+   conservation is fulfilled to significantly less than double precision.
+   In that case it is better to use the full set of Mandelstam invariants,
+   without using momentum conservation relations.
+   """,
+   bool,
+   False, experimental=True)
+
 properties = [
    process_name,
    process_path,
@@ -1287,7 +1300,9 @@ properties = [
 
    order_names,
    use_order_names,
-   use_vertex_labels
+   use_vertex_labels,
+
+   all_mandelstam
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

@@ -2,7 +2,7 @@
 
 import sys
 
-def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
+def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix='', all_inv=False):
 	"""
 	Generates a set of Mandelstam variables for
 	num_in incoming and num_out outgoing particles.
@@ -46,48 +46,50 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
 
 	"""
 	num_legs = num_in + num_out
-	cuts = sections(num_legs)
-	dual_cuts = sections(num_legs, True)
 
-	def normalize(i):
-		if i < 1:
-			return i + num_legs
-		elif i > num_legs:
-			return i - num_legs
-		else:
-			return i
-		
-	def find(i, j):
-		i = normalize(i)
-		j = normalize(j)
+	if all_inv:
+		names = []
+		for i in range(1, num_legs + 1):
+			for j in range(i, num_legs +1):
+				if i==j:
+					names.append(mandelstam_name(prefix, suffix, infix,[i]))
+				else:
+					names.append(mandelstam_name(prefix, suffix, infix,[i,j]))
+	else:
+		cuts = sections(num_legs)
+		dual_cuts = sections(num_legs, True)
 
-		if i < j:
-			lst = list(range(i, j + 1))
-		elif i == j:
-			lst = [i]
-		else:
-			lst = list(range(i + 1, num_legs + 1)) + list(range(1, j))
-
-		if lst in cuts:
-			return lst
-		elif lst in dual_cuts:
-			return cuts[dual_cuts.index(lst)]
-		elif (lst == list(range(i, num_legs + 1))
-				+ list(range(1, i))) or (lst == []):
-			return []
-		else:
-			sys.exit("Should never happen: Invalid cut: %r!" % lst)
-
-	#names = list(
-			#[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
-
-	names = []
-	for i in range(1, num_legs + 1):
-		for j in range(i, num_legs +1):
-			if i==j:
-				names.append(mandelstam_name(prefix, suffix, infix,[i]))
+		def normalize(i):
+			if i < 1:
+				return i + num_legs
+			elif i > num_legs:
+				return i - num_legs
 			else:
-				names.append(mandelstam_name(prefix, suffix, infix,[i,j]))
+				return i
+		
+		def find(i, j):
+			i = normalize(i)
+			j = normalize(j)
+
+			if i < j:
+				lst = list(range(i, j + 1))
+			elif i == j:
+				lst = [i]
+			else:
+				lst = list(range(i + 1, num_legs + 1)) + list(range(1, j))
+
+			if lst in cuts:
+				return lst
+			elif lst in dual_cuts:
+				return cuts[dual_cuts.index(lst)]
+			elif (lst == list(range(i, num_legs + 1))
+					+ list(range(1, i))) or (lst == []):
+				return []
+			else:
+				sys.exit("Should never happen: Invalid cut: %r!" % lst)
+
+		names = list(
+				[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
 
 	substitutions = []
 
@@ -108,20 +110,23 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix=''):
 				else:
 					sign = 1
 
-				#s_pp = mandelstam_name(prefix, suffix, infix, find(i, j))
-				#s_mm = mandelstam_name(prefix, suffix, infix, find(i+1, j-1))
-				#s_pm = mandelstam_name(prefix, suffix, infix, find(i, j-1))
-				#s_mp = mandelstam_name(prefix, suffix, infix, find(i+1, j))
-				#row.append({s_pp: sign, s_mm: sign, s_pm: -sign, s_mp: -sign})
-				s_ij = mandelstam_name(prefix, suffix, infix, [i, j])
-				s_ii = mandelstam_name(prefix, suffix, infix, [i])
-				s_jj = mandelstam_name(prefix, suffix, infix, [j])
-				row.append({s_ij: sign, s_ii: -sign, s_jj: -sign})
+				if all_inv:
+					s_ij = mandelstam_name(prefix, suffix, infix, [i, j])
+					s_ii = mandelstam_name(prefix, suffix, infix, [i])
+					s_jj = mandelstam_name(prefix, suffix, infix, [j])
+					row.append({s_ij: sign, s_ii: -sign, s_jj: -sign})
+				else:
+					s_pp = mandelstam_name(prefix, suffix, infix, find(i, j))
+					s_mm = mandelstam_name(prefix, suffix, infix, find(i+1, j-1))
+					s_pm = mandelstam_name(prefix, suffix, infix, find(i, j-1))
+					s_mp = mandelstam_name(prefix, suffix, infix, find(i+1, j))
+					row.append({s_pp: sign, s_mm: sign, s_pm: -sign, s_mp: -sign})
+
 		substitutions.append(row)
 
 	return (names, substitutions)
 
-def mandelstam_calc(num_in, num_out, prefix='s', suffix='', infix=''):
+def mandelstam_calc(num_in, num_out, prefix='s', suffix='', infix='', all_inv=False):
 	"""
 	This function returns a dictionary that contains for each
 	Mandelstam variables the vectors that are used to calculate it.
@@ -140,22 +145,25 @@ def mandelstam_calc(num_in, num_out, prefix='s', suffix='', infix=''):
 
 	result = {}
 	num_legs = num_in + num_out
-	#cuts = sections(num_legs)
-	#for cut in cuts:
-		#name = mandelstam_name(prefix, suffix, infix, cut)
-		#if len(cut) > 1:
-			#vecs = list(map(invert, cut))
-		#else:
-			#vecs = cut
-		#result[name] = vecs
-	for i in range(1, num_legs + 1):
-		for j in range(i, num_legs + 1):
-			if i==j:
-				name = mandelstam_name(prefix, suffix, infix, [i])
-				result[name] = [i]
+
+	if all_inv:
+		for i in range(1, num_legs + 1):
+			for j in range(i, num_legs + 1):
+				if i==j:
+					name = mandelstam_name(prefix, suffix, infix, [i])
+					result[name] = [i]
+				else:
+					name = mandelstam_name(prefix, suffix, infix, [i,j])
+					result[name] = [i,j]
+	else:
+		cuts = sections(num_legs)
+		for cut in cuts:
+			name = mandelstam_name(prefix, suffix, infix, cut)
+			if len(cut) > 1:
+				vecs = list(map(invert, cut))
 			else:
-				name = mandelstam_name(prefix, suffix, infix, [i,j])
-				result[name] = [i,j]
+				vecs = cut
+			result[name] = vecs
 	return result
 
 

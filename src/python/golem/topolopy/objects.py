@@ -1116,7 +1116,7 @@ class LoopIntegral:
       num_out = len([x for x in list(zerosum.values()) if x==-1])
       mandel_names, mandel_subst = \
          golem.algorithms.mandelstam.generate_mandelstam_set(
-            num_in, num_out, prefix, suffix, infix)
+            num_in, num_out, prefix, suffix, infix, False)
 
       for i in range(1, self.size() + 1):
          pr_i = self._propagators[i-1]
@@ -1218,7 +1218,7 @@ class LoopIntegral:
 
       mandel_names, mandel_subst = \
          golem.algorithms.mandelstam.generate_mandelstam_set(
-            num_in, num_out, prefix, suffix, infix)
+            num_in, num_out, prefix, suffix, infix, False)
 
       for i in range(1, self.size() + 1):
          pr_i = self._propagators[i-1]
