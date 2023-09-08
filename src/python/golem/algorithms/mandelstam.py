@@ -1,6 +1,7 @@
 # vim: ts=3:sw=3
 
 import sys
+from collections import Counter
 
 def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix='', all_inv=False):
 	"""
@@ -47,49 +48,50 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix='', al
 	"""
 	num_legs = num_in + num_out
 
+	cuts = sections(num_legs)
+	dual_cuts = sections(num_legs, True)
+
+	def normalize(i):
+		if i < 1:
+			return i + num_legs
+		elif i > num_legs:
+			return i - num_legs
+		else:
+			return i
+		
+	def find(i, j):
+		i = normalize(i)
+		j = normalize(j)
+
+		if i < j:
+			lst = list(range(i, j + 1))
+		elif i == j:
+			lst = [i]
+		else:
+			lst = list(range(i + 1, num_legs + 1)) + list(range(1, j))
+
+		if lst in cuts:
+			return lst
+		elif lst in dual_cuts:
+			return cuts[dual_cuts.index(lst)]
+		elif (lst == list(range(i, num_legs + 1))
+				+ list(range(1, i))) or (lst == []):
+			return []
+		else:
+			sys.exit("Should never happen: Invalid cut: %r!" % lst)
+
 	if all_inv:
-		names = []
+		extra = []
 		for i in range(1, num_legs + 1):
 			for j in range(i, num_legs +1):
-				if i==j:
-					names.append(mandelstam_name(prefix, suffix, infix,[i]))
-				else:
-					names.append(mandelstam_name(prefix, suffix, infix,[i,j]))
+				if i!=j:
+					extra.append([i,j])
+		cuts_tmp = extend(cuts,extra)
 	else:
-		cuts = sections(num_legs)
-		dual_cuts = sections(num_legs, True)
+		cuts_tmp = cuts
 
-		def normalize(i):
-			if i < 1:
-				return i + num_legs
-			elif i > num_legs:
-				return i - num_legs
-			else:
-				return i
-		
-		def find(i, j):
-			i = normalize(i)
-			j = normalize(j)
-
-			if i < j:
-				lst = list(range(i, j + 1))
-			elif i == j:
-				lst = [i]
-			else:
-				lst = list(range(i + 1, num_legs + 1)) + list(range(1, j))
-
-			if lst in cuts:
-				return lst
-			elif lst in dual_cuts:
-				return cuts[dual_cuts.index(lst)]
-			elif (lst == list(range(i, num_legs + 1))
-					+ list(range(1, i))) or (lst == []):
-				return []
-			else:
-				sys.exit("Should never happen: Invalid cut: %r!" % lst)
-
-		names = list(
-				[mandelstam_name(prefix, suffix, infix, l) for l in cuts])
+	names = list(
+			[mandelstam_name(prefix, suffix, infix, l) for l in cuts_tmp])
 
 	substitutions = []
 
@@ -111,7 +113,12 @@ def generate_mandelstam_set(num_in, num_out, prefix='s', suffix='', infix='', al
 					sign = 1
 
 				if all_inv:
-					s_ij = mandelstam_name(prefix, suffix, infix, [i, j])
+					if [i, j] in cuts_tmp:
+						s_ij = mandelstam_name(prefix, suffix, infix, [i, j])
+					elif [j, i] in cuts_tmp:
+						s_ij = mandelstam_name(prefix, suffix, infix, [j, i])
+					else:
+						sys.exit("Should never happen: Invalid sij: %r!" % [i, j])
 					s_ii = mandelstam_name(prefix, suffix, infix, [i])
 					s_jj = mandelstam_name(prefix, suffix, infix, [j])
 					row.append({s_ij: sign, s_ii: -sign, s_jj: -sign})
@@ -146,24 +153,24 @@ def mandelstam_calc(num_in, num_out, prefix='s', suffix='', infix='', all_inv=Fa
 	result = {}
 	num_legs = num_in + num_out
 
+	cuts_tmp = sections(num_legs)
+
 	if all_inv:
+		extra = []
 		for i in range(1, num_legs + 1):
-			for j in range(i, num_legs + 1):
-				if i==j:
-					name = mandelstam_name(prefix, suffix, infix, [i])
-					result[name] = [i]
-				else:
-					name = mandelstam_name(prefix, suffix, infix, [i,j])
-					result[name] = [i,j]
+			for j in range(i, num_legs +1):
+				if i!=j:
+					extra.append([i,j])
+		cuts = extend(cuts_tmp,extra)
 	else:
-		cuts = sections(num_legs)
-		for cut in cuts:
-			name = mandelstam_name(prefix, suffix, infix, cut)
-			if len(cut) > 1:
-				vecs = list(map(invert, cut))
-			else:
-				vecs = cut
-			result[name] = vecs
+		cuts = cuts_tmp
+	for cut in cuts:
+		name = mandelstam_name(prefix, suffix, infix, cut)
+		if len(cut) > 1:
+			vecs = list(map(invert, cut))
+		else:
+			vecs = cut
+		result[name] = vecs
 	return result
 
 
@@ -198,6 +205,15 @@ def sections(n, dual=False):
 			else:
 				result.append(sets[i2])
 	return result
+
+
+def extend(list1, list2):
+	result = list1
+	for l2 in list2:
+		if not Counter(l2) in list(map(Counter,list1)):
+			result.append(l2)
+	return result
+
 
 def mandelstam_name(prefix, suffix, infix, indices):
 	if indices == []:
