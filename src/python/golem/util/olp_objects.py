@@ -1,5 +1,7 @@
 # vim: ts=3:sw=3
 
+import io
+
 import golem
 
 from golem.util.config import GolemConfigError
@@ -648,7 +650,7 @@ class SUSYLesHouchesFile:
 	def __init__(self, *files):
 		self.blocks = {}
 		for f in files:
-			if isinstance(f, file):
+			if isinstance(f, io.IOBase):
 				self.load(f)
 			else:
 				the_file = open(f, "r")
