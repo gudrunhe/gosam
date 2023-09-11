@@ -158,9 +158,8 @@ def main(argv=sys.argv):
 		golem.util.tools.message("Reading configuration file %s" % fname)
 		try:
 			cf = golem.util.config.Properties()
-			f = open(fname, 'r')
-			cf.load(f)
-			f.close()
+			with open(fname, 'r') as f:
+				cf.load(f)
 			defaults.append(cf)
 		except golem.util.config.GolemConfigError as ex:
 			golem.util.tools.error(

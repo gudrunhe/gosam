@@ -156,11 +156,8 @@ class OLPOrderFile:
 		self._processing_instructions = []
 
 		if isinstance(source, str):
-			f = open(source)
-			try:
+			with open(source, "r") as f:
 				self.__init__(f, extensions)
-			finally:
-				f.close()
 		else:
 			parseStatus = None
 			line_number = 0

@@ -218,9 +218,8 @@ class Model:
 		for stub in stubs:
 			try:
 				fname = os.path.join(path, "%s%d.mdl" % (stub, idx))
-				f = open(fname, 'r')
-				tables[stub] = TableReader(f)
-				f.close()
+				with open(fname, 'r') as f:
+					tables[stub] = TableReader(f)
 			except CalcHEPImportError as exc:
 				raise CalcHEPImportError("While reading %r: %s"
 						% (fname, exc.value()))
@@ -250,19 +249,16 @@ class Model:
 		"""
 
 		message("   Writing Python file ...")
-		f = open(os.path.join(path, stub + ".py"), 'w')
-		self.write_python_file(f)
-		f.close()
+		with open(os.path.join(path, stub + ".py"), 'w') as f:
+			self.write_python_file(f)
 
 		message("   Writing QGraf file ...")
-		f = open(os.path.join(path, stub), 'w')
-		self.write_qgraf_file(f, stub)
-		f.close()
+		with open(os.path.join(path, stub), 'w') as f:
+			self.write_qgraf_file(f, stub)
 
 		message("   Writing Form file ...")
-		f = open(os.path.join(path, stub + ".hh"), 'w')
-		self.write_form_file(f)
-		f.close()
+		with open(os.path.join(path, stub + ".hh"), 'w') as f:
+			self.write_form_file(f)
 
 	def _check_header_sane(self, tbl):
 		required_headers = [

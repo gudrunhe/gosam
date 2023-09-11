@@ -929,25 +929,20 @@ class Model:
 
 	def store(self, path, local_name):
 		message("  Writing Python file ...")
-		f = open(os.path.join(path, "%s.py" % local_name), 'w')
-		self.write_python_file(f)
-		#print f
-		f.close()
+		with open(os.path.join(path, "%s.py" % local_name), 'w') as f:
+			self.write_python_file(f)
 
 		message("  Writing QGraf file ...")
-		f = open(os.path.join(path, local_name), 'w')
-		self.write_qgraf_file(f)
-		f.close()
+		with open(os.path.join(path, local_name), 'w') as f:
+			self.write_qgraf_file(f)
 
 		message("  Writing Form file ...")
-		f = open(os.path.join(path, "%s.hh" % local_name), 'w')
-		self.write_form_file(f)
-		f.close()
+		with open(os.path.join(path, "%s.hh" % local_name), 'w') as f:
+			self.write_form_file(f)
 
 #		message("  Writing Form CT file ...")
-#		f = open(os.path.join(path, "%sct.hh" % local_name), 'w')
-#		self.write_formct_file(f)
-#		f.close()
+#		with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
+#			self.write_formct_file(f)
 
 
 def canonical_field_names(p):
