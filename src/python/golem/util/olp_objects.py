@@ -648,12 +648,11 @@ class SUSYLesHouchesFile:
 	def __init__(self, *files):
 		self.blocks = {}
 		for f in files:
-			if isinstance(f, file):
-				self.load(f)
+			if isinstance(f, str):
+				with open(f, "r") as the_file:
+					self.load(the_file)
 			else:
-				the_file = open(f, "r")
-				self.load(the_file)
-				the_file.close()
+				self.load(f)
 
 	def load(self, f):
 		block = {}
