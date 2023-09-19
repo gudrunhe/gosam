@@ -293,6 +293,8 @@ def prepare_model_files(conf, output_path=None):
    
   # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
+  # Some options only work with ufo models
+   isufo = conf["is_ufo"]
 
    if "setup-file" in conf:
       rel_path = os.path.dirname(conf["setup-file"])
@@ -316,15 +318,10 @@ def prepare_model_files(conf, output_path=None):
          for ext in [".py", ".hh"]:
             copy_file(os.path.join(src_path, model + 'ct' + ext),
                   os.path.join(path, MODEL_LOCAL + 'ct' + ext))
-      if conf.getProperty(golem.properties.use_order_names):
-         warning("Property order_names can only be used when using a UFO model. Switching them off now.")
-         conf.setProperty(golem.properties.use_order_names,False)
-      if conf.getProperty(golem.properties.use_vertex_labels):
-         warning("Property vertex labels can only be used when using a UFO model. Switching them off now.")
-         conf.setProperty(golem.properties.use_vertex_labels,False)
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
-         conf["is_ufo"] = True
+         isufo = True
+         conf["is_ufo"] = isufo
          model_path = model_lst[1]
          model_path = os.path.expandvars(model_path)
          model_path = os.path.expanduser(model_path)
@@ -367,6 +364,13 @@ def prepare_model_files(conf, output_path=None):
    else:
       error("Parameter 'model' cannot have more than two entries.")
 
+   if not isufo:
+      if conf.getProperty(golem.properties.use_order_names):
+         warning("Property order_names can only be used when using a UFO model. Switching them off now.")
+         conf.setProperty(golem.properties.use_order_names,False)
+      if conf.getProperty(golem.properties.use_vertex_labels):
+         warning("Property vertex labels can only be used when using a UFO model. Switching them off now.")
+         conf.setProperty(golem.properties.use_vertex_labels,False)
 
 def extract_model_options(conf):
    for opt in conf.getListProperty(golem.properties.model_options):
