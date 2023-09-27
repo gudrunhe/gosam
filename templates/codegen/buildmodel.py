@@ -1094,7 +1094,7 @@ modelfile.write("            must_be_real=.true.\n")[$
 @end @for $]
 modelfile.write("     else\n")
 modelfile.write("         if (name(1:3) /= \"mdl\") then\n")
-modelfile.write("            call set_parameter(\"mdl\" // name(4:),re,im,ierr)\n")
+modelfile.write("            call set_parameter(\"mdl\" // name,re,im,ierr)\n")
 modelfile.write("            return\n")
 modelfile.write("         end if\n")
 modelfile.write("         ierr = 0 !FAIL / UNKNOWN\n")
@@ -2552,7 +2552,7 @@ modelfile_qp.write("            must_be_real=.true.\n")[$
 @end @for $]
 modelfile_qp.write("     else\n")
 modelfile_qp.write("         if (name(1:3) /= \"mdl\") then\n")
-modelfile_qp.write("            call set_parameter(\"mdl\" // name(4:),re,im,ierr)\n")
+modelfile_qp.write("            call set_parameter(\"mdl\" // name,re,im,ierr)\n")
 modelfile_qp.write("            return\n")
 modelfile_qp.write("         end if\n")
 modelfile_qp.write("         ierr = 0 !FAIL / UNKNOWN\n")
