@@ -372,6 +372,11 @@ class Model:
 #			f.write("'")
 #		f.write("\n}\n\n")
 
+		# search for additional floats appearing in lorentz structures
+		for l in self.all_lorentz:
+			structure = parser.compile(l.structure)
+			structure = structure.replaceFloats(self.prefix + "float", fsubs, fcounter)
+
 		self.floats = list(fsubs.keys())
 		self.floatsd = fsubs
 		self.floatsc = fcounter
