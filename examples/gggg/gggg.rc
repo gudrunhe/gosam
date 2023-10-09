@@ -1,0 +1,22 @@
+process_name=gggg
+process_path=virtual
+
+# PDG codes # Gluon: 21
+in=21,21
+out=21,21
+
+order=QCD, 2, 4
+
+# We only want the pure gauge theory part, no quarks
+qgraf.verbatim=\
+true=iprop[U,D,S,C,B,T,0,0];
+
+
+one=gs,e
+
+helicities=++++
+
+abbrev.level=diagram
+filter.nlo= lambda d: not d.isScaleless()
+
+regularisation_scheme=cdr

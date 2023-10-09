@@ -1,0 +1,21 @@
+process_name=wpwpjj
+process_path=virtual
+
+in=u, d~
+out=c~, s, e+, ne, mu+, nmu
+
+order=QCD, 2, 4
+model=smdiag
+
+zero=mU, mD, mC, mS, mB, me, mmu, wB
+one=gs,e
+
+helicities=-++-+-+-
+
+qgraf.verbatim=true=iprop[H,phim,phip,chi,T,0,0];
+
+# These parameters are not documented elsewhere because
+# usually they are set by the OLP interface
++olp.include_color_average=false
++olp.include_helicity_average=false
+

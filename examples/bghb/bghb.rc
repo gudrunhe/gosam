@@ -1,0 +1,26 @@
+process_name=bghb
+process_path=virtual
+
+in=5, 21
+out=25, 5
+order=QCD, 1, 3
+
+qgraf.verbatim=true=iprop[U,D,S,C,T,0,0];
+
+one=gs,e
+
+model=sm
+model.options= masses: mH mT, widths: none
+
+helicities=[bB=+-][+-]0B
++symmetries=parity
+
+
+regularisation_scheme=cdr
+
+
+# Single Pole check is set to false
+# because Yukawa renormalization is done
+# and the result would always give a 
+# wrong single pole
+SP_check =.false.

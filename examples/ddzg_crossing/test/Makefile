@@ -1,0 +1,33 @@
+
+PROCESS1=ddzg
+PROCESS2=dgzd
+
+FC=$(shell sh ../$(PROCESS1)/config.sh -fortcom)
+
+CFLAGS=$(shell sh ../$(PROCESS1)/config.sh -cflags)
+CFLAGS+=$(shell sh ../$(PROCESS2)/config.sh -cflags)
+
+LDFLAGS=$(shell sh ../$(PROCESS1)/config.sh -libs)
+LDFLAGS+=$(shell sh ../$(PROCESS2)/config.sh -libs)
+
+DEPS=$(shell sh ../$(PROCESS1)/config.sh -deps)
+DEPS+=$(shell sh ../$(PROCESS2)/config.sh -deps)
+
+.PHONY: compile test clean
+
+compile: test_program
+
+test.o: test.f90
+	$(FC) $(CFLAGS) -o $@ -c $<
+
+test_program: test.o $(DEPS)
+	$(FC) -o $@ $< $(LDFLAGS)
+
+test: test.log
+
+test.log: test_program
+	./test_program
+
+clean:
+	rm -rf test_program test.o
+	rm -rf test.log bad.points output.dat fort.*

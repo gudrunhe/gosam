@@ -1,0 +1,22 @@
+process_name=eett
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=-11,11
+out=6,-6
+
+order=QCD, 0, 2
+
+model=../model/Standard_Model_LanHep, 4
+model.options=
+
+qgraf.verbatim=true=iprop[part25,0,0];
+
+helicities=[dD=+-]D[+-][+-]
+
+one=mdlEE,mdlGG
+zero=mdlwtop
+
+reference-vectors=3:2,4:2
+
+reduction_programs=golem95

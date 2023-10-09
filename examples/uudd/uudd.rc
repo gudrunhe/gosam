@@ -1,0 +1,19 @@
+process_name=uudd
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=2,-2
+out=1,-1
+
+order=QCD, 2, 4
+
+qgraf.verbatim=\
+true=chord[S,C,B,T,0,0];
+
+
+one=gs,e
+zero=mU,mD
+
+helicities=[uU=+-]U[dD=+-]D
+
+regularisation_scheme=cdr

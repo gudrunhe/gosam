@@ -1,0 +1,28 @@
+###################
+# physics options #
+###################
+
+model=smehc
+model.options[0]= Nf:5, Nfgen:1
+model.options[1]= Nf:5, Nfgen:2
+
+zero=mD,mU
+one=gs,e
+
+symmetries=family
+
+qgraf.verbatim[0]=true=iprop[A,Z,U,C,S,B,H,0,0];
+qgraf.verbatim[1]=true=iprop[A,Z,C,S,B,H,0,0];
+
+filter.nlo= lambda d: not d.isScaleless()
+
+
+###################
+# rescue  options #
+###################
+
+PSP_check=True
+PSP_rescue=True
+PSP_verbosity=True
+PSP_chk_kfactor=1000
+

@@ -1,0 +1,26 @@
+process_name=hyy
+process_path=virtual
+
+in=H
+out=gamma, gamma
+order=QED, NONE, 3
+model=smdiag
+model.options= mW: 80.398, mZ: 91.1876, alpha: 0.00729735299
+
+one=e,gs
+zero=mU,mD,mS,mC,mB,w*
+
+helicities=0++
+
+r2=explicit
+
+qgraf.options=notadpole,nosnail,onshell
+qgraf.verbatim=true=iprop[U,D,S,C,B,em,mum,taum,0,0];
+
+reduction_programs=ninja, golem95
+
+reference-vectors=2:3,3:2
+filter.nlo={ \
+   'fermionic': CHORD([T]) == LOOPSIZE, \
+   'bosonic':   CHORD([T]) != LOOPSIZE \
+}

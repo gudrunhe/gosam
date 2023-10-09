@@ -1,0 +1,25 @@
+process_name=udene
+process_path=virtual
+
+# PDG codes
+# u: 2, d: 1
+# Gluon: 21
+# Z-Boson: 23
+# e-: 11, \nu_e: 12
+in=-2, 1
+out=11, -12
+
+order=QCD, 0, 2
+
+# Only W+ in s-channel, no Goldstone bosons
+qgraf.verbatim=\
+true=bridge[part24,anti24,1,100];
+
+
+model=FeynRules, ../model/Standard_Model_UFO
+
+model.options=
+
+# There's only one non-zero helicity
+helicities=+--+
+

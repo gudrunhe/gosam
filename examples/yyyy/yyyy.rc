@@ -1,0 +1,23 @@
+process_name=yyyy
+process_path=virtual
+
+in=gamma, gamma
+out=gamma, gamma
+
+order=QED, NONE, 4
+model=smdiag
+
+one=e
+
+helicities=++--, +++-, ++++
+
+qgraf.verbatim=\
+true=iprop[U,D,S,C,B,T,mum,taum,Wp,Wm,phim,phip,ghA,ghWp,ghWm,0,0];
+
+extensions=gaugecheck
+
+# These parameters are not documented elsewhere because
+# usually they are set by the OLP interface
++olp.include_color_average=false
++olp.include_helicity_average=false
++olp.include_symmetry_factor=false

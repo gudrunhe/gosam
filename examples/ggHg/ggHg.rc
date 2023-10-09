@@ -1,0 +1,30 @@
+process_name=ggHg
+process_path=virtual
+
+# PDG codes
+# Gluon: 21
+# Higgs-Boson: 25
+
+in=21, 21
+out=25, 21
+
+model=smehc
+# We only need one quark flavour 
+# running in the fermionic loops:
+model.options= Nf:5, Nfgen:1, ewchoose:1
+
+order=QCD, 3, 5
+
+one=gs,e
+zero=mU,mD
+
+symmetries=family
+
+# No other particles than gluons, Higgs and 
+# one quark flavour [d] running in the loops:
+qgraf.verbatim=true=iprop[A,Z,U,C,S,B,H,0,0];
+
+# Remove scaleless diagrams:
+filter.nlo= lambda d: not d.isScaleless()
+
+regularisation_scheme=cdr

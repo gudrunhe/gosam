@@ -1,0 +1,15 @@
+process_name=ddtt
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=1,-1
+out=6,-6
+
+order=QCD, 2, 4
+
+qgraf.verbatim=true=chord[U,S,C,B,0,0];
+
+helicities=[dD=+-]D[+-][+-]
+
+one=gs,e
+zero=mU,mD,mS,mC,mB,wT

@@ -1,0 +1,18 @@
+process_name=gggg
+process_path=virtual
+
+# PDG codes # Gluon: 21
+in=21,21
+out=21,21
+
+order=gs, 2, 2
+
+one=gs,e
+
+
+# Two of the three helicities must be zero at tree level,
+# we keep them as a check.
+helicities=++++,+++-,++--
+
+numpolvec=explicit
+regularisation_scheme=cdr
