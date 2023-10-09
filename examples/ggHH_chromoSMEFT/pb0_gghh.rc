@@ -17,6 +17,8 @@ extensions=
 
 model=FeynRules, ../model/UFO_modHEFT
 
+use_order_names=True
+
 r2=explicit
 
 PSP_chk_method=LoopInduced

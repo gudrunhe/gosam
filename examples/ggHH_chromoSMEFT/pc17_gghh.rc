@@ -21,6 +21,8 @@ model=FeynRules, ../model/UFO_modHEFTchromo
 #model.options= mdlEFTcount:3
 #model.options= mdlcgg:0,mdlcgghh:0,mdlctt:0,mdlct:0,mdlchhh:0
 
+use_order_names=True
+
 reduction_programs=golem95
 renormalisation=0
 

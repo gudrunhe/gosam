@@ -18,6 +18,8 @@ reduction_programs=golem95
 
 model=FeynRules, ../model/UFO_testSMEFTGoSam
 
+use_order_names=True
+
 r2=explicit
 
 PSP_chk_method=LoopInduced
