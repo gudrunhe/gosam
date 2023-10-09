@@ -706,12 +706,11 @@ filter_module = Property("filter.module",
    class my_nlo_filter_class:
       def __init__(self, fname):
          self.fields = []
-         f = open(fname, 'r')
-         for line in f.readlines():
-            fields = map(lambda s: s.strip(),
-                  line.split(","))
-            self.fields.append(fields)
-         f.close()
+         with open(fname, 'r') as f:
+            for line in f.readlines():
+               fields = map(lambda s: s.strip(),
+                     line.split(","))
+               self.fields.append(fields)
 
       def __call__(self, diag):
          for lst in self.fields:

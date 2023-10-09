@@ -667,8 +667,8 @@ def transform_templates(file_name, output_path, *props, **opts):
 
    try:
       xmlp = create_parser(toks[0], abs_outputpath, *props, **opts)
-      xmlf = open(os.path.join(*toks), 'r')
-      xmlp.Parse(xmlf.read())
+      with open(os.path.join(*toks), 'r') as xmlf:
+         xmlp.Parse(xmlf.read())
       message("All templates processed.")
 
    except IOError as ex:
