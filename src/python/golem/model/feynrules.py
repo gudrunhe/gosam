@@ -1027,11 +1027,11 @@ class Model:
 
 		message("  Writing QGraf file ...")
 		with open(os.path.join(path, local_name), 'w') as f:
-			self.write_qgraf_file(f)
+			self.write_qgraf_file(f, order_names)
 
 		message("  Writing Form file ...")
 		with open(os.path.join(path, "%s.hh" % local_name), 'w') as f:
-			self.write_form_file(f)
+			self.write_form_file(f, order_names)
 
 #		message("  Writing Form CT file ...")
 #		with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
