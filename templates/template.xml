@@ -398,27 +398,17 @@
 				<except if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
-			<file src="ninja_0.f90" dest="ninja_0h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="ninja_1.f90" dest="ninja_1h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="ninja_2.f90" dest="ninja_2h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
+			<foreach name="trnco" list="0,1,2">
+			    <file src="ninja.f90"
+				  dest="ninja_%sh%d.f90"
+				  arguments="trnco,helicity"
+				  class="Integrals">
+			      <only if-extension="ninja" />
+			      <except if-option="r2" value="only" />
+			      <only if-option="use_order_names" value="true" />
+			      <filter name="Fortran90" width="80"/>
+			  </file>
+			</foreach>
 			<file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="golem95" />
@@ -426,43 +416,29 @@
 				<except if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
-			<file src="golem95_0.f90" dest="golem95_0h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="golem95" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="golem95_1.f90" dest="golem95_1h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="golem95" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="golem95_2.f90" dest="golem95_2h%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="golem95" />
-				<except if-option="r2" value="only" />
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
+			<foreach name="trnco" list="0,1,2">
+			    <file src="golem95.f90"
+				  dest="golem95_%sh%d.f90"
+				  arguments="trnco,helicity"
+				  class="Integrals">
+			      <only if-extension="golem95" />
+			      <except if-option="r2" value="only" />
+			      <only if-option="use_order_names" value="true" />
+			      <filter name="Fortran90" width="80"/>
+			  </file>
+			</foreach>
 			<file src="amplitude.f90" dest="amplitudeh%d.f90"
 				arguments="helicity" class="Integrals">
 				<except if-option="use_order_names" value="true" />
 			</file>
-			<file src="amplitude_0.f90" dest="amplitudeh%d_0.f90"
-				arguments="helicity" class="Integrals">
-				<only if-option="use_order_names" value="true" />
-			</file>
-			<file src="amplitude_1.f90" dest="amplitudeh%d_1.f90"
-				arguments="helicity" class="Integrals">
-				<only if-option="use_order_names" value="true" />
-			</file>
-			<file src="amplitude_2.f90" dest="amplitudeh%d_2.f90"
-				arguments="helicity" class="Integrals">
-				<only if-option="use_order_names" value="true" />
-			</file>
+			<foreach name="trnco" list="0,1,2">
+			    <file src="amplitude.f90"
+				  dest="amplitudeh%d_%s.f90"
+				  arguments="helicity,trnco"
+				  class="Integrals">
+			      <only if-option="use_order_names" value="true" />
+			  </file>
+			</foreach>
 			<file src="globals.f90" class="Kinematics" />
 			<file src="diagramsct.f90" class="Multi">
 				<except if-option="genUV" value="false"/>
@@ -472,21 +448,15 @@
 			        <only if-extension="quadruple" />
 				<except if-option="use_order_names" value="true" />
 			</file>
-			<file src="amplitude_0_qp.f90" dest="amplitudeh%d_0_qp.f90"
-				arguments="helicity" class="Integrals" >
-			        <only if-extension="quadruple" />
-				<only if-option="use_order_names" value="true" />
-			</file>
-			<file src="amplitude_1_qp.f90" dest="amplitudeh%d_1_qp.f90"
-				arguments="helicity" class="Integrals" >
-			        <only if-extension="quadruple" />
-				<only if-option="use_order_names" value="true" />
-			</file>
-			<file src="amplitude_2_qp.f90" dest="amplitudeh%d_2_qp.f90"
-				arguments="helicity" class="Integrals" >
-			        <only if-extension="quadruple" />
-				<only if-option="use_order_names" value="true" />
-			</file>
+			<foreach name="trnco" list="0,1,2">
+			    <file src="amplitude_qp.f90"
+				  dest="amplitudeh%d_%s_qp.f90"
+				  arguments="helicity,trnco"
+				  class="Integrals">
+			      <only if-extension="quadruple" />
+			      <only if-option="use_order_names" value="true" />
+			  </file>
+			</foreach>
 			<file src="globals_qp.f90" class="Kinematics">
 			        <only if-extension="quadruple" />
 			</file>
@@ -498,30 +468,18 @@
 				<except if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
-			<file src="ninja_0_qp.f90" dest="ninja_0h%d_qp.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<only if-extension="quadruple" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="ninja_1_qp.f90" dest="ninja_1h%d_qp.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<only if-extension="quadruple" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
-			<file src="ninja_2_qp.f90" dest="ninja_2h%d_qp.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="ninja" />
-				<only if-extension="quadruple" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-			</file>
+			<foreach name="trnco" list="0,1,2">
+			    <file src="ninja_qp.f90"
+				  dest="ninja_%sh%d_qp.f90"
+				  arguments="trnco,helicity"
+				  class="Integrals">
+			      <only if-extension="ninja" />
+			      <only if-extension="quadruple" />
+			      <!-- <except if-option="r2" value="only" /> -->
+			      <only if-option="use_order_names" value="true" />
+			      <filter name="Fortran90" width="80"/>
+			  </file>
+			</foreach>
 		</directory>
 	</foreach>
 
@@ -546,32 +504,37 @@
 		<file src="golem95.f90"	class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />
+				<except if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 		</file>
+		<foreach name="trnco" list="0,1,2">
+		  <file src="golem95.f90"
+			dest="golem95_%s.f90"
+			arguments="trnco"
+			class="Integrals">
+		    <only if-extension="golem95" />
+		    <except if-option="r2" value="only" />
+		    <only if-option="use_order_names" value="true" />
+		    <filter name="Fortran90" width="80"/>
+		  </file>
+		</foreach>
 		<file src="ninja.f90" class="Integrals">
 				<only if-extension="ninja" />
 				<except if-option="r2" value="only" />
 				<except if-option="use_order_names" value="true" />
 				<filter name="Fortran90" width="80"/>
 		</file>
-		<file src="ninja_0.f90" class="Integrals">
-				<only if-extension="ninja" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-		</file>
-		<file src="ninja_1.f90" class="Integrals">
-				<only if-extension="ninja" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-		</file>
-		<file src="ninja_2.f90" class="Integrals">
-				<only if-extension="ninja" />
-				<!-- <except if-option="r2" value="only" /> -->
-				<only if-option="use_order_names" value="true" />
-				<filter name="Fortran90" width="80"/>
-		</file>
+		<foreach name="trnco" list="0,1,2">
+		  <file src="ninja.f90"
+			dest="ninja_%s.f90"
+			arguments="trnco"
+			class="Integrals">
+		    <only if-extension="ninja" />
+		    <!-- <except if-option="r2" value="only" /> -->
+		    <only if-option="use_order_names" value="true" />
+		    <filter name="Fortran90" width="80"/>
+		  </file>
+		</foreach>
 		<file src="diagramsl0.f90" class="Integrals" />
 		<file src="diagramsl0_qp.f90" class="Integrals" >
 		  <only if-extension="quadruple" />
@@ -589,26 +552,17 @@
 		  <except if-option="use_order_names" value="true" />
 		  <filter name="Fortran90" width="80"/>
 		</file>
-		<file src="ninja_0_qp.f90" class="Integrals">
-		  <only if-extension="ninja" />
-		  <only if-extension="quadruple" />
-		  <!-- <except if-option="r2" value="only" /> -->
-		  <only if-option="use_order_names" value="true" />
-		  <filter name="Fortran90" width="80"/>
-		</file>
-		<file src="ninja_1_qp.f90" class="Integrals">
-		  <only if-extension="ninja" />
-		  <only if-extension="quadruple" />
-		  <!-- <except if-option="r2" value="only" /> -->
-		  <only if-option="use_order_names" value="true" />
-		  <filter name="Fortran90" width="80"/>
-		</file>
-		<file src="ninja_2_qp.f90" class="Integrals">
-		  <only if-extension="ninja" />
-		  <only if-extension="quadruple" />
-		  <!-- <except if-option="r2" value="only" /> -->
-
-		  <filter name="Fortran90" width="80"/>
-		</file>
+		<foreach name="trnco" list="0,1,2">
+		  <file src="ninja_qp.f90"
+			dest="ninja_%s_qp.f90"
+			arguments="trnco"
+			class="Integrals">
+		    <only if-extension="ninja" />
+		    <only if-extension="quadruple" />
+		    <!-- <except if-option="r2" value="only" /> -->
+		    <only if-option="use_order_names" value="true" />
+		    <filter name="Fortran90" width="80"/>
+		  </file>
+		</foreach>
 	</directory>
 </template>
