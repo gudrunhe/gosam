@@ -139,7 +139,7 @@ for lidx in range(0,n_t_terms):
     f90file.write('      use [% process_name asprefix=\_ %]model \n')
     f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
     f90file.write('      use [% process_name asprefix=\_ %]color \n')
-    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
     f90file.write('      implicit none \n')
     f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
     if (int(rank)>=int(loopsize)+1):
@@ -157,15 +157,15 @@ if (extra_arg):
 f90file.write('!---#[ subroutine numerator_tmu:\n')
 f90file.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )[%
 @if helsum %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_tmu")\n'.format(diag) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_tmu")\n'.format(diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %]) )[%
 @else %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_tmu")\n'.format(diag,heli) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_tmu")\n'.format(diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %],heli) )[%
 @end @if %]
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki => ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')
 f90file.write('      integer(c_int), intent(in) :: ncut\n')
 f90file.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')
@@ -238,7 +238,7 @@ for lidx in range(0,n_t_terms):
     f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
-    f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
     f90file_qp.write('      implicit none \n')
     f90file_qp.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
     if (int(rank)>=int(loopsize)+1):
@@ -256,15 +256,15 @@ if (extra_arg):
 f90file_qp.write('!---#[ subroutine numerator_tmu:\n')
 f90file_qp.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )[%
 @if helsum %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_tmu")\n'.format(diag) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_tmu")\n'.format(diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %]) )[%
 @else %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_tmu")\n'.format(diag,heli) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_tmu")\n'.format(diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %],heli) )[%
 @end @if %]
 f90file_qp.write('      use iso_c_binding, only: c_int\n')
 f90file_qp.write('      use quadninjago_module, only: ki => ki_nin\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 f90file_qp.write('      implicit none \n')
 f90file_qp.write('      integer(c_int), intent(in) :: ncut\n')
 f90file_qp.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')

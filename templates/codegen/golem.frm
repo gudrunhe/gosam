@@ -1,6 +1,6 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 *
-* This version of golem.frm generates expressions for the numerator
+* This version of golem[% @if use_order_names %]_[% trnco %][% @end @if %].frm generates expressions for the numerator
 * only.
 *
 #-
@@ -59,7 +59,7 @@ CTensor epstensor;[%
    #Include- abbreviate.hh
    Symbol CC, R2;
 #Else
-   #Include- optimizeborn.hh
+   #Include- optimizeborn[% @if use_order_names %]_[% trnco %][% @end @if %].hh
 #EndIf[%
 @else %]
 #If `LOOPS' == 1
@@ -138,6 +138,30 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
       #call ReplaceVertices
    EndRepeat;
 #endif
+
+[% @if use_order_names
+%].sort[%
+@if eval trnco .neq. 2 %]
+Id Loopfac = 0;[%
+@end @if %]
+* Repeat Id Lambdam1^2 = Lambdam2;
+.sort
+[% @if eval trnco .eq. 0
+%]Id Lambdam2 = 0;[%
+@end @if %][%
+@if eval trnco .eq. 1
+%]Id Lambdam2^2 = 0;
+.sort
+Id Lambdam2 = 1;[%
+@end @if %][%
+@if eval trnco .eq. 2
+%]Id Lambdam2^2 = 0;
+Id Loopfac^2 = 0;
+.sort
+Id Lambdam2 = 1;
+Id Loopfac = 1;[%
+@end @if %][%
+@end @if %]
 
 #call VertexConstants
 #call ones
@@ -773,21 +797,21 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag"
+        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag.prc>
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag.prc> "#EndProcedure"
+        #Append <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag.prc>
-        #write <borndiag.prc> "#Procedure borndiag"
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag.prc> "#EndProcedure"
+	#Create <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf
@@ -806,21 +830,21 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag"
+        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag.prc>
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag.prc> "#EndProcedure"
+        #Append <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag.prc>
-        #write <borndiag.prc> "#Procedure borndiag"
-	#write <borndiag.prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag.prc> "#EndProcedure"
+	#Create <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf

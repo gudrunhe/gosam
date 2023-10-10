@@ -50,9 +50,11 @@ datfilename = file_name + '.dat'
 txt_lines=[]
 abb_max=getdata(datfilename)['abbrev_terms']
 
-outdict=translatefile('born.txt',config)
-f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
-f90file.write('   ! file: '+str(os.getcwd())+'diagramsl0.f90 \n')
+[% @if use_order_names
+%]outdict=translatefile(file_name+'.txt',config)[% @else
+%]outdict=translatefile('born.txt',config)[% @end @if %]
+f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0[% @if use_order_names %]_[% trnco %][% @end @if %]\n')
+f90file.write('   ! file: '+str(os.getcwd())+'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %].f90 \n')
 f90file.write('   ! generator: buildfortranborn.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
 f90file.write('   use [% process_name asprefix=\_ %]config, only: ki\n')[%
@@ -105,12 +107,12 @@ f90file.write('!         end do\n')
 f90file.write('!      end if\n')
 f90file.write('   end function     amplitude\n')
 f90file.write('!---#] function amplitude:\n')
-f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0\n')
+f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0[% @if use_order_names %]_[% trnco %][% @end @if %]\n')
 f90file.close()
 [% @if extension quadruple %]
-f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_qp\n')
-f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsl0_qp.f90 \n')
-f90file_qp.write('   ! generator: buildfortranborn.py \n')
+f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp\n')
+f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp.f90 \n')
+f90file_qp.write('   ! generator: buildfortranborn[% @if use_order_names %]_[% trnco %][% @end @if %].py \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
@@ -162,7 +164,7 @@ f90file_qp.write('!         end do\n')
 f90file_qp.write('!      end if\n')
 f90file_qp.write('   end function     amplitude\n')
 f90file_qp.write('!---#] function amplitude:\n')
-f90file_qp.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0_qp\n')
+f90file_qp.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp\n')
 f90file_qp.close()
 [% @end @if extension quadruple %]
 txtfile.close()
@@ -173,7 +175,7 @@ postformat(tmpname)
 [% @if extension quadruple %]
 postformat(tmpname_qp)
 [% @end @if extension quadruple %]
-shutil.move(tmpname,'diagramsl0.f90')
+shutil.move(tmpname,'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %].f90')
 [% @if extension quadruple %]
-shutil.move(tmpname_qp,'diagramsl0_qp.f90')
+shutil.move(tmpname_qp,'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp.f90')
 [% @end @if extension quadruple %]
