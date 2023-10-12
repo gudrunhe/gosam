@@ -489,6 +489,15 @@ def workflow(conf):
 		if conf.getProperty(p):
 			conf.setProperty(str(p), conf.getProperty(p))
 
+	# When using the EFT feature 'order_names' also 'use_order_names' must be set:
+	if conf.getProperty("order_names") and not conf.getProperty("use_order_names"):
+		raise GolemConfigError("You specified 'order_names' but forgot to set\n " +
+			"the flag 'use_order_names'!")
+	if not conf.getProperty("order_names") and conf.getProperty("use_order_names"):
+		warning("You explicitly set the 'use_order_names' flag without actually ",
+		  "specifying any 'order_names'. This can produce a lot of unnecessary code ",
+		  "so you might want to remove it.")
+
 	if not conf["extensions"] and props["extensions"]:
 		conf["extensions"]=props["extensions"]
 

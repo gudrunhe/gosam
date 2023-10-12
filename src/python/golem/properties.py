@@ -1172,7 +1172,8 @@ order_names = Property("order_names",
    """\
    A list of additional coupling order that should be 
    tracked throughout the amplitude generation. Relevant for
-   correct EFT treatment!
+   correct EFT treatment. If given, the 'use_order_names' flag
+   must be set, too. It can be False, but must at least exist.
 
    Example:
    order_names=QCD,NP,QL
@@ -1181,8 +1182,10 @@ order_names = Property("order_names",
 
 use_order_names = Property("use_order_names",
    """\
-   Whether or not to use the order_names property. Can only
-   be activated when using a UFO model file.
+   Whether or not to use the 'order_names' property. Can only
+   be activated when using a UFO model file. When no 'order_names'
+   are specified, and use_order_names=True, then a lot of unneces-
+   sary code is generated.
    """,
    bool,
    False, experimental=True)
