@@ -636,6 +636,13 @@ def workflow(conf):
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 
+	if generate_nlo_virt and conf.getProperty("use_order_names"):
+		if ('pjfry' in ext) or ('samurai' in ext):
+			raise GolemConfigError(
+					"The 'use_order_names' feature can only be used with ninja or golem95.\n" +
+					"Please select one of those as your redution program by setting:\n"+
+					"'reduction_programs=ninja, golem95' in the input card.\n")
+
 	if "shared" in ext:
 		conf["shared.fcflags"]="-fPIC"
 		conf["shared.ldflags"]="-fPIC"
