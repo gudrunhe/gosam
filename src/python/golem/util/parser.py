@@ -862,10 +862,9 @@ class Template:
          raise TemplateError("[% include ... %] takes exactly one argument.")
       try:
          path = self.templates()
-         template_file = open(os.path.join(path, args[0]), 'r')
-         template = self.__class__(template_file)
-         result = "".join(s for s in template(*self._stack))
-         template_file.close()
+         with open(os.path.join(path, args[0]), 'r') as template_file:
+            template = self.__class__(template_file)
+            result = "".join(s for s in template(*self._stack))
       except TemplateError as ex:
          raise TemplateError("In included file '%s': %s" % (args[0], ex))
 

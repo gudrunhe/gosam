@@ -131,9 +131,8 @@ def main(argv=sys.argv):
 
       for mfile in merge_files:
          if os.path.exists(mfile):
-            f = open(mfile, 'r')
-            defaults.load(f)
-            f.close()
+            with open(mfile, 'r') as f:
+               defaults.load(f)
 
       for fname in args:
          if os.path.exists(fname) and os.path.isdir(fname):

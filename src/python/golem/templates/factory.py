@@ -27,9 +27,8 @@ class TemplateFactory:
       if class_name == "Verbatim":
          if out_file is None:
             try:
-               f_in = open(in_file, 'r')
-               result = "".join(f_in.readlines())
-               f_in.close()
+               with open(in_file, 'r') as f_in:
+                  result = "".join(f_in.readlines())
             except IOError as err:
                raise golem.util.parser.TemplateError(err)
             return result
@@ -173,12 +172,11 @@ class TemplateFactory:
                result = "".join(s for s in template(*props))
                return result
             else:
-               f_out = open(out_file, 'w')
-               if filter is not None:
-                  f_out = filter.reset(f_out)
-               for chunk in template(*props):
-                  f_out.write(chunk)
-               f_out.close()
+               with open(out_file, 'w') as f_out:
+                  if filter is not None:
+                     f_out = filter.reset(f_out)
+                  for chunk in template(*props):
+                     f_out.write(chunk)
                set_executable_bit_if_needed(out_file,executable)
 
          except golem.util.parser.TemplateError as ex:

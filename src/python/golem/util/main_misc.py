@@ -211,9 +211,8 @@ def find_config_files():
 		for file in files:
 			full_name = os.path.join(dir, file)
 			if os.path.exists(full_name):
-				f = open(full_name, 'r')
-				props.load(f)
-				f.close()
+				with open(full_name, 'r') as f:
+					props.load(f)
 	libpaths = find_libraries()
 	for flag in libpaths:
 		props.setProperty(flag, libpaths[flag])
@@ -346,9 +345,8 @@ def read_golem_dir_file(path):
 
 	dir_file = os.path.join(path, consts.GOLEM_DIR_FILE_NAME)
 	if os.path.exists(dir_file):
-		f = open(dir_file, 'r')
-		result.load(f)
-		f.close()
+		with open(dir_file, 'r') as f:
+			result.load(f)
 
 		ver = list(map(int,result["golem-version"].split(".")))
 
@@ -406,9 +404,8 @@ def write_golem_dir_file(path, fname, conf):
 	dir_info["time-stamp"] = \
 			strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
-	f = open(os.path.join(path, consts.GOLEM_DIR_FILE_NAME), 'w')
-	dir_info.store(f, "Do not remove this file!")
-	f.close()
+	with open(os.path.join(path, consts.GOLEM_DIR_FILE_NAME), 'w') as f:
+		dir_info.store(f, "Do not remove this file!")
 
 def check_dont_overwrite(conf):
 	path = golem.util.tools.process_path(conf)

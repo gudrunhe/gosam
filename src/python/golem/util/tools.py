@@ -155,14 +155,12 @@ def copy_file(in_file, out_file):
    if not os.path.exists(in_file):
       raise GolemConfigError("File not found: %r" % in_file)
 
-   f = open(in_file, 'r')
-   lines = f.readlines()
-   f.close()
+   with open(in_file, 'r') as f:
+      lines = f.readlines()
 
-   f = open(out_file, 'w')
-   for line in lines:
-      f.write(line)
-   f.close()
+   with open(out_file, 'w') as f:
+      for line in lines:
+         f.write(line)
    
 def combinations(map):
    """
@@ -632,13 +630,12 @@ def diagram_count(path, suffix):
    fname = os.path.join(path, "diagrams-%s.hh" % suffix)
    result = 0
    if os.path.exists(fname):
-      f = open(fname, 'r')
-      for line in f:
-         if line.strip().startswith("#define DIAGRAMCOUNT"):
-            words = line.strip().split()
-            result = int(words[2].strip('"'))
-            break
-      f.close()
+      with open(fname, 'r') as f:
+         for line in f:
+            if line.strip().startswith("#define DIAGRAMCOUNT"):
+               words = line.strip().split()
+               result = int(words[2].strip('"'))
+               break
    else:
       pass
       # print "Warning: File %r not found." % fname

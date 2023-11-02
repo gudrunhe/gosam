@@ -126,10 +126,9 @@ class GolemShell(golem.util.ishell.InteractiveShell):
             model = model_lst[0]
             src_path = golem.util.path.golem_path("models")
             fname = os.path.join(src_path, model + ".py")
-            f = open(fname, 'r')
-            for line in f:
-               python_file.write(line)
-            f.close()
+            with open(fname, 'r') as f:
+               for line in f:
+                  python_file.write(line)
 
          elif len(model_lst) == 2:
             if model_lst[0].lower().strip() == "feynrules":
@@ -155,10 +154,9 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                   model = model_lst[1]
                   src_path = model_lst[0]
                   fname = os.path.join(src_path, model + ".py")
-                  f = open(fname, 'r')
-                  for line in f:
-                     python_file.write(line)
-                  f.close()
+                  with open(fname, 'r') as f:
+                     for line in f:
+                        python_file.write(line)
          else:
             print("Parameter 'model' cannot have more than two entries.")
             return
@@ -574,11 +572,10 @@ class SAVE(Command):
             return True
 
       try:
-         f = open(fname, 'w')
-         for cmd in shell.session[:-1]:
-            f.write(cmd + "\n")
-         f.write("#" + shell.session[-1] + "\n")
-         f.close()
+         with open(fname, 'w') as f:
+            for cmd in shell.session[:-1]:
+               f.write(cmd + "\n")
+            f.write("#" + shell.session[-1] + "\n")
          print("Current session stored in %r." % fname)
          return True
       except IOError as ex:
@@ -625,8 +622,8 @@ class LOAD(Command):
       try:
          self.stack.append(fname)
          shell.relative_path = os.path.dirname(fname)
-         f = open(fname, 'r')
-         lines = [line.rstrip() for line in f]
+         with open(fname, 'r') as f:
+            lines = [line.rstrip() for line in f]
          result = shell.insert_text(*lines)
          print("Session restored from %r." % fname)
          return result
@@ -755,9 +752,8 @@ class GENERATE(Command):
             print("The file or directory %r does not exist." % arg)
             return True
 
-         f = open(in_file, 'r')
-         conf.load(f)
-         f.close()
+         with open(in_file, 'r') as f:
+            conf.load(f)
          conf["setup-file"] = os.path.abspath(in_file)
 
          orders = golem.util.config.split_qgrafPower(",".join(map(str,conf.getListProperty(golem.properties.qgraf_power))))
