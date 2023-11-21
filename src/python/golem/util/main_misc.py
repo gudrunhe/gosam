@@ -144,7 +144,10 @@ def generate_process_files(conf, from_scratch=False):
 		else:
 			golem.util.tools.error("No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
 									.format(conf["process_name"]))
-	
+			
+	if conf.getBooleanProperty("veto_crossings"):
+		conf["crossings"] = []
+		props["crossings"] = []
 
 	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)

@@ -19,11 +19,15 @@ class OLPSubprocess:
       self.p_fin = p_fin
       self.crossings = {}
       self.crossings_conf = {}
+      self.crossings_p_ini = {}
+      self.crossings_p_fin = {}
       self.ids = {id: process_name}
       self.channels = {}
       self.key = key
       self.conf = conf
       self.crossings_conf[id]=conf
+      self.crossings_p_ini[id]= p_ini
+      self.crossings_p_fin[id]= p_fin
 
       self.num_legs = len(p_ini) + len(p_fin)
       self.num_helicities = -1
@@ -34,6 +38,15 @@ class OLPSubprocess:
             % (" ".join(map(str,p_ini)), " ".join(map(str,p_fin)))
       self.ids[id] = process_name
       self.crossings_conf[id] = conf
+      self.crossings_p_ini[id]= p_ini
+      self.crossings_p_fin[id]= p_fin
+
+   def clearCrossings(self):
+      self.crossings = {}
+      self.ids = {self.id: self.process_name}
+      self.crossings_conf = {self.id: self.conf}
+      self.crossings_p_ini = {self.id: self.p_ini}
+      self.crossings_p_fin = {self.id: self.p_fin}
 
    def assignChannels(self, id, channels):
       self.channels[id] = channels
@@ -594,6 +607,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    max_occupied_channel = -1
    subprocesses = {}
    subprocesses_flav = {}
+   vetoed_crossings = {}
 
    subprocesses_conf_short = []
 
@@ -644,6 +658,21 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
             golem.util.main_misc.generate_process_files(subprocess_conf,
                   from_scratch)
+            
+            if subprocess_conf.getBooleanProperty("veto_crossings"):
+               for id in subprocess.getIDs():
+                  if not id == subprocess.id:
+                     key = tuple(sorted(list(map(str, subprocess.crossings_p_ini[id]))
+                                         + [p.getPartner() for p in subprocess.crossings_p_fin[id]]))
+                     i=0
+                     while key in subprocesses or key in vetoed_crossings:
+                        key = key+(i,) if i == 0 else key[:-1] + (i,)
+                        i = i + 1
+                     sp = OLPSubprocess(id, subprocess.ids[id], subprocess.ids[id], subprocess.crossings_p_ini[id],
+                                         subprocess.crossings_p_fin[id], key, subprocess.crossings_conf[id])
+                     vetoed_crossings[key] = sp
+               subprocess.clearCrossings()
+
 
             helicities = list(
                   golem.util.tools.enumerate_and_reduce_helicities(
@@ -675,6 +704,68 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                contract_file.setProcessError(id, "Error: %s" % err)
 
          subprocesses_conf_short.append(subprocess_conf)
+
+      #---#[ Handle vetoed subprocesses:
+      for subprocess in list(vetoed_crossings.values()):
+         subdir = str(subprocess)
+         process_path = os.path.join(path, subdir)
+         if not os.path.exists(process_path):
+            golem.util.tools.message("Creating directory %r" % process_path)
+            try:
+               os.mkdir(process_path)
+            except IOError as err:
+               golem.util.tools.error(str(err))
+
+         subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
+         subprocess_conf["golem.name"] = "GoSam"
+         subprocess_conf["golem.version"] = ".".join(map(str,
+            golem.installation.GOLEM_VERSION))
+         subprocess_conf["golem.full-name"] = GOLEM_FULL
+         subprocess_conf["golem.revision"] = \
+            golem.installation.GOLEM_REVISION
+
+         golem.util.tools.POSTMORTEM_CFG = subprocess_conf
+
+         try:
+            golem.util.main_misc.workflow(subprocess_conf)
+            merge_extensions(subprocess_conf,conf)
+
+            golem.util.main_misc.generate_process_files(subprocess_conf,
+                  from_scratch)
+
+            helicities = list(
+                  golem.util.tools.enumerate_and_reduce_helicities(
+                     subprocess_conf))
+
+            generated_helicities = [t[0] for t in [t for t in helicities if t[1] is None]]
+
+            for id in subprocess.getIDs():
+               chelis[id] = len(helicities)
+               if subdivide:
+                  num_channels = len(helicities)
+                  min_channel = max_occupied_channel + 1
+                  max_channel = min_channel + num_channels - 1
+                  max_occupied_channel += num_channels
+                  channels[id] = list(range(min_channel, max_channel + 1))
+               else:
+                  max_occupied_channel += 1
+                  channel = max_occupied_channel
+                  channels[id] = [ channel ]
+
+               contract_file.setProcessResponse(id, channels[id])
+               subprocess.assignChannels(id, channels[id])
+               subprocess.assignNumberHelicities(len(helicities),
+                     generated_helicities)
+
+         except golem.util.config.GolemConfigError as err:
+            result = 1
+            for id in subprocess.getIDs():
+               contract_file.setProcessError(id, "Error: %s" % err)
+
+         subprocesses_conf_short.append(subprocess_conf)
+         subprocesses[subprocess.id] = subprocess
+      #---#] Handle vetoed subprocesses:
+
    #---#] Iterate over subprocesses:
    #---#[ Write output file:
    f_contract.write("# vim: syntax=olp\n")

@@ -673,11 +673,18 @@ filter_lo_diagrams = Property("filter.lo",
         - massive: select only propagators with/without a non-zero mass
         - color: one of the numbers 1, 3, -3 or 8, or a list of
                  these numbers
+   * d.iprop_momentum(field, momentum="...") = True when the diagram contains
+      a propagator of field with the specified momentum, False otherwise 
    * d.chord(...) = number of loop propagators with the given properties;
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
 
+   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to 
+         inconsistencies in the automatically generated crossings. This
+         can be circumvented by running GoSam with the option --no-crossings
+         or using the iprop_momentum function, which tracks invalid crossings.
+   
    See also: filter.nlo, select.lo, select.nlo
    """,
    str,"")

@@ -26,6 +26,8 @@ class Diagram:
       # self._fermion_flow = None
       self._sign = 0
 
+      self.filtered_by_momentum = False
+
       for c in components:
          c.addToDiagram(self)
 
@@ -337,8 +339,17 @@ class Diagram:
 
    def iprop(self, *args, **opts):
       opts["zero"] = self._zerosum
+      if "momentum" in opts:
+         warning("Using the iprop function with the 'momentum' key in the Python filter can lead to inconsistencies in the crossings. Consider running GoSam with --no-crossings or using the iprop_momentum function instead.")
       return sum([p.match(args, **opts)
          for p in list(self._propagators.values())])
+   
+   def iprop_momentum(self, field, momentum):
+      if sum([p.match(field, momentum) for p in list(self._propagators.values())]):
+         self.filtered_by_momentum = True
+         return True
+      else:
+         return False
 
    def chord(self, *args, **opts):
       opts["zero"] = self._zerosum

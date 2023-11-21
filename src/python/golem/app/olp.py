@@ -201,6 +201,7 @@ def main(argv=sys.argv):
 		default_conf["extensions"]=props["extensions"]
 
 	default_conf["ignore_empty_subprocess"] = cmd_ignore_empty_subprocess
+	default_conf["veto_crossings"] = False
 
 	skipped = 0
 	for arg in args:
