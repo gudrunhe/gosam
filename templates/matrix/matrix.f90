@@ -2234,9 +2234,12 @@ contains
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
       real(ki), dimension(num_legs,num_legs) :: borncc
-      real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli
+      real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli[%
+      @if use_order_names %]
+      real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli_tmp1, ampcc_heli_tmp2[%
+      @end @if %]
       real(ki), dimension(num_legs, 4) :: pvecs
-      complex(ki), dimension(numcs) :: color_vector[%
+      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %][%
       @if generate_lo_diagrams %][%
       @else %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
@@ -2269,10 +2272,40 @@ contains
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()
-      call OLP_color_correlated_lo(color_vector,ampcc_heli)
-
+      !---#] reinitialize kinematics:[%
+     @if use_order_names %]
+         select case (EFTcount)
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            ampcc_heli = ampcc_heli_tmp1
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_1,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         end select[%
+     @else %]
+         color_vector = amplitude[%map.index%]l0()
+         call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
+     @end @if use_order_names %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
   @else %][% 'if loop induced' %]
@@ -2308,17 +2341,49 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:[%
-         @if generate_lo_diagrams %]
-      color_vector = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()[%
+         @if generate_lo_diagrams %][%
+         @if use_order_names %]
+         select case (EFTcount)
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            ampcc_heli = ampcc_heli_tmp1
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_1,ampcc_heli_tmp2)
+            ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
+         end select[%
+         @else %]
+            color_vector = amplitude[%map.index%]l0()
+            call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
+         @end @if use_order_names %][%
          @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
          colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
-      color_vector = colorvec(:,0)[%
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
          @end @if generate_lo_diagrams %]
-      call OLP_color_correlated_lo(color_vector,ampcc_heli)
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
@@ -2486,7 +2551,7 @@ contains
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
-      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if use_order_names %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
          @end @for %][%
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
@@ -2526,9 +2591,14 @@ contains
       call init_event(pvecs[%
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
-      !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()
-      ! print *, "heli_amp[%helicity%] = ", heli_amp[%helicity%][%
+      !---#] reinitialize kinematics:[%
+      @if use_order_names %]
+         heli_amp[%helicity%]_0 = amplitude[% map.index %]l0_0()
+         heli_amp[%helicity%]_1 = amplitude[% map.index %]l0_1()
+         heli_amp[%helicity%]_2 = amplitude[% map.index %]l0_2()[%
+      @else %]
+         heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
+      @end @if %][%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -2567,7 +2637,131 @@ contains
       ! of momentum k_j. This term should, however not be phenomenologically
       ! relevant.[%
    @for particles lightlike vector %]
-      !---#[ particle [%index%] :
+      !---#[ particle [%index%] :[%
+   @if use_order_names %]
+      select case (EFTcount)
+      case (0)
+         ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+      case (1)
+         ! sigma(SM + dim6 X SM + dim6) without loopcounting
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+      case (2)
+         ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+      case (3)
+         ! sigma(SM + dim6 X SM + dim6) with loopcounting
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_1,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_1)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_1,&
+              &                            heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%mhelicity%]_2-heli_amp[%mhelicity%]_0,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_1)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_2,heli_amp[%helicity%]_2)&
+              &          - square_0l_0l_sc(heli_amp[%helicity%]_2-heli_amp[%helicity%]_1,&
+              &                            heli_amp[%helicity%]_2-heli_amp[%helicity%]_1)[%
+         @end @for helicities %]
+      end select[%
+   @else %]
       pp  = 0.0_ki[%
       @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
@@ -2591,7 +2785,8 @@ contains
       mm  = 0.0_ki[%
       @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
-      @end @for helicities %]
+      @end @for helicities %][%
+      @end @if use_order_names %]
 
       pm = phasefac[%index%]*pm
       mp = conjg(phasefac[%index%])*mp
