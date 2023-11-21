@@ -1142,5 +1142,17 @@ d[%$_%]h[%helicity%]l1c.f90: d[%$_%]h[%helicity%]l1c.txt
 	@end @for %][%
 @end @if %][%
 @end @if %]
-
+[%
+@if write_vanishing_amplitude %] 
+born.txt: 
+	@printf "#####Abbreviations\n\n\n#####Diagrams\namplitude =  0;" > born.txt
+	@echo "abbrev_terms=0" > born.dat
+	@touch born-stamp 
+born-stamp: born.txt 
+diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp 
+	@echo Python is processing tree diagrams @ Helicity [%helicity%] 
+	@$(PYTHON) ../codegen/buildfortranborn.py \ 
+		-i $< \ 
+		--HELICITY=[%helicity%][% 
+@end @if %]
 

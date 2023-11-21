@@ -131,11 +131,20 @@ def generate_process_files(conf, from_scratch=False):
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
 	props.setProperty("max_rank", conf["__max_rank__"])
+	props.setProperty("write_vanishing_amplitude", "false")
 
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
+
+	if len(keep_tree) + len(keep_virt) + len(keep_ct) == 0:
+		if conf.getBooleanProperty("ignore_empty_subprocess"):
+			props.setProperty("write_vanishing_amplitude", "true")
+		else:
+			golem.util.tools.error("No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
+									.format(conf["process_name"]))
+	
 
 	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)

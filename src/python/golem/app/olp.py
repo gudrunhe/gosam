@@ -16,6 +16,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
 		('E', "use-double-quotes", "Allow the use of double quotes"),
 		('b', "use-backslash", "Allow the use of backslash escapes"),
 		('i', "ignore-case", "Interpret the file case insensitive"),
+		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining diagrams"),
 		('x', "ignore-unknown", "Ignore unknown/unsupported options"),
 		('X', "no-crossings", "Never generate crossings [default]"),
 		('Y', "crossings", "Do generate crossings"),
@@ -38,6 +39,7 @@ cmd_extensions = {
 			"backslash_escape": False
 		}
 cmd_ignore_case = False
+cmd_ignore_empty_subprocess = False
 cmd_ignore_unknown = False
 cmd_force = False
 cmd_from_scratch = False
@@ -55,8 +57,8 @@ cmd_output_file = "%p%s.olc"
 
 def arg_handler(name, value=None):
 	global cmd_dest_dir, cmd_config_files, cmd_skip_default, \
-			cmd_extensions, cmd_ignore_case, cmd_ignore_unknown, \
-			cmd_output_file, cmd_templates, cmd_force, \
+			cmd_extensions, cmd_ignore_case, cmd_ignore_empty_subprocess, \
+			cmd_ignore_unknown, cmd_output_file, cmd_templates, cmd_force, \
 			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc
 
 	if name == 'destination':
@@ -88,6 +90,9 @@ def arg_handler(name, value=None):
 		return True
 	elif name == 'ignore-case':
 		cmd_ignore_case = True
+		return True
+	elif name == 'ignore-empty-subprocess':
+		cmd_ignore_empty_subprocess = True
 		return True
 	elif name == 'ignore-unknown':
 		cmd_ignore_unknown = True
@@ -194,6 +199,8 @@ def main(argv=sys.argv):
 
 	if not default_conf["extensions"]:
 		default_conf["extensions"]=props["extensions"]
+
+	default_conf["ignore_empty_subprocess"] = cmd_ignore_empty_subprocess
 
 	skipped = 0
 	for arg in args:
