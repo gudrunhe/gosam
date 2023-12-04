@@ -33,7 +33,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
          "merge file into template"),
       ('i', "interactive",
          "run an interactive session (not supported anymore)"),
-      ('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining diagrams"),
+      ('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
    ]
 
 generate_templates = False

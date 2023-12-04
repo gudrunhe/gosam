@@ -16,7 +16,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
 		('E', "use-double-quotes", "Allow the use of double quotes"),
 		('b', "use-backslash", "Allow the use of backslash escapes"),
 		('i', "ignore-case", "Interpret the file case insensitive"),
-		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining diagrams"),
+		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
 		('x', "ignore-unknown", "Ignore unknown/unsupported options"),
 		('X', "no-crossings", "Never generate crossings [default]"),
 		('Y', "crossings", "Do generate crossings"),

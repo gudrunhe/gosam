@@ -138,7 +138,7 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
 
-	if len(keep_tree) + len(keep_virt) + len(keep_ct) == 0:
+	if len(keep_tree) == 0:
 		if conf.getBooleanProperty("ignore_empty_subprocess"):
 			props.setProperty("write_vanishing_amplitude", "true")
 		else:

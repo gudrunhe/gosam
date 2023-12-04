@@ -128,8 +128,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
                   filter_flags[flag].append(idx)
       else:
          lose.append(idx)
-         if diagram.filtered_by_momentum == True:
-            conf["veto_crossings"] = True
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
       signs[idx] = diagram.sign()
    #   flows[idx] = diagram.fermion_flow()
@@ -195,8 +194,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
                max_rank = rk
       else:
          lose.append(idx)
-         if diagram.filtered_by_momentum == True:
-            conf["veto_crossings"] = True
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
             (len(keep_tot), len(lose)))
@@ -278,8 +276,7 @@ def analyze_ct_diagrams(diagrams, model, conf, onshell,
                max_rank = rk
       else:
          lose.append(idx)
-         if diagram.filtered_by_momentum == True:
-            conf["veto_crossings"] = True
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
    debug("After analyzing counter term diagrams: keeping %d, purging %d" % 
             (len(keep), len(lose)))
