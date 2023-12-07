@@ -668,7 +668,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             
             #---[ Handle Crossings:
             
-            if use_crossings and any([kw in subprocess_conf.getProperty(fltr) for fltr in ["filter.lo", "filter.nlo"]
+            if use_crossings and any([kw in subprocess_conf.getProperty(fltr)
+                                       if subprocess_conf.getProperty(fltr) else False
+                                       for fltr in ["filter.lo", "filter.nlo"]
                                        for kw in ["iprop_momentum"]]):
                # If the crossings of the original subprocess are vetoed, a new parent subprocess
                # for the remaining crossings is needed
