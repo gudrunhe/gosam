@@ -244,8 +244,11 @@ def run_qgraf(conf, in_particles, out_particles):
 			if len(order_names)>0:
 				for el in order_names:
 					topo_sty_out.write("<back> '%s' : [%s],\n" % (el,el))
-		if i==34 and use_vertex_labels:
-			topo_sty_out.write("<back> \"[VL]\",\n")
+		if i==34:
+			if use_vertex_labels:
+				topo_sty_out.write("<back> \"[VL]\",\n")
+			else:
+				topo_sty_out.write("<back> \" \",\n")
 		topo_sty_out.write(topo_sty_tmp[i])
 	topo_sty_out.close()
 

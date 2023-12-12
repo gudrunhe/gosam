@@ -911,7 +911,7 @@ class Vertex(DiagramComponent):
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
-         "rank=%s" % self.rank,"orders=%s" % self.orders] + list(map(str, self.fields)))) + ")"
+         "rank=%s" % self.rank,"orders=%s" % self.orders,"label=%s" % self.label] + list(map(str, self.fields)))) + ")"
 
 
 class Propagator(DiagramComponent):
