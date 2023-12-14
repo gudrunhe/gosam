@@ -74,11 +74,7 @@ def report_crash(exc, stack, fname="gosam.crashed"):
 
 
    if sys.platform.startswith('linux'):
-      emit("Linux",
-            libc=" ".join(platform.libc_ver()),
-            distribution="%s %s (%s)"
-               % platform.linux_distribution()
-      )
+      emit("Linux",release=platform.release())
    elif sys.platform.startswith('win'):
       emit("Windows",
             version=platform.win32_ver()
