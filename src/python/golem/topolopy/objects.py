@@ -1801,7 +1801,7 @@ class Momentum:
 
 
       tokens = []
-      for match in re.compile('\+|-|\*|[0-9A-Za-z_]+').finditer(mom):
+      for match in re.compile(r'\+|-|\*|[0-9A-Za-z_]+').finditer(mom):
          tokens.append(mom[match.start():match.end()])
 
       tokens.reverse()
