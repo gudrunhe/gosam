@@ -7,12 +7,11 @@ Python interface.
 import os
 import os.path
 import sys
-import imp
 import copy
 import golem.model.expressions as ex
 
 from golem.util.tools import error, warning, message, debug, \
-		LimitedWidthOutputStream
+		LimitedWidthOutputStream, load_source
 
 LINE_STYLES = {
 		'straight': 'fermion',
@@ -79,30 +78,23 @@ unprefixed_symbols = [
 
 class Model:
 	def __init__(self, model_path, model_options=None):
-		mfile = None
 		self.model_options = model_options or dict()
 
-		try:
-			sys.path.append(model_path)
-			parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
-			norm_path = os.path.normpath(model_path)
-			if norm_path.startswith(parent_path):
-				mname = norm_path[len(parent_path):].replace(os.sep, "")
-			else:
-				mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else '')))
-			if os.altsep is not None:
-				mname = mname.replace(os.altsep, "")
-			search_path = [ parent_path ]
+		sys.path.append(model_path)
+		parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
+		norm_path = os.path.normpath(model_path)
+		if norm_path.startswith(parent_path):
+			mname = norm_path[len(parent_path):].replace(os.sep, "")
+		else:
+			mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else '')))
+		if os.altsep is not None:
+			mname = mname.replace(os.altsep, "")
+		search_path = [ parent_path ]
 
-			message("Trying to import FeynRules model '%s' from %s" %
-					(mname, search_path[0]))
-			mfile, mpath, mdesc = imp.find_module(mname, search_path)
-			mod = imp.load_module(mname, mfile, mpath, mdesc)
-		except ImportError as exc:
-			error("Problem importing model file: %s" % exc)
-		finally:
-			if mfile is not None:
-				mfile.close()
+		message("Trying to import FeynRules model '%s' from %s" %
+				(mname, search_path[0]))
+		mod = load_ufo_files(mname, search_path)
+
 		self.all_particles  = mod.all_particles
 		self.all_couplings  = mod.all_couplings
 		self.all_parameters = mod.all_parameters
@@ -1407,4 +1399,19 @@ def transform_color(expr, colors, xidx):
 	else:
 		return expr
 
-
+def load_ufo_files(mname, mpath):
+	mfile = None
+	try:
+		if sys.version_info >= (3,6,):
+			fpath = mpath[0]+'/'+mname+'/__init__.py'
+			mod = load_source(mname,fpath)
+		else:
+			import imp
+			mfile, mpath, mdesc = imp.find_module(mname, mpath)
+			mod = imp.load_module(mname, mfile, mpath, mdesc)
+	except ImportError as exc:
+		error("Problem importing model file: %s" % exc)
+	finally:
+		if mfile is not None:
+			mfile.close()
+	return mod

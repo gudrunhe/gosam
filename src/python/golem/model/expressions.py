@@ -245,7 +245,7 @@ class ExpressionScanner(golem.model.scanner.Scanner):
 		return int(image)
 
 	def plus_op(self, image):
-		'@TOKEN :\+|-:'
+		r'@TOKEN :\+|-:'
 		if image == '+':
 			return 1
 		else:
@@ -256,7 +256,7 @@ class ExpressionScanner(golem.model.scanner.Scanner):
 		return image
 
 	def mul_op(self, image):
-		'@TOKEN :\*(?!\*)|/:'
+		r'@TOKEN :\*(?!\*)|/:'
 		if image == '*':
 			return 1
 		else:

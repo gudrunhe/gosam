@@ -1,13 +1,12 @@
 # vim: syntax=python:ts=3:sw=3
 
 import sys
-import imp
 import os
 import os.path
 
 import golem.util.main_qgraf
 from golem.util.path import golem_path
-from golem.util.tools import debug, message, warning, getModel
+from golem.util.tools import debug, message, warning, getModel, load_source
 
 def convert_to_digits(number, digits):
 	v = abs(number)
@@ -45,14 +44,14 @@ def pyxodraw(*args, **opts):
 		base_name = short_name[:short_name.rindex(".")]
 		debug("Pyxodraw is trying to load module %r" % base_name,
 				"from directory: %r" % arg_path)
-		mod = imp.load_source(base_name, arg)
+		mod = load_source(base_name, arg)
 
 		model_name = mod.__model_name__
 		diagrams = {}
 		mod.get_diagrams(diagrams)
 
 		if conf is None:
-			model_mod = imp.load_source(model_name,
+			model_mod = load_source(model_name,
 				os.path.join(arg_path, "%s.py" % golem.util.main_qgraf.MODEL_LOCAL))
 		else:
 			model_mod = getModel(conf, arg_path)

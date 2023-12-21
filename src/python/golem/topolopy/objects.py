@@ -922,7 +922,7 @@ class Vertex(DiagramComponent):
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
-         "rank=%s" % self.rank,"orders=%s" % self.orders] + list(map(str, self.fields)))) + ")"
+         "rank=%s" % self.rank,"orders=%s" % self.orders,"label=%s" % self.label] + list(map(str, self.fields)))) + ")"
 
 
 class Propagator(DiagramComponent):
@@ -1867,7 +1867,7 @@ class Momentum:
 
 
       tokens = []
-      for match in re.compile('\+|-|\*|[0-9A-Za-z_]+').finditer(mom):
+      for match in re.compile(r'\+|-|\*|[0-9A-Za-z_]+').finditer(mom):
          tokens.append(mom[match.start():match.end()])
 
       tokens.reverse()

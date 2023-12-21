@@ -2,7 +2,6 @@
 
 import sys
 import os.path
-import imp
 import traceback
 import getopt
 import re
@@ -447,8 +446,7 @@ def getModel(conf, extra_path=None):
 
    # --] EW scheme management
 
-   mod = imp.load_source("model", fname)
-
+   mod = load_source("model", fname)
    conf.cache["model"] = mod
    return mod
 
@@ -948,3 +946,15 @@ def derive_coupling_names(conf):
       if not flag:
          result[t] = '0'
    return result
+
+def load_source(mname, mpath):
+   if sys.version_info >= (3,6,):
+      import importlib.util
+      spec = importlib.util.spec_from_file_location(mname, mpath)
+      mod = importlib.util.module_from_spec(spec)
+      sys.modules[mname] = mod
+      spec.loader.exec_module(mod)
+   else:
+      import imp
+      mod = imp.load_source(mname, mpath)
+   return mod

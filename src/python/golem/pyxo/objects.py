@@ -564,7 +564,7 @@ class field:
 			else:
 				mode += "t"
 
-			f.write("   \Text(%0.1f,%0.1f)[%s]{%s}\n" %
+			f.write("   \\Text(%0.1f,%0.1f)[%s]{%s}\n" %
 					(fx, fy, mode, opts["label"]))
 
 	def draw_arc(self, f, x, y, r, phi1, phi2, lookup=None, **opts):
@@ -615,7 +615,7 @@ class field:
 			else:
 				mode += "t"
 
-			f.write("   \Text(%0.1f,%0.1f)[%s]{%s}\n" %
+			f.write("   \\Text(%0.1f,%0.1f)[%s]{%s}\n" %
 					(fx, fy, mode, opts["label"]))
 
 	def draw_arcn(self, f, x, y, r, phi1, phi2, lookup=None, **opts):
@@ -668,7 +668,7 @@ class field:
 			else:
 				mode += "t"
 
-			f.write("   \Text(%0.1f,%0.1f)[%s]{%s}\n" %
+			f.write("   \\Text(%0.1f,%0.1f)[%s]{%s}\n" %
 					(fx, fy, mode, opts["label"]))
 
 	def __repr__(self):

@@ -959,7 +959,7 @@ class Fortran(Program):
             full_name = os.path.join(dir, file)
             if os.path.exists(full_name):
                for l in open(full_name):
-                  m=re.match("^\s*fc.bin=\s*([^#]+)\s*(#.*)?$",l.strip())
+                  m=re.match(r'^\s*fc.bin=\s*([^#]+)\s*(#.*)?$',l.strip())
                   if m:
                      path, prog = os.path.split(m.group(1))
                      path=path.strip()
