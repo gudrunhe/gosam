@@ -475,7 +475,7 @@ class IntegerExpression(ConstantExpression):
 
 	def replaceNegativeIndices(self, lvl, pattern, found):
 		if lvl > 0 and self._integer < 0:
-			idx = abs(idx)
+			idx = abs(self._integer)
 			if idx in found:
 				return found[idx]
 			else:
@@ -1189,7 +1189,7 @@ class SumExpression(Expression):
 
 	def countSymbolPowers(self):
 		all_p = []
-		name = set([])
+		names = set([])
 		for term in self._terms:
 			p = term.countSymbolPowers()
 			all_p.append(p)
@@ -1264,7 +1264,7 @@ class SumExpression(Expression):
 			r_string += first.write_fortran()
 		else:
 			r_string +="("
-			r_string +=first.write_fortran(out)
+			r_string +=first.write_fortran()
 			r_string +=")"
 
 		for term in follow:

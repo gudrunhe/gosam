@@ -1,6 +1,7 @@
 # vim: ts=3:sw=3
 import golem
 import golem.util.parser
+from golem.util.parser import TemplateError
 from golem.util.config import Properties
 
 class OLPTemplate(golem.util.parser.Template):
@@ -78,7 +79,7 @@ class OLPTemplate(golem.util.parser.Template):
 		var_name = self._setup_name("var", prefix + "$_", opts)
 
 		if "shift" in opts:
-			shift = int(opts[shift])
+			shift = int(opts["shift"])
 		else:
 			shift = 0
 

@@ -672,9 +672,9 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 					shift_lst[idx] = shift
 					rank_lst[idx] = diagrams_tot[idx].rank()
 					ninjaidx_lst[idx] = \
-					    ninjaidx_formula(cls,diagrams[idx].size(),rank_lst[idx])
+					    self.ninjaidx_formula(diagrams_tot[idx].size(),rank_lst[idx])
 					ninjaidxb_lst[idx] = \
-					    ninjaidxb_formula(cls,diagrams[idx].size(),rank_lst[idx])
+					    self.ninjaidxb_formula(diagrams_tot[idx].size(),rank_lst[idx])
 					if diagrams_tot[idx].isNf():
 						nf_lst.add(idx)
 					if diagrams_tot[idx].isMassiveQuarkSE():

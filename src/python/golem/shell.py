@@ -13,7 +13,7 @@ import golem.util.constants
 import golem.util.config
 
 from golem.util.main_misc import find_config_files, write_template_file, \
-      workflow, generate_process_files
+      workflow, generate_process_files, read_golem_dir_file
 
 class GolemShell(golem.util.ishell.InteractiveShell):
    def __init__(self,
@@ -693,12 +693,12 @@ class GENERATE(Command):
 
          extensions = [e.lower() for e in golem.properties.getExtensions(conf)]
          if generate_nlo:
-            if not any([e in extensions for e in REDUCTION_EXTENSIONS]):
+            if not any([e in extensions for e in golem.properties.REDUCTION_EXTENSIONS]):
                shell.recommendations["+add.extensions"] = "samurai"
                flag=True
 
          if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
-              conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
+              conf["PSP_chk_method"] = "PoleRotation" if conf.getBooleanProperty("generate_lo_diagrams") else "LoopInduced"
 
          if len(process_path) == 0:
             if len(process_name) == 0:
@@ -749,7 +749,7 @@ class GENERATE(Command):
             else:
                in_file = fname
          else:
-            print("The file or directory %r does not exist." % arg)
+            print("The file or directory %r does not exist." % fname)
             return True
 
          with open(in_file, 'r') as f:

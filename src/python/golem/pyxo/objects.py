@@ -2,6 +2,7 @@
 
 import math
 import random
+from golem.util.tools import error
 
 def A(i, F, R=None):
 	if R is None:

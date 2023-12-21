@@ -13,6 +13,7 @@ import golem.util.tools
 from golem.util.config import GolemConfigError, Form
 import golem.installation
 import golem.util.constants
+from golem.util.tools import error
 
 # The following files contain routines which originally were
 # part of golem-main itself:

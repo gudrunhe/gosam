@@ -350,7 +350,7 @@ def get_qgraf_power(conf):
             if not notreelevel:
                return [qed_name, treepower, iepower + 2, qcd_name, icpower, icpower]
             else:
-               return [qed_name, treepowerm, qcd_name, icpower]
+               return [qed_name, treepower , qcd_name, icpower]
 
    return []
 

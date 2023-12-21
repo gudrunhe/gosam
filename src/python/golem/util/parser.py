@@ -648,7 +648,7 @@ class Template:
       if "match" in opts:
          bfl = 0
          if "flags" in opts:
-            flags = opts[flags].strip().upper()
+            flags = opts["flags"].strip().upper()
             for ch in flags:
                if ch == 'I':
                   bfl = bfl | re.I
@@ -1493,7 +1493,7 @@ class Template:
             " - ":      [300, lambda x, y: x - y],
             " .min. ":  [300, max],
             " .max. ":  [300, min],
-            " :: ":     [300, lambda x, y: sqrt(x*x + y*y)],
+            " :: ":     [300, lambda x, y: math.sqrt(x*x + y*y)],
 
             " * ":      [350, lambda x, y: x * y],
             " / ":      [350, lambda x, y: float(x) / float(y)],
