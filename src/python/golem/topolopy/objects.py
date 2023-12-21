@@ -351,6 +351,17 @@ class Diagram:
       else:
          return False
 
+   def ext_legs_from_vertex(self, *args, max_legs = 1, is_ingoing = None):
+      nlegs = len(self._vertices)*[0]
+      for leg in list(self._in_legs.values()) + list(self._out_legs.values()):
+         nlegs[leg.v - 1] += leg.match(args, is_ingoing=is_ingoing)
+      if any(n > max_legs for n in nlegs):
+         if is_ingoing is not None:
+            self.filtered_by_momentum = True
+         return True
+      else:
+         return False
+
    def chord(self, *args, **opts):
       opts["zero"] = self._zerosum
       return sum([self._propagators[abs(p)].match(args, **opts)
@@ -1096,6 +1107,50 @@ class Leg(DiagramComponent):
       return "%s(index=%s, %s, v%sr%s, %s, %s, %s)" % \
             (cl, self.index, self.field, self.v, self.r, self.mom,
                   self.twospin, self.color)
+
+   def match(self, fields, is_ingoing=None, twospin=None,
+             massive=None, color=None, zero=None):
+
+      flist = []
+      if fields is None:
+         flist.append(None)
+      elif isinstance(fields, str):
+         flist.append(fields)
+      elif "__iter__" in fields.__class__.__dict__:
+         if len(fields) == 0:
+            flist.append(None)
+         else:
+            flist.extend([str(e) for e in fields])
+      else:
+         flist.append(str(fields))
+      if not self.match_fields([self.field], flist):
+         return False
+
+      if is_ingoing is not None:
+         if not self.ingoing == is_ingoing:
+            return False
+
+      if twospin is not None:
+         if "__iter__" in twospin.__class__.__dict__:
+            if all([s != self.twospin for s in twospin]):
+               return False
+         else:
+            if self.twospin != int(twospin):
+               return False
+
+      if color is not None:
+         if "__iter__" in color.__class__.__dict__:
+            if all([c != self.color for c in color]):
+               return False
+         else:
+            if self.color != int(color):
+               return False
+
+      if massive is not None:
+         if (self.mass != "0") != massive:
+            return False
+
+      return True
 
 class LoopIntegral:
 

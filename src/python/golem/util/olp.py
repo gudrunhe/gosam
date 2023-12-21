@@ -671,7 +671,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             if use_crossings and any([kw in subprocess_conf.getProperty(fltr)
                                        if subprocess_conf.getProperty(fltr) else False
                                        for fltr in ["filter.lo", "filter.nlo"]
-                                       for kw in ["iprop_momentum"]]):
+                                       for kw in ["iprop_momentum", "ext_legs_from_vertex"]]):
                # If the crossings of the original subprocess are vetoed, a new parent subprocess
                # for the remaining crossings is needed
                keep_subprocess = subprocess_conf.getBooleanProperty("veto_crossings")
