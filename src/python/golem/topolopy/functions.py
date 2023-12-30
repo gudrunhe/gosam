@@ -1,6 +1,5 @@
 # vim: ts=3:sw=3:expandtab
 
-import imp
 import os.path
 
 import golem.properties

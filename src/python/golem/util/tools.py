@@ -2,7 +2,16 @@
 
 import sys
 import os.path
-import imp
+try: 
+  from imp import load_source as imp_load_source
+except:
+  import importlib
+  import types
+  def imp_load_source(module_name, module_path):
+    loader = importlib.SourceFileLoader(module_name, module_path)
+    module = types.ModuleType(loader.name)
+    loader.exec_module(module)
+    return module
 import traceback
 import getopt
 import re
@@ -435,7 +444,7 @@ def getModel(conf, extra_path=None):
 
    # --] EW scheme management
 
-   mod = imp.load_source("model", fname)
+   mod = imp_load_source("model", fname)
 
    conf.cache["model"] = mod
    return mod
