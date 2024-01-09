@@ -17,6 +17,7 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
 		('b', "use-backslash", "Allow the use of backslash escapes"),
 		('i', "ignore-case", "Interpret the file case insensitive"),
 		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
+		('j', "jobs=", "Maximum number of workers while processing the subprocesses (requires the multiprocess package) [default: os.cpu_count()]"),
 		('x', "ignore-unknown", "Ignore unknown/unsupported options"),
 		('X', "no-crossings", "Never generate crossings [default]"),
 		('Y', "crossings", "Do generate crossings"),
@@ -45,6 +46,7 @@ cmd_force = False
 cmd_from_scratch = False
 cmd_name = ""
 cmd_use_crossings = True
+cmd_jobs = os.cpu_count()
 
 cmd_mc = "any"
 
@@ -59,7 +61,7 @@ def arg_handler(name, value=None):
 	global cmd_dest_dir, cmd_config_files, cmd_skip_default, \
 			cmd_extensions, cmd_ignore_case, cmd_ignore_empty_subprocess, \
 			cmd_ignore_unknown, cmd_output_file, cmd_templates, cmd_force, \
-			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc
+			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc, cmd_jobs
 
 	if name == 'destination':
 		cmd_dest_dir = value
@@ -93,6 +95,9 @@ def arg_handler(name, value=None):
 		return True
 	elif name == 'ignore-empty-subprocess':
 		cmd_ignore_empty_subprocess = True
+		return True
+	elif name == 'jobs':
+		cmd_jobs = value
 		return True
 	elif name == 'ignore-unknown':
 		cmd_ignore_unknown = True
@@ -202,6 +207,7 @@ def main(argv=sys.argv):
 
 	default_conf["ignore_empty_subprocess"] = cmd_ignore_empty_subprocess
 	default_conf["veto_crossings"] = False
+	default_conf["n_jobs"] = cmd_jobs
 
 	skipped = 0
 	for arg in args:
