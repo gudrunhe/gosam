@@ -344,8 +344,8 @@ class Diagram:
       return sum([p.match(args, **opts)
          for p in list(self._propagators.values())])
    
-   def iprop_momentum(self, field, momentum):
-      if sum([p.match(field, momentum) for p in list(self._propagators.values())]):
+   def iprop_momentum(self, *args, momentum):
+      if sum([p.match(args, momentum) for p in list(self._propagators.values())]):
          self.filtered_by_momentum = True
          return True
       else:
