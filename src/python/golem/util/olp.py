@@ -445,7 +445,6 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
 
                try:
                   golem.util.main_misc.workflow(sp_conf)
-                  merge_extensions(sp_conf, conf)
 
                   # Generate the files for the crossing and apply the filters
                   golem.util.main_misc.generate_process_files(sp_conf,
@@ -492,7 +491,6 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
          subprocess_conf["golem.revision"] = \
             golem.installation.GOLEM_REVISION
          golem.util.main_misc.workflow(subprocess_conf)
-         merge_extensions(subprocess_conf, conf)
          golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch)
          # Regenerate process files for new parent subprocess if it exists
          if parent_subprocess:
@@ -507,7 +505,6 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
             parent_conf["golem.revision"] = \
                golem.installation.GOLEM_REVISION
             golem.util.main_misc.workflow(parent_conf)
-            merge_extensions(parent_conf, conf)
             golem.util.main_misc.generate_process_files(parent_conf, from_scratch)
             helicities[parent_subprocess.id] = list(
                golem.util.tools.enumerate_and_reduce_helicities(
@@ -528,34 +525,6 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
    subprocesses_conf_short.append(subprocess_conf)
 
    return vetoed_crossings, helicities, subprocesses_conf_short
-
-import pickle
-
-def pickle_trick(obj, max_depth=10):
-    output = {}
-
-    if max_depth <= 0:
-        return output
-
-    try:
-        pickle.dumps(obj)
-    except (pickle.PicklingError, TypeError) as e:
-        failing_children = []
-
-        if hasattr(obj, "__dict__"):
-            for k, v in obj.__dict__.items():
-                result = pickle_trick(v, max_depth=max_depth - 1)
-                if result:
-                    failing_children.append(result)
-
-        output = {
-            "fail": obj,
-            "err": e,
-            "depth": max_depth,
-            "failing_children": failing_children
-        }
-
-    return output
 
 def process_order_file(order_file_name, f_contract, path, default_conf,
       templates = None,
@@ -844,6 +813,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          subprocesses.update(res[0])
          helicities.update(res[1])
          subprocesses_conf_short += res[2]
+
+      for sp_conf in subprocesses_conf_short:
+         merge_extensions(sp_conf, conf)
 
 
       for sp in list(subprocesses.values()):

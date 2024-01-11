@@ -97,6 +97,10 @@ def arg_handler(name, value=None):
 		cmd_ignore_empty_subprocess = True
 		return True
 	elif name == 'jobs':
+		try:
+			import multiprocess
+		except ModuleNotFoundError:
+			golem.util.tools.warning("The '-j' option was set but the 'multiprocess' module could not be imported. Running sequentially.")
 		cmd_jobs = value
 		return True
 	elif name == 'ignore-unknown':
