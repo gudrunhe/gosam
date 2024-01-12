@@ -620,6 +620,19 @@ def interpret_particle_name(p, mod):
 
    return result
 
+
+def find_flav_group(f, flav_groups):
+   anti = [list(map(lambda x: -x, fg)) for fg in flav_groups]
+   fgs = flav_groups + anti
+   flav_group = [fg for fg in fgs if f in fg]
+   if len(flav_group)==0:
+      return [f]
+   elif len(flav_group)==1:
+      return flav_group[0]
+   else:
+      warning("flavour %d cannot be related to flavour group unambiguously!" % f)
+      return [f]
+
 def diagram_count(path, suffix):
    """
    Analyzes the file diagrams-<suffix>.hh to

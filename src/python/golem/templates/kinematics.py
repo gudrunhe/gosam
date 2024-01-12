@@ -85,7 +85,15 @@ class KinematicsTemplate(golem.util.parser.Template):
          if ":" in crossing:
             pos = crossing.index(":")
             self._crossings.append(crossing[:pos].strip())
-            
+
+      self._flavour_groups = [[]]
+      for i, fg in enumerate(conf.getProperty(golem.properties.flavour_groups)):
+         if ":" in fg:
+            if self._flavour_groups==[[]]:
+               self._flavour_groups=[list(map(int,fg.split(":")))]
+            else:
+               self._flavour_groups.append(list(map(int,fg.split(":"))))
+
       def get_qed_sign(pdg,sign):
          if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
             qed_sign=1
@@ -453,28 +461,34 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(var_name, name)
          yield props
 
+   def return_PDG(self,p):
+      return p.getPDGCode()
+
    def crossing(self, *args, **opts):
       first_name = self._setup_name("first", "is_first", opts)
       last_name = self._setup_name("last", "is_last", opts)
       index_name = self._setup_name("index", "index", opts)
       var_name = self._setup_name("var", "$_", opts)
       sign_name = self._setup_name("sign", "sign", opts)
-
-      initial = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.initial().split(",")]
-      final = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.final().split(",")]
+      initial = [self.return_PDG(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.initial().split(",")]
+      final = [self.return_PDG(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.final().split(",")]
       field_info = self._field_info
 
       avail = set(range(1, len(field_info)+1))
       mapping = {}
 
+      flvgrps = self._flavour_groups
+
       for i, field in enumerate(initial):
          found = 0
          for j in avail:
             f, a, s = field_info[j-1]
-            if s == 1 and field == f:
+            fpdg = self.return_PDG(golem.util.tools.interpret_particle_name(f, self._model))
+            apdg = self.return_PDG(golem.util.tools.interpret_particle_name(a, self._model))
+            if s == 1 and field in golem.util.tools.find_flav_group(fpdg,flvgrps):
                found = j
                break
-            elif s == -1 and field == a:
+            elif s == -1 and field in golem.util.tools.find_flav_group(apdg,flvgrps):
                found = -j
                break
          if found != 0:
@@ -489,10 +503,12 @@ class KinematicsTemplate(golem.util.parser.Template):
          found = 0
          for j in avail:
             f, a, s = field_info[j-1]
-            if s == -1 and field == f:
+            fpdg = self.return_PDG(golem.util.tools.interpret_particle_name(f, self._model))
+            apdg = self.return_PDG(golem.util.tools.interpret_particle_name(a, self._model))
+            if s == -1 and field in golem.util.tools.find_flav_group(fpdg,flvgrps):
                found = j
                break
-            elif s == 1 and field == a:
+            elif s == 1 and field in golem.util.tools.find_flav_group(apdg,flvgrps):
                found = -j
                break
          if found != 0:

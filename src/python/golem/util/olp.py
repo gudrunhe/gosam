@@ -1,7 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 
 import os
-import imp
 import golem
 import golem.util.tools
 import golem.installation
@@ -103,12 +102,23 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    process_name = process_name.lower()
    originalkey = tuple(sorted(s_ini + s_fin))
 
-   if use_crossings:
-      key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
+   flvgrps = [[]]
+   for i, fg in enumerate(conf.getProperty(golem.properties.flavour_groups)):
+      if ":" in fg:
+         if flvgrps==[[]]:
+            flvgrps=[list(map(int,fg.split(":")))]
+         else:
+            flvgrps.append(list(map(int,fg.split(":"))))
 
+   if use_crossings:
+      if flvgrps!=[[]]:
+         s_ini_fg = [str(golem.util.tools.find_flav_group(p.getPDGCode(),flvgrps)[0]) for p in p_ini]
+         s_fin_fg = [str(golem.util.tools.find_flav_group(p.getPartnerPDGCode(),flvgrps)[0]) for p in p_fin]
+         key = tuple(sorted(s_ini_fg + s_fin_fg))
+      else:
+         key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
    else:
       key = tuple(s_ini + [p.getPartner() for p in p_fin])
-
 
    if use_crossings:
       # look for existing compatible subprocesses

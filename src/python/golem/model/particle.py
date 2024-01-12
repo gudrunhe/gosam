@@ -65,6 +65,17 @@ class Particle:
 		"""
 		return self._partner
 
+	def getPartnerPDGCode(self):
+		"""
+		Returns the PDG code of its conjugate.
+		If the particle is self-conjugate it returns its
+		own PDG code.
+		"""
+		if self._partner == self._field:
+			return self._pdg_code
+		else:
+			return -self._pdg_code
+
 	def isMassive(self, zeroes={}):
 		return self.getMass(zeroes) != "0"
 
