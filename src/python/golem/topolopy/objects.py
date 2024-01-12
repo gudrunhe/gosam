@@ -888,20 +888,12 @@ class DiagramComponent:
    def match_fields(self, rays, query):
       if len(rays) == 0 and len(query) == 0:
          return True
-      r1 = rays[0]
-      r1_unquoted = r1
-      rem = rays[1:]
-      if r1[0:4] == 'part':
-         r1_unquoted = str(r1)
-         r1='\'%s\'' % r1
-      for i, q in enumerate(query):
-         if q is None:
-            if self.match_fields(rem, query[:i] + query[i+1:]):
-               return True
-         elif (r1 in q) or (r1_unquoted in q):
-            if self.match_fields(rem, query[:i] + query[i+1:]):
-               return True
-      return False
+      if all(isinstance(q, (list, tuple, dict)) for q in query):
+         return all(
+            any(r in q or "'{}'".format(r) in q for q in query) for r in rays
+         )
+      else:
+         return all(r in query or "'{}'".format(r) in query for r in rays)
 
 class Vertex(DiagramComponent):
    def __init__(self, index, rank, orders, label, *fields):
