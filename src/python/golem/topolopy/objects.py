@@ -362,6 +362,19 @@ class Diagram:
       else:
          return False
 
+   def vertex_with_external_legs(self, *fields, max_legs = 1, is_ingoing = None):
+      nlegs = len(self._vertices) * [0]
+      for v in list(self._vertices.values()):
+         if v.match(fields):
+            for leg in list(self._in_legs.values()) + list(self._out_legs.values()):
+               nlegs[leg.v - 1] += leg.v == v.index and (leg.ingoing == is_ingoing if is_ingoing is not None else True)
+      if any(n > max_legs for n in nlegs):
+         if is_ingoing is not None:
+            self.filtered_by_momentum = True
+         return True
+      else:
+         return False
+
    def chord(self, *args, **opts):
       opts["zero"] = self._zerosum
       return sum([self._propagators[abs(p)].match(args, **opts)
