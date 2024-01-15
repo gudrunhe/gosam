@@ -415,6 +415,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
          # for the remaining crossings is needed
          keep_subprocess = subprocess_conf.getBooleanProperty("veto_crossings")
          parent_subprocess = None
+         parent_key = None
          for id in subprocess.getIDs():
             if not id == subprocess.id:
                # Build subprocess object for each crossing
@@ -470,6 +471,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
                      if subprocess_conf.getBooleanProperty("veto_crossings"):
                         if not parent_subprocess:
                            parent_subprocess = sp
+                           parent_key = key
                            keep_subprocess = False
                         else:
                            parent_subprocess.addCrossing(sp.id, sp.process_name, sp.p_ini, sp.p_fin, sp.conf)
@@ -511,7 +513,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
                   parent_conf))
 
             subprocesses_conf_short.append(parent_conf)
-            vetoed_crossings[key] = parent_subprocess
+            vetoed_crossings[parent_key] = parent_subprocess
 
       helicities[subprocess.id] = list(
          golem.util.tools.enumerate_and_reduce_helicities(
