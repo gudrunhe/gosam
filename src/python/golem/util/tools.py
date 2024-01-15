@@ -962,11 +962,14 @@ def derive_coupling_names(conf):
 
 def load_source(mname, mpath):
    if sys.version_info >= (3,6,):
+      # see https://docs.python.org/dev/whatsnew/3.12.html#imp
       import importlib.util
-      spec = importlib.util.spec_from_file_location(mname, mpath)
+      import importlib.machinery
+      loader = importlib.machinery.SourceFileLoader(mname, mpath)
+      spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
       mod = importlib.util.module_from_spec(spec)
       sys.modules[mname] = mod
-      spec.loader.exec_module(mod)
+      loader.exec_module(mod)
    else:
       import imp
       mod = imp.load_source(mname, mpath)
