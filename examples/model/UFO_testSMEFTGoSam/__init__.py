@@ -6,7 +6,7 @@ from . import vertices
 from . import coupling_orders
 from . import write_param_card
 from . import propagators
-
+from . import function_library
 
 all_particles = particles.all_particles
 all_vertices = vertices.all_vertices
