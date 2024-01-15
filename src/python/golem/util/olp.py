@@ -381,7 +381,7 @@ def derive_zero_masses(model_path, slha_file, conf):
 
 def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, use_crossings, contract_file):
    helicities = {}
-   vetoed_crossings = {}
+   subprocesses = {}
    subprocesses_conf_short = []
 
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
@@ -460,7 +460,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
                            sp_conf))
 
                      subprocesses_conf_short.append(sp_conf)
-                     vetoed_crossings[key] = sp
+                     subprocesses[key] = sp
                   else:
                      # If the current crossing is not vetoed, it's process files are not needed and can be
                      # removed
@@ -513,7 +513,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
                   parent_conf))
 
             subprocesses_conf_short.append(parent_conf)
-            vetoed_crossings[parent_key] = parent_subprocess
+            subprocesses[parent_key] = parent_subprocess
 
       helicities[subprocess.id] = list(
          golem.util.tools.enumerate_and_reduce_helicities(
@@ -524,9 +524,11 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
       for id in subprocess.getIDs():
          contract_file.setProcessError(id, "Error: %s" % err)
 
+   subprocesses[tuple(sorted(list(map(str, subprocess.p_ini))
+                                  + [p.getPartner() for p in subprocess.p_fin]))] = subprocess
    subprocesses_conf_short.append(subprocess_conf)
 
-   return vetoed_crossings, helicities, subprocesses_conf_short
+   return subprocesses, helicities, subprocesses_conf_short
 
 def process_order_file(order_file_name, f_contract, path, default_conf,
       templates = None,
