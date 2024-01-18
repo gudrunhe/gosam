@@ -886,14 +886,25 @@ class DiagramComponent:
       pass
 
    def match_fields(self, rays, query):
-      if len(rays) == 0 and len(query) == 0:
+      if rays == query:
          return True
       if all(isinstance(q, (list, tuple, dict)) for q in query):
          return all(
-            any(r in q or "'{}'".format(r) in q for q in query) for r in rays
+            any(
+               (r in q and rays.count(r) <= q.count(r))
+               or ("'{}'".format(r) in q and rays.count("'{}'".format(r)) <= q.count("'{}'".format(r)))
+               for q in query
+            )
+            for r in rays
+         )
+      elif all(isinstance(q, str) for q in query):
+         return all(
+            (r in query and rays.count(r) <= query.count(r))
+            or ("'{}'".format(r) in query and rays.count("'{}'".format(r)) <= query.count("'{}'".format(r)))
+            for r in rays
          )
       else:
-         return all(r in query or "'{}'".format(r) in query for r in rays)
+         return False
 
 class Vertex(DiagramComponent):
    def __init__(self, index, rank, orders, label, *fields):
