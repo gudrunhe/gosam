@@ -379,7 +379,7 @@ def derive_zero_masses(model_path, slha_file, conf):
             result.append(mass)
    return result
 
-def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, use_crossings, contract_file):
+def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path, from_scratch, use_crossings, contract_file):
    helicities = {}
    subprocesses = {}
    subprocesses_conf_short = []
@@ -524,8 +524,7 @@ def handle_subprocess(conf, subprocess, subprocesses_conf, path, from_scratch, u
       for id in subprocess.getIDs():
          contract_file.setProcessError(id, "Error: %s" % err)
 
-   subprocesses[tuple(sorted(list(map(str, subprocess.p_ini))
-                                  + [p.getPartner() for p in subprocess.p_fin]))] = subprocess
+   subprocesses[subprocess_key] = subprocess
    subprocesses_conf_short.append(subprocess_conf)
 
    return subprocesses, helicities, subprocesses_conf_short
@@ -805,13 +804,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
       if Pool:
          with Pool(conf.getIntegerProperty("n_jobs")) as pool:
-            sp_res = pool.map(lambda sp: handle_subprocess(conf, sp, subprocesses_conf, path,
+            sp_res = pool.map(lambda sp: handle_subprocess(conf, sp[1], sp[0], subprocesses_conf, path,
                                                            from_scratch, use_crossings, contract_file),
-                              list(subprocesses.values()))
+                              subprocesses.items())
       else:
-         sp_res = map(lambda sp: handle_subprocess(conf, sp, subprocesses_conf, path,
+         sp_res = map(lambda sp: handle_subprocess(conf, sp[1], sp[0], subprocesses_conf, path,
                                                            from_scratch, use_crossings, contract_file),
-                      list(subprocesses.values()))
+                      subprocesses.items())
 
       for res in sp_res:
          subprocesses.update(res[0])
