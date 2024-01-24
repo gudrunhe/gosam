@@ -2209,7 +2209,7 @@ contains
    end subroutine color_correlated_lo2
 
 
-   pure subroutine OLP_color_correlated_lo(color_vector,res)
+   pure subroutine OLP_color_correlated_lo(color_vector,perm,res)
       use [% process_name asprefix=\_ %]color, only: [%
       @for pairs colored1 colored2 ordered %][%
       @if is_first %][% @else %], &
@@ -2217,12 +2217,21 @@ contains
       @end @for pairs %]
       implicit none
       complex(ki), dimension(numcs), intent(in) :: color_vector
+      integer, dimension(num_legs), intent(in) :: perm
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: res
+      real(ki), dimension(num_legs, num_legs) :: cij
+      cij(:,:) = 0.0_ki[%
+      @for pairs colored1 colored2 ordered %] [%
+      @if eval index1 .ne. index2 %]
+      cij(perm([%index1%]),perm([%index2%])) = square(color_vector,T[%index1%]T[%index2%])
+      cij(perm([%index2%]),perm([%index1%])) = cij(perm([%index1%]),perm([%index2%]))[%
+      @end @if %] [%
+      @end @for pairs %]
       res(:)=0.0_ki[%
       @for pairs colored1 colored2 ordered %] [%
       @if eval index1 .ne. index2 %]
-      res([% eval index1 - 1 + ( index2 - 1 ) * ( index2 - 2 ) // 2 + 1 %]) = square(color_vector,T[%
-        index1%]T[%index2%])[%
+      res([% eval index1 - 1 + ( index2 - 1 ) * ( index2 - 2 ) // 2 + 1 %]) = cij([%
+        index1%],[%index2%])[%
       @end @if %] [%
       @end @for pairs %]
    end subroutine OLP_color_correlated_lo
@@ -2239,6 +2248,7 @@ contains
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli_tmp1, ampcc_heli_tmp2[%
       @end @if %]
       real(ki), dimension(num_legs, 4) :: pvecs
+      integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %][%
       @if generate_lo_diagrams %][%
       @else %]
@@ -2248,6 +2258,14 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
       ampcc(:) = 0.0_ki[%
+     @for repeat 1 num_legs inclusive=true %][%
+        @if is_first %]
+      perm = (/[%
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
+     @end @for %][%
    @if helsum %][%
    @if generate_lo_diagrams %][%
   @for helicities %]
@@ -2268,6 +2286,14 @@ contains
       pvecs([%index%],:) = -vecs([%$_%],:)[%
            @end @select %][%
         @end @if %][%
+     @end @for %][%
+     @for helicity_mapping shift=1 %][%
+        @if is_first %]
+      perm = (/[%
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
      @end @for %]
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
@@ -2279,32 +2305,32 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          case(1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          case(2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          case(3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             color_vector_1 = amplitude[% map.index %]l0_1()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_1,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_1,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          end select[%
      @else %]
          color_vector = amplitude[%map.index%]l0()
-         call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
+         call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
      @end @if use_order_names %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
@@ -2315,7 +2341,7 @@ contains
          colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
-      call OLP_color_correlated_lo(color_vector,ampcc)[%
+      call OLP_color_correlated_lo(color_vector,perm,ampcc)[%
   @end @if %][% 
   @else %][% 'if not helsum' %][%
   @for helicities %]
@@ -2336,6 +2362,14 @@ contains
       pvecs([%index%],:) = -vecs([%$_%],:)[%
            @end @select %][%
         @end @if %][%
+     @end @for %][%
+     @for helicity_mapping shift=1 %][%
+        @if is_first %]
+      perm = (/[%
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
      @end @for %]
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
@@ -2348,32 +2382,32 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          case(1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          case(2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             color_vector_0 = amplitude[% map.index %]l0_0()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_0,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_0,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          case(3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             color_vector_1 = amplitude[% map.index %]l0_1()
             color_vector_2 = amplitude[% map.index %]l0_2()
-            call OLP_color_correlated_lo(color_vector_2,ampcc_heli_tmp1)
-            call OLP_color_correlated_lo(color_vector_2-color_vector_1,ampcc_heli_tmp2)
+            call OLP_color_correlated_lo(color_vector_2,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_2-color_vector_1,perm,ampcc_heli_tmp2)
             ampcc_heli = ampcc_heli_tmp1 - ampcc_heli_tmp2
          end select[%
          @else %]
             color_vector = amplitude[%map.index%]l0()
-            call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
+            call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
          @end @if use_order_names %][%
          @else %]
       ! For loop induced diagrams the scale should not matter
@@ -2382,7 +2416,7 @@ contains
          colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
-      call OLP_color_correlated_lo(color_vector,ampcc_heli)[%
+      call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
          @end @if generate_lo_diagrams %]
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
