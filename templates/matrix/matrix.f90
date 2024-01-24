@@ -2137,7 +2137,7 @@ contains
    !---#] subroutine ir_subtraction_qp :[%
 @end @if extension quadruple %]
    !---#[ color correlated ME :
-   pure subroutine color_correlated_lo(color_vector,res)
+   pure subroutine color_correlated_lo(color_vector,perm,res)
       use [% process_name asprefix=\_ %]color, only: [%
       @for pairs colored1 colored2 ordered %][%
       @if is_first %][% @else %], &
@@ -2145,12 +2145,15 @@ contains
       @end @for pairs %]
       implicit none
       complex(ki), dimension(numcs), intent(in) :: color_vector
+      integer, dimension(num_legs), intent(in) :: perm
       real(ki), dimension(num_legs,num_legs), intent(out) :: res
       res(:,:)=0.0_ki[%
       @for pairs colored1 colored2 ordered %]
-      res([%index1%],[%index2%]) = square(color_vector,T[%
-        index1%]T[%index2%])
-      res([%index2%],[%index1%]) = res([%index1%],[%index2%])[%
+      res(perm([%index1%]),perm([%index2%])) = square(color_vector,T[%
+        index1%]T[%index2%])[%
+      @if eval index1 .ne. index2 %]
+      res(perm([%index2%]),perm([%index1%])) = res(perm([%index1%]),perm([%index2%]))[%
+      @end @if %][%
       @end @for pairs %]
    end subroutine color_correlated_lo
 
@@ -2161,9 +2164,18 @@ contains
       real(ki), dimension(num_legs,num_legs), intent(out) :: borncc
       real(ki), dimension(num_legs,num_legs) :: borncc_heli
       real(ki), dimension(num_legs, 4) :: pvecs
+      integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector
 
       borncc(:,:) = 0.0_ki[%
+  @for repeat 1 num_legs inclusive=true %][%
+     @if is_first %]
+      perm = (/[%
+     @else %],[%
+     @end @if %][%$_%][%
+     @if is_last %]/)[%
+     @end @if %][%
+  @end @for %][%
   @if generate_lo_diagrams %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
@@ -2183,13 +2195,21 @@ contains
       pvecs([%index%],:) = -vecs([%$_%],:)[%
            @end @select %][%
         @end @if %][%
+     @end @for %][%
+     @for helicity_mapping shift=1 %][%
+        @if is_first %]
+      perm = (/[%
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
      @end @for %]
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:
       color_vector = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()
-      call color_correlated_lo(color_vector,borncc_heli)[%
+      call color_correlated_lo(color_vector,perm,borncc_heli)[%
       @if is_first %]
       ! The minus is part in the definition according to PowHEG Box.
       ! Since they use it we include it:[%
