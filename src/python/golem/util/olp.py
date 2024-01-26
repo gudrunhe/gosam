@@ -382,7 +382,7 @@ def derive_zero_masses(model_path, slha_file, conf):
 def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path, from_scratch, use_crossings, contract_file):
    helicities = {}
    subprocesses = {}
-   subprocesses_conf_short = []
+   subprocesses_conf_short = {}
 
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
                                           golem.installation.GOLEM_VERSION))
@@ -459,7 +459,7 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
                         golem.util.tools.enumerate_and_reduce_helicities(
                            sp_conf))
 
-                     subprocesses_conf_short.append(sp_conf)
+                     subprocesses_conf_short[id] = sp_conf
                      subprocesses[key] = sp
                   else:
                      # If the current crossing is not vetoed, it's process files are not needed and can be
@@ -512,7 +512,7 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
                golem.util.tools.enumerate_and_reduce_helicities(
                   parent_conf))
 
-            subprocesses_conf_short.append(parent_conf)
+            subprocesses_conf_short[parent_subprocess.id] = parent_conf
             subprocesses[parent_key] = parent_subprocess
 
       helicities[subprocess.id] = list(
@@ -525,7 +525,7 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
          contract_file.setProcessError(id, "Error: %s" % err)
 
    subprocesses[subprocess_key] = subprocess
-   subprocesses_conf_short.append(subprocess_conf)
+   subprocesses_conf_short[subprocess.id] = subprocess_conf
 
    return subprocesses, helicities, subprocesses_conf_short
 
@@ -771,7 +771,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    subprocesses = {}
    subprocesses_flav = {}
 
-   subprocesses_conf_short = []
+   subprocesses_conf_short = {}
 
    if file_ok:
       for lineno,id, inp, outp in contract_file.processes_ordered():
@@ -815,9 +815,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       for res in sp_res:
          subprocesses.update(res[0])
          helicities.update(res[1])
-         subprocesses_conf_short += res[2]
+         subprocesses_conf_short.update(res[2])
 
-      for sp_conf in subprocesses_conf_short:
+      for sp_conf in subprocesses_conf_short.values():
          merge_extensions(sp_conf, conf)
 
 
@@ -879,8 +879,8 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(),
          conf=conf,
-         subprocesses=list(subprocesses.values()),
-         subprocesses_conf=subprocesses_conf_short,
+         subprocesses=sorted(list(subprocesses.values()), key=lambda sp: sp.id),
+         subprocesses_conf=[sp for _, sp in sorted(subprocesses_conf_short.items(), key=lambda spi: spi[0])],
          contract=contract_file,
          user="olp")
 
