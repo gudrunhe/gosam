@@ -570,7 +570,7 @@ class Model:
 
 			vfunctions = {}
 			vertorders = []
-			for coord, coupling in list(v.couplings.items()):
+			for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
 				for name in orders:
 					if name in coupling.order:
 						vfunctions[name] = coupling.order[name]
@@ -830,7 +830,7 @@ class Model:
 					f.write(" (")
 
 
-				for coord, coupling in list(v.couplings.items()):
+				for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
 					if not coupling.name in cplnames[ivo]:
 						continue
 					ic, il = coord
