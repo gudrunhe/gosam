@@ -41,4 +41,5 @@
 	<file src="olp_parser.y" class="Verbatim" usedby="olp">
 		<only if-internal="OLP_DAEMON"/>
 	</file>
+	<file src="meson.build" class="OLP" usedby="olp" />
 </template>

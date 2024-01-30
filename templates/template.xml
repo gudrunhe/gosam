@@ -34,6 +34,7 @@
 	<file src="acinclude.m4" class="Kinematics">
 		<only if-extension="autotools" />
 	</file>
+	<file src="meson.build" class="Kinematics" />
 
 	<directory src="codegen">
 		<file src="abbrev.in" class="Multi">
@@ -319,6 +320,8 @@
 		<file src="globalsl1_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>
 		</file>
+		<file src="meson.build" class="Kinematics" />
+		<file src="generate_source.sh" class="Kinematics" />
 	</directory>
 
 	<directory src="doc">
@@ -365,6 +368,7 @@
 		<file src="refine_momenta.cpp" class="Kinematics">
 			<only if-extension="quadruple" />
 		</file>
+		<file src="meson.build" class="Kinematics" />
 	</directory>
 
 	<foreach iterator="helicity">
@@ -480,6 +484,8 @@
 			      <filter name="Fortran90" width="80"/>
 			  </file>
 			</foreach>
+			<file src="meson.build" class="Kinematics" />
+			<file src="generate_source.sh" class="Kinematics" />
 		</directory>
 	</foreach>
 
