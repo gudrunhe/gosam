@@ -808,9 +808,9 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
                                                            from_scratch, use_crossings, contract_file),
                               subprocesses.items())
       else:
-         sp_res = map(lambda sp: handle_subprocess(conf, sp[1], sp[0], subprocesses_conf, path,
+         sp_res = list(map(lambda sp: handle_subprocess(conf, sp[1], sp[0], subprocesses_conf, path,
                                                            from_scratch, use_crossings, contract_file),
-                      subprocesses.items())
+                           subprocesses.items()))
 
       for res in sp_res:
          subprocesses.update(res[0])
