@@ -1,6 +1,11 @@
 project('GoSam_Process', 'fortran', version:'1.0')
 
-add_global_arguments('-ffree-line-length-none', language: 'fortran')
+add_global_arguments('-w', language: 'fortran')
+add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
+[% @end @for %]  language: 'fortran')
+
+add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]'[% $_ %]'.split(' '),
+[% @end @for %] language: 'fortran')
 
 OLP_source = files('olp_module.f90')
 
