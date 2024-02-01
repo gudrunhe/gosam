@@ -1028,6 +1028,21 @@ class Java(Program):
       conf["haggies.bin"] = "%s -jar %s" % \
             (java, haggies_jar)
 
+class Meson(Program):
+   def __init__(self):
+      Program.__init__(self, "Meson", "meson")
+   
+   def store(self, conf):
+      conf["meson.bin"] = self.undohome(self.getInstance())
+      if "+installed.extensions" in conf:
+         conf["+installed.extensions"] += ", meson"
+      else:
+         conf["+installed.extensions"] = "meson"
+      if "+build.extensions" in conf:
+         conf["+build.extensions"] += ", meson"
+      else:
+         conf["+build.extensions"] = "meson"
+
 class Configurator:
    def __init__(self, hints, **components):
 

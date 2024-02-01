@@ -8,17 +8,21 @@
 
 	<file src="configure.ac" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-extension="meson"/>
 		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="autogen.sh" class="Verbatim" executable="yes">
 		<only if-extension="autotools" />
+		<except if-extension="meson"/>
 		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="Makefile.am" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-extension="meson"/>
 	</file>
 	<file src="Makefile" class="Kinematics" >
 		<except if-extension="autotools" />
+		<except if-extension="meson"/>
 	</file>
 	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
@@ -27,14 +31,19 @@
 	</file>
 	<file src="config.sh" class="Kinematics" executable="yes">
 		<except if-extension="autotools" />
+		<except if-extension="meson"/>
 	</file>
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-extension="meson"/>
 	</file>
 	<file src="acinclude.m4" class="Kinematics">
 		<only if-extension="autotools" />
+		<except if-extension="meson"/>
 	</file>
-	<file src="meson.build" class="Kinematics" />
+	<file src="meson.build" class="Kinematics">
+		<only if-extension="meson" />
+	</file>
 
 	<directory src="codegen">
 		<file src="abbrev.in" class="Multi">
@@ -271,9 +280,11 @@
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
+			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
+			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.source" class="Kinematics"/>
 		<file src="Makefile.dep" class="Kinematics"/>
@@ -320,8 +331,12 @@
 		<file src="globalsl1_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>
 		</file>
-		<file src="meson.build" class="Kinematics" />
-		<file src="generate_source.sh" class="Kinematics" />
+		<file src="meson.build" class="Kinematics">
+				<only if-extension="meson" />
+		</file>
+		<file src="generate_source.sh" class="Kinematics">
+			<only if-extension="meson"/>
+		</file>
 	</directory>
 
 	<directory src="doc">
@@ -333,6 +348,7 @@
 		</file>
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
+			<except if-extension="meson"/>
 		</file>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
@@ -347,9 +363,11 @@
 	<directory src="matrix">
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
+			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
+			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="Makefile.source" class="Verbatim"/>
@@ -368,16 +386,20 @@
 		<file src="refine_momenta.cpp" class="Kinematics">
 			<only if-extension="quadruple" />
 		</file>
-		<file src="meson.build" class="Kinematics" />
+		<file src="meson.build" class="Kinematics">
+				<only if-extension="meson" />
+		</file>
 	</directory>
 
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
 			<file src="Makefile" class="Integrals">
 				<except if-extension="autotools" />
+				<except if-extension="meson"/>
 			</file>
 			<file src="Makefile.am" class="Integrals">
 				<only if-extension="autotools" />
+				<except if-extension="meson"/>
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
@@ -484,8 +506,12 @@
 			      <filter name="Fortran90" width="80"/>
 			  </file>
 			</foreach>
-			<file src="meson.build" class="Kinematics" />
-			<file src="generate_source.sh" class="Kinematics" />
+			<file src="meson.build" class="Kinematics">
+				<only if-extension="meson" />
+			</file>
+			<file src="generate_source.sh" class="Kinematics">
+			<only if-extension="meson"/>
+			</file>
 		</directory>
 	</foreach>
 
