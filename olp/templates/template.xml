@@ -53,4 +53,7 @@
 		<only if-extension="meson"/>
 	</file>
 	<file src="build_olp_library.sh" class="OLP" usedby="olp" executable="yes"/>
+	<file src="meson_options.txt" class="OLP" usedby="olp">
+		<only if-extension="meson"/>
+	</file>
 </template>

@@ -95,11 +95,11 @@ generated_sources = [[%
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
-OLP_source += files(['globals.f90'])
-OLP_source += files(['amplitudeh[%helicity%][% @if use_order_names %]_0.f90',
+[% process_name %]_source += files(['globals.f90'])
+[% process_name %]_source += files(['amplitudeh[%helicity%][% @if use_order_names %]_0.f90',
                      'amplitudeh[%helicity%]_1.f90',
                      'amplitudeh[%helicity%]_2[% @end @if %].f90'])
-OLP_source += files([[%
+[% process_name %]_source += files([[%
 @if use_order_names %][%
     @for each 0 1 2 var=efto %][%
         @if helsum%][% @else%][%
@@ -125,4 +125,4 @@ OLP_source += files([[%
         @end @select %][%
     @end @if helsum %][%
 @end @if use_order_names %]])
-OLP_source += [% process_name %]_helicity[%helicity%]_gen
+[% process_name %]_source += [% process_name %]_helicity[%helicity%]_gen

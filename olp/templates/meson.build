@@ -1,5 +1,7 @@
 project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.57.0')
 
+
+
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %]  language: 'fortran')

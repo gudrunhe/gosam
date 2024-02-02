@@ -6,7 +6,7 @@
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
-OLP_source += files(['config.f90', 'accu.f90', 'rambo.f90', 'globalsl1.f90',
+[% process_name %]_source += files(['config.f90', 'accu.f90', 'rambo.f90', 'globalsl1.f90',
                      'util.f90', 'scalar_cache.f90', 'kinematics.f90',
                      'dipoles.f90', 'groups.f90'])
-OLP_source += [% process_name assuffix=\_ %]_common_gen
+[% process_name %]_source += [% process_name assuffix=\_ %]_common_gen

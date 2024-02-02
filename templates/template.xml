@@ -346,6 +346,15 @@
 		<file src="Makefile" class="Kinematics">
 			<except if-extension="autotools" />
 		</file>
+		<file src="Makefile" class="Kinematics">
+			<only if-extension="meson" />
+		</file>
+		<file src="meson.build" class="Kinematics">
+				<only if-extension="meson" />
+		</file>
+		<file src="generate_doc.sh" class="Kinematics">
+			<only if-extension="meson"/>
+		</file>
 		<file src="Makefile.am" class="Kinematics">
 			<only if-extension="autotools" />
 			<except if-extension="meson"/>
