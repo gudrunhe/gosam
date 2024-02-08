@@ -836,7 +836,7 @@ class Diagram:
    def YUKAWAfound(self):
       vertex_indices=list(self._vertices.keys())
       found=False
-      fields=[['T','Tbar','B','Bbar','part6','part5'],['T','Tbar','B','Bbar','part6','part5'],['H','part25']]
+      fields=[['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['H','part25']]
       for idx in vertex_indices:
          if self._vertices[idx].match(fields):
             found=True
