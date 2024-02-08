@@ -1231,6 +1231,25 @@ flavour_groups = Property("flavour_groups",
    list,
    "", experimental=True)
 
+respect_generations = Property("respect_generations",
+   """\
+   Boolean determining whether or not the quark generation should be taken into
+   account when the flavour_groups feature is used to find crossing relations among
+   olp channels. Is relevant if flavour changing vertices appear (Assuming diagonal CKM!).
+
+   Examples:
+
+   respect_generations=False and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) and (u ub to s sb) are crossings of (u ub to d db)
+
+   respect_generations=True and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) is a crossing of (u ub to s sb) but not of (u ub to d db)
+
+   Default is respect_generations=False.
+   """,
+   bool,
+   False, experimental=True)
+
 properties = [
    process_name,
    process_path,
@@ -1326,7 +1345,8 @@ properties = [
 
    all_mandelstam,
 
-   flavour_groups
+   flavour_groups,
+   respect_generations
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
