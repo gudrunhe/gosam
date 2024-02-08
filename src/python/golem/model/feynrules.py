@@ -568,22 +568,17 @@ class Model:
 
 			flip = spins[0] == 1 and spins[2] == 1
 
-			vrank = 0
-			for coord, coupling in list(v.couplings.items()):
-				ic, il = coord
-				lrank = v.lorentz[il].rank
-				if lrank > vrank:
-					vrank = lrank
-
 			vfunctions = {}
-			vfunctions["RK"] = vrank
 			vertorders = []
-			for c in sorted(list(v.couplings.values()),key=lambda x: x.name):
+			for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
 				for name in orders:
-					if name in c.order:
-						vfunctions[name] = c.order[name]
+					if name in coupling.order:
+						vfunctions[name] = coupling.order[name]
 					else:
 						vfunctions[name] = 0
+
+				ic, il = coord
+				vfunctions["RK"] = v.lorentz[il].rank
 
 				if not vfunctions in vertorders:
 					if len(vertorders) > 0:
@@ -752,26 +747,21 @@ class Model:
 				afields.append(cn[1])
 				spins.append(p.spin - 1)
 
-			vrank = 0
-			for coord, coupling in list(v.couplings.items()):
-				ic, il = coord
-				lrank = v.lorentz[il].rank
-				if lrank > vrank:
-					vrank = lrank
-
 			vorders = {}
-			# vfunctions["RK"] = vrank
 			vertorders = []
 			cplnames = []
-			for c in sorted(list(v.couplings.values()),key=lambda x: x.name):
+			for coord, coupling in list(v.couplings.items()):
 				for name in orders:
-					if name in c.order:
-						vorders[name] = c.order[name]
+					if name in coupling.order:
+						vorders[name] = coupling.order[name]
 					else:
 						vorders[name] = 0
 
+				ic, il = coord
+				vorders["RK"] = v.lorentz[il].rank
+
 				if vorders in vertorders:
-					cplnames[vertorders.index(vorders)].append(c.name)
+					cplnames[vertorders.index(vorders)].append(coupling.name)
 				else:
 					if len(vertorders) > 0:
 						warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
@@ -779,7 +769,7 @@ class Model:
 										+ "I will split it up.")
 					vocp = copy.deepcopy(vorders)
 					vertorders.append(vocp)
-					cplnames.append([c.name])
+					cplnames.append([coupling.name])
 
 			for ivo in range(len(vertorders)):
 
@@ -793,7 +783,7 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				f.write("Identify Once vertex(iv?, RK%d" % vrank)
+				f.write("Identify Once vertex(iv?, RK%d" % vertorders[ivo]["RK"])
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
@@ -840,7 +830,7 @@ class Model:
 					f.write(" (")
 
 
-				for coord, coupling in list(v.couplings.items()):
+				for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
 					if not coupling.name in cplnames[ivo]:
 						continue
 					ic, il = coord
