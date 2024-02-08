@@ -44,6 +44,10 @@
 	<file src="meson.build" class="Kinematics">
 		<only if-extension="meson" />
 	</file>
+	<file src="meson_options.txt" class="Kinematics">
+		<only if-extension="meson" />
+		<except if-internal="OLP_MODE"/>
+	</file>
 
 	<directory src="codegen">
 		<file src="abbrev.in" class="Multi">
@@ -605,5 +609,11 @@
 		    <filter name="Fortran90" width="80"/>
 		  </file>
 		</foreach>
+		<file src="meson.build" class="Kinematics">
+				<only if-extension="meson" />
+		</file>
+		<file src="generate_source.sh" class="Kinematics">
+			<only if-extension="meson"/>
+		</file>
 	</directory>
 </template>

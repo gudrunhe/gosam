@@ -9,4 +9,7 @@
 [% process_name %]_source += files(['config.f90', 'accu.f90', 'rambo.f90', 'globalsl1.f90',
                      'util.f90', 'scalar_cache.f90', 'kinematics.f90',
                      'dipoles.f90', 'groups.f90'])
+[% @if extension pjfry %]
+[% process_name %]_source += files(['precision_pjfry.f90', 'pjfry95pg.f90', 'pjfry_comb.f90'])
+[% @end @if %]
 [% process_name %]_source += [% process_name assuffix=\_ %]_common_gen
