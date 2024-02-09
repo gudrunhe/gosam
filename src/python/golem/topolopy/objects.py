@@ -871,7 +871,7 @@ class Diagram:
    def YUKAWAfound(self):
       vertex_indices=list(self._vertices.keys())
       found=False
-      fields=[['T','Tbar','B','Bbar','part6','part5'],['T','Tbar','B','Bbar','part6','part5'],['H','part25']]
+      fields=[['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['H','part25']]
       for idx in vertex_indices:
          if self._vertices[idx].match(fields):
             found=True
@@ -1051,19 +1051,19 @@ class Propagator(DiagramComponent):
 
       flist = []
       if fields is None:
-         flist.append(None)
+         flist = None
       elif isinstance(fields, str):
          flist.append(fields)
       elif "__iter__" in fields.__class__.__dict__:
          if len(fields) == 0:
-            flist.append(None)
+            flist = None
          else:
             flist.extend([str(e) for e in fields])
       else:
          flist.append(str(fields))
 
 
-      if not self.match_fields([self.field], flist):
+      if flist and not self.match_fields([self.field], flist):
          return False
 
       if momentum is not None:
