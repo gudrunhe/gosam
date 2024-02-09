@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]globals_qp
-   use [% process_name asprefix=\_ %]config, only: ki => ki_qp[%
+   use config, only: ki => ki_qp[%
    @for repeat num_colors shift=1 %][%
       @if is_first %]
    use [% process_name asprefix=\_ %]color_qp, only:[%

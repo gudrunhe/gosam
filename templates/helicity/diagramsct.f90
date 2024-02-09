@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module [% process_name asprefix=\_ %]diagramscth[% helicity %]
-   use [% process_name asprefix=\_ %]config, only: ki, &
+   use config, only: ki, &
    & debug_nlo_diagrams, logfile
    implicit none
    private

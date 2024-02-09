@@ -7,7 +7,7 @@
 @if extension quadruple %]
    use [% process_name asprefix=\_ %]util_qp, only: square_qp => square[%
 @end @if extension quadruple %]
-   use [% process_name asprefix=\_ %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
+   use config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
@@ -22,9 +22,9 @@
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
-   use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions[%
+   use model, only: Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -328,7 +328,7 @@ contains
 @if extension quadruple %]
       ! use [% process_name asprefix=\_ %]kinematics, only: adjust_kinematics
       use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
-      use [% process_name asprefix=\_ %]model[%
+      use model[%
 @end @if extension quadruple %]
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs[%
@@ -618,13 +618,13 @@ contains
 
    !---#[ subroutine samplitudel01 :
    subroutine     samplitudel01(vecs, scale2, amp, rat2, ok, h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -889,7 +889,7 @@ contains
    !---#] subroutine samplitudel01 :
    !---#[ function samplitudel0 :
    function     samplitudel0(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]config, only: logfile
+      use config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1013,7 +1013,7 @@ contains
    !---#] function samplitudel0 :
    !---#[ function samplitudel1 :
    function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -1312,12 +1312,12 @@ contains
    !---#] function samplitudel1 :
    !---#[ subroutine ir_subtraction :
    subroutine     ir_subtraction(vecs,scale2,amp,h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]kinematics, only: &
          & init_event, corrections_are_qcd
-      use [% process_name asprefix=\_ %]model
+      use model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -1429,13 +1429,13 @@ contains
 @if extension quadruple %]
    !---#[ subroutine samplitudel01_qp :
    subroutine     samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & inspect_kinematics, init_event
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1700,7 +1700,7 @@ contains
    !---#] subroutine samplitudel01_qp :
    !---#[ function samplitudel0_qp :
    function     samplitudel0_qp(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]config, only: logfile
+      use config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1824,7 +1824,7 @@ contains
    !---#] function samplitudel0_qp :
    !---#[ function samplitudel1_qp :
    function     samplitudel1_qp(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -2126,12 +2126,12 @@ contains
    !---#] function samplitudel1_qp :
    !---#[ subroutine ir_subtraction_qp :
    subroutine     ir_subtraction_qp(vecs,scale2,amp,h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & init_event, corrections_are_qcd
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
@@ -3437,7 +3437,7 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
    function get_formfactor_lo(vecs) result(factor)
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]kinematics
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor
@@ -3448,7 +3448,7 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
    function get_formfactor_nlo(vecs) result(factor)
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]kinematics
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor

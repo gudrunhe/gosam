@@ -2,8 +2,8 @@
  %]module     [% process_name asprefix=\_ %]diagramsh[%helicity%]l0[%
    @if fr5 %]fr5[%
    @end @if %]
-   use [% process_name asprefix=\_ %]accu, only: sorted_sum
-   use [% process_name asprefix=\_ %]config, only: ki, use_sorted_sum, &
+   use config, only: sorted_sum
+   use config, only: ki, use_sorted_sum, &
       & debug_lo_diagrams, logfile
    use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram
    use [% process_name asprefix=\_ %]color, only: numcs

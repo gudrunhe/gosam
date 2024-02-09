@@ -1,5 +1,5 @@
 module [% name asprefix=\_ %]matrix
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    implicit none
    private
 
@@ -14,10 +14,10 @@ module [% name asprefix=\_ %]matrix
 contains
 
    pure function prefactor()
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
       & include_color_avg_factor, include_helicity_avg_factor, &
       & include_symmetry_factor
-      use [% process_name asprefix=\_ %]model, only: NC
+      use model, only: NC
       use [% process_name asprefix=\_ %]kinematics, only: &
       & in_helicities, symmetry_factor
       use [% process_name asprefix=\_ %]color, only: incolors

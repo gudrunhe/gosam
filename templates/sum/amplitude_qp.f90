@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module    [% process_name asprefix=\_ %]amplitude_qp
-   use [% process_name asprefix=\_ %]config, only: ki => ki_qp, &
+   use config, only: ki => ki_qp, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color_qp, only: numcs[%
 @if generate_nlo_virt %][%
@@ -249,7 +249,7 @@ contains
    @for groups var=grp %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
-   use [% process_name asprefix=\_ %]config, only: &
+   use config, only: &
       & logfile, debug_nlo_diagrams
    use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow[%
       @if extension golem95 %]

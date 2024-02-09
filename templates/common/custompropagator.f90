@@ -1,7 +1,7 @@
 [%' vim: sw=3:syntax=golem
 '%]module     [% process_name asprefix=\_ %]custompropagator
    use [% process_name asprefix=\_%]config, only: ki
-   use [% process_name asprefix=\_ %]model
+   use model
    implicit none
    save
 

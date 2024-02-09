@@ -1,8 +1,8 @@
 %=$module     [$ process_name asprefix=\_ $]color
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use [$ process_name asprefix=\_ $]config, only: ki
-   use [$ process_name asprefix=\_ $]model, only: NC, Nf
+   use config, only: ki
+   use model, only: NC, Nf
    implicit none
    save
 

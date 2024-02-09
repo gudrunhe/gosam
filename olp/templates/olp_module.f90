@@ -21,21 +21,21 @@ contains
    @end @if %]")
       use, intrinsic :: iso_c_binding[%
       @for subprocesses %]
-      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem
-      use [%$_%]_config, only: [%$_%]_PSP_rescue => PSP_rescue, &
-           & [%$_%]_PSP_verbosity => PSP_verbosity, &[%
-      @if generate_lo_diagrams %]
-           & [%$_%]_PSP_chk_th1 => PSP_chk_th1, &
-           & [%$_%]_PSP_chk_th2 => PSP_chk_th2, &
-           & [%$_%]_PSP_chk_th3 => PSP_chk_th3, &
-           & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
-      @else %]
-           & [%$_%]_PSP_chk_li1 => PSP_chk_li1, &
-           & [%$_%]_PSP_chk_li2 => PSP_chk_li2, &
-           & [%$_%]_PSP_chk_li3 => PSP_chk_li3, &
-           & [%$_%]_PSP_chk_kfactor => PSP_chk_kfactor[%
-      @end @if %][%
+      use [%$_%]_matrix, only: [%$_%]_initgolem => initgolem[%
       @end @for %]
+      use config, only: PSP_rescue => PSP_rescue, &
+           & PSP_verbosity => PSP_verbosity, &[%
+      @if generate_lo_diagrams %]
+           & PSP_chk_th1 => PSP_chk_th1, &
+           & PSP_chk_th2 => PSP_chk_th2, &
+           & PSP_chk_th3 => PSP_chk_th3, &
+           & PSP_chk_kfactor => PSP_chk_kfactor[%
+      @else %]
+           & PSP_chk_li1 => PSP_chk_li1, &
+           & PSP_chk_li2 => PSP_chk_li2, &
+           & PSP_chk_li3 => PSP_chk_li3, &
+           & PSP_chk_kfactor => PSP_chk_kfactor[%
+      @end @if %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
       integer(kind=c_int), intent(out) :: ierr[%
@@ -53,11 +53,7 @@ contains
 
       integer :: l, ferr
       character(len=128) :: line_buf
-      character(len=9) :: kw[%
-      @if extension golem95 %]
-      integer :: PSP_verbosity, PSP_chk_th1, PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor
-      logical :: PSP_rescue[%
-      @end @if %]
+      character(len=9) :: kw
 
       ierr = 1
       l = strlen(contract_file_name)
@@ -102,20 +98,6 @@ contains
       ! PSP_chk_th2 = [% PSP_chk_th2 default=3 %]
       ! PSP_chk_th3 = [% PSP_chk_th3 default=5 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
-      @for subprocesses %]
-      ! [%$_%]_PSP_rescue = PSP_rescue
-      ! [%$_%]_PSP_verbosity =  PSP_verbosity[%
-      @if generate_lo_diagrams %]
-      ! [%$_%]_PSP_chk_th1 = PSP_chk_th1
-      ! [%$_%]_PSP_chk_th2 = PSP_chk_th2
-      ! [%$_%]_PSP_chk_th3 = PSP_chk_th3[%
-      @else %]
-      ! [%$_%]_PSP_chk_th1 = PSP_chk_li1
-      ! [%$_%]_PSP_chk_th2 = PSP_chk_li2
-      ! [%$_%]_PSP_chk_th3 = PSP_chk_li3[%
-      @end @if %]
-      ! [%$_%]_PSP_chk_kfactor = PSP_chk_kfactor[%
-      @end @for %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
       if(stage.lt.0) then[%
          @for subprocesses %]
@@ -149,12 +131,8 @@ contains
    @end @if %][%
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
-   use, intrinsic :: iso_c_binding, only: C_CHAR, C_NULL_CHAR[%
-   @for subprocesses %][%
-       @if is_first %]
-   use [%$_%]_version, only: gosamversion, gosamrevision[%
-       @end @if %][%
-   @end @for %]
+   use, intrinsic :: iso_c_binding, only: C_CHAR, C_NULL_CHAR
+   use version, only: gosamversion, gosamrevision
 
    implicit none
    character(kind=c_char), intent(inout), dimension(20)  :: olp_name
@@ -202,10 +180,8 @@ contains
    @end @if %][%
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
-      use, intrinsic :: iso_c_binding[%
-   @for subprocesses %]
-      use [%$_%]_model, only: [%$_%]_set_parameter => set_parameter[%
-   @end @for %]
+      use, intrinsic :: iso_c_binding
+      use model, only: set_parameter => set_parameter
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
       real(kind=c_double), intent(in) :: real_part, imag_part
@@ -222,13 +198,11 @@ contains
 
       integer :: l;
 
-      l = strlen(variable_name)[%
-   @for subprocesses %]
-      call [%$_%]_set_parameter(variable_name(1:l),real_part,imag_part,success)
+      l = strlen(variable_name)
+      call set_parameter(variable_name(1:l),real_part,imag_part,success)
       if(success==0) then ! return immediately on error
           return
-      end if[%
-   @end @for %]
+      end if
    end subroutine
 
 
@@ -361,13 +335,11 @@ contains
    @end @if %][%
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
-      use, intrinsic :: iso_c_binding[%
-      @for subprocesses %]
-      use [%$_%]_model, only: [%$_%]_parseline => parseline[%
+      use, intrinsic :: iso_c_binding
+      use model, only: parseline => parseline[%
       @if extension quadruple %]
-      use [%$_%]_model_qp, only: [%$_%]_parseline_qp => parseline[%
-      @end @if %][%
-      @end @for %]
+      use model_qp, only: parseline_qp => parseline[%
+      @end @if %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: line
       integer(kind=c_int), intent(out) :: stat
@@ -382,17 +354,15 @@ contains
          end function strlen
       end interface
 
-      l = strlen(line)[%
-      @for subprocesses %]
-      call [%$_%]_parseline(line(1:l),ios)[%
+      l = strlen(line)
+      call parseline(line(1:l),ios)[%
       @if extension quadruple %]
-      call [%$_%]_parseline_qp(line(1:l),ios)[%
+      call parseline_qp(line(1:l),ios)[%
       @end @if %]
       if (ios .ne. 0) then
          stat = 0
          return
-      end if[%
-      @end @for %]
+      end if
       stat = 1
    end subroutine OLP_Option[%
       @select olp.parameters default=NONE
@@ -422,8 +392,8 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
-      use [% sp.$_ %]_config, only: ki, [% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
-      use [% sp.$_ %]_model, only: parseline[% 
+      use config, only: ki, [% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
+      use model, only: parseline[%
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
       use [% cr.$_ %]_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated, &
@@ -623,11 +593,11 @@ contains
        @end @if %][%
        @if internal OLP_TRAILING_UNDERSCORE %]_[%
        @end @if %]")
-      use, intrinsic :: iso_c_binding[%
+      use, intrinsic :: iso_c_binding
+      use config , only:ki
+      use model[%
       @for subprocesses %][%
        @if is_first %]
-      use [%$_%]_config , only:ki
-      use [%$_%]_model
       use [%$_%]_kinematics, only: Spab3, Spaa [%
       @end @if %] [%
       @end @for %]
@@ -663,10 +633,8 @@ contains
        @if internal OLP_TRAILING_UNDERSCORE %]_[%
        @end @if %]")
 
-      use, intrinsic :: iso_c_binding[%
-      @for subprocesses %]
-      use [%$_%]_model, only: [%$_%]_print_parameter => print_parameter[%
-      @end @for %]
+      use, intrinsic :: iso_c_binding
+      use model, only: print_parameter => print_parameter
       implicit none
       character(kind=c_char,len=1), intent(in) :: filename
       integer :: ierr, l
@@ -692,25 +660,21 @@ contains
       if (ierr .ne. 0) then
          write(7,*) "OLP_PrintParameter: Could not open/create:", filename(1:l), "!"
          ierr = -1
-      end if[%
-      @for subprocesses %]
-      write (27, "(A)") "####### Setup of SubProcess [%$_%] #######"
-      call [%$_%]_print_parameter(.true.,27)
-      write (27, *)[%
-      @end @for%]
+      end if
+      write (27, "(A)") "####### Setup of SubProcess #######"
+      call print_parameter(.true.,27)
+      write (27, *)
 
       close(27)
 
    end subroutine OLP_PrintParameter
    !---#] OLP_PrintParameter
 
-   subroutine     read_slha_file(line)[%
-   @for subprocesses %]
-      use [%$_%]_model, only: [%$_%]_read_slha => read_slha[%
+   subroutine     read_slha_file(line)
+      use model, only: read_slha => read_slha[%
       @if extension quadruple %]
-      use [%$_%]_model_qp, only: [%$_%]_read_slha_qp => read_slha[%
-      @end @if %][%
-   @end @for %]
+      use model_qp, only: read_slha_qp => read_slha[%
+      @end @if %]
       implicit none
       character(len=*), intent(in) :: line
       character(len=512) :: file_name
@@ -720,17 +684,11 @@ contains
       open(unit=27,file=file_name,status='old',iostat=ierr)
       if(ierr.ne.0) then
          print*, "Could not find SLHA model file"
-      else[%
-      @for subprocesses %][%
-         @if is_first %][%
-         @else %]
-         rewind(unit=27)[%
-         @end @if %]
-         call [%$_%]_read_slha(27)[%
+      else
+         call read_slha(27)[%
          @if extension quadruple %]
-         call [%$_%]_read_slha_qp(27)[%
-         @end @if %][%
-      @end @for %]
+         call read_slha_qp(27)[%
+         @end @if %]
          close(27)
       end if
    end subroutine read_slha_file

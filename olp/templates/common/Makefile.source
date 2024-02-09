@@ -1,0 +1,52 @@
+include ../Makefile.conf
+
+
+FORM_OPT=\
+	-t $(TEMP) \
+	-w$(FORM_THREADS) -M -q \
+	-p ..:../codegen \
+	-D PROCESSPATH=.. \
+	-D LOOPS=0 \
+	-D OUTFILE=color \
+	-D CREATETT=1
+
+source: model.f90 version.f90 [%
+@if extension quadruple %] model_qp.f90 [%
+@end @if extension quadruple %]
+
+[%
+@if extension formopt %]
+model.txt:  func.txt
+	@echo Form is generating $@
+	@$(FORM) $(FORM_OPT) modelopt.frm
+model.f90 :  model.txt
+	@echo Python is generating model.f90
+	@$(PYTHON) buildmodel.py -i model.txt
+[% @if extension quadruple %]model_qp.f90 : model.f90[% @end @if %]
+[%@else%]
+model.f90: func.txt ../codegen/haggies-l0.in ../codegen/model.out
+	@echo haggies is generating model.f90
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-c ../codegen/haggies-l0.in \
+		-t ../codegen/model.out \
+		-o $@ $<
+[%@end @if %]
+
+
+[% @if internal HAGGIES %]
+version.out: ../codegen/info.frm
+	@echo FORM is generating $@
+	@$(FORM) $(FORM_OPT) -D OUTPUT=$@ ../codegen/info.frm
+
+version.f90: version.out
+	@echo haggies is generating version.f90
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-c ../codegen/haggies-l0.in \
+		-t $< -o $@ -F
+[% @else %]
+version.f90: info.frm
+	@echo FORM is generating $@
+	@$(FORM) $(FORM_OPT) -D OUTPUT=$@ info.frm
+[% @end @if %]
+
+

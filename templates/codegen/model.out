@@ -1,7 +1,7 @@
 %=$[$ ' vim:syntax=golem
-$]module     [$ process_name asprefix=\_ $]model
+$]module     model
    ! Model parameters for the model: [$ model $]
-   use [$ process_name asprefix=\_ $]config, only: ki[$
+   use config, only: ki[$
 @if extension samurai $], &
    & samurai_scalar, samurai_verbosity, samurai_test, &
    & samurai_group_numerators, samurai_istop[$
@@ -1416,4 +1416,4 @@ e_not_one $]
 !---#] EW scheme choice:
 [$@end @select$]
 
-end module [$ process_name asprefix=\_ $]model
+end module model

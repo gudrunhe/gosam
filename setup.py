@@ -119,6 +119,7 @@ DATA_DIRS = [
 			"templates/matrix",
 			"templates/sum",
 			"olp/templates",
+			"olp/templates/common",
 			"models",
 			"src/form",
 			"haggies"

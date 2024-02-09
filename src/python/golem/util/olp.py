@@ -873,9 +873,38 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    for p in golem.properties.properties:
       if conf.getProperty(p):
          conf.setProperty(str(p), conf.getProperty(p))
+      else:
+         conf.setProperty(str(p), p.getDefault())
 
    golem.properties.setInternals(conf)
 
+   #---#[ Fill in information needed by the main config to generate the common source files
+   conf["golem.name"] = "GoSam"
+   conf["golem.version"] = ".".join(map(str, golem.installation.GOLEM_VERSION))
+   conf["golem.full-name"] = GOLEM_FULL
+   conf["golem.revision"] = \
+      golem.installation.GOLEM_REVISION
+
+   orders = golem.util.config.split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
+   powers = orders[0] if orders else []
+
+   if len(powers) == 2:
+      generate_lo_diagrams = True
+      generate_nlo_virt = False
+   elif len(powers) == 3:
+      generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
+      generate_nlo_virt = True
+
+   conf["generate_lo_diagrams"] = generate_lo_diagrams
+   conf["generate_nlo_virt"] = generate_nlo_virt
+   conf["generate_uv_counterterms"] = conf.getProperty('genUV')
+
+   if "ewchoose" in golem.model.MODEL_OPTIONS:
+      conf.setProperty("ewchoose", str(golem.model.MODEL_OPTIONS["ewchoose"]))
+   else:
+      conf.setProperty("ewchoose", False)
+
+   # ---] Fill in information needed by the main config to generate the common source files
 
    golem.templates.xmltemplates.transform_templates(templates, path, conf.copy(),
          conf=conf,
