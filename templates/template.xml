@@ -124,7 +124,9 @@
 			<only if-extension="formopt" />
 			<only if-extension="ninja" />
 		</file>
-		<file src="info.frm" class="Kinematics" />
+		<file src="info.frm" class="Kinematics">
+			<except if-internal="OLP_MODE"/>
+		</file>
 		<file src="golem.frm" class="Kinematics">
 			<except if-option="use_order_names" value="true" />
 		</file>
@@ -141,6 +143,7 @@
 		</file>
 		<file src="modelopt.frm" class="Kinematics">
 			<only if-extension="formopt" />
+			<except if-internal="OLP_MODE"/>
 		</file>
 		<file src="abbreviate.hh" class="Kinematics"/>
 		<file src="optimizeborn.hh" class="Integrals">
@@ -247,6 +250,7 @@
 		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />
+			<except if-internal="OLP_MODE"/>
 		</file>
 		<file src="buildcolor.py" class="Kinematics">
 			<except if-option="abbrev.color" value="haggies" />
@@ -294,13 +298,16 @@
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="config.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
+			<except if-internal="OLP_MODE"/>
 		</file>
  		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
 		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
 		<file src="util.f90" class="Kinematics"/>
-		<file src="accu.f90" class="Kinematics"/>
+		<file src="accu.f90" class="Kinematics">
+			<except if-internal="OLP_MODE"/>
+		</file>
 		<file src="groups.f90" class="Integrals"/>
 		<file src="scalar_cache.f90" class="Integrals"/>
 		<file src="globalsl1.f90" class="Kinematics"/>
@@ -331,6 +338,7 @@
 		</file>
 		<file src="accu_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>
+			<except if-internal="OLP_MODE"/>
 		</file>
 		<file src="globalsl1_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>

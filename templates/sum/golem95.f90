@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]golem95
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    implicit none
    private[%
 
@@ -22,7 +22,7 @@ contains[%
 !---#[ subroutine reconstruct_group[% grp %]:
 subroutine     reconstruct_group[% grp %](coeffs)
    use tens_rec
-   use [% process_name asprefix=\_ %]config
+   use config
    use [% process_name asprefix=\_
        %]groups, only:[%
          @if use_flags_1 %] evaluate_virt_diagram,[%

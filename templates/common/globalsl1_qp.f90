@@ -1,5 +1,5 @@
 module     [% process_name asprefix=\_ %]globalsl1_qp
-   use [% process_name asprefix=\_ %]config, only: ki => ki_qp
+   use config, only: ki => ki_qp
    use [% process_name asprefix=\_ %]color_qp, only: numcs
    implicit none
 

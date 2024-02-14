@@ -1,10 +1,10 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% process_name asprefix=\_ %]config, only: ki, logfile, nlo_prefactors
+   use config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
-   use [% process_name asprefix=\_ %]model, only: parse[%
+   use model, only: parse[%
    @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: parse_qp => parse[%
+   use model_qp, only: parse_qp => parse[%
    @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
      & initgolem, exitgolem, ir_subtraction
@@ -94,10 +94,10 @@
  contains
 
 subroutine  print_parameters(scale2)
-   use [% process_name asprefix=\_ %]config, only: renormalisation, &
+   use config, only: renormalisation, &
         convert_to_cdr, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
-   use [% process_name asprefix=\_ %]model
+   use model
    implicit none
    real(ki) :: scale2[%
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]

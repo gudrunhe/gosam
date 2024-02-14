@@ -4,8 +4,8 @@
    This template should be processed by
    golem.templates.Kinematics.KinematicsTemplate
 '%]module     [% process_name asprefix=\_ %]kinematics
-   use [% process_name asprefix=\_%]config, only: ki
-   use [% process_name asprefix=\_ %]model
+   use config, only: ki
+   use model
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    save
@@ -253,10 +253,10 @@ contains
 @for particles lightlike vector %], hel[%index%][%
 @end @for %])[%
 @if internal NUMPOLVEC %]
-      use [% process_name asprefix=\_ %]config, only: debug_numpolvec, [% '
+      use config, only: debug_numpolvec, [% '
       %]logfile[%
 @end @if %]
-      use [% process_name asprefix=\_ %]model
+      use model
       implicit none
       real(ki), dimension(num_legs,4), intent(in) :: vecs[%
 @for particles lightlike vector %]

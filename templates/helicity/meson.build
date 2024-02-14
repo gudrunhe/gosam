@@ -111,7 +111,7 @@ generated_sources = [[%
                 @if extension ninja %] 'ninja_[% efto %]h[%helicity%].f90',[%
                 @end @if %][%
             @end @select %][%
-        @end @if helsum %]])[%
+        @end @if helsum %][%
     @end @for %][%
 @else %][%
     @if helsum%][% @else %][%

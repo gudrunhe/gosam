@@ -56,4 +56,40 @@
 	<file src="meson_options.txt" class="OLP" usedby="olp">
 		<only if-extension="meson"/>
 	</file>
+
+	<directory src="common" usedby="olp">
+		<file src="accu.f90" class="OLP" usedby="olp"/>
+		<file src="accu_qp.f90" class="OLP" usedby="olp">
+		        <only if-extension="quadruple"/>
+		</file>
+		<file src="config.f90" class="OLP" usedby="olp">
+			<except if-file="exists" in-mode="normal" />
+		</file>
+		<file src="info.frm" class="OLP" usedby="olp"/>
+		<file src="modelopt.frm" class="OLP" usedby="olp">
+			<only if-extension="formopt" />
+		</file>
+		<file src="func.txt" class="Model" usedby="olp"/>
+		<file src="func.hh" class="Model" usedby="olp">
+			<only if-extension="formopt" />
+		</file>
+		<file src="symbols.hh" class="Model" usedby="olp">
+			<only if-extension="formopt" />
+		</file>
+		<file src="pythonin.py" class="Multi" usedby="olp">
+			<only if-extension="formopt" />
+		</file>
+		<file src="t2f.py" class="Verbatim" usedby="olp"/>
+		<file src="filter.py" class="Verbatim" usedby="olp"/>
+		<file src="buildmodel.py" class="Model" usedby="olp">
+			<only if-extension="formopt" />
+		</file>
+		<file src="meson.build" class="OLP" usedby="olp">
+			<only if-extension="meson"/>
+		</file>
+		<file src="generate_source.sh" class="OLP" usedby="olp" executable="yes">
+			<only if-extension="meson"/>
+		</file>
+		<file src="Makefile.source" class="OLP" usedby="olp"/>
+	</directory>
 </template>

@@ -10,11 +10,15 @@ add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]
 [% @end @for %] language: 'fortran')
 
 OLP_source = files('olp_module.f90')
+common_source = []
 
+subdir('common')
 [%
 @for subprocesses %]
 subdir('[% $_ %]')[%
 @end @for subprocesses %]
+
+OLP_source += common_source
 
 lib = both_libraries('golem_olp', OLP_source, install: true, install_dir: meson.current_source_dir() / '.libs')
 

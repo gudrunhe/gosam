@@ -609,7 +609,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
-      "noformopt","tracify","better_num","quadruple"])
+      "noformopt","tracify","better_num","quadruple", "meson"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -1382,7 +1382,8 @@ def setInternals(conf):
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
 
-   conf["__HAGGIES__"] = "noformopt" in extensions or "haggies" in conf["abbrev.color"].lower()
+   conf["__HAGGIES__"] = ("noformopt" in extensions or
+                          ("haggies" in conf["abbrev.color"].lower() if conf["abbrev.color"] else False))
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions

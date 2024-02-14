@@ -1,7 +1,7 @@
 [%' vim: sw=3:syntax=golem
 '%]module     [% process_name asprefix=\_ %]util
    use [% process_name asprefix=\_ %]color, only: numcs
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    implicit none
    private
 
@@ -59,7 +59,7 @@ contains
 
       interface
          pure function brack(inner_Q, inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_Q
             complex(ki), intent(in) :: inner_mu2
@@ -83,7 +83,7 @@ contains
 
       interface
          pure function brack(inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), intent(in) :: inner_mu2
             complex(ki) :: brack
@@ -106,7 +106,7 @@ contains
 
       interface
          pure subroutine brack(inner_a, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(0:*), intent(inout) :: inner_co
@@ -126,7 +126,7 @@ contains
 
       interface
          pure subroutine brack(inner_a, inner_b, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -148,7 +148,7 @@ contains
 
       interface
          pure subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -173,7 +173,7 @@ contains
       interface
          pure subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
            & inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a0
             complex(ki), dimension(4), intent(in) :: inner_a1

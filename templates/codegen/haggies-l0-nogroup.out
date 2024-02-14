@@ -3,9 +3,9 @@
 	$][% output.file match=".*/(d\\d+h\\d+l0[fr5]*).f90" format ="%s"%]
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use [$ process_name asprefix=\_ $]config, only: ki
+   use config, only: ki
    [$ @if internal CUSTOM_SPIN2_PROP
-   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
+   $]use custompropagator[$ @end @if $]
 implicit none
 
    private
@@ -24,7 +24,7 @@ contains
    function     [% output.file
       match=".*/d(\\d+)h\\d+l0[fr5]*.f90" format ="diagram%s"
    %]() result(diagram)
-      use [$ process_name asprefix=\_ $]model
+      use model
       use [$ process_name asprefix=\_ $]kinematics
       use [$ process_name asprefix=\_ $]color
       implicit none
