@@ -922,8 +922,8 @@ def derive_coupling_names(conf):
    result = {}
 
    candidates = {
-         'QCD': ['gs', 'mdlG', 'mdlGG'],
-         'QED': ['e', 'mdlee', 'mdlEE']
+         'QCD': ['gs', 'mdlG', 'mdlGG', 'mdlGS'],
+         'QED': ['e', 'mdlee', 'mdlEE', 'mdlE']
    }
 
    model = getModel(conf)
