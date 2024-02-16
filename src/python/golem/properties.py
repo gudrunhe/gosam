@@ -1218,6 +1218,45 @@ all_mandelstam = Property("all_mandelstam",
    bool,
    False, experimental=True)
 
+flavour_groups = Property("flavour_groups",
+   """\
+   Defines which flavours should be considered equivalent, i.e. grouped
+   together during channel generation in olp mode. Only relevant if crossings
+   are generated. Uses pdg codes.
+
+   Examples:
+
+   flavour_groups=1:2:3:4:5
+   -> completely flavour blind process with five light quark-flavours
+
+   flavour_groups=1:3:5,2:4
+   -> distinguish up- and down-type quark-flavours
+
+   flavour_groups=
+   -> each flavour treated separately (default)
+   """,
+   list,
+   "", experimental=True)
+
+respect_generations = Property("respect_generations",
+   """\
+   Boolean determining whether or not the quark generation should be taken into
+   account when the flavour_groups feature is used to find crossing relations among
+   olp channels. Is relevant if flavour changing vertices appear (Assuming diagonal CKM!).
+
+   Examples:
+
+   respect_generations=False and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) and (u ub to s sb) are crossings of (u ub to d db)
+
+   respect_generations=True and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) is a crossing of (u ub to s sb) but not of (u ub to d db)
+
+   Default is respect_generations=False.
+   """,
+   bool,
+   False, experimental=True)
+
 properties = [
    process_name,
    process_path,
@@ -1311,7 +1350,10 @@ properties = [
    use_order_names,
    use_vertex_labels,
 
-   all_mandelstam
+   all_mandelstam,
+
+   flavour_groups,
+   respect_generations
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

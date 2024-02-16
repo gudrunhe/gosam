@@ -85,7 +85,17 @@ class KinematicsTemplate(golem.util.parser.Template):
          if ":" in crossing:
             pos = crossing.index(":")
             self._crossings.append(crossing[:pos].strip())
-            
+
+      self._flavour_groups = []
+      self._flavour_dict = {}
+      for i, fg in enumerate(conf.getProperty(golem.properties.flavour_groups)):
+         if fg=='':
+            break
+         for flv in list(map(int,fg.split(":"))):
+            self._flavour_dict[flv] = (i,"fg"+str(i))
+            self._flavour_dict[-flv] = (i,"fgbar"+str(i))
+         self._flavour_groups.append(list(map(int,fg.split(":"))))
+
       def get_qed_sign(pdg,sign):
          if (pdg>0 and pdg<20 and sign >0) or (pdg<0 and pdg>-20 and sign<0):
             qed_sign=1
@@ -453,6 +463,9 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(var_name, name)
          yield props
 
+   def return_PDG(self,p):
+      return p.getPDGCode()
+
    def crossing(self, *args, **opts):
       first_name = self._setup_name("first", "is_first", opts)
       last_name = self._setup_name("last", "is_last", opts)
@@ -463,44 +476,93 @@ class KinematicsTemplate(golem.util.parser.Template):
       initial = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.initial().split(",")]
       final = [str(golem.util.tools.interpret_particle_name(n, self._model)) for n in self.final().split(",")]
       field_info = self._field_info
+      flvgrps = self._flavour_groups
 
-      avail = set(range(1, len(field_info)+1))
-      mapping = {}
+      if flvgrps==[]:
+         use_flvgrps = False
+      else:
+         use_flvgrps = True
+         flvgrps_dict = self._flavour_dict
 
-      for i, field in enumerate(initial):
-         found = 0
-         for j in avail:
-            f, a, s = field_info[j-1]
-            if s == 1 and field == f:
-               found = j
-               break
-            elif s == -1 and field == a:
-               found = -j
-               break
-         if found != 0:
-            mapping[i+1] = found
-            avail.remove(abs(found))
-         else:
+      # Try to directly match the particle names first:
+      mapping, unmatched = self.find_mapping(field_info,initial,final)
+
+      # Any unmatched particles? -> check if we use flavour groups, otherwise exit with error
+      if len(unmatched)!=0:
+         if not use_flvgrps:
             raise golem.util.parser.TemplateError(
-                  "No valid crossing found (%d)." % (i+1))
-
-      l = len(initial)
-      for k, field in enumerate(final):
-         found = 0
-         for j in avail:
-            f, a, s = field_info[j-1]
-            if s == -1 and field == f:
-               found = j
-               break
-            elif s == 1 and field == a:
-               found = -j
-               break
-         if found != 0:
-            mapping[k+l+1] = found
-            avail.remove(abs(found))
+               "No valid crossing found (%s)." % ",".join(map(str,unmatched)))
          else:
-            raise golem.util.parser.TemplateError(
-                  "No valid crossing found (%d)." % (k+i+1))
+            # translate 'field_info' into flavour_groups, using k to distinguish different quarks form the same flavour group
+            k = [1 for _ in range(len(flvgrps))]
+            field_info_fg = [None for _ in range(len(field_info))]
+            skip = [False for _ in range(len(field_info))]
+            for i, fti in enumerate(field_info):
+               if skip[i]:
+                  continue
+               pdgf = self.return_PDG(golem.util.tools.interpret_particle_name(fti[0], self._model))
+               pdga = self.return_PDG(golem.util.tools.interpret_particle_name(fti[1], self._model))
+               if pdgf in flvgrps_dict and pdga in flvgrps_dict:
+                  fgf = flvgrps_dict[pdgf]
+                  fga = flvgrps_dict[pdga]
+                  s_fgf = fgf[1]+str(k[fgf[0]])
+                  s_fga = fga[1]+str(k[fgf[0]])
+                  k[fgf[0]] = k[fgf[0]]+1
+               else:
+                  fgf = str(pdgf)
+                  fga = str(pdga)
+               for j, ftj in enumerate(field_info):
+                  if skip[j]:
+                     continue
+                  if ftj[0]==fti[0] and ftj[1]==fti[1]:
+                     field_info_fg[j] = (fgf, fga, ftj[2])
+                     skip[j] = True
+                  elif ftj[1]==fti[0] and ftj[0]==fti[1]:
+                     field_info_fg[j] = (fga, fgf, ftj[2])
+                     skip[j] = True
+
+            # translate 'initial' and 'final' into flavour_groups, using k to distinguish different quarks form the same flavour group
+            k = [1 for _ in range(len(flvgrps))]
+            curr_chan = [(golem.util.tools.interpret_particle_name(p, self._model).getPDGCode() \
+               , golem.util.tools.interpret_particle_name(p, self._model).getPartnerPDGCode()) for p in initial+final]
+            initial_fg = [None for _ in range(len(initial))]
+            final_fg = [None for _ in range(len(final))]
+            skip = [False for _ in range(len(curr_chan))]
+            for i, fti in enumerate(curr_chan):
+               if skip[i]:
+                  continue
+               if fti[0] in flvgrps_dict and fti[1] in flvgrps_dict:
+                  fgf = flvgrps_dict[fti[0]]
+                  fga = flvgrps_dict[fti[1]]
+                  s_fgf = fgf[1]+str(k[fgf[0]])
+                  s_fga = fga[1]+str(k[fgf[0]])
+                  k[fgf[0]] = k[fgf[0]]+1
+               else:
+                  fgf = str(fti[0])
+                  fga = str(fti[1])
+               for j, ftj in enumerate(curr_chan):
+                  if skip[j]:
+                     continue
+                  if ftj[0]==fti[0]:
+                     if j<len(initial):
+                        initial_fg[j] = fgf
+                     else:
+                        final_fg[j-len(initial)] = fgf
+                     skip[j] = True
+                  elif ftj[1]==fti[0]:
+                     if j<len(initial):
+                        initial_fg[j] = fga
+                     else:
+                        final_fg[j-len(initial)] = fga
+                     skip[j] = True
+
+            # Try to match the flavour groups
+            mapping, unmatched = self.find_mapping(field_info_fg,initial_fg,final_fg)
+
+            # Still any unmatched particles? -> exit with error
+            if len(unmatched)!=0:
+               raise golem.util.parser.TemplateError(
+                  "No valid crossing found (%s)." % ",".join(map(str,unmatched)))
 
       props = golem.util.config.Properties()
 
@@ -520,6 +582,47 @@ class KinematicsTemplate(golem.util.parser.Template):
          props.setProperty(var_name, abs(old_vec))
          props.setProperty(sign_name, sign)
          yield props
+
+   def find_mapping(self,field_info,initial,final):
+      avail = set(range(1, len(field_info)+1))
+      mapping = {}
+      unmatched = []
+
+      for i, field in enumerate(initial):
+         found = 0
+         for j in avail:
+            f, a, s = field_info[j-1]
+            if s == 1 and field == f:
+               found = j
+               break
+            elif s == -1 and field == a:
+               found = -j
+               break
+         if found != 0:
+            mapping[i+1] = found
+            avail.remove(abs(found))
+         else:
+            unmatched.append((i,field))
+
+      l = len(initial)
+      for k, field in enumerate(final):
+         found = 0
+         for j in avail:
+            f, a, s = field_info[j-1]
+            if s == -1 and field == f:
+               found = j
+               break
+            elif s == 1 and field == a:
+               found = -j
+               break
+         if found != 0:
+            mapping[k+l+1] = found
+            avail.remove(abs(found))
+         else:
+            unmatched.append((i,field))
+
+      return(mapping,unmatched)
+
 
    def loqcd(self, *args, **opts):
       """

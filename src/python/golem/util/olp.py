@@ -128,12 +128,7 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    process_name = process_name.lower()
    originalkey = tuple(sorted(s_ini + s_fin))
 
-   if use_crossings:
-      key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
-
-   else:
-      key = tuple(s_ini + [p.getPartner() for p in p_fin])
-
+   key = get_sp_key(p_ini, p_fin, use_crossings, conf)
 
    if use_crossings:
       # look for existing compatible subprocesses
@@ -158,6 +153,86 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
       is_new = True
 
    return sp, is_new
+
+
+def get_sp_key(p_ini, p_fin, use_crossings, conf):
+   if use_crossings:
+      pflvgrps = conf.getProperty(golem.properties.flavour_groups)
+      if pflvgrps!=[] and pflvgrps!=['']:
+         # The following piece of code constructs the channel key respecting
+         # the given flavour groups/classes. Nested structure needed to deal
+         # with all the possible cases occuring for multiple quark lines.
+
+         # translate flavour_groups property into list of list -> flvgrps
+         # set up dictionary to translate pdg codes into flavour group identifiers -> flvgrps_dict
+         flvgrps = []
+         flvgrps_dict = {}
+         for i, fg in enumerate(pflvgrps):
+            if fg=='':
+               break
+            for flv in list(map(int,fg.split(":"))):
+               flvgrps_dict[flv] = (i,"fg"+str(i))
+               flvgrps_dict[-flv] = (i,"fgbar"+str(i))
+            flvgrps.append(list(map(int,fg.split(":"))))
+
+         # get pdg codes for channel, sort according to number of occurences (and value)
+         pdg_proc = [(p.getPDGCode(),p.getPartnerPDGCode()) for p in p_ini] \
+            + [(p.getPartnerPDGCode(),p.getPDGCode()) for p in p_fin]
+         pdg_proc.sort(key=lambda x: x[1])
+         pdg_proc.sort(key=lambda x: [p[0] for p in pdg_proc].count(x[1]))
+
+         # Whether or not to take the quark generation into account
+         generations = conf.getProperty(golem.properties.respect_generations)
+         gen_key = [0,0,0]
+
+         k = [1 for _ in range(len(pflvgrps))]
+         key_fg = [None for _ in range(len(pdg_proc))]
+         skip = [False for _ in range(len(pdg_proc))]
+         for i, pi in enumerate(pdg_proc):
+            if skip[i]:
+               continue
+            if pi[0] in flvgrps_dict and pi[1] in flvgrps_dict:
+               fgp = flvgrps_dict[pi[0]]
+               fga = flvgrps_dict[pi[1]]
+               s_fgp = fgp[1]+str(k[fgp[0]])
+               s_fga = fga[1]+str(k[fgp[0]])
+               k[fgp[0]] = k[fgp[0]]+1
+            else:
+               s_fgp = str(pi[0])
+               s_fga = str(pi[1])
+            for j, pj in enumerate(pdg_proc):
+               if skip[j]:
+                  continue
+               if pj[0]==pi[0]:
+                  key_fg[j] = s_fgp
+                  skip[j] = True
+               elif pj[0]==pi[1]:
+                  key_fg[j] = s_fga
+                  skip[j] = True
+               if i==0 and generations and pj[0] in flvgrps_dict and pj[1] in flvgrps_dict:
+                  if abs(pj[0])==1 or abs(pj[0])==2:
+                     gp = 1
+                  elif abs(pj[0])==3 or abs(pj[0])==4:
+                     gp = 2
+                  elif abs(pj[0])==5 or abs(pj[0])==6:
+                     gp = 3
+                  else:
+                     golem.util.tools.error("Particle pdg("+str(pj[0])+") does not belong to a known quark flavour generation!")
+                  gen_key[gp-1] = gen_key[gp-1]+1
+
+         # sort to catch cases like (u ub u ub -> s sb) <-> (c cb c cb -> d db)
+         # => Not the actual number of occurences per generation is important, but their relative distribution
+         gen_key.sort()
+         conf["gen_key"] = gen_key
+
+         key = tuple(sorted(key_fg))
+      else:
+         key = tuple(sorted(list(map(str,p_ini)) + [p.getPartner() for p in p_fin]))
+   else:
+      key = tuple(list(map(str,p_ini)) + [p.getPartner() for p in p_fin])
+
+   return key
+
 
 def is_config_compatible(conf1, conf2):
    """ Checks if a subprocess with conf2 can be a crossing of conf1 """
