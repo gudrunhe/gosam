@@ -102,6 +102,34 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
    process_name = process_name.lower()
    originalkey = tuple(sorted(s_ini + s_fin))
 
+   key = get_sp_key(p_ini, p_fin, use_crossings, conf)
+
+   if use_crossings:
+      # look for existing compatible subprocesses
+      for skey in subprocesses:
+       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf):
+         key = skey
+         break
+
+   if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
+      sp = subprocesses[key]
+      sp.addCrossing(id, process_name, p_ini, p_fin, conf)
+      is_new = False
+      adapt_config(subprocesses[key].conf,conf)
+   else:
+      i=0
+      # append digit to distinguish it from other subprocesses
+      while key in subprocesses:
+         key=key+(i,) if i==0 else key[:-1]+(i,)
+         i = i + 1
+      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
+      subprocesses[key] = sp
+      is_new = True
+
+   return sp, is_new
+
+
+def get_sp_key(p_ini, p_fin, use_crossings, conf):
    if use_crossings:
       pflvgrps = conf.getProperty(golem.properties.flavour_groups)
       if pflvgrps!=[] and pflvgrps!=['']:
@@ -173,33 +201,12 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
 
          key = tuple(sorted(key_fg))
       else:
-         key = tuple(sorted(s_ini + [p.getPartner() for p in p_fin]))
+         key = tuple(sorted(list(map(str,p_ini)) + [p.getPartner() for p in p_fin]))
    else:
-      key = tuple(s_ini + [p.getPartner() for p in p_fin])
+      key = tuple(list(map(str,p_ini)) + [p.getPartner() for p in p_fin])
 
-   if use_crossings:
-      # look for existing compatible subprocesses
-      for skey in subprocesses:
-       if skey[:len(key)]==key and is_config_compatible(subprocesses[skey].conf,conf):
-         key = skey
-         break
+   return key
 
-   if key in subprocesses and use_crossings and is_config_compatible(subprocesses[key].conf,conf):
-      sp = subprocesses[key]
-      sp.addCrossing(id, process_name, p_ini, p_fin, conf)
-      is_new = False
-      adapt_config(subprocesses[key].conf,conf)
-   else:
-      i=0
-      # append digit to distinguish it from other subprocesses
-      while key in subprocesses:
-         key=key+(i,) if i==0 else key[:-1]+(i,)
-         i = i + 1
-      sp = OLPSubprocess(id, process_name, process_name, p_ini, p_fin, originalkey, conf)
-      subprocesses[key] = sp
-      is_new = True
-
-   return sp, is_new
 
 def is_config_compatible(conf1, conf2):
    """ Checks if a subprocess with conf2 can be a crossing of conf1 """
