@@ -142,6 +142,28 @@ class OLPTemplate(golem.util.parser.Template):
 
 			yield props
 
+	def starting_choice(self, *args, ** opts):
+		if self.e_not_one(args,opts):
+			if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+				return '2'
+			else:
+				return golem.model.MODEL_OPTIONS["users_choice"]
+		else:
+			if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+				return '2'
+			else:
+				return golem.model.MODEL_OPTIONS["users_choice"]
+
+
+	def e_not_one(self, *args, ** opts):
+		ones = golem.model.MODEL_ONES
+		if "e" in ones:
+			e_not_one = False
+		else:
+			e_not_one = True
+		return e_not_one
+
+
 	def flags_filter(self, *args, **opts):
 		assert args == ("$_",)
 		flags=self._stack[-1]["$_"]
