@@ -6,6 +6,7 @@
 '%]module     [% process_name asprefix=\_ %]kinematics
    use config, only: ki
    use model
+   use SpinorBrackets
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    save
@@ -37,16 +38,17 @@
    %]real(ki), public :: [%symbol%]
    [% @end @for mandelstam %][%
 @for pairs ordered distinct %]
-   complex(ki), public :: spa[%
+   type(Spaa), public :: spa[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
-            %], spb[% 
+            %]
+   type(Spbb), public :: spb[%
                  @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][%
 @end @for %][% 
 @for pairs distinct %]
-   complex(ki), dimension(4), public :: spva[%
+   type(Spab3_vec), public :: spva[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %][% 
@@ -124,7 +126,7 @@
       module procedure Spab3_complex
       module procedure Spab3_mcfm
       module procedure Spab3_mcfmc
-      module procedure Spab3_vec
+      module procedure Spab3_vec_direct
    end interface
 
    interface Spba3
@@ -138,7 +140,7 @@
       module procedure e_real_idx
    end interface
 
-   public :: Spaa, Spbb, Spab3, Spba3, dotproduct, epstensor
+   public :: Spab3, Spba3, dotproduct, epstensor
    public :: inspect_kinematics, init_event
    public :: adjust_kinematics
    public :: boost_to_cms
@@ -771,14 +773,49 @@ contains
       end if
    end  subroutine light_cone_splitting_alg
 !---#] subroutine light_cone_splitting_alg:
-!---#[ function Spbb:
-   pure function Spbb(p, q)
-      implicit none
-      real(ki), dimension(4), intent(in) :: p, q
-      complex(ki) :: Spbb
-      Spbb = sign(1.0_ki, dotproduct(p, q)) * conjg(Spaa(q, p))
-   end  function Spbb
-!---#] function Spbb:
+!---#[ function Spab3_vec_direct
+   pure function Spab3_vec_direct(k1, k2)
+         implicit none
+         complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+
+         real(ki), dimension(0:3), intent(in) :: k1, k2
+         complex(ki), dimension(0:3) :: Spab3_vec_direct
+
+         real(ki) :: kp, km
+         complex(ki) :: kr, kl
+         complex(ki) :: pr1, pr2, pl1, pl2
+         complex(ki) :: f1, f2
+         real(ki) :: flip1, flip2, rt1, rt2
+
+         !-----positive energy case
+         if (k1(0) .gt. 0.0_ki) then
+            flip1=1.0_ki
+            f1=1.0_ki
+         else
+            flip1=-1.0_ki
+            f1=(0.0_ki, 1.0_ki)
+         endif
+         rt1=sqrt(flip1*(k1(0)+k1(1)))
+         pr1=cmplx(flip1*k1(3),-flip1*k1(2), ki)
+         pl1=conjg(pr1)
+
+         if (k2(0) .gt. 0.0_ki) then
+            flip2=1.0_ki
+            f2=1.0_ki
+         else
+            flip2=-1.0_ki
+            f2=(0.0_ki, 1.0_ki)
+         endif
+         rt2=sqrt(flip2*(k2(0)+k2(1)))
+         pr2=cmplx(flip2*k2(3),-flip2*k2(2), ki)
+         pl2=conjg(pr2)
+
+         Spab3_vec_direct(0) = f1*f2*(pr1*pl2/rt1/rt2 + rt1*rt2)
+         Spab3_vec_direct(1) = f1*f2*(rt1*rt2 - pr1*pl2/rt1/rt2)
+         Spab3_vec_direct(2) = i_*f1*f2*(pr1*rt2/rt1 - rt1*pl2/rt2)
+         Spab3_vec_direct(3) = f1*f2*(pr1*rt2/rt1 + rt1*pl2/rt2)
+      end  function Spab3_vec_direct
+!---+] function Spab3_vec_direct
 !---#[ function Spab3_complex:
    pure function Spab3_complex(k1, Q, k2)
       implicit none
@@ -797,121 +834,6 @@ contains
                   & + i_ * Spab3_mcfm(k1, J, k2)
    end  function Spab3_complex
 !---#] function Spab3_complex:
-!---#[ function Spab3_vec:
-   subroutine Spab3_vec_ffi(k1, k2, res_re, res_im) bind(C,name="[% process_name %]_Spab3_vec")
-      use, intrinsic :: iso_c_binding
-      real(kind=c_double), dimension(4), intent(in) :: k1, k2
-      real(kind=c_double), dimension(4), intent(out) :: res_re, res_im
-      complex(kind=c_double_complex), dimension(4) :: res
-      res = Spab3_vec(real(k1, ki), real(k2, ki))
-      res_re = res%re
-      res_im = res%im
-   end subroutine
-   pure function Spab3_vec(k1, k2)
-      implicit none
-      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-
-      real(ki), dimension(0:3), intent(in) :: k1, k2
-      complex(ki), dimension(0:3) :: Spab3_vec
-
-      real(ki) :: kp, km
-      complex(ki) :: kr, kl
-      complex(ki) :: pr1, pr2, pl1, pl2
-      complex(ki) :: f1, f2
-      real(ki) :: flip1, flip2, rt1, rt2
-
-      !-----positive energy case
-      if (k1(0) .gt. 0.0_ki) then
-         flip1=1.0_ki
-         f1=1.0_ki
-      else
-         flip1=-1.0_ki
-         f1=(0.0_ki, 1.0_ki)
-      endif
-      rt1=sqrt(flip1*(k1(0)+k1(1)))
-      pr1=cmplx(flip1*k1(3),-flip1*k1(2), ki)
-      pl1=conjg(pr1)
-
-      if (k2(0) .gt. 0.0_ki) then
-         flip2=1.0_ki
-         f2=1.0_ki
-      else
-         flip2=-1.0_ki
-         f2=(0.0_ki, 1.0_ki)
-      endif
-      rt2=sqrt(flip2*(k2(0)+k2(1)))
-      pr2=cmplx(flip2*k2(3),-flip2*k2(2), ki)
-      pl2=conjg(pr2)
-
-      Spab3_vec(0) = f1*f2*(pr1*pl2/rt1/rt2 + rt1*rt2)
-      Spab3_vec(1) = f1*f2*(rt1*rt2 - pr1*pl2/rt1/rt2)
-      Spab3_vec(2) = i_*f1*f2*(pr1*rt2/rt1 - rt1*pl2/rt2)
-      Spab3_vec(3) = f1*f2*(pr1*rt2/rt1 + rt1*pl2/rt2)
-   end  function Spab3_vec
-!---#] function Spab3_vec:
-!---#[ function Spab3_vec_old:
-   subroutine Spab3_vec_old_ffi(k1, k2, res_re, res_im) bind(C,name="[% process_name %]_Spab3_vec_old")
-      use, intrinsic :: iso_c_binding
-      real(kind=c_double), dimension(4), intent(in) :: k1, k2
-      real(kind=c_double), dimension(4), intent(out) :: res_re, res_im
-      complex(kind=c_double_complex), dimension(4) :: res
-      res = Spab3_vec_old(real(k1, ki), real(k2, ki))
-      res_re = res%re
-      res_im = res%im
-   end subroutine
-   pure function Spab3_vec_old(k1, k2)
-      implicit none
-      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-
-      real(ki), dimension(4), intent(in) :: k1, k2
-      complex(ki), dimension(0:3) :: Spab3_vec_old
-
-      Spab3_vec_old(0) =   Spab3_mcfm(k1, &
-         & (/1.0_ki, 0.0_ki, 0.0_ki, 0.0_ki/), k2)
-      Spab3_vec_old(1) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 1.0_ki, 0.0_ki, 0.0_ki/), k2)
-      Spab3_vec_old(2) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 0.0_ki, 1.0_ki, 0.0_ki/), k2)
-      Spab3_vec_old(3) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 0.0_ki, 0.0_ki, 1.0_ki/), k2)
-   end  function Spab3_vec_old
-!---#] function Spab3_vec_old:
-!---#[ function Spaa:
-   pure function Spaa(k1, k2)
-      ! This routine has been copied from mcfm and adapted to our setup
-      implicit none
-      real(ki), dimension(0:3), intent(in) :: k1, k2
-      complex(ki) :: Spaa
-
-      real(ki) :: rt1, rt2
-      complex(ki) :: c231, c232, f1, f2
-!---if one of the vectors happens to be zero this routine fails.
-!-----positive energy case
-         if (k1(0) .gt. 0.0_ki) then
-            rt1=sqrt(k1(0)+k1(1))
-            c231=cmplx(k1(3),-k1(2), ki)
-            f1=1.0_ki
-         else
-!-----negative energy case
-            rt1=sqrt(-k1(0)-k1(1))
-            c231=cmplx(-k1(3),k1(2), ki)
-            f1=(0.0_ki, 1.0_ki)
-         endif
-!-----positive energy case
-         if (k2(0) .gt. 0.0_ki) then
-            rt2=sqrt(k2(0)+k2(1))
-            c232=cmplx(k2(3),-k2(2), ki)
-            f2=1.0_ki
-         else
-!-----negative energy case
-            rt2=sqrt(-k2(0)-k2(1))
-            c232=cmplx(-k2(3),k2(2), ki)
-            f2=(0.0_ki, 1.0_ki)
-         endif
-
-         Spaa = -f2*f1*(c232*rt1/rt2-c231*rt2/rt1)
-   end  function Spaa
-!---#] function Spaa:
 !---#[ function Spab3_mcfm:
    pure function Spab3_mcfm(k1, Q, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -1232,7 +1154,7 @@ contains
    end subroutine lorentz_boost
    !---#] subroutine lorentz_boost :
    !---#[ function epsi0 :
-   pure function epsi0(k, q, s) result(eps)
+   function epsi0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1241,16 +1163,16 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf * Spab3(q,k) / Spaa(q,k)
+         eps = sqrthalf / Spaa(q,k) * Spab3(q,k)
       case(-1)
-         eps = sqrthalf * Spab3(k,q) / Spbb(k,q)
+         eps = sqrthalf / Spbb(k,q) * Spab3(k,q)
       case default
          eps(:) = (0.0_ki,0.0_ki)
       end select
    end  function epsi0
    !---#] function epsi0 :
    !---#[ function epso0 :
-   pure function epso0(k, q, s) result(eps)
+   function epso0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1261,7 +1183,7 @@ contains
    end  function epso0
    !---#] function epso0 :
    !---#[ function epsim :
-   pure function epsim(k, q, m, s) result(eps)
+   function epsim(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s
@@ -1274,9 +1196,9 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf * Spab3(q,l) / Spaa(q,l)
+         eps = sqrthalf / Spaa(q,l) * Spab3(q,l)
       case(-1)
-         eps = sqrthalf * Spab3(l,q) / Spbb(l,q)
+         eps = sqrthalf / Spbb(l,q) * Spab3(l,q)
       case(0)
          eps = (l+l-k)/m
       case default
@@ -1285,7 +1207,7 @@ contains
    end  function epsim
    !---#] function epsim :
    !---#[ function epsom :
-   pure function epsom(k, q, m, s) result(eps)
+   function epsom(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s

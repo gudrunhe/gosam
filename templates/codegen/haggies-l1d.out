@@ -80,6 +80,7 @@ contains[%
       @end @select $]) result(brack)
       use model
       use [$ process_name asprefix=\_ $]kinematics
+      use SpinorBrackets
       use [$ process_name asprefix=\_ $]color
       use [$ process_name asprefix=\_ $]abbrev[%
       @with args %][$

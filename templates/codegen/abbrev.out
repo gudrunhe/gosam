@@ -35,6 +35,7 @@ contains
       use config, only: deltaOS, &
      &    logfile, debug_nlo_diagrams
       use [$ process_name asprefix=\_ $]kinematics
+      use SpinorBrackets
       use model
       use [$ process_name asprefix=\_ $]color, only: TR
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
@@ -74,6 +75,7 @@ contains
    subroutine     init_abbrev_cont[% bp %]()
       use config, only: deltaOS
       use [$ process_name asprefix=\_ $]kinematics
+      use SpinorBrackets
       use model
       use [$ process_name asprefix=\_ $]color, only: TR
       implicit none[%
