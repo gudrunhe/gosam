@@ -134,7 +134,7 @@ if (int(rank)>=int(loopsize)+1):
 
 for lidx in range(0,n_t_terms):
     f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
-    f90file.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+    f90file.write('   subroutine brack_{0}(ninjaA0,'.format(lidx)
                   + extra_arg + ' brack)\n')
     f90file.write('      use model \n')
     f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
@@ -235,7 +235,7 @@ if (int(rank)>=int(loopsize)+1):
 
 for lidx in range(0,n_t_terms):
     f90file_qp.write('!---#[ subroutine brack_%s: \n' % lidx)
-    f90file_qp.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+    f90file_qp.write('   subroutine brack_{0}(ninjaA0,'.format(lidx)
                   + extra_arg + ' brack)\n')
     f90file_qp.write('      use model_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')

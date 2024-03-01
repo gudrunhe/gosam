@@ -130,7 +130,7 @@ f90file.write(' \n')
 f90file.write('contains \n')
 for irank in range(1,rank+2):
 	f90file.write('!---#[ function brack_%s: \n' % irank)
-	f90file.write('   pure function brack_%s(Q' % irank[%
+	f90file.write('   function brack_%s(Q' % irank[%
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')
@@ -547,7 +547,7 @@ f90file_qp.write(' \n')
 f90file_qp.write('contains \n')
 for irank in range(1,rank+2):
 	f90file_qp.write('!---#[ function brack_%s: \n' % irank)
-	f90file_qp.write('   pure function brack_%s(Q' % irank[%
+	f90file_qp.write('   function brack_%s(Q' % irank[%
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')

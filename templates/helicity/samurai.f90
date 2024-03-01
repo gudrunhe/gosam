@@ -170,6 +170,7 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
       & samurai_verbosity, samurai_istop, samurai_test, &
       & debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics
+   use SpinorBrackets
    use model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]

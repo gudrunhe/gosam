@@ -14,6 +14,8 @@ contains
    function amplitude()
       use model_qp
       use [% process_name asprefix=\_ %]kinematics_qp
+      use SpinorBrackets
+      end function amplitude
       use [% process_name asprefix=\_ %]color_qp
       use config, only: debug_lo_diagrams, &
         & use_sorted_sum

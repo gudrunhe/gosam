@@ -18,6 +18,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use iso_c_binding, only: c_ptr, c_loc, c_int
    use ninjago_module
    use [% process_name asprefix=\_ %]kinematics
+   use SpinorBrackets
    use model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]

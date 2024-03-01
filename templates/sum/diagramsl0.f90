@@ -14,6 +14,8 @@ contains
    function amplitude()
       use model
       use [% process_name asprefix=\_ %]kinematics
+      use SpinorBrackets
+      end function amplitude
       use [% process_name asprefix=\_ %]color
       use config, only: debug_lo_diagrams, &
         & use_sorted_sum

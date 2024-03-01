@@ -133,7 +133,7 @@ f90file.write('contains \n')
 for lidx in expids:
     f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
     # T.P. removed the explicit-implicit mu^2 stuff
-    f90file.write('   pure subroutine brack_%s(ninjaA, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
+    f90file.write('   subroutine brack_%s(ninjaA, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
     f90file.write('      use model \n')
     f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
     f90file.write('      use SpinorBrackets \n')
@@ -225,7 +225,7 @@ f90file_qp.write('contains \n')
 for lidx in expids:
     f90file_qp.write('!---#[ subroutine brack_%s: \n' % lidx)
     # T.P. removed the explicit-implicit mu^2 stuff
-    f90file_qp.write('   pure subroutine brack_%s(ninjaA, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
+    f90file_qp.write('   subroutine brack_%s(ninjaA, ninjaE3, ninjaE4, ninjaP, brack)\n' % lidx)
     f90file_qp.write('      use model_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
     f90file_qp.write('      use SpinorBrackets \n')
