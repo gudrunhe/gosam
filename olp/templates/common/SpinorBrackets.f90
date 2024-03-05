@@ -365,10 +365,10 @@ contains
     function Spab3_vec_get(self) result(res)
         implicit none
         class(Spab3_vec) :: self
-        complex(ki_sp), dimension(4) :: res
+        complex(ki_sp), dimension(0:3) :: res
         if (self%needs_evaluation) then
             call self%evaluate()
-            self%needs_evaluation = .true.
+            self%needs_evaluation = .false.
         end if
         res = self%value
     end function Spab3_vec_get
@@ -380,9 +380,9 @@ contains
         integer :: i
         if (self%needs_evaluation) then
             call self%evaluate()
-            self%needs_evaluation = .true.
+            self%needs_evaluation = .false.
         end if
-        res = self%value(i)
+        res = self%value(i-1)
     end function Spab3_vec_geti
 
     subroutine Spab3_vec_evaluate(self)
@@ -428,7 +428,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         real(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: mult_Sp3vec_real
+        complex(ki_sp), dimension(0:3) :: mult_Sp3vec_real
         mult_Sp3vec_real = sp%get() * r
     end function
 
@@ -436,7 +436,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         real(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: mult_real_Sp3vec
+        complex(ki_sp), dimension(0:3) :: mult_real_Sp3vec
         mult_real_Sp3vec = sp%get() * r
     end function
 
@@ -444,7 +444,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         complex(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: mult_Sp3vec_complex
+        complex(ki_sp), dimension(0:3) :: mult_Sp3vec_complex
         mult_Sp3vec_complex = sp%get() * r
     end function
 
@@ -452,7 +452,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         complex(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: mult_complex_Sp3vec
+        complex(ki_sp), dimension(0:3) :: mult_complex_Sp3vec
         mult_complex_Sp3vec = sp%get() * r
     end function
 
@@ -460,7 +460,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         real(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: div_Sp3vec_real
+        complex(ki_sp), dimension(0:3) :: div_Sp3vec_real
         div_Sp3vec_real = sp%get() / r
     end function
 
@@ -468,7 +468,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: sp
         complex(ki_sp), intent(in) :: r
-        complex(ki_sp), dimension(4) :: div_Sp3vec_complex
+        complex(ki_sp), dimension(0:3) :: div_Sp3vec_complex
         div_Sp3vec_complex = sp%get() / r
     end function
 
@@ -476,7 +476,7 @@ contains
         implicit none
         class(Spab3_vec), intent(in) :: spvec
         class(SpinorBracket), intent(in) :: sp
-        complex(ki_sp), dimension(4) :: div_Sp3vec_Sp
+        complex(ki_sp), dimension(0:3) :: div_Sp3vec_Sp
         div_Sp3vec_Sp = spvec%get() / sp%get()
     end function
 

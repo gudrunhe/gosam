@@ -140,7 +140,7 @@
       module procedure e_real_idx
    end interface
 
-   public :: Spab3, Spba3, dotproduct, epstensor
+   public :: Spaa_direct, Spbb_direct, Spab3, Spba3, dotproduct, epstensor
    public :: inspect_kinematics, init_event
    public :: adjust_kinematics
    public :: boost_to_cms
@@ -773,6 +773,76 @@ contains
       end if
    end  subroutine light_cone_splitting_alg
 !---#] subroutine light_cone_splitting_alg:
+!---#[ function Spaa_direct
+   pure function Spaa_direct(k1, k2)
+      ! This routine has been copied from mcfm and adapted to our setup
+      implicit none
+      real(ki), dimension(0:3), intent(in) :: k1, k2
+      complex(ki) :: Spaa_direct
+
+      real(ki) :: rt1, rt2
+      complex(ki) :: c231, c232, f1, f2
+!---if one of the vectors happens to be zero this routine fails.
+!-----positive energy case
+         if (k1(0) .gt. 0.0_ki) then
+            rt1=sqrt(k1(0)+k1(1))
+            c231=cmplx(k1(3),-k1(2), ki)
+            f1=1.0_ki
+         else
+!-----negative energy case
+            rt1=sqrt(-k1(0)-k1(1))
+            c231=cmplx(-k1(3),k1(2), ki)
+            f1=(0.0_ki, 1.0_ki)
+         endif
+!-----positive energy case
+         if (k2(0) .gt. 0.0_ki) then
+            rt2=sqrt(k2(0)+k2(1))
+            c232=cmplx(k2(3),-k2(2), ki)
+            f2=1.0_ki
+         else
+!-----negative energy case
+            rt2=sqrt(-k2(0)-k2(1))
+            c232=cmplx(-k2(3),k2(2), ki)
+            f2=(0.0_ki, 1.0_ki)
+         endif
+
+         Spaa_direct = -f2*f1*(c232*rt1/rt2-c231*rt2/rt1)
+   end  function Spaa_direct
+!---#] function Spaa_direct
+!---#[ function Spbb_direct
+   pure function Spbb_direct(k1, k2)
+    implicit none
+    real(ki_sp), dimension(0:3), intent(in) :: k1, k2
+    real(ki_sp) :: rt1, rt2
+    complex(ki_sp) :: c231, c232, f1, f2
+    complex(ki) :: Spbb_direct
+    !---if one of the vectors happens to be zero this routine fails.
+    !-----positive energy case
+        if (k1(0) .gt. 0.0_ki_sp) then
+            rt1=sqrt(k1(0)+k1(1))
+            c231=cmplx(k1(3),-k1(2), ki_sp)
+            f1=1.0_ki_sp
+        else
+    !-----negative energy case
+            rt1=sqrt(-k1(0)-k1(1))
+            c231=cmplx(-k1(3),k1(2), ki_sp)
+            f1=(0.0_ki_sp, 1.0_ki_sp)
+        endif
+    !-----positive energy case
+        if (k2(0) .gt. 0.0_ki_sp) then
+            rt2=sqrt(k2(0)+k2(1))
+            c232=cmplx(k2(3),-k2(2), ki_sp)
+            f2=1.0_ki_sp
+        else
+    !-----negative energy case
+            rt2=sqrt(-k2(0)-k2(1))
+            c232=cmplx(-k2(3),k2(2), ki_sp)
+            f2=(0.0_ki_sp, 1.0_ki_sp)
+        endif
+        Spbb_direct = sign(1.0_ki_sp, k1(0)*k2(0) - k1(1)*k2(1) - k1(2)*k2(2) - k1(3)*k2(3)) &
+        & * conjg(-f2*f1*(c231*rt2/rt1-c232*rt1/rt2))
+    end function Spbb_direct
+!---#] function Spbb_direct
 !---#[ function Spab3_vec_direct
    pure function Spab3_vec_direct(k1, k2)
          implicit none
@@ -810,10 +880,10 @@ contains
          pr2=cmplx(flip2*k2(3),-flip2*k2(2), ki)
          pl2=conjg(pr2)
 
-         Spab3_vec_direct(0) = f1*f2*(pr1*pl2/rt1/rt2 + rt1*rt2)
-         Spab3_vec_direct(1) = f1*f2*(rt1*rt2 - pr1*pl2/rt1/rt2)
-         Spab3_vec_direct(2) = i_*f1*f2*(pr1*rt2/rt1 - rt1*pl2/rt2)
-         Spab3_vec_direct(3) = f1*f2*(pr1*rt2/rt1 + rt1*pl2/rt2)
+         Spab3_vec_direct(0) = f1*f2*((pr1/rt1)*(pl2/rt2) + rt1*rt2)
+         Spab3_vec_direct(1) = f1*f2*(rt1*rt2 - (pr1/rt1)*(pl2/rt2))
+         Spab3_vec_direct(2) = i_*f1*f2*((pr1/rt1)*rt2 - rt1*(pl2/rt2))
+         Spab3_vec_direct(3) = f1*f2*((pr1/rt1)*rt2 + rt1*(pl2/rt2))
       end  function Spab3_vec_direct
 !---+] function Spab3_vec_direct
 !---#[ function Spab3_complex:
@@ -1154,7 +1224,7 @@ contains
    end subroutine lorentz_boost
    !---#] subroutine lorentz_boost :
    !---#[ function epsi0 :
-   function epsi0(k, q, s) result(eps)
+   pure function epsi0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1163,16 +1233,16 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf / Spaa(q,k) * Spab3(q,k)
+         eps = sqrthalf * Spab3(q,k) / Spaa_direct(q,k)
       case(-1)
-         eps = sqrthalf / Spbb(k,q) * Spab3(k,q)
+         eps = sqrthalf * Spab3(k,q) / Spbb_direct(k,q)
       case default
          eps(:) = (0.0_ki,0.0_ki)
       end select
    end  function epsi0
    !---#] function epsi0 :
    !---#[ function epso0 :
-   function epso0(k, q, s) result(eps)
+   pure function epso0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1183,7 +1253,7 @@ contains
    end  function epso0
    !---#] function epso0 :
    !---#[ function epsim :
-   function epsim(k, q, m, s) result(eps)
+   pure function epsim(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s
@@ -1196,9 +1266,9 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf / Spaa(q,l) * Spab3(q,l)
+         eps = sqrthalf * Spab3(q,l) / Spaa_direct(q,l)
       case(-1)
-         eps = sqrthalf / Spbb(l,q) * Spab3(l,q)
+         eps = sqrthalf * Spab3(l,q) / Spbb_direct(l,q)
       case(0)
          eps = (l+l-k)/m
       case default
@@ -1207,7 +1277,7 @@ contains
    end  function epsim
    !---#] function epsim :
    !---#[ function epsom :
-   function epsom(k, q, m, s) result(eps)
+   pure function epsom(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s
