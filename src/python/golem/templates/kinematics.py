@@ -64,6 +64,8 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._latex = []
       self._helicity_stack = []
       self._mapping_stack = []
+      self._current_helicity_list_stack = []
+      self._current_mapping_list_stack = []
       self._color_stack = []
       self._cs_stack = []
       self._cs_line_stack = []
@@ -824,6 +826,27 @@ class KinematicsTemplate(golem.util.parser.Template):
                props.setProperty(helicity_name,
                   "[%% ' ERROR: %s not defined for this particle. ' %%]"
                   % helicity_name)
+         elif len(self._current_helicity_list_stack) > 0:
+            sym = golem.algorithms.helicity.heli_to_symbol
+            symbol_plus = self._setup_name("symbol_plus", sym[+1], opts)
+            symbol_minus = self._setup_name("symbol_minus", sym[-1], opts)
+            symbol_plus2 = self._setup_name("symbol_plus2", sym[+2], opts)
+            symbol_minus2 = self._setup_name("symbol_minus2", sym[-2], opts)
+            symbol_zero = self._setup_name("symbol_zero", sym[0], opts)
+            symbols = {
+               -2: symbol_minus2,
+               -1: symbol_minus,
+               0: symbol_zero,
+               +1: symbol_plus,
+               +2: symbol_plus2
+            }
+            encoded_h = golem.util.tools.encode_helicity(self._current_helicity_list_stack[-1][0][1], symbols)
+            if index in encoded_h:
+               props.setProperty(helicity_name, encoded_h[index])
+            else:
+               props.setProperty(helicity_name,
+                  "[%% ' ERROR: %s not defined for this particle. ' %%]"
+                  % helicity_name)
 
          if index in self._references:
             refk = self._references[index]
@@ -1525,7 +1548,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       if len(self._mapping_stack) == 0:
          raise golem.util.parser.TemplateError(
                " [% @for helicity_mapping %] " +
-               "must be inside [% @for helicities %].")
+               "must be inside [% @for helicities %] or [% @for unique_helicity_mappings %].")
 
       prefix = self._setup_name("prefix", "", opts)
       first_name = self._setup_name("first", prefix + "is_first", opts)
@@ -1698,6 +1721,141 @@ class KinematicsTemplate(golem.util.parser.Template):
             self._mapping_stack.pop()
             self._helicity_stack.pop()
          i += 1
+
+   def unique_helicity_mappings(self, *args, **opts):
+      """
+      Enumerates all unique helicity mappings for the current helicity list.
+      """
+      props = Properties()
+      lightlike_vector_indices = [i for i in range(len(self._lightlike))
+                                 if self._lightlike[i] and (self._twospin[i] == 2 or self._twospin[i] == -2)]
+      unique_mappings = []
+      for i, mapping in enumerate(self._helicity_map):
+         lightlike_vector_helicities = [self._helicity_comb[i][k] for k in lightlike_vector_indices]
+         if (lightlike_vector_helicities, mapping[1]) not in unique_mappings:
+            unique_mappings.append((lightlike_vector_helicities, mapping[1]))
+
+      for lv_helicities, mapping in unique_mappings:
+         current_helicities = []
+         current_mappings = []
+         for i in range(len(self._helicity_comb)):
+            if (self._helicity_map[i][1] == mapping and
+                all(self._helicity_comb[i][lightlike_vector_indices[k]] == lv_helicities[k]
+                    for k in range(len(lv_helicities)))):
+               current_helicities.append((i, self._helicity_comb[i]))
+               current_mappings.append(self._helicity_map[i])
+
+         self._mapping_stack.append(mapping)
+         self._current_helicity_list_stack.append(current_helicities)
+         self._current_mapping_list_stack.append(current_mappings)
+         yield props
+         self._mapping_stack.pop()
+         self._current_helicity_list_stack.pop()
+         self._current_mapping_list_stack.pop()
+
+   def current_helicities(self, *args, **opts):
+      """
+      Enumerates all helicities with the current helicity mapping. See 'helicities' for details.
+      """
+
+      if len(self._current_helicity_list_stack) == 0:
+         raise golem.util.parser.TemplateError(
+               " [% @for current_helicities %] " +
+               "must be inside [% @for unique_helicity_mappings %].")
+
+      sym = golem.algorithms.helicity.heli_to_symbol
+      symbol_plus   = self._setup_name("symbol_plus",   sym[+1], opts)
+      symbol_minus  = self._setup_name("symbol_minus",  sym[-1], opts)
+      symbol_plus2  = self._setup_name("symbol_plus2",  sym[+2], opts)
+      symbol_minus2 = self._setup_name("symbol_minus2", sym[-2], opts)
+      symbol_zero   = self._setup_name("symbol_zero",   sym[ 0], opts)
+      base = int(self._setup_name("base", "0", opts))
+      prefix   = self._setup_name("prefix",   "", opts)
+      var_name = self._setup_name("var", prefix + "helicity", opts)
+      first_name = self._setup_name("first", prefix + "is_first", opts)
+      last_name = self._setup_name("last", prefix + "is_last", opts)
+      generated_name = self._setup_name("is_generated",
+            prefix + "generated", opts)
+      map_index = self._setup_name("map.index", prefix + "map.index", opts)
+      map_perm = self._setup_name("map.permutation", prefix + "map.permutation", opts)
+      map_gauge_set = self._setup_name("map.gauge_set", prefix + "map.gauge_set", opts)
+
+
+      largs = [a.lower() for a in args]
+
+      generated_only = "generated" in largs
+
+      symbols = {
+               -2: symbol_minus2,
+               -1: symbol_minus,
+                0: symbol_zero,
+               +1: symbol_plus,
+               +2: symbol_plus2
+            }
+
+      isymbols = {}
+      for s,v in list(symbols.items()):
+         isymbols[v] = s
+
+      isymbols.setdefault(100)
+
+      pfilter = {}
+
+      if "where" in opts:
+         and_list = opts["where"].split(",")
+         for s_expr in and_list:
+            tokens = s_expr.split(".")
+
+            where_name = tokens[0]
+            where_index = self._eval_int(where_name)-1
+            where_op = tokens[1]
+            where_val = isymbols[tokens[2]]
+            if where_op == "eq":
+               pfilter[where_index] = [where_val]
+            elif where_op == "ne":
+               pfilter[where_index] = list(range(-100,where_val)) + \
+                     list(range(where_val+1,100))
+            elif where_op == "le":
+               pfilter[where_index] = list(range(-100,where_val+1))
+            elif where_op == "ge":
+               pfilter[where_index] = list(range(where_val,100))
+            elif where_op == "lt":
+               pfilter[where_index] = list(range(-100,where_val))
+            elif where_op == "gt":
+               pfilter[where_index] = list(range(where_val+1,100))
+            else:
+               pfilter[where_index] = []
+
+      props = Properties()
+      l = len(self._helicity_comb)
+      for h, mapping in zip(self._current_helicity_list_stack[-1], self._current_mapping_list_stack[-1]):
+         gi, _, color_basis, permutation, gauge_set = mapping
+         is_generated = (h[0] - base == gi)
+
+         if generated_only and not is_generated:
+            continue
+
+         helicity = golem.util.tools.encode_helicity(h[1], symbols)
+         skip = False
+         for idx, sym in list(helicity.items()):
+            if idx in pfilter:
+               isym = isymbols[sym]
+               if isym not in pfilter[idx]:
+                  skip = True
+                  break
+         if not skip:
+            props.setProperty(first_name, h[0] == base)
+            props.setProperty(last_name, h[0]-base >= l-1)
+            props.setProperty(var_name, h[0])
+            props.setProperty(generated_name, is_generated)
+            props.setProperty(map_index, gi+base)
+            props.setProperty(map_perm, permutation.cycles(1))
+            props.setProperty(map_gauge_set, gauge_set)
+            self._helicity_stack.append(helicity)
+            self._color_stack.append(color_basis)
+            yield props
+            self._color_stack.pop()
+            self._helicity_stack.pop()
          
    def modified_helicity(self, *args, **opts):
       if (len(self._helicity_stack) > 0) and \

@@ -103,7 +103,7 @@ contains
    end subroutine samplitude
 
    function     samplitudel0(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel0
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel0, orig_func_h => samplitudel0_h
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
@@ -113,7 +113,7 @@ contains
       call twist_momenta(vecs, new_vecs)
 
       if (present(h)) then
-         amp = orig_func(new_vecs, h)
+         amp = orig_func_h(new_vecs, h)
       else
          amp = orig_func(new_vecs)
       end if
@@ -121,7 +121,7 @@ contains
    end function samplitudel0
 
    function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
-      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel1
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel1, orig_func_h => samplitudel1_h
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
@@ -138,7 +138,7 @@ contains
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
          @else %]
-         amp = orig_func(new_vecs, scale2, ok, rat2, h)[%
+         amp = orig_func_h(new_vecs, scale2, ok, rat2, h)[%
          @end @if %]
       else
          amp = orig_func(new_vecs, scale2, ok, rat2)
