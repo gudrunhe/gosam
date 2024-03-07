@@ -14,7 +14,8 @@ components = {
                "Form": REQUIRED,
                "QGraf": REQUIRED,
                "Java": OPTIONAL,
-               "Meson": OPTIONAL
+               "Meson": OPTIONAL,
+               "Linker": OPTIONAL
              }
 
 def find_libraries(hints={}, return_config=False):

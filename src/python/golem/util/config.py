@@ -718,7 +718,7 @@ class Program(Component):
             for dir in dirs:
                fname = os.path.join(dir, progname + ext)
                if os.path.exists(fname):
-                  if dir not in self.locations:
+                  if fname not in self.locations:
                      self.locations.append(fname)
 
    def getInstance(self,conf=None):
@@ -953,7 +953,7 @@ class Fortran(Program):
    def examine(self, hints):
       fc = os.getenv("FC")
       files=["gosam.conf"]
-      directories = [gpath.golem_path(), gpath.gosam_contrib_path()]
+      directories = [gpath.golem_path()]
       for dir in directories:
          for file in files:
             full_name = os.path.join(dir, file)
@@ -1042,6 +1042,53 @@ class Meson(Program):
          conf["+build.extensions"] += ", meson"
       else:
          conf["+build.extensions"] = "meson"
+
+class Linker(Program):
+   def __init__(self):
+      Program.__init__(self, "mold", "ld.mold", "lld", "ld.lld", "gold", "ld.gold")
+
+   def store(self, conf):
+      fc = conf["fc.bin"]
+      try:
+         if "GNU" in subprocess.run([fc, "--version"], capture_output=True, text=True).stdout:
+            gfortran_version = int(subprocess.run([fc, "-dumpversion"], capture_output=True, text=True).stdout)
+      except:
+         gfortran_version = None
+      if gfortran_version:
+         for loc in self.locations:
+            exe = loc.split("/")[-1]
+            if "mold" in exe:
+               if gfortran_version >= 12:
+                  conf["ld"] = "mold"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'mold', but the used version of gfortran is not compatible. Using default linker.")
+               break
+            elif "lld" in exe or "llvm-link" in exe:
+               if gfortran_version >= 9:
+                  conf["ld"] = "lld"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'lld', but the used version of gfortran is not compatible. Using default linker.")
+               break
+            elif "gold" in exe:
+               if gfortran_version >= 5:
+                  conf["ld"] = "gold"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'gold', but the used version of gfortran is not compatible. Using default linker.")
+               break
+
+
 
 class Configurator:
    def __init__(self, hints, **components):
