@@ -1257,6 +1257,24 @@ respect_generations = Property("respect_generations",
    bool,
    False, experimental=True)
 
+meson_buildtype = Property("meson.buildtype", """\
+   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option. The respective buildtypes
+   represent:
+                           Debug Symbols        Optimization level
+      plain                false                plain
+      debug                true                 0
+      debugoptimized       true                 2
+      release              false                3
+      minsize              true                 s
+   """, str, default="release", options=["plain", "debug", "debugoptimized", "release", "minsize"])
+
+meson_arch = Property("meson.arch", """\
+   CPU architecture passed to the compiler as the '-march=<arch>' option. By default, GCC generates
+   code for a generic x86-64 CPU. When using the 'native' option, GCC uses all possible instructions
+   available on the currenly used CPU. This can result in faster executing code, but may make the
+   libraries / executables unusable on other CPUs. For all possible options, see the GCC documentation.
+   """, str, default="x86-64")
+
 properties = [
    process_name,
    process_path,
@@ -1353,7 +1371,10 @@ properties = [
    all_mandelstam,
 
    flavour_groups,
-   respect_generations
+   respect_generations,
+
+   meson_buildtype,
+   meson_arch
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

@@ -250,7 +250,7 @@ def main(argv=sys.argv):
 		except golem.util.olp_objects.OLPError as ex:
 			golem.util.tools.warning(
 					"Order file %r has been skipped because of errors: %s" %
-					(arg, ex.message))
+					(arg, str(ex)))
 			skipped += 1
 		except IOError as ex:
 			golem.util.tools.warning(

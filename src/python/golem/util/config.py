@@ -437,6 +437,8 @@ class Properties:
          if key.startswith("$"):
             dollar_variables.append( (key[1:], value) )
          else:
+            if "contrib_fc" in key:
+               continue
             self.setProperty(unescape(key), unescape(value))
          buf = ""
 
@@ -940,12 +942,11 @@ class Form(Program):
 
 class Fortran(Program):
    def __init__(self):
-      Program.__init__(self, "Fortran",
+      Program.__init__(self, "Fortran", "gfortran",
             "ifort", "f95i",
             "f95", "f95n",
             "lfc", "lf95", "f95f",
-            "xlf95", "xlf90", "xlf",
-            "gfortran", "g95",
+            "xlf95", "xlf90", "xlf", "g95",
             "f95", "f90", "frt", "pgf", "pgf90", "pghpf",
             "fort90", "fl64", "fl32",
             "pgf77", "g77", "fort77", "f77", "af77", "f2c")
@@ -1051,7 +1052,8 @@ class Linker(Program):
       fc = conf["fc.bin"]
       try:
          if "GNU" in subprocess.run([fc, "--version"], capture_output=True, text=True).stdout:
-            gfortran_version = int(subprocess.run([fc, "-dumpversion"], capture_output=True, text=True).stdout)
+            gfortran_version = int(subprocess.run([fc, "-dumpversion"],
+                                                  capture_output=True, text=True).stdout.split(".")[0])
       except:
          gfortran_version = None
       if gfortran_version:
@@ -1067,7 +1069,7 @@ class Linker(Program):
                else:
                   print("# ~~~ Found linker 'mold', but the used version of gfortran is not compatible. Using default linker.")
                break
-            elif "lld" in exe or "llvm-link" in exe:
+            elif "lld" in exe:
                if gfortran_version >= 9:
                   conf["ld"] = "lld"
                   if "+build.extensions" in conf:
