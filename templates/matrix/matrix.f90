@@ -829,7 +829,8 @@ contains
       @end @if%][%
 
       @select r2
-      @case implicit explicit off %]
+      @case implicit explicit off %][%
+		@if generate_nlo_virt %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -844,6 +845,7 @@ contains
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
          @end @if extension dred %]
       end if[%
+		@end @if %][%
       @end @select r2 %]
       if (present(ok)) ok = my_ok
 
