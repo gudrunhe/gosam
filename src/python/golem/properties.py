@@ -233,6 +233,14 @@ qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
    """,
    str, "")
 
+qgraf_verbatim_ct = Property("qgraf.verbatim.ct",
+   """\
+   Same as qgraf.verbatim but only applied to CT diagrams.
+
+   See also: qgraf.verbatim, qgraf.verbatim.nlo
+   """,
+   str, "")
+
 ldflags_golem95 = Property("golem95.ldflags",
    """\
    LDFLAGS required to link golem95.

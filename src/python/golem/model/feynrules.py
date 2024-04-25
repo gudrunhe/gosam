@@ -639,6 +639,8 @@ class Model:
 						lwf.write(",")
 					lwf.write(field)
 				lwf.write(";")
+				if self.useCT:
+					lwf.write("isCT='0',")
 				is_first = True
 				for name, power in list(vertorders[ivo].items()):
 					if is_first:
@@ -705,7 +707,7 @@ class Model:
 
 					if not vfunctions in vertorders:
 						if len(vertorders) > 0:
-							warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+							warning(("CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
 										% (v.name, vertorders, vfunctions))
 											+ "I will split it up.")
 						vfcp = copy.deepcopy(vfunctions)
@@ -732,6 +734,7 @@ class Model:
 								lwf.write(",")
 							lwf.write(field)
 						lwf.write(";")
+						lwf.write("isCT='1',")
 						is_first = True
 						for name, power in list(vertorders[ivo].items()):
 							if is_first:
@@ -829,7 +832,6 @@ class Model:
 
 		if self.useCT:
 			ctparams = list(self.ctfunctions.keys())
-			print(ctparams)
 			if len(ctparams) > 0:
 				if len(ctparams) == 1:
 					f.write("Symbol %s;" % ctparams[0])
