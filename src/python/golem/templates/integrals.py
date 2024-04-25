@@ -11,9 +11,9 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, loopcache_tot, in_particles, out_particles, tree_signs,
 			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles,
-		        eprops, helicity_map):
+		        eprops, helicity_map, ct_signs):
 		self.init_kinematics(conf, in_particles, out_particles,
-				tree_signs, heavy_quarks, helicity_map)
+				tree_signs, heavy_quarks, helicity_map, ct_signs)
 		self._loopcache = loopcache
 		self._loopcache_tot = loopcache_tot
 		self._partitions = loopcache.partition()

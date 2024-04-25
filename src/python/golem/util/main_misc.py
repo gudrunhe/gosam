@@ -114,7 +114,7 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache = \
+	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache, ctcache, ct_signs = \
 			run_analyzer(path, conf, in_particles, out_particles)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
 #			run_analyzer(path, conf, in_particles, out_particles)
@@ -164,7 +164,10 @@ def generate_process_files(conf, from_scratch=False):
 			nlo_flags = flags[1],
 			massive_bubbles = massive_bubbles,
 			diagram_sum = eprops,
-			helicity_map=helicity_map)
+			helicity_map=helicity_map,
+			ctcache=ctcache,
+			ct_signs=ct_signs,
+			ct_flags = flags[2])
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
@@ -182,10 +185,10 @@ def cleanup(path):
 		for ext in ["", ".py", ".pyc", ".pyo"]:
 			cleanup_files.append("model" + ext)
 
-	for filename in cleanup_files:
-		full_name = os.path.join(path, filename)
-		if os.path.exists(full_name):
-			os.remove(full_name)
+	#for filename in cleanup_files:
+		#full_name = os.path.join(path, filename)
+		#if os.path.exists(full_name):
+			#os.remove(full_name)
 
 def find_config_files():
 	"""
@@ -546,9 +549,12 @@ def workflow(conf):
 
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = conf.getProperty('genUV')
-	#generate_uv_counterterms
-	#False
+	conf["generate_uv_counterterms"] = conf.getProperty('genUV') # MH: FLAGGED FOR DELETION
+	conf["generate_eft_counterterms"] = conf.getProperty('EFTCT')
+
+	if conf.getBooleanProperty("EFTCT") and not "FeynRules" in conf.getProperty("model"):
+		raise GolemConfigError("EFT counterterms can only be used with an appropriate UFO model!\n " +
+			"Please provide such a model or set 'EFTCT=False'")
 
 	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
 		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
@@ -699,7 +705,7 @@ def workflow(conf):
 def run_analyzer(path, conf, in_particles, out_particles):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
-	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
+	generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
 
 	model = golem.util.tools.getModel(conf)
 		
@@ -755,20 +761,19 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		loopcache     = golem.topolopy.objects.LoopCache()
 		loopcache_tot = golem.topolopy.objects.LoopCache()
 	
-	if generate_ct:
+	if generate_ct and generate_virt:
 		modname = consts.PATTERN_TOPOLOPY_CT
 		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading counter term diagram file %r" % fname)
+		debug("Loading counterterm diagram file %r" % fname)
 		mod_diag_ct = golem.util.tools.load_source(modname, fname)
-		# keep_tree, tree_signs, tree_flows =
-		keep_ct, ct_signs = \
+		keep_ct, ct_signs, ctcache = \
 				golem.topolopy.functions.analyze_ct_diagrams(
-				mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
-				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+					mod_diag_ct.diagrams, model, conf,
+					filter_flags = ct_flags)
 	else:
 		keep_ct = []
 		ct_signs = {}
-	# tree_flows = {}
+		ctcache = golem.topolopy.objects.CTCache()
 
 
 	conf["__heavy_quarks__"] = quark_masses
@@ -784,7 +789,6 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache
-
+	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache, ctcache, ct_signs
 
 

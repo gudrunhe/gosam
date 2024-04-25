@@ -502,6 +502,17 @@ genUV = Property("genUV",
    bool,
    False, experimental=True)
 
+EFTCT = Property("EFTCT",
+   """\
+   Generate diagrams with EFT counterterms provided by the UFO model.
+
+   Examples:
+   EFTCT=true
+   EFTCT=false
+   """,
+   bool,
+   False, experimental=True)
+
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
@@ -655,6 +666,24 @@ select_nlo_diagrams = Property("select.nlo",
    """,
    list,sep=",")
 
+select_ct_diagrams = Property("select.ct",
+   """\
+   A list of integer numbers, indicating EFT counterterm diagrams to be
+   selected. If no list is given, all diagrams are selected.
+   Otherwise, all diagrams not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.ct=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.ct=1,2,5,8,50,51,52,53
+
+   See also: select.nlo, filter.lo, filter.nlo
+   """,
+   list,sep=",")
+
 filter_lo_diagrams = Property("filter.lo",
    """\
    A python function which provides a filter for tree diagrams.
@@ -702,6 +731,14 @@ filter_nlo_diagrams = Property("filter.nlo",
    A python function which provides a filter for loop diagrams.
 
    See filter.lo for more explanation.
+   """,
+   str,"")
+
+filter_ct_diagrams = Property("filter.ct",
+   """\
+   A python function which provides a filter for eft counterterm diagrams.
+
+   See filter.ct for more explanation.
    """,
    str,"")
 
@@ -1297,6 +1334,7 @@ properties = [
    sum_helicities,
    regularisation_scheme,
    genUV,
+   EFTCT,
    helicities,
    qgraf_options,
    qgraf_verbatim,
@@ -1311,8 +1349,10 @@ properties = [
 
    select_lo_diagrams,
    select_nlo_diagrams,
+   select_ct_diagrams,
    filter_lo_diagrams,
    filter_nlo_diagrams,
+   filter_ct_diagrams,
    filter_module,
 
    config_renorm_beta,

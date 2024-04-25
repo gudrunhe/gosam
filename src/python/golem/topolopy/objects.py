@@ -1695,6 +1695,13 @@ class LoopCache:
       self._roots = roots
       return roots
 
+class CTCache:
+   def __init__(self):
+      self.diagrams = {}
+
+   def add(self, diagram, diagram_index):
+      self.diagrams[diagram_index] = diagram
+
 class Momentum:
    def __init__(self, arg, zero):
       if isinstance(arg, str):

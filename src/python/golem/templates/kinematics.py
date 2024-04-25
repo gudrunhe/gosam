@@ -16,7 +16,7 @@ class KinematicsTemplate(golem.util.parser.Template):
    """
 
    def init_kinematics(self, conf, in_particles, out_particles,
-         tree_signs, heavy_quarks, helicity_map):
+         tree_signs, heavy_quarks, helicity_map, ct_signs):
       self._mandel_stack = []
       zeroes = golem.util.tools.getZeroes(conf)
       self._zeroes = zeroes
@@ -72,6 +72,7 @@ class KinematicsTemplate(golem.util.parser.Template):
       self._cs_trace_stack = []
       self._field_info = []
       self._tree_signs = tree_signs
+      self._ct_signs = ct_signs
       # self._tree_flows = tree_flows
       self._crossings = []
       self._charge = []
@@ -417,6 +418,19 @@ class KinematicsTemplate(golem.util.parser.Template):
       else:
          raise golem.util.parser.TemplateError(
                "[% tree_sign %] with unknown diagram number.")
+
+   def ct_sign(self, *args, **opts):
+      if len(args) == 0:
+         raise golem.util.parser.TemplateError(
+               "[% ct_sign %] without diagram number.")
+
+      diag = self._eval_int(args[0])
+
+      if diag in self._ct_signs:
+         return str(self._ct_signs[diag])
+      else:
+         raise golem.util.parser.TemplateError(
+               "[% ct_sign %] with unknown diagram number.")
 
    def _OBSOLETE_tree_flow(self, *args, **opts):
       first_name = self._setup_name("first", "is_first", opts)

@@ -45,12 +45,12 @@
     @case 1%]only one group[%
     @else %][% count groups %] groups [%
  @end @select %] of NLO diagrams by analyzing their one-loop integrals.[%
- @if generate_uv_counterterms
-   %] There are [% @select topolopy.count.ct
- @case 0 %]no counterterms[%
- @case 1 %]one counter term[%
- @else %][%topolopy.count.ct %] counter terms[%
- @end @select %] from UV-renormalisation.[%
+ @if generate_eft_counterterms
+   %] There [% @select topolopy.count.ct
+ @case 0 %]are no extra counterterm diagrams[%
+ @case 1 %]is one extra counterterm diagram[%
+ @else %]are [%topolopy.count.ct %] extra counterterm diagrams[%
+ @end @select %] from renormalisation of EFT coefficients.[%
  @end @if %]
 \end{abstract}
 \newpage
@@ -530,33 +530,44 @@ $S^\prime=S[%
 @end @if pyxodraw %][%
 @end @for groups %][%
  @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-\section{Counter-Term Diagrams}
-\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}[%
-@if pyxodraw %][% 
-@with modules pyxoct.tex path=process %][% 
-   @for elements topolopy.keep.ct var=DIAG index=DIAGINDEX %][%
-     @if is_first %]
-\begin{longtable}{cc}
+ [% @if generate_eft_counterterms %][% @if generate_nlo_virt %]
+\section{Counterterm Diagrams}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}
+
+[%
+@if pyxodraw %][%
+   @with modules pyxoct.tex path=process %][%
+      @for elements topolopy.keep.ct var=DIAG index=DIAGINDEX %][%
+         @if is_first %]\begin{longtable}{cc}
 \endfirsthead
-\endhead
-[% @end @if %]
+\endhead[%
+         @end @if %]
+%---#[ counterterm diagram[% DIAG %]:
 \hbox{
 \begin{minipage}{0.45\textwidth}
 \begin{center}
 [%diagram suffix=DIAG%]\\
-{\sl Diagram~[%DIAG%]}
+{\sl [%
+         @select ct_sign DIAG
+         @case -1 %]-[%
+         @end @select %]Diagram~[%DIAG%]}[%
+@if use_vertex_labels %]\\
+[% getVertexInfo ct DIAG %][%
+@end @if %]
 \end{center}
 \end{minipage}}
-[%   @if is_last %]
+%---#] counterterm diagram[% DIAG %]:[%
+         @if is_last %]
 \end{longtable}
-[%   @else %]
-[%   @if eval DIAG .mod. 2 .eq. 0 %]\\[% @else %]&[%@end @if%]
-[%   @end @if %]
-[% @end @for %][%
+[%       @else %]
+[%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+         @end @if %][%
+      @end @for %][%
    @end @with%][%
 @end @if pyxodraw %][%
-@end @if generate_uv_counterterms %]
+@end @if generate_nlo_virt %][%
+@end @if generate_eft_counterterms %]
+
 \printindex
 
 \section{Related Work}

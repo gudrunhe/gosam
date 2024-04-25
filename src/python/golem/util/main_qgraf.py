@@ -218,15 +218,13 @@ def run_qgraf(conf, in_particles, out_particles):
 
 	flag_generate_nlo_virt = conf.getBooleanProperty("generate_nlo_virt")
 	flag_generate_lo_diagrams = conf.getBooleanProperty("generate_lo_diagrams")
-	flag_generate_uv_counterterms = \
-			conf.getBooleanProperty("generate_uv_counterterms")
 	flag_draw_diagrams = conf.getProperty(golem.properties.pyxodraw)
 	flag_topolopy = True
 
-	flag_generate_ct_diagrams = True
+	flag_generate_eft_counterterms = conf.getBooleanProperty("generate_eft_counterterms")
 
 	if not (flag_generate_nlo_virt or
-			flag_generate_lo_diagrams or flag_generate_uv_counterterms):
+			flag_generate_lo_diagrams or flag_generate_eft_counterterms):
 		# Should never happen but is not considered an error either.
 		# nothing to do
 		return
@@ -261,7 +259,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty_out = open(form_sty_name,'w')
 	for i in range(len(form_sty_tmp)):
 		if i==34 and conf["is_ufo"]:
-			if flag_generate_ct_diagrams:
+			if flag_generate_eft_counterterms:
 				form_sty_out.write("<back> isCT[isCT],\n")
 			form_sty_out.write("<back> RK[RK],\n")
 			if use_order_names:
@@ -293,7 +291,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo
 
-		if flag_generate_ct_diagrams:
+		if flag_generate_eft_counterterms:
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
@@ -329,7 +327,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
-		if flag_generate_ct_diagrams:
+		if flag_generate_eft_counterterms:
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
@@ -355,13 +353,13 @@ def run_qgraf(conf, in_particles, out_particles):
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# ----------------- EFT CT PART -------------------------------------------
-	if flag_generate_ct_diagrams:
+	if flag_generate_eft_counterterms and flag_generate_nlo_virt:
 		output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
 
 		if powers and powers is not None:
 			new_verbatim = verbatim + "\n" + verbatim_ct + "\n" + \
-					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers]) + \
+					"".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers]) + \
 					"\ntrue=vsum[isCT,1,1];\n"
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_ct + "\ntrue=vsum[isCT,1,1];\n"
@@ -387,44 +385,6 @@ def run_qgraf(conf, in_particles, out_particles):
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
 			run_qgraf_dat(conf, output_name, log_name)
-
-	## ----------------- UV COUNTERTERMS -----------------------------------
-	## This doesn't work...at some point it would be better to add the RENO
-	## fields automatically
-	## Edited on 16.11.12
-	#if flag_generate_uv_counterterms:
-		#output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
-		#log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
-
-		#if powers and powers is not None:
-			#new_verbatim = verbatim + "\n" + \
-					#"true=vsum[%s,%s,%s];\n" % (powers[0][0], str(int(powers[0][2])-6), str(int(powers[0][2])-6)) \
-					#+ "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[2], po[2]) for po in powers[2:]])
-		#else:
-			#new_verbatim = verbatim
-
-		#write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name, \
-				#options, new_verbatim, in_particles, out_particles, \
-				#["RENO"], 1)
-		#run_qgraf_dat(conf, output_name, log_name)
-
-		#if flag_draw_diagrams:
-			#output_name = consts.PATTERN_PYXO_CT + python_ext
-			#log_name    = consts.PATTERN_PYXO_CT + log_ext
-			#write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				#options, new_verbatim, in_particles, out_particles, \
-				#["RENO"], 1)
-			#run_qgraf_dat(conf, output_name, log_name)
-			#golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
-					#conf=conf)
-			#for ext in [python_ext, pyo_ext, pyc_ext]:
-				#cleanup_files.append(consts.PATTERN_PYXO_CT + ext)
-		#if flag_topolopy:
-			#output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
-			#log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
-			#write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				#options, new_verbatim, in_particles, out_particles, [], 1)
-			#run_qgraf_dat(conf, output_name, log_name)
 
 	# Clean up and leave
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")
