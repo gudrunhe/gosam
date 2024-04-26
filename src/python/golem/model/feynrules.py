@@ -777,6 +777,8 @@ class Model:
 		f.write("AutoDeclare Symbols RK,")
 		for el in order_names:
 			f.write("%s," % el)
+		if self.useCT:
+			f.write(",isCT")
 		f.write(";\n")
 		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
 		f.write("\n")
@@ -925,7 +927,10 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				f.write("Identify Once vertex(iv?, RK%d" % vertorders[ivo]["RK"])
+				if self.useCT:
+					f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
+				else:
+					f.write("Identify Once vertex(iv?, RK%d" % vertorders[ivo]["RK"])
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
@@ -1074,7 +1079,7 @@ class Model:
 
 						fold_name = "(%s) %s CTVertex" % ( v.name+"_"+str(ivo)+"_"+str_ieps, " -- ".join(names))
 						f.write("*---#[ %s:\n" % fold_name)
-						f.write("Identify Once ctvertex(iv?, RK%d" % vertorders[ivo]["RK"])
+						f.write("Identify Once ctvertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
 						for el in order_names:
 							f.write(", %s%d"
 								% (el,vertorders[ivo][el]))
