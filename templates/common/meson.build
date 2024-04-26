@@ -10,7 +10,7 @@ generated_source = ['color.f90' [% @if internal OLP_MODE %][% @else %], 'version
 
 [% process_name %]_source += files(['rambo.f90', 'globalsl1.f90',
                      'util.f90', 'scalar_cache.f90', 'kinematics.f90',
-                     'dipoles.f90', 'groups.f90'])
+                     'dipoles.f90', 'groups.f90', 'SpinorBrackets.f90'])
 
 [% @if extension pjfry %]
 [% process_name %]_source += files(['precision_pjfry.f90', 'pjfry95pg.f90', 'pjfry_comb.f90'])

@@ -5,6 +5,6 @@ common_gen = custom_target('common_gen',
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
-common_source += files(['accu.f90', 'config.f90', 'SpinorBrackets.f90'])
+common_source += files(['accu.f90', 'config.f90'])
 
 common_source += common_gen

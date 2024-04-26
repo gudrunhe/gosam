@@ -347,7 +347,8 @@
 				<only if-extension="meson" />
 		</file>
 		<file src="generate_source.sh" class="Kinematics">
-			<only if-extension="meson"/>
+		                <only if-extension="meson"/>
+		<file src="SpinorBrackets.f90" class="Kinematics"/>
 		</file>
 	</directory>
 
