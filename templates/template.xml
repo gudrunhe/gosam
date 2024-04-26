@@ -348,7 +348,9 @@
 		</file>
 		<file src="generate_source.sh" class="Kinematics">
 		                <only if-extension="meson"/>
-		<file src="SpinorBrackets.f90" class="Kinematics"/>
+		</file>
+		<file src="SpinorBrackets.f90" class="Kinematics">
+			<except if-internal="OLP_MODE"/>
 		</file>
 	</directory>
 
