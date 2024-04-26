@@ -143,7 +143,7 @@ def translate(tokens,inconfig):
                         if token == "SUBSCRIPT":
                                 if any(args[0].startswith(s) for s in ["spa", "spb"]):
                                         args[0] += "%get"
-                                elif args[0].startswith("spv"):
+                                elif args[0].startswith("spv") and args[0][4] != 'e' and args[0][6] != 'e':
                                         args[0] += "%geti"
                         newitem = replace(token,args,lambdafunc)
                         newlist.append(newitem[0])
