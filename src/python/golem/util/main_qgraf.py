@@ -269,6 +269,30 @@ def run_qgraf(conf, in_particles, out_particles):
 		form_sty_out.write(form_sty_tmp[i])
 	form_sty_out.close()
 
+	pyxo_sty_name = os.path.join(path, pyxo_sty)
+	pyxo_sty_tmp = open(pyxo_sty_name,'r').readlines()
+	pyxo_sty_out = open(pyxo_sty_name,'w')
+	for i in range(len(pyxo_sty_tmp)):
+		if i==25 and conf["is_ufo"]:
+			# vertex type identifier:
+			# (0,0) -> normal vertex (dot)
+			# (1,i) with i any integer (NP order) -> EFT CT vertex (cross)
+			# (0,i) with i>0 (NP order) -> NP vertex (box)
+			tmp_str = "<end><back>vtype="
+			if flag_generate_eft_counterterms:
+				tmp_str = tmp_str+"([isCT],"
+			else:
+				tmp_str = tmp_str+"(0,"
+			if use_order_names and "NP" in order_names:
+				tmp_str = tmp_str+"[NP])"
+			else:
+				tmp_str = tmp_str+"0)"
+			tmp_str = tmp_str+",<back>),<end><back>\n"
+			pyxo_sty_out.write(tmp_str)
+			continue
+		pyxo_sty_out.write(pyxo_sty_tmp[i])
+	pyxo_sty_out.close()
+
 	form_ext    = ".hh"
 	python_ext  = ".py"
 	pyo_ext     = ".pyo"
