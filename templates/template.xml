@@ -158,6 +158,18 @@
 		    <only if-option="use_order_names" value="true" />
 		  </file>
 		</foreach>
+		<file src="optimizeeftct.hh" class="Integrals">
+			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<foreach name="trnco" list="0,1,2">
+		  <file src="optimizeeftct.hh"
+			dest="optimizeeftct_%s.hh" arguments="trnco"
+			class="Integrals">
+		    <only if-extension="formopt" />
+		    <only if-option="use_order_names" value="true" />
+		  </file>
+		</foreach>
 		<file src="finaloptimization.frm" class="Kinematics">
 			<only if-extension="formopt" />
 		</file>
@@ -246,7 +258,18 @@
 		    <only if-option="use_order_names" value="true" />
 		  </file>
 		</foreach>
-
+		<file src="buildfortraneftct.py" class="Kinematics">
+			<only if-extension="formopt" />
+			<except if-option="use_order_names" value="true" />
+		</file>
+		<foreach name="trnco" list="0,1,2">
+		  <file src="buildfortraneftct.py"
+			dest="buildfortraneftct_%s.py" arguments="trnco"
+			class="Kinematics">
+		    <only if-extension="formopt" />
+		    <only if-option="use_order_names" value="true" />
+		  </file>
+		</foreach>
 		<file src="t2f.py" class="Verbatim"/>
 		<file src="buildmodel.py" class="Model">
 			<only if-extension="formopt" />

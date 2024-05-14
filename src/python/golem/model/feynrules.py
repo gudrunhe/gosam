@@ -1021,12 +1021,8 @@ class Model:
 				if len(dummies) > 0:
 					f.write("Sum %s;\n" % ", ".join(dummies))
 				f.write("*---#] %s:\n" % fold_name)
-		f.write("#EndProcedure\n")
-		f.write("*---#] Procedure ReplaceVertices :\n")
 
 		if self.useCT:
-			f.write("*---#[ Procedure ReplaceCTVertices :\n")
-			f.write("#Procedure ReplaceCTVertices\n")
 
 			for v in self.all_CTvertices:
 				particles = v.particles
@@ -1079,7 +1075,7 @@ class Model:
 
 						fold_name = "(%s) %s CTVertex" % ( v.name+"_"+str(ivo)+"_"+str_ieps, " -- ".join(names))
 						f.write("*---#[ %s:\n" % fold_name)
-						f.write("Identify Once ctvertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
+						f.write("Identify Once vertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
 						for el in order_names:
 							f.write(", %s%d"
 								% (el,vertorders[ivo][el]))
@@ -1170,9 +1166,9 @@ class Model:
 						if len(dummies) > 0:
 							f.write("Sum %s;\n" % ", ".join(dummies))
 						f.write("*---#] %s:\n" % fold_name)
-			f.write("#EndProcedure\n")
-			f.write("*---#] Procedure ReplaceCTVertices :\n")
 
+		f.write("#EndProcedure\n")
+		f.write("*---#] Procedure ReplaceVertices :\n")
 
 		f.write("*---#[ Dummy Indices:\n")
 		for ind in list(lsubs.values()):

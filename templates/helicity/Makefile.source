@@ -238,21 +238,103 @@ DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
 [% @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-DIAGRAMS_CT=[%
-   @for elements topolopy.keep.ct %] \
-	d[%$_%][% @if use_order_names %]_0h[%helicity%]l1c.f90 d[%$_%]_2h[%helicity%]l1c.f90 d[%$_%]_2[% @end @if %]h[%helicity%]l1c.f90[%
-   @end @for %]
-TXT_CT=$(subst .f90,.txt,$(DIAGRAMS_CT))
-SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
+[% @if generate_eft_counterterms %]
+DIAGRAMS_EFTCT=[%
+@if group %][%
+@else %][%
+	@for elements topolopy.keep.ct %] \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]ct.f90 \
+		d[%$_%]_1h[%helicity%]ct.f90 \
+		d[%$_%]_2[% @end @if %]h[%helicity%]ct.f90[%
+	@end @for %][%
 @end @if %]
+
+DIAGRAMS_EFTCT_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+@else %][%
+	@for elements topolopy.keep.ct %] \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]ctfr5.f90 \
+		d[%$_%]_1h[%helicity%]ctfr5.f90 \
+		d[%$_%]_2[% @end @if %]h[%helicity%]ctfr5.f90[%
+	@end @for %][%
+@end @if %][%
+@end @if %]
+
+[% @if use_order_names %][%
+@for each 0 1 2 var=efto
+%]TXT_EFTCT[% efto %]=[%
+@if group %][%
+   @for elements topolopy.keep.ct %] \
+		d[%$_%]_[% efto %]h[%helicity%]ct.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_EFTCT))[%
+@end @if %]
+
+TXT_EFTCT[% efto %]_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+   @for elements topolopy.keep.ct %] \
+		d[%$_%]_[% efto %]h[%helicity%]ct-fr.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_EFTCT))[%
+@end @if %][%
+@end @if %]
+
+[% @end @for %][%
+@else %]TXT_EFTCT=[%
+@if group %][%
+   @for elements topolopy.keep.ct %] \
+		d[%$_%]h[%helicity%]ct.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_EFTCT))[%
+@end @if %]
+
+TXT_EFTCT_FR5=[% @if internal REQUIRE_FR5 %][%
+@if group %][%
+   @for elements topolopy.keep.ct %] \
+		d[%$_%]h[%helicity%]ct-fr.txt[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,.txt,$(DIAGRAMS_EFTCT))[%
+@end @if %][%
+@end @if %][%
+@end @if %]
+
+TXT_EFTCT_STAMP=[%
+@if group %][%
+   @for elements topolopy.keep.ct %] \
+		d[%$_%][% @if use_order_names %]_0h[%helicity%]ct-stamp \
+		d[%$_%]_1h[%helicity%]ct-stamp \
+		d[%$_%]_2[% @end @if %]h[%helicity%]ct-stamp[%
+   @end @for %][%
+@else %] \
+   $(subst .f90,-stamp,$(DIAGRAMS_EFTCT))[%
+@end @if %]
+
+SOURCE_EFTCT= \
+	diagramsct[% @if use_order_names %]_0.f90 diagramsct_1.f90 diagramsct_2[% @end @if %].f90 $(DIAGRAMS_EFTCT)[%
+   @if internal REQUIRE_FR5 %] \
+	diagramsct[% @if use_order_names %]_0fr5.f90 diagramsct_1fr5.f90 diagramsct_2fr5[% @end @if %].f90 $(DIAGRAMS_EFTCT_FR5)[%
+   @end @if %][%
+   @if extension quadruple %] \
+	diagramsct[% @if use_order_names %]_0_qp.f90 \
+	diagramsct_1_qp.f90 \
+	diagramsct_2_qp[% @end @if %].f90[%
+   @end @if %]
+[% @else %]
+DIAGRAMS_EFTCT=
+TXT_EFTCT=
+SOURCE_EFTCT=
+[% @end @if generate_eft_counterterms %]
 
 .PHONY: source
 .SUFFIXES:
 
 [%
 @if extension formopt %]
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT) $(SOURCE_EFTCT)[%
 @for elements topolopy.keep.tree %][%
 @if is_first %][% @if is_last %][%
 @if use_order_names %][%
@@ -265,7 +347,10 @@ born_[% efto %].txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=2 \
 		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
 		../codegen/golem_[% efto %].frm
@@ -280,7 +365,10 @@ born.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=2 \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
@@ -295,7 +383,10 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=1 \
 		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
 		../codegen/golem_[% efto %].frm
@@ -309,7 +400,10 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=1 \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
@@ -332,7 +426,10 @@ born_[% efto %].txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=-1 \
 		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
 		../codegen/golem_[% efto %].frm
@@ -350,7 +447,10 @@ born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=-1 \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
@@ -365,7 +465,10 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=0 \
 		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l0 \
 		../codegen/golem_[% efto %].frm
@@ -379,7 +482,10 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
 		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
+		-D DIAG=[%$_%] \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D BORNFLG=0 \
 		-D OUTFILE=d[%$_%]h[%helicity%]l0 \
 		../codegen/golem.frm
@@ -408,7 +514,7 @@ diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: bor
 @end @if %][%
 @end @if %][% @end @for %][%
 @else %]
-all_source: $(SOURCE_TREE) $(SOURCE_VIRT)[%
+all_source: $(SOURCE_TREE) $(SOURCE_VIRT) $(SOURCE_EFTCT)[%
 @select abbrev.level @case helicity %]
 abbrevh[%helicity%].f90: $(TXT_VIRT)
 	@echo Haggies is generating abbreviations for virtual part @ Helicity [%helicity%]
@@ -1092,65 +1198,273 @@ abbrevg[%grp%]h[%helicity%].f90:[%
 	@end @select %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %][%
+@end @if %]
+
+[% @if extension formopt %][%
+@if generate_eft_counterterms %][%
+@for elements topolopy.keep.ct %][%
+@if is_first %][% @if is_last %][%
 @if use_order_names %][%
 @for each 0 1 2 var=efto %]
-d[%$_%]_[% efto %]h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+d[%$_%]_[% efto %]h[%helicity%]ct.txt:
+	   @echo "* dummy file" > $@
+eft_ct_[% efto %].txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
+		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1c \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=2 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]ct \
 		../codegen/golem_[% efto %].frm
-d[%$_%]_[% efto %]h[%helicity%]l1c.f90: d[%$_%]_[% efto %]h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
+	@touch eft_ct_[% efto %]-stamp[%
 @end @for %][%
 @else %]
-d[%$_%]h[%helicity%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%] @ Helicity [%helicity%]
+d[%$_%]h[%helicity%]ct.txt:
+	   @echo "* dummy file" > $@
+eft_ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
+		-D LOOPS=0 \
 		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]h[%helicity%]l1c \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=2 \
+		-D OUTFILE=d[%$_%]h[%helicity%]ct \
 		../codegen/golem.frm
-d[%$_%]h[%helicity%]l1c.f90: d[%$_%]h[%helicity%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%] @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
+	@touch eft_ct-stamp[%
+@end @if %][%
+@else %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D HELICITY=[%helicity%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]ct \
+		../codegen/golem_[% efto %].frm
+	@touch d[%$_%]_[% efto %]h[%helicity%]ct-stamp
+d[%$_%]_[% efto %]h[%helicity%]ct-stamp: d[%$_%]_[% efto %]h[%helicity%]ct.txt[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]ct \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]ct-stamp
+d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt[%
 @end @if %][%
-	@end @for %][%
 @end @if %][%
+@else %][%
+@if is_last %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]ct.txt:
+	@echo "* dummy file" > $@
+	@touch d[%$_%]_[% efto %]h[%helicity%]ct-stamp
+d[%$_%]_[% efto %]h[%helicity%]ct-stamp: d[%$_%]_[% efto %]h[%helicity%]ct.txt
+eft_ct_[% efto %].txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
+	@cat $(TXT_EFTCT[% efto %]) > eftctdiag[% efto %].prc
+	@echo Form is processing counterterm diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=-1 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]ct \
+		../codegen/golem_[% efto %].frm
+	@touch eft_ct_[% efto %]-stamp[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]ct.txt:
+	@echo "* dummy file" > $@
+	@touch d[%$_%]h[%helicity%]ct-stamp
+d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt
+born.txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
+	@cat $(TXT_EFTCT) > eftctdiag.prc
+	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=-1 \
+		-D OUTFILE=d[%$_%]h[%helicity%]ct \
+		../codegen/golem.frm
+	@touch born-stamp[%
+@end @if %][%
+@else %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%]_[% efto %] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=0 \
+		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]ct \
+		../codegen/golem_[% efto %].frm
+	@touch d[%$_%]_[% efto %]h[%helicity%]ct-stamp
+d[%$_%]_[% efto %]h[%helicity%]ct-stamp: d[%$_%]_[% efto %]h[%helicity%]ct.txt[%
+@end @for %][%
+@else %]
+d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D BORNFLG=0 \
+		-D OUTFILE=d[%$_%]h[%helicity%]ct \
+		../codegen/golem.frm
+	@touch d[%$_%]h[%helicity%]ct-stamp
+d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt[%
+@end @if %][%
+@end @if %][% @end @if %][%
+@end @for %][%
+@for elements topolopy.keep.ct %][% @if is_last %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+eft_ct_[% efto %]-stamp: eft_ct_[% efto %].txt
+diagramsct_[% efto %].f90[% @if extension quadruple %] diagramsct_[% efto %]_qp.f90[% @end @if %]: eft_ct_[% efto %].txt eft_ct_[% efto %]-stamp
+	@echo Python is processing counterterm diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortraneftct_[% efto %].py \
+		-i $< \
+		--HELICITY=[%helicity%][%
+@end @for %][%
+@else %]
+born-stamp: born.txt
+diagramsct.f90[% @if extension quadruple %] diagramsct_qp.f90[% @end @if %]: born.txt born-stamp
+	@echo Python is processing counterterm diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortraneftct.py \
+		-i $< \
+		--HELICITY=[%helicity%][%
+@end @if %][%
+@end @if %][% @end @for %][%
+@else %][%
+@select abbrev.level @case helicity %]
+abbrevh[%helicity%].f90: $(TXT_VIRT)
+	@echo Haggies is generating abbreviations for virtual part @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-t ../codegen/abbrev.out \
+		-c ../codegen/abbrev.in \
+		-D helicity=[%helicity%] \
+		-o $@ \
+		$(subst .txt,.abb,$(filter %l1.txt,$(TXT_VIRT))) \
+		$(filter %l1.abb,$(TXT_VIRT))[%
+@end @select %][%
+@for elements topolopy.keep.ct %]
+d[%$_%]_0h[%helicity%]ct.txt: ../diagrams-ct.hh
+	@echo Form is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
+	@$(FORM) $(FORM_OPT) \
+		-w$(FORM_THREADS) \
+		-D GROUP=[% group convert=bool true=1 false=0 %] \
+		-D LOOPS=0 \
+		-D DIAG=[%$_%] \
+		-D EFTCTFLG=1 \
+		-D OUTFILE=d[%$_%]_0h[%helicity%]ct \
+		../codegen/golem_0.frm[%
+   @if internal REQUIRE_FR5 %]
+d[%$_%]_0h[%helicity%]ct-fr.txt: d[%$_%]_0h[%helicity%]ct.txt[%
+	@end @if %][%
+	@if group %][%
+	@else %]
+d[%$_%]_0h[%helicity%]ct.f90: d[%$_%]_0h[%helicity%]ct.txt
+	@echo Haggies is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]_0h[%helicity%]ct.dat \
+			| sed 's/extrasymbols=//')) \
+		-o $@ $<[%
+      @if internal REQUIRE_FR5 %]
+d[%$_%]_0h[%helicity%]ctfr5.f90: d[%$_%]_0h[%helicity%]ct-fr.txt
+	@echo Haggies is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		$(addprefix -p,$(shell grep extrasymbols \
+			d[%$_%]_0h[%helicity%]ct.dat \
+			| sed 's/extraysymbols=//')) \
+		-o $@ $<[%
+      @end @if internal REQUIRE_FR5 %][%
+   @end @if %][%
+@end @for %][%
+
+@if group %][%
+@if use_order_names %][%
+@for each 0 1 2 var=efto %]
+diagramsct_[% efto %].f90: $(TXT_EFTCT[% efto %])
+	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		-D helicity=[%helicity%] -D "modsuffix=" \
+		-o $@ $+[%
+   @if internal REQUIRE_FR5 %]
+diagramsct_[% efto %]fr5.f90: $(TXT_EFTCT[% efto %]_FR5)
+	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		-D helicity=[%helicity%] -D modsuffix=fr5 \
+		-o $@ $+[%
+   @end @if %][%
+@end @for %][%
+@else %]
+diagramsct.f90: $(TXT_EFTCT)
+	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		-D helicity=[%helicity%] -D "modsuffix=" \
+		-o $@ $+[%
+   @if internal REQUIRE_FR5 %]
+diagramsctfr5.f90: $(TXT_EFTCT_FR5)
+	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
+	@$(HAGGIES) $(HAGGIES_OPT) -F \
+		-c ../codegen/haggies-ct.in \
+		-t ../codegen/haggies-ct.out \
+		-D helicity=[%helicity%] -D modsuffix=fr5 \
+		-o $@ $+[%
+   @end @if %][%
+@end @if %][%
+@end @if %][%
+@end @if generate_eft_counterterms %][%
 @end @if %]
-[%
-@if write_vanishing_amplitude %] 
+
+[% @if write_vanishing_amplitude %]
 born.txt: 
 	@printf "#####Abbreviations\n\n\n#####Diagrams\namplitude =  0;" > born.txt
 	@echo "abbrev_terms=0" > born.dat
 	@touch born-stamp 
 born-stamp: born.txt 
 diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp 
-	@echo Python is processing tree diagrams @ Helicity [%helicity%] 
+	@echo Python is processing counterterm diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortranborn.py \ 
 		-i $< \ 
 		--HELICITY=[%helicity%][% 

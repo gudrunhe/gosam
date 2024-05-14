@@ -58,6 +58,10 @@ CTensor epstensor;[%
    Autodeclare Symbol Qsp;
    #Include- abbreviate.hh
    Symbol CC, R2;
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
+   #Include- optimizeeftct[% @if use_order_names %]_[% trnco %][% @end @if %].hh
+[% @end @if %]
 #Else
    #Include- optimizeborn[% @if use_order_names %]_[% trnco %][% @end @if %].hh
 #EndIf[%
@@ -98,8 +102,15 @@ Function SmQt;
 #include- color.hh
 .global
 
-#include- diagrams-`LOOPS'.hh #global
-#include- model.hh[%
+#include- model.hh
+
+[% @if generate_eft_counterterms %]
+#If `EFTCTFLG' == 1
+#include- diagrams-ct.hh #global
+#include- diagrams-ct.hh #diagram`DIAG'
+#Else
+[% @end @if %]
+#include- diagrams-`LOOPS'.hh #global[%
 @if diagsum %]
 #If `LOOPS' == 0
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'
@@ -109,6 +120,9 @@ F diag1,...,diag`DIAGRAMCOUNT';
 #EndIf[%
 @else %]
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
+@end @if %][%
+@if generate_eft_counterterms %]
+#EndIf[%
 @end @if %][%
 @select r2
 @case explicit only %]
@@ -794,6 +808,28 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
+   #If `BORNFLG' == 1
+   #Create <`OUTFILE'.txt>
+        #write <`OUTFILE'.txt> "#Procedure eftctdiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Create <`OUTFILE'.txt>
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+	#write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #ElseIf `BORNFLG' == 2
+	#Create <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure eftctdiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #EndIf
+[% @end @if %]
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
@@ -827,6 +863,28 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
+   #If `BORNFLG' == 1
+   #Create <`OUTFILE'.txt>
+        #write <`OUTFILE'.txt> "#Procedure eftctdiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Create <`OUTFILE'.txt>
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+	#write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #ElseIf `BORNFLG' == 2
+	#Create <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure eftctdiag[% @if use_order_names %][% trnco %][% @end @if %]"
+	#write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #EndIf
+[% @end @if %]
 #Else
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
