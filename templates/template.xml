@@ -160,6 +160,7 @@
 		</foreach>
 		<file src="optimizeeftct.hh" class="Integrals">
 			<only if-extension="formopt" />
+			<only if-option="EFTCT" value="true" />
 			<except if-option="use_order_names" value="true" />
 		</file>
 		<foreach name="trnco" list="0,1,2">
@@ -167,6 +168,7 @@
 			dest="optimizeeftct_%s.hh" arguments="trnco"
 			class="Integrals">
 		    <only if-extension="formopt" />
+			<only if-option="EFTCT" value="true" />
 		    <only if-option="use_order_names" value="true" />
 		  </file>
 		</foreach>
@@ -260,6 +262,7 @@
 		</foreach>
 		<file src="buildfortraneftct.py" class="Kinematics">
 			<only if-extension="formopt" />
+			<only if-option="EFTCT" value="true" />
 			<except if-option="use_order_names" value="true" />
 		</file>
 		<foreach name="trnco" list="0,1,2">
@@ -267,6 +270,7 @@
 			dest="buildfortraneftct_%s.py" arguments="trnco"
 			class="Kinematics">
 		    <only if-extension="formopt" />
+			<only if-option="EFTCT" value="true" />
 		    <only if-option="use_order_names" value="true" />
 		  </file>
 		</foreach>

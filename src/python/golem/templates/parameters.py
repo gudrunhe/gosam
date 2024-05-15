@@ -33,6 +33,7 @@ class ModelTemplate(Template):
 
 		self._parameters = {}
 		self._functions = {}
+		self._ctfunctions = {}
 		name_length = 0
 		self._floats = {}
 		self._functions_fortran = {}
@@ -61,9 +62,13 @@ class ModelTemplate(Template):
 			t = self._mod.types[name]
 			#if len(name) > name_length:
 			#	name_length = len(name)
-
 			self._functions[name] = t
-		
+
+		if(hasattr(self._mod, 'ctfunctions')):
+			for name, expression in list(self._mod.ctfunctions.items()):
+				t = self._mod.types[name]
+				self._ctfunctions[name] = t
+
 		self._name_length = name_length
 
 		props = Properties()
@@ -168,6 +173,16 @@ class ModelTemplate(Template):
 			expr = parser.compile(value)
 			functions[name] = expr
 	
+		if(hasattr(model_mod,'ctfunctions')):
+			golem.util.tools.message("Found counterterms in model ...")
+			for name, value in list(model_mod.ctfunctions.items()):
+				for ctp, pcf in value.items():
+					i += 1
+					expr = parser.compile(pcf)
+					pstr = "m" if ctp<0 else "p"
+					ctname = name+"ctpole"+pstr+str(abs(ctp))
+					functions[ctname] = expr
+
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 
@@ -216,6 +231,16 @@ class ModelTemplate(Template):
 			expr = parser.compile(value)
 			functions[name] = expr
 	
+		if(hasattr(model_mod,'ctfunctions')):
+			golem.util.tools.message("Found counterterms in model ...")
+			for name, value in list(model_mod.ctfunctions.items()):
+				for ctp, pcf in value.items():
+					i += 1
+					expr = parser.compile(pcf)
+					pstr = "m" if ctp<0 else "p"
+					ctname = name+"ctpole"+pstr+str(abs(ctp))
+					functions[ctname] = expr
+
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 		# the only difference
@@ -458,6 +483,46 @@ class ModelTemplate(Template):
 			props.setProperty(index_name, str(i+base))
 			props.setProperty(name_name, name)
 			props.setProperty(type_name, type)
+
+			yield props
+
+	def ctfunctions(self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		type_name  = self._setup_name("type", "type", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name  = self._setup_name("last", "is_last", opts)
+		loweps_name = self._setup_name("loweps", "loweps",opts)
+		higheps_name = self._setup_name("higheps", "higheps",opts)
+
+		if "base" in opts:
+			base = int(opts["base"])
+		else:
+			base = 1
+
+		lst = list(self._ctfunctions.keys())
+
+		for i in range(len(lst)):
+			props = Properties()
+			if i == 0:
+				props.setProperty(first_name, "true")
+			else:
+				props.setProperty(first_name, "false")
+			if i == len(lst) - 1:
+				props.setProperty(last_name, "true")
+			else:
+				props.setProperty(last_name, "false")
+
+			name = lst[i]
+			type = self._ctfunctions[name][0]
+			el = self._ctfunctions[name][1]
+			eh = self._ctfunctions[name][2]
+
+			props.setProperty(index_name, str(i+base))
+			props.setProperty(name_name, name)
+			props.setProperty(type_name, type)
+			props.setProperty(loweps_name, el)
+			props.setProperty(higheps_name, eh)
 
 			yield props
 
