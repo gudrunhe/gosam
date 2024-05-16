@@ -532,7 +532,10 @@ d[%$_%]_0h[%helicity%]l0.txt: ../diagrams-0.hh
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
+		-D LOOPS=0 \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D DIAG=[%$_%] \
 		-D OUTFILE=d[%$_%]_0h[%helicity%]l0 \
 		../codegen/golem_0.frm[%
@@ -619,7 +622,10 @@ d[%$_%]_[% efto %]h[%helicity%]l1.txt: ../diagrams-1.hh
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
-		-D LOOPS=1 \
+		-D LOOPS=1 \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D GROUP=0 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
@@ -837,7 +843,10 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
-		-D LOOPS=1 \
+		-D LOOPS=1 \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D GROUP=0 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
@@ -1062,7 +1071,10 @@ d[%$_%]_[% efto %]h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
-		-D LOOPS=1 \
+		-D LOOPS=1 \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D GROUP=0 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
@@ -1126,7 +1138,10 @@ d[%$_%]h[%helicity%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]h[%hel
 	      @if is_mqse %] \
 		-D MQSE=1[%
 			@end @if %] \
-		-D LOOPS=1 \
+		-D LOOPS=1 \[%
+@if generate_eft_counterterms %]
+		-D EFTCTFLG=0 \[%
+@end @if %]
 		-D GROUP=0 \
 		-D DIAG=[%$_%] \
 		-D LOOPSIZE=[% loopsize diagram=$_ %] \
