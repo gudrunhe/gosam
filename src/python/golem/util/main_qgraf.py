@@ -259,8 +259,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty_out = open(form_sty_name,'w')
 	for i in range(len(form_sty_tmp)):
 		if i==34 and conf["is_ufo"]:
-			if flag_generate_eft_counterterms:
-				form_sty_out.write("<back> isCT[isCT],\n")
+			form_sty_out.write("<back> isCT[isCT],\n")
 			form_sty_out.write("<back> RK[RK],\n")
 			if use_order_names:
 				if len(order_names)>0:
@@ -279,10 +278,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			# (1,i) with i any integer (NP order) -> EFT CT vertex (cross)
 			# (0,i) with i>0 (NP order) -> NP vertex (box)
 			tmp_str = "<end><back>vtype="
-			if flag_generate_eft_counterterms:
-				tmp_str = tmp_str+"([isCT],"
-			else:
-				tmp_str = tmp_str+"(0,"
+			tmp_str = tmp_str+"([isCT],"
 			if use_order_names and "NP" in order_names:
 				tmp_str = tmp_str+"[NP])"
 			else:
@@ -315,8 +311,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo
 
-		if flag_generate_eft_counterterms:
-			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
+		new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
@@ -351,8 +346,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
-		if flag_generate_eft_counterterms:
-			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
+		new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 1)

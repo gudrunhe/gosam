@@ -162,7 +162,6 @@ class Model:
 							else:
 								ctcoeff = ctcoeff.replace(ctparam.name,'0')
 						self.ctfunctions[name][ctpole] = ctcoeff
-						#self.cttypes[name][ctpole] = "C"
 					self.cttypes[name] = ("C",min(self.ctpoles[name]),max(self.ctpoles[name]))
 				else:
 					error("CT coupling %s is neither a dict nor str!" % c)
@@ -650,8 +649,7 @@ class Model:
 						lwf.write(",")
 					lwf.write(field)
 				lwf.write(";")
-				if self.useCT:
-					lwf.write("isCT='0',")
+				lwf.write("isCT='0',")
 				is_first = True
 				for name, power in list(vertorders[ivo].items()):
 					if is_first:
@@ -783,11 +781,10 @@ class Model:
 
 		f.write("*---#[ Symbol Definitions:\n")
 		f.write("*---#[ Coupling Orders:\n")
-		f.write("AutoDeclare Symbols RK,")
+		f.write("AutoDeclare Symbols RK")
 		for el in order_names:
-			f.write("%s," % el)
-		if self.useCT:
-			f.write(",isCT")
+			f.write(",%s" % el)
+		f.write(",isCT")
 		f.write(";\n")
 		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
 		f.write("\n")
@@ -936,10 +933,7 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				if self.useCT:
-					f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
-				else:
-					f.write("Identify Once vertex(iv?, RK%d" % vertorders[ivo]["RK"])
+				f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
