@@ -502,17 +502,6 @@ genUV = Property("genUV",
    bool,
    False, experimental=True)
 
-EFTCT = Property("EFTCT",
-   """\
-   Generate diagrams with EFT counterterms provided by the UFO model.
-
-   Examples:
-   EFTCT=true
-   EFTCT=false
-   """,
-   bool,
-   False, experimental=True)
-
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
@@ -989,6 +978,15 @@ config_renorm_yukawa = Property("renorm_yukawa",
    """,
    bool, True)
 
+config_renorm_eftwilson = Property("renorm_eftwilson",
+   """\
+   Sets the same variable in config.f90
+
+   Enables renormalization of EFT Wilson coefficients
+   NOTE: Works only for special UFO models
+   """,
+   bool, True, experimental=True)
+
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
@@ -1334,7 +1332,6 @@ properties = [
    sum_helicities,
    regularisation_scheme,
    genUV,
-   EFTCT,
    helicities,
    qgraf_options,
    qgraf_verbatim,
@@ -1362,6 +1359,7 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_renorm_yukawa,
+   config_renorm_eftwilson,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,

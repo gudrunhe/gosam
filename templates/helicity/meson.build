@@ -19,6 +19,24 @@ generated_sources = [[%
                 @end @if %][%
             @end @if %][%
         @end @if generate_lo_diagrams %][%
+        @if generate_eft_counterterms %][%
+            @if group %]
+	            'diagramsct_[% efto %].f90',[%
+            @else %][%
+                @for elements topolopy.keep.ct %]
+	                'd[%$_%]_[% efto %]h[%helicity%]ct.f90',[%
+                @end @for %][%
+            @end @if %][%
+            @if internal REQUIRE_FR5 %][%
+                @if group %]
+	                'diagramsct_[% efto %]fr5.f90',[%
+                @else %][%
+                    @for elements topolopy.keep.ct %]
+	                    'd[%$_%]_[% efto %]h[%helicity%]ctfr5.f90',[%
+                    @end @for %][%
+                @end @if %][%
+            @end @if %][%
+        @end @if generate_eft_counterterms %][%
         @if helsum %][% @else %][%
             @if generate_nlo_virt %][%
                 @select abbrev.level
@@ -62,6 +80,24 @@ generated_sources = [[%
             @end @if %][%
         @end @if %][%
     @end @if generate_lo_diagrams %][%
+    @if generate_eft_counterterms %][%
+        @if group %]
+	        'diagramsct.f90',[%
+        @else %][%
+            @for elements topolopy.keep.ct %]
+	            'd[%$_%]h[%helicity%]ct.f90',[%
+            @end @for %][%
+        @end @if %][%
+        @if internal REQUIRE_FR5 %][%
+            @if group %]
+	            'diagramsctfr5.f90',[%
+            @else %][%
+                @for elements topolopy.keep.ct %]
+                    'd[%$_%]h[%helicity%]ctfr5.f90',[%
+                @end @for %][%
+            @end @if %][%
+        @end @if %][%
+    @end @if generate_eft_counterterms %][%
     @if helsum %][% @else %][%
         @if generate_nlo_virt %][%
             @select abbrev.level

@@ -550,11 +550,11 @@ def workflow(conf):
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV') # MH: FLAGGED FOR DELETION
-	conf["generate_eft_counterterms"] = conf.getProperty('EFTCT')
+	conf["generate_eft_counterterms"] = conf.getProperty('renorm_eftwilson')
 
-	if conf.getBooleanProperty("EFTCT") and not "FeynRules" in conf.getProperty("model"):
+	if conf.getBooleanProperty("renorm_eftwilson") and not "FeynRules" in conf.getProperty("model"):
 		raise GolemConfigError("EFT counterterms can only be used with an appropriate UFO model!\n " +
-			"Please provide such a model or set 'EFTCT=False'")
+			"Please provide such a model or set 'renorm_eftwilson=False'")
 
 	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
 		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
