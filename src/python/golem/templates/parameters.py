@@ -176,9 +176,17 @@ class ModelTemplate(Template):
 		if(hasattr(model_mod,'ctfunctions')):
 			golem.util.tools.message("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
-				for ctp, pcf in value.items():
+				# We expect only 1/eps and finite terms from the CT. The 1/eps^2 of the virtual is of IR origin. The following piece of code checks if the CT is defined with additional coefficients. => Throw exception in this case?
+				ctpolesmdl = list(int(k) for k in value.keys())
+				ctpoles = [-2,-1,0]
+				if(any([k not in ctpoles for k in ctpolesmdl])):
+					golem.util.tools.warning("Counterterm parameter %s has pole coeffcients not expected at NLO!" % name)
+				for ctp in ctpoles:
 					i += 1
-					expr = parser.compile(pcf)
+					if ctp in value:
+						expr = parser.compile(value[ctp])
+					else:
+						expr = parser.compile('0')
 					pstr = "m" if ctp<0 else "p"
 					ctname = name+"ctpole"+pstr+str(abs(ctp))
 					functions[ctname] = expr

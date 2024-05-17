@@ -842,14 +842,14 @@ class Model:
 			ctparams = list(self.ctfunctions.keys())
 			if len(ctparams) > 0:
 				if len(ctparams) == 1:
-					f.write("Symbol %s;" % ctparams[0])
+					f.write("Symbol %s;" % ctparams[0] + "eftctcpl")
 				else:
 					f.write("Symbols")
 					lwf.nl()
-					lwf.write(ctparams[0])
+					lwf.write(ctparams[0] + "eftctcpl")
 					for ctp in ctparams[1:]:
 						lwf.write(",")
-						lwf.write(ctp)
+						lwf.write(ctp + "eftctcpl")
 					lwf.write(";")
 
 			f.write("\n")
@@ -1130,7 +1130,7 @@ class Model:
 						lorentz = lorex[v.lorentz[il].name]
 						scolor = v.color[ic]
 						f.write("\n   + %s"
-								% (self.prefix + coupling.name.replace("_", "")))
+								% (self.prefix + coupling.name.replace("_", "") + "eftctcpl"))
 						if scolor != "1":
 							color = parser.compile(scolor)
 							color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)

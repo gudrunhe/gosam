@@ -91,9 +91,9 @@ modelfile.write('   complex(ki) :: [$$_$]\n')[$
       @for ctfunctions $][$
          @select type
             @case R $]
-modelfile.write('   real(ki), dimension([$loweps$]:[$higheps$]) :: [$$_$]\n')[$
+modelfile.write('   real(ki), dimension(-2:0) :: [$$_$]\n')[$
             @case C $]
-modelfile.write('   complex(ki), dimension([$loweps$]:[$higheps$]) :: [$$_$]\n')[$
+modelfile.write('   complex(ki), dimension(-2:0) :: [$$_$]\n')[$
          @end @select type $][$
       @end @for functions $]
 modelfile.write('   integer, parameter, private :: line_length = [$buffer_length$]\n')
