@@ -725,12 +725,12 @@ contains
       if (present(h)) then
          amp(1) = samplitudel0_h(vecs, h)[%
 @if generate_eft_counterterms %]
-         ampct = samplitudect_h(vecs, h)[%
+         ampct = samplitudect_h(vecs, h)/nlo_coupling[%
 @end @if %]
       else
          amp(1)   = samplitudel0(vecs)[%
 @if generate_eft_counterterms %]
-         ampct = samplitudect(vecs)[%
+         ampct = samplitudect(vecs)/nlo_coupling[%
 @end @if %]
       end if[%
       @else %]
@@ -2046,15 +2046,14 @@ contains
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
-      complex(ki), dimension(numcs,numcs,2) :: oper
-      complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      complex(ki), dimension(numcs,numcs,2) :: oper[%
+@if use_order_names %]
+      complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if use_order_names %]
       real(ki) :: nlo_coupling
-
-      [% @if use_order_names %]
-      write(*,*) "Warning: you are using the ir_subtraction subroutine with the"
-      write(*,*) " 'use_order_names'  feature switched on!  This might not work"
-      write(*,*) "depending on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
       
       if (present(h)) then
          call ir_subtraction_h(vecs, scale2, amp, h)
@@ -2105,8 +2104,157 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @for current_helicities %]
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()[%
+     @for current_helicities %][%
+@if use_order_names %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not use_order_names' %]
+         pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -2116,7 +2264,8 @@ contains
          else
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
-         endif
+         endif[%
+@end @if use_order_names %]
          amp = amp + heli_amp[%
   @end @for current_helicities %][%
   @end @for unique_helicity_mappings %][%
@@ -2158,15 +2307,14 @@ contains
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
-      complex(ki), dimension(numcs,numcs,2) :: oper
-      complex(ki), dimension(numcs) :: color_vectorl0, pcolor
+      complex(ki), dimension(numcs,numcs,2) :: oper[%
+@if use_order_names %]
+      complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if use_order_names %]
       real(ki) :: nlo_coupling
-
-      [% @if use_order_names %]
-      write(*,*) "Warning: you are using the ir_subtraction subroutine with the"
-      write(*,*) " 'use_order_names'  feature switched on!  This might not work"
-      write(*,*) "depending on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
@@ -2215,8 +2363,157 @@ contains
          call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-         !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()[%
+         !---#] reinitialize kinematics:[%
+@if use_order_names %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not use_order_names' %]
+         pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -2226,7 +2523,8 @@ contains
          else
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
-         endif
+         endif[%
+@end @if use_order_names %]
          amp = amp + heli_amp[%
   @end @for helicities %]
       end select[%
@@ -2309,12 +2607,12 @@ contains
       if (present(h)) then
          amp(1) = samplitudel0_h_qp(vecs, h)[%
 @if generate_eft_counterterms %]
-         ampct = samplitudect_h_qp(vecs, h)[%
+         ampct = samplitudect_h_qp(vecs, h)/nlo_coupling[%
 @end @if %]
       else
          amp(1)   = samplitudel0_qp(vecs)[%
 @if generate_eft_counterterms %]
-         ampct = samplitudect_qp(vecs)[%
+         ampct = samplitudect_qp(vecs)/nlo_coupling[%
 @end @if %]
       end if[%
       @else %]
@@ -3674,16 +3972,15 @@ contains
       real(ki_qp), dimension(2), intent(out) :: amp
       real(ki_qp), dimension(2) :: heli_amp
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
-      complex(ki_qp), dimension(numcs,numcs,2) :: oper
-      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor
+      complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
+@if use_order_names %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if use_order_names %]
       real(ki_qp) :: nlo_coupling
 
-      [% @if use_order_names %]
-      write(*,*) "Warning:  you are using the ir_subtraction_qp subroutine with the"
-      write(*,*) "'use_order_names' feature switched on! This might not work depen-"
-      write(*,*) "ing on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
-      
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
       @case 0 1 %]
@@ -3730,8 +4027,157 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @for current_helicities %]
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]_qp()[%
+     @for current_helicities %][%
+@if use_order_names %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not use_order_names' %]
+         pcolor = amplitude[%map.index%]l0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -3741,7 +4187,8 @@ contains
          else
            heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
-         endif
+         endif[%
+@end @if use_order_names %]
          amp = amp + heli_amp[%
   @end @for current_helicities %][%
   @end @for unique_helicity_mappings %][%
@@ -3768,7 +4215,7 @@ contains
    end subroutine ir_subtraction_qp
    !---#] subroutine ir_subtraction_qp :
    !---#[ subroutine ir_subtraction_h_qp :
-   subroutine     ir_subtraction_qp(vecs,scale2,amp,h)
+   subroutine     ir_subtraction_h_qp(vecs,scale2,amp,h)
       use config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
@@ -3782,15 +4229,14 @@ contains
       real(ki_qp), dimension(2), intent(out) :: amp
       real(ki_qp), dimension(2) :: heli_amp
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
-      complex(ki_qp), dimension(numcs,numcs,2) :: oper
-      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor
+      complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
+@if use_order_names %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if use_order_names %]
       real(ki_qp) :: nlo_coupling
-
-      [% @if use_order_names %]
-      write(*,*) "Warning:  you are using the ir_subtraction_qp subroutine with the"
-      write(*,*) "'use_order_names' feature switched on! This might not work depen-"
-      write(*,*) "ing on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
@@ -3839,8 +4285,157 @@ contains
          call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-         !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]_qp()[%
+         !---#] reinitialize kinematics:[%
+@if use_order_names %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not use_order_names' %]
+         pcolor = amplitude[%map.index%]l0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -3850,7 +4445,8 @@ contains
          else
            heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
-         endif
+         endif[%
+@end @if use_order_names %]
          amp = amp + heli_amp[%
   @end @for helicities %]
       end select[%
@@ -3874,7 +4470,7 @@ contains
       case(2)
          amp(:) = amp(:) * nlo_coupling / 8.0_ki_qp / pi / pi
       end select
-   end subroutine ir_subtraction_qp
+   end subroutine ir_subtraction_h_qp
    !---#] subroutine ir_subtraction_h_qp :[%
 @end @if extension quadruple %]
    !---#[ color correlated ME :
