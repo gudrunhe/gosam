@@ -985,7 +985,7 @@ config_renorm_eftwilson = Property("renorm_eftwilson",
    Enables renormalization of EFT Wilson coefficients
    NOTE: Works only for special UFO models
    """,
-   bool, True, experimental=True)
+   bool, False, experimental=True)
 
 config_reduction_interoperation = Property("reduction_interoperation",
    """

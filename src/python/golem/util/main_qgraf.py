@@ -311,7 +311,8 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo
 
-		new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
+		if conf["is_ufo"]:
+			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 0)
@@ -346,7 +347,8 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
-		new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
+		if conf["is_ufo"]:
+			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
 				options, new_verbatim, in_particles, out_particles, [], 1)
