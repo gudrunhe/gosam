@@ -140,6 +140,10 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 
 #call zeroes
 
+#If (`LOOPS' == 0 )[% @if generate_eft_counterterms %] && (`EFTCTFLG' == 0)[% @end @if %]
+#include yukawas.hh
+#call ReplaceYukawas
+#EndIf
 
 * models that implement their own vertex replacements
 * must define the preprocessor variable USEVERTEXPROC

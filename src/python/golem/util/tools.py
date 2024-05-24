@@ -291,7 +291,10 @@ def prepare_model_files(conf, output_path=None):
   # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
   # Some options only work with ufo models
-   isufo = conf["is_ufo"]
+   isufo = False
+   conf["is_ufo"] = isufo
+
+   conf["use_order_names"] = conf.getProperty(golem.properties.use_order_names)
 
    if "setup-file" in conf:
       rel_path = os.path.dirname(conf["setup-file"])

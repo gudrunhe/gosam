@@ -27,11 +27,14 @@ class ModelTemplate(Template):
 		self._modeltype =  conf.getProperty("modeltype")
 		if not self._modeltype:
 			self._modeltype = conf.getProperty("model")
+		self._order_names = sorted(conf.getProperty(golem.properties.order_names))
+
 
 		self._comment_chars = ['#', '!', ';']
 		self._buffer_length = 80
 
 		self._parameters = {}
+		self._particles = {}
 		self._functions = {}
 		self._ctfunctions = {}
 		name_length = 0
@@ -58,6 +61,9 @@ class ModelTemplate(Template):
 					param = (name, t, [value, "0.0"])
 			self._parameters[name] = param		
 		
+		for name, value in list(self._mod.particles.items()):
+			self._particles[name] = value
+
 		for name, expression in list(self._mod.functions.items()):
 			t = self._mod.types[name]
 			#if len(name) > name_length:
@@ -452,6 +458,88 @@ class ModelTemplate(Template):
 			props.setProperty(type_name, type)
 			props.setProperty(real_name, value[0])
 			props.setProperty(imag_name, value[1])
+
+			yield props
+
+	def modelparticles(self, *args, **opts):
+		name_name = self._setup_name("name", "name", opts)
+		antiname_name = self._setup_name("antiname", "antiname", opts)
+		mass_name = self._setup_name("mass", "mass", opts)
+		massive_name = self._setup_name("massive", "is_massive", opts)
+
+		color_filter = []
+		spin_filter = []
+		charge_filter = []
+
+		if "white" in args:
+			color_filter.extend([1, -1])
+		if "colored" in args:
+			color_filter.extend([3, -3, 8, -8])
+		if "fundamental" in args:
+			color_filter.extend([-3, 3])
+		if "quarks" in args:
+			color_filter.append(3)
+		if "anti-quarks" in args:
+			color_filter.append(-3)
+		if ("adjoint" in args) or ("gluons" in args):
+			color_filter.extend([-8, 8])
+
+		have_color_filter = (len(color_filter) != 0)
+
+		if "scalar" in args:
+			spin_filter.append(0)
+		if "spinor" in args:
+			spin_filter.extend([-1, 1])
+		if "vector" in args:
+			spin_filter.extend([-2, 2])
+		if "vectorspinor" in args:
+			spin_filter.extend([-3, 3])
+		if "tensor" in args:
+			spin_filter.extend([-4, 4])
+		if "boson" in args:
+			spin_filter.extend([-4,-2,0,2,4])
+		if "fermion" in args:
+			spin_filter.extend([-3,-1,3,1])
+
+		have_spin_filter = (len(spin_filter) != 0)
+
+		if "charged" in args:
+			charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+
+		have_charge_filter = (len(charge_filter) != 0)
+
+		have_massive_filter = ("massive" in args)
+
+		for name, value in list(self._particles.items()):
+			props = Properties()
+
+			if have_color_filter and value.getColor() not in color_filter:
+				continue
+
+			if have_spin_filter and value.getSpin() not in spin_filter:
+				continue
+
+			if have_charge_filter and value.getCharge() not in charge_filter:
+				continue
+
+			if have_massive_filter and not value.isMassive(self._zeroes):
+				continue
+
+			mass = value.getMass()
+			antiname = value.getPartner()
+
+			props.setProperty(name_name, name)
+			props.setProperty(mass_name, mass)
+			props.setProperty(antiname_name, antiname)
+
+			yield props
+
+	def ordernames(self, *args, **opts):
+		name_name = self._setup_name("name", "name", opts)
+
+		for on in self._order_names:
+			props = Properties()
+			props.setProperty(name_name, on)
 
 			yield props
 

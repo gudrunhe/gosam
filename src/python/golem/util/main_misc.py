@@ -551,6 +551,7 @@ def workflow(conf):
 	conf["generate_nlo_virt"] = generate_nlo_virt
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV') # MH: FLAGGED FOR DELETION
 	conf["generate_eft_counterterms"] = conf.getProperty('renorm_eftwilson')
+	conf["generate_yuk_counterterms"] = conf.getProperty('renorm_yukawa') and generate_nlo_virt
 
 	if conf.getBooleanProperty("renorm_eftwilson") and not "FeynRules" in conf.getProperty("model"):
 		raise GolemConfigError("EFT counterterms can only be used with an appropriate UFO model!\n " +

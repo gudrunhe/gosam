@@ -113,9 +113,6 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
       if diagram.EHCfound():
          conf["ehc"]=True
 
-      if diagram.YUKAWAfound():
-         conf["yukawa"]=True
-
       if analyze_diagram(diagram, zero, fltr):
          keep.append(idx)
 

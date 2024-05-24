@@ -305,6 +305,7 @@
 		<file src="ct.hh" class="Integrals">
 			<except if-option="genUV" value="false"/>
 		</file>
+		<file src="yukawas.hh" class="Model"/>
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">

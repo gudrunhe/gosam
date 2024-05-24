@@ -35,6 +35,9 @@ Symbols m, TR, NC, NA, eps(-2:2), sign1, ..., sign4;
 Symbol sqrt2, Sqrt2, sqrt3, Sqrt3, scale2;
 Symbol deltaaxial, deltaOS, deltaHV;
 
+Symbol CYUKAWA, CYUKAWA2, RENLOG;
+AutoDeclare Symbol LOGYUK;
+
 Vector ZERO, vDUMMYA;
 
 #If `LOOPS' == 1

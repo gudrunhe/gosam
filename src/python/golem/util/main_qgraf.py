@@ -258,7 +258,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	form_sty_tmp = open(form_sty_name,'r').readlines()
 	form_sty_out = open(form_sty_name,'w')
 	for i in range(len(form_sty_tmp)):
-		if i==34 and conf["is_ufo"]:
+		if i==34 and conf["is_ufo"]=='True':
 			form_sty_out.write("<back> isCT[isCT],\n")
 			form_sty_out.write("<back> RK[RK],\n")
 			if use_order_names:
@@ -272,7 +272,7 @@ def run_qgraf(conf, in_particles, out_particles):
 	pyxo_sty_tmp = open(pyxo_sty_name,'r').readlines()
 	pyxo_sty_out = open(pyxo_sty_name,'w')
 	for i in range(len(pyxo_sty_tmp)):
-		if i==25 and conf["is_ufo"]:
+		if i==25 and conf["is_ufo"]=='True':
 			# vertex type identifier:
 			# (0,0) -> normal vertex (dot)
 			# (1,i) with i any integer (NP order) -> EFT CT vertex (cross)
@@ -311,7 +311,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_lo
 
-		if conf["is_ufo"]:
+		if conf["is_ufo"]=='True':
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
@@ -347,7 +347,7 @@ def run_qgraf(conf, in_particles, out_particles):
 		else:
 			new_verbatim = verbatim + "\n" + verbatim_nlo
 
-		if conf["is_ufo"]:
+		if conf["is_ufo"]=='True':
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
