@@ -186,6 +186,12 @@
               true=.true.
               false=.false. %]
 
+   ! if renormalisation.eq.1, include renormalisation of EFT Wilson coefficients (only works with special UFO models):
+   logical :: renorm_eftwilson = [% renorm_eftwilson
+             convert=bool
+             true=.true.
+             false=.false. %]
+
    ! Switch mass counter terms for massive quarks on or off
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off

@@ -290,9 +290,13 @@ def prepare_model_files(conf, output_path=None):
    
   # new: if we generate UV counterterms we need extra files
    genUV = conf["generate_uv_counterterms"]
-  # Some options only work with ufo models
-   isufo = False
-   conf["is_ufo"] = isufo
+  # Some options only work with ufo models.
+  # For OLP mode: check if property is set already.
+   if conf["is_ufo"] is not None:
+      isufo = conf["is_ufo"]
+   else:
+      isufo = False
+      conf["is_ufo"] = isufo
 
    conf["use_order_names"] = conf.getProperty(golem.properties.use_order_names)
 
