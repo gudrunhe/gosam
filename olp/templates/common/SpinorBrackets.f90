@@ -529,4 +529,4 @@ contains
         q = Sp2%get()
         dotproduct_Sp_Sp = p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3)
     end  function dotproduct_Sp_Sp
-end module
+end module SpinorBrackets
