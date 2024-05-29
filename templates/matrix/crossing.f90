@@ -6,9 +6,9 @@ module [% name asprefix=\_ %]matrix
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1, ir_subtraction
    public :: OLP_spin_correlated_lo2, OLP_color_correlated
-   public :: spin_correlated_lo2_whizard
+   public :: spin_correlated_lo2_whizard, spin_correlated_lo2
    ! TODO:
-   ! public :: color_correlated_lo2, spin_correlated_lo2
+   ! public :: color_correlated_lo2
 
 
 contains
@@ -200,6 +200,25 @@ contains
    end subroutine OLP_spin_correlated_lo2
 
 
+   subroutine spin_correlated_lo2(vecs, bornsc)
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => spin_correlated_lo2
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%num_legs%], 4, 4) :: bornsc
+
+      real(ki), dimension([%num_legs%], 4) :: new_vecs
+
+      call twist_momenta(vecs, new_vecs)
+
+      call orig_func(new_vecs, bornsc)
+
+      call twist_result_spin_correlated_lo2(bornsc)
+
+      bornsc=bornsc*prefactor()
+
+   end subroutine spin_correlated_lo2_whizard
+
+
    subroutine spin_correlated_lo2_whizard(vecs, bornsc)
       use [% process_name asprefix=\_ %]matrix, only: orig_func => spin_correlated_lo2_whizard
       implicit none
@@ -258,4 +277,14 @@ contains
      @end @for %]
    end subroutine twist_result_spin_correlated_lo2_whizard
       
+   pure subroutine twist_result_spin_correlated_lo2(bornsc)
+     implicit none
+     real(ki), dimension([%num_legs%], 4, 4), intent(inout) :: bornsc
+     real(ki), dimension([%num_legs%], 4, 4) :: temp
+     temp = bornsc[%
+     @for crossing %]
+     bornsc([% index %],:,:) = temp([% $_ %],:,:)[%
+     @end @for %]
+   end subroutine twist_result_spin_correlated_lo2
+
 end module [% name asprefix=\_ %]matrix
