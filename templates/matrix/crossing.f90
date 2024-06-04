@@ -216,7 +216,7 @@ contains
 
       bornsc=bornsc*prefactor()
 
-   end subroutine spin_correlated_lo2_whizard
+   end subroutine spin_correlated_lo2
 
 
    subroutine spin_correlated_lo2_whizard(vecs, bornsc)
