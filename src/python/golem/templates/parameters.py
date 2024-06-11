@@ -178,7 +178,7 @@ class ModelTemplate(Template):
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
-	
+
 		if(hasattr(model_mod,'ctfunctions')):
 			golem.util.tools.message("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
@@ -588,8 +588,6 @@ class ModelTemplate(Template):
 		type_name  = self._setup_name("type", "type", opts)
 		first_name = self._setup_name("first", "is_first", opts)
 		last_name  = self._setup_name("last", "is_last", opts)
-		loweps_name = self._setup_name("loweps", "loweps",opts)
-		higheps_name = self._setup_name("higheps", "higheps",opts)
 
 		if "base" in opts:
 			base = int(opts["base"])
@@ -610,15 +608,11 @@ class ModelTemplate(Template):
 				props.setProperty(last_name, "false")
 
 			name = lst[i]
-			type = self._ctfunctions[name][0]
-			el = self._ctfunctions[name][1]
-			eh = self._ctfunctions[name][2]
+			type = self._ctfunctions[name]
 
 			props.setProperty(index_name, str(i+base))
 			props.setProperty(name_name, name)
 			props.setProperty(type_name, type)
-			props.setProperty(loweps_name, el)
-			props.setProperty(higheps_name, eh)
 
 			yield props
 

@@ -373,7 +373,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# ----------------- EFT CT PART -------------------------------------------
-	if flag_generate_eft_counterterms and flag_generate_nlo_virt:
+	if flag_generate_eft_counterterms:
 		output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
 		log_name    = consts.PATTERN_DIAGRAMS_CT + log_ext
 

@@ -120,12 +120,11 @@ class Model:
 		self.useCT = False
 		# the following code block splits all_couplings into
 		# two separate lists of CT and non-CT couplings
-		# also fills self.ctfunctions used both in write_python_file and write_form_file
+		# also fills self.ctfunctions used write_python_file
 		if hasattr(mod,"CT_vertices"):
 			self.useCT = True
 			self.all_CTcouplings = []
 			self.ctfunctions = {}
-			self.ctpoles = {}
 			self.cttypes = {}
 			for a in dir(mod.CT_vertices.C):
 				b = getattr(mod.CT_vertices.C,a)
@@ -136,33 +135,47 @@ class Model:
 		# construct the CT dictionary representing the Laurent expansion
 			for c in self.all_CTcouplings:
 				name = self.prefix + c.name.replace("_", "")
+				self.ctfunctions[(name+'const')] = {}
+				self.ctfunctions[(name+'log')] = {}
+				self.cttypes[(name+'const')] = "C"
+				self.cttypes[(name+'log')] = "C"
 				if isinstance(c.value,dict):
-					# the value of the coupling is already a dictionary representing the Laurent expansion
-					self.ctpoles[name] = list(c.value.keys())
-					self.ctfunctions[name] = c.value
-					self.cttypes[name] = ("C",min(self.ctpoles[name]),max(self.ctpoles[name]))
+					# the value of the coupling is a dictionary representing the Laurent expansion
+					# => split const from log terms, if present
+					for ctpart in ['const','log']:
+						for ctpole in list(c.value.keys()):
+							if isinstance(c.value[ctpole],dict):
+								ctcoeff = c.value[ctpole][ctpart]
+							else:
+								if ctpart == 'const':
+									ctcoeff = c.value[ctpole]
+								else:
+									ctcoeff = '0'
+							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
 				elif isinstance(c.value,str):
 					# the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
-					# => have to construct the dictionary
-					self.ctfunctions[name] = {}
-					self.cttypes[name] = {}
 
 					CTparams = [ctp for ctp in self.all_CTparameters if ctp.name in c.value]
 					CTpoles = set()
 
 					for ctparam in CTparams:
 						CTpoles = CTpoles.union(set(ctparam.value.keys()))
-					self.ctpoles[name] = list(CTpoles)
 
-					for ctpole in CTpoles:
-						ctcoeff = c.value
-						for ctparam in CTparams:
-							if ctpole in ctparam.value:
-								ctcoeff = ctcoeff.replace(ctparam.name,ctparam.value[ctpole])
-							else:
-								ctcoeff = ctcoeff.replace(ctparam.name,'0')
-						self.ctfunctions[name][ctpole] = ctcoeff
-					self.cttypes[name] = ("C",min(self.ctpoles[name]),max(self.ctpoles[name]))
+					for ctpart in ['const','log']:
+						for ctpole in CTpoles:
+							ctcoeff = c.value
+							for ctparam in CTparams:
+								if ctpole in ctparam.value:
+									if isinstance(ctparam.value[ctpole],dict):
+										ctcoeff = ctcoeff.replace(ctparam.name,ctparam.value[ctpole][ctpart])
+									else:
+										if ctpart == 'const':
+											ctcoeff = ctcoeff.replace(ctparam.name,ctparam.value[ctpole])
+										else:
+											ctcoeff = ctcoeff.replace(ctparam.name,'0')
+								else:
+									ctcoeff = ctcoeff.replace(ctparam.name,'0')
+							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
 				else:
 					error("CT coupling %s is neither a dict nor str!" % c)
 
@@ -388,7 +401,6 @@ class Model:
 					for fn in cmath_functions:
 						expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
 								ex.SpecialExpression(str(fn)))
-					expr = expr.algsubs(ex.SymbolExpression('reglog'),ex.SpecialExpression('log'))
 					expr = expr.prefixSymbolsWith(self.prefix)
 					expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
 					expr = expr.algsubs(sym_cmplx(
@@ -839,7 +851,7 @@ class Model:
 		f.write("\n")
 
 		if self.useCT:
-			ctparams = list(self.ctfunctions.keys())
+			ctparams = [self.prefix + c.name.replace("_", "") for c in self.all_CTcouplings]
 			if len(ctparams) > 0:
 				if len(ctparams) == 1:
 					f.write("Symbol %s;" % ctparams[0] + "eftctcpl")
