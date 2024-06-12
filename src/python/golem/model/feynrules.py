@@ -662,6 +662,9 @@ class Model:
 					lwf.write(field)
 				lwf.write(";")
 				lwf.write("isCT='0',")
+				if 'NP' in vertorders[ivo]:
+					flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
+					lwf.write("isNP='%s'," % str(flagNP))
 				is_first = True
 				for name, power in list(vertorders[ivo].items()):
 					if is_first:
@@ -754,6 +757,9 @@ class Model:
 						lwf.write(field)
 					lwf.write(";")
 					lwf.write("isCT='1',")
+					if 'NP' in vertorders[ivo]:
+						flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
+						lwf.write("isNP='%s'," % str(flagNP))
 					is_first = True
 					for name, power in list(vertorders[ivo].items()):
 						if is_first:
@@ -797,6 +803,8 @@ class Model:
 		for el in order_names:
 			f.write(",%s" % el)
 		f.write(",isCT")
+		if 'NP' in order_names:
+			f.write(",isNP")
 		f.write(";\n")
 		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
 		f.write("\n")
@@ -945,7 +953,11 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
+				if 'NP' in vertorders[ivo]:
+					flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
+					f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
+				else:
+					f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
@@ -1088,7 +1100,11 @@ class Model:
 
 					fold_name = "(%s) %s CTVertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 					f.write("*---#[ %s:\n" % fold_name)
-					f.write("Identify Once vertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
+					if 'NP' in vertorders[ivo]:
+						flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
+						f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
+					else:
+						f.write("Identify Once vertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
 					for el in order_names:
 						f.write(", %s%d"
 							% (el,vertorders[ivo][el]))

@@ -260,6 +260,8 @@ def run_qgraf(conf, in_particles, out_particles):
 	for i in range(len(form_sty_tmp)):
 		if i==34 and conf["is_ufo"]=='True':
 			form_sty_out.write("<back> isCT[isCT],\n")
+			if use_order_names and 'NP' in order_names:
+				form_sty_out.write("<back> isNP[isNP],\n")
 			form_sty_out.write("<back> RK[RK],\n")
 			if use_order_names:
 				if len(order_names)>0:
