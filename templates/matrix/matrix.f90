@@ -737,7 +737,7 @@ contains
       real(ki), intent(in) :: scale2
       real(ki), dimension(4), intent(out) :: amp[%
 @if generate_eft_counterterms %]
-      real(ki), dimension(-2:0) :: ampct[%
+      real(ki), dimension(2:4) :: ampct[%
 @end @if %]
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
@@ -931,21 +931,13 @@ contains
          @if generate_eft_counterterms %]
          if (renorm_eftwilson) then
             if (present(h)) then
-               if (renorm_logs) then
-                  ampct = samplitudect_h(vecs, .true., scale2, h)/nlo_coupling
-               else
-                  ampct = samplitudect_h(vecs, .false., scale2, h)/nlo_coupling
-               end if
+               ampct((/4,3,2/)) = samplitudect_h(vecs, renorm_logs, scale2, h)
             else
-               if (renorm_logs) then
-                  ampct = samplitudect(vecs, .true., scale2)/nlo_coupling
-               else
-                  ampct = samplitudect(vecs, .false., scale2)/nlo_coupling
-               end if
+               ampct((/4,3,2/)) = samplitudect(vecs, renorm_logs, scale2)
             end if
-            amp(2) = amp(2) + ampct(0)
-            amp(3) = amp(3) + ampct(-1)
-            amp(4) = amp(4) + ampct(-2)
+            ! account for nlo_prefactors in EFT counterterms
+            ampct = (8.0_ki*pi**2/nlo_coupling)*ampct
+            amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
          end if[%
          @end @if generate_eft_counterterms %][%
             @else %]
