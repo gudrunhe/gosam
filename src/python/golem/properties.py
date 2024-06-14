@@ -1275,6 +1275,10 @@ meson_arch = Property("meson.arch", """\
    libraries / executables unusable on other CPUs. For all possible options, see the GCC documentation.
    """, str, default="x86-64")
 
+unitary_gauge = Property("unitary_gauge", """
+   Use unitary gauge propagators for the massive vector bosons instead of Feynman gauge propagators.
+""", bool, default=False)
+
 properties = [
    process_name,
    process_path,
@@ -1374,7 +1378,9 @@ properties = [
    respect_generations,
 
    meson_buildtype,
-   meson_arch
+   meson_arch,
+
+   unitary_gauge
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]

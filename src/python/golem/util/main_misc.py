@@ -712,6 +712,9 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading tree diagram file %r" % fname)
 		mod_diag_lo = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_lo.diagrams.values():
+				d.unitary_gauge = True
 		conf["ehc"]=False
 		# keep_tree, tree_signs, tree_flows =
 		keep_tree, tree_signs, treecache = \
@@ -743,6 +746,9 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_virt.diagrams.values():
+				d.unitary_gauge = True
 
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
 			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
@@ -760,6 +766,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading counter term diagram file %r" % fname)
 		mod_diag_ct = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_ct.diagrams.values():
+				d.unitary_gauge = True
+
 		# keep_tree, tree_signs, tree_flows =
 		keep_ct, ct_signs = \
 				golem.topolopy.functions.analyze_ct_diagrams(

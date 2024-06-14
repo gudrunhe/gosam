@@ -260,7 +260,7 @@
 		<file src="color.hh" class="Verbatim"/>
 		<file src="vertices.hh" class="Verbatim"/>
 		<file src="legs.hh" class="Verbatim"/>
-		<file src="propagators.hh" class="Verbatim"/>
+		<file src="propagators.hh" class="Kinematics"/>
 		<!-- file src="fermion_flow.hh" class="Integrals" /-->
 		<file src="shiftmomenta.prc" class="Integrals" />
 		<file src="r2.hh" class="Integrals" />

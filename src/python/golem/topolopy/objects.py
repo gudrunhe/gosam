@@ -27,6 +27,7 @@ class Diagram:
       self._sign = 0
 
       self.filtered_by_momentum = False
+      self.unitary_gauge = False
 
       for c in components:
          c.addToDiagram(self)
@@ -190,7 +191,7 @@ class Diagram:
       rk = 0
       for p in self._loop:
          twospin = self._propagators[abs(p)].twospin
-         if twospin != 2:
+         if twospin != 2 or (self.unitary_gauge and self._propagators[abs(p)].mass != "0"):
             rk += twospin
 
       for v in self._loop_vertices:
@@ -198,6 +199,9 @@ class Diagram:
 
       if MQSE and self.isMassiveQuarkSE() and rk < 2:
          return 2
+
+      if rk > self.loopsize() + 1:
+         error("Encountered diagram with rank - loopsize = {} - {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize()))
 
       return rk
 
