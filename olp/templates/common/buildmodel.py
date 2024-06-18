@@ -3,6 +3,7 @@
 
 import sys
 import os
+import re
 from optparse import OptionParser
 from t2f import translatefile, postformat, getdata
 from pythonin import parameters, symbols, lambdafunc
@@ -83,6 +84,14 @@ modelfile.write('   complex(ki), parameter :: [$$_$] = ([$ real convert=float fo
 modelfile.write('   real(ki) :: [$$_$]\n')[$
             @case C $]
 modelfile.write('   complex(ki) :: [$$_$]\n')[$
+         @end @select type $][$
+      @end @for functions $][$
+      @for ctfunctions $][$
+         @select type
+            @case R $]
+modelfile.write('   real(ki), dimension(-2:0) :: [$$_$]\n')[$
+            @case C $]
+modelfile.write('   complex(ki), dimension(-2:0) :: [$$_$]\n')[$
          @end @select type $][$
       @end @for functions $]
 modelfile.write('   integer, parameter, private :: line_length = [$buffer_length$]\n')
@@ -1239,7 +1248,9 @@ modelfile.write("     &3383279502884197169399375105820974944592307816406286209_k
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @if $][$
 @end @select $]
-modelfile.write("%s" % outdict['Functions'])
+newfcs = re.sub(r"ctpolem([0-9]*)",r"(-\1)",outdict["Functions"])
+newfcs = re.sub(r"ctpolep([0-9]*)",r"(\1)",newfcs)
+modelfile.write("%s" % newfcs)
 modelfile.write("end subroutine init_functions\n")
 modelfile.write("!---#] subroutine init_functions:\n")
 modelfile.write("!---#[ utility functions for model initialization:\n")
