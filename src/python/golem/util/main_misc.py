@@ -553,7 +553,7 @@ def workflow(conf):
 	conf["generate_eft_counterterms"] = conf.getBooleanProperty('renorm_eftwilson') and generate_nlo_virt
 	conf["generate_yuk_counterterms"] = conf.getBooleanProperty('renorm_yukawa') and generate_nlo_virt
 
-	if conf.getBooleanProperty("renorm_eftwilson") and not "FeynRules" in conf.getProperty("model"):
+	if conf.getBooleanProperty("renorm_eftwilson") and not conf["is_ufo"]:
 		raise GolemConfigError("EFT counterterms can only be used with an appropriate UFO model!\n " +
 			"Please provide such a model or set 'renorm_eftwilson=False'")
 
