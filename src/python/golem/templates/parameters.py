@@ -28,7 +28,7 @@ class ModelTemplate(Template):
 		if not self._modeltype:
 			self._modeltype = conf.getProperty("model")
 		self._order_names = sorted(conf.getProperty(golem.properties.order_names))
-
+		self._useCT = conf.getBooleanProperty('renorm_eftwilson')
 
 		self._comment_chars = ['#', '!', ';']
 		self._buffer_length = 80
@@ -70,7 +70,7 @@ class ModelTemplate(Template):
 			#	name_length = len(name)
 			self._functions[name] = t
 
-		if(hasattr(self._mod, 'ctfunctions')):
+		if(hasattr(self._mod, 'ctfunctions') and self._useCT):
 			for name, expression in list(self._mod.ctfunctions.items()):
 				t = self._mod.types[name]
 				self._ctfunctions[name] = t
@@ -179,7 +179,7 @@ class ModelTemplate(Template):
 			expr = parser.compile(value)
 			functions[name] = expr
 
-		if(hasattr(model_mod,'ctfunctions')):
+		if(hasattr(model_mod,'ctfunctions') and self._useCT):
 			golem.util.tools.message("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
 				# We expect only 1/eps and finite terms from the CT. The 1/eps^2 of the virtual is of IR origin. The following piece of code checks if the CT is defined with additional coefficients. => Throw exception in this case?
@@ -245,7 +245,7 @@ class ModelTemplate(Template):
 			expr = parser.compile(value)
 			functions[name] = expr
 	
-		if(hasattr(model_mod,'ctfunctions')):
+		if(hasattr(model_mod,'ctfunctions') and self._useCT):
 			golem.util.tools.message("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
 				for ctp, pcf in value.items():
