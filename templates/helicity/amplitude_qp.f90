@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if use_order_names %]_[% trnco %][% @end @if %]_qp
-   use config, only: ki => ki_qp, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color_qp, only: numcs[%
 @if generate_nlo_virt %][%
@@ -305,7 +305,7 @@ contains
 @else %][% 'evaluate group only for sum' %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
-   use config, only: &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
       & logfile, debug_nlo_diagrams
    use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow[%
       @if extension golem95 %]

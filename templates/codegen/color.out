@@ -1,8 +1,8 @@
 %=$module     [$ process_name asprefix=\_ $]color
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use config, only: ki
-   use model, only: NC, Nf
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: NC, Nf
    implicit none
    save
 

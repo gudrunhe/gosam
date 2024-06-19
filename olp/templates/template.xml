@@ -56,6 +56,9 @@
 	<file src="meson_options.txt" class="OLP" usedby="olp">
 		<only if-extension="meson"/>
 	</file>
+	<file src="install_mod_files.py" class="Verbatim" executable="yes" usedby="olp">
+		<only if-extension="meson"/>
+	</file>
 
 	<directory src="common" usedby="olp">
 		<file src="accu.f90" class="OLP" usedby="olp"/>

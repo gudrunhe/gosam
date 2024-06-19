@@ -4,7 +4,7 @@ $][% @with args %]module     [$ process_name asprefix=\_
             $]d[% DIAGRAM %]h[% HELICITY %]l1d
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    use [$ process_name asprefix=\_ $]util, only: cond, d => metric_tensor
    [$ @if internal CUSTOM_SPIN2_PROP
    $]use custompropagator[$ @end @if $]
@@ -40,7 +40,7 @@ contains[%
       @select r2
       @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [$ process_name asprefix=\_ $]kinematics
       use [$ process_name asprefix=\_ $]color
       use [$ process_name asprefix=\_ $]abbrev[%
@@ -78,7 +78,7 @@ contains[%
       @select r2
       @case implicit explicit $], mu2[$
       @end @select $]) result(brack)
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [$ process_name asprefix=\_ $]kinematics
       use SpinorBrackets
       use [$ process_name asprefix=\_ $]color

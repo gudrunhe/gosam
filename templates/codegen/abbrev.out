@@ -1,7 +1,7 @@
 %=$[% ' vim: syntax=golem
 %]module     [$ process_name asprefix=\_
 	$][% output.file match=".*/([^/.]*)\\.f90" format="%s" %]
-   use config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    use [$ process_name asprefix=\_ $]globals[% 
            output.file match=".*/[^/.h]*(h[0-9]*)\\.f90" format="%s" %]
    [$ @if internal CUSTOM_SPIN2_PROP
@@ -32,11 +32,11 @@ contains
    @if use_flags_1 $]
       use [$ process_name asprefix=\_ $]groups, only: evaluate_virt_diagram[$
    @end @if $]
-      use config, only: deltaOS, &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: deltaOS, &
      &    logfile, debug_nlo_diagrams
       use [$ process_name asprefix=\_ $]kinematics
       use SpinorBrackets
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [$ process_name asprefix=\_ $]color, only: TR
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       implicit none[$
@@ -73,10 +73,10 @@ contains
    end subroutine
 
    subroutine     init_abbrev_cont[% bp %]()
-      use config, only: deltaOS
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: deltaOS
       use [$ process_name asprefix=\_ $]kinematics
       use SpinorBrackets
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [$ process_name asprefix=\_ $]color, only: TR
       implicit none[%
                @end @if %][%

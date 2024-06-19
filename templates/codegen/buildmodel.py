@@ -33,9 +33,9 @@ modelfile = open('model.f90', 'w')
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file
-modelfile.write('module     model\n')
+modelfile.write('module     [$ process_name $]_model\n')
 modelfile.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile.write('   use config, only: ki')[$
+modelfile.write('   use [$ @if internal OLP_MODE $][$ @else $][$ process_name$]_[$ @end @if $]config, only: ki')[$
 @if extension samurai $]
 modelfile.write(', &\n')
 modelfile.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
@@ -1475,7 +1475,7 @@ modelfile.write("  end subroutine\n")[$
 modelfile.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
-modelfile.write("end module model\n")
+modelfile.write("end module [$ process_name $]_model\n")
 
 modelfile.close()
 ### additional formatting for output files
@@ -1491,9 +1491,9 @@ modelfile_qp = open('model_qp.f90', 'w')
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file
-modelfile_qp.write('module     model_qp\n')
+modelfile_qp.write('module     [$ process_name $]_model_qp\n')
 modelfile_qp.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile_qp.write('   use config, only: ki => ki_qp')[$
+modelfile_qp.write('   use [$ @if internal OLP_MODE $][$ @else $][$ process_name$]_[$ @end @if $]config, only: ki => ki_qp')[$
 @if extension samurai $]
 modelfile_qp.write(', &\n')
 modelfile_qp.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
@@ -2933,7 +2933,7 @@ modelfile_qp.write("  end subroutine\n")[$
 modelfile_qp.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
-modelfile_qp.write("end module model_qp\n")
+modelfile_qp.write("end module [$ process_name $]_model_qp\n")
 
 modelfile_qp.close()
 ### additional formatting for output files

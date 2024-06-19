@@ -57,7 +57,7 @@ f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'l0
 f90file.write('   ! file: '+str(os.getcwd())+'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %].f90 \n')
 f90file.write('   ! generator: buildfortranborn.py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
-f90file.write('   use config, only: ki\n')[%
+f90file.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 f90file.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
@@ -72,11 +72,11 @@ f90file.write('\n')
 f90file.write('contains\n')
 f90file.write('!---#[ function amplitude:\n')
 f90file.write('   function amplitude()\n')
-f90file.write('      use model\n')
+f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use SpinorBrackets\n')
 f90file.write('      use [% process_name asprefix=\_ %]color\n')
-f90file.write('      use config, only: debug_lo_diagrams, &\n')
+f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_lo_diagrams, &\n')
 f90file.write('        & use_sorted_sum\n')
 f90file.write('      use accu, only: sorted_sum\n')
 f90file.write('      use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram\n')
@@ -115,7 +115,7 @@ f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+
 f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsl0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortranborn[% @if use_order_names %]_[% trnco %][% @end @if %].py \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')
-f90file_qp.write('   use config, only: ki => ki_qp\n')[%
+f90file_qp.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 f90file_qp.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
@@ -130,11 +130,11 @@ f90file_qp.write('\n')
 f90file_qp.write('contains\n')
 f90file_qp.write('!---#[ function amplitude:\n')
 f90file_qp.write('   function amplitude()\n')
-f90file_qp.write('      use model_qp\n')
+f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp\n')
 f90file_qp.write('      use SpinorBrackets\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp\n')
-f90file_qp.write('      use config, only: debug_lo_diagrams, &\n')
+f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_lo_diagrams, &\n')
 f90file_qp.write('        & use_sorted_sum\n')
 f90file_qp.write('      use accu_qp, only: sorted_sum\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]util_qp, only: inspect_lo_diagram\n')

@@ -1,10 +1,10 @@
 [% ' vim: syntax=golem
  %]program test
-   use config, only: ki, logfile, nlo_prefactors
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
-   use model, only: parse[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: parse[%
    @if extension quadruple %]
-   use model_qp, only: parse_qp => parse[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp, only: parse_qp => parse[%
    @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
      & initgolem, exitgolem, ir_subtraction
@@ -94,10 +94,10 @@
  contains
 
 subroutine  print_parameters(scale2)
-   use config, only: renormalisation, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renormalisation, &
         convert_to_cdr, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
-   use model
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    implicit none
    real(ki) :: scale2[%
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]

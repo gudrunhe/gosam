@@ -1,7 +1,7 @@
 %=$[$ ' vim:syntax=golem
 $]module     model
    ! Model parameters for the model: [$ model $]
-   use config, only: ki[$
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki[$
 @if extension samurai $], &
    & samurai_scalar, samurai_verbosity, samurai_test, &
    & samurai_group_numerators, samurai_istop[$

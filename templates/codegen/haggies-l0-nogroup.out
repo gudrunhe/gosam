@@ -3,7 +3,7 @@
 	$][% output.file match=".*/(d\\d+h\\d+l0[fr5]*).f90" format ="%s"%]
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
-   use config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    [$ @if internal CUSTOM_SPIN2_PROP
    $]use custompropagator[$ @end @if $]
 implicit none
@@ -24,7 +24,7 @@ contains
    function     [% output.file
       match=".*/d(\\d+)h\\d+l0[fr5]*.f90" format ="diagram%s"
    %]() result(diagram)
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [$ process_name asprefix=\_ $]kinematics
       use SpinorBrackets
       use [$ process_name asprefix=\_ $]color

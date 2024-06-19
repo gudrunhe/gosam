@@ -1,5 +1,5 @@
 module SpinorBrackets
-    use config, only: ki_sp => ki
+    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki_sp => ki
     implicit none
 
     type SpinorBracket

@@ -110,7 +110,7 @@ for irank in range(0,rank+1):
 f90file.write('module     [% process_name asprefix=\_%]'+diag_name+'\n')
 f90file.write('   ! file: '+str(os.getcwd())+diag_name+'.f90 \n')
 f90file.write('   ! generator: buildfortran_d.py \n')
-f90file.write('   use config, only: ki \n')
+f90file.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki \n')
 f90file.write('   use [% process_name asprefix=\_ %]util, only: cond, d => metric_tensor \n')
 f90file.write('\n')
 f90file.write('   implicit none\n')
@@ -134,7 +134,7 @@ for irank in range(1,rank+2):
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')
-	f90file.write('      use model \n')
+	f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use SpinorBrackets \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
@@ -527,7 +527,7 @@ f90file.close()
 f90file_qp.write('module     [% process_name asprefix=\_%]'+diag_name+'_qp\n')
 f90file_qp.write('   ! file: '+str(os.getcwd())+diag_name+'_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortran_d.py \n')
-f90file_qp.write('   use config, only: ki => ki_qp\n')
+f90file_qp.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp\n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]util_qp, only: cond, d => metric_tensor \n')
 f90file_qp.write('\n')
 f90file_qp.write('   implicit none\n')
@@ -551,7 +551,7 @@ for irank in range(1,rank+2):
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')
-	f90file_qp.write('      use model_qp \n')
+	f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
 	f90file_qp.write('      use SpinorBrackets \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')

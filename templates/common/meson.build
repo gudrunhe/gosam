@@ -1,7 +1,7 @@
 generated_source = ['color.f90' [% @if internal OLP_MODE %][% @else %], 'version.f90', 'model.f90'[% @end @if %]]
 
 [% process_name %]_common_gen = \
-      custom_target('[% process_name assuffix=\_ %]_common_gen',
+      custom_target('[% process_name %]_common_gen',
               output : generated_source,
               command : ['generate_source.sh'],
               build_by_default: true,
