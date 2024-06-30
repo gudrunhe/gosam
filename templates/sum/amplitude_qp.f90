@@ -257,14 +257,9 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use form_factor_type, only: form_factor
    use [% process_name asprefix=\_ %]golem95, only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
-         @if extension pjfry %], contract_pjfry[%
-         @end @if %][%
          @if extension samurai %], &
       & global_coeffs => coeffs_group[% grp %], &
       & reduce_numetens => reduce_numetens_group[% grp %][%
-         @end @if %][%
-         @if extension pjfry %]
-   use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf[%
          @end @if %][%
       @end @if %][%
       @if extension samurai %]
@@ -285,10 +280,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    type(tensrec_info_group[% grp %]), target :: coeffs
    type(form_factor) :: gres[%
-         @if extension pjfry %]
-   integer :: ep
-   complex(ki_pjf) :: pjres[%
-         @end @if %][%
       @end @if %][%
       @if extension samurai %]
    complex(ki_sam), dimension(-2:0) :: tot
@@ -337,22 +328,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @else %]
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
          @end @if %][%
-      @end @if %][%
-         @if extension pjfry %]
-   case(3) ! use PJFry only
-      call reconstruct_golem95(coeffs)[%
-            @if generate_lo_diagrams %]
-      do ep=0,2
-         pjres = contract_pjfry(coeffs, scale2, ep)
-         samplitude(-ep) = 2.0_ki * real(pjres, ki)
-      end do[%
-            @else %]
-      do ep=0,2
-         pjres = contract_pjfry(coeffs, scale2, ep)
-         samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-      end do[%
-            @end @if %]
-      ok = .true.[%
       @end @if %][%
       @if extension samurai %][%
          @if extension golem95 %]
@@ -416,62 +391,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
             @end @if %]
          ok = .true.
-      end if[%
-            @if extension pjfry %]
-   ! Modes which require Golem95, PJFry and Samurai
-   case(12) ! Try Samurai first, use PJFry is samurai fails
-      call samurai_reduce(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-               @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-               @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-               @end @if %]
-         ok = .true.
-      else
-         call reconstruct_golem95(coeffs)[%
-               @if generate_lo_diagrams %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = 2.0_ki * real(pjres, ki)
-         end do[%
-               @else %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-         end do[%
-               @end @if %]
-         ok = .true.
       end if
-   case(14) ! Tensorial Reconstruction + Samurai on numetens
-           ! + PJFry on failure
-      call reconstruct_golem95(coeffs)
-      global_coeffs => coeffs
-      call reduce_numetens(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-               @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-               @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-               @end @if %]
-         ok = .true.
-      else[%
-               @if generate_lo_diagrams %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = 2.0_ki * real(pjres, ki)
-         end do[%
-               @else %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-         end do[%
-               @end @if %]
-         ok = .true.
-      end if[%
-            @end @if %][%
-         @end @if %][%
-      @end @if %]
    case default
       print*, "Your current choice of reduction_interoperation is", &
             & reduction_interoperation
@@ -487,17 +407,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       print*, "* This code was generated [%
       @if extension golem95 %]with[%
       @else %]without[%
-      @end @if %] support for Golem95."[%
-      @if extension golem95 %]
-      print*, "* This code was generated [%
-         @if extension pjfry %]with[%
-         @else %]without[%
-         @end @if %] support for PJFry."[%
-      @else %][%
-         @if extension pjfry %]
-      print*, "* PJFry cannot be used without the extension 'golem95'"[%
-         @end @if %][%
-      @end @if %]
+      @end @if %] support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then[%

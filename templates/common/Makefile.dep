@@ -3,11 +3,7 @@
 OBJEXT ?=o
 OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 # Module Dependencies:[%
-@for each $(OBJEXTG) var=O %][%
-   @if extension pjfry %]
-pjfry95pg.[%O%]: precision_pjfry.[%O%]
-pjfry_comb.[%O%]: pjfry95pg.[%O%] precision_pjfry.[%O%][%
-   @end @if %]
+@for each $(OBJEXTG) var=O %]
 accu.[%O%]: config.[%O%]
 model.[%O%]: config.[%O%]
 color.[%O%]: config.[%O%] model.[%O%]
@@ -19,9 +15,6 @@ dipoles.[%O%]: config.[%O%] color.[%O%] model.[%O%] kinematics.[%O%][%
 	@select r2
 	@case implicit explicit off %]
 groups.[%O%]: config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
-   	@if extension pjfry %] \
-	pjfry95pg.[%O%] pjfry_comb.[%O%] precision_pjfry.[%O%][%
-	   @end @if %][%
 	@end @select %][%
    @if internal CUSTOM_SPIN2_PROP %]
 custompropagator.[%O%]: config.[%O%] model.[%O%][%
@@ -37,11 +30,7 @@ kinematics_qp.[%O%]: config.[%O%] model_qp.[%O%] scalar_cache.[%O%]
 dipoles_qp.[%O%]: config.[%O%] color_qp.[%O%] model_qp.[%O%] kinematics_qp.[%O%][%
 @end @if %][%
 @end @for %][%
-@for each $(OBJEXTG) var=O %][%
-   @if extension pjfry %]
-[% process_name asprefix=\_ %]pjfry95pg.mod: precision_pjfry.[%O%] pjfry95pg.[%O%]
-[% process_name asprefix=\_ %]pjfry_comb: pjfry_comb.[%O%] pjfry95pg.[%O%] precision_pjfry.[%O%][%
-@end @if %]
+@for each $(OBJEXTG) var=O %]
 [% process_name asprefix=\_ %]accu.mod: accu.[%O%] config.[%O%]
 [% process_name asprefix=\_ %]color.mod: color.[%O%]
 [% process_name asprefix=\_ %]config.mod: config.[%O%]
@@ -56,9 +45,6 @@ dipoles_qp.[%O%]: config.[%O%] color_qp.[%O%] model_qp.[%O%] kinematics_qp.[%O%]
 	@select r2
 	@case implicit explicit off %]
 [% process_name asprefix=\_ %]groups.mod: groups.[%O%] config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
-   	@if extension pjfry %] \
-	pjfry95pg.[%O%] pjfry_comb.[%O%] precision_pjfry.[%O%][%
-	   @end @if %][%
 	@end @select %][%
    @if internal CUSTOM_SPIN2_PROP %]
 [% process_name asprefix=\_ %]custompropagator.mod: custompropagator.[%O%] config.[%O%] model.[%O%][%

@@ -519,13 +519,13 @@ reduction_programs = Property("reduction_programs",
       """\
         Specifies the reduction libraries which should be supported.
 
-        Possible values: ninja, samurai, golem95, pjfry (experimental)
+        Possible values: ninja, samurai, golem95
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
       list,
       "ninja,golem95",
-      options=["ninja","samurai","golem95","pjfry"]
+      options=["ninja","samurai","golem95"]
    )
 
 polvec_method = Property("polvec",
@@ -568,7 +568,6 @@ extensions = Property("extensions",
 #   samurai      --- enable Samurai for the reduction
 #   ninja        --- enable Ninja for the reduction
 #   golem95      --- enable Golem95 for the reduction
-#   pjfry        --- enable PJFry for the reduction (experimental)
 #   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
 #                    not compatible with the formopt option.
 #   qshift       --- apply the shift of Q already at the FORM level
@@ -587,7 +586,7 @@ extensions = Property("extensions",
 
    ,
    list,",".join(DEFAULT_EXTENSIONS),
-   options=["samurai", "golem95", "pjfry", "dred",
+   options=["samurai", "golem95", "dred",
       "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
@@ -930,7 +929,7 @@ config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
 
-   Possible values are: ninja, samurai, golem95, pjfry (experimental)
+   Possible values are: ninja, samurai, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam decide
    depending on reduction_libraries
@@ -1364,7 +1363,7 @@ properties = [
    unitary_gauge
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
+REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja"]
 
 def getExtensions(conf):
    ext_name = str(extensions)

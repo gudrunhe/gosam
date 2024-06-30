@@ -12,10 +12,6 @@ generated_source = ['color.f90' [% @if internal OLP_MODE %][% @else %], 'version
                      'util.f90', 'scalar_cache.f90', 'kinematics.f90',
                      'dipoles.f90', 'groups.f90'])
 
-[% @if extension pjfry %]
-[% process_name %]_source += files(['precision_pjfry.f90', 'pjfry95pg.f90', 'pjfry_comb.f90'])
-[% @end @if %]
-
 [% @if internal OLP_MODE %][% @else %]
 [% process_name %]_source += files(['config.f90', 'accu.f90', 'SpinorBrackets.f90' [% @if internal CUSTOM_SPIN2_PROP %], 'custompropagator.f90'[%
 @end @if %]])

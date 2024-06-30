@@ -847,24 +847,6 @@ class Samurai(Library):
       conf["samurai.fcflags"] = "-I%s" % incd
       conf["samurai.ldflags"] = "-L%s -lsamurai" % path
 
-class PJFry(Library):
-   def __init__(self):
-      Library.__init__(self, "PJFry", "libpjfry")
-
-   def store(self, conf):
-      paths = self.getInstallationPath()
-      if len(paths) == 0:
-         return
-
-      path = self.undohome(paths[0])
-
-      if "+installed.extensions" in conf:
-         conf["+installed.extensions"] += ", pjfry"
-      else:
-         conf["+installed.extensions"] = "pjfry"
-
-      conf["+pjfry.ldflags"] = "-L%s -lpjfry" % path
-
 class Golem95(Library):
    def __init__(self):
       Library.__init__(self, "Golem", "libgolem")

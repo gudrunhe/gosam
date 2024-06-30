@@ -53,7 +53,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                   "gfortran", "g95", "ifort"],
             str(golem.properties.group_diagrams): ["true", "false"],
             str(golem.properties.extensions): [
-                  "samurai", "golem95", "pjfry", "fr5", "dred",
+                  "samurai", "golem95", "fr5", "dred",
                   "qshift", "topolynomial",
                   "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
                   "generate-all-helicities", "olp_daemon", "numpolvec",

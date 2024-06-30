@@ -220,15 +220,6 @@
 		<file src="groups.f90" class="Integrals"/>
 		<file src="scalar_cache.f90" class="Integrals"/>
 		<file src="globalsl1.f90" class="Kinematics"/>
-		<file src="precision_pjfry.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
-		<file src="pjfry95pg.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
-		<file src="pjfry_comb.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
 		<file src="custompropagator.f90" class="Model">
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
 			<except if-file="exists" in-mode="normal" />

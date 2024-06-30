@@ -559,10 +559,6 @@ def workflow(conf):
 			if red in ext:
 				red_flag = True
 				break
-		if "pjfry" in ext and not "golem95" in ext:
-			golem.util.tools.warning("The PJFRY interface needs Golem95 routines.",
-					"Golem95 is automatically added to reduction_programs.")
-			conf["gosam-auto-reduction.extensions"] = "golem95"
 		if not red_flag:
 			golem.util.tools.warning(
 					"Generating code for the virtual part without specifying",
@@ -646,7 +642,7 @@ def workflow(conf):
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 
 	if generate_nlo_virt and conf.getProperty("use_order_names"):
-		if ('pjfry' in ext) or ('samurai' in ext):
+		if 'samurai' in ext:
 			raise GolemConfigError(
 					"The 'use_order_names' feature can only be used with ninja or golem95.\n" +
 					"Please select one of those as your redution program by setting:\n"+
