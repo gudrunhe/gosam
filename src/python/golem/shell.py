@@ -54,7 +54,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
             str(golem.properties.group_diagrams): ["true", "false"],
             str(golem.properties.extensions): [
                   "samurai", "golem95", "pjfry", "fr5", "dred",
-                  "autotools", "qshift", "topolynomial",
+                  "qshift", "topolynomial",
                   "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
                   "generate-all-helicities", "olp_daemon", "numpolvec",
                   "f77", "no-fr5","ninja","customspin2prop"],

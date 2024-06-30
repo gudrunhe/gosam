@@ -562,9 +562,7 @@ extensions = Property("extensions",
 
    Build system related extensions:
 
-   autotools    --- use autotools to generate Makefiles
-   shared       --- create shared libraries (=dynamically linkable code),
-                    enabled by default with autotools extension
+   shared       --- create shared libraries (=dynamically linkable code)
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
 
@@ -605,7 +603,7 @@ extensions = Property("extensions",
    ,
    list,",".join(DEFAULT_EXTENSIONS),
    options=["samurai", "golem95", "pjfry", "dred",
-      "autotools", "qshift", "topolynomial",
+      "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",

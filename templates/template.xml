@@ -6,22 +6,7 @@
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
 
-	<file src="configure.ac" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="autogen.sh" class="Verbatim" executable="yes">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="Makefile.am" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
 	<file src="Makefile" class="Kinematics" >
-		<except if-extension="autotools" />
 		<except if-extension="meson"/>
 	</file>
 	<file src="Makefile.source" class="Kinematics" />
@@ -30,15 +15,6 @@
 		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="config.sh" class="Kinematics" executable="yes">
-		<except if-extension="autotools" />
-	</file>
-	<file src="config.sh.in" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
-	<file src="acinclude.m4" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
 	</file>
 	<file src="meson.build" class="Kinematics">
 		<only if-extension="meson" />
@@ -290,11 +266,6 @@
 
 	<directory src="common">
 		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
 			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.source" class="Kinematics"/>
@@ -361,21 +332,12 @@
 		<file src="axodraw.sty" class="Verbatim"/>
 		<file src="gind.ist" class="Verbatim"/>
 		<file src="Makefile.source" class="Verbatim"/>
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-		</file>
-		<file src="Makefile" class="Kinematics">
-			<only if-extension="meson" />
-		</file>
+		<file src="Makefile" class="Kinematics"/>
 		<file src="meson.build" class="Kinematics">
 				<only if-extension="meson" />
 		</file>
 		<file src="generate_doc.sh" class="Kinematics">
 			<only if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
-			<except if-extension="meson"/>
 		</file>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
@@ -389,11 +351,6 @@
 
 	<directory src="matrix">
 		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
 			<except if-extension="meson"/>
 		</file>
 		<file src="Makefile.dep" class="Kinematics"/>
@@ -421,11 +378,6 @@
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
 			<file src="Makefile" class="Integrals">
-				<except if-extension="autotools" />
-				<except if-extension="meson"/>
-			</file>
-			<file src="Makefile.am" class="Integrals">
-				<only if-extension="autotools" />
 				<except if-extension="meson"/>
 			</file>
 			<file src="Makefile.dep" class="Integrals"/>
@@ -547,10 +499,6 @@
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
 		<file src="Makefile" class="Integrals">
-			<except if-extension="autotools" />
-		</file>
-		<file src="Makefile.am" class="Integrals">
-			<only if-extension="autotools" />
 		</file>
 		<file src="globals.f90" class="Kinematics"/>
 		<file src="../form.set" dest="form.set" class="Kinematics"/>
