@@ -449,7 +449,9 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
             @end @if %]
          ok = .true.
-      end if
+      end if[%
+         @end @if %][%
+      @end @if %]
    case default
       print*, "Your current choice of reduction_interoperation is", &
             & reduction_interoperation
