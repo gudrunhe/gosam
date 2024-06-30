@@ -137,13 +137,6 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
 
-	if len(keep_tree) == 0:
-		if conf.getBooleanProperty("ignore_empty_subprocess"):
-			props.setProperty("write_vanishing_amplitude", "true")
-		else:
-			golem.util.tools.error("No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
-									.format(conf["process_name"]))
-
 	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 
@@ -721,6 +714,14 @@ def run_analyzer(path, conf, in_particles, out_particles):
 				golem.topolopy.functions.analyze_tree_diagrams(
 					mod_diag_lo.diagrams, model, conf,
 					filter_flags = lo_flags)
+
+		if len(keep_tree) == 0:
+			if conf.getBooleanProperty("ignore_empty_subprocess"):
+				conf.setProperty("write_vanishing_amplitude", "true")
+			else:
+				golem.util.tools.error(
+					"No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
+					.format(conf["process_name"]))
 	else:
 		keep_tree = []
 		tree_signs = {}
