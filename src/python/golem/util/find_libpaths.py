@@ -12,7 +12,7 @@ components = {
                "Fortran": OPTIONAL,
                "Form": REQUIRED,
                "QGraf": REQUIRED,
-               "Meson": OPTIONAL,
+               "Meson": REQUIRED,
                "Linker": OPTIONAL
              }
 
