@@ -13,7 +13,6 @@ components = {
                "PJFry": OPTIONAL,
                "Form": REQUIRED,
                "QGraf": REQUIRED,
-               "Java": OPTIONAL,
                "Meson": OPTIONAL,
                "Linker": OPTIONAL
              }

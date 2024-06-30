@@ -26,70 +26,13 @@
 	</file>
 
 	<directory src="codegen">
-		<file src="abbrev.in" class="Multi">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="abbrev.out" class="Integrals">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="abbrevloc.out" class="Integrals">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="color.in" class="Verbatim">
-			<only if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="color.out" class="Kinematics">
-			<only if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="functions.out" class="Kinematics">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="model.out" class="Model">
-			<only if-internal="HAGGIES" />
-		</file>
-
-		<file src="haggies-l0.in" class="Multi">
-			<only if-internal="HAGGIES" />
-		</file>
-
-		<file src="haggies-l0-group.out" dest="haggies-l0.out"
-				class="Integrals">
-			<only if-option="group" value="true"/>
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l0-nogroup.out" dest="haggies-l0.out"
-				class="Kinematics">
-			<only if-option="group" value="false"/>
-			<except if-extension="formopt" />
-		</file>
-
-		<file src="haggies-l1.in" class="Multi">
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l1.out" class="Kinematics">
-			<except if-extension="formopt" />
-		</file>
 		<file src="helsum.frm" class="Kinematics" >
 			<only if-option="helsum" value="true" />
 		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
 		</file>
-		<file src="colorin.py" class="Multi">
-			<except if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="haggies-l1d.out" class="Kinematics">
-			<only if-internal="GENERATE_DERIVATIVES"/>
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l1c.in" class="Multi">
-			<except if-option="genUV" value="false" />
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l1c.out" class="Kinematics">
-			<except if-option="genUV" value="false" />
-			<except if-extension="formopt" />
-		</file>
+		<file src="colorin.py" class="Multi"/>
 
 		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
@@ -228,9 +171,7 @@
 			<only if-extension="formopt" />
 			<except if-internal="OLP_MODE"/>
 		</file>
-		<file src="buildcolor.py" class="Kinematics">
-			<except if-option="abbrev.color" value="haggies" />
-		</file>
+		<file src="buildcolor.py" class="Kinematics"/>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>

@@ -20,21 +20,10 @@ source: color.f90 model.f90 version.f90 [%
 @end @if extension quadruple %]
 
 
-[%
-@select abbrev.color @case form none%]
 color.f90[% @if extension quadruple %] color_qp.f90[% @end @if %]: color.txt
 	@echo Python is generating color.f90
 	@$(PYTHON) ../codegen/buildcolor.py -i color.txt
-[%@case haggies%]
-color.f90 color.dat: color.txt ../codegen/color.in ../codegen/color.out
-	@echo haggies is generating color.f90
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/color.in \
-		-t ../codegen/color.out \
-		-o $@ $<
-[%@end @select %]
-[%
-@if extension formopt %]
+
 model.txt:  ../codegen/func.txt
 	@echo Form is generating $@
 	@$(FORM) $(FORM_OPT) ../codegen/modelopt.frm
@@ -42,31 +31,10 @@ model.f90 :  model.txt
 	@echo Python is generating model.f90
 	@$(PYTHON) ../codegen/buildmodel.py -i model.txt
 [% @if extension quadruple %]model_qp.f90 : model.f90[% @end @if %]
-[%@else%]
-model.f90: ../codegen/func.txt ../codegen/haggies-l0.in ../codegen/model.out
-	@echo haggies is generating model.f90
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/haggies-l0.in \
-		-t ../codegen/model.out \
-		-o $@ $<
-[%@end @if %]
 
-
-[% @if internal HAGGIES %]
-version.out: ../codegen/info.frm
-	@echo FORM is generating $@
-	@$(FORM) $(FORM_OPT) -D OUTPUT=$@ ../codegen/info.frm
-
-version.f90: version.out
-	@echo haggies is generating version.f90
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/haggies-l0.in \
-		-t $< -o $@ -F
-[% @else %]
 version.f90: ../codegen/info.frm
 	@echo FORM is generating $@
 	@$(FORM) $(FORM_OPT) -D OUTPUT=$@ ../codegen/info.frm
-[% @end @if %]
 
 color.txt: ../codegen/color.frm
 	@echo FORM is generating color.txt

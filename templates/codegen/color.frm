@@ -27,11 +27,7 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
-[%@select abbrev.color @case haggies none %]
-							+ c(`c1',`c2') * propcolor(`I', `J')
-[%@case form %]
 							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
-[%@end @select %]
 						#EndDo
 					#EndDo
 					;
@@ -62,8 +58,6 @@ Id delta(iDUMMY1?, iDUMMY1?) = NC;
 
 
 [%@select abbrev.color @case form %]
-* You are using Form Optimization, this is experimental
-* and may crash due to lack of memory
 .sort
 *
 AutoDeclare S TLabel,CLabel;
@@ -164,46 +158,6 @@ Format O[%formopt.level%],stats=off;
 
 #Close<`OUTFILE'.tmp>
 #Close<`OUTFILE'.txt>
-.end
-[% @case haggies %]
-
-Brackets+ c;
-.sort
-#Create <`OUTFILE'.txt>
-#Write <`OUTFILE'.txt> "NA=NC*NC-1;"
-#If "`INCOLORS'" != ""
-	#Write <`OUTFILE'.txt> "incolors=1%"
-	#Do NC={`INCOLORS'}
-		#Write <`OUTFILE'.txt> " * `NC'%"
-	#EndDo
-	#Write <`OUTFILE'.txt> ";"
-#Else
-	#Write <`OUTFILE'.txt> "incolors=1;"
-#EndIf
-
-#Do c1=1,`NUMCS'
-#Do c2=`c1',`NUMCS'
-	#$t=CC[c(`c1',`c2')];
-	#Write <`OUTFILE'.txt> "CC_`c1'_`c2' = %$;", $t
-#EndDo
-#EndDo
-#If `CREATETT'
-	#Do I={`COLORED'}
-		#If `I'0 != 0
-			#Do J={`COLORED'}
-				#If `J' >= `I'
-					#Do c1=1,`NUMCS'
-					#Do c2=`c1',`NUMCS'
-						#$t=T`I'T`J'[c(`c1',`c2')];
-						#Write <`OUTFILE'.txt> "T`I'T`J'_`c1'_`c2' = %$;", $t
-					#EndDo
-					#EndDo
-				#EndIf
-			#EndDo
-		#EndIf
-	#EndDo
-#EndIf
-#Close <`OUTFILE'.txt>
 .end
 [%@case none%]
 

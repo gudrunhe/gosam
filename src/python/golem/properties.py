@@ -409,21 +409,6 @@ form_workspace = Property("form.workspace",
    1000)
 
 
-haggies_bin = Property("haggies.bin",
-   """\
-   Points to the Haggies executable.
-   Haggies is used to transform the expressions of the
-   diagrams into optimized Fortran90 programs if the
-   extension "noformopt" is active. It can also be used
-   to optimize the color expressions.
-
-   Examples:
-      1) haggies.bin=/home/my_user_name/bin/haggies
-      2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
-   """,
-   str,
-   "java -jar %s" % golem_path("haggies", "haggies.jar"))
-
 form_tmp = Property("form.tempdir",
    """\
    Temporary directory for Form. Should point to a directory
@@ -773,12 +758,11 @@ abbrev_color = Property("abbrev.color",
    """\
    The program in use for the generation of color related abbreviations.
    The value should be one of:
-      haggies        color algebra in form, optimization with haggies
       form           color algebra and optimization in form
       none           color algebra in form, no optimization
    """,
    str, "form",
-   options=["haggies","form","none"], hidden=True)
+   options=["form","none"], hidden=True)
 
 abbrev_limit = Property("abbrev.limit",
    """\
@@ -1345,7 +1329,6 @@ properties = [
    form_threads,
    form_tmp,
    form_workspace,
-   haggies_bin,
    fc_bin,
    python_bin,
 
@@ -1419,7 +1402,6 @@ def setInternals(conf):
          "__REGULARIZATION_HV__",
          "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
-         "__HAGGIES__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
          "__OLP_DAEMON__",
@@ -1448,9 +1430,6 @@ def setInternals(conf):
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
-
-   conf["__HAGGIES__"] = ("noformopt" in extensions or
-                          ("haggies" in conf["abbrev.color"].lower() if conf["abbrev.color"] else False))
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions

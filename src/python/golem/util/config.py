@@ -1019,16 +1019,6 @@ class QGraf(Program):
    def store(self, conf):
       conf["qgraf.bin"] = self.undohome(self.getInstance())
 
-class Java(Program):
-   def __init__(self):
-      Program.__init__(self, "Java", "java")
-
-   def store(self, conf):
-      haggies_jar = self.undohome(gpath.golem_path("haggies", "haggies.jar"))
-      java = self.undohome(self.getInstance())
-      conf["haggies.bin"] = "%s -jar %s" % \
-            (java, haggies_jar)
-
 class Meson(Program):
    def __init__(self):
       Program.__init__(self, "Meson", "meson")
