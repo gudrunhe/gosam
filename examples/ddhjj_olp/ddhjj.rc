@@ -3,8 +3,7 @@
 ###################
 
 model=smehc
-model.options[0]= Nf:5, Nfgen:1
-model.options[1]= Nf:5, Nfgen:2
+model.options= Nf:5, Nfgen:1
 
 zero=mD,mU
 one=gs,e

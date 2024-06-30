@@ -19,6 +19,6 @@ reduction_programs=ninja, golem95
 
 extensions=generate-all-helicities
 filter.nlo={ \
-   'fermionic': CHORD([T]) == LOOPSIZE, \
-   'bosonic':   CHORD([T]) != LOOPSIZE \
+   'fermionic': CHORD(T) == LOOPSIZE, \
+   'bosonic':   CHORD(T) != LOOPSIZE \
 }
