@@ -31,7 +31,6 @@
 	</file>
 	<file src="config.sh" class="Kinematics" executable="yes">
 		<except if-extension="autotools" />
-		<except if-extension="meson"/>
 	</file>
 	<file src="config.sh.in" class="Kinematics">
 		<only if-extension="autotools" />
@@ -46,6 +45,10 @@
 	</file>
 	<file src="meson_options.txt" class="Kinematics">
 		<only if-extension="meson" />
+		<except if-internal="OLP_MODE"/>
+	</file>
+	<file src="install_mod_files.py" class="Verbatim" executable="yes">
+		<only if-extension="meson"/>
 		<except if-internal="OLP_MODE"/>
 	</file>
 

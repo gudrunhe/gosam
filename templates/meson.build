@@ -1,5 +1,5 @@
 [% @if internal OLP_MODE %][% @else %]
-project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.57.0')
+project('GoSam_Process_[% process_name %]', 'fortran', version:'1.0', meson_version: '>=0.57.0')
 
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
@@ -26,5 +26,9 @@ subdir('matrix')
 [% @if internal OLP_MODE %]
 OLP_source += [% process_name %]_source
 [% @else %]
-lib = both_libraries('golem_process_[% process_name %]', [% process_name %]_source, install: true, install_dir: meson.current_source_dir() / '.libs')
+lib = both_libraries('golem_process_[% process_name %]', [% process_name %]_source, install: true)
+meson.add_install_script(
+  find_program(files('install_mod_files.py')),
+  get_option('includedir') / meson.project_name(),
+)
 [% @end @if %]
