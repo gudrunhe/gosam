@@ -6,9 +6,6 @@
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
 
-	<file src="Makefile" class="Kinematics" >
-		<except if-extension="meson"/>
-	</file>
 	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
@@ -265,9 +262,6 @@
 	</directory>
 
 	<directory src="common">
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="meson"/>
-		</file>
 		<file src="Makefile.source" class="Kinematics"/>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="config.f90" class="Kinematics">
@@ -350,9 +344,6 @@
 	</directory>
 
 	<directory src="matrix">
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="meson"/>
-		</file>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="Makefile.source" class="Verbatim"/>
 		<file src="matrix.f90" class="Kinematics"/>
@@ -377,9 +368,6 @@
 
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
-			<file src="Makefile" class="Integrals">
-				<except if-extension="meson"/>
-			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
 			<file src="../form.set" dest="form.set" class="Kinematics"/>
@@ -498,8 +486,6 @@
 		<only if-option="helsum" value="true" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
-		<file src="Makefile" class="Integrals">
-		</file>
 		<file src="globals.f90" class="Kinematics"/>
 		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="amplitude.f90" class="Integrals" />
