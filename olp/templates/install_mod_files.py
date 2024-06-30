@@ -32,5 +32,4 @@ if not exists(module_dir):
     makedirs(module_dir)
 
 for mod in modules:
-    print("Installing", mod, "to", module_dir)
     copy(mod, module_dir)
