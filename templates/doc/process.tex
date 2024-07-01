@@ -530,7 +530,7 @@ $S^\prime=S[%
 @end @if pyxodraw %][%
 @end @for groups %][%
  @end @if generate_nlo_virt %]
- [% @if generate_eft_counterterms %][% @if generate_nlo_virt %]
+ [% @if generate_eft_counterterms %]
 \section{Counterterm Diagrams}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}
 
@@ -565,7 +565,6 @@ $S^\prime=S[%
       @end @for %][%
    @end @with%][%
 @end @if pyxodraw %][%
-@end @if generate_nlo_virt %][%
 @end @if generate_eft_counterterms %]
 
 \printindex
