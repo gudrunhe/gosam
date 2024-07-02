@@ -138,7 +138,7 @@ for irank in range(1,rank+2):
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use SpinorBrackets \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 	f90file.write('      implicit none \n')
 	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -167,7 +167,7 @@ f90file.write(dstring)
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 f90file.write('      use SpinorBrackets \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]
@@ -555,7 +555,7 @@ for irank in range(1,rank+2):
 	f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
 	f90file_qp.write('      use SpinorBrackets \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
-	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 	f90file_qp.write('      implicit none \n')
 	f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -584,7 +584,7 @@ f90file_qp.write(dstring)
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
 f90file_qp.write('      use SpinorBrackets \n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 f90file_qp.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]

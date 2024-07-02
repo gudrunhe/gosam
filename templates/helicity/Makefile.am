@@ -1,7 +1,7 @@
 noinst_LTLIBRARIES=libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%].la
 libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= \
-	globals.f90 amplitudeh[%helicity%][% @if use_order_names %]_0.f90 amplitudeh[%helicity%]_1.f90 amplitudeh[%helicity%]_2[% @end @if %].f90[%
-@if use_order_names %][%
+	globals.f90 amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90 amplitudeh[%helicity%]_1.f90 amplitudeh[%helicity%]_2[% @end @if %].f90[%
+@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %][%
 @if helsum%][%
 @else%][%
@@ -119,14 +119,14 @@ libgolem_process[% process_name assuffix=\_ %]_helicity[%helicity%]_la_SOURCES= 
    @end @select %][%
 @end @if generate_nlo_virt %][%
 @end @if helsum %][%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
 
 nodist_pkginclude_HEADERS=[%
 	process_name asprefix=\_ %]globalsh[% helicity %].mod [%
-	process_name asprefix=\_ %]amplitudeh[%helicity%][% @if use_order_names %]_0.mod [%
+	process_name asprefix=\_ %]amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.mod [%
 	process_name asprefix=\_ %]amplitudeh[%helicity%]_1.mod [%
 	process_name asprefix=\_ %]amplitudeh[%helicity%]_2[% @end @if %].mod[%
-@if use_order_names %][%
+@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %][%
 @if helsum %][%
 @else %][%
@@ -242,7 +242,7 @@ nodist_pkginclude_HEADERS=[%
    @end @select %][%
 @end @if generate_nlo_virt %][%
 @end @if helsum %][%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
 
 CLEANFILES=$(nodist_pkginclude_HEADERS)
 ACLOCAL_AMFLAGS=-I m4
@@ -251,7 +251,7 @@ AM_FCFLAGS=$(GOLEM_CONFIG_FCFLAGS) -I../common
 AM_LDFLAGS=$(GOLEM_CONFIG_LDFLAGS)
 
 GENERATED_SRC=[%
-@if use_order_names %][%
+@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %][%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -339,7 +339,7 @@ GENERATED_SRC=[%
    @end @for %][%
 @end @if generate_nlo_virt %][%
 @end @if helsum %][%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
 
 $(GENERATED_SRC): %: source
 

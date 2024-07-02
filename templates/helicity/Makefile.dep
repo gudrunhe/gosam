@@ -7,7 +7,7 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
    @if generate_lo_diagrams %][%
       @if group %][%
       @else %][%
-      @if use_order_names %][%
+      @if enable_truncation_orders %][%
       @for each 0 1 2 var=efto %]
 diagramsl0_[% efto %].[%O%]:[%
          @for elements topolopy.keep.tree %] \
@@ -70,7 +70,7 @@ d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
-	 @if use_order_names %][%
+	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
 abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%]: globals.[%O%][%
 	         @select r2
@@ -115,7 +115,7 @@ d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
-	 @if use_order_names %][%
+	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
 abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
 	         @select r2
@@ -149,7 +149,7 @@ samuraih[%helicity%].[%O%]: [%
    	   @end @if extension samurai %][%
 
       	@if extension golem95 %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 golem95_[% efto %]h[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
@@ -171,7 +171,7 @@ golem95h[%helicity%].[%O%]: [%
 	      @end @if extension golem95 %][%
 
       	@if extension ninja %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 ninja_[% efto %]h[%helicity%].[%O%]: [%
          	@for elements topolopy.keep.virt %] \
@@ -195,7 +195,7 @@ d[%$_%]h[%helicity%]l121.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
 	@end @for %][%
 	@end @if %][%
         @if extension quadruple %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 ninja_[% efto %]h[%helicity%]_qp.[%O%]: [%
          	@for elements topolopy.keep.virt %] \
@@ -229,7 +229,7 @@ diagramsct.[%O%]:[%
 	d[%$_%]h[%helicity%]l1c.[%O%][%
 		@end @for %][%
 	@end @if generate_uv_counterterms %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %].[%O%][% @end @if %][%
 @if helsum %][%
@@ -309,7 +309,7 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
 @end @if helsum %][%
 @end @if %][%
 @if extension quadruple %][%
-@if use_order_names %][%
+@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %]_qp.[%O%][% @end @if %][%
 @if helsum %][%
@@ -389,7 +389,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 
 @for each $(OBJEXTG) var=O %][%
    @if generate_lo_diagrams %][%
-   @if use_order_names %][%
+   @if enable_truncation_orders %][%
    @for each 0 1 2 var=efto %]   
 [% process_name asprefix=\_ %]diagramsh[% helicity %]l0_[% efto %].mod: diagramsl0_[% efto %].[%O%][%
    @for elements topolopy.keep.tree %]
@@ -430,7 +430,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 			@end @if extension samurai %][%
 
 		@if extension golem95 %][%
-		@if use_order_names %][%
+		@if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]golem95_[% efto %]h[%helicity%].mod: golem95_[% efto %]h[%helicity%].[%O%][%
    		@end @for %][%
@@ -440,7 +440,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 		@end @if extension golem95 %][%
 
 		@if extension ninja %][%
-		@if use_order_names %][%
+		@if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]ninja_[% efto %]h[%helicity%].mod: ninja_[% efto %]h[%helicity%].[%O%] [%
 			@for elements topolopy.keep.virt %]
@@ -485,7 +485,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
-	 @if use_order_names %][%
+	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%].mod: abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
 	         @select r2
@@ -518,7 +518,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
-	 @if use_order_names %][%
+	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.mod: abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
 	         @select r2
@@ -549,7 +549,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 [% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1c.mod: d[%$_%]_0h[%helicity%]l1c.[%O%][%
 		@end @for %][%
 	@end @if generate_uv_counterterms %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]amplitudeh[% helicity %]_[% efto %].mod: amplitudeh[%helicity%]_[% efto %].[%O%][%
    	@end @for %][%
@@ -558,7 +558,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
    	@end @if %]
 [% process_name asprefix=\_ %]globalsh[% helicity %].mod: globals.[%O%][%
 @if extension quadruple %][%
-	@if use_order_names %][%
+	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]amplitudeh[% helicity %]_[% efto %]_qp.mod: amplitudeh[%helicity%]_[% efto %]_qp.[%O%][%
    	@end @for %][%

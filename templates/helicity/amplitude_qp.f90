@@ -1,5 +1,5 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if use_order_names %]_[% trnco %][% @end @if %]_qp
+ %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp
    use config, only: ki => ki_qp, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color_qp, only: numcs[%
@@ -15,11 +15,11 @@
       @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %][%
+   use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %][%
       @end @if %][%
       @if extension ninja %]
    use quadninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %]_qp[%
+   use [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]_qp[%
       @end @if %][%
    @end @select %][%
 @end @if %][%
@@ -39,10 +39,10 @@ contains
       & num_light_quarks, num_gluons[%
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp, only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp, only: amplitudel0 => amplitude[%
    @if internal REQUIRE_FR5 %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
    @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
       implicit none
@@ -106,7 +106,7 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%][% @if use_order_names %]_[% trnco %][% @end @if %]h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%
@@ -119,7 +119,7 @@ contains
 @end @if %][%
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %]_qp, only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp, only: amplitudel0 => amplitude[%
 @end @if %][%
 @select r2 @case only %][%
 @else %]
@@ -127,7 +127,7 @@ contains
 @end @select %][%
       @if generate_uv_counterterms %]
       use [% process_name asprefix=\_
-      %]diagramscth[%helicity%][% @if use_order_names %]_[% trnco %][% @end @if %], only: samplitudect => samplitudect[%
+      %]diagramscth[%helicity%][% @if enable_truncation_orders %]_[% trnco %][% @end @if %], only: samplitudect => samplitudect[%
       @end @if %]
       implicit none
       real(ki), intent(in) :: scale2
@@ -311,7 +311,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    use parametre, only: mu2_scale_par
    use form_factor_type, only: form_factor
-   use [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity
+   use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
        %], only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
          @if extension pjfry %], contract_pjfry[%
@@ -330,7 +330,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use options, only: samurai_out => iout[%
       @end @if %][%
       @if extension ninja %]
-   use [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity
+   use [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
       %]_qp, only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
@@ -590,4 +590,4 @@ end subroutine evaluate_group[% grp %]
 @end @if %][%
    @end @for groups %][%
 @end @select %]
-end module [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if use_order_names %]_[% trnco %][% @end @if %]_qp
+end module [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp

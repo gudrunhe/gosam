@@ -982,8 +982,10 @@ config_renorm_eftwilson = Property("renorm_eftwilson",
    """\
    Sets the same variable in config.f90
 
-   Enables renormalization of EFT Wilson coefficients
-   NOTE: Works only for special UFO models
+   Enables renormalization of EFT Wilson coefficients.
+   Works only with special New Physics UFO models, con-
+   taining 'NP' as additional coupling order. 'order_names'
+   must be specified and explicitly contain 'NP'.
    """,
    bool, False, experimental=True)
 
@@ -1222,20 +1224,23 @@ order_names = Property("order_names",
    """\
    A list of additional coupling order that should be 
    tracked throughout the amplitude generation. Relevant for
-   correct EFT treatment. If given, the 'use_order_names' flag
-   must be set, too. It can be False, but must at least exist.
+   correct EFT treatment. Only works in combination with UFO
+   models. All couplings listed must be defined in the model's
+   coupling_orders.py file.
 
    Example:
    order_names=QCD,NP,QL
    """,
    list,default="",experimental=True)
 
-use_order_names = Property("use_order_names",
+enable_truncation_orders = Property("enable_truncation_orders",
    """\
-   Whether or not to use the 'order_names' property. Can only
-   be activated when using a UFO model file. When no 'order_names'
-   are specified, and use_order_names=True, then a lot of unneces-
-   sary code is generated.
+   Whether or not to generate extra code to assess different
+   truncation orders in EFT calculations. Only works with a
+   New Physics UFO model containing 'NP' as additional coupling
+   order. 'order_names' must be specified and explicitly contain
+   'NP'. When set to False (default) no truncation is performed,
+   i.e. the amplitude is squared in the naive way.
    """,
    bool,
    False, experimental=True)
@@ -1411,7 +1416,7 @@ properties = [
    form_factor_nlo,
 
    order_names,
-   use_order_names,
+   enable_truncation_orders,
    use_vertex_labels,
 
    all_mandelstam,

@@ -35,7 +35,7 @@ heli=options.helicity
 
 print('----------------------------------')
 print('Input file is:      %s' % file_name+'.txt')
-print('Diagram written in: %s' % 'diagramsct[% @if use_order_names %]_[% trnco %][% @end @if %].f90')
+print('Diagram written in: %s' % 'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].f90')
 print('----------------------------------')
 
 txtfile = open(file_name+'.txt','r')
@@ -51,12 +51,12 @@ datfilename = file_name + '.dat'
 txt_lines=[]
 abb_max=getdata(datfilename)['abbrev_terms']
 
-[% @if use_order_names
+[% @if enable_truncation_orders
 %]outdict=translatefile(file_name+'.txt',config)[% @else
 %]outdict=translatefile('eft_ct.txt',config)[% @end @if %]
-f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if use_order_names %]_[% trnco %][% @end @if %]\n')
-f90file.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if use_order_names %]_[% trnco %][% @end @if %].f90 \n')
-f90file.write('   ! generator: buildfortraneftct[% @if use_order_names %]_[% trnco %][% @end @if %].py \n')
+f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]\n')
+f90file.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].f90 \n')
+f90file.write('   ! generator: buildfortraneftct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
 f90file.write('   use config, only: ki\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
@@ -142,12 +142,12 @@ f90file.write('      end if\n')
 f90file.write('\n')
 f90file.write('   end function reglog\n')
 f90file.write('!---#] function reglog:\n')
-f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if use_order_names %]_[% trnco %][% @end @if %]\n')
+f90file.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]\n')
 f90file.close()
 [% @if extension quadruple %]
-f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if use_order_names %]_[% trnco %][% @end @if %]_qp\n')
-f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if use_order_names %]_[% trnco %][% @end @if %]_qp.f90 \n')
-f90file_qp.write('   ! generator: buildfortraneftct[% @if use_order_names %]_[% trnco %][% @end @if %].py \n')
+f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp\n')
+f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp.f90 \n')
+f90file_qp.write('   ! generator: buildfortraneftct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].py \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')
 f90file_qp.write('   use config, only: ki => ki_qp\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
@@ -233,7 +233,7 @@ f90file_qp.write('      end if\n')
 f90file_qp.write('\n')
 f90file_qp.write('   end function reglog\n')
 f90file_qp.write('!---#] function reglog:\n')
-f90file_qp.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if use_order_names %]_[% trnco %][% @end @if %]_qp\n')
+f90file_qp.write('end module [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp\n')
 f90file_qp.close()
 [% @end @if extension quadruple %]
 txtfile.close()
@@ -244,7 +244,7 @@ postformat(tmpname)
 [% @if extension quadruple %]
 postformat(tmpname_qp)
 [% @end @if extension quadruple %]
-shutil.move(tmpname,'diagramsct[% @if use_order_names %]_[% trnco %][% @end @if %].f90')
+shutil.move(tmpname,'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].f90')
 [% @if extension quadruple %]
-shutil.move(tmpname_qp,'diagramsct[% @if use_order_names %]_[% trnco %][% @end @if %]_qp.f90')
+shutil.move(tmpname_qp,'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp.f90')
 [% @end @if extension quadruple %]

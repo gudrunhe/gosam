@@ -1,6 +1,6 @@
 ![% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]
-module     [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %]_qp
+module     [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]_qp
    ! This file has been generated for ninja 
    use quadninjago_module, only: ki_nin
    use config
@@ -22,13 +22,13 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use model_qp[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l1_qp, only: numerator_diagram[% DIAG %] => numerator_ninja
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l121_qp, only: numerator_tmu_diagram[% DIAG %] => numerator_tmu
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l131_qp, only: numerator_t3_diagram[% DIAG %] => numerator_t3
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l132_qp, only: numerator_t2_diagram[% DIAG %] => numerator_t2[%
          @end @for %]
    use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow[%
@@ -188,4 +188,4 @@ end subroutine ninja_reduce_group[% grp %]
 !-----#] subroutine ninja_reduce_group[% grp %]:[%
    @end @for %]
 !---#] reduce groups with ninja:
-end module [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %]_qp
+end module [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]_qp

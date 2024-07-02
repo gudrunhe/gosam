@@ -507,9 +507,9 @@ def workflow(conf):
 		if conf.getProperty("order_names"):
 			raise_err = True
 			err_str = err_str+", order_names" if err_str else "order_names"
-		if conf.getBooleanProperty("use_order_names"):
+		if conf.getBooleanProperty("enable_truncation_orders"):
 			raise_err = True
-			err_str = err_str+", use_order_names" if err_str else "use_order_names"
+			err_str = err_str+", enable_truncation_orders" if err_str else "enable_truncation_orders"
 		if conf.getBooleanProperty("renorm_eftwilson"):
 			raise_err = True
 			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
@@ -524,9 +524,9 @@ def workflow(conf):
 	elif (True if not conf.getProperty("order_names") else ('NP' not in conf.getProperty("order_names"))):
 		# model is a UFO, but no order_names specified or 'NP' not present in 'order_names'
 		# Note: whether or not 'NP' is present in UFO is checked in feynrules.py, can't be done here
-		if conf.getBooleanProperty("use_order_names"):
+		if conf.getBooleanProperty("enable_truncation_orders"):
 			raise_err = True
-			err_str = err_str+", use_order_names" if err_str else "use_order_names"
+			err_str = err_str+", enable_truncation_orders" if err_str else "enable_truncation_orders"
 		if conf.getBooleanProperty("renorm_eftwilson"):
 			raise_err = True
 			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
@@ -686,10 +686,10 @@ def workflow(conf):
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 
-	if generate_nlo_virt and conf.getProperty("use_order_names"):
+	if generate_nlo_virt and conf.getProperty("enable_truncation_orders"):
 		if ('pjfry' in ext) or ('samurai' in ext):
 			raise GolemConfigError(
-					"The 'use_order_names' feature can only be used with ninja or golem95.\n" +
+					"The 'enable_truncation_orders' feature can only be used with ninja or golem95.\n" +
 					"Please select one of those as your redution program by setting:\n"+
 					"'reduction_programs=ninja, golem95' in the input card.\n")
 

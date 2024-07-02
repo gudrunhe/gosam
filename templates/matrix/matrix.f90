@@ -36,7 +36,7 @@
 @if helsum %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
    use [% process_name asprefix=\_
@@ -58,10 +58,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
             @end @if %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
       @if generate_eft_counterterms %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
    use [% process_name asprefix=\_
@@ -83,10 +83,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
             @end @if %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
    use [% process_name asprefix=\_
@@ -108,10 +108,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
             @end @if %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_yuk_counterterms %][%
    @end @for %][%
-   @if use_order_names %]
+   @if enable_truncation_orders %]
    use [% process_name asprefix=\_
       %]amplitude_0, only: samplitudel1_0summed => samplitude[%
         @if extension quadruple %]
@@ -141,7 +141,7 @@
 @else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
    use [% process_name asprefix=\_
@@ -163,10 +163,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
       @end @if extension quadruple %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
       @if generate_eft_counterterms %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
    use [% process_name asprefix=\_
@@ -188,10 +188,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
       @end @if extension quadruple %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
    use [% process_name asprefix=\_
@@ -213,10 +213,10 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
       @end @if extension quadruple %][%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if generate_yuk_counterterms %][%
       @if generate_nlo_virt %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0, [% ' '
         %]only: samplitudeh[%helicity%]l1_0 => samplitude, &
@@ -1024,7 +1024,7 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki[%
@@ -1056,7 +1056,7 @@ contains
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -1140,7 +1140,7 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki[%
@@ -1173,7 +1173,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -1257,8 +1257,8 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), dimension(-2:0) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki), dimension(-2:0,numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
       integer :: ieps
       real(ki), intent(in) :: scale2
@@ -1293,7 +1293,7 @@ contains
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -1416,8 +1416,8 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki), dimension(-2:0) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki), dimension(-2:0,numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
       integer :: ieps
       real(ki), intent(in) :: scale2
@@ -1453,7 +1453,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -1577,8 +1577,8 @@ contains
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: amp, heli_amp, scale2
-      complex(ki), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki), dimension(numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
       logical :: logs
 
@@ -1611,7 +1611,7 @@ contains
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -1716,8 +1716,8 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki) :: amp, heli_amp, scale2
-      complex(ki), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki), dimension(numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
       logical :: logs
 
@@ -1751,7 +1751,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -1865,11 +1865,11 @@ contains
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if use_order_names %]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -1941,7 +1941,7 @@ contains
      if(debug_nlo_diagrams) then
         write(logfile,*) "<helicity index='[% helicity %]'>"
      end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -1995,11 +1995,11 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
-     @end @if use_order_names%]
+     @end @if enable_truncation_orders%]
      if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %](real(scale2,ki))
+      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
       heli_amp(0) = heli_amp(0) + fr
      end if
      ok = ok .and. my_ok
@@ -2048,7 +2048,7 @@ contains
          @end @for %])
             !---#] reinitialize kinematics:[%
       @for current_helicities %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -2094,16 +2094,16 @@ contains
             heli_amp(-1) = square(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square(colorvec_2(:,-1)) + square(colorvec_2(:,-2),colorvec_2(:,0))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
         do c=1,numcs
            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
         end do
         heli_amp( 0) = square(colorvec(:, 0))
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
-      @end @if use_order_names%]
+      @end @if enable_truncation_orders%]
       if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %](real(scale2,ki))
+         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
          heli_amp(0) = heli_amp(0) + fr
       end if
       ok = ok .and. my_ok
@@ -2160,11 +2160,11 @@ contains
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if use_order_names %]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -2203,7 +2203,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -2257,9 +2257,9 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
-     @end @if use_order_names%][%
+     @end @if enable_truncation_orders%][%
       @else %][% 'if not generate_lo_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -2283,7 +2283,7 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
             !---#] reinitialize kinematics:[%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -2329,17 +2329,17 @@ contains
             heli_amp(-1) = square(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square(colorvec_2(:,-1)) + square(colorvec_2(:,-2),colorvec_2(:,0))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
         do c=1,numcs
            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
         end do
         heli_amp( 0) = square(colorvec(:, 0))
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
-      @end @if use_order_names%][%
+      @end @if enable_truncation_orders%][%
       @end @if generate_lo_diagrams%]
          if (corrections_are_qcd .and. renorm_gamma5) then
-            fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %](real(scale2,ki))
+            fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -2394,12 +2394,12 @@ contains
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper[%
-@if use_order_names %]
+@if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
       complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
 @else %]
       complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
       real(ki) :: nlo_coupling
       
       if (present(h)) then
@@ -2452,7 +2452,7 @@ contains
      @end @for %])
          !---#] reinitialize kinematics:[%
      @for current_helicities %][%
-@if use_order_names %]
+@if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -2600,7 +2600,7 @@ contains
                heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
             endif
          end select[%
-@else %][% 'if not use_order_names' %]
+@else %][% 'if not enable_truncation_orders' %]
          pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
@@ -2612,7 +2612,7 @@ contains
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
          endif[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
          amp = amp + heli_amp[%
   @end @for current_helicities %][%
   @end @for unique_helicity_mappings %][%
@@ -2655,12 +2655,12 @@ contains
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
       complex(ki), dimension(numcs,numcs,2) :: oper[%
-@if use_order_names %]
+@if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
       complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
 @else %]
       complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
       real(ki) :: nlo_coupling
 
       if(corrections_are_qcd) then[%
@@ -2711,7 +2711,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-@if use_order_names %]
+@if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -2859,7 +2859,7 @@ contains
                heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
             endif
          end select[%
-@else %][% 'if not use_order_names' %]
+@else %][% 'if not enable_truncation_orders' %]
          pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
@@ -2871,7 +2871,7 @@ contains
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
          endif[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
          amp = amp + heli_amp[%
   @end @for helicities %]
       end select[%
@@ -3200,7 +3200,7 @@ contains
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki_qp[%
@@ -3232,7 +3232,7 @@ contains
      if (debug_lo_diagrams) then
       write(logfile,*) "<helicity index='[% helicity %]' >"
      end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
       select case (EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> SM + dim-6 
@@ -3316,7 +3316,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki_qp) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki_qp[%
@@ -3349,7 +3349,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -3433,8 +3433,8 @@ contains
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), dimension(-2:0) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       integer :: ieps
       real(ki_qp), intent(in) :: scale2
@@ -3469,7 +3469,7 @@ contains
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -3592,8 +3592,8 @@ contains
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki_qp), dimension(-2:0) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       integer :: ieps
       real(ki_qp), intent(in) :: scale2
@@ -3629,7 +3629,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -3753,8 +3753,8 @@ contains
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp) :: amp, heli_amp, scale2
-      complex(ki_qp), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki_qp), dimension(numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       logical :: logs
 
@@ -3787,7 +3787,7 @@ contains
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -3892,8 +3892,8 @@ contains
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki_qp) :: amp, heli_amp, scale2
-      complex(ki_qp), dimension(numcs) :: amp0[% @if use_order_names %]_0, amp0_1, amp0_2[% @end @if %]
-      complex(ki_qp), dimension(numcs) :: ampct[% @if use_order_names %]_0, ampct_1, ampct_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       logical :: logs
 
@@ -3927,7 +3927,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -4041,11 +4041,11 @@ contains
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if use_order_names%]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders%]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -4117,7 +4117,7 @@ contains
      if(debug_nlo_diagrams) then
         write(logfile,*) "<helicity index='[% helicity %]'>"
      end if[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -4171,11 +4171,11 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
-     @end @if use_order_names %]
+     @end @if enable_truncation_orders %]
      if (corrections_are_qcd .and. renorm_gamma5) then
-        fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+        fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
         heli_amp(0) = heli_amp(0) + fr
      end if
      ok = ok .and. my_ok
@@ -4225,7 +4225,7 @@ contains
          @end @for %])
          !---#] reinitialize kinematics:[%
          @for current_helicities %][%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -4274,16 +4274,16 @@ contains
             heli_amp(-1) = square_qp(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square_qp(colorvec_2(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_2(:,-1))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
          do c=1,numcs
             colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
          heli_amp( 0) = square_qp(colorvec(:, 0))
          heli_amp(-1) = square_qp(colorvec(:,-1))
          heli_amp(-2) = square_qp(colorvec(:,-2))[%
-      @end @if use_order_names %]
+      @end @if enable_truncation_orders %]
       if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
          heli_amp(0) = heli_amp(0) + fr
       end if
       ok = ok .and. my_ok
@@ -4341,11 +4341,11 @@ contains
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if use_order_names%]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders%]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -4419,7 +4419,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -4473,9 +4473,9 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
-     @end @if use_order_names %][%
+     @end @if enable_truncation_orders %][%
       @else %][% 'if not generate_lo_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -4499,7 +4499,7 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -4548,17 +4548,17 @@ contains
             heli_amp(-1) = square_qp(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square_qp(colorvec_2(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_2(:,-1))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
          do c=1,numcs
             colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
          heli_amp( 0) = square_qp(colorvec(:, 0))
          heli_amp(-1) = square_qp(colorvec(:,-1))
          heli_amp(-2) = square_qp(colorvec(:,-2))[%
-      @end @if use_order_names %][%
+      @end @if enable_truncation_orders %][%
       @end @if %]
          if (corrections_are_qcd .and. renorm_gamma5) then
-            fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+            fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -4614,12 +4614,12 @@ contains
       real(ki_qp), dimension(2) :: heli_amp
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
-@if use_order_names %]
+@if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
       complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
 @else %]
       complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
       real(ki_qp) :: nlo_coupling
 
       if(corrections_are_qcd) then[%
@@ -4669,7 +4669,7 @@ contains
      @end @for %])
          !---#] reinitialize kinematics:[%
      @for current_helicities %][%
-@if use_order_names %]
+@if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -4817,7 +4817,7 @@ contains
                heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
             endif
          end select[%
-@else %][% 'if not use_order_names' %]
+@else %][% 'if not enable_truncation_orders' %]
          pcolor = amplitude[%map.index%]l0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
@@ -4829,7 +4829,7 @@ contains
            heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
          endif[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
          amp = amp + heli_amp[%
   @end @for current_helicities %][%
   @end @for unique_helicity_mappings %][%
@@ -4871,12 +4871,12 @@ contains
       real(ki_qp), dimension(2) :: heli_amp
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
       complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
-@if use_order_names %]
+@if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
       complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
 @else %]
       complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
       real(ki_qp) :: nlo_coupling
 
       if(corrections_are_qcd) then[%
@@ -4927,7 +4927,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-@if use_order_names %]
+@if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6
@@ -5075,7 +5075,7 @@ contains
                heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
             endif
          end select[%
-@else %][% 'if not use_order_names' %]
+@else %][% 'if not enable_truncation_orders' %]
          pcolor = amplitude[%map.index%]l0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
@@ -5087,7 +5087,7 @@ contains
            heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
          endif[%
-@end @if use_order_names %]
+@end @if enable_truncation_orders %]
          amp = amp + heli_amp[%
   @end @for helicities %]
       end select[%
@@ -5145,13 +5145,13 @@ contains
       integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the color_correlated_lo2 subroutine with the"
-      write(*,*) "the  'use_order_names' feature switched on! This subroutine does not"
+      write(*,*) "the  'enable_truncation_orders' feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine OL_color_correlated instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
       
       borncc(:,:) = 0.0_ki[%
   @for repeat 1 num_legs inclusive=true %][%
@@ -5194,7 +5194,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()
+      color_vector = amplitude[%map.index%]l0[% @if enable_truncation_orders %]_0[% @end @if %]()
       call color_correlated_lo(color_vector,perm,borncc_heli)[%
       @if is_first %]
       ! The minus is part in the definition according to PowHEG Box.
@@ -5250,12 +5250,12 @@ contains
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
       real(ki), dimension(num_legs,num_legs) :: borncc
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli[%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli_tmp1, ampcc_heli_tmp2, ampcc_heli_tmp3[%
       @end @if %]
       real(ki), dimension(num_legs, 4) :: pvecs
       integer, dimension(num_legs) :: perm
-      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %][%
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %][%
       @if generate_lo_diagrams %][%
       @else %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
@@ -5305,7 +5305,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -5365,10 +5365,10 @@ contains
             call OLP_color_correlated_lo(color_vector_1-color_vector_0,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          color_vector = amplitude[%map.index%]l0()
          call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
-     @end @if use_order_names %]
+     @end @if enable_truncation_orders %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
   @else %][% 'if not generate_lo_diagrams' %]
@@ -5413,7 +5413,7 @@ contains
      @end @for %])
       !---#] reinitialize kinematics:[%
          @if generate_lo_diagrams %][%
-         @if use_order_names %]
+         @if enable_truncation_orders %]
          select case (EFTcount)
          case (0)
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
@@ -5468,15 +5468,15 @@ contains
             call OLP_color_correlated_lo(color_vector_1-color_vector_0,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          end select[%
-         @else %][% 'if not use_order_names' %]
+         @else %][% 'if not enable_truncation_orders' %]
             color_vector = amplitude[%map.index%]l0()
             call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
-         @end @if use_order_names %][%
+         @end @if enable_truncation_orders %][%
          @else %][% 'if not generate_lo_diagrams' %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
@@ -5521,13 +5521,13 @@ contains
    @end @for %][%
 @end @if generate_lo_diagrams %]
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the spin_correlated_lo2  subroutine with the"
-      write(*,*) "'use_order_names' feature switched on! This subroutine does not sup-"
+      write(*,*) "'enable_truncation_orders' feature switched on! This subroutine does not sup-"
       write(*,*) "sport this feature,  yet,  and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
 
       bornsc(:,:,:) = 0.0_ki[%
    @if helsum %]
@@ -5562,7 +5562,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -5658,7 +5658,7 @@ contains
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
-      complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if use_order_names %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if enable_truncation_orders %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
          @end @for %][%
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
@@ -5699,7 +5699,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:[%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
          heli_amp[%helicity%]_0 = amplitude[% map.index %]l0_0()
          heli_amp[%helicity%]_1 = amplitude[% map.index %]l0_1()
          heli_amp[%helicity%]_2 = amplitude[% map.index %]l0_2()[%
@@ -5745,7 +5745,7 @@ contains
       ! relevant.[%
    @for particles lightlike vector %]
       !---#[ particle [%index%] :[%
-   @if use_order_names %]
+   @if enable_truncation_orders %]
       select case (EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> SM + dim-6 
@@ -5993,7 +5993,7 @@ contains
               &                            heli_amp[%helicity%]_1-heli_amp[%helicity%]_0)[%
          @end @for helicities %]
       end select[%
-   @else %][% 'if not use_order_names' %]
+   @else %][% 'if not enable_truncation_orders' %]
       pp  = 0.0_ki[%
       @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
@@ -6018,7 +6018,7 @@ contains
       @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
       @end @for helicities %][%
-      @end @if use_order_names %]
+      @end @if enable_truncation_orders %]
 
       pm = phasefac[%index%]*pm
       mp = conjg(phasefac[%index%])*mp
@@ -6082,13 +6082,13 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the  OLP_spin_correlated_lo2 subroutine with"
-      write(*,*) "the 'use_order_names'  feature switched on! This subroutine does not"
+      write(*,*) "the 'enable_truncation_orders'  feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
 
       ampsc(:) = 0.0_ki[%
    @if helsum %]
@@ -6123,12 +6123,12 @@ contains
             @end @for %])
       !---#] reinitialize kinematics:[%
              @if generate_lo_diagrams %]
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
              @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[%
              @end @if generate_lo_diagrams %][%

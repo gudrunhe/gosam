@@ -1,5 +1,5 @@
 generated_sources = [[%
-@if use_order_names %][%
+@if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%
         @if generate_lo_diagrams %][%
             @if group %]
@@ -121,7 +121,7 @@ generated_sources = [[%
             @end @for %][%
         @end @if generate_nlo_virt %][%
     @end @if helsum %][%
-@end @if use_order_names %]]
+@end @if enable_truncation_orders %]]
 
 [% process_name %]_helicity[%helicity%]_gen = \
       custom_target('[% process_name %]_helicity[%helicity%]_gen',
@@ -132,11 +132,11 @@ generated_sources = [[%
                 )
 
 [% process_name %]_source += files(['globals.f90'])
-[% process_name %]_source += files(['amplitudeh[%helicity%][% @if use_order_names %]_0.f90',
+[% process_name %]_source += files(['amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90',
                      'amplitudeh[%helicity%]_1.f90',
                      'amplitudeh[%helicity%]_2[% @end @if %].f90'])
 [% process_name %]_source += files([[%
-@if use_order_names %][%
+@if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%
         @if helsum%][% @else%][%
             @select r2 @case implicit explicit off %][%
@@ -160,5 +160,5 @@ generated_sources = [[%
            @end @if %][%
         @end @select %][%
     @end @if helsum %][%
-@end @if use_order_names %]])
+@end @if enable_truncation_orders %]])
 [% process_name %]_source += [% process_name %]_helicity[%helicity%]_gen
