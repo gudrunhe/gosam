@@ -28,6 +28,8 @@ class ModelTemplate(Template):
 		if not self._modeltype:
 			self._modeltype = conf.getProperty("model")
 		self._order_names = sorted(conf.getProperty(golem.properties.order_names))
+		if self._order_names==['']:
+			self._order_names=[]
 		self._useCT = conf.getBooleanProperty('renorm_eftwilson')
 
 		self._comment_chars = ['#', '!', ';']

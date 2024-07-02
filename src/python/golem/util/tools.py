@@ -335,6 +335,8 @@ def prepare_model_files(conf, output_path=None):
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
          order_names = sorted(conf.getProperty(golem.properties.order_names))
+         if order_names==['']:
+            order_names=[]
          mdl.store(path, MODEL_LOCAL, order_names)
          message("Done with model import.")
       else:
@@ -361,14 +363,6 @@ def prepare_model_files(conf, output_path=None):
                         os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    else:
       error("Parameter 'model' cannot have more than two entries.")
-
-   if not isufo:
-      if conf.getProperty(golem.properties.use_order_names):
-         warning("Property order_names can only be used when using a UFO model. Switching them off now.")
-         conf.setProperty(golem.properties.use_order_names,False)
-      if conf.getProperty(golem.properties.use_vertex_labels):
-         warning("Property vertex labels can only be used when using a UFO model. Switching them off now.")
-         conf.setProperty(golem.properties.use_vertex_labels,False)
 
 def extract_model_options(conf):
    for opt in conf.getListProperty(golem.properties.model_options):

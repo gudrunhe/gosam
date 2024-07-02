@@ -235,17 +235,17 @@ def run_qgraf(conf, in_particles, out_particles):
 	topo_sty    = "topolopy.sty"
 
 	order_names = sorted(conf.getProperty(golem.properties.order_names))
-	use_order_names = conf.getProperty(golem.properties.use_order_names)
+	if order_names==['']:
+		order_names=[]
 	use_vertex_labels = conf.getProperty(golem.properties.use_vertex_labels)
 
 	topo_sty_name = os.path.join(path, topo_sty)
 	topo_sty_tmp = open(topo_sty_name,'r').readlines()
 	topo_sty_out = open(topo_sty_name,'w')
 	for i in range(len(topo_sty_tmp)):
-		if i==33 and use_order_names:
-			if len(order_names)>0:
-				for el in order_names:
-					topo_sty_out.write("<back> '%s' : [%s],\n" % (el,el))
+		if i==33 and len(order_names)>0:
+			for el in order_names:
+				topo_sty_out.write("<back> '%s' : [%s],\n" % (el,el))
 		if i==34:
 			if use_vertex_labels:
 				topo_sty_out.write("<back> \"[VL]\",\n")
@@ -260,13 +260,11 @@ def run_qgraf(conf, in_particles, out_particles):
 	for i in range(len(form_sty_tmp)):
 		if i==34 and conf["is_ufo"]=='True':
 			form_sty_out.write("<back> isCT[isCT],\n")
-			if use_order_names and 'NP' in order_names:
-				form_sty_out.write("<back> isNP[isNP],\n")
+			form_sty_out.write("<back> isNP[isNP],\n")
 			form_sty_out.write("<back> RK[RK],\n")
-			if use_order_names:
-				if len(order_names)>0:
-					for el in order_names:
-						form_sty_out.write("<back> %s[%s],\n" % (el,el))
+			if len(order_names)>0:
+				for el in order_names:
+					form_sty_out.write("<back> %s[%s],\n" % (el,el))
 		form_sty_out.write(form_sty_tmp[i])
 	form_sty_out.close()
 
@@ -281,7 +279,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			# (0,i) with i>0 (NP order) -> NP vertex (box)
 			tmp_str = "<end><back>vtype="
 			tmp_str = tmp_str+"([isCT],"
-			if use_order_names and "NP" in order_names:
+			if "NP" in order_names:
 				tmp_str = tmp_str+"[NP])"
 			else:
 				tmp_str = tmp_str+"0)"

@@ -159,8 +159,10 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
    EndRepeat;
 #endif
 
+[% @if is_ufo 
+%].sort
 [% @if use_order_names
-%].sort[%
+%][%
 @if eval trnco .neq. 2 %]
 Id Loopfac = 0;[%
 @end @if %]
@@ -180,7 +182,11 @@ Id Loopfac^2 = 0;
 .sort
 Id Lambdam2 = 1;
 Id Loopfac = 1;[%
-@end @if %][%
+@end @if %][% 
+@else 
+%]Id Lambdam1 = 1;
+Id Lambdam2 = 1;[%
+@end @if %][% 
 @end @if %]
 
 #call VertexConstants

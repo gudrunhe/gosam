@@ -1312,7 +1312,7 @@ d[%$_%]h[%helicity%]ct.txt:
 	@echo "* dummy file" > $@
 	@touch d[%$_%]h[%helicity%]ct-stamp
 d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt
-born.txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
+eft_ct.txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
 	@cat $(TXT_EFTCT) > eftctdiag.prc
 	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -1324,7 +1324,7 @@ born.txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
 		-D BORNFLG=-1 \
 		-D OUTFILE=d[%$_%]h[%helicity%]ct \
 		../codegen/golem.frm
-	@touch born-stamp[%
+	@touch eft_ct-stamp[%
 @end @if %][%
 @else %][%
 @if use_order_names %][%
@@ -1371,8 +1371,8 @@ diagramsct_[% efto %].f90[% @if extension quadruple %] diagramsct_[% efto %]_qp.
 		--HELICITY=[%helicity%][%
 @end @for %][%
 @else %]
-born-stamp: born.txt
-diagramsct.f90[% @if extension quadruple %] diagramsct_qp.f90[% @end @if %]: born.txt born-stamp
+eft_ct-stamp: eft_ct.txt
+diagramsct.f90[% @if extension quadruple %] diagramsct_qp.f90[% @end @if %]: eft_ct.txt eft_ct-stamp
 	@echo Python is processing counterterm diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortraneftct.py \
 		-i $< \
@@ -1429,46 +1429,6 @@ d[%$_%]_0h[%helicity%]ctfr5.f90: d[%$_%]_0h[%helicity%]ct-fr.txt
       @end @if internal REQUIRE_FR5 %][%
    @end @if %][%
 @end @for %][%
-
-@if group %][%
-@if use_order_names %][%
-@for each 0 1 2 var=efto %]
-diagramsct_[% efto %].f90: $(TXT_EFTCT[% efto %])
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		-D helicity=[%helicity%] -D "modsuffix=" \
-		-o $@ $+[%
-   @if internal REQUIRE_FR5 %]
-diagramsct_[% efto %]fr5.f90: $(TXT_EFTCT[% efto %]_FR5)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		-D helicity=[%helicity%] -D modsuffix=fr5 \
-		-o $@ $+[%
-   @end @if %][%
-@end @for %][%
-@else %]
-diagramsct.f90: $(TXT_EFTCT)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		-D helicity=[%helicity%] -D "modsuffix=" \
-		-o $@ $+[%
-   @if internal REQUIRE_FR5 %]
-diagramsctfr5.f90: $(TXT_EFTCT_FR5)
-	@echo Haggies is processing tree level diagrams @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		-D helicity=[%helicity%] -D modsuffix=fr5 \
-		-o $@ $+[%
-   @end @if %][%
-@end @if %][%
-@end @if %][%
 @end @if generate_eft_counterterms %][%
 @end @if %]
 

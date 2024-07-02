@@ -598,7 +598,7 @@ class Model:
 		
 		for el in order_names:
 			if not(el in orders):
-				warning(("Specified order name %s is not present in UFO model and, hence, has no effect." %  (el)))
+				error("WARNING: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(el))
 		orders.update(order_names)
 
 		for v in self.all_vertices:
@@ -616,9 +616,9 @@ class Model:
 
 			deg = len(fields)
 			if deg >= 7:
-			   warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
-			   continue
-			   assert False
+				warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+				continue
+				assert False
 
 			flip = spins[0] == 1 and spins[2] == 1
 
@@ -662,9 +662,8 @@ class Model:
 					lwf.write(field)
 				lwf.write(";")
 				lwf.write("isCT='0',")
-				if 'NP' in vertorders[ivo]:
-					flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
-					lwf.write("isNP='%s'," % str(flagNP))
+				flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+				lwf.write("isNP='%s'," % str(flagNP))
 				is_first = True
 				for name, power in list(vertorders[ivo].items()):
 					if is_first:
@@ -690,11 +689,6 @@ class Model:
 			orders = set()
 			for c in self.all_CTcouplings:
 				orders.update(list(c.order.keys()))
-
-			for el in order_names:
-				if not(el in orders):
-					warning(("Specified order name %s is not present in UFO model and, hence, has no effect." %  (el)))
-			orders.update(order_names)
 
 			for v in self.all_CTvertices:
 				particles = v.particles
@@ -757,9 +751,8 @@ class Model:
 						lwf.write(field)
 					lwf.write(";")
 					lwf.write("isCT='1',")
-					if 'NP' in vertorders[ivo]:
-						flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
-						lwf.write("isNP='%s'," % str(flagNP))
+					flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+					lwf.write("isNP='%s'," % str(flagNP))
 					is_first = True
 					for name, power in list(vertorders[ivo].items()):
 						if is_first:
@@ -803,8 +796,7 @@ class Model:
 		for el in order_names:
 			f.write(",%s" % el)
 		f.write(",isCT")
-		if 'NP' in order_names:
-			f.write(",isNP")
+		f.write(",isNP")
 		f.write(";\n")
 		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
 		f.write("\n")
@@ -953,11 +945,8 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				if 'NP' in vertorders[ivo]:
-					flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
-					f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
-				else:
-					f.write("Identify Once vertex(iv?, isCT0, RK%d" % vertorders[ivo]["RK"])
+				flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+				f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
@@ -1100,11 +1089,8 @@ class Model:
 
 					fold_name = "(%s) %s CTVertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 					f.write("*---#[ %s:\n" % fold_name)
-					if 'NP' in vertorders[ivo]:
-						flagNP = 1 if vertorders[ivo]['NP']!=0 else 0
-						f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
-					else:
-						f.write("Identify Once vertex(iv?, isCT1, RK%d" % vertorders[ivo]["RK"])
+					flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+					f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
 					for el in order_names:
 						f.write(", %s%d"
 							% (el,vertorders[ivo][el]))

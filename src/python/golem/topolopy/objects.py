@@ -206,17 +206,6 @@ class Diagram:
 
       return rk
 
-   # def orders(self):
-   #    tmporders = dict()
-   #    for v in self._vertices:
-   #       for key in self._vertices[v].orders.keys():
-   #          if key in tmporders:
-   #             tmporders[key] += self._vertices[v].orders[key]
-   #          else:
-   #             tmporders[key] = self._vertices[v].orders[key]
-
-   #    return tmporders
-
    def order(self,okey):
       tmporders = dict()
       for v in self._vertices:
@@ -225,12 +214,16 @@ class Diagram:
                tmporders[key] += self._vertices[v].orders[key]
             else:
                tmporders[key] = self._vertices[v].orders[key]
-      if okey is None:
-         return 0
-      elif isinstance(okey, str):
-         return tmporders[okey]
-      else:
-         return tmporders[str(okey)]
+      try:
+         if okey is None:
+            return 0
+         elif isinstance(okey, str):
+            return tmporders[okey]
+         else:
+            return tmporders[str(okey)]
+      except:
+         error("'{0}' cannot be used as key in order function.".format(okey))
+
 
    def VertexInfo(self):
       VInfo = dict()

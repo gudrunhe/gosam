@@ -499,14 +499,45 @@ def workflow(conf):
 		if conf.getProperty(p):
 			conf.setProperty(str(p), conf.getProperty(p))
 
-	# When using the EFT feature 'order_names' also 'use_order_names' must be set:
-	if conf.getProperty("order_names") and not conf.getProperty("use_order_names"):
-		raise GolemConfigError("You specified 'order_names' but forgot to set\n " +
-			"the flag 'use_order_names'!")
-	if not conf.getProperty("order_names") and conf.getProperty("use_order_names"):
-		warning("You explicitly set the 'use_order_names' flag without actually ",
-		  "specifying any 'order_names'. This can produce a lot of unnecessary code ",
-		  "so you might want to remove it.")
+	# Check for incompatible configuration:
+	raise_err = False
+	err_str = ""
+	if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+		# model is not a UFO
+		if conf.getProperty("order_names"):
+			raise_err = True
+			err_str = err_str+", order_names" if err_str else "order_names"
+		if conf.getBooleanProperty("use_order_names"):
+			raise_err = True
+			err_str = err_str+", use_order_names" if err_str else "use_order_names"
+		if conf.getBooleanProperty("renorm_eftwilson"):
+			raise_err = True
+			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
+		if conf.getBooleanProperty("use_vertex_labels"):
+			raise_err = True
+			err_str = err_str+", use_vertex_labels" if err_str else "use_vertex_labels"
+		if raise_err:
+			print(err_str);
+			raise GolemConfigError("The properties '{0}'".format(err_str) +
+			  " which you set in your configuration are only compatible" +
+			  " with a UFO model, but you did not use one.")
+	elif (True if not conf.getProperty("order_names") else ('NP' not in conf.getProperty("order_names"))):
+		# model is a UFO, but no order_names specified or 'NP' not present in 'order_names'
+		# Note: whether or not 'NP' is present in UFO is checked in feynrules.py, can't be done here
+		if conf.getBooleanProperty("use_order_names"):
+			raise_err = True
+			err_str = err_str+", use_order_names" if err_str else "use_order_names"
+		if conf.getBooleanProperty("renorm_eftwilson"):
+			raise_err = True
+			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
+		if raise_err:
+			print(err_str);
+			raise GolemConfigError("The properties '{0}'".format(err_str) +
+			  " which you set in your configuration can only be used when" +
+			  " 'order_names' are specified and contain the parameter 'NP'.")
+	else:
+		# model is a UFO and 'order_names' contain 'NP': Can use full EFT functionality
+		pass
 
 	if not conf["extensions"] and props["extensions"]:
 		conf["extensions"]=props["extensions"]
@@ -552,10 +583,6 @@ def workflow(conf):
 	conf["generate_uv_counterterms"] = conf.getProperty('genUV') # MH: FLAGGED FOR DELETION
 	conf["generate_eft_counterterms"] = conf.getBooleanProperty('renorm_eftwilson') and generate_nlo_virt
 	conf["generate_yuk_counterterms"] = conf.getBooleanProperty('renorm_yukawa') and generate_nlo_virt
-
-	if conf.getBooleanProperty("renorm_eftwilson") and not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
-		raise GolemConfigError("EFT counterterms can only be used with an appropriate UFO model!\n " +
-			"Please provide such a model or set 'renorm_eftwilson=False'")
 
 	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
 		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
