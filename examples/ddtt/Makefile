@@ -5,8 +5,6 @@ GOSAM=gosam.py
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-
-
 .PHONY: all golem test comptest clean very-clean
 
 all: golem test
@@ -19,7 +17,7 @@ comptest: golem
 	$(MAKE) -C test compile
 
 golem: $(PROCESS).log
-	$(MAKE) -C virtual compile
+	cd virtual; meson setup build --prefix ${CURDIR}/virtual; cd build; meson compile; meson install
 
 $(PROCESS).log: $(PROCESS).in
 	@echo setting up virtual ...
@@ -33,7 +31,7 @@ clean:
 	rm -f $(PROCESS).in $(PROCESS).log
 	$(MAKE) -C test clean
 	rm -f virtual/.golem.dir
-	$(MAKE) -C virtual clean
+	cd virtual; meson clean
 
 very-clean:
 	rm -f $(PROCESS).in $(PROCESS).log

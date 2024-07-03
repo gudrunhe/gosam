@@ -19,7 +19,6 @@ include README
 include COPYING
 include MANIFEST.in
 include PKG-INFO
-include haggies/haggies.jar
 recursive-include examples      README Makefile *.rc test/test.f90
 recursive-include examples      test/analytic.f90
 include examples/README

@@ -16,7 +16,7 @@ module     accu
    !              ! output:
    !              !   0.0      1.0
    !
-   use config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    implicit none
 
    integer, parameter, private :: min_ex_ki = minexponent(1.0_ki)

@@ -12,7 +12,7 @@
    use precision_golem, only: ki_gol => ki
    use tens_rec[%
 @end @if golem95 %]
-   use config, only: ki [% @if extension golem95
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki [% @if extension golem95
    %][% @if extension samurai %], reduction_interoperation, samurai_scalar [% 
    @end @if %][% @end @if %]
    implicit none
@@ -82,20 +82,6 @@
       @end @if %][%
    @end @for %]
    public :: tear_down_golem95[%
-   @if extension pjfry %][%
-      @for groups var=grp %][%
-         @if is_first %]
-
-   interface contract_pjfry[%
-         @end @if %]
-      module procedure fry_tensor_coefficients_group_[% grp %][%
-         @if is_last %]
-   end interface
-   
-   public :: contract_pjfry[%
-         @end @if %][%
-      @end @for %][%
-   @end @if extension pjfry %][%
 @end @if %][%
 
 @if use_flags_0 %]
@@ -230,7 +216,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    use form_factor_[% $_ %]p, only: a[% $_ %]0[%
       @end @for %]
    use form_factor_type, only: form_factor, operator(+), operator(-)
-   use config, only: debug_nlo_diagrams, logfile
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics, only:[%
       @for repeat num_legs shift=1 %][%
          @if is_first %] [% @else %], [%
@@ -241,7 +227,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    & [%
          @end @if%][%symbol%][%
       @end @for mandelstam %]
-   use model
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    implicit none
    type(tensrec_info_group[% grp %]), intent(in) :: coeffs
    type(form_factor) :: amp, dbg_amp
@@ -433,191 +419,6 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    100 format (A30,E24.16,A6,E24.16,A3)
 end function contract_tensor_coefficients_group_[% grp %]
 !-----#] function contract_tensor_coefficients_group_[% grp %]:[%
-         @if extension pjfry %]
-!-----#[ function fry_tensor_coefficients_group_[% grp %]:
-function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(amp)
-   use array, only: packb
-   use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf
-   use [% process_name asprefix=\_ %]pjfry_comb
-   use [% process_name asprefix=\_ %]pjfry95pg
-   use config, only: debug_nlo_diagrams, logfile
-   use [% process_name asprefix=\_ %]kinematics, only:&
-   & [%
-         @for mandelstam non-zero sym_prefix=es %][% 
-            @if is_first %][% @else %],[%
-              @if eval index % 8 .eq. 7 %]&
-   &[%
-              @end @if%] [% @end @if %][%symbol%][%
-         @end @for mandelstam %][%
-         @for repeat num_legs shift=1 %],[%
-            @if is_first %]&
-   &[%
-            @end @if %] k[% $_ %][%
-         @end @for %]
-   use model
-   implicit none
-   type(tensrec_info_group[% grp %]), intent(in) :: coeffs
-   real(ki), intent(in) :: scale2
-   integer, intent(in) :: ep
-   complex(ki) :: amp, dbg_amp
-
-   integer :: b_set
-   real(ki_gol), dimension([% ls %],0:3) :: rmomenta
-
-   call pginitgolem95([% ls %])[%
-
-         @for smat group=grp powfmt=%s**%d prodfmt=%s*%s prefix=es 
-              upper diagonal %]
-   call pgsetmat([%rowindex%],[%colindex%], [%
-            @if im.is_zero %]real([% @else %]cmplx([% @end @if %][%
-            @if re.is_zero %]0.0_ki[% 
-            @else %][%
-               @for elements re delimiter=; var=term first=first_term %][%
-                  @for elements term delimiter=: %][%
-                     @if is_first %][%
-                        @if eval $_ .ge. 0 %][%
-                           @if first_term %][%
-                           @else %]+[%
-                           @end @if %][%
-                        @else %]-[%
-                        @end @if %][%
-   
-                        @select $_
-                        @case 2 -2 %][%
-                        @case 4 -4%]2.0_ki*[%
-                        @else %][%
-                           @with eval .abs. $_ / 2 result=num %][%
-                              num convert=float format=%0.1f_ki%][%
-                           @end @with %]*[%
-                        @end @select %][%
-                     @else %][% $_ %][%
-                     @end @if %][%
-                  @end @for %][%
-               @end @for %][%
-            @end @if %][%
-      
-            @if im.is_zero %][% @else %],[% @end @if %][%
-      
-            @for elements im delimiter=; var=term first=first_term %][%
-               @for elements term delimiter=: %][%
-                  @if is_first %][%
-                     @if eval $_ .ge. 0 %]+[%
-                     @else %]-[%
-                     @end @if %][%
-      
-                     @select $_
-                     @case 2 -2 %][%
-                     @case 4 -4%]2.0_ki*[%
-                     @else %][%
-                        @with eval .abs. $_ / 2 result=num %][%
-                           num convert=float format=%0.1f_ki %][%
-                        @end @with %]*[%
-                     @end @select %][%
-                  @else %][% $_ %][%
-                  @end @if %][%
-               @end @for %][%
-            @end @for %], ki_pjf))[%
-         @end @for %]
-   call pgsetmusq(real(scale2, ki_pjf))
-   call pgpreparesmatrix()
-   b_ref = b_ref[%ls%][%
-
-         @for propagators group=grp prefix=k %]
-   rmomenta([% $_ %],:) = [%
-            @if eval momentum .eq. 0 %]0.0_ki_gol[%
-            @else %]real([% momentum %], ki_gol)[%
-            @end @if %][%
-         @end @for %][%
-
-         @for diagrams group=grp var=DIAG idxshift=1 %]
-   !-------#[ Diagram [% DIAG %]:[%
-            @if use_flags_1 %]
-   if(evaluate_virt_diagram([% DIAG %])) then[%
-            @end @if %]
-      if(debug_nlo_diagrams) then
-         write(logfile,*) "<diagram index='[% DIAG %]'>"
-      end if
-      b_set = [%
-            @if eval ( .len.  ( .str. pinches ) ) .eq. 0 %]0[%
-            @else %]packb((/[% pinches %]/))[%
-            @end @if %]
-
-      amp = [%
-            @if is_first %][%
-            @if diagsum %]+ [%
-            @else %][% diagram_sign %][%
-            @end @if %][%
-            @else %]amp [%
-            @if diagsum %]+ [%
-            @else %][% diagram_sign %] [%
-            @end @if %][%
-            @end @if %][%
-            @if is_nf %] [% 
-            @if diagsum %][%
-            @else %] real(Nfrat, ki_gol) * [% @end @if %][%
-            @end @if %]([%
-            @if eval rank .eq. 0 %]coeffs%coeffs_[% DIAG %] * pga[%
-                loopsize diagram=DIAG %]0(b_set, ep)[%
-            @else %]contract[% loopsize diagram=DIAG %]_[% rank 
-      %](coeffs%coeffs_[% DIAG %], rmomenta, b_set, ep)[%
-            @end @if %][%
-            @select r2 @case implicit %][%
-               @select loopsize diagram=DIAG
-               @case 2 3 4 %][%
-                  @if eval rank .gt. 1 %]&
-       &     + contract[% loopsize diagram=DIAG %]_[% rank
-      %]s1(coeffs%coeffs_[% DIAG %]s1, rmomenta, b_set, ep)[%
-               @end @if %][%
-                  @if eval rank .gt. 3 %]&
-       &     + contract[% loopsize diagram=DIAG %]_[% rank
-      %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set, ep)[%
-                  @end @if %][%
-               @case 5 %][%
-                  @if eval rank .gt. 5 %]&
-       &     + contract[% loopsize diagram=DIAG %]_[% rank
-      %]s1(coeffs%coeffs_[% DIAG %]s1, rmomenta, b_set, ep)
-       &     + contract[% loopsize diagram=DIAG %]_[% rank
-      %]s2(coeffs%coeffs_[% DIAG %]s2, rmomenta, b_set, ep)&
-             &     + contract[% loopsize diagram=DIAG %]_[% rank
-      %]s1(coeffs%coeffs_[% DIAG %]s3, rmomenta, b_set, ep)[%
-                  @end @if %][%
-               @end @select %][%
-            @end @select %])
-      if(debug_nlo_diagrams) then[%
-            @if is_first %]
-         dbg_amp = amp[%
-            @else %]
-         dbg_amp = amp - dbg_amp[%
-            @end @if %]
-         select case(ep)
-         case (0)
-            write(logfile,100) &
-            & "<result kind='nlo-finite' re='", real(dbg_amp, ki), &
-            & "' im='", aimag(dbg_amp), "'/>"
-         case (1)
-            write(logfile,100) &
-            & "<result kind='nlo-single' re='", real(dbg_amp, ki), &
-            & "' im='", aimag(dbg_amp), "'/>"
-         case (2)
-            write(logfile,100) &
-            & "<result kind='nlo-double' re='", real(dbg_amp, ki), &
-            & "' im='", aimag(dbg_amp), "'/>"
-         end select
-         write(logfile,*) "</diagram>"
-      end if[%
-            @if use_flags_1 %][%
-               @if is_first %]
-   else
-      amp = 0.0_ki[%
-               @end @if %]
-   end if[%
-            @end @if %]
-   !-------#] Diagram [% DIAG %]:[%
-         @end @for diagrams %]
-   100 format (A30,E24.16,A6,E24.16,A3)
-end function fry_tensor_coefficients_group_[% grp %]
-!-----#] function fry_tensor_coefficients_group_[% grp %]:[%
-         @end @if %][%
       @end @with %][%
    @end @for groups %]
 !---#] contract tensor coefficients golem95:[%
@@ -634,7 +435,7 @@ function     numetens_group[% grp %](icut, Q, mu2) result(num)
             @else %],[%
             @end @if %] k[% $_ %][%
          @end @for %]
-   use model
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    implicit none
    integer, intent(in) :: icut
    complex(ki_sam), dimension(4), intent(in) :: Q[%
@@ -779,10 +580,10 @@ subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    use madds, only: s_mat[%
    @end @if %][% @end @if %]
    use options, only: samurai_out => iout
-   use config, only: samurai_group_numerators, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: samurai_group_numerators, &
       samurai_istop, samurai_verbosity
    use [% process_name asprefix=\_ %]kinematics
-   use model
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    use [% process_name asprefix=\_ %]globalsl1, only: epspow
    implicit none
    real(ki_sam), intent(in) :: scale2
@@ -935,41 +736,5 @@ subroutine quadninja_exit()
 end subroutine quadninja_exit
 !---#] subroutine quadninja_exit:[%
    @end @if extension quadruple %][%
-   @end @if extension ninja %][%
-@if extension pjfry %]
-function pga10(b_set, ep)
-   use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf
-   use [% process_name asprefix=\_ %]pjfry95pg
-   use array, only: pminus, unpackb
-   use [% process_name asprefix=\_ %]pjfry_comb, only: b_ref
-   implicit none
-   
-   integer, intent(in) :: b_set, ep
-   complex(ki_pjf) :: pga10
-
-   real(ki_pjf) :: musq, msq, lg
-   integer :: b_pin
-   integer, dimension(1) :: s_pin
-
-   b_pin = pminus(b_ref, b_set)
-   s_pin = unpackb(b_pin, 1)
-   msq = - 0.5_ki_pjf * pggetmat(s_pin(1), s_pin(1))
-
-   if (msq.eq.0.0_ki_pjf) then
-      pga10 = (0.0_ki_pjf, 0.0_ki_pjf)
-      return
-   end if
-
-   select case(ep)
-   case(0)
-      musq = pggetmusq()
-      lg = log(musq/msq)
-      pga10 = msq * (1.0_ki_pjf + lg)
-   case(1)
-      pga10 = msq
-   case default
-      pga10 = (0.0_ki_pjf, 0.0_ki_pjf)
-   end select
-end function pga10[%
-@end @if %]
+   @end @if extension ninja %]
 end module [% process_name asprefix=\_ %]groups

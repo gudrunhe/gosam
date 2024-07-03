@@ -847,24 +847,6 @@ class Samurai(Library):
       conf["samurai.fcflags"] = "-I%s" % incd
       conf["samurai.ldflags"] = "-L%s -lsamurai" % path
 
-class PJFry(Library):
-   def __init__(self):
-      Library.__init__(self, "PJFry", "libpjfry")
-
-   def store(self, conf):
-      paths = self.getInstallationPath()
-      if len(paths) == 0:
-         return
-
-      path = self.undohome(paths[0])
-
-      if "+installed.extensions" in conf:
-         conf["+installed.extensions"] += ", pjfry"
-      else:
-         conf["+installed.extensions"] = "pjfry"
-
-      conf["+pjfry.ldflags"] = "-L%s -lpjfry" % path
-
 class Golem95(Library):
    def __init__(self):
       Library.__init__(self, "Golem", "libgolem")
@@ -1018,16 +1000,6 @@ class QGraf(Program):
 
    def store(self, conf):
       conf["qgraf.bin"] = self.undohome(self.getInstance())
-
-class Java(Program):
-   def __init__(self):
-      Program.__init__(self, "Java", "java")
-
-   def store(self, conf):
-      haggies_jar = self.undohome(gpath.golem_path("haggies", "haggies.jar"))
-      java = self.undohome(self.getInstance())
-      conf["haggies.bin"] = "%s -jar %s" % \
-            (java, haggies_jar)
 
 class Meson(Program):
    def __init__(self):

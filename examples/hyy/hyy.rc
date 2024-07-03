@@ -21,6 +21,6 @@ reduction_programs=ninja, golem95
 
 reference-vectors=2:3,3:2
 filter.nlo={ \
-   'fermionic': CHORD([T]) == LOOPSIZE, \
-   'bosonic':   CHORD([T]) != LOOPSIZE \
+   'fermionic': CHORD(T) == LOOPSIZE, \
+   'bosonic':   CHORD(T) != LOOPSIZE \
 }

@@ -8,33 +8,9 @@
 
 	<file src="olp_module.f90" class="OLP" usedby="olp"/>
 	<file src="olp.h" class="OLP" usedby="olp"/>
-	<file src="make_parallel.py" class="OLP" usedby="olp" executable="yes">
-		<only if-extension="autotools"/>
-		<except if-extension="meson"/>
-	</file>
-	<file src="Makefile" class="OLP" usedby="olp">
-		<except if-extension="autotools"/>
-		<except if-extension="meson"/>
-	</file>
 	<file src="config.sh" class="OLP" usedby="olp" executable="yes" />
-	<file src="Makefile.am" class="OLP" usedby="olp">
-		<only if-extension="autotools"/>
-		<except if-extension="meson"/>
-	</file>
 	<file src="Makefile.conf" class="OLP" usedby="olp">
 		<except if-file="exists" in-mode="normal" />
-	</file>
-	<file src="configure.ac" class="OLP" usedby="olp">
-		<only if-extension="autotools"/>
-		<except if-extension="meson"/>
-	</file>
-	<file src="autogen.sh" class="Verbatim" usedby="olp" executable="yes">
-		<only if-extension="autotools"/>
-		<except if-extension="meson"/>
-	</file>
-	<file src="acinclude.m4" class="OLP" usedby="olp">
-		<only if-extension="autotools"/>
-		<except if-extension="meson"/>
 	</file>
 
 	<file src="olp_daemon.h" class="Verbatim" usedby="olp">
@@ -54,6 +30,9 @@
 	</file>
 	<file src="build_olp_library.sh" class="OLP" usedby="olp" executable="yes"/>
 	<file src="meson_options.txt" class="OLP" usedby="olp">
+		<only if-extension="meson"/>
+	</file>
+	<file src="install_mod_files.py" class="Verbatim" executable="yes" usedby="olp">
 		<only if-extension="meson"/>
 	</file>
 

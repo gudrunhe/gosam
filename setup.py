@@ -122,7 +122,6 @@ DATA_DIRS = [
 			"olp/templates/common",
 			"models",
 			"src/form",
-			"haggies"
 ]
 
 DATA_EXCLUDE = [

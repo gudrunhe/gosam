@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp
-   use config, only: ki => ki_qp, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color_qp, only: numcs[%
 @if generate_nlo_virt %][%
@@ -292,7 +292,7 @@ contains
 @else %][% 'evaluate group only for sum' %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
-   use config, only: &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
       & logfile, debug_nlo_diagrams
    use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow[%
       @if extension golem95 %]
@@ -301,14 +301,9 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
        %], only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
-         @if extension pjfry %], contract_pjfry[%
-         @end @if %][%
          @if extension samurai %], &
       & global_coeffs => coeffs_group[% grp %], &
       & reduce_numetens => reduce_numetens_group[% grp %][%
-         @end @if %][%
-         @if extension pjfry %]
-   use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf[%
          @end @if %][%
       @end @if %][%
       @if extension samurai %]
@@ -331,10 +326,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    type(tensrec_info_group[% grp %]), target :: coeffs
    type(form_factor) :: gres[%
-         @if extension pjfry %]
-   integer :: ep
-   complex(ki_pjf) :: pjres[%
-         @end @if %][%
       @end @if %][%
       @if extension samurai %]
    complex(ki_sam), dimension(-2:0) :: tot
@@ -383,22 +374,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @else %]
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
          @end @if %][%
-      @end @if %][%
-         @if extension pjfry %]
-   case(3) ! use PJFry only
-      call reconstruct_golem95(coeffs)[%
-            @if generate_lo_diagrams %]
-      do ep=0,2
-         pjres = contract_pjfry(coeffs, scale2, ep)
-         samplitude(-ep) = 2.0_ki * real(pjres, ki)
-      end do[%
-            @else %]
-      do ep=0,2
-         pjres = contract_pjfry(coeffs, scale2, ep)
-         samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-      end do[%
-            @end @if %]
-      ok = .true.[%
       @end @if %][%
       @if extension samurai %][%
          @if extension golem95 %]
@@ -463,59 +438,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
             @end @if %]
          ok = .true.
       end if[%
-            @if extension pjfry %]
-   ! Modes which require Golem95, PJFry and Samurai
-   case(12) ! Try Samurai first, use PJFry is samurai fails
-      call samurai_reduce(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-               @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-               @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-               @end @if %]
-         ok = .true.
-      else
-         call reconstruct_golem95(coeffs)[%
-               @if generate_lo_diagrams %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = 2.0_ki * real(pjres, ki)
-         end do[%
-               @else %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-         end do[%
-               @end @if %]
-         ok = .true.
-      end if
-   case(14) ! Tensorial Reconstruction + Samurai on numetens
-           ! + PJFry on failure
-      call reconstruct_golem95(coeffs)
-      global_coeffs => coeffs
-      call reduce_numetens(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-               @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-               @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-               @end @if %]
-         ok = .true.
-      else[%
-               @if generate_lo_diagrams %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = 2.0_ki * real(pjres, ki)
-         end do[%
-               @else %]
-         do ep=0,2
-            pjres = contract_pjfry(coeffs, scale2, ep)
-            samplitude(-ep) = cmplx(real(pjres, ki_pjf), aimag(pjres), ki)
-         end do[%
-               @end @if %]
-         ok = .true.
-      end if[%
-            @end @if %][%
          @end @if %][%
       @end @if %]
    case default
@@ -533,17 +455,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       print*, "* This code was generated [%
       @if extension golem95 %]with[%
       @else %]without[%
-      @end @if %] support for Golem95."[%
-      @if extension golem95 %]
-      print*, "* This code was generated [%
-         @if extension pjfry %]with[%
-         @else %]without[%
-         @end @if %] support for PJFry."[%
-      @else %][%
-         @if extension pjfry %]
-      print*, "* PJFry cannot be used without the extension 'golem95'"[%
-         @end @if %][%
-      @end @if %]
+      @end @if %] support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then[%

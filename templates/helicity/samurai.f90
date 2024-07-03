@@ -10,7 +10,7 @@
    !              + passing of invariants has been added.
    ! 2.1.1 -> 2.9.0: the generic samurai function is now used again.
    use precision, only: ki_sam => ki
-   use config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    private[%
@@ -30,7 +30,7 @@ function     numeval_group[% grp %](icut, Q, mu2) result(num)[%
             @else %],[%
             @end @if %] k[% $_ %][%
          @end @for %]
-   use model[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
    use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 
@@ -166,12 +166,12 @@ subroutine     reduce_group[% grp %](scale2,tot,totr,ok)
    @if version_newer samurai.version 2.1 %]
    use madds, only: s_mat[%
    @end @if %][% @end @if %]
-   use config, only: samurai_group_numerators, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: samurai_group_numerators, &
       & samurai_verbosity, samurai_istop, samurai_test, &
       & debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics
    use SpinorBrackets
-   use model[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
    use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 

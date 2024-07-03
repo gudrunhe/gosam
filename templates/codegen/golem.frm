@@ -616,7 +616,7 @@ Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(?head, vDUMMY1?, vDUMMY1?) = 0;
 @case implicit %]
 * Implicit reduction of R2 term:
 * All terms in the numerator which come with a \epsilon or \mu^2
-* are reduced with the reduction library (Samurai/Golem95/PJFry etc.)
+* are reduced with the reduction library (Samurai/Golem95 etc.)
 .sort 5.3;
 Local d`DIAG'R2 = 0;[%
 @case explicit %]

@@ -137,13 +137,6 @@ def generate_process_files(conf, from_scratch=False):
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
 
-	if len(keep_tree) == 0:
-		if conf.getBooleanProperty("ignore_empty_subprocess"):
-			props.setProperty("write_vanishing_amplitude", "true")
-		else:
-			golem.util.tools.error("No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
-									.format(conf["process_name"]))
-
 	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
 
@@ -599,10 +592,6 @@ def workflow(conf):
 			if red in ext:
 				red_flag = True
 				break
-		if "pjfry" in ext and not "golem95" in ext:
-			golem.util.tools.warning("The PJFRY interface needs Golem95 routines.",
-					"Golem95 is automatically added to reduction_programs.")
-			conf["gosam-auto-reduction.extensions"] = "golem95"
 		if not red_flag:
 			golem.util.tools.warning(
 					"Generating code for the virtual part without specifying",
@@ -686,7 +675,7 @@ def workflow(conf):
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 
 	if generate_nlo_virt and conf.getProperty("enable_truncation_orders"):
-		if ('pjfry' in ext) or ('samurai' in ext):
+		if 'samurai' in ext:
 			raise GolemConfigError(
 					"The 'enable_truncation_orders' feature can only be used with ninja or golem95.\n" +
 					"Please select one of those as your redution program by setting:\n"+
@@ -745,12 +734,23 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading tree diagram file %r" % fname)
 		mod_diag_lo = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_lo.diagrams.values():
+				d.unitary_gauge = True
 		conf["ehc"]=False
 		# keep_tree, tree_signs, tree_flows =
 		keep_tree, tree_signs, treecache = \
 				golem.topolopy.functions.analyze_tree_diagrams(
 					mod_diag_lo.diagrams, model, conf,
 					filter_flags = lo_flags)
+
+		if len(keep_tree) == 0:
+			if conf.getBooleanProperty("ignore_empty_subprocess"):
+				conf.setProperty("write_vanishing_amplitude", "true")
+			else:
+				golem.util.tools.error(
+					"No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
+					.format(conf["process_name"]))
 	else:
 		keep_tree = []
 		tree_signs = {}
@@ -776,6 +776,9 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_virt.diagrams.values():
+				d.unitary_gauge = True
 
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
 			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
@@ -793,6 +796,12 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading counterterm diagram file %r" % fname)
 		mod_diag_ct = golem.util.tools.load_source(modname, fname)
+		if conf.getBooleanProperty("unitary_gauge"):
+			for d in mod_diag_ct.diagrams.values():
+				d.unitary_gauge = True
+
+		# keep_tree, tree_signs, tree_flows =
+		keep_ct, ct_signs = \
 		keep_ct, ct_signs, ctcache = \
 				golem.topolopy.functions.analyze_ct_diagrams(
 					mod_diag_ct.diagrams, model, conf,

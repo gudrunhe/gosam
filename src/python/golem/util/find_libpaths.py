@@ -10,11 +10,9 @@ components = {
                "Samurai": OPTIONAL,
                "Golem95": OPTIONAL,
                "Fortran": OPTIONAL,
-               "PJFry": OPTIONAL,
                "Form": REQUIRED,
                "QGraf": REQUIRED,
-               "Java": OPTIONAL,
-               "Meson": OPTIONAL,
+               "Meson": REQUIRED,
                "Linker": OPTIONAL
              }
 

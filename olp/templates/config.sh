@@ -6,56 +6,66 @@ else
    PWD="$(dirname "$0")"
 fi
 
-USE_INTERNAL=
+MAKEFILECONF=$PWD/Makefile.conf
 
-CFLAGS="-I${PWD}"
-FCFLAGS="${CFLAGS}[%
-@for subprocesses %] \
- `sh ${PWD}/[%path%]/config.sh -[%
-   @if is_first %][% @else %]p[% @end @if %]cflags`[%
-@end @for %]"
-LDFLAGS="${PWD}/olp_module.o[%
-@for subprocesses %] \
- `sh ${PWD}/[%path%]/config.sh -[%
-   @if is_first %][% @else %]p[% @end @if %]libs`[%
-@end @for %]"[%
-@for subprocesses %][%
-   @if is_first %]
+FC="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FC[ \t?]*='|sed 's/^[ \t]*FC[ \t?]*=//')"
+LDFLAGS="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*LDFLAGS[ \t?]*='|sed 's/^[ \t]*LDFLAGS[ \t?]*=//')"
+CFLAGS="$(sed -n 'H
+   ${
+   g
+   s/\\[ \t]*\n[ \t]*//g
+   p
+   }' $MAKEFILECONF|\
+   grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
 
 [% @if extension shared %]
-LDFLAGS_ALL="-Wl,-rpath=${PWD} -L${PWD} -lgosam_process"
+PROCESS_LDFLAGS="-L$PWD/lib -Wl,-rpath=$PWD/lib"
+[% @else %]
+PROCESS_LDFLAGS="$PWD/lib/libgolem_olp.a"
 [% @end @if %]
-
-FC=`sh ${PWD}/[% path %]/config.sh -fortcom`
-OLIBS=`sh ${PWD}/[% path %]/config.sh -olibs`
-OCFLAGS=`sh ${PWD}/[% path %]/config.sh -ocflags`[%
-   @end @if %][%
-@end @for %]
+PROCESS_CFLAGS="-I$PWD/include/GoSam_Process"
 
 while [ $# -gt 0 ]; do
    case "$1" in
       -libs)
-[% @if extension shared %]
-        if [ -n "$USE_INTERNAL" ] ; then
-              printf " $LDFLAGS"
-        else
-              printf " $LDFLAGS_ALL"
-        fi
-[% @else %]
-              printf " $LDFLAGS"
-[% @end @if %]
-   ;;
-      -olibs)
-              printf " $OLIBS"
+              printf " $PROCESS_LDFLAGS $LDFLAGS"
    ;;
       -cflags)
-              printf " $CFLAGS"
+              printf " $PROCESS_CFLAGS $CFLAGS"
+   ;;
+      -plibs)
+              printf " $PROCESS_LDFLAGS"
+   ;;
+      -pcflags)
+              printf " $PROCESS_CFLAGS"
+   ;;
+      -olibs)
+              printf " $LDFLAGS"
    ;;
       -ocflags)
-              printf " $OCFLAGS"
+              printf " $CFLAGS"
    ;;
-      -fcflags)
-              printf " $FCFLAGS"
+      -deps)[%
+	      @if extension shared %]
+	      printf ""[%
+	      @else %]
+              printf " $PROCESS_LDFLAGS"[%
+	@end @if %]
+   ;;
+      -name)
+              printf " [% process_name%]"
    ;;
       -fortcom)
               printf " $FC"
@@ -72,22 +82,21 @@ while [ $# -gt 0 ]; do
               echo Options:
               echo "   -libs    prints the flags needed to link this code"
               echo "            including the libraries it depends on"
-              echo "   -fcflags prints the flags needed to compile this code"
-              echo "            with fortran"
-              echo "   -cflags  prints the flags needed to compile this code"
-              echo "            with C/C++"
-              echo "   -fortcom the name of the fortran compiler in use"[%
-@if extension shared %]
-              echo "   -intern  return flags for linking with all sub-libraries instead of the"
-              echo "            libgosam_process.so, need to be the first paramter."[%
-@end @if %]
+              echo "   -plibs   prints the flags needed to link this code"
+              echo "            but not the libraries it depends on"
+              echo "   -olibs   prints the flags needed to link the libraries"
+              echo "            on which this code depends"
+              echo "   -cflags  prints the flags needed to compile this code;"
+              echo "            includes include paths of the dependencies"
+              echo "   -pcflags prints the flags needed to compile this code;"
+              echo "            does not include dependencies"
+              echo "   -ocflags prints the compilation flags pointing to"
+              echo "            include paths of dependencies"
+              echo "   -deps    prints the paths to the files used by -libs"
+              echo "   -fortcom the name of the fortran compiler in use"
+              echo "   -name    prints the process name"
               echo "   -help    prints this screen"
-   ;;[%
-@if extension shared %]
-      -intern)
-              USE_INTERNAL=1
    ;;
-[% @end @if %]
       *)
               printf " $1"
    ;;

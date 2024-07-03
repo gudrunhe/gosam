@@ -18,8 +18,8 @@ comptest: golem
 	$(MAKE) -C test compile
 
 golem: $(PROCESS1).log $(PROCESS2).log
-	$(MAKE) -C $(PROCESS1) compile
-	$(MAKE) -C $(PROCESS2) compile
+	cd $(PROCESS1); meson setup build --prefix ${CURDIR}/$(PROCESS1); cd build; meson compile; meson install
+	cd $(PROCESS2); meson setup build --prefix ${CURDIR}/$(PROCESS2); cd build; meson compile; meson install
 
 $(PROCESS1).log: $(PROCESS1).in
 	@echo setting up $(PROCESS1) ...
@@ -39,7 +39,8 @@ $(PROCESS2).in: $(PROCESS2).rc $(wildcard ../setup.in)
 
 clean:
 	rm -f $(PROCESS1).in $(PROCESS1).log
-	$(MAKE) -C $(PROCESS1) clean
+	cd $(PROCESS1); meson clean
+	cd $(PROCESS2); meson clean
 	rm -f $(PROCESS1)/.golem.dir
 	$(MAKE) -C test clean
 

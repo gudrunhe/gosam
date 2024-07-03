@@ -21,6 +21,10 @@ subdir('[% $_ %]')[%
 
 OLP_source += common_source
 
-lib = both_libraries('golem_olp', OLP_source, install: true, install_dir: meson.current_source_dir() / '.libs')
+lib = both_libraries('golem_olp', OLP_source, install: true)#, install_dir: meson.current_source_dir() / '.libs')
 
-install_headers('olp.h', subdir: 'gosam_process')
+install_headers('olp.h', subdir: 'GoSam_Process')
+meson.add_install_script(
+  find_program(files('install_mod_files.py')),
+  get_option('includedir') / meson.project_name(),
+)

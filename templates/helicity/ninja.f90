@@ -3,7 +3,7 @@
 module     [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]
    ! This file has been generated for ninja 
    use ninjago_module, only: ki_nin
-   use config
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config
    implicit none
    private[%
 
@@ -19,7 +19,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use ninjago_module
    use [% process_name asprefix=\_ %]kinematics
    use SpinorBrackets
-   use model[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
    use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 

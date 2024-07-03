@@ -2,7 +2,6 @@
 
 import os
 import shutil
-import imp
 import golem
 import golem.util.tools
 import golem.installation
@@ -1012,13 +1011,8 @@ def mc_specials(conf, order_file):
    if mc_name.startswith("powheg"):
       required_extensions.extend(["f77"])
       required_extensions.extend(["olp_badpts"])
-   elif mc_name.startswith("sherpa"):
-      required_extensions.extend(["autotools"])
-   elif mc_name.startswith("whizard"):
-      required_extensions.extend(["autotools"])
    elif mc_name.startswith("amcatnlo"):
       required_extensions.extend(["f77"])
-      required_extensions.extend(["autotools"])
 
    extensions = golem.properties.getExtensions(conf)
    add_extensions = []
