@@ -26,7 +26,7 @@ summarize :
 	printf "\033[0m"
 	printf "\n"
 
-ALL_TESTS = $(shell ls -d */ | sed s\#/\#\#)
+ALL_TESTS = $(shell ls -d */ | grep -v "model" | sed s\#/\#\#)
 .PHONY .SILENT : $(ALL_TESTS)
 $(ALL_TESTS) :
 	echo ------------------------------------------------------------

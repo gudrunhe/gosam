@@ -417,21 +417,6 @@ form_workspace = Property("form.workspace",
    1000)
 
 
-haggies_bin = Property("haggies.bin",
-   """\
-   Points to the Haggies executable.
-   Haggies is used to transform the expressions of the
-   diagrams into optimized Fortran90 programs if the
-   extension "noformopt" is active. It can also be used
-   to optimize the color expressions.
-
-   Examples:
-      1) haggies.bin=/home/my_user_name/bin/haggies
-      2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
-   """,
-   str,
-   "java -jar %s" % golem_path("haggies", "haggies.jar"))
-
 form_tmp = Property("form.tempdir",
    """\
    Temporary directory for Form. Should point to a directory
@@ -530,13 +515,13 @@ reduction_programs = Property("reduction_programs",
       """\
         Specifies the reduction libraries which should be supported.
 
-        Possible values: ninja, samurai, golem95, pjfry (experimental)
+        Possible values: ninja, samurai, golem95
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
       list,
       "ninja,golem95",
-      options=["ninja","samurai","golem95","pjfry"]
+      options=["ninja","samurai","golem95"]
    )
 
 polvec_method = Property("polvec",
@@ -558,9 +543,7 @@ extensions = Property("extensions",
 
    Build system related extensions:
 
-   autotools    --- use autotools to generate Makefiles
-   shared       --- create shared libraries (=dynamically linkable code),
-                    enabled by default with autotools extension
+   shared       --- create shared libraries (=dynamically linkable code)
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
 
@@ -581,7 +564,6 @@ extensions = Property("extensions",
 #   samurai      --- enable Samurai for the reduction
 #   ninja        --- enable Ninja for the reduction
 #   golem95      --- enable Golem95 for the reduction
-#   pjfry        --- enable PJFry for the reduction (experimental)
 #   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
 #                    not compatible with the formopt option.
 #   qshift       --- apply the shift of Q already at the FORM level
@@ -600,8 +582,8 @@ extensions = Property("extensions",
 
    ,
    list,",".join(DEFAULT_EXTENSIONS),
-   options=["samurai", "golem95", "pjfry", "dred",
-      "autotools", "qshift", "topolynomial",
+   options=["samurai", "golem95", "dred",
+      "qshift", "topolynomial",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
@@ -797,12 +779,11 @@ abbrev_color = Property("abbrev.color",
    """\
    The program in use for the generation of color related abbreviations.
    The value should be one of:
-      haggies        color algebra in form, optimization with haggies
       form           color algebra and optimization in form
       none           color algebra in form, no optimization
    """,
    str, "form",
-   options=["haggies","form","none"], hidden=True)
+   options=["form","none"], hidden=True)
 
 abbrev_limit = Property("abbrev.limit",
    """\
@@ -981,7 +962,7 @@ config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
 
-   Possible values are: ninja, samurai, golem95, pjfry (experimental)
+   Possible values are: ninja, samurai, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam decide
    depending on reduction_libraries
@@ -1311,6 +1292,10 @@ meson_arch = Property("meson.arch", """\
    libraries / executables unusable on other CPUs. For all possible options, see the GCC documentation.
    """, str, default="x86-64")
 
+unitary_gauge = Property("unitary_gauge", """
+   Use unitary gauge propagators for the massive vector bosons instead of Feynman gauge propagators.
+""", bool, default=False)
+
 properties = [
    process_name,
    process_path,
@@ -1381,7 +1366,6 @@ properties = [
    form_threads,
    form_tmp,
    form_workspace,
-   haggies_bin,
    fc_bin,
    python_bin,
 
@@ -1412,10 +1396,12 @@ properties = [
    respect_generations,
 
    meson_buildtype,
-   meson_arch
+   meson_arch,
+
+   unitary_gauge
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
+REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja"]
 
 def getExtensions(conf):
    ext_name = str(extensions)
@@ -1453,7 +1439,6 @@ def setInternals(conf):
          "__REGULARIZATION_HV__",
          "__REQUIRE_FR5__",
          "__GAUGE_CHECK__",
-         "__HAGGIES__",
          "__NUMPOLVEC__",
          "__REDUCE_HELICITIES__",
          "__OLP_DAEMON__",
@@ -1482,9 +1467,6 @@ def setInternals(conf):
 
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
-
-   conf["__HAGGIES__"] = ("noformopt" in extensions or
-                          ("haggies" in conf["abbrev.color"].lower() if conf["abbrev.color"] else False))
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions

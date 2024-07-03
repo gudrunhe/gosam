@@ -1,5 +1,5 @@
 [%' vim: syntax=golem
-'%]module     config
+'%]module     [% process_name %]_config
    implicit none
 
    integer, parameter :: dbl = kind(1.0d0)
@@ -19,7 +19,6 @@
    integer, parameter :: SAMURAI   = 0
    integer, parameter :: GOLEM95   = 1
    integer, parameter :: NINJA     = 2
-   integer, parameter :: PJFRY     = 3 ! experimental
    integer, parameter :: QUADNINJA = 4 ! experimental
    ! Reduction methods
    integer :: reduction_interoperation = [%
@@ -30,8 +29,7 @@
          @if extension samurai %]SAMURAI[%
          @else %][%
             @if extension golem95 %]GOLEM95[%
-             @else%][%@if extension pjfry  %]PJFRY[%
-              @else%]-1[%@end @if%][%
+             @else%]-1[%
             @end @if %][%
          @end @if %][%
       @end @if %][%
@@ -53,8 +51,7 @@
                  @if extension samurai %]SAMURAI[%
                  @else %][%
                     @if extension golem95 %]GOLEM95[%
-                     @else%][%@if extension pjfry  %]PJFRY[%
-                         @else %]-1[%@end @if%][%
+                     @else%]-1[%
                     @end @if %][%
                  @end @if %][%
               @end @if %][%
@@ -293,5 +290,5 @@
    !
    integer :: ewchoice = [% starting_choice %][%
    @end @if %]
-end module config
+end module [% process_name %]_config
 

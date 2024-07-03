@@ -17,7 +17,7 @@ comptest: gosam
 	$(MAKE) -C test compile
 
 gosam: $(PROCESS).log
-	$(MAKE) -C virtual compile
+	cd virtual; meson setup build --prefix ${CURDIR}/virtual; cd build; meson compile; meson install
 
 $(PROCESS).log: $(PROCESS).in
 	@echo setting up virtual ...
@@ -29,7 +29,7 @@ $(PROCESS).in: $(PROCESS).rc $(wildcard ../setup.in)
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log
-	$(MAKE) -C virtual clean
+	cd virtual; meson clean
 	rm -f virtual/.golem.dir
 	$(MAKE) -C test clean
 

@@ -7,7 +7,7 @@
 @if extension quadruple %]
    use [% process_name asprefix=\_ %]util_qp, only: square_qp => square[%
 @end @if extension quadruple %]
-   use config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
@@ -22,9 +22,9 @@
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
-   use model, only: Nf, NC, sqrt2, init_functions[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -60,7 +60,7 @@
             @end @if %][%
       @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
-      @if generate_eft_counterterms %][% 
+      @if generate_eft_counterterms %][%
       @if eval topolopy.count.ct .gt. 0 %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
@@ -84,10 +84,11 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
             @end @if %][%
-      @end @if enable_truncation_orders %][% 
+      @end @if enable_truncation_orders %][%
       @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
+	  @if generate_lo_diagrams%][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
@@ -111,6 +112,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
             @end @if %][%
       @end @if enable_truncation_orders %][%
+	  @end @if generate_lo_diagrams%][%
       @end @if generate_yuk_counterterms %][%
    @end @for %][%
    @if enable_truncation_orders %]
@@ -167,7 +169,7 @@
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
-      @if generate_eft_counterterms %][% 
+      @if generate_eft_counterterms %][%
       @if eval topolopy.count.ct .gt. 0 %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
@@ -191,10 +193,11 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
       @end @if extension quadruple %][%
-      @end @if enable_truncation_orders %][% 
+      @end @if enable_truncation_orders %][%
       @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
+	  @if generate_lo_diagrams%][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
@@ -218,6 +221,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
+	  @end @if generate_lo_diagrams%][%
       @end @if generate_yuk_counterterms %][%
       @if generate_nlo_virt %][%
       @if enable_truncation_orders %]
@@ -283,10 +287,10 @@
 
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel0_h, samplitudel1, samplitudel1_h[%
-@if generate_eft_counterterms %][% 
+@if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
    public :: samplitudect, samplitudect_h[%
-@end @if %][% 
+@end @if %][%
 @end @if %][%
 @if generate_yuk_counterterms %]
    public :: samplitudeyukct, samplitudeyukct_h[%
@@ -440,7 +444,7 @@ contains
 @if extension quadruple %]
       ! use [% process_name asprefix=\_ %]kinematics, only: adjust_kinematics
       use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
-      use model[%
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
 @end @if extension quadruple %]
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs[%
@@ -730,21 +734,21 @@ contains
 
    !---#[ subroutine samplitudel01 :
    subroutine     samplitudel01(vecs, scale2, amp, rat2, ok, h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(4), intent(out) :: amp[%
-@if generate_eft_counterterms %][% 
+@if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
-      real(ki), dimension(2:4) :: ampct[% 
+      real(ki), dimension(2:4) :: ampct[%
 @end @if %][%
 @end @if %]
       real(ki), intent(out) :: rat2
@@ -792,10 +796,10 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki[%
-@if generate_eft_counterterms %][% 
+@if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
       ampct = 0.0_ki[%
-@end @if %][% 
+@end @if %][%
 @end @if %][%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
@@ -938,7 +942,7 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
-         @if generate_eft_counterterms %][% 
+         @if generate_eft_counterterms %][%
          @if eval topolopy.count.ct .gt. 0 %]
          if (renorm_eftwilson) then
             if (present(h)) then
@@ -949,7 +953,7 @@ contains
             ! account for nlo_prefactors in EFT counterterms
             ampct = (8.0_ki*pi**2/nlo_coupling)*ampct
             amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
-         end if[% 
+         end if[%
          @end @if %][%
          @end @if generate_eft_counterterms %][%
             @else %]
@@ -1031,7 +1035,7 @@ contains
    !---#] subroutine samplitudel01 :
    !---#[ function samplitudel0 :
    function     samplitudel0(vecs) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1146,7 +1150,7 @@ contains
    !---#] function samplitudel0 :
    !---#] function samplitudel0_h :
    function     samplitudel0_h(vecs, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1261,11 +1265,11 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudel0_h
    !---#] function samplitudel0_h :
-[% @if generate_eft_counterterms %][% 
+[% @if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
    !---#[ function samplitudect :
    function     samplitudect(vecs, logs, scale2) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1423,7 +1427,7 @@ contains
    !---#] function samplitudect :
    !---#[ function samplitudect_h :
    function     samplitudect_h(vecs, logs, scale2, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1586,7 +1590,7 @@ contains
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct :
    function     samplitudeyukct(vecs,logs,scale2) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1724,7 +1728,7 @@ contains
    !---#] function samplitudeyukct :
    !---#[ function samplitudeyukct_h :
    function     samplitudeyukct_h(vecs, logs, scale2, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -1865,7 +1869,7 @@ contains
  [% @end @if generate_yuk_counterterms %]
    !---#[ function samplitudel1 :
    function     samplitudel1(vecs,scale2,ok,rat2) result(amp)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -2159,7 +2163,7 @@ contains
    !---#] function samplitudel1 :
    !---#[ function samplitudel1_h :
    function     samplitudel1_h(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -2394,12 +2398,12 @@ contains
    !---#] function samplitudel1_h :
    !---#[ subroutine ir_subtraction :
    subroutine     ir_subtraction(vecs,scale2,amp,h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]kinematics, only: &
          & init_event, corrections_are_qcd
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -2655,12 +2659,12 @@ contains
    !---#] subroutine ir_subtraction :
    !---#[ subroutine ir_subtraction :
    subroutine     ir_subtraction_h(vecs,scale2,amp,h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]kinematics, only: &
          & init_event, corrections_are_qcd
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -2914,22 +2918,22 @@ contains
 @if extension quadruple %]
    !---#[ subroutine samplitudel01_qp :
    subroutine     samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & inspect_kinematics, init_event
-      use model_qp
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
       real(ki_qp), dimension(4), intent(out) :: amp[%
-@if generate_eft_counterterms %][% 
+@if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
       real(ki_qp), dimension(2:4) :: ampct[%
-@end @if %][% 
+@end @if %][%
 @end @if %]
       real(ki_qp), intent(out) :: rat2
       logical, intent(out), optional :: ok
@@ -2976,10 +2980,10 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki_qp[%
-@if generate_eft_counterterms %][% 
+@if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
       ampct = 0.0_ki_qp[%
-@end @if %][% 
+@end @if %][%
 @end @if %][%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
@@ -3122,7 +3126,7 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
-         @if generate_eft_counterterms %][% 
+         @if generate_eft_counterterms %][%
          @if eval topolopy.count.ct .gt. 0 %]
          if (renorm_eftwilson) then
             if (present(h)) then
@@ -3133,7 +3137,7 @@ contains
             ! account for nlo_prefactors in EFT counterterms
             ampct = (8.0_ki_qp*pi**2/nlo_coupling)*ampct
             amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
-         end if[% 
+         end if[%
          @end @if %][%
          @end @if generate_eft_counterterms %][%
             @else %]
@@ -3215,7 +3219,7 @@ contains
    !---#] subroutine samplitudel01_qp :
    !---#[ function samplitudel0_qp :
    function     samplitudel0_qp(vecs) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -3330,7 +3334,7 @@ contains
    !---#] function samplitudel0_qp :
    !---#[ function samplitudel0_h_qp :
    function     samplitudel0_h_qp(vecs, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -3445,11 +3449,11 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudel0_h_qp
    !---#] function samplitudel0_h_qp :
-[% @if generate_eft_counterterms %][% 
+[% @if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
    !---#[ function samplitudect_qp :
    function     samplitudect_qp(vecs, logs, scale2) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -3607,7 +3611,7 @@ contains
    !---#] function samplitudect_qp :
    !---#[ function samplitudect_h_qp :
    function     samplitudect_h_qp(vecs, logs, scale2, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -3770,7 +3774,7 @@ contains
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct_qp :
    function     samplitudeyukct_qp(vecs,logs,scale2) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -3908,7 +3912,7 @@ contains
    !---#] function samplitudeyukct_qp :
    !---#[ function samplitudeyukct_qp_h :
    function     samplitudeyukct_qp_h(vecs, logs, scale2, h) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -4049,7 +4053,7 @@ contains
 [% @end @if generate_yuk_counterterms %]
    !---#[ function samplitudel1_qp :
    function     samplitudel1_qp(vecs,scale2,ok,rat2) result(amp)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -4348,7 +4352,7 @@ contains
    !---#] function samplitudel1_qp :
       !---#[ function samplitudel1_h_qp :
    function     samplitudel1_h_qp(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -4622,12 +4626,12 @@ contains
    !---#] function samplitudel1_h_qp :
    !---#[ subroutine ir_subtraction_qp :
    subroutine     ir_subtraction_qp(vecs,scale2,amp,h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & init_event, corrections_are_qcd
-      use model_qp
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
@@ -4879,12 +4883,12 @@ contains
    !---#] subroutine ir_subtraction_qp :
    !---#[ subroutine ir_subtraction_h_qp :
    subroutine     ir_subtraction_h_qp(vecs,scale2,amp,h)
-      use config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & init_event, corrections_are_qcd
-      use model_qp
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
@@ -6335,7 +6339,7 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
    function get_formfactor_lo(vecs) result(factor)
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [% process_name asprefix=\_ %]kinematics
 	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -6347,7 +6351,7 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
    function get_formfactor_nlo(vecs) result(factor)
-      use model
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [% process_name asprefix=\_ %]kinematics
 	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs

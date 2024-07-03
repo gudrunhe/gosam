@@ -4,8 +4,8 @@
    This template should be processed by
    golem.templates.Kinematics.KinematicsTemplate
 '%]module     [% process_name asprefix=\_ %]kinematics_qp
-   use config, only: ki => ki_qp
-   use model_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
    use SpinorBrackets
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
@@ -255,10 +255,10 @@ contains
 @for particles lightlike vector %], hel[%index%][%
 @end @for %])[%
 @if internal NUMPOLVEC %]
-      use config, only: debug_numpolvec, [% '
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_numpolvec, [% '
       %]logfile[%
 @end @if %]
-      use model_qp
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
       implicit none
       real(ki), dimension(num_legs,4), intent(in) :: vecs[%
 @for particles lightlike vector %]

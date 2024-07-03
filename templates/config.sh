@@ -34,49 +34,22 @@ CFLAGS="$(sed -n 'H
    }' $MAKEFILECONF|\
    grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
 
+[% @if internal OLP_MODE %]
 [% @if extension shared %]
-PROCESS_LDFLAGS="-L$PWD/matrix -Wl,-rpath=$PWD/matrix[%
-	@for helicities generated %] \
--L$PWD/helicity[%helicity%] -Wl,-rpath=$PWD/helicity[%helicity%] [%
-	@end @for helicities %] \
--L$PWD/sum -Wl,-rpath=$PWD/sum \
--L$PWD/common -Wl,-rpath=$PWD/common \
--lgosam_process[% process_name assuffix=\_ %]_matrix[%
-	@for helicities generated %][% 
-	@if enable_truncation_orders %] \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_0 \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_1 \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_2[%
-	@else %] \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][%
-	@end @if %][%
-	@end @for helicities %][%
-	@if helsum%] \
--lgosam_process[% process_name assuffix=\_ %]_amplitude[%
-	@end @if %] \
--lgosam_process[% process_name assuffix=\_ %]_common"
+PROCESS_LDFLAGS="-L$PWD/lib -Wl,-rpath=$PWD/lib"
 [% @else %]
-PROCESS_LDFLAGS="$PWD/matrix/matrix.a[%
-	@for helicities generated %][% 
-	@if enable_truncation_orders %] \
-$PWD/helicity[%helicity%]/amplitude[%helicity%]_0.a \
-$PWD/helicity[%helicity%]/amplitude[%helicity%]_1.a \
-$PWD/helicity[%helicity%]/amplitude[%helicity%]_2.a[%
-	@else %] \
-$PWD/helicity[%helicity%]/amplitude[%helicity%].a[%
-	@end @if %][%
-	@end @for helicities %][%
-@if helsum %] \
-$PWD/sum/amplitude.a[%
-@end @if %] \
-$PWD/common/common.a"
+PROCESS_LDFLAGS="$PWD/lib/libgolem_olp.a"
+[% @end @if %]
+PROCESS_CFLAGS="-I$PWD/include/GoSam_Process"
+[% @else %]
+[% @if extension shared %]
+PROCESS_LDFLAGS="-L$PWD/lib -Wl,-rpath=$PWD/lib"
+[% @else %]
+PROCESS_LDFLAGS="$PWD/lib/libgolem_process_[% process_name %].a"
 [% @end @if %]
 
-PROCESS_CFLAGS="-I$PWD/matrix[%
-	@for helicities generated %] \
--I$PWD/helicity[%helicity%][%
-	@end @for helicities %] \
--I$PWD/common"
+PROCESS_CFLAGS="-I$PWD/include/GoSam_Process_[% process_name %]"
+[% @end @if %]
 
 while [ $# -gt 0 ]; do
    case "$1" in

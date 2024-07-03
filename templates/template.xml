@@ -6,40 +6,12 @@
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
 
-	<file src="configure.ac" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="autogen.sh" class="Verbatim" executable="yes">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-		<except if-internal="OLP_MODE" />
-	</file>
-	<file src="Makefile.am" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
-	<file src="Makefile" class="Kinematics" >
-		<except if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
 	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
 		<except if-internal="OLP_MODE" />
 	</file>
 	<file src="config.sh" class="Kinematics" executable="yes">
-		<except if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
-	<file src="config.sh.in" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
-	</file>
-	<file src="acinclude.m4" class="Kinematics">
-		<only if-extension="autotools" />
-		<except if-extension="meson"/>
 	</file>
 	<file src="meson.build" class="Kinematics">
 		<only if-extension="meson" />
@@ -48,64 +20,20 @@
 		<only if-extension="meson" />
 		<except if-internal="OLP_MODE"/>
 	</file>
+	<file src="install_mod_files.py" class="Verbatim" executable="yes">
+		<only if-extension="meson"/>
+		<except if-internal="OLP_MODE"/>
+	</file>
 
 	<directory src="codegen">
-		<file src="abbrev.in" class="Multi">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="abbrev.out" class="Integrals">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="abbrevloc.out" class="Integrals">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="color.in" class="Verbatim">
-			<only if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="color.out" class="Kinematics">
-			<only if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="functions.out" class="Kinematics">
-			<only if-internal="HAGGIES" />
-		</file>
-		<file src="model.out" class="Model">
-			<only if-internal="HAGGIES" />
-		</file>
-
-		<file src="haggies-l0.in" class="Multi">
-			<only if-internal="HAGGIES" />
-		</file>
-
-		<file src="haggies-l0-group.out" dest="haggies-l0.out"
-				class="Integrals">
-			<only if-option="group" value="true"/>
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l0-nogroup.out" dest="haggies-l0.out"
-				class="Kinematics">
-			<only if-option="group" value="false"/>
-			<except if-extension="formopt" />
-		</file>
-
-		<file src="haggies-l1.in" class="Multi">
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l1.out" class="Kinematics">
-			<except if-extension="formopt" />
-		</file>
 		<file src="helsum.frm" class="Kinematics" >
 			<only if-option="helsum" value="true" />
 		</file>
 		<file src="pythonin.py" class="Multi">
 			<only if-extension="formopt" />
 		</file>
-		<file src="colorin.py" class="Multi">
-			<except if-option="abbrev.color" value="haggies" />
-		</file>
-		<file src="haggies-l1d.out" class="Kinematics">
-			<only if-internal="GENERATE_DERIVATIVES"/>
-			<except if-extension="formopt" />
-		</file>
+		<file src="colorin.py" class="Multi"/>
+
 		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
 			<only if-extension="formopt" />
@@ -270,15 +198,13 @@
 			<only if-extension="formopt" />
 			<except if-internal="OLP_MODE"/>
 		</file>
-		<file src="buildcolor.py" class="Kinematics">
-			<except if-option="abbrev.color" value="haggies" />
-		</file>
+		<file src="buildcolor.py" class="Kinematics"/>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>
 		<file src="vertices.hh" class="Verbatim"/>
 		<file src="legs.hh" class="Verbatim"/>
-		<file src="propagators.hh" class="Verbatim"/>
+		<file src="propagators.hh" class="Kinematics"/>
 		<!-- file src="fermion_flow.hh" class="Integrals" /-->
 		<file src="shiftmomenta.prc" class="Integrals" />
 		<file src="r2.hh" class="Integrals" />
@@ -302,14 +228,6 @@
 	</directory>
 
 	<directory src="common">
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
 		<file src="Makefile.source" class="Kinematics"/>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="config.f90" class="Kinematics">
@@ -327,15 +245,6 @@
 		<file src="groups.f90" class="Integrals"/>
 		<file src="scalar_cache.f90" class="Integrals"/>
 		<file src="globalsl1.f90" class="Kinematics"/>
-		<file src="precision_pjfry.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
-		<file src="pjfry95pg.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
-		<file src="pjfry_comb.f90" class="Model">
-			<only if-extension="pjfry"/>
-		</file>
 		<file src="custompropagator.f90" class="Model">
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
 			<except if-file="exists" in-mode="normal" />
@@ -374,21 +283,12 @@
 		<file src="axodraw.sty" class="Verbatim"/>
 		<file src="gind.ist" class="Verbatim"/>
 		<file src="Makefile.source" class="Verbatim"/>
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-		</file>
-		<file src="Makefile" class="Kinematics">
-			<only if-extension="meson" />
-		</file>
+		<file src="Makefile" class="Kinematics"/>
 		<file src="meson.build" class="Kinematics">
 				<only if-extension="meson" />
 		</file>
 		<file src="generate_doc.sh" class="Kinematics">
 			<only if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
-			<except if-extension="meson"/>
 		</file>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
@@ -401,14 +301,6 @@
 	</directory>
 
 	<directory src="matrix">
-		<file src="Makefile" class="Kinematics">
-			<except if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
-		<file src="Makefile.am" class="Kinematics">
-			<only if-extension="autotools" />
-			<except if-extension="meson"/>
-		</file>
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="Makefile.source" class="Verbatim"/>
 		<file src="matrix.f90" class="Kinematics"/>
@@ -433,14 +325,6 @@
 
 	<foreach iterator="helicity">
 		<directory src="helicity" dest="helicity%d" arguments="helicity">
-			<file src="Makefile" class="Integrals">
-				<except if-extension="autotools" />
-				<except if-extension="meson"/>
-			</file>
-			<file src="Makefile.am" class="Integrals">
-				<only if-extension="autotools" />
-				<except if-extension="meson"/>
-			</file>
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
 			<file src="../form.set" dest="form.set" class="Kinematics"/>
@@ -556,12 +440,6 @@
 		<only if-option="helsum" value="true" />
 		<file src="Makefile.source" class="Integrals"/>
 		<file src="Makefile.dep" class="Integrals"/>
-		<file src="Makefile" class="Integrals">
-			<except if-extension="autotools" />
-		</file>
-		<file src="Makefile.am" class="Integrals">
-			<only if-extension="autotools" />
-		</file>
 		<file src="globals.f90" class="Kinematics"/>
 		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="amplitude.f90" class="Integrals" />
