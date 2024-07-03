@@ -88,6 +88,7 @@
       @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
+	  @if generate_lo_diagrams%][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
@@ -111,6 +112,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
             @end @if %][%
       @end @if enable_truncation_orders %][%
+	  @end @if generate_lo_diagrams%][%
       @end @if generate_yuk_counterterms %][%
    @end @for %][%
    @if enable_truncation_orders %]
@@ -195,6 +197,7 @@
       @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
+	  @if generate_lo_diagrams%][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
@@ -218,6 +221,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
+	  @end @if generate_lo_diagrams%][%
       @end @if generate_yuk_counterterms %][%
       @if generate_nlo_virt %][%
       @if enable_truncation_orders %]
@@ -1586,7 +1590,7 @@ contains
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct :
    function     samplitudeyukct(vecs,logs,scale2) result(amp)
-      use config, only: logfile
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
