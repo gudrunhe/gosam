@@ -223,12 +223,6 @@ d[%$_%]h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 	@end @select %][%
    @end @if generate_nlo_virt%][%
 @end @if helsum %][%
-	@if generate_uv_counterterms %]
-diagramsct.[%O%]:[%
-     	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.[%O%][%
-		@end @for %][%
-	@end @if generate_uv_counterterms %][%
 	@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %].[%O%][% @end @if %][%
@@ -264,9 +258,6 @@ amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagram
             @end @for %][%
          @end @select %][%
       @end @if %][%
-			@if generate_uv_counterterms %] \
-			diagramsct.[%O%][%
-			@end @if %][%
 @end @if helsum %][%
 @end @for %][%
 @else %]
@@ -303,9 +294,6 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
             @end @for %][%
          @end @select %][%
       @end @if %][%
-			@if generate_uv_counterterms %] \
-			diagramsct.[%O%][%
-			@end @if %][%
 @end @if helsum %][%
 @end @if %][%
 @if extension quadruple %][%
@@ -342,9 +330,6 @@ amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_d
             @end @for %][%
          @end @select %][%
       @end @if %][%
-			@if generate_uv_counterterms %] \
-			diagramsct_qp.[%O%][%
-			@end @if %][%
 @end @if helsum %][%
 @end @for %][%
 @else %]
@@ -379,9 +364,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
             @end @for %][%
          @end @select %][%
       @end @if %][%
-			@if generate_uv_counterterms %] \
-			diagramsct_qp.[%O%][%
-			@end @if %][%
 @end @if helsum %][%
 @end @if %][%
 @end @if %][%
@@ -543,12 +525,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
       @end @select %][%
    @end @if extension quadruple %][%
    @end @if generate_nlo_virt%][%
-	@if generate_uv_counterterms %]
-[% process_name asprefix=\_ %]diagramscth[% helicity %].mod: diagramsct.[%O%][%
-     	@for elements topolopy.keep.ct %]
-[% process_name asprefix=\_ %]d[%$_%]_0h[%helicity%]l1c.mod: d[%$_%]_0h[%helicity%]l1c.[%O%][%
-		@end @for %][%
-	@end @if generate_uv_counterterms %][%
 	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]amplitudeh[% helicity %]_[% efto %].mod: amplitudeh[%helicity%]_[% efto %].[%O%][%

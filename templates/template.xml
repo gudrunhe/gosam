@@ -106,15 +106,6 @@
 			<only if-internal="GENERATE_DERIVATIVES"/>
 			<except if-extension="formopt" />
 		</file>
-		<file src="haggies-l1c.in" class="Multi">
-			<except if-option="genUV" value="false" />
-			<except if-extension="formopt" />
-		</file>
-		<file src="haggies-l1c.out" class="Kinematics">
-			<except if-option="genUV" value="false" />
-			<except if-extension="formopt" />
-		</file>
-
 		<file src="filter.py" class="Verbatim"/>
 		<file src="derive.frm" class="Kinematics">
 			<only if-extension="formopt" />
@@ -301,9 +292,6 @@
 		<file src="diagsum.frm" dest="diagsum.frm"
 		                class="Integrals" >
 			<only if-option="diagsum" value="true"/>
-		</file>
-		<file src="ct.hh" class="Integrals">
-			<except if-option="genUV" value="false"/>
 		</file>
 		<file src="yukawas.hh" class="Model"/>
 	</directory>
@@ -518,9 +506,6 @@
 			  </file>
 			</foreach>
 			<file src="globals.f90" class="Kinematics" />
-			<file src="diagramsct.f90" class="Multi">
-				<except if-option="genUV" value="false"/>
-			</file>
 			<file src="amplitude_qp.f90" dest="amplitudeh%d_qp.f90"
 				arguments="helicity" class="Integrals" >
 			        <only if-extension="quadruple" />

@@ -71,11 +71,7 @@ contains
 @select r2 @case only %][%
 @else %]
       use [% process_name asprefix=\_ %]groups[%
-@end @select %][%
-      @if generate_uv_counterterms %]
-      use [% process_name asprefix=\_
-      %]diagramsct, only: samplitudect => samplitudect[%
-      @end @if %]
+@end @select %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
@@ -92,10 +88,7 @@ contains
       [% @if generate_lo_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(-2:0) :: acc
       [% @if generate_lo_diagrams %]real(ki)[% @else 
-      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part[%
-      @if generate_uv_counterterms %]
-      real(ki), dimension(3) :: sampct[%
-      @end @if %]
+      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part
 
       logical :: acc_ok
 
@@ -233,12 +226,6 @@ contains
          @end @for groups %][%
       @end @for %][%
    @end @select %][%
-   @if generate_uv_counterterms %]
-      sampct = samplitudect(scale2)
-      samplitude(0) = samplitude(0) + sampct(3)
-      samplitude(-1) = samplitude(-1) + sampct(2)
-      samplitude(-2) = samplitude(-2) + sampct(1)[%
-   @end @if %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
 @end @if generate_nlo_virt %]

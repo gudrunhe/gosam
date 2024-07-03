@@ -117,13 +117,7 @@ OBJECTS_[% efto %]= \
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]_[% efto %]h[%helicity%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if helsum %]
 GENERATED_SRC_[% efto %]=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -201,13 +195,7 @@ GENERATED_SRC_[% efto %]=[%
 	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]_[% efto %]h[%helicity%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %]
+@end @if helsum %]
 [% @end @for %][%
 @else %]
 OBJECTS= \
@@ -303,13 +291,7 @@ OBJECTS= \
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if helsum %]
 GENERATED_SRC=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -388,12 +370,6 @@ GENERATED_SRC=[%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
 @end @if helsum %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %][%
 @end @if %]
 
 .PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]

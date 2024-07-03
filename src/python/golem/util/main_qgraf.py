@@ -46,12 +46,6 @@ def diagram_count(conf, loops, cut=0):
 			fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_NLO_VIRT + ext)]
 		else:
 			return 0
-	elif loops == 2:
-		present = conf.getBooleanProperty("generate_uv_counterterms")
-		if present:
-			fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_CT + ext)]
-		else:
-			return 0
 	else:
 		raise NotImplementedError(
 				"A value of loops=%d in diagram_count is not implemented."
@@ -68,7 +62,7 @@ def diagram_count(conf, loops, cut=0):
 	return result
 
 def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
-		in_particles, out_particles, r_particles, loops):
+		in_particles, out_particles, loops):
 	"""
 	Prepares the file 'qgraf.dat' for the next subprocess.
 
@@ -82,7 +76,6 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	verbatim -- list of propagator selections etc.
 	in_particles -- list of incoming particles
 	out_particles -- list of outgoing particles
-	r_particles -- list, which is either empty or [RENO]
 	loops -- number of loops, either 0 or 1
 
 	SIDE EFFECTS
@@ -90,7 +83,6 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 	Writes to the file qgraf.dat in the directory specified by 'path'. Creates it
 	if necessary.
 	"""
-	assert (len(r_particles) == 0) or (len(r_particles) == 1 and loops == 1)
 
 	qgraf_dat_name = os.path.join(path, "qgraf.dat")
 	output_name = os.path.join(path, output_short_name)
@@ -136,23 +128,12 @@ def write_qgraf_dat(path, style, model, output_short_name, options, verbatim, \
 			f.write("\n")
 			length=0
 
-	# add r-particle if present
-#	if len(r_particles) == 1:
-#		if comma:
-#			f.write(", ")
-#		else:
-#			comma = True
-#		f.write("%s[ZERO]" % str(r_particles[0]))
-
 	f.write(";\n")
 
 	f.write("loops=%d;\nloop_momentum=p;\n" % loops)
 
 	# write line: options = <opt1>, <opt2>, ...;
 	f.write("options=%s;\n" % ", ".join(options))
-	# genUV
-	if len(r_particles) == 1:
-		f.write("true=iprop[%s,1,1];\n" % str(r_particles[0]))
 
 	# append verbatim lines
 	f.write(verbatim)
@@ -315,14 +296,14 @@ def run_qgraf(conf, in_particles, out_particles):
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 		run_qgraf_dat(conf, output_name, log_name)
 
 		if flag_draw_diagrams:
 			output_name = consts.PATTERN_PYXO_LO + python_ext
 			log_name    = consts.PATTERN_PYXO_LO + log_ext
 			write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 			run_qgraf_dat(conf, output_name, log_name)
 			golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 					conf=conf)
@@ -333,7 +314,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			output_name = consts.PATTERN_TOPOLOPY_LO + python_ext
 			log_name    = consts.PATTERN_TOPOLOPY_LO + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# ----------------- VIRTUAL PART --------------------------------------
@@ -351,14 +332,14 @@ def run_qgraf(conf, in_particles, out_particles):
 			new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 1)
+				options, new_verbatim, in_particles, out_particles, 1)
 		run_qgraf_dat(conf, output_name, log_name)
 
 		if flag_draw_diagrams:
 			output_name = consts.PATTERN_PYXO_NLO_VIRT + python_ext
 			log_name    = consts.PATTERN_PYXO_NLO_VIRT + log_ext
 			write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 1)
+				options, new_verbatim, in_particles, out_particles, 1)
 			run_qgraf_dat(conf, output_name, log_name)
 			golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 					conf=conf)
@@ -369,7 +350,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			output_name = consts.PATTERN_TOPOLOPY_VIRT + python_ext
 			log_name    = consts.PATTERN_TOPOLOPY_VIRT + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 1)
+				options, new_verbatim, in_particles, out_particles, 1)
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# ----------------- EFT CT PART -------------------------------------------
@@ -385,14 +366,14 @@ def run_qgraf(conf, in_particles, out_particles):
 			new_verbatim = verbatim + "\n" + verbatim_ct + "\ntrue=vsum[isCT,1,1];\n"
 
 		write_qgraf_dat(path, form_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 		run_qgraf_dat(conf, output_name, log_name)
 
 		if flag_draw_diagrams:
 			output_name = consts.PATTERN_PYXO_CT + python_ext
 			log_name    = consts.PATTERN_PYXO_CT + log_ext
 			write_qgraf_dat(path, pyxo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 			run_qgraf_dat(conf, output_name, log_name)
 			golem.pyxo.pyxodraw.pyxodraw(os.path.join(path, output_name),
 					conf=conf)
@@ -403,7 +384,7 @@ def run_qgraf(conf, in_particles, out_particles):
 			output_name = consts.PATTERN_TOPOLOPY_CT + python_ext
 			log_name    = consts.PATTERN_TOPOLOPY_CT + log_ext
 			write_qgraf_dat(path, topo_sty, consts.MODEL_LOCAL, output_name,
-				options, new_verbatim, in_particles, out_particles, [], 0)
+				options, new_verbatim, in_particles, out_particles, 0)
 			run_qgraf_dat(conf, output_name, log_name)
 
 	# Clean up and leave

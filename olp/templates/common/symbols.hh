@@ -51,11 +51,3 @@ Vector ZERO, vDUMMYA;
 @if extension formopt %]
 CF dotproduct;
 [% @end @if %]
-[%
-@if genUV %]
-#If `LOOPS' == ct
-   Vector  p1;
-   CFunction deltaM, deltaZ;
-   Symbols epspole1, epsfin;
-#EndIf[%
-@end @if %]

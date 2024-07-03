@@ -972,7 +972,6 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
 
    conf["generate_lo_diagrams"] = generate_lo_diagrams
    conf["generate_nlo_virt"] = generate_nlo_virt
-   conf["generate_uv_counterterms"] = conf.getProperty('genUV')
 
    if "ewchoose" in golem.model.MODEL_OPTIONS:
       conf.setProperty("ewchoose", str(golem.model.MODEL_OPTIONS["ewchoose"]))

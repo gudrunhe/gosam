@@ -457,7 +457,7 @@ def workflow(conf):
 
 	generate_nlo_virt
 	generate_lo_diagrams
-	generate_uv_counterterms
+	generate_eft_counterterms
 	"""
 	ini = conf.getProperty(golem.properties.qgraf_in)
 	fin = conf.getProperty(golem.properties.qgraf_out)
@@ -580,7 +580,6 @@ def workflow(conf):
 
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = conf.getProperty('genUV') # MH: FLAGGED FOR DELETION
 	conf["generate_eft_counterterms"] = conf.getBooleanProperty('renorm_eftwilson') and generate_nlo_virt
 	conf["generate_yuk_counterterms"] = conf.getBooleanProperty('renorm_yukawa') and generate_nlo_virt
 

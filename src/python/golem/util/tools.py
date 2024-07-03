@@ -288,8 +288,6 @@ def prepare_model_files(conf, output_path=None):
       model_lst[0] = 'sm'
       conf.setProperty("model","sm")
    
-  # new: if we generate UV counterterms we need extra files
-   genUV = conf["generate_uv_counterterms"]
   # Some options only work with ufo models.
   # For OLP mode: check if property is set already.
    if conf["is_ufo"] is not None:
@@ -317,11 +315,6 @@ def prepare_model_files(conf, output_path=None):
       for ext in ["", ".py", ".hh"]:
          copy_file(os.path.join(src_path, model + ext),
                os.path.join(path, MODEL_LOCAL + ext))
-      if genUV == 'true':
-         print('Generating UV terms')
-         for ext in [".py", ".hh"]:
-            copy_file(os.path.join(src_path, model + 'ct' + ext),
-                  os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    elif len(model_lst) == 2:
       if model_lst[0].lower().strip() == "feynrules":
          isufo = True
@@ -357,10 +350,6 @@ def prepare_model_files(conf, output_path=None):
             for ext in ["", ".py", ".hh"]:
                copy_file(os.path.join(model_path, model + ext),
                   os.path.join(path, MODEL_LOCAL + ext))
-            if genUV == 'true':
-               for ext in [".hh", ".py"]:
-                  copy_file(os.path.join(model_path, model + 'ct' + ext),
-                        os.path.join(path, MODEL_LOCAL + 'ct' + ext))
    else:
       error("Parameter 'model' cannot have more than two entries.")
 

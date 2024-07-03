@@ -490,18 +490,6 @@ renorm = Property("renorm",
    bool,
    False, experimental=True)
 
-genUV = Property("genUV",
-   """\
-   Indicates if the UV counterterms should be generated
-   using Qgraf.
-
-   Examples:
-   genUV=true
-   genUV=false
-   """,
-   bool,
-   False, experimental=True)
-
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
@@ -1336,7 +1324,6 @@ properties = [
    renorm,
    sum_helicities,
    regularisation_scheme,
-   genUV,
    helicities,
    qgraf_options,
    qgraf_verbatim,
