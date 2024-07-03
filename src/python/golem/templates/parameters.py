@@ -536,6 +536,12 @@ class ModelTemplate(Template):
 
 			yield props
 
+	def modelhiggs(self, *args, **opts):
+		for name, value in list(self._particles.items()):
+			if value.getPDGCode()==25:
+				# This assumes that there is a unique Higgs particle with pdg code 25
+				return(name)
+
 	def ordernames(self, *args, **opts):
 		name_name = self._setup_name("name", "name", opts)
 
