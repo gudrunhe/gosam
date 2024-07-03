@@ -20,6 +20,7 @@ generated_sources = [[%
             @end @if %][%
         @end @if generate_lo_diagrams %][%
         @if generate_eft_counterterms %][%
+        @if eval topolopy.count.ct .gt. 0 %][%
             @if group %]
 	            'diagramsct_[% efto %].f90',[%
             @else %][%
@@ -35,7 +36,8 @@ generated_sources = [[%
 	                    'd[%$_%]_[% efto %]h[%helicity%]ctfr5.f90',[%
                     @end @for %][%
                 @end @if %][%
-            @end @if %][%
+            @end @if %][% 
+        @end @if %][%
         @end @if generate_eft_counterterms %][%
         @if helsum %][% @else %][%
             @if generate_nlo_virt %][%
@@ -81,6 +83,7 @@ generated_sources = [[%
         @end @if %][%
     @end @if generate_lo_diagrams %][%
     @if generate_eft_counterterms %][%
+    @if eval topolopy.count.ct .gt. 0 %][%
         @if group %]
 	        'diagramsct.f90',[%
         @else %][%
@@ -96,7 +99,8 @@ generated_sources = [[%
                     'd[%$_%]h[%helicity%]ctfr5.f90',[%
                 @end @for %][%
             @end @if %][%
-        @end @if %][%
+        @end @if %][% 
+    @end @if %][%
     @end @if generate_eft_counterterms %][%
     @if helsum %][% @else %][%
         @if generate_nlo_virt %][%

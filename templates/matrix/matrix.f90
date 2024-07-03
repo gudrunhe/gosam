@@ -60,7 +60,8 @@
             @end @if %][%
       @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
-      @if generate_eft_counterterms %][%
+      @if generate_eft_counterterms %][% 
+      @if eval topolopy.count.ct .gt. 0 %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
@@ -83,7 +84,8 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
             @end @if %][%
-      @end @if enable_truncation_orders %][%
+      @end @if enable_truncation_orders %][% 
+      @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
       @if enable_truncation_orders %]
@@ -165,7 +167,8 @@
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
       @end @if generate_lo_diagrams %][%
-      @if generate_eft_counterterms %][%
+      @if generate_eft_counterterms %][% 
+      @if eval topolopy.count.ct .gt. 0 %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
@@ -188,7 +191,8 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
       @end @if extension quadruple %][%
-      @end @if enable_truncation_orders %][%
+      @end @if enable_truncation_orders %][% 
+      @end @if %][%
       @end @if generate_eft_counterterms %][%
       @if generate_yuk_counterterms %][%
       @if enable_truncation_orders %]
@@ -279,8 +283,10 @@
 
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel0_h, samplitudel1, samplitudel1_h[%
-@if generate_eft_counterterms %]
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
    public :: samplitudect, samplitudect_h[%
+@end @if %][% 
 @end @if %][%
 @if generate_yuk_counterterms %]
    public :: samplitudeyukct, samplitudeyukct_h[%
@@ -736,8 +742,10 @@ contains
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
       real(ki), dimension(4), intent(out) :: amp[%
-@if generate_eft_counterterms %]
-      real(ki), dimension(2:4) :: ampct[%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+      real(ki), dimension(2:4) :: ampct[% 
+@end @if %][%
 @end @if %]
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
@@ -784,8 +792,10 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki[%
-@if generate_eft_counterterms %]
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
       ampct = 0.0_ki[%
+@end @if %][% 
 @end @if %][%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
@@ -928,7 +938,8 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
-         @if generate_eft_counterterms %]
+         @if generate_eft_counterterms %][% 
+         @if eval topolopy.count.ct .gt. 0 %]
          if (renorm_eftwilson) then
             if (present(h)) then
                ampct((/4,3,2/)) = samplitudect_h(vecs, renorm_logs, scale2, h)
@@ -938,7 +949,8 @@ contains
             ! account for nlo_prefactors in EFT counterterms
             ampct = (8.0_ki*pi**2/nlo_coupling)*ampct
             amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
-         end if[%
+         end if[% 
+         @end @if %][%
          @end @if generate_eft_counterterms %][%
             @else %]
          ! No tree level present[%
@@ -1249,7 +1261,8 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudel0_h
    !---#] function samplitudel0_h :
-[% @if generate_eft_counterterms %]
+[% @if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
    !---#[ function samplitudect :
    function     samplitudect(vecs, logs, scale2) result(amp)
       use config, only: logfile
@@ -1568,6 +1581,7 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudect_h
    !---#] function samplitudect_h :
+[% @end @if %]
 [% @end @if generate_eft_counterterms %]
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct :
@@ -2912,8 +2926,10 @@ contains
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
       real(ki_qp), dimension(4), intent(out) :: amp[%
-@if generate_eft_counterterms %]
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
       real(ki_qp), dimension(2:4) :: ampct[%
+@end @if %][% 
 @end @if %]
       real(ki_qp), intent(out) :: rat2
       logical, intent(out), optional :: ok
@@ -2960,8 +2976,10 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki_qp[%
-@if generate_eft_counterterms %]
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
       ampct = 0.0_ki_qp[%
+@end @if %][% 
 @end @if %][%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
@@ -3104,7 +3122,8 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
-         @if generate_eft_counterterms %]
+         @if generate_eft_counterterms %][% 
+         @if eval topolopy.count.ct .gt. 0 %]
          if (renorm_eftwilson) then
             if (present(h)) then
                ampct((/4,3,2/)) = samplitudect_h_qp(vecs, renorm_logs, scale2, h)
@@ -3114,7 +3133,8 @@ contains
             ! account for nlo_prefactors in EFT counterterms
             ampct = (8.0_ki_qp*pi**2/nlo_coupling)*ampct
             amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
-         end if[%
+         end if[% 
+         @end @if %][%
          @end @if generate_eft_counterterms %][%
             @else %]
          ! No tree level present[%
@@ -3425,7 +3445,8 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudel0_h_qp
    !---#] function samplitudel0_h_qp :
-[% @if generate_eft_counterterms %]
+[% @if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
    !---#[ function samplitudect_qp :
    function     samplitudect_qp(vecs, logs, scale2) result(amp)
       use config, only: logfile
@@ -3744,6 +3765,7 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudect_h_qp
    !---#] function samplitudect_h_qp :
+[% @end @if %]
 [% @end @if generate_eft_counterterms %]
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct_qp :

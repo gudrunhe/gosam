@@ -238,7 +238,8 @@ DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
 [% @end @if generate_nlo_virt %]
-[% @if generate_eft_counterterms %]
+[% @if generate_eft_counterterms %][%
+@if eval topolopy.count.ct .gt. 0 %]
 DIAGRAMS_EFTCT=[%
 @if group %][%
 @else %][%
@@ -323,7 +324,12 @@ SOURCE_EFTCT= \
 	diagramsct_1_qp.f90 \
 	diagramsct_2_qp[% @end @if %].f90[%
    @end @if %]
-[% @else %]
+[% @else %][% ' no CT diagram left after filters %]
+DIAGRAMS_EFTCT=
+TXT_EFTCT=
+SOURCE_EFTCT=
+[% @end @if %][% 
+@else %][% ' do not generate_eft_counterterms %]
 DIAGRAMS_EFTCT=
 TXT_EFTCT=
 SOURCE_EFTCT=
@@ -1236,7 +1242,7 @@ eft_ct_[% efto %].txt: ../diagrams-ct.hh
 		../codegen/golem_[% efto %].frm
 	@touch eft_ct_[% efto %]-stamp[%
 @end @for %][%
-@else %]
+@else %][% ' no truncation orders enabled %]
 d[%$_%]h[%helicity%]ct.txt:
 	   @echo "* dummy file" > $@
 eft_ct.txt: ../diagrams-ct.hh
@@ -1251,8 +1257,8 @@ eft_ct.txt: ../diagrams-ct.hh
 		-D OUTFILE=d[%$_%]h[%helicity%]ct \
 		../codegen/golem.frm
 	@touch eft_ct-stamp[%
-@end @if %][%
-@else %][%
+@end @if enable_truncation_orders %][%
+@else %][% ' else case of is_last %][%
 @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
@@ -1269,7 +1275,7 @@ d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
 	@touch d[%$_%]_[% efto %]h[%helicity%]ct-stamp
 d[%$_%]_[% efto %]h[%helicity%]ct-stamp: d[%$_%]_[% efto %]h[%helicity%]ct.txt[%
 @end @for %][%
-@else %]
+@else %][% ' no truncation orders enabled %]
 d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
 	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -1283,9 +1289,9 @@ d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
 		../codegen/golem.frm
 	@touch d[%$_%]h[%helicity%]ct-stamp
 d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt[%
-@end @if %][%
-@end @if %][%
-@else %][%
+@end @if enable_truncation_orders %][%
+@end @if is_last %][%
+@else %][% ' else case of is_first %][%
 @if is_last %][%
 @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
@@ -1307,7 +1313,7 @@ eft_ct_[% efto %].txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
 		../codegen/golem_[% efto %].frm
 	@touch eft_ct_[% efto %]-stamp[%
 @end @for %][%
-@else %]
+@else %][% ' no truncation orders enabled %]
 d[%$_%]h[%helicity%]ct.txt:
 	@echo "* dummy file" > $@
 	@touch d[%$_%]h[%helicity%]ct-stamp
@@ -1325,8 +1331,8 @@ eft_ct.txt: ../diagrams-ct.hh $(TXT_EFTCT_STAMP)
 		-D OUTFILE=d[%$_%]h[%helicity%]ct \
 		../codegen/golem.frm
 	@touch eft_ct-stamp[%
-@end @if %][%
-@else %][%
+@end @if enable_truncation_orders %][%
+@else %][% ' else case of is_last %][%
 @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
@@ -1343,7 +1349,7 @@ d[%$_%]_[% efto %]h[%helicity%]ct.txt: ../diagrams-ct.hh
 	@touch d[%$_%]_[% efto %]h[%helicity%]ct-stamp
 d[%$_%]_[% efto %]h[%helicity%]ct-stamp: d[%$_%]_[% efto %]h[%helicity%]ct.txt[%
 @end @for %][%
-@else %]
+@else %][% ' no truncation orders enabled %]
 d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
 	@echo Form is processing counterterm diagram [%$_%] @ Helicity [%helicity%]
 	@$(FORM) $(FORM_OPT) \
@@ -1357,9 +1363,9 @@ d[%$_%]h[%helicity%]ct.txt: ../diagrams-ct.hh
 		../codegen/golem.frm
 	@touch d[%$_%]h[%helicity%]ct-stamp
 d[%$_%]h[%helicity%]ct-stamp: d[%$_%]h[%helicity%]ct.txt[%
-@end @if %][%
-@end @if %][% @end @if %][%
-@end @for %][%
+@end @if enable_truncation_orders %][%
+@end @if is_last %][% @end @if is_first %][%
+@end @for elements topolopy.keep.ct %][%
 @for elements topolopy.keep.ct %][% @if is_last %][%
 @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
@@ -1370,67 +1376,17 @@ diagramsct_[% efto %].f90[% @if extension quadruple %] diagramsct_[% efto %]_qp.
 		-i $< \
 		--HELICITY=[%helicity%][%
 @end @for %][%
-@else %]
+@else %][% ' no truncation orders enabled %]
 eft_ct-stamp: eft_ct.txt
 diagramsct.f90[% @if extension quadruple %] diagramsct_qp.f90[% @end @if %]: eft_ct.txt eft_ct-stamp
 	@echo Python is processing counterterm diagrams @ Helicity [%helicity%]
 	@$(PYTHON) ../codegen/buildfortraneftct.py \
 		-i $< \
 		--HELICITY=[%helicity%][%
-@end @if %][%
-@end @if %][% @end @for %][%
-@else %][%
-@select abbrev.level @case helicity %]
-abbrevh[%helicity%].f90: $(TXT_VIRT)
-	@echo Haggies is generating abbreviations for virtual part @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-t ../codegen/abbrev.out \
-		-c ../codegen/abbrev.in \
-		-D helicity=[%helicity%] \
-		-o $@ \
-		$(subst .txt,.abb,$(filter %l1.txt,$(TXT_VIRT))) \
-		$(filter %l1.abb,$(TXT_VIRT))[%
-@end @select %][%
-@for elements topolopy.keep.ct %]
-d[%$_%]_0h[%helicity%]ct.txt: ../diagrams-ct.hh
-	@echo Form is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=0 \
-		-D DIAG=[%$_%] \
-		-D EFTCTFLG=1 \
-		-D OUTFILE=d[%$_%]_0h[%helicity%]ct \
-		../codegen/golem_0.frm[%
-   @if internal REQUIRE_FR5 %]
-d[%$_%]_0h[%helicity%]ct-fr.txt: d[%$_%]_0h[%helicity%]ct.txt[%
-	@end @if %][%
-	@if group %][%
-	@else %]
-d[%$_%]_0h[%helicity%]ct.f90: d[%$_%]_0h[%helicity%]ct.txt
-	@echo Haggies is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_0h[%helicity%]ct.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ $<[%
-      @if internal REQUIRE_FR5 %]
-d[%$_%]_0h[%helicity%]ctfr5.f90: d[%$_%]_0h[%helicity%]ct-fr.txt
-	@echo Haggies is processing counterterm diagram [%$_%]_0 @ Helicity [%helicity%]
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-c ../codegen/haggies-ct.in \
-		-t ../codegen/haggies-ct.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]_0h[%helicity%]ct.dat \
-			| sed 's/extraysymbols=//')) \
-		-o $@ $<[%
-      @end @if internal REQUIRE_FR5 %][%
-   @end @if %][%
-@end @for %][%
+@end @if enable_truncation_orders %][%
+@end @if is_last %][% @end @for elements topolopy.keep.ct %][%
 @end @if generate_eft_counterterms %][%
-@end @if %]
+@end @if extension formopt %]
 
 [% @if write_vanishing_amplitude %]
 born.txt: 
