@@ -10,9 +10,9 @@ include ../Makefile.conf[%
 @end @if %]
 
 [% @if extension shared %]
-compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][% @if use_order_names %]_0.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_1.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_2.so[% @end @if %]
+compile: source libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%][% @if enable_truncation_orders %]_0.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_1.so libgosam_process[% process_name assuffix=\_ %]_amplitude[%helicity%]_2.so[% @end @if %]
 [% @else %]
-compile: source amplitude[%helicity%][% @if use_order_names %]_0.a amplitude[%helicity%]_1.a amplitude[%helicity%]_2[% @end @if %].a
+compile: source amplitude[%helicity%][% @if enable_truncation_orders %]_0.a amplitude[%helicity%]_1.a amplitude[%helicity%]_2[% @end @if %].a
 [% @end @if %]
 
 -include Makefile.source
@@ -22,7 +22,7 @@ HAVE_MAKEFILE_SOURCE=$(if $(wildcard Makefile.source),1,0)[%
 HAVE_ORIG_DIAGRAM_FILE=$(if $(shell test -e ../diagrams-1.hh && head -n 100 ../diagrams-1.hh | grep 'Local'),1,0)[%
 @end @if %]
 
-[% @if use_order_names %][%
+[% @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 OBJECTS_[% efto %]= \
 	[% @if eval efto .eq. 0 %]globals.o [% @end @if %]amplitudeh[%helicity%]_[% efto %].o[%
@@ -117,13 +117,7 @@ OBJECTS_[% efto %]= \
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]_[% efto %]h[%helicity%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if helsum %]
 GENERATED_SRC_[% efto %]=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -201,13 +195,7 @@ GENERATED_SRC_[% efto %]=[%
 	@end @for %][%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]_[% efto %]h[%helicity%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %]
+@end @if helsum %]
 [% @end @for %][%
 @else %]
 OBJECTS= \
@@ -303,13 +291,7 @@ OBJECTS= \
       @end @for %][%
    @end @select %][%
 @end @if generate_nlo_virt %][%
-@end @if helsum %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if helsum %]
 GENERATED_SRC=[%
 @if generate_lo_diagrams %][%
    @if group %] \
@@ -388,12 +370,6 @@ GENERATED_SRC=[%
 	@end @select %][%
 @end @if generate_nlo_virt %][%
 @end @if helsum %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]h[%helicity%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %][%
 @end @if %]
 
 .PHONY: compile source clean very-clean doc [% @if diagsum %]convert[%@end @if%]
@@ -418,7 +394,7 @@ endif
 
 [% @for elements topolopy.keep.virt %]
 
-[% @if use_order_names %][%
+[% @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto%]
 d[%$_%]_[% efto %]h[%helicity%]l1: d[%$_%]_[% efto %]h[%helicity%]l1.f90 abbrevd[%$_%]_[% efto %]h[%helicity%].f90[% @if eval efto .eq. 0 %] globals.o[% @end @if %][%
 @if extension quadruple %] d[%$_%]_[% efto %]h[%helicity%]l1_qp.f90 abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.f90[% @if eval efto .eq. 0 %] globals_qp.o[% @end @if %][%
@@ -475,7 +451,7 @@ endif[%
 @end @if %][%
 @end @for %]
 
-[% @if use_order_names %][%
+[% @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
 $(OBJECTS_[% efto %]): %.o: %.f90
 	$(vecho) "-> Compiling $@ .."

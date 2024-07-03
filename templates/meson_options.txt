@@ -1,0 +1,5 @@
+option('test_executables', type: 'boolean', value: false,
+        description: 'Build the matrix/test.exe targets for each subprocess and install them to ${SOURCE_DIR}/test')
+
+option('doc', type: 'boolean', value: false,
+        description: 'Build the process documentation files for each subprocess and install them to ${SOURCE_DIR}/doc')

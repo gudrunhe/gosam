@@ -2,6 +2,7 @@
 
 import math
 import random
+from golem.util.tools import error
 
 def A(i, F, R=None):
 	if R is None:
@@ -253,11 +254,12 @@ class diagram:
 
 class vertex:
 
-	def __init__(self, degree, *fields):
+	def __init__(self, degree, *fields, vtype=None):
 		self.degree = degree
 		assert len(fields) == degree
 		self.rays = fields
 		self.set_coord(0, 0)
+		self.vtype = vtype
 
 	def set_coord(self, x, y):
 		self.x = x
@@ -268,10 +270,7 @@ class vertex:
 
 	def draw(self, f, diag, lookup=None, *args, **opts):
 		fields = []
-		ctdiag = False
 		for field in self.rays:
-			if field.name == 'RENO':
-				ctdiag=True
 			fields.append(field.name)
 		sfields = "%% %s vertex" % "-".join(fields)
 
@@ -282,10 +281,22 @@ class vertex:
 
 		x, y = self.get_coord()
 
-		if ctdiag== True:
-			f.write("   \\Cross(%0.1f,%0.1f){%s}{1.0} " % (x, y, vsize))
+		if self.vtype is not None:
+			# vertex type identifier:
+			# (0,0) -> normal vertex (dot)
+			# (1,i) with i any integer (NP order) -> EFT CT vertex (cross)
+			# (0,i) with i>0 (NP order) -> NP vertex (box)
+			if self.vtype[0]==1:
+				f.write("   \\Cross(%0.1f,%0.1f){%s}{1.0} " % (x, y, vsize))
+			elif self.vtype[1]==0:
+				f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
+			elif self.vtype[1]>=1:
+				f.write("   \\GBoxc(%0.1f,%0.1f)(%s,%s)0 " % (x, y, 2*vsize, 2*vsize))
+			else:
+				error("I don't know this vertex type identifier: %s" % str(self.vtype))
 		else:
 			f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
+
 		f.write(sfields + "\n")
 
 class propagator:

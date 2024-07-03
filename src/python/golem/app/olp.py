@@ -16,6 +16,8 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
 		('E', "use-double-quotes", "Allow the use of double quotes"),
 		('b', "use-backslash", "Allow the use of backslash escapes"),
 		('i', "ignore-case", "Interpret the file case insensitive"),
+		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
+		('j', "jobs=", "Maximum number of workers while processing the subprocesses (requires the multiprocess package) [default: os.cpu_count()]"),
 		('x', "ignore-unknown", "Ignore unknown/unsupported options"),
 		('X', "no-crossings", "Never generate crossings [default]"),
 		('Y', "crossings", "Do generate crossings"),
@@ -38,11 +40,13 @@ cmd_extensions = {
 			"backslash_escape": False
 		}
 cmd_ignore_case = False
+cmd_ignore_empty_subprocess = False
 cmd_ignore_unknown = False
 cmd_force = False
 cmd_from_scratch = False
 cmd_name = ""
 cmd_use_crossings = True
+cmd_jobs = os.cpu_count()
 
 cmd_mc = "any"
 
@@ -55,9 +59,9 @@ cmd_output_file = "%p%s.olc"
 
 def arg_handler(name, value=None):
 	global cmd_dest_dir, cmd_config_files, cmd_skip_default, \
-			cmd_extensions, cmd_ignore_case, cmd_ignore_unknown, \
-			cmd_output_file, cmd_templates, cmd_force, \
-			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc
+			cmd_extensions, cmd_ignore_case, cmd_ignore_empty_subprocess, \
+			cmd_ignore_unknown, cmd_output_file, cmd_templates, cmd_force, \
+			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc, cmd_jobs
 
 	if name == 'destination':
 		cmd_dest_dir = value
@@ -88,6 +92,16 @@ def arg_handler(name, value=None):
 		return True
 	elif name == 'ignore-case':
 		cmd_ignore_case = True
+		return True
+	elif name == 'ignore-empty-subprocess':
+		cmd_ignore_empty_subprocess = True
+		return True
+	elif name == 'jobs':
+		try:
+			import multiprocess
+		except ModuleNotFoundError:
+			golem.util.tools.warning("The '-j' option was set but the 'multiprocess' module could not be imported. Running sequentially.")
+		cmd_jobs = value
 		return True
 	elif name == 'ignore-unknown':
 		cmd_ignore_unknown = True
@@ -195,6 +209,10 @@ def main(argv=sys.argv):
 	if not default_conf["extensions"]:
 		default_conf["extensions"]=props["extensions"]
 
+	default_conf["ignore_empty_subprocess"] = cmd_ignore_empty_subprocess
+	default_conf["veto_crossings"] = False
+	default_conf["n_jobs"] = cmd_jobs
+
 	skipped = 0
 	for arg in args:
 		path = golem.util.olp.derive_output_name(
@@ -232,7 +250,7 @@ def main(argv=sys.argv):
 		except golem.util.olp_objects.OLPError as ex:
 			golem.util.tools.warning(
 					"Order file %r has been skipped because of errors: %s" %
-					(arg, ex.message))
+					(arg, str(ex)))
 			skipped += 1
 		except IOError as ex:
 			golem.util.tools.warning(

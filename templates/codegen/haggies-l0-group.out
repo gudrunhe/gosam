@@ -5,9 +5,9 @@
    ! file:      [% output.file %]
    ! generator: [% program.name %] ([% program.version %])
    use [$ process_name asprefix=\_ $]color, only: numcs
-   use [$ process_name asprefix=\_ $]config, only: ki
+   use config, only: ki
    [$ @if internal CUSTOM_SPIN2_PROP
-   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
+   $]use custompropagator[$ @end @if $]
    implicit none
 
    private
@@ -19,10 +19,11 @@
 
 contains
    function     amplitude()
-      use [$ process_name asprefix=\_ $]model
+      use model
       use [$ process_name asprefix=\_ $]kinematics
+      use SpinorBrackets
       use [$ process_name asprefix=\_ $]color
-      use [$ process_name asprefix=\_ $]config, only: debug_lo_diagrams, &
+      use config, only: debug_lo_diagrams, &
         & use_sorted_sum
       use [$ process_name asprefix=\_ $]accu, only: sorted_sum
       use [$ process_name asprefix=\_ $]util, only: inspect_lo_diagram[$

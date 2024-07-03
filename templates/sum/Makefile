@@ -100,13 +100,7 @@ OBJECTS= \
 		   @end @if %][%
       @end @for %][%
    @end @select %][%
-@end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %] \
-	diagramsct.o[%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]l1c.o[%
-	@end @for %][%
-@end @if %]
+@end @if generate_nlo_virt %]
 GENERATED_SRC=[%
 @if generate_nlo_virt %][%
    @select abbrev.level
@@ -160,13 +154,7 @@ GENERATED_SRC=[%
 		   @end @if %][%
 	@end @for %][%
 	@end @select %][%
-@end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %] \
-	d[%$_%]l1c.f90[%
-	@end @for %] \
-	diagramsct.f90 [%
-@end @if %]
+@end @if generate_nlo_virt %]
 
 HELSUM_CFLAGS=[%
 	@for helicities generated %] \

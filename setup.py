@@ -73,7 +73,7 @@ def get_git_revision():
 
 VERSION = "2.1.1"
 GIT_REVISION = get_git_revision()
-TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
+TAR_VERSION = "%s+%s" % (VERSION,GIT_REVISION)
 
 
 INFO = {
@@ -119,6 +119,7 @@ DATA_DIRS = [
 			"templates/matrix",
 			"templates/sum",
 			"olp/templates",
+			"olp/templates/common",
 			"models",
 			"src/form",
 			"haggies"

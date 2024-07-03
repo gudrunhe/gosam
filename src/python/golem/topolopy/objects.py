@@ -1,6 +1,7 @@
 # vim: ts=3:sw=3:expandtab
 
 import re
+import itertools
 
 import golem.algorithms.mandelstam
 import golem.util.tools
@@ -25,6 +26,9 @@ class Diagram:
 
       # self._fermion_flow = None
       self._sign = 0
+
+      self.filtered_by_momentum = False
+      self.unitary_gauge = False
 
       for c in components:
          c.addToDiagram(self)
@@ -86,7 +90,7 @@ class Diagram:
       v_keep = self._vertices[nkeep]
       d_keep = len(v_keep.fields)
       v_keep.rank += v_kill.rank
-      for key in v_kill.orders():
+      for key in v_kill.orders:
          if key in v_keep.orders:
             v_keep.orders[key] += v_kill.orders[key]
          else:
@@ -188,7 +192,7 @@ class Diagram:
       rk = 0
       for p in self._loop:
          twospin = self._propagators[abs(p)].twospin
-         if twospin != 2:
+         if twospin != 2 or (self.unitary_gauge and self._propagators[abs(p)].mass != "0"):
             rk += twospin
 
       for v in self._loop_vertices:
@@ -197,18 +201,10 @@ class Diagram:
       if MQSE and self.isMassiveQuarkSE() and rk < 2:
          return 2
 
+      if rk > self.loopsize() + 1:
+         error("Encountered diagram with rank - loopsize = {} - {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize()))
+
       return rk
-
-   # def orders(self):
-   #    tmporders = dict()
-   #    for v in self._vertices:
-   #       for key in self._vertices[v].orders.keys():
-   #          if key in tmporders:
-   #             tmporders[key] += self._vertices[v].orders[key]
-   #          else:
-   #             tmporders[key] = self._vertices[v].orders[key]
-
-   #    return tmporders
 
    def order(self,okey):
       tmporders = dict()
@@ -218,12 +214,16 @@ class Diagram:
                tmporders[key] += self._vertices[v].orders[key]
             else:
                tmporders[key] = self._vertices[v].orders[key]
-      if okey is None:
-         return 0
-      elif isinstance(okey, str):
-         return tmporders[okey]
-      else:
-         return tmporders[str(okey)]
+      try:
+         if okey is None:
+            return 0
+         elif isinstance(okey, str):
+            return tmporders[okey]
+         else:
+            return tmporders[str(okey)]
+      except:
+         error("'{0}' cannot be used as key in order function.".format(okey))
+
 
    def VertexInfo(self):
       VInfo = dict()
@@ -329,31 +329,64 @@ class Diagram:
       return li.is_scaleless(onshell, powfmt, prefix)
 
    def vertices(self, *fields):
-      return sum([v.match(fields) for v in list(self._vertices.values())])
+      return sum([v.match(list(fields)) for v in list(self._vertices.values())])
 
    def loopvertices(self, *fields):
-      return sum([self._vertices[v].match(fields)
+      return sum([self._vertices[v].match(list(fields))
          for v in self._loop_vertices])
 
    def iprop(self, *args, **opts):
       opts["zero"] = self._zerosum
-      return sum([p.match(args, **opts)
+      if "momentum" in opts:
+         warning("Using the iprop function with the 'momentum' key in the Python filter can lead to inconsistencies in the crossings. Consider running GoSam with --no-crossings or using the iprop_momentum function instead.")
+      return sum([p.match(list(args), **opts)
          for p in list(self._propagators.values())])
+   
+   def iprop_momentum(self, *args, momentum):
+      if sum([p.match(list(args), momentum) for p in list(self._propagators.values())]):
+         self.filtered_by_momentum = True
+         return True
+      else:
+         return False
+
+   def ext_legs_from_vertex(self, *args, max_legs = 1, is_ingoing = None):
+      nlegs = len(self._vertices)*[0]
+      for leg in list(self._in_legs.values()) + list(self._out_legs.values()):
+         nlegs[leg.v - 1] += leg.match(list(args), is_ingoing=is_ingoing)
+      if any(n > max_legs for n in nlegs):
+         if is_ingoing is not None:
+            self.filtered_by_momentum = True
+         return True
+      else:
+         return False
+
+   def vertex_with_external_legs(self, *fields, max_legs = 1, is_ingoing = None):
+      nlegs = len(self._vertices) * [0]
+      for v in list(self._vertices.values()):
+         if v.match(list(fields)):
+            for leg in list(self._in_legs.values()) + list(self._out_legs.values()):
+               nlegs[leg.v - 1] += leg.v == v.index and (leg.ingoing == is_ingoing if is_ingoing is not None else True)
+      if any(n > max_legs for n in nlegs):
+         if is_ingoing is not None:
+            self.filtered_by_momentum = True
+         return True
+      else:
+         return False
 
    def chord(self, *args, **opts):
       opts["zero"] = self._zerosum
-      return sum([self._propagators[abs(p)].match(args, **opts)
+      return sum([self._propagators[abs(p)].match(list(args), **opts)
          for p in self._loop])
 
    def bridge(self, *args, **opts):
       opts["zero"] = self._zerosum
-      return sum([self._propagators[p].match(args, **opts)
+      return sum([self._propagators[p].match(list(args), **opts)
          for p in set(self._propagators.keys())-set(map(abs,self._loop))])
 
    def onshell(self, *args, **opts):
       opts["zero"] = self._zerosum
       return sum([
-         self._propagators[abs(p)].match(args, **opts)
+         self._propagators[abs(p)].match(list(args), **opts)
             and self._propagators[abs(p)].momentum.onshell()
          for p in set(self._propagators.keys())-set(map(abs,self._loop))
       ])
@@ -833,15 +866,6 @@ class Diagram:
           found=True
      return found
 
-   def YUKAWAfound(self):
-      vertex_indices=list(self._vertices.keys())
-      found=False
-      fields=[['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['T','Tbar','B','Bbar','part6','anti6','part5','anti5'],['H','part25']]
-      for idx in vertex_indices:
-         if self._vertices[idx].match(fields):
-            found=True
-      return found
-
 class DiagramComponent:
 
    def addToDiagram(self, diagram):
@@ -851,22 +875,19 @@ class DiagramComponent:
       pass
 
    def match_fields(self, rays, query):
-      if len(rays) == 0 and len(query) == 0:
+      if rays == query:
          return True
-      r1 = rays[0]
-      r1_unquoted = r1
-      rem = rays[1:]
-      if r1[0:4] == 'part':
-         r1_unquoted = str(r1)
-         r1='\'%s\'' % r1
-      for i, q in enumerate(query):
-         if q is None:
-            if self.match_fields(rem, query[:i] + query[i+1:]):
-               return True
-         elif (r1 in q) or (r1_unquoted in q):
-            if self.match_fields(rem, query[:i] + query[i+1:]):
-               return True
-      return False
+      if all(isinstance(q, (list, tuple, dict)) for q in query):
+         return ((sorted(rays) in list(map(sorted, itertools.product(*query)))) or
+                 (sorted(["'{}'".format(r) for r in rays]) in list(map(sorted, itertools.product(*query)))))
+      elif all(isinstance(q, str) for q in query):
+         return all(
+            (r in query and rays.count(r) == query.count(r))
+            or ("'{}'".format(r) in query and rays.count("'{}'".format(r)) == query.count("'{}'".format(r)))
+            for r in rays
+         )
+      else:
+         return False
 
 class Vertex(DiagramComponent):
    def __init__(self, index, rank, orders, label, *fields):
@@ -885,18 +906,26 @@ class Vertex(DiagramComponent):
       if len(fields) != len(rays):
          return False
 
-      flists = []
-      for f in fields:
-         if f is None:
-            flists.append(None)
-         elif isinstance(f, str):
-            flists.append([f])
-         elif "__iter__" in f.__class__.__dict__:
-            flists.append([str(e) for e in f])
+      flist = []
+      if fields is None:
+         flist = None
+      elif isinstance(fields, str):
+         flist.append(fields)
+      elif "__iter__" in fields.__class__.__dict__:
+         if len(fields) == 0:
+            flist = None
          else:
-            flists.append([str(f)])
+            if all(isinstance(l, (list, tuple, dict)) for l in fields):
+               if len(fields) > 1:
+                  flist.extend([[str(e) for e in l] for l in fields])
+               else:
+                  flist.extend([str(e) for e in fields[0]])
+            else:
+               flist.extend([str(e) for e in fields])
+      else:
+         flist.append(str(fields))
 
-      return self.match_fields(rays, flists)
+      return self.match_fields(rays, flist) if flist else True
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
@@ -1013,19 +1042,25 @@ class Propagator(DiagramComponent):
 
       flist = []
       if fields is None:
-         flist.append(None)
+         flist = None
       elif isinstance(fields, str):
          flist.append(fields)
       elif "__iter__" in fields.__class__.__dict__:
          if len(fields) == 0:
-            flist.append(None)
+            flist = None
          else:
-            flist.extend([str(e) for e in fields])
+            if all(isinstance(l, (list, tuple, dict)) for l in fields):
+               if len(fields) > 1:
+                  flist.extend([[str(e) for e in l] for l in fields])
+               else:
+                  flist.extend([str(e) for e in fields[0]])
+            else:
+               flist.extend([str(e) for e in fields])
       else:
          flist.append(str(fields))
 
 
-      if not self.match_fields([self.field], flist):
+      if flist and not self.match_fields([self.field], flist):
          return False
 
       if momentum is not None:
@@ -1085,6 +1120,56 @@ class Leg(DiagramComponent):
       return "%s(index=%s, %s, v%sr%s, %s, %s, %s)" % \
             (cl, self.index, self.field, self.v, self.r, self.mom,
                   self.twospin, self.color)
+
+   def match(self, fields, is_ingoing=None, twospin=None,
+             massive=None, color=None, zero=None):
+
+      flist = []
+      if fields is None:
+         flist.append(None)
+      elif isinstance(fields, str):
+         flist.append(fields)
+      elif "__iter__" in fields.__class__.__dict__:
+         if len(fields) == 0:
+            flist = None
+         else:
+            if all(isinstance(l, (list, tuple, dict)) for l in fields):
+               if len(fields) > 1:
+                  flist.extend([[str(e) for e in l] for l in fields])
+               else:
+                  flist.extend([str(e) for e in fields[0]])
+            else:
+               flist.extend([str(e) for e in fields])
+      else:
+         flist.append(str(fields))
+      if not self.match_fields([self.field], flist):
+         return False
+
+      if is_ingoing is not None:
+         if not self.ingoing == is_ingoing:
+            return False
+
+      if twospin is not None:
+         if "__iter__" in twospin.__class__.__dict__:
+            if all([s != self.twospin for s in twospin]):
+               return False
+         else:
+            if self.twospin != int(twospin):
+               return False
+
+      if color is not None:
+         if "__iter__" in color.__class__.__dict__:
+            if all([c != self.color for c in color]):
+               return False
+         else:
+            if self.color != int(color):
+               return False
+
+      if massive is not None:
+         if (self.mass != "0") != massive:
+            return False
+
+      return True
 
 class LoopIntegral:
 
@@ -1612,6 +1697,13 @@ class LoopCache:
 
       self._roots = roots
       return roots
+
+class CTCache:
+   def __init__(self):
+      self.diagrams = {}
+
+   def add(self, diagram, diagram_index):
+      self.diagrams[diagram_index] = diagram
 
 class Momentum:
    def __init__(self, arg, zero):

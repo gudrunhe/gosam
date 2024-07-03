@@ -4,7 +4,7 @@ import os.path
 
 import golem.properties
 
-from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache, TreeCache
+from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache, TreeCache, CTCache
 import golem.topolopy.userlib
 from golem.util.config import GolemConfigError
 from golem.util.tools import error, warning, debug
@@ -113,9 +113,6 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
       if diagram.EHCfound():
          conf["ehc"]=True
 
-      if diagram.YUKAWAfound():
-         conf["yukawa"]=True
-
       if analyze_diagram(diagram, zero, fltr):
          keep.append(idx)
 
@@ -127,6 +124,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
                   filter_flags[flag].append(idx)
       else:
          lose.append(idx)
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
       signs[idx] = diagram.sign()
    #   flows[idx] = diagram.fermion_flow()
@@ -192,6 +190,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
                max_rank = rk
       else:
          lose.append(idx)
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
    debug("After analyzing loop diagrams: keeping %d, purging %d" % 
             (len(keep_tot), len(lose)))
@@ -229,56 +228,44 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
 
    return keep, keep_tot, eprops, loopcache, loopcache_tot
 
-def analyze_ct_diagrams(diagrams, model, conf, onshell,
-      quark_masses = None, filter_flags = None, massive_bubbles = {}):
+def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):
    zero = golem.util.tools.getZeroes(conf)
-   lst = setup_list(golem.properties.select_nlo_diagrams, conf)
-   fltr = setup_filter(golem.properties.filter_nlo_diagrams, conf, model)
+   lst = setup_list(golem.properties.select_ct_diagrams, conf)
+   fltr = setup_filter(golem.properties.filter_ct_diagrams, conf, model)
    keep = []
    lose = []
-   max_rank = 0
+   signs = {}
 
-   loopcache = LoopCache()
+   ctcache = CTCache()
 
    for idx, diagram in list(diagrams.items()):
       if lst:
          if idx not in lst:
             lose.append(idx)
             continue
+
       if analyze_diagram(diagram, zero, fltr):
-         # check for massive quarks first. Even though the
-         # diagram might fail the next test it contributes
-         # to the renormalization of the gluon wave function.
-         if quark_masses is not None:
-            for qm in diagram.QuarkBubbleMasses():
-               if qm not in quark_masses:
-                  quark_masses.append(qm)
+         keep.append(idx)
 
-         if diagram.onshell() > 0:
-            lose.append(idx)
-         else:
-            keep.append(idx)
-            loopcache.add(diagram, idx)
-            
-            diagram.isMassiveBubble(idx, massive_bubbles)
-
-            if filter_flags is not None:
-               for flag in diagram.filter_flags:
-                  if flag not in filter_flags:
-                     filter_flags[flag] = [idx]
-                  else:
-                     filter_flags[flag].append(idx)
-            rk = diagram.rank()
-            if rk > max_rank:
-               max_rank = rk
+         if filter_flags is not None:
+            for flag in diagram.filter_flags:
+               if flag not in filter_flags:
+                  filter_flags[flag] = [idx]
+               else:
+                  filter_flags[flag].append(idx)
       else:
          lose.append(idx)
+         conf["veto_crossings"] = diagram.filtered_by_momentum
 
-   debug("After analyzing counter term diagrams: keeping %d, purging %d" % 
-            (len(keep), len(lose)))
+      signs[idx] = diagram.sign()
 
-   conf["__max_rank__"] = max_rank
-   return keep, loopcache
+   debug("After analyzing CT diagrams: keeping %d, purging %d" %
+         (len(keep), len(lose)))
+
+   for idx in keep:
+      ctcache.add(diagrams[idx], idx)
+
+   return keep, signs, ctcache
 
 
 def analyze_diagram(diagram, zero, fltr):

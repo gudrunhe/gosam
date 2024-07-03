@@ -63,7 +63,8 @@ class TemplateFactory:
                      or "heavy_quarks" not in opts \
                      or "massive_bubbles" not in opts \
                      or "diagram_sum" not in opts \
-                     or "helicity_map" not in opts:
+                     or "helicity_map" not in opts\
+                     or "ct_signs" not in opts:
                   raise golem.util.parser.TemplateError(
                         "Cannot use template 'Integrals' here.")
                loopcache = opts["loopcache"]
@@ -79,13 +80,13 @@ class TemplateFactory:
                massive_bubbles = opts["massive_bubbles"]
                diagram_sum = opts["diagram_sum"]
                helicity_map = opts["helicity_map"]
-
+               ct_signs = opts["ct_signs"]
 
                template = golem.templates.integrals.IntegralsTemplate(
                      f_template)
                template.setup(loopcache, loopcache_tot, in_particles, out_particles,
                      tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
-                     massive_bubbles, diagram_sum, helicity_map)
+                     massive_bubbles, diagram_sum, helicity_map, ct_signs)
             elif class_name == "Integrals_doc":
                if "loopcache" not in opts \
                      or "in_particles" not in opts \
@@ -97,9 +98,12 @@ class TemplateFactory:
                      or "heavy_quarks" not in opts \
                      or "massive_bubbles" not in opts \
                      or "helicity_map" not in opts \
-                     or "treecache" not in opts:
+                     or "treecache" not in opts\
+                     or "ctcache" not in opts\
+                     or "ct_signs" not in opts \
+                     or "ct_flags" not in opts:
                   raise golem.util.parser.TemplateError(
-                     "Cannot use template 'Integrals' here.")
+                     "Cannot use template 'Integrals_doc' here.")
                loopcache = opts["loopcache_tot"]
                treecache = opts["treecache"]
                in_particles = opts["in_particles"]
@@ -112,19 +116,23 @@ class TemplateFactory:
                nlo_flags = opts["nlo_flags"]
                massive_bubbles = opts["massive_bubbles"]
                helicity_map = opts["helicity_map"]
+               ctcache = opts["ctcache"]
+               ct_signs = opts["ct_signs"]
+               ct_flags = opts["ct_flags"]
 
                template = golem.templates.integrals_doc.IntegralsTemplate_doc(
                      f_template)
                template.setup(loopcache, in_particles, out_particles,
                      tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
-                     massive_bubbles, helicity_map, treecache)
+                     massive_bubbles, helicity_map, treecache, ctcache, ct_signs, ct_flags)
             elif class_name == "Kinematics":
                if "in_particles" not in opts or \
                      "out_particles" not in opts or \
                      "conf" not in opts or \
                      "tree_signs" not in opts or \
                      "heavy_quarks" not in opts or \
-                     "helicity_map" not in opts:
+                     "helicity_map" not in opts or \
+                     "ct_signs" not in opts:
                   raise golem.util.parser.TemplateError(
                         "Cannot use template 'Kinematics' here.")
                in_particles = opts["in_particles"]
@@ -134,11 +142,12 @@ class TemplateFactory:
                # tree_flows = opts["tree_flows"]
                heavy_quarks = opts["heavy_quarks"]
                helicity_map = opts["helicity_map"]
+               ct_signs = opts["ct_signs"]
 
                template = golem.templates.kinematics.KinematicsTemplate(
                      f_template)
                template.init_kinematics(conf, in_particles, out_particles,
-                     tree_signs, heavy_quarks, helicity_map)
+                     tree_signs, heavy_quarks, helicity_map, ct_signs)
             elif class_name == "OLP":
                if "contract" not in opts or \
                      "subprocesses" not in opts or \

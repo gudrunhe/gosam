@@ -1,6 +1,6 @@
 * vim: syntax=form:ts=3:sw=3:expandtab
 *
-* This version of golem[% @if use_order_names %]_[% trnco %][% @end @if %].frm generates expressions for the numerator
+* This version of golem[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].frm generates expressions for the numerator
 * only.
 *
 #-
@@ -58,8 +58,12 @@ CTensor epstensor;[%
    Autodeclare Symbol Qsp;
    #Include- abbreviate.hh
    Symbol CC, R2;
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
+   #Include- optimizeeftct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].hh
+[% @end @if %]
 #Else
-   #Include- optimizeborn[% @if use_order_names %]_[% trnco %][% @end @if %].hh
+   #Include- optimizeborn[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].hh
 #EndIf[%
 @else %]
 #If `LOOPS' == 1
@@ -98,8 +102,15 @@ Function SmQt;
 #include- color.hh
 .global
 
-#include- diagrams-`LOOPS'.hh #global
-#include- model.hh[%
+#include- model.hh
+
+[% @if generate_eft_counterterms %]
+#If `EFTCTFLG' == 1
+#include- diagrams-ct.hh #global
+#include- diagrams-ct.hh #diagram`DIAG'
+#Else
+[% @end @if %]
+#include- diagrams-`LOOPS'.hh #global[%
 @if diagsum %]
 #If `LOOPS' == 0
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'
@@ -109,6 +120,9 @@ F diag1,...,diag`DIAGRAMCOUNT';
 #EndIf[%
 @else %]
 #include- diagrams-`LOOPS'.hh #diagram`DIAG'[%
+@end @if %][%
+@if generate_eft_counterterms %]
+#EndIf[%
 @end @if %][%
 @select r2
 @case explicit only %]
@@ -126,6 +140,12 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 
 #call zeroes
 
+[% @if generate_nlo_virt
+%]#If (`LOOPS' == 0 )[% @if generate_eft_counterterms %] && (`EFTCTFLG' == 0)[% @end @if %]
+#include yukawas.hh
+#call ReplaceYukawas
+#EndIf[%
+@end @if %]
 
 * models that implement their own vertex replacements
 * must define the preprocessor variable USEVERTEXPROC
@@ -139,8 +159,10 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
    EndRepeat;
 #endif
 
-[% @if use_order_names
-%].sort[%
+[% @if is_ufo 
+%].sort
+[% @if enable_truncation_orders
+%][%
 @if eval trnco .neq. 2 %]
 Id Loopfac = 0;[%
 @end @if %]
@@ -160,7 +182,11 @@ Id Loopfac^2 = 0;
 .sort
 Id Lambdam2 = 1;
 Id Loopfac = 1;[%
-@end @if %][%
+@end @if %][% 
+@else 
+%]Id Lambdam1 = 1;
+Id Lambdam2 = 1;[%
+@end @if %][% 
 @end @if %]
 
 #call VertexConstants
@@ -794,24 +820,46 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
-#Else
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
+        #write <`OUTFILE'.txt> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
-	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Append <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #ElseIf `BORNFLG' == 2
+	#Create <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #EndIf
+[% @end @if %]
+#Else
+   #If `BORNFLG' == 1
+   #Create <`OUTFILE'.txt>
+        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Create <`OUTFILE'.txt>
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
-	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+	#Create <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf
@@ -827,24 +875,46 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 @end @if %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
-#Else
+[% @if generate_eft_counterterms %]
+#ElseIf `EFTCTFLG' == 1
    #If `BORNFLG' == 1
    #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
+        #write <`OUTFILE'.txt> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == 0
         #Create <`OUTFILE'.txt>
 	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
    #ElseIf `BORNFLG' == -1
-        #Append <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
-	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Append <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #ElseIf `BORNFLG' == 2
+	#Create <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
+        #Call OptimizeEFTCT()
+   #EndIf
+[% @end @if %]
+#Else
+   #If `BORNFLG' == 1
+   #Create <`OUTFILE'.txt>
+        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == 0
+        #Create <`OUTFILE'.txt>
+	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
+   #ElseIf `BORNFLG' == -1
+        #Append <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #ElseIf `BORNFLG' == 2
-	#Create <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc>
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if use_order_names %][% trnco %][% @end @if %]"
-	#write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if use_order_names %][% trnco %][% @end @if %].prc> "#EndProcedure"
+	#Create <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
+	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
+        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
         #Call OptimizeBorn()
    #EndIf
 #EndIf

@@ -27,12 +27,18 @@ class ModelTemplate(Template):
 		self._modeltype =  conf.getProperty("modeltype")
 		if not self._modeltype:
 			self._modeltype = conf.getProperty("model")
+		self._order_names = sorted(conf.getProperty(golem.properties.order_names))
+		if self._order_names==['']:
+			self._order_names=[]
+		self._useCT = conf.getBooleanProperty('renorm_eftwilson')
 
 		self._comment_chars = ['#', '!', ';']
 		self._buffer_length = 80
 
 		self._parameters = {}
+		self._particles = {}
 		self._functions = {}
+		self._ctfunctions = {}
 		name_length = 0
 		self._floats = {}
 		self._functions_fortran = {}
@@ -57,13 +63,20 @@ class ModelTemplate(Template):
 					param = (name, t, [value, "0.0"])
 			self._parameters[name] = param		
 		
+		for name, value in list(self._mod.particles.items()):
+			self._particles[name] = value
+
 		for name, expression in list(self._mod.functions.items()):
 			t = self._mod.types[name]
 			#if len(name) > name_length:
 			#	name_length = len(name)
-
 			self._functions[name] = t
-		
+
+		if(hasattr(self._mod, 'ctfunctions') and self._useCT):
+			for name, expression in list(self._mod.ctfunctions.items()):
+				t = self._mod.types[name]
+				self._ctfunctions[name] = t
+
 		self._name_length = name_length
 
 		props = Properties()
@@ -167,7 +180,25 @@ class ModelTemplate(Template):
 				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
-	
+
+		if(hasattr(model_mod,'ctfunctions') and self._useCT):
+			golem.util.tools.message("Found counterterms in model ...")
+			for name, value in list(model_mod.ctfunctions.items()):
+				# We expect only 1/eps and finite terms from the CT. The 1/eps^2 of the virtual is of IR origin. The following piece of code checks if the CT is defined with additional coefficients. => Throw exception in this case?
+				ctpolesmdl = list(int(k) for k in value.keys())
+				ctpoles = [-2,-1,0]
+				if(any([k not in ctpoles for k in ctpolesmdl])):
+					golem.util.tools.warning("Counterterm parameter %s has pole coeffcients not expected at NLO!" % name)
+				for ctp in ctpoles:
+					i += 1
+					if ctp in value:
+						expr = parser.compile(value[ctp])
+					else:
+						expr = parser.compile('0')
+					pstr = "m" if ctp<0 else "p"
+					ctname = name+"ctpole"+pstr+str(abs(ctp))
+					functions[ctname] = expr
+
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 
@@ -216,6 +247,16 @@ class ModelTemplate(Template):
 			expr = parser.compile(value)
 			functions[name] = expr
 	
+		if(hasattr(model_mod,'ctfunctions') and self._useCT):
+			golem.util.tools.message("Found counterterms in model ...")
+			for name, value in list(model_mod.ctfunctions.items()):
+				for ctp, pcf in value.items():
+					i += 1
+					expr = parser.compile(pcf)
+					pstr = "m" if ctp<0 else "p"
+					ctname = name+"ctpole"+pstr+str(abs(ctp))
+					functions[ctname] = expr
+
 		golem.util.tools.message("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 		# the only difference
@@ -422,6 +463,88 @@ class ModelTemplate(Template):
 
 			yield props
 
+	def modelparticles(self, *args, **opts):
+		name_name = self._setup_name("name", "name", opts)
+		antiname_name = self._setup_name("antiname", "antiname", opts)
+		mass_name = self._setup_name("mass", "mass", opts)
+		massive_name = self._setup_name("massive", "is_massive", opts)
+
+		color_filter = []
+		spin_filter = []
+		charge_filter = []
+
+		if "white" in args:
+			color_filter.extend([1, -1])
+		if "colored" in args:
+			color_filter.extend([3, -3, 8, -8])
+		if "fundamental" in args:
+			color_filter.extend([-3, 3])
+		if "quarks" in args:
+			color_filter.append(3)
+		if "anti-quarks" in args:
+			color_filter.append(-3)
+		if ("adjoint" in args) or ("gluons" in args):
+			color_filter.extend([-8, 8])
+
+		have_color_filter = (len(color_filter) != 0)
+
+		if "scalar" in args:
+			spin_filter.append(0)
+		if "spinor" in args:
+			spin_filter.extend([-1, 1])
+		if "vector" in args:
+			spin_filter.extend([-2, 2])
+		if "vectorspinor" in args:
+			spin_filter.extend([-3, 3])
+		if "tensor" in args:
+			spin_filter.extend([-4, 4])
+		if "boson" in args:
+			spin_filter.extend([-4,-2,0,2,4])
+		if "fermion" in args:
+			spin_filter.extend([-3,-1,3,1])
+
+		have_spin_filter = (len(spin_filter) != 0)
+
+		if "charged" in args:
+			charge_filter.extend([1.0,-1.0,1.0/3.0,-1.0/3.0,2.0/3.0,-2.0/3.0])
+
+		have_charge_filter = (len(charge_filter) != 0)
+
+		have_massive_filter = ("massive" in args)
+
+		for name, value in list(self._particles.items()):
+			props = Properties()
+
+			if have_color_filter and value.getColor() not in color_filter:
+				continue
+
+			if have_spin_filter and value.getSpin() not in spin_filter:
+				continue
+
+			if have_charge_filter and value.getCharge() not in charge_filter:
+				continue
+
+			if have_massive_filter and not value.isMassive(self._zeroes):
+				continue
+
+			mass = value.getMass()
+			antiname = value.getPartner()
+
+			props.setProperty(name_name, name)
+			props.setProperty(mass_name, mass)
+			props.setProperty(antiname_name, antiname)
+
+			yield props
+
+	def ordernames(self, *args, **opts):
+		name_name = self._setup_name("name", "name", opts)
+
+		for on in self._order_names:
+			props = Properties()
+			props.setProperty(name_name, on)
+
+			yield props
+
 	def functions(self, *args, **opts):
 		type_filter = self._setup_filter(["R", "C"], args)
 
@@ -454,6 +577,40 @@ class ModelTemplate(Template):
 
 			name = lst[i]
 			type = self._functions[name]
+
+			props.setProperty(index_name, str(i+base))
+			props.setProperty(name_name, name)
+			props.setProperty(type_name, type)
+
+			yield props
+
+	def ctfunctions(self, *args, **opts):
+		index_name = self._setup_name("index", "index", opts)
+		name_name  = self._setup_name("name", "$_", opts)
+		type_name  = self._setup_name("type", "type", opts)
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name  = self._setup_name("last", "is_last", opts)
+
+		if "base" in opts:
+			base = int(opts["base"])
+		else:
+			base = 1
+
+		lst = list(self._ctfunctions.keys())
+
+		for i in range(len(lst)):
+			props = Properties()
+			if i == 0:
+				props.setProperty(first_name, "true")
+			else:
+				props.setProperty(first_name, "false")
+			if i == len(lst) - 1:
+				props.setProperty(last_name, "true")
+			else:
+				props.setProperty(last_name, "false")
+
+			name = lst[i]
+			type = self._ctfunctions[name]
 
 			props.setProperty(index_name, str(i+base))
 			props.setProperty(name_name, name)

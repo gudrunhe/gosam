@@ -1,6 +1,7 @@
 # vim: ts=3:sw=3
 import golem
 import golem.util.parser
+from golem.util.parser import TemplateError
 from golem.util.config import Properties
 
 class OLPTemplate(golem.util.parser.Template):
@@ -78,7 +79,7 @@ class OLPTemplate(golem.util.parser.Template):
 		var_name = self._setup_name("var", prefix + "$_", opts)
 
 		if "shift" in opts:
-			shift = int(opts[shift])
+			shift = int(opts["shift"])
 		else:
 			shift = 0
 
@@ -140,6 +141,28 @@ class OLPTemplate(golem.util.parser.Template):
 
 
 			yield props
+
+	def starting_choice(self, *args, ** opts):
+		if self.e_not_one(args,opts):
+			if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+				return '2'
+			else:
+				return golem.model.MODEL_OPTIONS["users_choice"]
+		else:
+			if golem.model.MODEL_OPTIONS["users_choice"] == '0':
+				return '2'
+			else:
+				return golem.model.MODEL_OPTIONS["users_choice"]
+
+
+	def e_not_one(self, *args, ** opts):
+		ones = golem.model.MODEL_ONES
+		if "e" in ones:
+			e_not_one = False
+		else:
+			e_not_one = True
+		return e_not_one
+
 
 	def flags_filter(self, *args, **opts):
 		assert args == ("$_",)

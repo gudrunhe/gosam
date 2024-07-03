@@ -4,8 +4,9 @@
    This template should be processed by
    golem.templates.Kinematics.KinematicsTemplate
 '%]module     [% process_name asprefix=\_ %]kinematics_qp
-   use [% process_name asprefix=\_%]config, only: ki => ki_qp
-   use [% process_name asprefix=\_ %]model_qp
+   use config, only: ki => ki_qp
+   use model_qp
+   use SpinorBrackets
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    save
@@ -37,19 +38,20 @@
    %]real(ki), public :: [%symbol%]
    [% @end @for mandelstam %][%
 @for pairs ordered distinct %]
-   complex(ki), public :: spa[%
+   type(Spaa), public :: spa[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
-            %], spb[% 
+            %]
+   type(Spbb), public :: spb[%
                  @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
             %][% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][%
-@end @for %][% 
+@end @for %][%
 @for pairs distinct %]
-   complex(ki), dimension(4), public :: spva[%
+   type(Spab3_vec), public :: spva[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
             %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
-            %][% 
+            %][%
 @end @for %][%
 @for particles %]
    real(ki), dimension(4), public :: k[%index%][%
@@ -90,7 +92,7 @@
       @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
    complex(ki), dimension(4), public :: spva[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %]e[% index2 %], spvae[% index2 %][% 
+            %]e[% index2 %], spvae[% index2 %][%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
       @end @if %][%
    @end @for %][%
@@ -124,7 +126,7 @@
       module procedure Spab3_complex
       module procedure Spab3_mcfm
       module procedure Spab3_mcfmc
-      module procedure Spab3_vec
+      module procedure Spab3_vec_direct
    end interface
 
    interface Spba3
@@ -138,7 +140,7 @@
       module procedure e_real_idx
    end interface
 
-   public :: Spaa, Spbb, Spab3, Spba3, dotproduct, epstensor
+   public :: Spab3, Spba3, dotproduct, epstensor
    public :: inspect_kinematics, init_event
    public :: adjust_kinematics
    public :: boost_to_cms
@@ -253,10 +255,10 @@ contains
 @for particles lightlike vector %], hel[%index%][%
 @end @for %])[%
 @if internal NUMPOLVEC %]
-      use [% process_name asprefix=\_ %]config, only: debug_numpolvec, [% '
+      use config, only: debug_numpolvec, [% '
       %]logfile[%
 @end @if %]
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       implicit none
       real(ki), dimension(num_legs,4), intent(in) :: vecs[%
 @for particles lightlike vector %]
@@ -266,7 +268,7 @@ contains
       complex(ki) :: N[%index%]
       logical :: flag[%index%][%
 @end @for %]
-      
+
       call invalidate_cache()[%
 @for particles %]
       k[%index%] = vecs([%index%],:)[%
@@ -276,7 +278,7 @@ contains
    @case 1 %]
       ! mass1 = '[% mass1 %]', mass2 = '[% mass2 %]'
       call light_cone_decomposition(k[% index1%], l[%index1%], [%
-      @select mass2 
+      @select mass2
       @case 0%]k[%index2%][%
       @else %]l[%index2%][%
       @end @select mass2 %], [%mass1%])[%
@@ -291,7 +293,7 @@ contains
       @if is_first_term %][%
       @else %]&
             & + [%
-      @end @if %][% 
+      @end @if %][%
       @if term_is_mass %][% term_mass %]**2[%
       @else %][%
          @select term_coeff
@@ -316,7 +318,7 @@ contains
    @if is_lightlike2%]k[%index2%][%
    @else %]l[%index2%][%
    @end @if %])
-      spb[% 
+      spb[%
    @if is_lightlike2 %]k[%
    @else %]l[%
    @end @if %][% index2
@@ -349,7 +351,7 @@ contains
 @if internal NUMPOLVEC %]
       if(.true.[%
    @for particles lightlike vector %] .and. present(hel[%index%])[%
-   @end @for %]) then[%   
+   @end @for %]) then[%
    @for particles lightlike vector initial %][%
       @with eval 'k .rep. ( reference > 0 ) . 'l .rep. ( reference < 0 )
           . reference result=refvec %]
@@ -551,7 +553,7 @@ contains
                @end @if %]
             else[% '
                ! T F => <k1 k2] %]
-               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [% 
+               spvae[% index1 %]e[% index2 %] = N[%index1%] * N[%index2%] * [%
                @if eval index1 .eq. index2 %]2.0_ki * k[%index1%][%
                @else %]Spab3_vec(k[%index1%], k[%index2%])[%
                @end @if %][% '
@@ -771,14 +773,49 @@ contains
       end if
    end  subroutine light_cone_splitting_alg
 !---#] subroutine light_cone_splitting_alg:
-!---#[ function Spbb:
-   pure function Spbb(p, q)
-      implicit none
-      real(ki), dimension(4), intent(in) :: p, q
-      complex(ki) :: Spbb
-      Spbb = sign(1.0_ki, dotproduct(p, q)) * conjg(Spaa(q, p))
-   end  function Spbb
-!---#] function Spbb:
+!---#[ function Spab3_vec_direct
+   pure function Spab3_vec_direct(k1, k2)
+         implicit none
+         complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+
+         real(ki), dimension(0:3), intent(in) :: k1, k2
+         complex(ki), dimension(0:3) :: Spab3_vec_direct
+
+         real(ki) :: kp, km
+         complex(ki) :: kr, kl
+         complex(ki) :: pr1, pr2, pl1, pl2
+         complex(ki) :: f1, f2
+         real(ki) :: flip1, flip2, rt1, rt2
+
+         !-----positive energy case
+         if (k1(0) .gt. 0.0_ki) then
+            flip1=1.0_ki
+            f1=1.0_ki
+         else
+            flip1=-1.0_ki
+            f1=(0.0_ki, 1.0_ki)
+         endif
+         rt1=sqrt(flip1*(k1(0)+k1(1)))
+         pr1=cmplx(flip1*k1(3),-flip1*k1(2), ki)
+         pl1=conjg(pr1)
+
+         if (k2(0) .gt. 0.0_ki) then
+            flip2=1.0_ki
+            f2=1.0_ki
+         else
+            flip2=-1.0_ki
+            f2=(0.0_ki, 1.0_ki)
+         endif
+         rt2=sqrt(flip2*(k2(0)+k2(1)))
+         pr2=cmplx(flip2*k2(3),-flip2*k2(2), ki)
+         pl2=conjg(pr2)
+
+         Spab3_vec_direct(0) = f1*f2*(pr1*pl2/rt1/rt2 + rt1*rt2)
+         Spab3_vec_direct(1) = f1*f2*(rt1*rt2 - pr1*pl2/rt1/rt2)
+         Spab3_vec_direct(2) = i_*f1*f2*(pr1*rt2/rt1 - rt1*pl2/rt2)
+         Spab3_vec_direct(3) = f1*f2*(pr1*rt2/rt1 + rt1*pl2/rt2)
+      end  function Spab3_vec_direct
+!---+] function Spab3_vec_direct
 !---#[ function Spab3_complex:
    pure function Spab3_complex(k1, Q, k2)
       implicit none
@@ -797,60 +834,6 @@ contains
                   & + i_ * Spab3_mcfm(k1, J, k2)
    end  function Spab3_complex
 !---#] function Spab3_complex:
-!---#[ function Spab3_vec:
-   pure function Spab3_vec(k1, k2)
-      implicit none
-      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-
-      real(ki), dimension(4), intent(in) :: k1, k2
-      complex(ki), dimension(0:3) :: Spab3_vec
-
-      Spab3_vec(0) =   Spab3_mcfm(k1, &
-         & (/1.0_ki, 0.0_ki, 0.0_ki, 0.0_ki/), k2)
-      Spab3_vec(1) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 1.0_ki, 0.0_ki, 0.0_ki/), k2)
-      Spab3_vec(2) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 0.0_ki, 1.0_ki, 0.0_ki/), k2)
-      Spab3_vec(3) = - Spab3_mcfm(k1, &
-         & (/0.0_ki, 0.0_ki, 0.0_ki, 1.0_ki/), k2)
-   end  function Spab3_vec
-!---#] function Spab3_vec:
-!---#[ function Spaa:
-   pure function Spaa(k1, k2)
-      ! This routine has been copied from mcfm and adapted to our setup
-      implicit none
-      real(ki), dimension(0:3), intent(in) :: k1, k2
-      complex(ki) :: Spaa
-
-      real(ki) :: rt1, rt2
-      complex(ki) :: c231, c232, f1, f2
-!---if one of the vectors happens to be zero this routine fails.
-!-----positive energy case
-         if (k1(0) .gt. 0.0_ki) then
-            rt1=sqrt(k1(0)+k1(1))
-            c231=cmplx(k1(3),-k1(2), ki)
-            f1=1.0_ki
-         else
-!-----negative energy case
-            rt1=sqrt(-k1(0)-k1(1))
-            c231=cmplx(-k1(3),k1(2), ki)
-            f1=(0.0_ki, 1.0_ki)
-         endif
-!-----positive energy case
-         if (k2(0) .gt. 0.0_ki) then
-            rt2=sqrt(k2(0)+k2(1))
-            c232=cmplx(k2(3),-k2(2), ki)
-            f2=1.0_ki
-         else
-!-----negative energy case
-            rt2=sqrt(-k2(0)-k2(1))
-            c232=cmplx(-k2(3),k2(2), ki)
-            f2=(0.0_ki, 1.0_ki)
-         endif
-
-         Spaa = -f2*f1*(c232*rt1/rt2-c231*rt2/rt1)
-   end  function Spaa
-!---#] function Spaa:
 !---#[ function Spab3_mcfm:
    pure function Spab3_mcfm(k1, Q, k2)
       ! This routine has been copied from mcfm and adapted to our setup
@@ -876,7 +859,7 @@ contains
          Spab3_mcfm = 0.0_ki
          return
       end if
-            
+
       !-----positive energy case
       if (k1(0) .gt. 0.0_ki) then
          flip1=1.0_ki
@@ -929,7 +912,7 @@ contains
          Spab3_mcfmc = 0.0_ki
          return
       end if
-            
+
       rt1=sqrt((k1(0)+k1(1)))
       pr1=k1(3)-k1(2) * (0.0_ki, 1.0_ki)
       pl1=conjg(pr1)
@@ -1017,7 +1000,7 @@ contains
    pure subroutine adjust_kinematics(vecs)
       implicit none
       real(ki), dimension([%num_legs%],4), intent(inout) :: vecs
-   
+
       real(ki) :: p02, p12, Sz, SE, s0, s1
       real(ki) :: z0, z1, z0a, z0b, E0, E1, E0a, E0b
       real(ki) :: a, b, c, d, x, y
@@ -1045,7 +1028,7 @@ contains
           %],2)) - sum(vecs([%eval num_in + 1%]:[%eval num_legs - 1%],2))
       vecs([%num_legs%],3) = sum(vecs(1:[%num_in
           %],3)) - sum(vecs([%eval num_in + 1%]:[%eval num_legs - 1%],3))
-   
+
       SE = sum(vecs([%eval num_in + 1%]:[%
          eval num_legs - 2%],1)) - sum(vecs(1:[%num_in%],1))
       Sz = sum(vecs([%eval num_in + 1%]:[%
@@ -1078,7 +1061,7 @@ contains
             E0 = c + z0*x
          else
             d = sqrt(d)
-         
+
             z0a = 0.5_ki*(- b + d)/a
             z0b = 0.5_ki*(- b - d)/a
             E0a = c + z0a*x
@@ -1100,7 +1083,7 @@ contains
 
       z1 = - z0 - Sz
       E1 = - E0 - SE
-   
+
       ! Adjust the last two vectors:
       vecs([%eval num_legs - 1%],1) = E0
       vecs([%eval num_legs - 1%],4) = z0
@@ -1122,7 +1105,7 @@ contains
      if(p_cms(2).ne.0.0_ki .and. p_cms(3).ne.0.0_ki) then
         write(*,*) "Error in boost to CMS frame: vecs(1,:) and vecs(2,:) ",&
              &"are not incoming momenta."
-        return 
+        return
      else if(abs(p_cms(4)).lt.1.0E-08_ki) then
         return
      else
@@ -1139,10 +1122,10 @@ contains
    !---#] subroutine boost_to_cms :
    !---#[ subroutine lorentz_boost :
    subroutine lorentz_boost(mass,p,vecs)
-     ! take momenta vecs in frame in which one particle is at rest with mass "mass" 
+     ! take momenta vecs in frame in which one particle is at rest with mass "mass"
      ! and convert to frame in which the one particle has fourvector p
      implicit none
-     
+
      real(ki), dimension(4), intent(in) :: p
      real(ki), dimension(2:4) :: beta
      real(ki) :: mass, gamma, bdotp
@@ -1166,12 +1149,12 @@ contains
            vecs(i,k)=vecs_in(i,k)+gamma*beta(k)*(gamma/(gamma+one)*bdotp-vecs_in(i,1))
         enddo
      enddo
-        
+
      return
    end subroutine lorentz_boost
    !---#] subroutine lorentz_boost :
    !---#[ function epsi0 :
-   pure function epsi0(k, q, s) result(eps)
+   function epsi0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1180,16 +1163,16 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf * Spab3(q,k) / Spaa(q,k)
+         eps = sqrthalf / Spaa(q,k) * Spab3(q,k)
       case(-1)
-         eps = sqrthalf * Spab3(k,q) / Spbb(k,q)
+         eps = sqrthalf / Spbb(k,q) * Spab3(k,q)
       case default
          eps(:) = (0.0_ki,0.0_ki)
       end select
    end  function epsi0
    !---#] function epsi0 :
    !---#[ function epso0 :
-   pure function epso0(k, q, s) result(eps)
+   function epso0(k, q, s) result(eps)
       implicit none
 
       real(ki), dimension(0:3), intent(in) :: k, q
@@ -1200,7 +1183,7 @@ contains
    end  function epso0
    !---#] function epso0 :
    !---#[ function epsim :
-   pure function epsim(k, q, m, s) result(eps)
+   function epsim(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s
@@ -1213,9 +1196,9 @@ contains
 
       select case(s)
       case(1)
-         eps = sqrthalf * Spab3(q,l) / Spaa(q,l)
+         eps = sqrthalf / Spaa(q,l) * Spab3(q,l)
       case(-1)
-         eps = sqrthalf * Spab3(l,q) / Spbb(l,q)
+         eps = sqrthalf / Spbb(l,q) * Spab3(l,q)
       case(0)
          eps = (l+l-k)/m
       case default
@@ -1224,7 +1207,7 @@ contains
    end  function epsim
    !---#] function epsim :
    !---#[ function epsom :
-   pure function epsom(k, q, m, s) result(eps)
+   function epsom(k, q, m, s) result(eps)
       implicit none
       real(ki), dimension(0:3), intent(in) :: k, q
       integer, intent(in) :: s

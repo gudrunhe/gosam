@@ -140,6 +140,11 @@ def translate(tokens,inconfig):
                         tlist = translate(bracklist,config)
                         args = glue(tlist).split(',')
                         itoken = itoken +1
+                        if token == "SUBSCRIPT":
+                                if any(args[0].startswith(s) for s in ["spa", "spb"]):
+                                        args[0] += "%get"
+                                elif args[0].startswith("spv") and args[0][4] != 'e' and args[0][6] != 'e':
+                                        args[0] += "%geti"
                         newitem = replace(token,args,lambdafunc)
                         newlist.append(newitem[0])
                         itoken = itoken + 2
@@ -151,8 +156,12 @@ def translate(tokens,inconfig):
                 elif token in list(symbols.keys()):
                         if token == '^':
                                 if tokens[itoken+1] == '-':
-                                        newtoken = symbols[token] + '(-%s)' % tokens[itoken +2]
-                                        itoken=itoken +3
+                                        if tokens[itoken + 2] == '1':
+                                                newtoken = '1.0_ki/' + newlist.pop()
+                                                itoken += 3
+                                        else:
+                                                newtoken = symbols[token] + '(-%s)' % tokens[itoken + 2]
+                                                itoken = itoken + 3
                                 else:
                                         newtoken = symbols[token] + '%s' % tokens[itoken +1]
                                         itoken=itoken +2

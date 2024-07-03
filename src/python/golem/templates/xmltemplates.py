@@ -368,7 +368,7 @@ class _TemplateState:
             required = "all"
             rlen = 1
          else:
-            raise TemlateXMLException(
+            raise TemplateXMLError(
                "Attribute 'required' is mandantory if more than one " +
                "extension is listed in 'if-extension'.")
 
@@ -441,13 +441,13 @@ class _TemplateState:
             required = "all"
             rlen = 1
          else:
-            raise TemlateXMLException(
+            raise TemplateXMLError(
                "Attribute 'required' is mandantory if more than one " +
-               "extension is listed in 'if-extension'.")
+               "extension is listed in 'if-internal'.")
 
          if l != rlen:
             raise TemplateXMLError(
-                  "Unknown attributes encountered near 'if-extension'")
+                  "Unknown attributes encountered near 'if-internal'")
 
          if required == "all":
             for i in tmpinternals:
@@ -455,7 +455,7 @@ class _TemplateState:
                   return False
             return True
          elif required == "some":
-            for ex in extensions:
+            for i in tmpinternals:
                if i in internals and str(self._getproperty(i)).lower() == 'true':
                   return True
             return False
@@ -537,7 +537,7 @@ class _TemplateState:
    def start_foreach(self, attrs):
       if "iterator" in attrs:
          if "list" in attrs:
-            raise TemplateXMLException(
+            raise TemplateXMLError(
                "<foreach> cannot have both atributes, 'iterator' and 'list'")
 
          itername = attrs["iterator"]
@@ -574,7 +574,7 @@ class _TemplateState:
                "Unknown iterator at <foreach iterator=%r>" % itername)
       elif "list" in attrs:
          if "iterator" in attrs:
-            raise TemplateXMLException(
+            raise TemplateXMLError(
                "<foreach> cannot have both attributes, 'iterator' and 'list'")
 
          lst = attrs["list"].split(",")
@@ -589,7 +589,7 @@ class _TemplateState:
 
          self.shuffle_push(values)
       else:
-         raise TemplateXMLException(
+         raise TemplateXMLError(
             "<foreach> must have one of the attributes 'iterator' or 'list'")
 
    def end_foreach(self):

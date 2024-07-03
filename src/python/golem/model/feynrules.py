@@ -8,6 +8,7 @@ import os
 import os.path
 import sys
 import copy
+import re
 import golem.model.expressions as ex
 
 from golem.util.tools import error, warning, message, debug, \
@@ -107,16 +108,76 @@ class Model:
 		self.floatsd = {}
 		self.floatsc = []
 
+		try:
+			self.all_CTparameters = mod.all_CTparameters
+		except AttributeError:
+			pass
+
+		try:
+			self.all_CTvertices = mod.all_CTvertices
+		except AttributeError:
+			pass
+
+		self.useCT = False
 		# the following code block splits all_couplings into
 		# two separate lists of CT and non-CT couplings
+		# also fills self.ctfunctions used write_python_file
 		if hasattr(mod,"CT_vertices"):
+			self.useCT = True
 			self.all_CTcouplings = []
+			self.ctfunctions = {}
+			self.cttypes = {}
 			for a in dir(mod.CT_vertices.C):
 				b = getattr(mod.CT_vertices.C,a)
 				if type(b).__name__ == "Coupling":
 					self.all_CTcouplings.append(b)
 					if b in self.all_couplings:
 						self.all_couplings.remove(b)
+		# construct the CT dictionary representing the Laurent expansion
+			for c in self.all_CTcouplings:
+				name = self.prefix + c.name.replace("_", "")
+				self.ctfunctions[(name+'const')] = {}
+				self.ctfunctions[(name+'log')] = {}
+				self.cttypes[(name+'const')] = "C"
+				self.cttypes[(name+'log')] = "C"
+				if isinstance(c.value,dict):
+					# the value of the coupling is a dictionary representing the Laurent expansion
+					# => split const from log terms, if present
+					for ctpart in ['const','log']:
+						for ctpole in list(c.value.keys()):
+							if isinstance(c.value[ctpole],dict):
+								ctcoeff = c.value[ctpole][ctpart]
+							else:
+								if ctpart == 'const':
+									ctcoeff = c.value[ctpole]
+								else:
+									ctcoeff = '0'
+							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
+				elif isinstance(c.value,str):
+					# the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
+					CTparams = [ctp for ctp in self.all_CTparameters if ctp.name in re.split('\(|\)|\+|\*|-|/', c.value)]
+					CTpoles = set()
+
+					for ctparam in CTparams:
+						CTpoles = CTpoles.union(set(ctparam.value.keys()))
+
+					for ctpart in ['const','log']:
+						for ctpole in CTpoles:
+							ctcoeff = c.value
+							for ctparam in CTparams:
+								if ctpole in ctparam.value:
+									if isinstance(ctparam.value[ctpole],dict):
+										ctcoeff = ctcoeff.replace(ctparam.name,ctparam.value[ctpole][ctpart])
+									else:
+										if ctpart == 'const':
+											ctcoeff = ctcoeff.replace(ctparam.name,ctparam.value[ctpole])
+										else:
+											ctcoeff = ctcoeff.replace(ctparam.name,'0')
+								else:
+									ctcoeff = ctcoeff.replace(ctparam.name,'0')
+							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
+				else:
+					error("CT coupling %s is neither a dict nor str!" % c)
 
 		parser = ex.ExpressionParser()
 		ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
@@ -143,7 +204,7 @@ class Model:
 		mnemonics = {}
 		latex_names = {}
 		line_types = {}
-		particlect = {}	
+		particlect = {}
 
 		for p in self.all_particles:
 			if is_first:
@@ -321,48 +382,41 @@ class Model:
 			f.write("'")
 		f.write("\n}\n\n")
 
-#		for c in self.all_ctcouplings:
-#			# generally it is a laurent series in eps
-#			# we have a 'value' and some coefficients
-#			# need to think about the 'order'
-#			print c
-#			name = self.prefix + c.name.replace("_", "")
-#			ctfunctions[name] = c.value
-#			types[name] = "C"
-#			# now loop over the coefficients in the Laurent series
-#			ct = c.counterterm[(1,0)]
-#			l = len(ct)
-#		for k,v in ct.items():
-#					name = self.prefix + c.name.replace("_","") + 'c%s' % l
-#				l = l - 1
-#				ctfunctions[name] = v
-#				types[name] = "C"
-#		message("      Generating counter term function list ...")
-#		f.write("ctfunctions = {")
-#		fcounter = [0]
-#		fsubs = {}
-#		is_first = True
-#		for name, value in ctfunctions.items():
-#
-#			expr = parser.compile(value)
-#			for fn in cmath_functions:
-#				expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
-#						ex.SpecialExpression(str(fn)))
-#			expr = expr.prefixSymbolsWith(self.prefix)
-#			expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-#			expr = expr.algsubs(sym_cmplx(
-#				ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
-#
-#			if is_first:
-#				is_first = False
-#				f.write("\n")
-#			else:
-#				f.write(",\n")
-#			f.write("\t%r: " % name)
-#			f.write("'")
-#			expr.write(f)
-#			f.write("'")
-#		f.write("\n}\n\n")
+		if self.useCT:
+			types.update(self.cttypes)
+
+			message("      Generating counter term function list ...")
+			f.write("ctfunctions = {")
+			is_first = True
+			for name, value in self.ctfunctions.items():
+				if is_first:
+					is_first = False
+					f.write("\n")
+				else:
+					f.write(",\n")
+				f.write("\t%r: " % name)
+				is_firstcf = True
+				for pl, cf in value.items():
+					expr = parser.compile(cf)
+					for fn in cmath_functions:
+						expr = expr.algsubs(ex.DotExpression(sym_cmath, fn),
+								ex.SpecialExpression(str(fn)))
+					expr = expr.prefixSymbolsWith(self.prefix)
+					expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+					expr = expr.algsubs(sym_cmplx(
+						ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+
+					if is_firstcf:
+						is_firstcf = False
+						f.write("{\n")
+					else:
+						f.write(",\n")
+					f.write("\t\t%r: " % pl)
+					f.write("'")
+					expr.write(f)
+					f.write("'")
+				f.write("\n\t}")
+			f.write("\n}\n\n")
 
 		# search for additional floats appearing in lorentz structures
 		for l in self.all_lorentz:
@@ -544,7 +598,7 @@ class Model:
 		
 		for el in order_names:
 			if not(el in orders):
-				warning(("Specified order name %s is not present in UFO model and, hence, has no effect." %  (el)))
+				error("WARNING: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(el))
 		orders.update(order_names)
 
 		for v in self.all_vertices:
@@ -562,9 +616,9 @@ class Model:
 
 			deg = len(fields)
 			if deg >= 7:
-			   warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
-			   continue
-			   assert False
+				warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+				continue
+				assert False
 
 			flip = spins[0] == 1 and spins[2] == 1
 
@@ -607,6 +661,9 @@ class Model:
 						lwf.write(",")
 					lwf.write(field)
 				lwf.write(";")
+				lwf.write("isCT='0',")
+				flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+				lwf.write("isNP='%s'," % str(flagNP))
 				is_first = True
 				for name, power in list(vertorders[ivo].items()):
 					if is_first:
@@ -619,6 +676,95 @@ class Model:
 				lwf.nl()
 
 		f.write("%---#] Vertices:\n\n")
+		if self.useCT:
+			f.write("%---#[ CTVertices:\n")
+
+			lwf = LimitedWidthOutputStream(f, 70)
+
+			for c in self.all_CTcouplings:
+				keys = [key for key in list(c.order.keys()) if key[0:1].isdigit()]
+				for k in keys:
+					c.order["O%s" % k] = c.order[k]
+					del c.order[k]
+			orders = set()
+			for c in self.all_CTcouplings:
+				orders.update(list(c.order.keys()))
+
+			for v in self.all_CTvertices:
+				particles = v.particles
+				names = []
+				fields = []
+				afields = []
+				spins = []
+				for p in particles:
+					names.append(p.name)
+					cn = canonical_field_names(p)
+					fields.append(cn[0])
+					afields.append(cn[1])
+					spins.append(p.spin - 1)
+
+				deg = len(fields)
+				if deg >= 7:
+					warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+					continue
+					assert False
+
+				flip = spins[0] == 1 and spins[2] == 1
+
+				vfunctions = {}
+				vertorders = []
+				for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
+					for name in orders:
+						if name in coupling.order:
+							vfunctions[name] = coupling.order[name]
+						else:
+							vfunctions[name] = 0
+
+					ic, il, ip = coord
+					vfunctions["RK"] = v.lorentz[il].rank
+
+					if not vfunctions in vertorders:
+						if len(vertorders) > 0:
+							warning(("CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
+										% (v.name, vertorders, vfunctions))
+											+ "I will split it up.")
+						vfcp = copy.deepcopy(vfunctions)
+						vertorders.append(vfcp)
+
+
+				for ivo in range(len(vertorders)):
+					f.write("%% %s: %s CTVertex" % ( v.name+"_"+str(ivo), " -- ".join(names)))
+					lwf.nl()
+					lwf.write("[")
+					is_first = True
+
+					xfields = afields[:]
+					if flip:
+						xfields[0] = afields[1]
+						xfields[1] = afields[0]
+
+					for field in xfields:
+						if is_first:
+							is_first = False
+						else:
+							lwf.write(",")
+						lwf.write(field)
+					lwf.write(";")
+					lwf.write("isCT='1',")
+					flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+					lwf.write("isNP='%s'," % str(flagNP))
+					is_first = True
+					for name, power in list(vertorders[ivo].items()):
+						if is_first:
+							is_first = False
+						else:
+							lwf.write(",")
+						lwf.write("%s='%-d'" % (name, power))
+					lwf.write(",VL='%s'" % (v.name+"_"+str(ivo)))
+					lwf.write("]")
+					lwf.nl()
+
+			f.write("%---#] CTVertices:\n\n")
 
 	def write_form_file(self, f, order_names):
 		parser = ex.ExpressionParser()
@@ -646,9 +792,11 @@ class Model:
 
 		f.write("*---#[ Symbol Definitions:\n")
 		f.write("*---#[ Coupling Orders:\n")
-		f.write("AutoDeclare Symbols RK,")
+		f.write("AutoDeclare Symbols RK")
 		for el in order_names:
-			f.write("%s," % el)
+			f.write(",%s" % el)
+		f.write(",isCT")
+		f.write(",isNP")
 		f.write(";\n")
 		f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
 		f.write("\n")
@@ -702,6 +850,22 @@ class Model:
 
 		f.write("\n")
 
+		if self.useCT:
+			ctparams = [self.prefix + c.name.replace("_", "") for c in self.all_CTcouplings]
+			if len(ctparams) > 0:
+				if len(ctparams) == 1:
+					f.write("Symbol %s;" % ctparams[0] + "eftctcpl")
+				else:
+					f.write("Symbols")
+					lwf.nl()
+					lwf.write(ctparams[0] + "eftctcpl")
+					for ctp in ctparams[1:]:
+						lwf.write(",")
+						lwf.write(ctp + "eftctcpl")
+					lwf.write(";")
+
+			f.write("\n")
+
 		if len(self.floats) == 1:
 			f.write("Symbol %s;\n" % self.floats[0])
 		elif len(self.floats) > 1:
@@ -730,8 +894,6 @@ class Model:
 		f.write("#Procedure ReplaceVertices\n")
 
 		orders = set()
-		# for c in self.all_couplings:
-		# 	orders.update(list(c.order.keys()))
 		orders.update(list(order_names))
 
 		for v in self.all_vertices:
@@ -783,7 +945,8 @@ class Model:
 
 				fold_name = "(%s) %s Vertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
 				f.write("*---#[ %s:\n" % fold_name)
-				f.write("Identify Once vertex(iv?, RK%d" % vertorders[ivo]["RK"])
+				flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+				f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
 				for el in order_names:
 					f.write(", %s%d"
 						% (el,vertorders[ivo][el]))
@@ -874,8 +1037,154 @@ class Model:
 				if len(dummies) > 0:
 					f.write("Sum %s;\n" % ", ".join(dummies))
 				f.write("*---#] %s:\n" % fold_name)
+
+		if self.useCT:
+
+			for v in self.all_CTvertices:
+				particles = v.particles
+				names = []
+				fields = []
+				afields = []
+				spins = []
+				for p in particles:
+					names.append(p.name)
+					cn = canonical_field_names(p)
+					fields.append(cn[0])
+					afields.append(cn[1])
+					spins.append(p.spin - 1)
+
+				vorders = {}
+				vertorders = []
+				cplnames = []
+				for coord, coupling in list(v.couplings.items()):
+					for name in orders:
+						if name in coupling.order:
+							vorders[name] = coupling.order[name]
+						else:
+							vorders[name] = 0
+
+					ic, il, ip = coord
+					vorders["RK"] = v.lorentz[il].rank
+
+					if vorders in vertorders:
+						cplnames[vertorders.index(vorders)].append(coupling.name)
+					else:
+						if len(vertorders) > 0:
+							warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+										% (v.name, vertorders, vorders))
+											+ "I will split it up.")
+						vocp = copy.deepcopy(vorders)
+						vertorders.append(vocp)
+						cplnames.append([coupling.name])
+
+				for ivo in range(len(vertorders)):
+
+					flip = spins[0] == 1 and spins[2] == 1
+					deg = len(particles)
+
+					xidx = list(range(deg))
+					if flip:
+						xidx[0] = 1
+						xidx[1] = 0
+
+					fold_name = "(%s) %s CTVertex" % ( v.name+"_"+str(ivo), " -- ".join(names))
+					f.write("*---#[ %s:\n" % fold_name)
+					flagNP = 0 if 'NP' not in vertorders[ivo] else (1 if vertorders[ivo]['NP']!=0 else 0)
+					f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
+					for el in order_names:
+						f.write(", %s%d"
+							% (el,vertorders[ivo][el]))
+					colors = []
+					for i in xidx:
+						p = particles[i]
+						field = afields[i]
+						anti = fields[i]
+						color = abs(p.color)
+						spin = abs(p.spin) - 1
+						if field.startswith("anti") and not p.pdg_code in [24,-24]:
+							spin = - spin
+							color = - color
+						colors.append(color)
+
+						f.write(",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+								% (field, i+1, spin, i+1, i+1, abs(spin), color, i+1,
+									abs(color)))
+					f.write(") =")
+
+					if 'NP' in vertorders[ivo].keys():
+						if 'QL' in vertorders[ivo].keys():
+							f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vertorders[ivo]['NP'],vertorders[ivo]['QL']))
+						else:
+							f.write("\n  Lambdam2^%d * (" % (vertorders[ivo]['NP']))
+					elif 'QL' in vertorders[ivo].keys():
+						f.write("\n  Loopfac^%d * (" % (vertorders[ivo]['QL']))
+
+
+					dummies = []
+
+					brack_flag = False
+					for i, s in enumerate(spins):
+						if s == 3 or s == 4:
+							brack_flag = True
+							idx = "idx%dL%d" % (i+1, s)
+							idxa = "idx%dL%da" % (i+1, s)
+							idxb = "idx%dL%db" % (i+1, s)
+							f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+							dummies.append(idxa)
+							dummies.append(idxb)
+
+					if brack_flag:
+						f.write(" (")
+
+
+					for coord, coupling in sorted(list(v.couplings.items()),key=lambda x: x[0]):
+						if not coupling.name in cplnames[ivo]:
+							continue
+						ic, il, ip = coord
+						lorentz = lorex[v.lorentz[il].name]
+						scolor = v.color[ic]
+						f.write("\n   + %s"
+								% (self.prefix + coupling.name.replace("_", "") + "eftctcpl"))
+						if scolor != "1":
+							color = parser.compile(scolor)
+							color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+							color = color.replaceNegativeIndices(0, "MDLIndex%d",
+									dummy_found)
+							color = transform_color(color, colors, xidx)
+							if lorentz == ex.IntegerExpression(1):
+								expr = color
+							else:
+								expr = color * lorentz
+						else:
+							expr = lorentz
+						if not expr == ex.IntegerExpression(1):
+							f.write(" * (")
+							lwf.nl()
+							expr.write(lwf)
+							f.write("\n   )")
+
+						for ind in list(lsubs.values()):
+							s = str(ind)
+							if expr.dependsOn(s):
+								if s not in dummies:
+									dummies.append(s)
+
+					if brack_flag:
+						f.write(")")
+					if 'NP' in vertorders[ivo].keys() or 'QL' in vertorders[ivo].keys():
+						f.write("\n)")
+					f.write(";\n")
+
+					for idx in list(dummy_found.values()):
+						dummies.append(str(idx))
+
+					if len(dummies) > 0:
+						f.write("Sum %s;\n" % ", ".join(dummies))
+					f.write("*---#] %s:\n" % fold_name)
+
 		f.write("#EndProcedure\n")
 		f.write("*---#] Procedure ReplaceVertices :\n")
+
 		f.write("*---#[ Dummy Indices:\n")
 		for ind in list(lsubs.values()):
 			f.write("Index %s;\n" % ind)
@@ -922,7 +1231,7 @@ class Model:
 		f.write("*---#[ Parameters:\n")
 
 		params = []
-		for c in self.all_ctcouplings:
+		for c in self.all_CTcouplings:
 			params.append(self.prefix + c.name.replace("_", ""))
 
 		if len(params) > 0:
@@ -956,7 +1265,7 @@ class Model:
 		f.write("*---#[ Procedure ReplaceCT :\n")
 		f.write("#Procedure ReplaceCT\n")
 
-		for v in self.all_ctvertices:
+		for v in self.all_CTvertices:
 			particles = v.particles
 			names = []
 			fields = []
@@ -1015,10 +1324,9 @@ class Model:
 		with open(os.path.join(path, "%s.hh" % local_name), 'w') as f:
 			self.write_form_file(f, order_names)
 
-#		message("  Writing Form CT file ...")
-#		with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
-#			self.write_formct_file(f)
-
+		#message("  Writing Form CT file ...")
+		#with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
+			#self.write_formct_file(f)
 
 def canonical_field_names(p):
 	pdg_code = p.pdg_code

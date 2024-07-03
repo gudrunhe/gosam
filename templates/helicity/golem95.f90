@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module     [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %]
+ %]module     [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    implicit none
    private[%
 
@@ -22,16 +22,16 @@ contains[%
 !---#[ subroutine reconstruct_group[% grp %]:
 subroutine     reconstruct_group[% grp %](coeffs)
    use tens_rec
-   use [% process_name asprefix=\_ %]config
+   use config
    use [% process_name asprefix=\_
        %]groups, only:[%
          @if use_flags_1 %] evaluate_virt_diagram,[%
          @end @if %] tensrec_info_group[% grp %][%
          @for diagrams group=grp var=DIAG idxshift=1 %]
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l1, only: numerator_d[% DIAG %] => numerator_golem95[%
             @if internal GENERATE_DERIVATIVES %]
-   use [% process_name asprefix=\_ %]d[% DIAG %][% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l1d, only: reconstruct_d[% DIAG %][%
             @end @if %][%
          @end @for %]
@@ -82,4 +82,4 @@ subroutine     reconstruct_group[% grp %](coeffs)
 end subroutine reconstruct_group[% grp %]
 !---#] subroutine reconstruct_group[% grp %]:[%
 @end @for groups %]
-end module [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %]
+end module [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]

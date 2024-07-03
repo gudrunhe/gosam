@@ -10,9 +10,9 @@ import golem.util.tools
 class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map, treecache):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map, treecache, ctcache, ct_signs, ct_flags):
 		self.init_kinematics(conf, in_particles, out_particles,
-				tree_signs, heavy_quarks, helicity_map)
+				tree_signs, heavy_quarks, helicity_map, ct_signs)
 		self._loopcache = loopcache
 		self._partitions = loopcache.partition()
 		self._treecache = treecache
@@ -21,6 +21,8 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 		self._diagram_flags_0 = lo_flags
 		self._diagram_flags_1 = nlo_flags
 		self._massive_bubbles = massive_bubbles
+		self._ctcache = ctcache
+		self._diagram_flags_ct = ct_flags
 
 	def getVertexInfo(self, *args, **opts):
 		level = self._eval_string(args[0])
@@ -29,6 +31,8 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 			VI = self._treecache.diagrams[idx].VertexInfo()
 		elif level == "loop":
 			VI = self._loopcache.diagrams[idx].VertexInfo()
+		elif level == "ct":
+			VI = self._ctcache.diagrams[idx].VertexInfo()
 		else:
 			raise TemplateError("Unknown level in [% getVertexInfo %]")
 		VIstr = ""
@@ -458,6 +462,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 	def use_flags_1(self, *args, **opts):
 		return len(list(self._diagram_flags_1.keys())) > 1
 
+	def use_flags_ct(self, *args, **opts):
+		return len(list(self._diagram_flags_ct.keys())) > 1
+
 	def min_diagram_1(self, *args, **opts):
 		return str(min(self._loopcache.diagrams.keys()))
 
@@ -469,6 +476,12 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 	def max_diagram_0(self, *args, **opts):
 		return str(max(self._tree_signs.keys()))
+
+	def min_diagram_ct(self, *args, **opts):
+		return str(min(self._ct_signs.keys()))
+
+	def max_diagram_ct(self, *args, **opts):
+		return str(max(self._ct_signs.keys()))
 
 	def diagrams(self, *args, **opts):
 		nopts = opts.copy()

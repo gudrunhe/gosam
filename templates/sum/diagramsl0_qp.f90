@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]diagramsl0_qp
    use [% process_name asprefix=\_ %]color_qp, only: numcs
-   use [% process_name asprefix=\_ %]config, only: ki => ki_qp
+   use config, only: ki => ki_qp
    implicit none
    private
    complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
@@ -12,12 +12,14 @@ contains
 
 !---#[ function amplitude:
    function amplitude()
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       use [% process_name asprefix=\_ %]kinematics_qp
+      use SpinorBrackets
+      end function amplitude
       use [% process_name asprefix=\_ %]color_qp
-      use [% process_name asprefix=\_ %]config, only: debug_lo_diagrams, &
+      use config, only: debug_lo_diagrams, &
         & use_sorted_sum
-      use [% process_name asprefix=\_ %]accu_qp, only: sorted_sum
+      use accu_qp, only: sorted_sum
       use [% process_name asprefix=\_ %]util_qp, only: inspect_lo_diagram
 
 [%

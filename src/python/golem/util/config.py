@@ -437,6 +437,8 @@ class Properties:
          if key.startswith("$"):
             dollar_variables.append( (key[1:], value) )
          else:
+            if "contrib_fc" in key:
+               continue
             self.setProperty(unescape(key), unescape(value))
          buf = ""
 
@@ -718,7 +720,7 @@ class Program(Component):
             for dir in dirs:
                fname = os.path.join(dir, progname + ext)
                if os.path.exists(fname):
-                  if dir not in self.locations:
+                  if fname not in self.locations:
                      self.locations.append(fname)
 
    def getInstance(self,conf=None):
@@ -940,12 +942,11 @@ class Form(Program):
 
 class Fortran(Program):
    def __init__(self):
-      Program.__init__(self, "Fortran",
+      Program.__init__(self, "Fortran", "gfortran",
             "ifort", "f95i",
             "f95", "f95n",
             "lfc", "lf95", "f95f",
-            "xlf95", "xlf90", "xlf",
-            "gfortran", "g95",
+            "xlf95", "xlf90", "xlf", "g95",
             "f95", "f90", "frt", "pgf", "pgf90", "pghpf",
             "fort90", "fl64", "fl32",
             "pgf77", "g77", "fort77", "f77", "af77", "f2c")
@@ -953,7 +954,7 @@ class Fortran(Program):
    def examine(self, hints):
       fc = os.getenv("FC")
       files=["gosam.conf"]
-      directories = [gpath.golem_path(), gpath.gosam_contrib_path()]
+      directories = [gpath.golem_path()]
       for dir in directories:
          for file in files:
             full_name = os.path.join(dir, file)
@@ -1027,6 +1028,69 @@ class Java(Program):
       java = self.undohome(self.getInstance())
       conf["haggies.bin"] = "%s -jar %s" % \
             (java, haggies_jar)
+
+class Meson(Program):
+   def __init__(self):
+      Program.__init__(self, "Meson", "meson")
+   
+   def store(self, conf):
+      conf["meson.bin"] = self.undohome(self.getInstance())
+      if "+installed.extensions" in conf:
+         conf["+installed.extensions"] += ", meson"
+      else:
+         conf["+installed.extensions"] = "meson"
+      if "+build.extensions" in conf:
+         conf["+build.extensions"] += ", meson"
+      else:
+         conf["+build.extensions"] = "meson"
+
+class Linker(Program):
+   def __init__(self):
+      Program.__init__(self, "mold", "ld.mold", "lld", "ld.lld", "gold", "ld.gold")
+
+   def store(self, conf):
+      fc = conf["fc.bin"]
+      try:
+         if "GNU" in subprocess.run([fc, "--version"], capture_output=True, text=True).stdout:
+            gfortran_version = int(subprocess.run([fc, "-dumpversion"],
+                                                  capture_output=True, text=True).stdout.split(".")[0])
+      except:
+         gfortran_version = None
+      if gfortran_version:
+         for loc in self.locations:
+            exe = loc.split("/")[-1]
+            if "mold" in exe:
+               if gfortran_version >= 12:
+                  conf["ld"] = "mold"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'mold', but the used version of gfortran is not compatible. Using default linker.")
+               break
+            elif "lld" in exe:
+               if gfortran_version >= 9:
+                  conf["ld"] = "lld"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'lld', but the used version of gfortran is not compatible. Using default linker.")
+               break
+            elif "gold" in exe:
+               if gfortran_version >= 5:
+                  conf["ld"] = "gold"
+                  if "+build.extensions" in conf:
+                     conf["+build.extensions"] += ", linker"
+                  else:
+                     conf["+build.extensions"] = "linker"
+               else:
+                  print("# ~~~ Found linker 'gold', but the used version of gfortran is not compatible. Using default linker.")
+               break
+
+
 
 class Configurator:
    def __init__(self, hints, **components):

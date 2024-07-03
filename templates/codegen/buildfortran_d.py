@@ -110,7 +110,7 @@ for irank in range(0,rank+1):
 f90file.write('module     [% process_name asprefix=\_%]'+diag_name+'\n')
 f90file.write('   ! file: '+str(os.getcwd())+diag_name+'.f90 \n')
 f90file.write('   ! generator: buildfortran_d.py \n')
-f90file.write('   use [% process_name asprefix=\_ %]config, only: ki \n')
+f90file.write('   use config, only: ki \n')
 f90file.write('   use [% process_name asprefix=\_ %]util, only: cond, d => metric_tensor \n')
 f90file.write('\n')
 f90file.write('   implicit none\n')
@@ -130,14 +130,15 @@ f90file.write(' \n')
 f90file.write('contains \n')
 for irank in range(1,rank+2):
 	f90file.write('!---#[ function brack_%s: \n' % irank)
-	f90file.write('   pure function brack_%s(Q' % irank[%
+	f90file.write('   function brack_%s(Q' % irank[%
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')
-	f90file.write('      use [% process_name asprefix=\_ %]model \n')
+	f90file.write('      use model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
+	f90file.write('      use SpinorBrackets \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
-	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 	f90file.write('      implicit none \n')
 	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -165,7 +166,8 @@ dstring=dstring.rstrip(',') + ')' + ' result(numerator)\n'
 f90file.write(dstring)
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+f90file.write('      use SpinorBrackets \n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]
@@ -525,7 +527,7 @@ f90file.close()
 f90file_qp.write('module     [% process_name asprefix=\_%]'+diag_name+'_qp\n')
 f90file_qp.write('   ! file: '+str(os.getcwd())+diag_name+'_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortran_d.py \n')
-f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp\n')
+f90file_qp.write('   use config, only: ki => ki_qp\n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]util_qp, only: cond, d => metric_tensor \n')
 f90file_qp.write('\n')
 f90file_qp.write('   implicit none\n')
@@ -545,14 +547,15 @@ f90file_qp.write(' \n')
 f90file_qp.write('contains \n')
 for irank in range(1,rank+2):
 	f90file_qp.write('!---#[ function brack_%s: \n' % irank)
-	f90file_qp.write('   pure function brack_%s(Q' % irank[%
+	f90file_qp.write('   function brack_%s(Q' % irank[%
       @select r2
       @case implicit explicit %]+ ', mu2'[%
       @end @select %]+') result(brack)\n')
-	f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp \n')
+	f90file_qp.write('      use model_qp \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
+	f90file_qp.write('      use SpinorBrackets \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
-	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 	f90file_qp.write('      implicit none \n')
 	f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
       @select r2
@@ -580,7 +583,8 @@ dstring=dstring.rstrip(',') + ')' + ' result(numerator)\n'
 f90file_qp.write(dstring)
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if use_order_names %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      use SpinorBrackets \n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 f90file_qp.write('      implicit none \n')[%
       @if internal DERIVATIVES_AT_ZERO %][%
       @else %]

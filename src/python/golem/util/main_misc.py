@@ -114,7 +114,7 @@ def generate_process_files(conf, from_scratch=False):
 
 	# Run the new analyzer:
 	message("Analyzing diagrams")
-	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache = \
+	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache, ctcache, ct_signs = \
 			run_analyzer(path, conf, in_particles, out_particles)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
 #			run_analyzer(path, conf, in_particles, out_particles)
@@ -130,11 +130,19 @@ def generate_process_files(conf, from_scratch=False):
 	props.setProperty("templates", templates)
 	props.setProperty("process_path", path)
 	props.setProperty("max_rank", conf["__max_rank__"])
+	props.setProperty("write_vanishing_amplitude", "false")
 
 	conf["__info.count.tree__"] = len(keep_tree)
 	conf["__info.count.virt__"] = len(keep_virt)
 	conf["__info.count.docu__"] = len(keep_vtot)
 	conf["__info.count.ct__"] = len(keep_ct)
+
+	if len(keep_tree) == 0:
+		if conf.getBooleanProperty("ignore_empty_subprocess"):
+			props.setProperty("write_vanishing_amplitude", "true")
+		else:
+			golem.util.tools.error("No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
+									.format(conf["process_name"]))
 
 	for key, value in list(golem.util.tools.derive_coupling_names(conf).items()):
 		props.setProperty("%s_COUPLING_NAME" % key, value)
@@ -156,7 +164,10 @@ def generate_process_files(conf, from_scratch=False):
 			nlo_flags = flags[1],
 			massive_bubbles = massive_bubbles,
 			diagram_sum = eprops,
-			helicity_map=helicity_map)
+			helicity_map=helicity_map,
+			ctcache=ctcache,
+			ct_signs=ct_signs,
+			ct_flags = flags[2])
 
 	if flag_create_ff_files:
 		create_ff_files(conf, in_particles, out_particles)
@@ -174,10 +185,10 @@ def cleanup(path):
 		for ext in ["", ".py", ".pyc", ".pyo"]:
 			cleanup_files.append("model" + ext)
 
-	for filename in cleanup_files:
-		full_name = os.path.join(path, filename)
-		if os.path.exists(full_name):
-			os.remove(full_name)
+	#for filename in cleanup_files:
+		#full_name = os.path.join(path, filename)
+		#if os.path.exists(full_name):
+			#os.remove(full_name)
 
 def find_config_files():
 	"""
@@ -446,7 +457,7 @@ def workflow(conf):
 
 	generate_nlo_virt
 	generate_lo_diagrams
-	generate_uv_counterterms
+	generate_eft_counterterms
 	"""
 	ini = conf.getProperty(golem.properties.qgraf_in)
 	fin = conf.getProperty(golem.properties.qgraf_out)
@@ -488,14 +499,45 @@ def workflow(conf):
 		if conf.getProperty(p):
 			conf.setProperty(str(p), conf.getProperty(p))
 
-	# When using the EFT feature 'order_names' also 'use_order_names' must be set:
-	if conf.getProperty("order_names") and not conf.getProperty("use_order_names"):
-		raise GolemConfigError("You specified 'order_names' but forgot to set\n " +
-			"the flag 'use_order_names'!")
-	if not conf.getProperty("order_names") and conf.getProperty("use_order_names"):
-		warning("You explicitly set the 'use_order_names' flag without actually ",
-		  "specifying any 'order_names'. This can produce a lot of unnecessary code ",
-		  "so you might want to remove it.")
+	# Check for incompatible configuration:
+	raise_err = False
+	err_str = ""
+	if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+		# model is not a UFO
+		if conf.getProperty("order_names"):
+			raise_err = True
+			err_str = err_str+", order_names" if err_str else "order_names"
+		if conf.getBooleanProperty("enable_truncation_orders"):
+			raise_err = True
+			err_str = err_str+", enable_truncation_orders" if err_str else "enable_truncation_orders"
+		if conf.getBooleanProperty("renorm_eftwilson"):
+			raise_err = True
+			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
+		if conf.getBooleanProperty("use_vertex_labels"):
+			raise_err = True
+			err_str = err_str+", use_vertex_labels" if err_str else "use_vertex_labels"
+		if raise_err:
+			print(err_str);
+			raise GolemConfigError("The properties '{0}'".format(err_str) +
+			  " which you set in your configuration are only compatible" +
+			  " with a UFO model, but you did not use one.")
+	elif (True if not conf.getProperty("order_names") else ('NP' not in conf.getProperty("order_names"))):
+		# model is a UFO, but no order_names specified or 'NP' not present in 'order_names'
+		# Note: whether or not 'NP' is present in UFO is checked in feynrules.py, can't be done here
+		if conf.getBooleanProperty("enable_truncation_orders"):
+			raise_err = True
+			err_str = err_str+", enable_truncation_orders" if err_str else "enable_truncation_orders"
+		if conf.getBooleanProperty("renorm_eftwilson"):
+			raise_err = True
+			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
+		if raise_err:
+			print(err_str);
+			raise GolemConfigError("The properties '{0}'".format(err_str) +
+			  " which you set in your configuration can only be used when" +
+			  " 'order_names' are specified and contain the parameter 'NP'.")
+	else:
+		# model is a UFO and 'order_names' contain 'NP': Can use full EFT functionality
+		pass
 
 	if not conf["extensions"] and props["extensions"]:
 		conf["extensions"]=props["extensions"]
@@ -538,9 +580,8 @@ def workflow(conf):
 
 	conf["generate_lo_diagrams"] = generate_lo_diagrams
 	conf["generate_nlo_virt"] = generate_nlo_virt
-	conf["generate_uv_counterterms"] = conf.getProperty('genUV')
-	#generate_uv_counterterms
-	#False
+	conf["generate_eft_counterterms"] = conf.getBooleanProperty('renorm_eftwilson') and generate_nlo_virt
+	conf["generate_yuk_counterterms"] = conf.getBooleanProperty('renorm_yukawa') and generate_nlo_virt
 
 	if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower()=="automatic":
 		conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
@@ -644,10 +685,10 @@ def workflow(conf):
 	conf["reduction_interoperation"]=conf["reduction_interoperation"].upper()
 	conf["reduction_interoperation_rescue"]=conf["reduction_interoperation_rescue"].upper()
 
-	if generate_nlo_virt and conf.getProperty("use_order_names"):
+	if generate_nlo_virt and conf.getProperty("enable_truncation_orders"):
 		if ('pjfry' in ext) or ('samurai' in ext):
 			raise GolemConfigError(
-					"The 'use_order_names' feature can only be used with ninja or golem95.\n" +
+					"The 'enable_truncation_orders' feature can only be used with ninja or golem95.\n" +
 					"Please select one of those as your redution program by setting:\n"+
 					"'reduction_programs=ninja, golem95' in the input card.\n")
 
@@ -691,7 +732,7 @@ def workflow(conf):
 def run_analyzer(path, conf, in_particles, out_particles):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")
-	generate_ct = conf.getBooleanProperty("generate_uv_counterterms")
+	generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
 
 	model = golem.util.tools.getModel(conf)
 		
@@ -750,17 +791,16 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	if generate_ct:
 		modname = consts.PATTERN_TOPOLOPY_CT
 		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading counter term diagram file %r" % fname)
+		debug("Loading counterterm diagram file %r" % fname)
 		mod_diag_ct = golem.util.tools.load_source(modname, fname)
-		# keep_tree, tree_signs, tree_flows =
-		keep_ct, ct_signs = \
+		keep_ct, ct_signs, ctcache = \
 				golem.topolopy.functions.analyze_ct_diagrams(
-				mod_diag_ct.diagrams, model, conf, onshell, quark_masses,
-				filter_flags = virt_flags, massive_bubbles = massive_bubbles)
+					mod_diag_ct.diagrams, model, conf,
+					filter_flags = ct_flags)
 	else:
 		keep_ct = []
 		ct_signs = {}
-	# tree_flows = {}
+		ctcache = golem.topolopy.objects.CTCache()
 
 
 	conf["__heavy_quarks__"] = quark_masses
@@ -776,7 +816,6 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	flags = (lo_flags, virt_flags, ct_flags)
 
 	# return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
-	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache
-
+	return keep_tree, keep_virt, keep_vtot, eprops, keep_ct, loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache, ctcache, ct_signs
 
 

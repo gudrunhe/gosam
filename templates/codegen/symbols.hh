@@ -35,6 +35,9 @@ Symbols m, TR, NC, NA, eps(-2:2), sign1, ..., sign4;
 Symbol sqrt2, Sqrt2, sqrt3, Sqrt3, scale2;
 Symbol deltaaxial, deltaOS, deltaHV;
 
+Symbol CYUKAWA, CYUKAWA2, RENLOG;
+AutoDeclare Symbol LOGYUK;
+
 Vector ZERO, vDUMMYA;
 
 #If `LOOPS' == 1
@@ -48,14 +51,6 @@ Vector ZERO, vDUMMYA;
 @if extension formopt %]
 CF dotproduct;
 [% @end @if %]
-[%
-@if genUV %]
-#If `LOOPS' == ct
-   Vector  p1;
-   CFunction deltaM, deltaZ;
-   Symbols epspole1, epsfin;
-#EndIf[%
-@end @if %]
 
 *---#[ Process dependent symbol definitions:
 #Define LEGS "[% num_legs %]"

@@ -7,7 +7,7 @@
 @if extension quadruple %]
    use [% process_name asprefix=\_ %]util_qp, only: square_qp => square[%
 @end @if extension quadruple %]
-   use [% process_name asprefix=\_ %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
+   use config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
@@ -22,9 +22,9 @@
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
-   use [% process_name asprefix=\_ %]model, only: Nf, NC, sqrt2, init_functions[%
+   use model, only: Nf, NC, sqrt2, init_functions[%
 @if extension quadruple %]
-   use [% process_name asprefix=\_ %]model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+   use model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
      & init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: TR, CA, CF, numcs, &
@@ -36,7 +36,7 @@
 @if helsum %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
    use [% process_name asprefix=\_
@@ -58,10 +58,62 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
             @end @if %][%
+      @end @if enable_truncation_orders %][%
+      @end @if generate_lo_diagrams %][%
+      @if generate_eft_counterterms %][% 
+      @if eval topolopy.count.ct .gt. 0 %][%
+      @if enable_truncation_orders %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_1, only: amplitude[%helicity%]ct_1 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_2, only: amplitude[%helicity%]ct_2 => amplitude[%
+            @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_0_qp, only: amplitude[%helicity%]ct_0_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_1_qp, only: amplitude[%helicity%]ct_1_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_2_qp, only: amplitude[%helicity%]ct_2_qp => amplitude[%
+            @end @if %][%
+      @else %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct, only: amplitude[%helicity%]ct => amplitude[%
+            @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
+            @end @if %][%
+      @end @if enable_truncation_orders %][% 
       @end @if %][%
-      @end @if %][%
+      @end @if generate_eft_counterterms %][%
+      @if generate_yuk_counterterms %][%
+      @if enable_truncation_orders %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1, only: amplitude[%helicity%]yukct_1 => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2, only: amplitude[%helicity%]yukct_2 => amplitude_yukren[%
+            @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]yukct_0_qp => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]yukct_1_qp => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]yukct_2_qp => amplitude_yukren[%
+            @end @if %][%
+      @else %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]yukct => amplitude_yukren[%
+            @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
+            @end @if %][%
+      @end @if enable_truncation_orders %][%
+      @end @if generate_yuk_counterterms %][%
    @end @for %][%
-   @if use_order_names %]
+   @if enable_truncation_orders %]
    use [% process_name asprefix=\_
       %]amplitude_0, only: samplitudel1_0summed => samplitude[%
         @if extension quadruple %]
@@ -91,7 +143,7 @@
 @else %][%
    @for helicities generated %][%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
    use [% process_name asprefix=\_
@@ -113,10 +165,62 @@
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
       @end @if extension quadruple %][%
+      @end @if enable_truncation_orders %][%
+      @end @if generate_lo_diagrams %][%
+      @if generate_eft_counterterms %][% 
+      @if eval topolopy.count.ct .gt. 0 %][%
+      @if enable_truncation_orders %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_0, only: amplitude[%helicity%]ct_0 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_1, only: amplitude[%helicity%]ct_1 => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_2, only: amplitude[%helicity%]ct_2 => amplitude[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_0_qp, only: amplitude[%helicity%]ct_0_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_1_qp, only: amplitude[%helicity%]ct_1_qp => amplitude
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_2_qp, only: amplitude[%helicity%]ct_2_qp => amplitude[%
+      @end @if extension quadruple %][%
+      @else %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct, only: amplitude[%helicity%]ct => amplitude[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]ct_qp, only: amplitude[%helicity%]ct_qp => amplitude[%
+      @end @if extension quadruple %][%
+      @end @if enable_truncation_orders %][% 
       @end @if %][%
-      @end @if %][%
+      @end @if generate_eft_counterterms %][%
+      @if generate_yuk_counterterms %][%
+      @if enable_truncation_orders %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]yukct_0 => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1, only: amplitude[%helicity%]yukct_1 => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2, only: amplitude[%helicity%]yukct_2 => amplitude_yukren[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]yukct_0_qp => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]yukct_1_qp => amplitude_yukren
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]yukct_2_qp => amplitude_yukren[%
+      @end @if extension quadruple %][%
+      @else %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0, only: amplitude[%helicity%]yukct => amplitude_yukren[%
+      @if extension quadruple %]
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]yukct_qp => amplitude_yukren[%
+      @end @if extension quadruple %][%
+      @end @if enable_truncation_orders %][%
+      @end @if generate_yuk_counterterms %][%
       @if generate_nlo_virt %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0, [% ' '
         %]only: samplitudeh[%helicity%]l1_0 => samplitude, &
@@ -178,7 +282,15 @@
    integer :: banner_ch = 6
 
    public :: initgolem, exitgolem, samplitude
-   public :: samplitudel0, samplitudel1
+   public :: samplitudel0, samplitudel0_h, samplitudel1, samplitudel1_h[%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+   public :: samplitudect, samplitudect_h[%
+@end @if %][% 
+@end @if %][%
+@if generate_yuk_counterterms %]
+   public :: samplitudeyukct, samplitudeyukct_h[%
+@end @if %]
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
    public :: spin_correlated_lo2_whizard
    public :: OLP_color_correlated, OLP_spin_correlated_lo2
@@ -328,7 +440,7 @@ contains
 @if extension quadruple %]
       ! use [% process_name asprefix=\_ %]kinematics, only: adjust_kinematics
       use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
-      use [% process_name asprefix=\_ %]model[%
+      use model[%
 @end @if extension quadruple %]
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs[%
@@ -618,18 +730,23 @@ contains
 
    !---#[ subroutine samplitudel01 :
    subroutine     samplitudel01(vecs, scale2, amp, rat2, ok, h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
+         & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
-      real(ki), dimension(4), intent(out) :: amp
+      real(ki), dimension(4), intent(out) :: amp[%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+      real(ki), dimension(2:4) :: ampct[% 
+@end @if %][%
+@end @if %]
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -669,13 +786,18 @@ contains
 
 [% @if generate_lo_diagrams %]
       if (present(h)) then
-         amp(1) = samplitudel0(vecs, h)
+         amp(1) = samplitudel0_h(vecs, h)
       else
          amp(1)   = samplitudel0(vecs)
       end if[%
       @else %]
       amp(1)   = 0.0_ki[%
-      @end @if%][%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+      ampct = 0.0_ki[%
+@end @if %][% 
+@end @if %][%
+@end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
       select case (renormalisation)
       case (0)
@@ -704,9 +826,9 @@ contains
          print *, 'with "helsum=1".'[%
          @else %][%
          @if generate_lo_diagrams %]
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         amp((/4,3,2/)) = samplitudel1_h(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
          @else %]
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
+         amp((/4,3,2/)) = samplitudel1_h(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
          @end @if %][%
          @end @if %]
       else[%
@@ -755,26 +877,30 @@ contains
                @if extension dred %]
                amp(2) = amp(2) + lo_qcd_couplings * CA / 6.0_ki * amp(1)[%
                @end @if %]
-            end if[%
-               @for yukawa %][%
-               @if is_yukawa %]
+            end if
+
+            [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
-            ! Renormalization of Yukawa coupling
-               if ([% $_ %] > 0.0_ki) then  [%
-                @for particles massive quarks anti-quarks %]
-                   amp(3) = amp(3) -1.5_ki * CF * amp(1)
-                   amp(2) = amp(2) -[%
-               @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki * CF * amp(1)
-                   if (renorm_logs) then
-                      amp(2) = amp(2) &
-                     &   - (1.5_ki*log(scale2/[%mass%]/[%mass%])) * CF * amp(1)
-                   end if[%
-               @end @for %]
+               if (present(h)) then
+                  amp(3) = amp(3) -1.5_ki * CF * samplitudeyukct_h(vecs, .false., scale2, h)
+                  amp(2) = amp(2) -[%
+                     @if extension dred %]2.5[% @else %]2.0[%
+                     @end @if %]_ki * CF * samplitudeyukct_h(vecs, .false., scale2, h)
+                  if (renorm_logs) then
+                     amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct_h(vecs, .true., scale2, h)
+                  end if
+               else
+                  amp(3) = amp(3) -1.5_ki * CF * samplitudeyukct(vecs, .false., scale2)
+                  amp(2) = amp(2) -[%
+                     @if extension dred %]2.5[% @else %]2.0[%
+                     @end @if %]_ki * CF * samplitudeyukct(vecs, .false., scale2)
+                  if (renorm_logs) then
+                     amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct(vecs, .true., scale2)
+                  end if
                end if
-            end if[%
-               @end @if %][%
-               @end @for %]
+            end if
+            [% @end @if generate_yuk_counterterms %]
+
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]
@@ -812,9 +938,23 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
+         @if generate_eft_counterterms %][% 
+         @if eval topolopy.count.ct .gt. 0 %]
+         if (renorm_eftwilson) then
+            if (present(h)) then
+               ampct((/4,3,2/)) = samplitudect_h(vecs, renorm_logs, scale2, h)
+            else
+               ampct((/4,3,2/)) = samplitudect(vecs, renorm_logs, scale2)
+            end if
+            ! account for nlo_prefactors in EFT counterterms
+            ampct = (8.0_ki*pi**2/nlo_coupling)*ampct
+            amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
+         end if[% 
+         @end @if %][%
+         @end @if generate_eft_counterterms %][%
             @else %]
          ! No tree level present[%
-            @end @if %]
+            @end @if generate_lo_diagrams %]
       case (2)
          ! massive quark counterterms only
       case default
@@ -829,7 +969,8 @@ contains
       @end @if%][%
 
       @select r2
-      @case implicit explicit off %]
+      @case implicit explicit off %][%
+		@if generate_nlo_virt %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -844,6 +985,7 @@ contains
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
          @end @if extension dred %]
       end if[%
+		@end @if %][%
       @end @select r2 %]
       if (present(ok)) ok = my_ok
 
@@ -888,32 +1030,19 @@ contains
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
    !---#[ function samplitudel0 :
-   function     samplitudel0(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]config, only: logfile
+   function     samplitudel0(vecs) result(amp)
+      use config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
-      integer, optional, intent(in) :: h
       real(ki) :: amp, heli_amp
-      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
-
-      if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
-      else
-         eval_heli(:) = .true.
-      end if
 
       amp = 0.0_ki[%
   @if generate_lo_diagrams %][%
-  @for helicities %]
-      if (eval_heli([%helicity%])) then
-         if (debug_lo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]' >"
-         end if
-         !---#[ reinitialize kinematics:[%
+  @for unique_helicity_mappings %]
+	    !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
            @select sign @case 1 %]
@@ -935,7 +1064,11 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @for current_helicities %]
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if[%
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -996,9 +1129,9 @@ contains
                 & "<result kind='lo' value='", heli_amp, "'/>"
             write(logfile,*) "</helicity>"
          end if
-         amp = amp + heli_amp
-      end if[%
-  @end @for helicities %]
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings%]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -1011,9 +1144,728 @@ contains
    @end @if generate_lo_diagrams %]
    end function samplitudel0
    !---#] function samplitudel0 :
+   !---#] function samplitudel0_h :
+   function     samplitudel0_h(vecs, h) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki) :: amp, heli_amp
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+
+      amp = 0.0_ki[%
+  @if generate_lo_diagrams %]
+	  select case(h) [%
+  @for helicities %]
+      case ([%helicity%])
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0) &
+            & + square(color_vector_0, color_vector_2 - color_vector_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0) &
+            & + square(color_vector_0, color_vector_2 - color_vector_0)
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_1) &
+            & + square(color_vector_1, color_vector_2 - color_vector_1)
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0, color_vector_2 - color_vector_0)
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_2 - color_vector_0)
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = square(color_vector_0, color_vector_2 - color_vector_0)
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            heli_amp = 0.5_ki * square(color_vector_1 - color_vector_0, &
+            &          2.0_ki*color_vector_2 - color_vector_1 - color_vector_0)
+         end select[%
+     @else %]
+         color_vector = amplitude[% map.index %]l0()
+         heli_amp = square(color_vector)[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudel0_h
+   !---#] function samplitudel0_h :
+[% @if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+   !---#[ function samplitudect :
+   function     samplitudect(vecs, logs, scale2) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension(-2:0) :: amp, heli_amp
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+      integer :: ieps
+      real(ki), intent(in) :: scale2
+      logical, intent(in) :: logs
+
+      amp = 0.0_ki[%
+  @if generate_lo_diagrams %][%
+  @for unique_helicity_mappings %]
+	    !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %]
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:))
+            end do
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_1 = amplitude[% map.index %]ct_1(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_0, ampct_0(ieps,:))
+            end do
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_0, ampct_0(ieps,:))
+            end do
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_1 = amplitude[% map.index %]ct_1(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0()
+         ampct = amplitude[% map.index %]ct(logs, scale2)
+         do ieps=-2,0
+            heli_amp(ieps) = square(amp0, ampct(ieps,:))
+         end do[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings%]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudect
+   !---#] function samplitudect :
+   !---#[ function samplitudect_h :
+   function     samplitudect_h(vecs, logs, scale2, h) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki), dimension(-2:0) :: amp, heli_amp
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+      integer :: ieps
+      real(ki), intent(in) :: scale2
+      logical, intent(in) :: logs
+
+      amp = 0.0_ki[%
+  @if generate_lo_diagrams %]
+	  select case(h) [%
+  @for helicities %]
+      case ([%helicity%])
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+          case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:))
+            end do
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_1 = amplitude[% map.index %]ct_1(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_0, ampct_0(ieps,:))
+            end do
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2, ampct_2(ieps,:)) &
+               & - square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_0, ampct_0(ieps,:))
+            end do
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]ct_0(logs, scale2)
+            ampct_1 = amplitude[% map.index %]ct_1(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0()
+         ampct = amplitude[% map.index %]ct(logs, scale2)
+         do ieps=-2,0
+            heli_amp(ieps) = square(amp0, ampct(ieps,:))
+         end do[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudect_h
+   !---#] function samplitudect_h :
+[% @end @if %]
+[% @end @if generate_eft_counterterms %]
+[% @if generate_yuk_counterterms %]
+   !---#[ function samplitudeyukct :
+   function     samplitudeyukct(vecs,logs,scale2) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki) :: amp, heli_amp, scale2
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+      logical :: logs
+
+      amp = 0.0_ki[%
+  @if generate_lo_diagrams %][%
+  @for unique_helicity_mappings %]
+	    !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %]
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (3)
+           ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0()
+         ampct = amplitude[% map.index %]yukct(logs,scale2)
+         heli_amp = square(amp0, ampct)[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings%]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudeyukct
+   !---#] function samplitudeyukct :
+   !---#[ function samplitudeyukct_h :
+   function     samplitudeyukct_h(vecs, logs, scale2, h) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki) :: amp, heli_amp, scale2
+      complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+      logical :: logs
+
+      amp = 0.0_ki[%
+  @if generate_lo_diagrams %]
+	  select case(h) [%
+  @for helicities %]
+      case ([%helicity%])
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+          case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0()
+         ampct = amplitude[% map.index %]yukct(logs,scale2)
+         heli_amp = square(amp0, ampct)[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudeyukct_h
+   !---#] function samplitudeyukct_h :
+ [% @end @if generate_yuk_counterterms %]
    !---#[ function samplitudel1 :
-   function     samplitudel1(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use [% process_name asprefix=\_ %]config, only: &
+   function     samplitudel1(vecs,scale2,ok,rat2) result(amp)
+      use config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -1023,20 +1875,18 @@ contains
       real(ki), intent(out) :: rat2[%
       @if helsum %][%
       @else %]
-      integer, optional, intent(in) :: h
       real(ki), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if use_order_names %]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki) :: fr, rational2
 
       amp(:) = 0.0_ki
@@ -1076,19 +1926,8 @@ contains
             end if
             write(logfile,*) "</helicity>"
          end if[%
-   @else %][% 'if not helsum' %]
-
-      if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
-      else
-         eval_heli(:) = .true.
-      end if[%
-   @for helicities%]
-      if (eval_heli([%helicity%])) then
-         if(debug_nlo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]'>"
-         end if[%
+   @else %][% 'if not helsum' %][%
+   @for unique_helicity_mappings %][%
       @if generate_lo_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1112,7 +1951,11 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @for current_helicities %]
+     if(debug_nlo_diagrams) then
+        write(logfile,*) "<helicity index='[% helicity %]'>"
+     end if[%
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -1166,9 +2009,35 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
-     @end @if use_order_names%][%
+     @end @if enable_truncation_orders%]
+     if (corrections_are_qcd .and. renorm_gamma5) then
+      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+      heli_amp(0) = heli_amp(0) + fr
+     end if
+     ok = ok .and. my_ok
+     amp = amp + heli_amp
+     rat2 = rat2 + rational2
+     if(debug_nlo_diagrams) then
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+        if (corrections_are_qcd .and. renorm_gamma5) then
+           write(logfile,'(A30,E24.16,A3)') &
+               & "<result kind='fin-ren' value='", fr, "'/>"
+        end if
+        if(my_ok) then
+           write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+        else
+           write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+        end if
+        write(logfile,*) "</helicity>"
+     end if[%
+     @end @for current_helicities %][%
       @else %][% 'if not generate_lo_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -1192,7 +2061,8 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
             !---#] reinitialize kinematics:[%
-      @if use_order_names %]
+      @for current_helicities %][%
+      @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -1238,39 +2108,252 @@ contains
             heli_amp(-1) = square(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square(colorvec_2(:,-1)) + square(colorvec_2(:,-2),colorvec_2(:,0))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
         do c=1,numcs
            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
         end do
         heli_amp( 0) = square(colorvec(:, 0))
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
-      @end @if use_order_names%][%
-      @end @if generate_lo_diagrams%]
+      @end @if enable_truncation_orders%]
+      if (corrections_are_qcd .and. renorm_gamma5) then
+         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+         heli_amp(0) = heli_amp(0) + fr
+      end if
+      ok = ok .and. my_ok
+      amp = amp + heli_amp
+      rat2 = rat2 + rational2
+      if(debug_nlo_diagrams) then
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
          if (corrections_are_qcd .and. renorm_gamma5) then
-            !---#[ reinitialize kinematics:[%
-      @for helicity_mapping shift=1 %][%
-         @if parity %][%
-            @select sign @case 1 %]
-            pvecs([%index%],1) = vecs([%$_%],1)
-            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-            @else %]
-            pvecs([%index%],1) = -vecs([%$_%],1)
-            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-            @end @select %][%
-         @else %][%
-            @select sign @case 1 %]
-            pvecs([%index%],:) = vecs([%$_%],:)[%
-            @else %]
-            pvecs([%index%],:) = -vecs([%$_%],:)[%
-            @end @select %][%
-         @end @if %][%
-      @end @for %]
-            call init_event(pvecs[%
+            write(logfile,'(A30,E24.16,A3)') &
+                & "<result kind='fin-ren' value='", fr, "'/>"
+         end if
+         if(my_ok) then
+            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+         else
+            write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+         end if
+         write(logfile,*) "</helicity>"
+      end if[%
+      @end @for current_helicities %][%
+      @end @if generate_lo_diagrams%][%
+   @end @for unique_helicity_mappings %][%
+   @end @if helsum %][%
+   @end @if generate_nlo_virt %]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if
+   end function samplitudel1
+   !---#] function samplitudel1 :
+   !---#[ function samplitudel1_h :
+   function     samplitudel1_h(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
+      use config, only: &
+         & debug_nlo_diagrams, logfile, renorm_gamma5
+      use [% process_name asprefix=\_ %]kinematics, only: init_event
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      logical, intent(out) :: ok
+      real(ki), intent(in) :: scale2
+      real(ki), intent(out) :: rat2[%
+      @if helsum %][%
+      @else %]
+      integer, optional, intent(in) :: h
+      real(ki), dimension([%num_legs%], 4) :: pvecs[%
+      @end @if %]
+      real(ki), dimension(-2:0) :: amp, heli_amp[%
+      @if generate_lo_diagrams %][%
+      @if enable_truncation_orders %]
+      complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
+      @end @if %][%
+      @else %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
+      integer :: c[%
+      @end @if %]
+      logical :: my_ok
+      real(ki) :: fr, rational2
+
+      amp(:) = 0.0_ki
+      rat2 = 0.0_ki
+      ok = .true.[%
+   @if generate_nlo_virt%]
+      select case(h)[%
+   @for helicities%]
+      case([%helicity%])
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]'>"
+         end if[%
+      @if generate_lo_diagrams %]
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6 
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!   
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0)
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_2)
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1()
+            heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0)
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp = samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2 - amp0_0)
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0)
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0()
+            amp0_1 = amplitude[% map.index %]l0_1()
+            heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1 - amp0_0)
+         end select[%
+     @else %][% 'if not enable_truncation_orders' %]
+         heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
+     @end @if enable_truncation_orders%][%
+      @else %][% 'if not generate_lo_diagrams' %]
+         !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+         call init_event(pvecs[%
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
-            !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %](real(scale2,ki))
+            !---#] reinitialize kinematics:[%
+      @if enable_truncation_orders %]
+         select case (EFTcount)
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_0(:,-2),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            & + square(colorvec_0(:,-1)) + square(colorvec_0(:,-1),colorvec_2(:,-1) - colorvec_0(:,-1))
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            do c=1,numcs
+               ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_1(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:, 0) - colorvec_1(:, 0))
+            heli_amp(-1) = square(colorvec_1(:,-1),colorvec_2(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square(colorvec_1(:,-2),colorvec_2(:, 0)) + square(colorvec_1(:, 0),colorvec_2(:,-2)) &
+            &  + square(colorvec_1(:,-1)) + square(colorvec_1(:,-1),colorvec_2(:,-1) - colorvec_1(:,-1))
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_0(:, 0)) + square(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square(colorvec_0(:,-1),colorvec_2(:, 0)) + square(colorvec_0(:, 0),colorvec_2(:,-1)) 
+            heli_amp(-2) = square(colorvec_0(:,-1)) + square(colorvec_0(:,-2),colorvec_0(:, 0)) &
+            & + square(colorvec_0(:,-1)) + square(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            do c=1,numcs
+               ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2(real(scale2,ki),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square(colorvec_2(:, 0))
+            heli_amp(-1) = square(colorvec_2(:,-1),colorvec_2(:, 0))
+            heli_amp(-2) = square(colorvec_2(:,-1)) + square(colorvec_2(:,-2),colorvec_2(:,0))
+         end select[%
+      @else %][% 'if not enable_truncation_orders' %]
+        do c=1,numcs
+           colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+        end do
+        heli_amp( 0) = square(colorvec(:, 0))
+        heli_amp(-1) = square(colorvec(:,-1))
+        heli_amp(-2) = square(colorvec(:,-2))[%
+      @end @if enable_truncation_orders%][%
+      @end @if generate_lo_diagrams%]
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -1294,10 +2377,9 @@ contains
                write(logfile,'(A29)') "<flag name='ok' status='no'/>"
             end if
             write(logfile,*) "</helicity>"
-         end if
-      end if[%
-   @end @for helicities %][%
-   @end @if helsum %][%
+         end if[%
+   @end @for helicities %]
+      end select[%
    @end @if generate_nlo_virt %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
@@ -1308,16 +2390,16 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki)
       end if
-   end function samplitudel1
-   !---#] function samplitudel1 :
+   end function samplitudel1_h
+   !---#] function samplitudel1_h :
    !---#[ subroutine ir_subtraction :
    subroutine     ir_subtraction(vecs,scale2,amp,h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]kinematics, only: &
          & init_event, corrections_are_qcd
-      use [% process_name asprefix=\_ %]model
+      use model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -1325,24 +2407,18 @@ contains
       real(ki), dimension(2), intent(out) :: amp
       real(ki), dimension(2) :: heli_amp
       real(ki), dimension([%num_legs%], 4) :: pvecs
-      complex(ki), dimension(numcs,numcs,2) :: oper
-      complex(ki), dimension(numcs) :: color_vectorl0, pcolor
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
+      complex(ki), dimension(numcs,numcs,2) :: oper[%
+@if enable_truncation_orders %]
+      complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if enable_truncation_orders %]
       real(ki) :: nlo_coupling
-
-      [% @if use_order_names %]
-      write(*,*) "Warning: you are using the ir_subtraction subroutine with the"
-      write(*,*) " 'use_order_names'  feature switched on!  This might not work"
-      write(*,*) "depending on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
       
       if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
+         call ir_subtraction_h(vecs, scale2, amp, h)
       else
-         eval_heli(:) = .true.
-      end if
-
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
       @case 0 1 %]
@@ -1366,8 +2442,7 @@ contains
       endif
       amp(:) = 0.0_ki[%
   @if generate_lo_diagrams %][%
-  @for helicities %]
-      if (eval_heli([%helicity%])) then
+  @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -1389,8 +2464,158 @@ contains
          call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-         !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()[%
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %][%
+@if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not enable_truncation_orders' %]
+         pcolor = amplitude[%map.index%]l0()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -1400,10 +2625,11 @@ contains
          else
            heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
-         endif
-         amp = amp + heli_amp
-      endif[%
-  @end @for helicities %][%
+         endif[%
+@end @if enable_truncation_orders %]
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
       amp = amp * get_formfactor_nlo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
@@ -1424,23 +2650,287 @@ contains
       case(2)
          amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi
       end select
+      end if
    end subroutine ir_subtraction
-   !---#] subroutine ir_subtraction :[%
+   !---#] subroutine ir_subtraction :
+   !---#[ subroutine ir_subtraction :
+   subroutine     ir_subtraction_h(vecs,scale2,amp,h)
+      use config, only: &
+         & nlo_prefactors
+      use [% process_name asprefix=\_ %]dipoles, only: pi
+      use [% process_name asprefix=\_ %]kinematics, only: &
+         & init_event, corrections_are_qcd
+      use model
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), intent(in) :: scale2
+      integer, optional, intent(in) :: h
+      real(ki), dimension(2), intent(out) :: amp
+      real(ki), dimension(2) :: heli_amp
+      real(ki), dimension([%num_legs%], 4) :: pvecs
+      complex(ki), dimension(numcs,numcs,2) :: oper[%
+@if enable_truncation_orders %]
+      complex(ki), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if enable_truncation_orders %]
+      real(ki) :: nlo_coupling
+
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      if (corrections_are_qcd) then
+        oper = insertion_operator(real(scale2,ki), vecs)
+      else
+        oper = insertion_operator_qed(real(scale2,ki), vecs)
+      endif
+      amp(:) = 0.0_ki[%
+  @if generate_lo_diagrams %]
+      select case(h) [%
+  @for helicities %]
+      case([%helicity%])
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+@if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2, oper(:,:,1)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2, oper(:,:,2)) &
+               & - square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2)*oper(1,1,1) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2)*oper(1,1,2) &
+               & - square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2)) &
+               & - square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2) &
+               & - square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not enable_truncation_orders' %]
+         pcolor = amplitude[%map.index%]l0()[%
+     @for color_mapping shift=1%]
+         color_vectorl0([% $_ %]) = pcolor([% index %])[%
+     @end @for %]
+         if (corrections_are_qcd) then
+           heli_amp(1) = square(color_vectorl0, oper(:,:,1))
+           heli_amp(2) = square(color_vectorl0, oper(:,:,2))
+         else
+           heli_amp(1) = square(color_vectorl0)*oper(1,1,1)
+           heli_amp(2) = square(color_vectorl0)*oper(1,1,2)
+         endif[%
+@end @if enable_truncation_orders %]
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select[%
+      @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
+      amp = amp * get_formfactor_nlo(vecs)[%@end @if %]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki)
+      end if[%
+   @end @if %]
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         amp(:) = amp(:) * nlo_coupling
+      case(2)
+         amp(:) = amp(:) * nlo_coupling / 8.0_ki / pi / pi
+      end select
+   end subroutine ir_subtraction_h
+   !---#] subroutine ir_subtraction_h :[%
 @if extension quadruple %]
    !---#[ subroutine samplitudel01_qp :
    subroutine     samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
+         & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & inspect_kinematics, init_event
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
-      real(ki_qp), dimension(4), intent(out) :: amp
+      real(ki_qp), dimension(4), intent(out) :: amp[%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+      real(ki_qp), dimension(2:4) :: ampct[%
+@end @if %][% 
+@end @if %]
       real(ki_qp), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -1478,15 +2968,20 @@ contains
          call inspect_kinematics(logfile)
       end if
 
-      [% @if generate_lo_diagrams %]
+[% @if generate_lo_diagrams %]
       if (present(h)) then
-         amp(1) = samplitudel0_qp(vecs, h)
+         amp(1) = samplitudel0_h_qp(vecs, h)
       else
          amp(1)   = samplitudel0_qp(vecs)
       end if[%
       @else %]
       amp(1)   = 0.0_ki_qp[%
-      @end @if%][%
+@if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+      ampct = 0.0_ki_qp[%
+@end @if %][% 
+@end @if %][%
+@end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
       select case (renormalisation)
       case (0)
@@ -1515,9 +3010,9 @@ contains
          print *, 'with "helsum=1".'[%
          @else %][%
          @if generate_lo_diagrams %]
-         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
+         amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
          @else %]
-         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
+         amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
          @end @if %][%
          @end @if %]
       else[%
@@ -1566,26 +3061,30 @@ contains
                @if extension dred %]
                amp(2) = amp(2) + lo_qcd_couplings * CA_qp / 6.0_ki_qp * amp(1)[%
                @end @if %]
-            end if[%
-               @for yukawa %][%
-               @if is_yukawa %]
+            end if
+
+            [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
-            ! Renormalization of Yukawa coupling
-               if ([% $_ %] > 0.0_ki_qp) then  [%
-                @for particles massive quarks anti-quarks %]
-                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * amp(1)
+               if (present(h)) then
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * samplitudeyukct_h_qp(vecs, .false., scale2, h)
                   amp(2) = amp(2) -[%
-               @if extension dred %]2.5[% @else %]2.0[%
-               @end @if %]_ki_qp * CF_qp * amp(1)
+                     @if extension dred %]2.5[% @else %]2.0[%
+                     @end @if %]_ki_qp * CF * samplitudeyukct_h_qp(vecs, .false., scale2, h)
                   if (renorm_logs) then
-                     amp(2) = amp(2) &
-                    &   - (1.5_ki_qp*log(scale2/[%mass%]/[%mass%])) * CF_qp * amp(1)
-                  end if[%
-               @end @for %]
+                     amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_h_qp(vecs, .true., scale2, h)
+                  end if
+               else
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .false., scale2)
+                  amp(2) = amp(2) -[%
+                     @if extension dred %]2.5[% @else %]2.0[%
+                     @end @if %]_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .false., scale2)
+                  if (renorm_logs) then
+                     amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .true., scale2)
+                  end if
                end if
-            end if[%
-               @end @if %][%
-               @end @for %]
+            end if
+            [% @end @if generate_yuk_counterterms %]
+
             if (renorm_mqwf) then[%
             @for particles massive quarks anti-quarks %][%
                @if is_first %]
@@ -1623,9 +3122,23 @@ contains
                @end @if %][%
             @end @for %]
          end if[%
+         @if generate_eft_counterterms %][% 
+         @if eval topolopy.count.ct .gt. 0 %]
+         if (renorm_eftwilson) then
+            if (present(h)) then
+               ampct((/4,3,2/)) = samplitudect_h_qp(vecs, renorm_logs, scale2, h)
+            else
+               ampct((/4,3,2/)) = samplitudect_qp(vecs, renorm_logs, scale2)
+            end if
+            ! account for nlo_prefactors in EFT counterterms
+            ampct = (8.0_ki_qp*pi**2/nlo_coupling)*ampct
+            amp((/2,3,4/)) = amp((/2,3,4/)) + ampct((/2,3,4/))
+         end if[% 
+         @end @if %][%
+         @end @if generate_eft_counterterms %][%
             @else %]
          ! No tree level present[%
-            @end @if %]
+            @end @if generate_lo_diagrams %]
       case (2)
          ! massive quark counterterms only
       case default
@@ -1640,7 +3153,8 @@ contains
       @end @if%][%
 
       @select r2
-      @case implicit explicit off %]
+      @case implicit explicit off %][%
+		@if generate_nlo_virt %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -1655,6 +3169,7 @@ contains
            &        + num_gluons * 1.0_ki_qp/6.0_ki_qp * CA_qp)[%
          @end @if extension dred %]
       end if[%
+		@end @if %][%
       @end @select r2 %]
       if (present(ok)) ok = my_ok
 
@@ -1699,28 +3214,136 @@ contains
    end subroutine samplitudel01_qp
    !---#] subroutine samplitudel01_qp :
    !---#[ function samplitudel0_qp :
-   function     samplitudel0_qp(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]config, only: logfile
+   function     samplitudel0_qp(vecs) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki_qp) :: amp, heli_amp
+      complex(ki_qp), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+
+      amp = 0.0_ki_qp[%
+  @if generate_lo_diagrams %][%
+  @for unique_helicity_mappings %]
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+      call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %]
+     if (debug_lo_diagrams) then
+      write(logfile,*) "<helicity index='[% helicity %]' >"
+     end if[%
+     @if enable_truncation_orders %]
+      select case (EFTcount)
+      ! amplitude*_0 -> SM
+      ! amplitude*_1 -> SM + dim-6 
+      ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+      ! => "without loopcounting" means that the loop-supressed vertices
+      !    are included despite their suppression!
+      case (0)
+      ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_0) &
+         & + square_qp(color_vector_0, color_vector_2 - color_vector_0)
+      case (1)
+         ! sigma(SM + dim6 X SM + dim6) without loopcounting
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_2)
+      case (2)
+         ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_0) &
+         & + square_qp(color_vector_0, color_vector_2 - color_vector_0)
+      case (3)
+         ! sigma(SM + dim6 X SM + dim6) with loopcounting
+         color_vector_1 = amplitude[% map.index %]l0_1_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_1) &
+         & + square_qp(color_vector_1, color_vector_2 - color_vector_1)
+      case (4)
+         ! sigma(SM X dim6) without loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_0, color_vector_2 - color_vector_0)
+      case (5)
+         ! sigma(dim6 X dim6)  without loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_2 - color_vector_0)
+      case (6)
+         ! sigma(SM X dim6) with loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = square_qp(color_vector_0, color_vector_2 - color_vector_0)
+      case (7)
+         ! sigma(dim6 X dim6)  with loopcounting
+         color_vector_0 = amplitude[% map.index %]l0_0_qp()
+         color_vector_1 = amplitude[% map.index %]l0_1_qp()
+         color_vector_2 = amplitude[% map.index %]l0_2_qp()
+         heli_amp = 0.5_ki_qp * square_qp(color_vector_1 - color_vector_0, &
+         &          2.0_ki_qp*color_vector_2 - color_vector_1 - color_vector_0)
+      end select[%
+     @else %]
+      color_vector = amplitude[% map.index %]l0_qp()
+      heli_amp = square_qp(color_vector)[%
+     @end @if %]
+      if (debug_lo_diagrams) then
+         write(logfile,'(A25,E24.16,A3)') &
+               & "<result kind='lo' value='", heli_amp, "'/>"
+         write(logfile,*) "</helicity>"
+      end if
+      amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings %]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudel0_qp
+   !---#] function samplitudel0_qp :
+   !---#[ function samplitudel0_h_qp :
+   function     samplitudel0_h_qp(vecs, h) result(amp)
+      use config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
       real(ki_qp) :: amp, heli_amp
-      complex(ki_qp), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %]
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
+      complex(ki_qp), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
-      if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
-      else
-         eval_heli(:) = .true.
-      end if
-
       amp = 0.0_ki_qp[%
-  @if generate_lo_diagrams %][%
+  @if generate_lo_diagrams %]
+      select case(h) [%
   @for helicities %]
-      if (eval_heli([%helicity%])) then
+      case([%helicity%])
          if (debug_lo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]' >"
          end if
@@ -1746,7 +3369,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -1807,9 +3430,9 @@ contains
                 & "<result kind='lo' value='", heli_amp, "'/>"
             write(logfile,*) "</helicity>"
          end if
-         amp = amp + heli_amp
-      end if[%
+         amp = amp + heli_amp[%
   @end @for helicities %]
+      end select
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki_qp)
       end if
@@ -1820,11 +3443,613 @@ contains
          amp = amp / real(symmetry_factor, ki_qp)
       end if[%
    @end @if generate_lo_diagrams %]
-   end function samplitudel0_qp
-   !---#] function samplitudel0_qp :
+   end function samplitudel0_h_qp
+   !---#] function samplitudel0_h_qp :
+[% @if generate_eft_counterterms %][% 
+@if eval topolopy.count.ct .gt. 0 %]
+   !---#[ function samplitudect_qp :
+   function     samplitudect_qp(vecs, logs, scale2) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki_qp), dimension(-2:0) :: amp, heli_amp
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      integer :: ieps
+      real(ki_qp), intent(in) :: scale2
+      logical, intent(in) :: logs
+
+      amp = 0.0_ki_qp[%
+  @if generate_lo_diagrams %][%
+  @for unique_helicity_mappings %]
+	    !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %]
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:))
+            end do
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_1 = amplitude[% map.index %]ct_1_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_0, ampct_0(ieps,:))
+            end do
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_0, ampct_0(ieps,:))
+            end do
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_1 = amplitude[% map.index %]ct_1_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0_qp()
+         ampct = amplitude[% map.index %]ct_qp(logs, scale2)
+         do ieps=-2,0
+            heli_amp(ieps) = square(amp0, ampct(ieps,:))
+         end do[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings%]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudect_qp
+   !---#] function samplitudect_qp :
+   !---#[ function samplitudect_h_qp :
+   function     samplitudect_h_qp(vecs, logs, scale2, h) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki_qp), dimension(-2:0) :: amp, heli_amp
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(-2:0,numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      integer :: ieps
+      real(ki_qp), intent(in) :: scale2
+      logical, intent(in) :: logs
+
+      amp = 0.0_ki_qp[%
+  @if generate_lo_diagrams %]
+	  select case(h) [%
+  @for helicities %]
+      case ([%helicity%])
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+          case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:))
+            end do
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_1 = amplitude[% map.index %]ct_1_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_0, ampct_0(ieps,:))
+            end do
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp()
+            ampct_2 = amplitude[% map.index %]ct_2_qp()
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:))
+            end do
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2, ampct_2(ieps,:)) &
+               & - square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_0, ampct_0(ieps,:))
+            end do
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]ct_0_qp(logs, scale2)
+            ampct_1 = amplitude[% map.index %]ct_1_qp(logs, scale2)
+            ampct_2 = amplitude[% map.index %]ct_2_qp(logs, scale2)
+            do ieps=-2,0
+               heli_amp(ieps) = square_qp(amp0_2-amp0_0, ampct_2(ieps,:)-ampct_0(ieps,:)) &
+               & - square_qp(amp0_2-amp0_1, ampct_2(ieps,:)-ampct_1(ieps,:))
+            end do
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0_qp()
+         ampct = amplitude[% map.index %]ct_qp(logs, scale2)
+         do ieps=-2,0
+            heli_amp(ieps) = square(amp0, ampct(ieps,:))
+         end do[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudect_h_qp
+   !---#] function samplitudect_h_qp :
+[% @end @if %]
+[% @end @if generate_eft_counterterms %]
+[% @if generate_yuk_counterterms %]
+   !---#[ function samplitudeyukct_qp :
+   function     samplitudeyukct_qp(vecs,logs,scale2) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki_qp) :: amp, heli_amp, scale2
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      logical :: logs
+
+      amp = 0.0_ki_qp[%
+  @if generate_lo_diagrams %][%
+  @for unique_helicity_mappings %]
+	    !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %]
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (3)
+           ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0_qp()
+         ampct = amplitude[% map.index %]yukct_qp(logs,scale2)
+         heli_amp = square(amp0, ampct)[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings%]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudeyukct_qp
+   !---#] function samplitudeyukct_qp :
+   !---#[ function samplitudeyukct_qp_h :
+   function     samplitudeyukct_qp_h(vecs, logs, scale2, h) result(amp)
+      use config, only: logfile
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki_qp) :: amp, heli_amp, scale2
+      complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
+      complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      logical :: logs
+
+      amp = 0.0_ki_qp[%
+  @if generate_lo_diagrams %]
+	  select case(h) [%
+  @for helicities %]
+      case ([%helicity%])
+         if (debug_lo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]' >"
+         end if
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+          case (0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2)
+         case (2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         case (4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (5)
+            ! sigma(dim6 X dim6)  without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
+         case (6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2, ampct_2) &
+            & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_0, ampct_0)
+         case (7)
+            ! sigma(dim6 X dim6)  with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
+            & - square(amp0_2-amp0_1, ampct_2-ampct_1)
+         end select[%
+     @else %]
+         amp0 = amplitude[% map.index %]l0_qp()
+         ampct = amplitude[% map.index %]yukct_qp(logs,scale2)
+         heli_amp = square(amp0, ampct)[%
+     @end @if %]
+         if (debug_lo_diagrams) then
+            write(logfile,'(A25,E24.16,A3)') &
+                & "<result kind='lo' value='", heli_amp, "'/>"
+            write(logfile,*) "</helicity>"
+         end if
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if generate_lo_diagrams %]
+   end function samplitudeyukct_qp_h
+   !---#] function samplitudeyukct_qp_h :
+[% @end @if generate_yuk_counterterms %]
    !---#[ function samplitudel1_qp :
-   function     samplitudel1_qp(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
-      use [% process_name asprefix=\_ %]config, only: &
+   function     samplitudel1_qp(vecs,scale2,ok,rat2) result(amp)
+      use config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -1834,20 +4059,18 @@ contains
       real(ki_qp), intent(out) :: rat2[%
       @if helsum %][%
       @else %]
-      integer, optional, intent(in) :: h
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
       @if generate_lo_diagrams %][%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
       @else %]
-      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if use_order_names%]_0, colorvec_1, colorvec_2[% @end @if %]
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders%]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
       real(ki_qp) :: fr, rational2
 
       amp(:) = 0.0_ki_qp
@@ -1887,19 +4110,8 @@ contains
             end if
             write(logfile,*) "</helicity>"
          end if[%
-   @else %][% 'if not helsum' %]
-
-      if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
-      else
-         eval_heli(:) = .true.
-      end if[%
-   @for helicities%]
-      if (eval_heli([%helicity%])) then
-         if(debug_nlo_diagrams) then
-            write(logfile,*) "<helicity index='[% helicity %]'>"
-         end if[%
+   @else %][% 'if not helsum' %][%
+   @for unique_helicity_mappings %][%
       @if generate_lo_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1923,7 +4135,11 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @for current_helicities %]
+     if(debug_nlo_diagrams) then
+        write(logfile,*) "<helicity index='[% helicity %]'>"
+     end if[%
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -1977,9 +4193,36 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
             &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0)
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
-     @end @if use_order_names %][%
+     @end @if enable_truncation_orders %]
+     if (corrections_are_qcd .and. renorm_gamma5) then
+        fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+        heli_amp(0) = heli_amp(0) + fr
+     end if
+     ok = ok .and. my_ok
+     amp = amp + heli_amp
+     rat2 = rat2 + rational2
+
+     if(debug_nlo_diagrams) then
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+        write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+        if (corrections_are_qcd .and. renorm_gamma5) then
+           write(logfile,'(A30,E24.16,A3)') &
+               & "<result kind='fin-ren' value='", fr, "'/>"
+        end if
+        if(my_ok) then
+           write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+        else
+           write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+        end if
+        write(logfile,*) "</helicity>"
+     end if[%
+     @end @for current_helicities %][%
       @else %][% 'if not generate_lo_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
@@ -2003,7 +4246,8 @@ contains
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
          !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+         @for current_helicities %][%
+     @if enable_truncation_orders %]
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -2052,39 +4296,291 @@ contains
             heli_amp(-1) = square_qp(colorvec_2(:,-1),colorvec_2(:, 0))
             heli_amp(-2) = square_qp(colorvec_2(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_2(:,-1))
          end select[%
-      @else %][% 'if not use_order_names' %]
+      @else %][% 'if not enable_truncation_orders' %]
          do c=1,numcs
             colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
          end do
          heli_amp( 0) = square_qp(colorvec(:, 0))
          heli_amp(-1) = square_qp(colorvec(:,-1))
          heli_amp(-2) = square_qp(colorvec(:,-2))[%
-      @end @if use_order_names %][%
-      @end @if %]
+      @end @if enable_truncation_orders %]
+      if (corrections_are_qcd .and. renorm_gamma5) then
+         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+         heli_amp(0) = heli_amp(0) + fr
+      end if
+      ok = ok .and. my_ok
+      amp = amp + heli_amp
+      rat2 = rat2 + rational2
+
+      if(debug_nlo_diagrams) then
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
          if (corrections_are_qcd .and. renorm_gamma5) then
-            !---#[ reinitialize kinematics:[%
-      @for helicity_mapping shift=1 %][%
-         @if parity %][%
-            @select sign @case 1 %]
-            pvecs([%index%],1) = vecs([%$_%],1)
-            pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-            @else %]
-            pvecs([%index%],1) = -vecs([%$_%],1)
-            pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-            @end @select %][%
-         @else %][%
-            @select sign @case 1 %]
-            pvecs([%index%],:) = vecs([%$_%],:)[%
-            @else %]
-            pvecs([%index%],:) = -vecs([%$_%],:)[%
-            @end @select %][%
-         @end @if %][%
-      @end @for %]
-            call init_event(pvecs[%
+            write(logfile,'(A30,E24.16,A3)') &
+                & "<result kind='fin-ren' value='", fr, "'/>"
+         end if
+         if(my_ok) then
+            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+         else
+            write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+         end if
+         write(logfile,*) "</helicity>"
+      end if[%
+      @end @for current_helicities %][%
+      @end @if %][%
+   @end @for unique_helicity_mappings%][%
+   @end @if helsum %][%
+   @end @if generate_nlo_virt %]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if
+   end function samplitudel1_qp
+   !---#] function samplitudel1_qp :
+      !---#[ function samplitudel1_h_qp :
+   function     samplitudel1_h_qp(vecs,scale2,ok,rat2[% @if helsum %][% @else %],h[% @end @if %]) result(amp)
+      use config, only: &
+         & debug_nlo_diagrams, logfile, renorm_gamma5
+      use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      logical, intent(out) :: ok
+      real(ki_qp), intent(in) :: scale2
+      real(ki_qp), intent(out) :: rat2[%
+      @if helsum %][%
+      @else %]
+      integer, optional, intent(in) :: h
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs[%
+      @end @if %]
+      real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
+      @if generate_lo_diagrams %][%
+      @if enable_truncation_orders %]
+      complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
+      @end @if %][%
+      @else %]
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders%]_0, colorvec_1, colorvec_2[% @end @if %]
+      integer :: c[%
+      @end @if %]
+      logical :: my_ok
+      real(ki_qp) :: fr, rational2
+
+      amp(:) = 0.0_ki_qp
+      rat2 = 0.0_ki_qp
+      ok = .true.[%
+   @if generate_nlo_virt%][%
+   @if helsum %]
+      if(debug_nlo_diagrams) then
+         write(logfile,*) "<helicity index='sum'>"
+      end if
+      call init_event(vecs)[%
+      @if generate_lo_diagrams %]
+         heli_amp = samplitudel1summed_qp(real(scale2,ki_qp),my_ok,rational2)[%
+      @else %]
+         do c=1,numcs
+            colorvec(c,:) = samplitudel1summed_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))[%
+      @end @if %]
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if[%
+   @else %][% 'if not helsum' %]
+
+      select case(h)[%
+   @for helicities%]
+      case ([%helicity%])
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='[% helicity %]'>"
+         end if[%
+      @if generate_lo_diagrams %]
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6 
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!   
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
+            heli_amp = samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2 - amp0_0)
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            amp0_0 = amplitude[% map.index %]l0_0_qp()
+            amp0_1 = amplitude[% map.index %]l0_1_qp()
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0) &
+            &        - samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 - amp0_0)
+         end select[%
+     @else %][% 'if not enable_truncation_orders' %]
+         heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
+     @end @if enable_truncation_orders %][%
+      @else %][% 'if not generate_lo_diagrams' %]
+         !---#[ reinitialize kinematics:[%
+         @for helicity_mapping shift=1 %][%
+            @if parity %][%
+               @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+               @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+               @end @select %][%
+            @else %][%
+               @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+               @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+               @end @select %][%
+            @end @if %][%
+         @end @for %]
+         call init_event(pvecs[%
          @for particles lightlike vector %], [%hel%]1[%
          @end @for %])
-            !---#] reinitialize kinematics:
-            fr = finite_renormalisation[%map.index%][% @if use_order_names %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+         !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0))
+            heli_amp(-1) = square_qp(colorvec_0(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            do c=1,numcs
+               ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_1(:, 0)) + square_qp(colorvec_1(:, 0), colorvec_2(:, 0) - colorvec_1(:, 0))
+            heli_amp(-1) = square_qp(colorvec_1(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_1(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_1(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_1(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_1(:,-1)) + square_qp(colorvec_1(:,-1), colorvec_2(:,-1) - colorvec_1(:,-1))
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_2(:, 0) - colorvec_0(:, 0)) 
+            heli_amp(-1) = square_qp(colorvec_0(:,-1),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-1))
+            heli_amp(-2) = square_qp(colorvec_0(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_0(:, 0),colorvec_2(:,-2)) &
+            &  + square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_2(:,-1) - colorvec_0(:,-1))
+         case(3)
+            ! sigma(SM + dim6 + dim6^2 X SM + dim6 + dim6^2)
+            do c=1,numcs
+               ! colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               ! colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
+            end do
+            ! heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
+            ! heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))
+            ! heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2))
+            heli_amp( 0) = square_qp(colorvec_2(:, 0))
+            heli_amp(-1) = square_qp(colorvec_2(:,-1),colorvec_2(:, 0))
+            heli_amp(-2) = square_qp(colorvec_2(:,-2),colorvec_2(:, 0)) + square_qp(colorvec_2(:,-1))
+         end select[%
+      @else %][% 'if not enable_truncation_orders' %]
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))[%
+      @end @if enable_truncation_orders %][%
+      @end @if %]
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
             heli_amp(0) = heli_amp(0) + fr
          end if
          ok = ok .and. my_ok
@@ -2108,9 +4604,9 @@ contains
                write(logfile,'(A29)') "<flag name='ok' status='no'/>"
             end if
             write(logfile,*) "</helicity>"
-         end if
-      end if[%
-   @end @for helicities%][%
+         end if[%
+   @end @for helicities%]
+      end select[%
    @end @if helsum %][%
    @end @if generate_nlo_virt %]
       if (include_helicity_avg_factor) then
@@ -2122,16 +4618,16 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki_qp)
       end if
-   end function samplitudel1_qp
-   !---#] function samplitudel1_qp :
+   end function samplitudel1_h_qp
+   !---#] function samplitudel1_h_qp :
    !---#[ subroutine ir_subtraction_qp :
    subroutine     ir_subtraction_qp(vecs,scale2,amp,h)
-      use [% process_name asprefix=\_ %]config, only: &
+      use config, only: &
          & nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]kinematics_qp, only: &
          & init_event, corrections_are_qcd
-      use [% process_name asprefix=\_ %]model_qp
+      use model_qp
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), intent(in) :: scale2
@@ -2139,23 +4635,14 @@ contains
       real(ki_qp), dimension(2), intent(out) :: amp
       real(ki_qp), dimension(2) :: heli_amp
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
-      complex(ki_qp), dimension(numcs,numcs,2) :: oper
-      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor
-      logical, dimension(0:[% eval num_helicities - 1 %]) :: eval_heli
+      complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
+@if enable_truncation_orders %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if enable_truncation_orders %]
       real(ki_qp) :: nlo_coupling
-
-      [% @if use_order_names %]
-      write(*,*) "Warning:  you are using the ir_subtraction_qp subroutine with the"
-      write(*,*) "'use_order_names' feature switched on! This might not work depen-"
-      write(*,*) "ing on the truncation option (EFTcount) chosen."
-      [% @end @if use_order_names%]
-      
-      if (present(h)) then
-         eval_heli(:) = .false.
-         eval_heli(h) = .true.
-      else
-         eval_heli(:) = .true.
-      end if
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
@@ -2180,8 +4667,7 @@ contains
       endif
       amp(:) = 0.0_ki_qp[%
   @if generate_lo_diagrams %][%
-  @for helicities %]
-      if (eval_heli([%helicity%])) then
+  @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -2203,8 +4689,158 @@ contains
          call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-         !---#] reinitialize kinematics:
-         pcolor = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]_qp()[%
+         !---#] reinitialize kinematics:[%
+     @for current_helicities %][%
+@if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not enable_truncation_orders' %]
+         pcolor = amplitude[%map.index%]l0_qp()[%
      @for color_mapping shift=1%]
          color_vectorl0([% $_ %]) = pcolor([% index %])[%
      @end @for %]
@@ -2214,10 +4850,11 @@ contains
          else
            heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
            heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
-         endif
-         amp = amp + heli_amp
-      endif[%
-  @end @for helicities %][%
+         endif[%
+@end @if enable_truncation_orders %]
+         amp = amp + heli_amp[%
+  @end @for current_helicities %][%
+  @end @for unique_helicity_mappings %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
       amp = amp * get_formfactor_nlo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
@@ -2239,7 +4876,265 @@ contains
          amp(:) = amp(:) * nlo_coupling / 8.0_ki_qp / pi / pi
       end select
    end subroutine ir_subtraction_qp
-   !---#] subroutine ir_subtraction_qp :[%
+   !---#] subroutine ir_subtraction_qp :
+   !---#[ subroutine ir_subtraction_h_qp :
+   subroutine     ir_subtraction_h_qp(vecs,scale2,amp,h)
+      use config, only: &
+         & nlo_prefactors
+      use [% process_name asprefix=\_ %]dipoles_qp, only: pi
+      use [% process_name asprefix=\_ %]kinematics_qp, only: &
+         & init_event, corrections_are_qcd
+      use model_qp
+      implicit none
+      real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki_qp), intent(in) :: scale2
+      integer, optional, intent(in) :: h
+      real(ki_qp), dimension(2), intent(out) :: amp
+      real(ki_qp), dimension(2) :: heli_amp
+      real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      complex(ki_qp), dimension(numcs,numcs,2) :: oper[%
+@if enable_truncation_orders %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0_0, color_vectorl0_1, color_vectorl0_2
+      complex(ki_qp), dimension(numcs) :: pcolor_0, pcolor_1, pcolor_2[%
+@else %]
+      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor[%
+@end @if enable_truncation_orders %]
+      real(ki_qp) :: nlo_coupling
+
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki_qp[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki_qp[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      if (corrections_are_qcd) then
+        oper = insertion_operator_qp(real(scale2,ki_qp), vecs)
+      else
+        oper = insertion_operator_qed_qp(real(scale2,ki_qp), vecs)
+      endif
+      amp(:) = 0.0_ki_qp[%
+  @if generate_lo_diagrams %]
+      select case(h)[%
+  @for helicities %]
+      case ([%helicity%])
+         !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+         pvecs([%index%],1) = vecs([%$_%],1)
+         pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+         pvecs([%index%],1) = -vecs([%$_%],1)
+         pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+         pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+         pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %]
+         call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+         !---#] reinitialize kinematics:[%
+@if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> SM + dim-6
+         ! amplitude*_2 -> SM + dim-6 + loop-suppressed
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!
+         case(0)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(1)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2)
+            endif
+         case(2)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(3)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2)
+            endif
+         case(4)
+            ! sigma(SM X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(5)
+            ! sigma(dim6 X dim6) without loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_2 = amplitude[%map.index%]l0_2()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_2-color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(6)
+            ! sigma(SM X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2)) &
+               & - square_qp(color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2) &
+               & - square_qp(color_vectorl0_0)*oper(1,1,2)
+            endif
+         case(7)
+            ! sigma(dim6 X dim6) with loopcounting
+            pcolor_0 = amplitude[%map.index%]l0_0()
+            pcolor_1 = amplitude[%map.index%]l0_1()[%
+     @for color_mapping shift=1%]
+            color_vectorl0_0([% $_ %]) = pcolor_0([% index %])
+            color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
+     @end @for %]
+            if (corrections_are_qcd) then
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0, oper(:,:,2))
+            else
+               heli_amp(1) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1-color_vectorl0_0)*oper(1,1,2)
+            endif
+         end select[%
+@else %][% 'if not enable_truncation_orders' %]
+         pcolor = amplitude[%map.index%]l0_qp()[%
+     @for color_mapping shift=1%]
+         color_vectorl0([% $_ %]) = pcolor([% index %])[%
+     @end @for %]
+         if (corrections_are_qcd) then
+           heli_amp(1) = square_qp(color_vectorl0, oper(:,:,1))
+           heli_amp(2) = square_qp(color_vectorl0, oper(:,:,2))
+         else
+           heli_amp(1) = square_qp(color_vectorl0)*oper(1,1,1)
+           heli_amp(2) = square_qp(color_vectorl0)*oper(1,1,2)
+         endif[%
+@end @if enable_truncation_orders %]
+         amp = amp + heli_amp[%
+  @end @for helicities %]
+      end select[%
+      @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
+      amp = amp * get_formfactor_nlo(vecs)[%@end @if %]
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if[%
+   @end @if %]
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         amp(:) = amp(:) * nlo_coupling
+      case(2)
+         amp(:) = amp(:) * nlo_coupling / 8.0_ki_qp / pi / pi
+      end select
+   end subroutine ir_subtraction_h_qp
+   !---#] subroutine ir_subtraction_h_qp :[%
 @end @if extension quadruple %]
    !---#[ color correlated ME :
    pure subroutine color_correlated_lo(color_vector,perm,res)
@@ -2272,13 +5167,13 @@ contains
       integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the color_correlated_lo2 subroutine with the"
-      write(*,*) "the  'use_order_names' feature switched on! This subroutine does not"
+      write(*,*) "the  'enable_truncation_orders' feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine OL_color_correlated instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
       
       borncc(:,:) = 0.0_ki[%
   @for repeat 1 num_legs inclusive=true %][%
@@ -2321,7 +5216,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0[% @if use_order_names %]_0[% @end @if %]()
+      color_vector = amplitude[%map.index%]l0[% @if enable_truncation_orders %]_0[% @end @if %]()
       call color_correlated_lo(color_vector,perm,borncc_heli)[%
       @if is_first %]
       ! The minus is part in the definition according to PowHEG Box.
@@ -2377,12 +5272,12 @@ contains
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
       real(ki), dimension(num_legs,num_legs) :: borncc
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli[%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli_tmp1, ampcc_heli_tmp2, ampcc_heli_tmp3[%
       @end @if %]
       real(ki), dimension(num_legs, 4) :: pvecs
       integer, dimension(num_legs) :: perm
-      complex(ki), dimension(numcs) :: color_vector[% @if use_order_names %]_0, color_vector_1, color_vector_2[% @end @if %][%
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %][%
       @if generate_lo_diagrams %][%
       @else %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
@@ -2432,7 +5327,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:[%
-     @if use_order_names %]
+     @if enable_truncation_orders %]
          select case (EFTcount)
          ! amplitude*_0 -> SM
          ! amplitude*_1 -> SM + dim-6 
@@ -2492,10 +5387,10 @@ contains
             call OLP_color_correlated_lo(color_vector_1-color_vector_0,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          end select[%
-     @else %][% 'if not use_order_names' %]
+     @else %][% 'if not enable_truncation_orders' %]
          color_vector = amplitude[%map.index%]l0()
          call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
-     @end @if use_order_names %]
+     @end @if enable_truncation_orders %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
   @else %][% 'if not generate_lo_diagrams' %]
@@ -2540,7 +5435,7 @@ contains
      @end @for %])
       !---#] reinitialize kinematics:[%
          @if generate_lo_diagrams %][%
-         @if use_order_names %]
+         @if enable_truncation_orders %]
          select case (EFTcount)
          case (0)
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
@@ -2595,15 +5490,15 @@ contains
             call OLP_color_correlated_lo(color_vector_1-color_vector_0,perm,ampcc_heli_tmp1)
             ampcc_heli = ampcc_heli_tmp1
          end select[%
-         @else %][% 'if not use_order_names' %]
+         @else %][% 'if not enable_truncation_orders' %]
             color_vector = amplitude[%map.index%]l0()
             call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
-         @end @if use_order_names %][%
+         @end @if enable_truncation_orders %][%
          @else %][% 'if not generate_lo_diagrams' %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
@@ -2630,6 +5525,7 @@ contains
    !---#[ spin correlated ME :
    subroutine spin_correlated_lo2(vecs, bornsc)
       use [% process_name asprefix=\_ %]kinematics
+	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
@@ -2647,13 +5543,13 @@ contains
    @end @for %][%
 @end @if generate_lo_diagrams %]
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the spin_correlated_lo2  subroutine with the"
-      write(*,*) "'use_order_names' feature switched on! This subroutine does not sup-"
+      write(*,*) "'enable_truncation_orders' feature switched on! This subroutine does not sup-"
       write(*,*) "sport this feature,  yet,  and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
 
       bornsc(:,:,:) = 0.0_ki[%
    @if helsum %]
@@ -2688,7 +5584,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -2773,6 +5669,7 @@ contains
      ! the OpenLoops (HELAS) convention for the polarization vectors.
      ! This is required by Whizard.
       use [% process_name asprefix=\_ %]kinematics
+	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
@@ -2783,7 +5680,7 @@ contains
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
-      complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if use_order_names %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
+      complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if enable_truncation_orders %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
          @end @for %][%
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
@@ -2824,7 +5721,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:[%
-      @if use_order_names %]
+      @if enable_truncation_orders %]
          heli_amp[%helicity%]_0 = amplitude[% map.index %]l0_0()
          heli_amp[%helicity%]_1 = amplitude[% map.index %]l0_1()
          heli_amp[%helicity%]_2 = amplitude[% map.index %]l0_2()[%
@@ -2870,7 +5767,7 @@ contains
       ! relevant.[%
    @for particles lightlike vector %]
       !---#[ particle [%index%] :[%
-   @if use_order_names %]
+   @if enable_truncation_orders %]
       select case (EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> SM + dim-6 
@@ -3118,7 +6015,7 @@ contains
               &                            heli_amp[%helicity%]_1-heli_amp[%helicity%]_0)[%
          @end @for helicities %]
       end select[%
-   @else %][% 'if not use_order_names' %]
+   @else %][% 'if not enable_truncation_orders' %]
       pp  = 0.0_ki[%
       @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
@@ -3143,7 +6040,7 @@ contains
       @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
       @end @for helicities %][%
-      @end @if use_order_names %]
+      @end @if enable_truncation_orders %]
 
       pm = phasefac[%index%]*pm
       mp = conjg(phasefac[%index%])*mp
@@ -3176,6 +6073,7 @@ contains
 
    subroutine OLP_spin_correlated_lo2(vecs, ampsc)
       use [% process_name asprefix=\_ %]kinematics
+	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(2*num_legs*num_legs) :: ampsc
@@ -3206,13 +6104,13 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_lo_diagrams %]
 
-      [% @if use_order_names %]
+      [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the  OLP_spin_correlated_lo2 subroutine with"
-      write(*,*) "the 'use_order_names'  feature switched on! This subroutine does not"
+      write(*,*) "the 'enable_truncation_orders'  feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
       write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
-      [% @end @if use_order_names%]
+      [% @end @if enable_truncation_orders%]
 
       ampsc(:) = 0.0_ki[%
    @if helsum %]
@@ -3247,12 +6145,12 @@ contains
             @end @for %])
       !---#] reinitialize kinematics:[%
              @if generate_lo_diagrams %]
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if use_order_names %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
              @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if use_order_names %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[%
              @end @if generate_lo_diagrams %][%
@@ -3437,8 +6335,9 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]
    function get_formfactor_lo(vecs) result(factor)
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]kinematics
+	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor
 
@@ -3448,8 +6347,9 @@ contains
 
    [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
    function get_formfactor_nlo(vecs) result(factor)
-      use [% process_name asprefix=\_ %]model
+      use model
       use [% process_name asprefix=\_ %]kinematics
+	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor
 

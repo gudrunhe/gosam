@@ -3,6 +3,7 @@
 
 import sys
 import os
+import re
 from optparse import OptionParser
 from t2f import translatefile, postformat, getdata
 from pythonin import parameters, kinematics, symbols, lambdafunc, dotproducts
@@ -33,9 +34,9 @@ modelfile = open('model.f90', 'w')
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file
-modelfile.write('module     [$ process_name asprefix=\_ $]model\n')
+modelfile.write('module     model\n')
 modelfile.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile.write('   use [$ process_name asprefix=\_ $]config, only: ki')[$
+modelfile.write('   use config, only: ki')[$
 @if extension samurai $]
 modelfile.write(', &\n')
 modelfile.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
@@ -85,6 +86,14 @@ modelfile.write('   complex(ki), parameter :: [$$_$] = ([$ real convert=float fo
 modelfile.write('   real(ki) :: [$$_$]\n')[$
             @case C $]
 modelfile.write('   complex(ki) :: [$$_$]\n')[$
+         @end @select type $][$
+      @end @for functions $][$
+      @for ctfunctions $][$
+         @select type
+            @case R $]
+modelfile.write('   real(ki), dimension(-2:0) :: [$$_$]\n')[$
+            @case C $]
+modelfile.write('   complex(ki), dimension(-2:0) :: [$$_$]\n')[$
          @end @select type $][$
       @end @for functions $]
 modelfile.write('   integer, parameter, private :: line_length = [$buffer_length$]\n')
@@ -1241,7 +1250,9 @@ modelfile.write("     &3383279502884197169399375105820974944592307816406286209_k
 modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @if $][$
 @end @select $]
-modelfile.write("%s" % outdict['Functions'])
+newfcs = re.sub(r"ctpolem([0-9]*)",r"(-\1)",outdict["Functions"])
+newfcs = re.sub(r"ctpolep([0-9]*)",r"(\1)",newfcs)
+modelfile.write("%s" % newfcs)
 modelfile.write("end subroutine init_functions\n")
 modelfile.write("!---#] subroutine init_functions:\n")
 modelfile.write("!---#[ utility functions for model initialization:\n")
@@ -1475,7 +1486,7 @@ modelfile.write("  end subroutine\n")[$
 modelfile.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
-modelfile.write("end module [$ process_name asprefix=\_ $]model\n")
+modelfile.write("end module model\n")
 
 modelfile.close()
 ### additional formatting for output files
@@ -1491,9 +1502,9 @@ modelfile_qp = open('model_qp.f90', 'w')
 
 outdict=translatefile(options.input,config)
 # Write model.f90 file
-modelfile_qp.write('module     [$ process_name asprefix=\_ $]model_qp\n')
+modelfile_qp.write('module     model_qp\n')
 modelfile_qp.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile_qp.write('   use [$ process_name asprefix=\_ $]config, only: ki => ki_qp')[$
+modelfile_qp.write('   use config, only: ki => ki_qp')[$
 @if extension samurai $]
 modelfile_qp.write(', &\n')
 modelfile_qp.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
@@ -2933,7 +2944,7 @@ modelfile_qp.write("  end subroutine\n")[$
 modelfile_qp.write("!---#] EW scheme choice:\n")[$
 @end @if$][$
 @end @select$]
-modelfile_qp.write("end module [$ process_name asprefix=\_ $]model_qp\n")
+modelfile_qp.write("end module model_qp\n")
 
 modelfile_qp.close()
 ### additional formatting for output files

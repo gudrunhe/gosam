@@ -83,14 +83,6 @@ DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
 [% @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-DIAGRAMS_CT=[%
-   @for elements topolopy.keep.ct %] \
-	d[%$_%]l1c.f90[%
-   @end @for %]
-TXT_CT=$(subst .f90,.txt,$(DIAGRAMS_CT))
-SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
-@end @if %]
 
 .PHONY: source
 .SUFFIXES:
@@ -376,30 +368,6 @@ abbrevg[%grp%].f90:[%
 	@end @select %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %]
-d[%$_%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%] @ Helicity sum
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
-		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]l1c \
-		../codegen/golem.frm
-d[%$_%]l1c.f90: d[%$_%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%] @ Helicity sum
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D -1 [% ' all helicities' %] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-	@end @for %][%
-@end @if %][%
 @end @if %]
 
 

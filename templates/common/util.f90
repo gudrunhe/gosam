@@ -1,7 +1,7 @@
 [%' vim: sw=3:syntax=golem
 '%]module     [% process_name asprefix=\_ %]util
    use [% process_name asprefix=\_ %]color, only: numcs
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    implicit none
    private
 
@@ -49,7 +49,7 @@ contains
       end if
    end  function metric_tensor
 
-   pure function cond_q_mu2(cnd, brack, Q, mu2) result(cond)
+   function cond_q_mu2(cnd, brack, Q, mu2) result(cond)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: Q
@@ -58,8 +58,8 @@ contains
       complex(ki) :: cond
 
       interface
-         pure function brack(inner_Q, inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+         function brack(inner_Q, inner_mu2)
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_Q
             complex(ki), intent(in) :: inner_mu2
@@ -74,7 +74,7 @@ contains
       end if
    end  function cond_q_mu2
 
-   pure function cond_mu2(cnd, brack, mu2) result(cond)
+   function cond_mu2(cnd, brack, mu2) result(cond)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), intent(in) :: mu2
@@ -82,8 +82,8 @@ contains
       complex(ki) :: cond
 
       interface
-         pure function brack(inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+         function brack(inner_mu2)
+            use config, only: ki
             implicit none
             complex(ki), intent(in) :: inner_mu2
             complex(ki) :: brack
@@ -98,15 +98,15 @@ contains
    end  function cond_mu2
 
 [% @if extension ninja %]
-   pure subroutine cond_mu_r1(cnd, brack, a, coeffs)
+   subroutine cond_mu_r1(cnd, brack, a, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_co)
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(0:*), intent(inout) :: inner_co
@@ -118,15 +118,15 @@ contains
       end if
    end  subroutine cond_mu_r1
 
-   pure subroutine cond_mu_r2(cnd, brack, a, b, coeffs)
+   subroutine cond_mu_r2(cnd, brack, a, b, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a, b
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_b, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_b, inner_co)
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -139,7 +139,7 @@ contains
       end if
    end  subroutine cond_mu_r2
 
-   pure subroutine cond_abc_p3(cnd, brack, a, b, c, param, coeffs)
+   subroutine cond_abc_p3(cnd, brack, a, b, c, param, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a, b, c
@@ -147,8 +147,8 @@ contains
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -163,7 +163,7 @@ contains
       end if
    end  subroutine cond_abc_p3
 
-   pure subroutine    cond_abc_p2(cnd, brack, a0, a1, b, c, param, coeffs)
+   subroutine    cond_abc_p2(cnd, brack, a0, a1, b, c, param, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a0, a1, b, c
@@ -171,9 +171,9 @@ contains
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
+         subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
            & inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a0
             complex(ki), dimension(4), intent(in) :: inner_a1

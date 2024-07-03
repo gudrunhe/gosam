@@ -12,7 +12,7 @@
    use precision_golem, only: ki_gol => ki
    use tens_rec[%
 @end @if golem95 %]
-   use [% process_name asprefix=\_%]config, only: ki [% @if extension golem95
+   use config, only: ki [% @if extension golem95
    %][% @if extension samurai %], reduction_interoperation, samurai_scalar [% 
    @end @if %][% @end @if %]
    implicit none
@@ -230,7 +230,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    use form_factor_[% $_ %]p, only: a[% $_ %]0[%
       @end @for %]
    use form_factor_type, only: form_factor, operator(+), operator(-)
-   use [% process_name asprefix=\_ %]config, only: debug_nlo_diagrams, logfile
+   use config, only: debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics, only:[%
       @for repeat num_legs shift=1 %][%
          @if is_first %] [% @else %], [%
@@ -241,7 +241,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    & [%
          @end @if%][%symbol%][%
       @end @for mandelstam %]
-   use [% process_name asprefix=\_ %]model
+   use model
    implicit none
    type(tensrec_info_group[% grp %]), intent(in) :: coeffs
    type(form_factor) :: amp, dbg_amp
@@ -440,7 +440,7 @@ function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(
    use [% process_name asprefix=\_ %]precision_pjfry, only: ki_pjf
    use [% process_name asprefix=\_ %]pjfry_comb
    use [% process_name asprefix=\_ %]pjfry95pg
-   use [% process_name asprefix=\_ %]config, only: debug_nlo_diagrams, logfile
+   use config, only: debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics, only:&
    & [%
          @for mandelstam non-zero sym_prefix=es %][% 
@@ -454,7 +454,7 @@ function     fry_tensor_coefficients_group_[% grp %](coeffs, scale2, ep) result(
    &[%
             @end @if %] k[% $_ %][%
          @end @for %]
-   use [% process_name asprefix=\_ %]model
+   use model
    implicit none
    type(tensrec_info_group[% grp %]), intent(in) :: coeffs
    real(ki), intent(in) :: scale2
@@ -634,7 +634,7 @@ function     numetens_group[% grp %](icut, Q, mu2) result(num)
             @else %],[%
             @end @if %] k[% $_ %][%
          @end @for %]
-   use [% process_name asprefix=\_ %]model
+   use model
    implicit none
    integer, intent(in) :: icut
    complex(ki_sam), dimension(4), intent(in) :: Q[%
@@ -779,10 +779,10 @@ subroutine     reduce_numetens_group[% grp %](scale2,tot,totr,ok)
    use madds, only: s_mat[%
    @end @if %][% @end @if %]
    use options, only: samurai_out => iout
-   use [% process_name asprefix=\_ %]config, only: samurai_group_numerators, &
+   use config, only: samurai_group_numerators, &
       samurai_istop, samurai_verbosity
    use [% process_name asprefix=\_ %]kinematics
-   use [% process_name asprefix=\_ %]model
+   use model
    use [% process_name asprefix=\_ %]globalsl1, only: epspow
    implicit none
    real(ki_sam), intent(in) :: scale2

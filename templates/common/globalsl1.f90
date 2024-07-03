@@ -1,5 +1,5 @@
 module     [% process_name asprefix=\_ %]globalsl1
-   use [% process_name asprefix=\_ %]config, only: ki
+   use config, only: ki
    use [% process_name asprefix=\_ %]color, only: numcs
    implicit none
 

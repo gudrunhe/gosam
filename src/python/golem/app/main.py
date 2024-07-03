@@ -13,6 +13,7 @@ import golem.util.tools
 from golem.util.config import GolemConfigError, Form
 import golem.installation
 import golem.util.constants
+from golem.util.tools import error
 
 # The following files contain routines which originally were
 # part of golem-main itself:
@@ -32,7 +33,8 @@ CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
       ('m', "merge=",
          "merge file into template"),
       ('i', "interactive",
-         "run an interactive session (not supported anymore)")
+         "run an interactive session (not supported anymore)"),
+      ('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
    ]
 
 generate_templates = False
@@ -42,11 +44,12 @@ generate_profile = False
 from_scratch = False
 merge_files = []
 interactive_session = None
+ignore_empty_subprocess = False
 
 def arg_handler(name, value=None):
    global generate_templates, use_default_files, template_format, \
          generate_profile, from_scratch, merge_files, \
-         interactive_session, draw_diagrams
+         interactive_session, draw_diagrams, ignore_empty_subprocess
    if name == "scratch":
       from_scratch = True
       return True
@@ -71,6 +74,9 @@ def arg_handler(name, value=None):
    if name == "interactive":
       golem.util.tools.warning("Interactive mode is not supported anymore. GoSam will probably crash.")
       interactive_session = golem.shell.GolemShell()
+      return True
+   elif name == 'ignore-empty-subprocess':
+      ignore_empty_subprocess = True
       return True
 
 def main(argv=sys.argv):
@@ -209,6 +215,7 @@ def main(argv=sys.argv):
          c["golem.full-name"] = GOLEM_FULL
          c["golem.revision"] = \
             golem.installation.GOLEM_REVISION
+         c["ignore_empty_subprocess"] = ignore_empty_subprocess
 
          message("Processing %r" % arg)
          golem.util.tools.POSTMORTEM_CFG = c

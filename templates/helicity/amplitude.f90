@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
- %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if use_order_names %]_[% trnco %][% @end @if %]
-   use [% process_name asprefix=\_ %]config, only: ki, &
+ %]module    [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]
+   use config, only: ki, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color, only: numcs[%
 @if generate_nlo_virt %][%
@@ -15,11 +15,11 @@
       @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %][%
+   use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %][%
       @end @if %][%
       @if extension ninja %]
    use ninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity %][%
+   use [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %][%
       @end @if %][%
    @end @select %][%
 @end @if %][%
@@ -39,10 +39,10 @@ contains
       & num_light_quarks, num_gluons[%
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
    @if internal REQUIRE_FR5 %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
    @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
       implicit none
@@ -85,8 +85,7 @@ contains
 @if generate_lo_diagrams %]opt_amp0,[%
 @else %]the_col0,[%
 @end @if%]opt_perm)
-      use [% process_name asprefix=\_
-         %]config, only: include_eps_terms, include_eps2_terms, &
+      use config, only: include_eps_terms, include_eps2_terms, &
       & logfile, debug_nlo_diagrams
       use [% process_name asprefix=\_
          %]globalsl1, only:[%
@@ -106,7 +105,7 @@ contains
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
-      %]abbrevd[%$_%][% @if use_order_names %]_[% trnco %][% @end @if %]h[%helicity%], only: init_abbrevd[%$_%] => init_abbrev[%
+      %]abbrevd[%$_%][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[%helicity%], only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
    @case group %][%
@@ -119,16 +118,12 @@ contains
 @end @if %][%
 @if generate_lo_diagrams %]
       use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if use_order_names %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
+      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
 @end @if %][%
 @select r2 @case only %][%
 @else %]
       use [% process_name asprefix=\_ %]groups[%
-@end @select %][%
-      @if generate_uv_counterterms %]
-      use [% process_name asprefix=\_
-      %]diagramscth[%helicity%][% @if use_order_names %]_[% trnco %][% @end @if %], only: samplitudect => samplitudect[%
-      @end @if %]
+@end @select %]
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
@@ -145,10 +140,7 @@ contains
       [% @if generate_lo_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(-2:0) :: acc
       [% @if generate_lo_diagrams %]real(ki)[% @else 
-      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part[%
-      @if generate_uv_counterterms %]
-      real(ki), dimension(3) :: sampct[%
-      @end @if %]
+      %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part
 
       logical :: acc_ok
 
@@ -286,12 +278,6 @@ contains
          @end @for groups %][%
       @end @for %][%
    @end @select %][%
-   @if generate_uv_counterterms %]
-      sampct = samplitudect(scale2)
-      samplitude(0) = samplitude(0) + sampct(3)
-      samplitude(-1) = samplitude(-1) + sampct(2)
-      samplitude(-2) = samplitude(-2) + sampct(1)[%
-   @end @if %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
 @end @if helsum %][%
@@ -305,13 +291,13 @@ contains
 @else %][% 'evaluate group only for sum' %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
-   use [% process_name asprefix=\_ %]config, only: &
+   use config, only: &
       & logfile, debug_nlo_diagrams
    use [% process_name asprefix=\_ %]globalsl1, only: epspow[%
       @if extension golem95 %]
    use parametre, only: mu2_scale_par
    use form_factor_type, only: form_factor
-   use [% process_name asprefix=\_ %]golem95[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity
+   use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
        %], only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
          @if extension pjfry %], contract_pjfry[%
@@ -330,7 +316,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use options, only: samurai_out => iout[%
       @end @if %][%
       @if extension ninja %]
-   use [% process_name asprefix=\_ %]ninja[% @if use_order_names %]_[% trnco %][% @end @if %]h[% helicity
+   use [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
       %], only: ninja_reduce => ninja_reduce_group[% grp %][%
       @end @if %]
    implicit none
@@ -590,4 +576,4 @@ end subroutine evaluate_group[% grp %]
 @end @if %][%
    @end @for groups %][%
 @end @select %]
-end module [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if use_order_names %]_[% trnco %][% @end @if %]
+end module [% process_name asprefix=\_ %]amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]

@@ -233,6 +233,14 @@ qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
    """,
    str, "")
 
+qgraf_verbatim_ct = Property("qgraf.verbatim.ct",
+   """\
+   Same as qgraf.verbatim but only applied to CT diagrams.
+
+   See also: qgraf.verbatim, qgraf.verbatim.nlo
+   """,
+   str, "")
+
 ldflags_golem95 = Property("golem95.ldflags",
    """\
    LDFLAGS required to link golem95.
@@ -482,18 +490,6 @@ renorm = Property("renorm",
    bool,
    False, experimental=True)
 
-genUV = Property("genUV",
-   """\
-   Indicates if the UV counterterms should be generated
-   using Qgraf.
-
-   Examples:
-   genUV=true
-   genUV=false
-   """,
-   bool,
-   False, experimental=True)
-
 fc_bin = Property("fc.bin",
    """\
    Denotes the executable file of the Fortran90 compiler.
@@ -609,7 +605,7 @@ extensions = Property("extensions",
       "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
       "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
       "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
-      "noformopt","tracify","better_num","quadruple"])
+      "noformopt","tracify","better_num","quadruple", "meson"])
 
 select_lo_diagrams = Property("select.lo",
    """\
@@ -647,6 +643,24 @@ select_nlo_diagrams = Property("select.nlo",
    """,
    list,sep=",")
 
+select_ct_diagrams = Property("select.ct",
+   """\
+   A list of integer numbers, indicating EFT counterterm diagrams to be
+   selected. If no list is given, all diagrams are selected.
+   Otherwise, all diagrams not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.ct=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.ct=1,2,5,8,50,51,52,53
+
+   See also: select.nlo, filter.lo, filter.nlo
+   """,
+   list,sep=",")
+
 filter_lo_diagrams = Property("filter.lo",
    """\
    A python function which provides a filter for tree diagrams.
@@ -673,11 +687,18 @@ filter_lo_diagrams = Property("filter.lo",
         - massive: select only propagators with/without a non-zero mass
         - color: one of the numbers 1, 3, -3 or 8, or a list of
                  these numbers
+   * d.iprop_momentum(field, momentum="...") = True when the diagram contains
+      a propagator of field with the specified momentum, False otherwise 
    * d.chord(...) = number of loop propagators with the given properties;
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
 
+   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to 
+         inconsistencies in the automatically generated crossings. This
+         can be circumvented by running GoSam with the option --no-crossings
+         or using the iprop_momentum function, which tracks invalid crossings.
+   
    See also: filter.nlo, select.lo, select.nlo
    """,
    str,"")
@@ -687,6 +708,14 @@ filter_nlo_diagrams = Property("filter.nlo",
    A python function which provides a filter for loop diagrams.
 
    See filter.lo for more explanation.
+   """,
+   str,"")
+
+filter_ct_diagrams = Property("filter.ct",
+   """\
+   A python function which provides a filter for eft counterterm diagrams.
+
+   See filter.ct for more explanation.
    """,
    str,"")
 
@@ -937,6 +966,17 @@ config_renorm_yukawa = Property("renorm_yukawa",
    """,
    bool, True)
 
+config_renorm_eftwilson = Property("renorm_eftwilson",
+   """\
+   Sets the same variable in config.f90
+
+   Enables renormalization of EFT Wilson coefficients.
+   Works only with special New Physics UFO models, con-
+   taining 'NP' as additional coupling order. 'order_names'
+   must be specified and explicitly contain 'NP'.
+   """,
+   bool, False, experimental=True)
+
 config_reduction_interoperation = Property("reduction_interoperation",
    """
    Default reduction library.
@@ -1172,20 +1212,23 @@ order_names = Property("order_names",
    """\
    A list of additional coupling order that should be 
    tracked throughout the amplitude generation. Relevant for
-   correct EFT treatment. If given, the 'use_order_names' flag
-   must be set, too. It can be False, but must at least exist.
+   correct EFT treatment. Only works in combination with UFO
+   models. All couplings listed must be defined in the model's
+   coupling_orders.py file.
 
    Example:
    order_names=QCD,NP,QL
    """,
    list,default="",experimental=True)
 
-use_order_names = Property("use_order_names",
+enable_truncation_orders = Property("enable_truncation_orders",
    """\
-   Whether or not to use the 'order_names' property. Can only
-   be activated when using a UFO model file. When no 'order_names'
-   are specified, and use_order_names=True, then a lot of unneces-
-   sary code is generated.
+   Whether or not to generate extra code to assess different
+   truncation orders in EFT calculations. Only works with a
+   New Physics UFO model containing 'NP' as additional coupling
+   order. 'order_names' must be specified and explicitly contain
+   'NP'. When set to False (default) no truncation is performed,
+   i.e. the amplitude is squared in the naive way.
    """,
    bool,
    False, experimental=True)
@@ -1250,6 +1293,24 @@ respect_generations = Property("respect_generations",
    bool,
    False, experimental=True)
 
+meson_buildtype = Property("meson.buildtype", """\
+   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option. The respective buildtypes
+   represent:
+                           Debug Symbols        Optimization level
+      plain                false                plain
+      debug                true                 0
+      debugoptimized       true                 2
+      release              false                3
+      minsize              true                 s
+   """, str, default="release", options=["plain", "debug", "debugoptimized", "release", "minsize"])
+
+meson_arch = Property("meson.arch", """\
+   CPU architecture passed to the compiler as the '-march=<arch>' option. By default, GCC generates
+   code for a generic x86-64 CPU. When using the 'native' option, GCC uses all possible instructions
+   available on the currenly used CPU. This can result in faster executing code, but may make the
+   libraries / executables unusable on other CPUs. For all possible options, see the GCC documentation.
+   """, str, default="x86-64")
+
 properties = [
    process_name,
    process_path,
@@ -1263,7 +1324,6 @@ properties = [
    renorm,
    sum_helicities,
    regularisation_scheme,
-   genUV,
    helicities,
    qgraf_options,
    qgraf_verbatim,
@@ -1278,8 +1338,10 @@ properties = [
 
    select_lo_diagrams,
    select_nlo_diagrams,
+   select_ct_diagrams,
    filter_lo_diagrams,
    filter_nlo_diagrams,
+   filter_ct_diagrams,
    filter_module,
 
    config_renorm_beta,
@@ -1289,6 +1351,7 @@ properties = [
    config_renorm_logs,
    config_renorm_gamma5,
    config_renorm_yukawa,
+   config_renorm_eftwilson,
    config_reduction_interoperation,
    config_reduction_interoperation_rescue,
    config_samurai_scalar,
@@ -1340,13 +1403,16 @@ properties = [
    form_factor_nlo,
 
    order_names,
-   use_order_names,
+   enable_truncation_orders,
    use_vertex_labels,
 
    all_mandelstam,
 
    flavour_groups,
-   respect_generations
+   respect_generations,
+
+   meson_buildtype,
+   meson_arch
 ]
 
 REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
@@ -1417,7 +1483,8 @@ def setInternals(conf):
    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
 
-   conf["__HAGGIES__"] = "noformopt" in extensions or "haggies" in conf["abbrev.color"].lower()
+   conf["__HAGGIES__"] = ("noformopt" in extensions or
+                          ("haggies" in conf["abbrev.color"].lower() if conf["abbrev.color"] else False))
 
    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
    conf["__NUMPOLVEC__"] = "numpolvec" in extensions

@@ -1,11 +1,11 @@
 %=$[% ' vim: syntax=golem
 %]module     [$ process_name asprefix=\_
 	$][% output.file match=".*/([^/.]*)\\.f90" format="%s" %]
-   use [$ process_name asprefix=\_ $]config, only: ki
+   use config, only: ki
    use [$ process_name asprefix=\_ $]globals[% 
            output.file match=".*/[^/.h]*(h[0-9]*)\\.f90" format="%s" %]
    [$ @if internal CUSTOM_SPIN2_PROP
-   $]use [$ process_name asprefix=\_ $]custompropagator[$ @end @if $]
+   $]use custompropagator[$ @end @if $]
    implicit none
    private[%
    @for instructions registers="XXX" %][%
@@ -29,9 +29,10 @@ contains
    @if use_flags_1 $]
       use [$ process_name asprefix=\_ $]groups, only: evaluate_virt_diagram[$
    @end @if $]
-      use [$ process_name asprefix=\_ $]config, only: deltaOS
+      use config, only: deltaOS
       use [$ process_name asprefix=\_ $]kinematics
-      use [$ process_name asprefix=\_ $]model
+      use SpinorBrackets
+      use model
       use [$ process_name asprefix=\_ $]color, only: TR
       use [$ process_name asprefix=\_ $]globalsl1, only: epspow
       implicit none[$
@@ -59,9 +60,10 @@ contains
    end subroutine
 
    subroutine     init_abbrev_cont[% bp %]()
-      use [$ process_name asprefix=\_ $]config, only: deltaOS
+      use config, only: deltaOS
       use [$ process_name asprefix=\_ $]kinematics
-      use [$ process_name asprefix=\_ $]model
+      use SpinorBrackets
+      use model
       use [$ process_name asprefix=\_ $]color, only: TR
       implicit none[%
                @end @if %][%
