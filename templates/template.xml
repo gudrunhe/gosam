@@ -11,7 +11,7 @@
 		<except if-file="exists" in-mode="normal" />
 		<except if-internal="OLP_MODE" />
 	</file>
-	<file src="config.sh" class="Kinematics" executable="yes">
+	<file src="config.sh.in" class="Kinematics" executable="yes">
 	</file>
 	<file src="meson.build" class="Kinematics">
 		<only if-extension="meson" />

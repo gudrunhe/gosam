@@ -1,5 +1,5 @@
 [% @if internal OLP_MODE %][% @else %]
-project('GoSam_Process_[% process_name %]', 'fortran', version:'1.0', meson_version: '>=0.57.0')
+project('GoSam_Process_[% process_name %]', 'fortran', version:'1.0', meson_version: '>=0.57.0', default_options: ['buildtype=release'])
 
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
@@ -31,4 +31,15 @@ meson.add_install_script(
   find_program(files('install_mod_files.py')),
   get_option('includedir') / meson.project_name(),
 )
+configure_file(input: 'config.sh.in', 
+  output: 'config.sh', 
+  configuration: {
+    'prefix': get_option('prefix'),
+    'libdir': get_option('libdir'),
+    'includedir': get_option('includedir') / meson.project_name(),
+    'static_lib': 'libgolem_olp.a'
+  },
+  install: true,
+  install_dir: meson.current_source_dir()
+  )
 [% @end @if %]

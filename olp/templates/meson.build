@@ -1,4 +1,4 @@
-project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.57.0')
+project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.57.0', default_options: ['buildtype=release'])
 
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
@@ -21,10 +21,21 @@ subdir('[% $_ %]')[%
 
 OLP_source += common_source
 
-lib = both_libraries('golem_olp', OLP_source, install: true)#, install_dir: meson.current_source_dir() / '.libs')
+lib = both_libraries('golem_olp', OLP_source, install: true)
 
 install_headers('olp.h', subdir: 'GoSam_Process')
 meson.add_install_script(
   find_program(files('install_mod_files.py')),
   get_option('includedir') / meson.project_name(),
 )
+
+configure_file(input: 'config.sh.in', 
+  output: 'config.sh', 
+  configuration: {
+    'prefix': get_option('prefix'),
+    'libdir': get_option('libdir'),
+    'includedir': get_option('includedir') / meson.project_name(),
+  },
+  install: true,
+  install_dir: meson.current_source_dir()
+  )

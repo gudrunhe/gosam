@@ -6,11 +6,7 @@ else
    PWD="$(dirname "$0")"
 fi
 
-[% @if internal OLP_MODE %]
-MAKEFILECONF=$PWD/../Makefile.conf[%
-@else %]
-MAKEFILECONF=$PWD/Makefile.conf[%
-@end @if %]
+MAKEFILECONF=$PWD/Makefile.conf
 
 FC="$(sed -n 'H
    ${
@@ -34,22 +30,12 @@ CFLAGS="$(sed -n 'H
    }' $MAKEFILECONF|\
    grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
 
-[% @if internal OLP_MODE %]
 [% @if extension shared %]
-PROCESS_LDFLAGS="-L$PWD/lib -Wl,-rpath=$PWD/lib"
+PROCESS_LDFLAGS="-L@prefix@/@libdir@ -Wl,-rpath=@prefix@/@libdir@"
 [% @else %]
-PROCESS_LDFLAGS="$PWD/lib/libgolem_olp.a"
+PROCESS_LDFLAGS="@prefix@/@libdir@/libgolem_olp.a"
 [% @end @if %]
-PROCESS_CFLAGS="-I$PWD/include/GoSam_Process"
-[% @else %]
-[% @if extension shared %]
-PROCESS_LDFLAGS="-L$PWD/lib -Wl,-rpath=$PWD/lib"
-[% @else %]
-PROCESS_LDFLAGS="$PWD/lib/libgolem_process_[% process_name %].a"
-[% @end @if %]
-
-PROCESS_CFLAGS="-I$PWD/include/GoSam_Process_[% process_name %]"
-[% @end @if %]
+PROCESS_CFLAGS="-I@prefix@/@includedir@"
 
 while [ $# -gt 0 ]; do
    case "$1" in
