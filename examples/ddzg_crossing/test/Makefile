@@ -4,6 +4,8 @@ PROCESS2=dgzd
 
 FC=$(shell sh ../$(PROCESS1)/config.sh -fortcom)
 
+FCFLAGS=-ffree-line-length-none
+
 CFLAGS=$(shell sh ../$(PROCESS1)/config.sh -cflags)
 CFLAGS+=$(shell sh ../$(PROCESS2)/config.sh -cflags)
 
@@ -18,7 +20,7 @@ DEPS+=$(shell sh ../$(PROCESS2)/config.sh -deps)
 compile: test_program
 
 test.o: test.f90
-	$(FC) $(CFLAGS) -o $@ -c $<
+	$(FC) $(CFLAGS) $(FCFLAGS) -o $@ -c $<
 
 test_program: test.o $(DEPS)
 	$(FC) -o $@ $< $(LDFLAGS)
