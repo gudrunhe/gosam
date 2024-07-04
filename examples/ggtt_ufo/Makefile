@@ -1,7 +1,9 @@
 
 PROCESS=ggtt
 
+ifndef GOSAM
 GOSAM=gosam.py
+endif
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 

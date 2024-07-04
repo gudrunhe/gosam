@@ -2,7 +2,9 @@
 PROCESS1=ddzg
 PROCESS2=dgzd
 
+ifndef GOSAM
 GOSAM=gosam.py
+endif
 GOSAM_RC1=$(addprefix -m ,$(wildcard ../setup.in)) -m $(PROCESS1).rc
 GOSAM_RC2=$(addprefix -m ,$(wildcard ../setup.in)) -m $(PROCESS2).rc
 

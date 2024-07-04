@@ -1,5 +1,7 @@
 .DEFAULT_GOAL=runtests
 
+GOSAM_BIN=gosam.py
+
 .PHONY : clean
 clean :
 	for f in * ; \
@@ -39,7 +41,7 @@ $(ALL_TESTS) :
 	|| printf "make very-clean failed\n@@@ FAILURE @@@\n" \
 		> "$@/test/test.log" \
 	printf "Running 'make test' in $@...\n"
-	$(MAKE) -C "$@" test \
+	$(MAKE) GOSAM=$(GOSAM_BIN) -C "$@" test \
 	|| printf "make test failed\n@@@ FAILURE @@@\n" \
 		> "$@/test/test.log"
 	echo ------------------------------------------------------------

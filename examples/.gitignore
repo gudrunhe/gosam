@@ -1,0 +1,11 @@
+*/virtual
+__pycache__
+test_program
+ddzg
+dgzd
+*.crashed
+*.in
+*.log
+*.mod
+*.o
+*.olc
