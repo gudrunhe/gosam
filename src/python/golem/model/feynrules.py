@@ -155,7 +155,7 @@ class Model:
 							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
 				elif isinstance(c.value,str):
 					# the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
-					CTparams = [ctp for ctp in self.all_CTparameters if ctp.name in re.split('\(|\)|\+|\*|-|/', c.value)]
+					CTparams = [ctp for ctp in self.all_CTparameters if ctp.name in re.split(r'\(|\)|\+|\*|-|/', c.value)]
 					CTpoles = set()
 
 					for ctparam in CTparams:
