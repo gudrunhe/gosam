@@ -800,8 +800,6 @@ def run_analyzer(path, conf, in_particles, out_particles):
 			for d in mod_diag_ct.diagrams.values():
 				d.unitary_gauge = True
 
-		# keep_tree, tree_signs, tree_flows =
-		keep_ct, ct_signs = \
 		keep_ct, ct_signs, ctcache = \
 				golem.topolopy.functions.analyze_ct_diagrams(
 					mod_diag_ct.diagrams, model, conf,
