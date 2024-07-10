@@ -5,7 +5,7 @@ add_project_arguments('-w', language: 'cpp')
 
 threads = dependency('threads')
 
-cc = meson.get_compiler('c')
+cc = meson.get_compiler('cpp')
 cdata = configuration_data()
 check_headers = [
   'fcntl.h',
