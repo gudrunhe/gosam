@@ -14,8 +14,8 @@ project('GoSam',
 
 python = import('python').find_installation()
 
-if not python.language_version().version_compare('>=3.6')
-    error('Found Python version ' + python.language_version() + ', but the minimum required version is 3.6')
+if not python.language_version().version_compare('>=3.7')
+    error('Found Python version ' + python.language_version() + ', but the minimum required version is 3.7')
 endif
 
 git_rev = run_command(find_program('git'), 'rev-parse', '--short=7', 'HEAD', capture: true, check: true).stdout().strip()
