@@ -198,6 +198,7 @@ class Diagram:
       for v in self._loop_vertices:
          rk += self._vertices[v].rank
 
+      # ToDo: MH: What exactly does this do? How do effective couplings affect this?
       if MQSE and self.isMassiveQuarkSE() and rk < 2:
          return 2
 
@@ -296,7 +297,25 @@ class Diagram:
             color=[8,-8]) != 1:
          return False
 
+      for lv in self._loop_vertices:
+         if self._vertices[lv].numlegs() != 3:
+            return False
+         
+      if self.NPinloop():
+         # exclude self-energy graphs with NP-vertex insertions
+         # ToDo: this is potentially problematic but needed to 
+         # resolve issues with the chromomagentic operator CtG
+         # => How to do mass renormalisation in presence of SMEFT operators?
+         return False
+
       return True
+   
+   def NPinloop(self):
+      for lv in self._loop_vertices:
+         vertord = self._vertices[lv].get_orders()
+         if (False if 'NP' not in vertord.keys() else (vertord['NP']!=0)):
+            return True
+      return False
 
    def isScaleless(self):
       powfmt='%s**%d'
@@ -926,6 +945,12 @@ class Vertex(DiagramComponent):
          flist.append(str(fields))
 
       return self.match_fields(rays, flist) if flist else True
+
+   def numlegs(self):
+      return len(self.fields)
+
+   def get_orders(self):
+      return self.orders
 
    def __repr__(self):
       return "Vertex(" + (", ".join(["index=%s" % self.index,
