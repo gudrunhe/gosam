@@ -34,6 +34,9 @@ CFLAGS="$(sed -n 'H
    }' $MAKEFILECONF|\
    grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
 
+LDFLAGS="$LDFLAGS @dep_ldflags@"
+CFLAGS="$CFLAGS @dep_cflags@"
+
 [% @if internal OLP_MODE %]
 [% @if extension shared %]
 PROCESS_LDFLAGS="-L@prefix@/@libdir@ -Wl,-rpath=@prefix@/@libdir@"

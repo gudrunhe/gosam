@@ -241,62 +241,6 @@ qgraf_verbatim_ct = Property("qgraf.verbatim.ct",
    """,
    str, "")
 
-ldflags_golem95 = Property("golem95.ldflags",
-   """\
-   LDFLAGS required to link golem95.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   golem95.ldflags=-L/usr/local/lib/ -lgolem-gfortran-double
-
-   """,
-   str,
-   "")
-
-fcflags_golem95 = Property("golem95.fcflags",
-   """\
-   FCFLAGS required to compile with golem95.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   golem95.fcflags=-I/usr/local/include/golem95
-
-   """,
-   str,
-   "")
-
-ldflags_samurai = Property("samurai.ldflags",
-   """\
-   LDFLAGS required to link samurai.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   samurai.ldflags=-L/usr/local/lib/ -lsamurai-gfortran-double
-
-   """,
-   str,
-   "")
-
-fcflags_samurai = Property("samurai.fcflags",
-   """\
-   FCFLAGS required to compile with samurai.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   samurai.fcflags=-I/usr/local/include/samurai
-
-   """,
-   str,
-   "")
-
 version_samurai = Property("samurai.version",
    """\
    The version of the samurai library in use.
@@ -307,34 +251,6 @@ version_samurai = Property("samurai.version",
    """,
    str,
    "2.1.1", hidden=True)
-
-ldflags_ninja = Property("ninja.ldflags",
-   """\
-   LDFLAGS required to link ninja.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   ninja.ldflags=-L/usr/local/lib/ -lninja
-
-   """,
-   str,
-   "")
-
-fcflags_ninja = Property("ninja.fcflags",
-   """\
-   FCFLAGS required to compile with ninja.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   ninja.fcflags=-I/usr/local/include/ninja
-
-   """,
-   str,
-   "")
 
 zero = Property("zero",
    """\
@@ -1369,13 +1285,7 @@ properties = [
    fc_bin,
    python_bin,
 
-   fcflags_ninja,
-   ldflags_ninja,
-   fcflags_samurai,
-   ldflags_samurai,
    version_samurai,
-   fcflags_golem95,
-   ldflags_golem95,
 
    r2,
    symmetries,

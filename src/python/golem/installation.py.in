@@ -1,0 +1,19 @@
+DATA_DIR = '@prefix@/@datadir@'
+INFO = {
+   'name': 'gosam',
+   'version': '@version@',
+   'author': 'The GoSam (Golem and Samurai) Collaboration',
+   'author_email': 'gosam@hepforge.org',
+   'maintainer': 'The GoSam Collaboration',
+   'maintainer_email': 'gosam@hepforge.org',
+   'url': 'https://github.com/gudrunhe/gosam',
+   'description': 'GoSam, An Automated One-Loop Matrix Element Generator',
+   'long_description': '\t\t\t\tGoSam is a matrix element generator for one-loop\n\t\t\t\tamplitudes in quantum field theories.\n\t\t\t\t',
+   'license': 'GPLv3+',
+   'platforms': ['POSIX'],
+   'classifiers': ['License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)', 'Development Status :: 5 - Production/Stable', 'Environment :: Console', 'Intended Audience :: Developers', 'Intended Audience :: Science/Research', 'Natural Language :: English', 'Operating System :: POSIX', 'Programming Language :: Fortran', 'Programming Language :: Python', 'Programming Language :: Python :: 3', 'Topic :: Scientific/Engineering :: Physics'],
+   'provides': ['gosam (@version@)']
+}
+
+GOLEM_VERSION = [@major_version@,@minor_version@,@patch_version@]
+GOLEM_REVISION = '@VCS_TAG@'

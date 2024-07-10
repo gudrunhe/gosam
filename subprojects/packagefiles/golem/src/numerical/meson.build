@@ -1,0 +1,1 @@
+golem95_src += files(['mod_adapt_gauss.f90', 'mod_numeric.f90'])

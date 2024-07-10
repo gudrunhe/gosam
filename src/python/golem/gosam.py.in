@@ -1,9 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # vim: ts=3:sw=3:expandtab
 
 import sys
-
-### [line replaced by setup.py - do not delete]
+sys.path = sys.path[:1] + ['@py_install_dir@'] + sys.path[1:]
 
 import golem.app.main as main
 import golem.app.olp as olp

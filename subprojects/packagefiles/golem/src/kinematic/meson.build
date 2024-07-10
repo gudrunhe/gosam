@@ -1,0 +1,1 @@
+golem95_src += files(['inverse_matrice.f90', 'matrice_s.f90'])

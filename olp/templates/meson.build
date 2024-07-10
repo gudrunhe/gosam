@@ -1,4 +1,22 @@
-project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.57.0', default_options: ['buildtype=release'])
+project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.58.0', default_options: ['buildtype=release'])
+
+dependencies = []
+dependencies += dependency('avh_olo')
+[% @if extension golem95 %]dependencies += dependency('golem95')[% @end @if %]
+[% @if extension samurai %]dependencies += dependency('samurai')
+dependencies += dependency('ff')
+dependencies += dependency('qcdloop')[% @end @if %]
+[% @if extension ninja %]dependencies += dependency('ninja')[% @end @if %]
+
+dep_ldflags = ''
+dep_cflags = ''
+pkg_config = find_program('pkg-config')
+
+foreach d: dependencies
+    dep_ldflags += ' ' + run_command(pkg_config, '--libs', d.name(), capture: true, check: true).stdout()
+    dep_ldflags += ' -Wl,-rpath,' + d.get_variable('libdir')
+    dep_cflags += ' ' + run_command(pkg_config, '--cflags', d.name(), capture: true, check: true).stdout()
+endforeach
 
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
@@ -21,7 +39,7 @@ subdir('[% $_ %]')[%
 
 OLP_source += common_source
 
-lib = both_libraries('golem_olp', OLP_source, install: true)
+lib = both_libraries('golem_olp', OLP_source, install: true, dependencies: dependencies)
 
 install_headers('olp.h', subdir: 'GoSam_Process')
 meson.add_install_script(
@@ -35,6 +53,8 @@ configure_file(input: 'config.sh.in',
     'prefix': get_option('prefix'),
     'libdir': get_option('libdir'),
     'includedir': get_option('includedir') / meson.project_name(),
+    'dep_cflags': dep_cflags,
+    'dep_ldflags': dep_ldflags
   },
   install: true,
   install_dir: meson.current_source_dir()
