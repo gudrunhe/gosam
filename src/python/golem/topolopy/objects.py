@@ -203,7 +203,8 @@ class Diagram:
          return 2
 
       if rk > self.loopsize() + 1:
-         error("Encountered diagram with rank - loopsize = {} - {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize()))
+         debug("{}".format(self))
+         error("Encountered diagram with rank {}, loopsize {} and rank - loopsize = {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize(), rk - self.loopsize()))
 
       return rk
 

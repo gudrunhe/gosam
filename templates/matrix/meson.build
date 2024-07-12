@@ -10,6 +10,9 @@ if get_option('test_executables')
     [% @end @if %]
     [% process_name %]_test = executable('[% process_name %]_test',
                                          [% process_name %]_test_source,
+                                         dependencies: dependencies,
+                                         install_rpath: dependencies[0].get_variable('libdir'),
+                                         link_args: '-Wl,--disable-new-dtags',
                                          build_by_default: false,
                                          install: true,
                                          install_dir: meson.project_source_root() / 'test')
