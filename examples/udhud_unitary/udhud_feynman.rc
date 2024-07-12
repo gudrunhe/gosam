@@ -1,0 +1,17 @@
+process_name=udhud_feynman
+process_path=udhud_feynman
+
+in=anti1, part2
+out=part25, anti1, part2
+order=QED, 3, 3
+model=FeynRules, ../model/Standard_Model_UFO
+
+one=mdlee,mdlG
+zero=mdlMB
+
+qgraf.options=notadpole,nosnail,onshell
+qgraf.verbatim=true=iprop[part3,part4,part5,part6,part11,part13,part15,0,0];
+
+reduction_programs=ninja, golem95
+
+filter.nlo= lambda d: d.chord(part21) > 0
