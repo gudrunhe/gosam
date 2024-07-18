@@ -1,0 +1,37 @@
+diff -r f8af2931f63c src/ninjago.F90
+--- a/src/ninjago.F90	Thu Jun 15 14:16:46 2017 +0100
++++ b/src/ninjago.F90	Wed Jul 17 21:34:40 2024 +0200
+@@ -12,12 +12,19 @@
+   public :: ki_nin
+ 
+   ! subroutines
+-  public :: ninja_diagram, ninja_diagram_rm, ninja_diagram_cm, ninja_diagram_nm
+-  public :: ninja_clear_integral_cache, ninja_free_integral_cache
+-  public :: ninja_set_test, ninja_set_test_tolerance
+-  public :: ninja_set_verbosity, ninja_set_output_precision
++  public :: ninja_diagram
++  public :: ninja_diagram_rm
++  public :: ninja_diagram_cm
++  public :: ninja_diagram_nm
++  public :: ninja_clear_integral_cache
++  public :: ninja_free_integral_cache
++  public :: ninja_set_test
++  public :: ninja_set_test_tolerance
++  public :: ninja_set_verbosity
++  public :: ninja_set_output_precision
+   public :: ninja_set_integral_library
+-  public :: ninja_fp_check_default_threshold, ninja_fp_check_threshold
++  public :: ninja_fp_check_default_threshold
++  public :: ninja_fp_check_threshold
+   public :: ninja_fp_check
+ 
+   ! parameter flags
+@@ -102,7 +109,7 @@
+   !
+   ! S-matrix is a 2-dimensional array s_mat where S(i,j) =
+   ! (Vi(i)-Vi(j))^2.
+-  interface  ninja_diagram
++  interface ninja_diagram
+ 
+      ! Interface for real masses
+      subroutine ninja_diagram_rm(numerator, numerator_t3, numerator_t2,&

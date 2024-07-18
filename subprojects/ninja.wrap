@@ -4,7 +4,7 @@ source_filename=ninja-1.1.0.tar.gz
 directory=ninja-1.1.0
 source_hash=04b544a8b9d3e5be28e60d7e808ee4a91e9e5196783148b5e6ec5046e78e836b
 patch_directory=ninja
-diff_files = ninja/types.hh.patch
+diff_files = ninja/types.hh.patch, ninja/genquadsources.sed.patch, ninja/ninjago.F90.patch
 
 [provide]
 dependency_names = ninja
