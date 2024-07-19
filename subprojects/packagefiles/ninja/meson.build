@@ -14,6 +14,7 @@ ninja_subdirs = ['ninja']
 ninja_src = files(['src/basis.cc', 'src/cuts_utils.cc', 'src/ninja.cc', 'src/Xcuts.cc', 'src/cuts.cc',
     'src/Xninja.cc', 'src/spinors.cc', 'src/tensor_ninja.cc', 'src/coefficient_level_subs.cc',
     'src/integral_library.cc', 'src/avholo_interface.cc', 'src/rambo.cc', 'src/ninja_wraps.cc', 'src/ninjago.F90',
+    'src/gosam_interface.cc', 'src/gosam_interface.hh',
     'src/basis.hh', 'src/cuts.hh', 'src/cuts_utils.hh', 'src/Xcuts.hh',
     'src/cuts_utils-inl.hh', 'src/coefficient_level_subs.hh', 'src/integermath.hh', 'src/tmp_utils.hh',
     'src/ninja_scoped_array.hh', 'src/cuts_vector.hh', 'src/integral_library_wrapper.hh', 'src/s_mat_wrapper.hh',
@@ -50,7 +51,7 @@ if get_option('quadninja')
     ninja_subdirs += 'quadninja'
 endif
 
-ninja_src += files(['src/ninjavholo_wraps.cc', 'src/ninjavholo.F90', 'src/gosam_interface.cc', 'src/mninja.F90'])
+ninja_src += files(['src/ninjavholo_wraps.cc', 'src/ninjavholo.F90', 'src/mninja.F90'])
 
 ninja = both_libraries('ninja',
     ninja_src,
