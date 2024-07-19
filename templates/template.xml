@@ -277,6 +277,10 @@
 		<file src="SpinorBrackets.f90" class="Kinematics">
 			<except if-internal="OLP_MODE"/>
 		</file>
+		<file src="SpinorBrackets_qp.f90" class="Kinematics">
+			<except if-internal="OLP_MODE"/>
+			<only if-extension="quadruple"/>
+		</file>
 	</directory>
 
 	<directory src="doc">

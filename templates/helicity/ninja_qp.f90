@@ -18,7 +18,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use iso_c_binding, only: c_ptr, c_loc, c_int
    use quadninjago_module
    use [% process_name asprefix=\_ %]kinematics_qp
-   use SpinorBrackets
+   use SpinorBrackets_qp
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
