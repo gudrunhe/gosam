@@ -12,6 +12,10 @@ project('GoSam',
     ]
 )
 
+if not (build_machine.system() == 'linux' or build_machine.system() == 'darwin')
+    error('Found system ' + build_machine.system() + ', but only Linux and OSX are supported.')
+endif
+
 python = import('python').find_installation()
 
 if not python.language_version().version_compare('>=3.7')

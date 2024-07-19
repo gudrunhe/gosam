@@ -79,7 +79,7 @@ This file contains a list of processes that have been used to validate GoSam:
 
 - ___hyy___: $H(k_1) \rightarrow \gamma(k_2) + \gamma(k_3)$ @ $\alpha^3$ \
            This is a loop induced process, it also includes only one helicity. \
-           Bosonic and fermionic contributions can be enabled seperately, only fermionic contributions by default.
+           Bosonic and fermionic contributions can be enabled separately, only fermionic contributions by default.
 
 
 - ___hyy_all_helicities___: $H(k_1) \rightarrow \gamma(k_2) + \gamma(k_3)$ @ $\alpha^3$ \
@@ -132,7 +132,7 @@ This file contains a list of processes that have been used to validate GoSam:
 
 
 - ___WpWpjj___: $u(k_1)+\bar{d}(k_2) \rightarrow \bar{c}(k_3)+s(k_4)+e^{+}(k_5)+\nu_e(k_6)+\mu^{+}(k_7)+\nu_\mu(k_8)$ @ $\alpha_s^4, \alpha^4$ \
-           Comparison with single phase space point of arXiv:1007.5313v???
+           Comparison with single phase space point of [arXiv:1007.5313](https://arxiv.org/abs/1007.5313)
 
 
 - ___yyyy___: $\gamma(k_1)+\gamma(k_2) \rightarrow \gamma(k_3)+\gamma(k_4)$ \
@@ -152,7 +152,7 @@ Each example can be run by executing
 ```console
 make test
 ```
-in the respective example folder. Additonally, a `Makefile` is provided to automatically run multiple tests. 
+in the respective example folder. Additionally, a `Makefile` is provided to automatically run multiple tests. 
 It defines the following commands:
 
 - `make runtests`: \
@@ -186,6 +186,6 @@ It defines the following commands:
 # Possible Issues
 
 In case you encounter failing tests, please, contact the authors. Bug reports,
-including the corresponding 'ntest/test.log' can be sent to
+including the corresponding `ntest/test.log` can be sent to
 
-The GoSam collaboration http://gosam.hepforge.org/
+[The GoSam collaboration](https://github.com/gudrunhe/gosam)
