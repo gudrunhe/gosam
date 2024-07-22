@@ -21,6 +21,6 @@ generated_source = ['color.f90' [% @if internal OLP_MODE %][% @else %], 'version
 [% @if internal OLP_MODE %][% @else %]
 [% process_name %]_source += files(['config.f90', 'accu.f90', 'SpinorBrackets.f90' [% @if internal CUSTOM_SPIN2_PROP %], 'custompropagator.f90'[%
 @end @if %]])
-[% @if extension quadruple %] [% process_name %]_source += files(['accu_qp.f90', 'SpinorBrackets_qp.f90'[% @end @if %]])
+[% @if extension quadruple %] [% process_name %]_source += files(['accu_qp.f90', 'SpinorBrackets_qp.f90'])[% @end @if %]
 [% @end @if %]
 [% process_name %]_source += [% process_name %]_common_gen
