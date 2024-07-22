@@ -6,7 +6,7 @@
 '%]module     [% process_name asprefix=\_ %]kinematics_qp
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
-   use SpinorBrackets
+   use SpinorBrackets_qp
    use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    save

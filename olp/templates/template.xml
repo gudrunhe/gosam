@@ -71,5 +71,8 @@
 		</file>
 		<file src="Makefile.source" class="OLP" usedby="olp"/>
 		<file src="SpinorBrackets.f90" class="OLP" usedby="olp"/>
+		<file src="SpinorBrackets_qp.f90" class="OLP" usedby="olp">
+			<only if-extension="quadruple"/>
+		</file>
 	</directory>
 </template>

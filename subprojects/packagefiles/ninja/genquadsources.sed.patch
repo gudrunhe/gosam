@@ -1,0 +1,14 @@
+diff -r f8af2931f63c src/quadsources/genquadsources.sed
+--- a/src/quadsources/genquadsources.sed	Thu Jun 15 14:16:46 2017 +0100
++++ b/src/quadsources/genquadsources.sed	Wed Jul 17 21:17:09 2024 +0200
+@@ -8,6 +8,10 @@
+ s/ NINJA_/ QUADNINJA_/g
+ s/ninjavholo_/quadninjavholo_/g
+ s/ninja_tensor_evaluate/quadninja_tensor_evaluate/g
++s/ninjago_/quadninjago_/g
++s/public :: ninja_/public :: quadninja_/g
++s/subroutine ninja_/subroutine quadninja_/g
++s/interface ninja_/interface quadninja_/g
+ s;//quadninja//;;g
+ s;!!quadninja!!;;g
+ 

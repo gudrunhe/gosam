@@ -1,0 +1,6 @@
+option(
+    'quadninja',
+    type: 'boolean',
+    value: true,
+    description: 'Build QuadNinja, a copy of Ninja in quadruple precision'
+    )
