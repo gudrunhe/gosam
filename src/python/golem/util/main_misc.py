@@ -211,12 +211,16 @@ def find_config_files():
 	files = [".gosam", ".golem",
 			"gosam.in", "golem.in",
 			"gosam.conf", "golem.conf"]
+	avail_props = list(map(str,[p for p in golem.properties.properties]))
 	for dir in directories:
 		for file in files:
 			full_name = os.path.join(dir, file)
 			if os.path.exists(full_name):
-				with open(full_name, 'r') as f:
-					props.load(f)
+				try:
+					with open(full_name, 'r') as f:
+						props.load(f,avail_props)
+				except GolemConfigError as err:
+					golem.util.tools.error("Configuration file is not sound:", str(err))
 	libpaths = find_libraries()
 	for flag in libpaths:
 		props.setProperty(flag, libpaths[flag])
@@ -349,8 +353,11 @@ def read_golem_dir_file(path):
 
 	dir_file = os.path.join(path, consts.GOLEM_DIR_FILE_NAME)
 	if os.path.exists(dir_file):
-		with open(dir_file, 'r') as f:
-			result.load(f)
+		try:
+			with open(dir_file, 'r') as f:
+				result.load(f)
+		except GolemConfigError as err:
+			golem.util.tools.error("Configuration file is not sound:", str(err))
 
 		ver = list(map(int,result["golem-version"].split(".")))
 
@@ -510,7 +517,6 @@ def workflow(conf):
 			raise_err = True
 			err_str = err_str+", use_vertex_labels" if err_str else "use_vertex_labels"
 		if raise_err:
-			print(err_str);
 			raise GolemConfigError("The properties '{0}'".format(err_str) +
 			  " which you set in your configuration are only compatible" +
 			  " with a UFO model, but you did not use one.")
@@ -524,7 +530,6 @@ def workflow(conf):
 			raise_err = True
 			err_str = err_str+", renorm_eftwilson" if err_str else "renorm_eftwilson"
 		if raise_err:
-			print(err_str);
 			raise GolemConfigError("The properties '{0}'".format(err_str) +
 			  " which you set in your configuration can only be used when" +
 			  " 'order_names' are specified and contain the parameter 'NP'.")

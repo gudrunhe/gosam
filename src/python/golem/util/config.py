@@ -377,9 +377,11 @@ class Properties:
       for key in keys:
          stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
 
-   def load(self, stream):
+   def load(self, stream, avail_props=[]):
       dollar_variables = []
       buf = ""
+      raise_err = False
+      err_str = ""
       for line in stream:
          buf += line.strip()
          if buf.startswith("!") or buf.startswith("#"):
@@ -438,9 +440,18 @@ class Properties:
             dollar_variables.append( (key[1:], value) )
          else:
             if "contrib_fc" in key:
+               buf = ""
+               continue
+            if (False if avail_props == [] else (key not in avail_props)):
+               raise_err = True
+               err_str = err_str+", "+str(key) if err_str else str(key)
+               buf = ""
                continue
             self.setProperty(unescape(key), unescape(value))
          buf = ""
+      if raise_err:
+         raise GolemConfigError("The properties '{0}'".format(err_str)
+                                +" which you set in your configuration file are unknown.")
 
    def __getitem__(self, key):
       return self._getProperty(key)

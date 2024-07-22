@@ -203,6 +203,8 @@ def main(argv=sys.argv):
             f.seek(0)
             c.load(f)
             f.close()
+         except GolemConfigError as err:
+            golem.util.tools.error("Configuration file is not sound:", str(err))
          finally:
             if temp_file_path:
                os.unlink(temp_file_path)

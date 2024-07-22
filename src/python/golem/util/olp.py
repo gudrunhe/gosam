@@ -552,9 +552,7 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
                         subprocess.removeCrossing(sp.id)
 
                except golem.util.config.GolemConfigError as err:
-                  result = 1
-                  for id in subprocess.getIDs():
-                     contract_file.setProcessError(id, "Error: %s" % err)
+                  golem.util.tools.error("Configuration file is not sound:", str(err))
 
          # Regenerate process files for the original subprocess with new list of crossings
          shutil.rmtree(process_path)
@@ -594,9 +592,7 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
             subprocess_conf))
 
    except golem.util.config.GolemConfigError as err:
-      result = 1
-      for id in subprocess.getIDs():
-         contract_file.setProcessError(id, "Error: %s" % err)
+      golem.util.tools.error("Configuration file is not sound:", str(err))
 
    subprocesses[subprocess_key] = subprocess
    subprocesses_conf_short[subprocess.id] = subprocess_conf
