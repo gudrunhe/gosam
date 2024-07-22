@@ -12,11 +12,11 @@ installation_py = configure_file(
     configuration : {
         'prefix': get_option('prefix'),
         'datadir': get_option('datadir'),
-        'version': meson.project_version(),
-        'major_version': meson.project_version().split('.')[0],
-        'minor_version': meson.project_version().split('.')[1],
-        'patch_version': meson.project_version().split('.')[2],
-        'VCS_TAG': git_rev
+        'version': meson.project_version().split('-')[0],
+        'major_version': meson.project_version().split('-')[0].split('.')[0],
+        'minor_version': meson.project_version().split('-')[0].split('.')[1],
+        'patch_version': meson.project_version().split('-')[0].split('.')[2],
+        'VCS_TAG': meson.project_version().split('-')[1]
     },
     install: true,
     install_dir: python.get_install_dir() / 'golem'

@@ -1,15 +1,14 @@
 project('GoSam',
     'fortran',
     'cpp',
-    version: '3.0.0',
-    default_options: [
-        'buildtype=release',
-        'bindir=' + get_option('bindir') + '/GoSam',
-        'includedir=' + get_option('includedir') + '/GoSam',
-        'libdir=' + get_option('libdir') + '/GoSam',
-        'datadir=' + get_option('datadir') + '/GoSam',
-        'b_ndebug=false'
-    ]
+    version: '3.0.0-' + run_command(find_program('git'), 'rev-parse', '--short=7', 'HEAD', capture: true, check: true).stdout().strip(),
+    default_options: {
+        'buildtype': 'release',
+        'bindir': get_option('bindir') + '/GoSam',
+        'includedir': get_option('includedir') + '/GoSam',
+        'libdir': get_option('libdir') + '/GoSam',
+        'datadir': get_option('datadir') + '/GoSam'
+    }
 )
 
 if not (build_machine.system() == 'linux' or build_machine.system() == 'darwin')
@@ -22,7 +21,7 @@ if not python.language_version().version_compare('>=3.7')
     error('Found Python version ' + python.language_version() + ', but the minimum required version is 3.7')
 endif
 
-git_rev = run_command(find_program('git'), 'rev-parse', '--short=7', 'HEAD', capture: true, check: true).stdout().strip()
+meson.add_dist_script('cement-version.sh', meson.project_version())
 
 subproject('avh_olo')
 subproject('ff')
