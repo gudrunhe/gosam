@@ -10,7 +10,7 @@
 \input lstolp
 %\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
 %\lstset{basicstyle=\tt,backgroundcolor=\color{lstbg}}
-\newcommand{\gosamversion}{{2{.}0}}
+\newcommand{\gosamversion}{{3{.}0}}
 \newcommand{\gosam}{{\sc GoSam}\xspace}
 \newcommand{\gosamv}[1][\gosamversion]{{\sc GoSam}\xspace}
 \newcommand{\golemVC}{{\tt golem95C}\xspace}
@@ -48,7 +48,7 @@
 \newcommand{\nn}{\nonumber}
 \def\eps{\epsilon}
 
-\title{{\sc GoSam}\,2.0 Manual}
+\title{{\sc GoSam}\,3.0 Manual}
 \author{The GoSam Collaboration}
 \date{Version \today}
 
@@ -83,7 +83,6 @@ can be reduced and evaluated numerically with either
 \ninja~\cite{Mastrolia:2012bu,vanDeurzen:2013saa,Peraro:2014cba}
 or \golemVC~\cite{Golem95:2008,Cullen:2011kv,Guillet:2013msa}
 or \samurai~\cite{Mastrolia:2010nb,vanDeurzen:2013pja}.
-%or \pjfry~\cite{Yundin:2011,Fleischer:2010sq}.
 A file containing the pictorial represenation of the diagrams along with other information 
 about the process is also produced. 
 
@@ -103,169 +102,85 @@ prompts, with
 \chapter{Download and installation}
 \section{Prerequisites}
 
-The distribution of \gosam-\gosamversion{}, together with the install script, 
-will provide all external and auxiliary programs which are necessary 
+The distribution of \gosam-\gosamversion{} will provide all external and auxiliary programs which are necessary 
 to successfully run \gosam. 
 Therefore, the user does not have to install any external programs manually.
 
 The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
 The system requirements are
-\python~($\geq3.6$),
+\python~($\geq3.7$),
 a {\tt fortran} compiler (gfortran or ifort), 
-a C/C++ compiler (gcc/icc), and (GNU) {\tt make}.
+a C/C++ compiler (gcc/icc), (GNU) {\tt make}, and the Meson build system.
 By default, \gosam uses the gfortran/gcc  compilers from the GNU Compiler Suite.
-To use an Intel compiler  (ifort/icc), the {\tt --intel} option can be used.
-Specific paths to the compilers can be provided using the {\tt --fc, --cc, --cxx}  options.
+To use a different {\tt fortran} compiler and linker, the {\tt FC} and {\tt FC\_LD} environment variables can
+be set during the installation.
 
 
 \section{Download}
 
-The \gosam-\gosamversion{} source code 
-will be downloaded automatically by the install script {\tt gosam\_installer.py}. 
-The install script can be downloaded by \\
-{\$  \tt wget http://gosam.hepforge.org/gosam-installer/gosam\_installer.py}\\
-or by going to the webpage \\
-{\tt http://gosam.hepforge.org/}
-and clicking on {\tt installation script}.
-
-
-
-The \gosam-\gosamversion{} package can also be downloaded 
-manually either via \texttt{subversion}
-or via  download from the {\sc HepForge} webpage.
+The \gosam-\gosamversion{} package can either be cloned 
+via \texttt{git}
+or downloaded as a release tar-ball from the {\tt GitHub} webpage.
 
 \subsection*{HTTP Download}
 At the URL \\
-\url{http://www.hepforge.org/downloads/gosam/}\\
+\url{https://github.com/gudrunhe/gosam/releases}\\
 one can download the package
-\gosam-\gosamversion{}  as a tar-ball. 
+\gosam-\gosamversion{} as a tar-ball. 
 one can unpack it using the command
 \begin{example}
 \$ tar xzvf \packagename{}.tar.gz
 \end{example}
 
-\subsection*{Subversion}
-One can check-out a working copy of the repository with the command
+\subsection*{Git}
+One can clone a working copy of the repository with the command
 \begin{example}
-\$ svn co http://svn.hepforge.org/gosam/branches/\\
-   \contl{}gosam-\gosamversion{}
+\$ git clone https://github.com/gudrunhe/gosam
 \end{example}
-This will create a folder \texttt{gosam-\gosamversion} in your current directory.
-Authenticated users can use 
-\begin{example}
-\$ svn co svn+ssh://svn.hepforge.org/hepforge/svn/\\
-   \contl{}gosam/branches/gosam-\gosamversion{}
-\end{example}
-to gain read and write access to the project files.
+This will create a folder \texttt{gosam} in your current directory.
 
 \section{Installation}
 
-The installation of \gosam-\gosamversion{} is very simple when using the installation script.
-The latter can be downloaded by\\
-%\bcen
-{\tt \$  wget  http://gosam.hepforge.org/gosam\_installer.py}\\
-%\ecen
-By default \gosam{} and the external programs it uses  will be 
-installed into a subfolder {\tt ./local}
-of the current directory. A different path can be specified 
-using the {\tt --prefix=PATH\_where\_to\_install} option.
-
-\noindent To run the script the user should execute the following commands\\
-{\tt \$  chmod +x gosam\_installer.py\\
-     \$  ./gosam\_installer.py     [--prefix=...]
-}\\ 
- or\\
-{\tt           
-\$ python gosam\_installer.py   [--prefix=...]
-}\\
-Upon installation, the installer will ask some questions, which are described in 
-detail below. To use the default installation all the questions can 
-be ``answered" by hitting the {\tt ENTER} key.
-
-As soon as all questions are answered, the main installation process will start. 
-The components will be downloaded, built and installed. 
-The whole procedure takes about 10-30 minutes.
+The installation of GoSam and its dependencies is very simple and fully automated through the Meson
+build system. In the GoSam source directory, running 
+\begin{example}
+\$ meson setup build --prefix <prefix> [-Doption=value] \\
+\$ meson install -C build
+\end{example}
+will download and install GoSam as well as all its dependencies. The optional options {\tt -Doption=value} can
+be used to set the build option {\tt option} to {\tt value}. A complete list of build options is available by
+running {\tt meson configure} in the build directory after setup. {\tt meson configure -Doption=value} can also
+be used to set a build option in an already configured build directory. To avoid collisions with existing
+installations of the dependencies, everything will be installed to the subfolder {\tt GoSam},
+e.g. {\tt <prefix>/lib/GoSam}.
 
 At the end of the installation process, 
 a script {\tt gosam\_setup\_env.sh} will be created in the
-{\tt bin/} subdirectory of the install location, 
+{\tt bin/GoSam/} subdirectory of the install location, 
 which will (temporarily) set all environment
 variables, as soon as the script is sourced into a shell,  
 by \\
 {\tt \$ source [path]/gosam\_setup\_env.sh}.
-The installer also gives  a recommendation how
-these environment variables can be set permanently.
-The script can be used in all {\tt tcsh}- and {\tt bash}-compatible shells.
 
-All  files which have been installed are tracked in the file \\
-{\tt installer-log.ini}.
-Please keep this file and the install script. They are needed to update and
-uninstall \gosam. 
-
-For the default installation, internet access is required.
-
-\subsection{Additional information about the installation process}
-
-Before the installation starts, the installer first checks if a new version of
-the installation script is available on the \gosam webpage,  
-and if this is the case, asks if it is allowed to update the script.
-
-Then the installer searches for existing components (\qgraf,\,{\tt FORM}).
-
-If they are not found, one can either 
-press {\tt ENTER} to have them installed by the script, or provide a path to
-the binary (tab-completion can be used).
-
-If they are found, their version is checked, 
-and if needed the installation
-of a version which has been tested to run with \gosam{} is suggested.
-
-All files are downloaded to the {\tt GoSam} subfolder and extracted.
-The build files remain on the system; they can be removed manually.
-%One can delete the {\tt GoSam} subfolder after the installation. 
-%However, as they contain examples ({\tt ./GoSam/gosam/examples})
-% and documentation, this is not recommended.
-%Examples can be found in {\tt ./GoSam/gosam/examples}.
-
-
-By default, \gosam uses the gfortran/gcc from the GNU Compiler Suite compiler.
-If one wants to use the compiler from Intel (ifort/icc), the --intel option can be used.
-Specific paths to the compilers can be provided using the {\tt --fc, --cc} and 
-{\tt --cxx} option.
-
-All installation options can be listed with the --help flag:\\
-{\tt \$ ./gosam\_installer.py --help}
-
+For the default installation, internet access is required to download the dependencies during the build process.
 
 \subsection{Updating an existing installation}
 
-To update an existing installation, the installer can be started again without
-any option. It determines the install location from the file {\tt installer-log.ini}
-which is searched for in the current directory. The script will look 
-online for updates and ask if they should be installed.
-
-Before overwriting or deleting existing files which have been modified by the user, 
-the installer stops. One can use the {\tt -f} flag to force the action.
-
-\subsection{Uninstalling}
-To uninstall \gosam, including the installed auxiliary libraries,
-the installer needs to be started with the {\tt -u} or {\tt --uninstall} flag.
-
-As in the case of updates, the install script searches for the file 
-{\tt installer-log.ini} in the current directory.
-
-Modified files are not deleted. Use the {\tt -f} flag to force the action of
-deleting them.
-
-%In some rare conditions it might be necessary to run the uninstaller twice.
-
+If GoSam was cloned from git, it can be updated by running
+\begin{example}
+\$ git pull
+\end{example}
+The new version can then be installed with 
+\begin{example}
+\$ meson install -C build
+\end{example}
 
 
 \section{Description of the components}
 
 
 The generation of matrix element code using \gosamv can be understood
-as a three step process. 
+as a three-step process. 
 %In principle, each step could be run on a different machine.
 % and the programs listed below only need to be available during the respective step.
 \begin{enumerate}
@@ -273,14 +188,12 @@ as a three step process.
 and \qgraf are used. This phase is initiated by
 running \texttt{gosam.py process.in}, where {\tt process.in} contains the 
 user input for the process to be calculated.
-\item {\bf code generation}: only \form and \haggies are run.
-This phase is initiated by  \texttt{\$ make source}.
+\item {\bf code generation}: only \form is run.
+This phase is automatically initiated when the build is started.
 \item {\bf compilation and running}: 
 a {\tt fortran} compiler and the chosen reduction libraries are used.
 This phase is initiated
-by  \texttt{\$ make compile}. Please note that running
-\texttt{make compile} will invoke \texttt{make source} if the latter
-has not been run  before, or if some of the source files are missing.
+by  \texttt{\$ meson install}.
 \end{enumerate}
 
 If you use the \gosamv package, you should be aware that
@@ -291,38 +204,24 @@ the tools will be required).
 \marginlabel{\qgraf (1)} \qgraf~\cite{Nogueira:1991ex}
 is required in version 3{.}1 or
 higher. 
-The install script coming with \gosamv[2] will download and install \qgraf
-automatically.
+\qgraf will automatically be downloaded and installed during the installation of \gosam.
 It can be also downloaded manually from
 \url{http://cfif.ist.utl.pt/~paulo/qgraf.html}.
 
-\marginlabel{\python (1)} The program has been tested with \python{}
-versions 2{.}6 and 2{.}7.
-%It is currently not guaranteed to work with any other version. 
-%Since \python{} 3{.}x introduces many new
-%language features there might be conflicts which have to be resolved before
-%this program is ready to be run with versions of \python{} 3{.}x.
-%Please see also \url{http://python.org}.
+\marginlabel{\python (1)} \gosam requires at least {\tt Python} version 3{.}7.
 
 \marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
 version 4{.}0 or higher is required to profit from all optimisation features.
-\form is  distributed with the \gosam-2.0 package for the user's convenience.
+\form will automatically be downloaded and installed during the installation of \gosam.
 For manual download, \form is available from
 \url{http://www.nikhef.nl/~form/}.
-
-\marginlabel{\haggies (2)} The code generator \haggies{}~\cite{Reiter:2009ts}
-is also included in the \gosam{} distribution already.
-Alternatively, it can also be obtained separately from the URL
-\url{http://sourceforge.net/projects/haggies/}.\\
-\haggies requires \texttt{Java} in version~1{.}5 or higher.
-%The current version of \gosamv requires \haggies{} in version 1{.}1 or higher.
 
 \marginlabel{\ninja/\golemVC/\samurai (3)}
 For one-loop calculations, at least one of these three libraries is
 required. 
 %If the program is used for the extraction of the $R_2$ term
 %only, the libraries are not required.\\
-The libraries are already distributed with the code and compiled by the install script.
+The libraries are downloaded and installed during the installation of \gosam.
 Alternatively, 
 \begin{itemize}
 \item \golemVC can be downloaded from\\
@@ -348,7 +247,7 @@ listing the colour structures, etc.
 license policies which are different from the license
 applying to \gosamv. The authors of \gosamv do \emph{not}
 take any responsibility for any problems related to the
-above mentioned software packages.
+above-mentioned software packages.
 
 
 
@@ -442,55 +341,50 @@ The output directory is assumed to be in the relative path
 16 qgraf.verbatim.nlo=
 17 polvec=numerical
 18 diagsum=True
-19 reduction_programs=ninja,golem95,samurai
-20 extensions=shared
-21 debug=nlo
-22 select.lo=
-23 select.nlo=
-24 filter.lo=
-25 filter.nlo=
-26 filter.module=
-27 renorm_beta=True
-28 renorm_mqwf=True
-29 renorm_decoupling=True
-30 renorm_mqse=True
-31 renorm_logs=True
-32 renorm_gamma5=True
-33 reduction_interoperation=-1
-34 reduction_interoperation_rescue=-1
-35 samurai_scalar=2
-36 nlo_prefactors=0
-37 PSP_check=True
-38 PSP_rescue=True
-39 PSP_verbosity=False
-40 PSP_chk_th1=8
-41 PSP_chk_th2=3
-42 PSP_chk_th3=5
-43 PSP_chk_kfactor=10000
-44 PSP_chk_li1=16
-45 PSP_chk_li2=7
-46 PSP_chk_li3=6
-47 PSP_chk_li4=19
-48 PSP_chk_method=Automatic
-49 reference-vectors=
-50 abbrev.limit=0
-51 templates=
-52 qgraf.bin=qgraf
-53 form.bin=form
-54 form.threads=2
-55 form.tempdir=/tmp
-56 haggies.bin=
-57 fc.bin=/usr/bin/gfortran
-58 python.bin=python3
-59 ninja.fcflags=
-60 ninja.ldflags=
-61 samurai.fcflags=
-62 samurai.ldflags=
-63 golem95.fcflags=
-64 golem95.ldflags=
-65 r2=explicit
-66 symmetries=family,generation
-67 crossings=
+19 helsum=False
+20 reduction_programs=ninja,golem95,samurai
+21 extensions=shared
+22 debug=nlo
+23 select.lo=
+24 select.nlo=
+25 filter.lo=
+26 filter.nlo=
+27 filter.module=
+28 renorm_beta=True
+29 renorm_mqwf=True
+30 renorm_decoupling=True
+31 renorm_mqse=True
+32 renorm_logs=True
+33 renorm_gamma5=True
+34 reduction_interoperation=-1
+35 reduction_interoperation_rescue=-1
+36 samurai_scalar=2
+37 nlo_prefactors=0
+38 PSP_check=True
+39 PSP_rescue=True
+40 PSP_verbosity=False
+41 PSP_chk_th1=8
+42 PSP_chk_th2=3
+43 PSP_chk_th3=5
+44 PSP_chk_kfactor=10000
+45 PSP_chk_li1=16
+46 PSP_chk_li2=7
+47 PSP_chk_li3=6
+48 PSP_chk_li4=19
+49 PSP_chk_method=Automatic
+50 reference-vectors=
+51 abbrev.limit=0
+52 templates=
+53 qgraf.bin=qgraf
+54 form.bin=form
+55 form.threads=2
+56 form.tempdir=/tmp
+57 haggies.bin=
+58 fc.bin=/usr/bin/gfortran
+59 python.bin=python3
+60 r2=explicit
+61 symmetries=family,generation
+62 crossings=
 \end{lstlisting}
 % 9 qgraf.options=nosnails,notadpoles,onshell
 
@@ -644,8 +538,7 @@ The default is {\tt ninja,golem95}.
 this option  contains a list of useful extensions
 to the core of the program, which operate at the code generation stage. 
 The currently available extensions are 
-\begin{itemize}
-\item {\tt autotools}:  use autotools to generate Makefiles            
+\begin{itemize}        
 \item {\tt shared}: create shared libraries (i.e. dynamically linkable code
 rather than static libraries). This extension is 
 enabled by default when using the {\tt autotools} extension.    
@@ -831,7 +724,6 @@ Example: \\
 of color related abbreviations.
 Possible options are
 \begin{itemize}
-	\item\texttt{haggies} -- color algebra in form, optimization with haggies
 	\item\texttt{form} -- color algebra and optimization in form (default)
 	\item\texttt{none} -- color algebra in form, no optimization
 \end{itemize}
@@ -858,19 +750,7 @@ An automatic search is attempted if left empty.
 %{\tt /usr/bin/gfortran}.
 \item[59] \texttt{python.bin}:  path to the {\tt python3} executable.
 An automatic search is attempted if left empty.
-\item[60] \texttt{ninja.fcflags}: compiler flags to compile with \ninja.
-An automatic search is attempted if left empty.
-\item[61] \texttt{ninja.ldflags}: LDFLAGS required to link the \ninja{} library.
-An automatic search is attempted if left empty.
-\item[62] \texttt{samurai.fcflags}:  compiler flags to compile with \samurai.
-An automatic search is attempted if left empty.
-\item[63] \texttt{samurai.ldflags}: LDFLAGS required to link the \samurai{} library.
-An automatic search is attempted if left empty. 
-\item[64] \texttt{golem95.fcflags}: compiler flags to compile with \golemVC{}.
-An automatic search is attempted if left empty. 
-\item[65] \texttt{golem95.ldflags}:  LDFLAGS required to link the \golemVC{} library.
-An automatic search is attempted if left empty. 
-\item[66] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
+\item[60] \texttt{r2}: treatment of the rational part $R_2$. The possibilities are
 \begin{itemize}
 \item {\tt implicit}: $\mu^2$ terms are kept in the numerator and reduced at runtime
 \item {\tt explicit}: $\mu^2$ terms are reduced analytically 
@@ -878,7 +758,7 @@ An automatic search is attempted if left empty.
 \item {\tt off}: all $\mu^2$ terms are set to zero.
 \end{itemize}
  The default is {\tt r2=explicit}.
-\item[66] \texttt{symmetries}: this information is used when the list of helicity configurations is generated.
+\item[61] \texttt{symmetries}: this information is used when the list of helicity configurations is generated.
 An empty list means that all helicity configurations will be generated, even if some of them could be 
 mapped onto each other.
 Possible values are:  
@@ -903,7 +783,7 @@ with PDG codess 1-6 are assumed not to mix.
              \%+$\langle n\rangle $ refers to $+n$ only,                                 
              \%-$\langle n\rangle $ refers to $-n$ only  
 \end{itemize}	                                   
-\item[67] \texttt{crossings}:  a list of crossed processes derived from this process.
+\item[62] \texttt{crossings}:  a list of crossed processes derived from this process.
     For each process in the list a module similar to {\tt matrix.f90} is  generated.  
     Example: \\                                                 
     {\tt process\_name=ddx\_uux }\\                                           
@@ -929,8 +809,7 @@ After running \texttt{gosam.py} with an appropriate setup file, the
 process directory contains a number of files which are described below.
 
 \marginlabel{\tt codegen/} This directory contains files which are only
-relevant for code ge\-ne\-ration. These files will therefore not be included
-in a tar-ball created with \texttt{make dist}.
+relevant for code ge\-ne\-ration.
 
 \marginlabel{\tt common/} Contains {\tt Fortran} files which are common to all helicity
 amplitudes and to the constructed matrix element code. 
@@ -950,8 +829,8 @@ helicity amplitude (labelled by {\tt i}). The labeling of the helicities can be 
 Note that the code will automatically map equivalent helicity 
 configurations onto one single helicity and perform the corresponding book-keeping.
 
-Before invoking \texttt{make source}, 
-this directory only contains the makefiles. After the full code
+Before invoking \texttt{meson install}, 
+this directory only contains the Meson and make files. After the full code
 generation, for each diagram three classes of files are created: The
 basic algebraic expressions for the individual one-loop diagrams are
 contained in the files {\tt d*h*l1.txt} in an optimized format. The
@@ -1005,61 +884,45 @@ by \qgraf.
 programs. For details, run
 {\tt \$ sh ./config.sh -help}.
 
-%\marginlabel{\tt process.hh} contains the process dependent definitions
-%for \form. This file is used by \texttt{codegen/golem.frm} to generate the expressions
-%for each diagram in every helicity configuration.
-%\marginlabel{\tt process.dat} contains the on-shell conditions, the number of
-%incoming particles and an expression for momentum conservation. This
-%file is needed by the program \texttt{golem-analyzer.py}.
-%\marginlabel{\tt func.txt} Defines dependencies between parameters of the model files.
-
 \marginlabel{\tt Makefile.conf} This files contains the settings
 which are global for all helicity configurations, 
 like e.g. the paths to the reduction libraries, compiler options, etc.
 
-\marginlabel{\tt Makefile\\Makefile.source} 
- \texttt{Makefile.source} is used when calling
-\texttt{make source}. Running \texttt{make} from the process
-directory will pass through all subdirectories. The following
-targets of \texttt{make} are available for direct use:
-\begin{description}
-\item[\texttt{help}] lists all major targets.
-\item[\texttt{source}] generate source files, mainly \fortranXC files.
-\item[\texttt{compile}] compile the \fortranXC sources.
-\item[\texttt{dist}] create a tar-ball of the source files.
-\item[\texttt{clean}] remove object files and intermediate files.
-\item[\texttt{very-clean}] remove files including targets of
-                                \texttt{make source}.
-\item[\texttt{doc}] create various documents related to the process.
-      To obtain a description of the \emph{topologies}, you need to run
-      \texttt{source} before \texttt{make doc}.
-\end{description}
+\marginlabel{\tt meson.build} This file contains the main Meson project and library definitions.
+
+\marginlabel{\tt meson\_options.txt} This file contains the build options for the Meson project. The currently
+defined build options are 
+\begin{itemize}
+   \item[{\tt doc}] Build and install {\tt doc/process.pdf}. The default is {\tt False}.
+   \item[{\tt test\_executables}] Build and install {\tt matrix/test.f90}. The default is {\tt False}. 
+\end{itemize}
+
+\marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
+install all generated {\tt {.}mod} files.
 
 \section{Code generation and compilation}
-The \fortranXC code is generated by the command
+After {\tt gosam{.}py} has terminated, the build system in the process directory has to be initalized. 
+This is done with the command 
 \begin{example}
-\$ make source
+\$ meson setup build --prefix <prefix> [-Doption=value]
 \end{example}
-and can be compiled using
-\begin{example}
-\$ make compile
-\end{example}
-Please note that the \texttt{compile} target invokes
-the \texttt{source} target if necessary. By using the make command line option
-\texttt{-j \it JOBS} one can parallelize this.
+where {\tt <prefix>} is the location the process library is installed to. In addition to the built-in Meson
+build options, {\tt doc} and {\tt test\_executables} can be set with the {\tt -D} option. This builds and 
+installs {\tt process{.}pdf} and the test programs respectively. The test programs evaluate the generated
+amplitude at a random phase space point and generate a log file {\tt \_debug.xml}.
 
-A simple test program,
-which gives the value of the amplitude at a randomly generated phase space point,
-can be found in the directory \texttt{matrix/}.
-In order to compile and run it, type
+After the process directory is configured, the \fortranXC source code can be generated and compiled by 
+executing
 \begin{example}
-\$ cd matrix\\
-\$ make test.exe\\
-\$ ./test.exe
+\$ meson compile [-j <jobs>]
 \end{example}
-The program will generate a file \texttt{\_debug.xml},
-which, depending on the settings, contains the values of individual  helicity amplitudes
-and diagrams for the set of phase space points used in {\tt test.f90}.
+With the {\tt -j} option, the number of jobs Meson will run in parallel can be set. By default, Meson will
+fully utilize the CPU. After the compilation is done, the generated process libraries can be installed by
+invoking 
+\begin{example}
+\$ meson install
+\end{example}
+If the default number of jobs is used, calling {\tt meson compile} can be omitted.
 
 %\subsection{Computation of Abbreviations}
 
@@ -1071,31 +934,10 @@ as abbreviations.
 
 While in version 1.0 of \gosam{} the {\tt Fortran} code for the
 amplitudes was written using \haggies~\cite{Reiter:2009ts}, we now
-largely use the features provided by \form{} version
+use the features provided by \form{} version
 4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more
 compact code and a speed-up in amplitude evaluation of about a factor
-of ten.  The option to use \haggies{} is still available by setting
-the extension {\tt noformopt}.
-
-In the case where \haggies{} instead of \form version 4 is used to produce abbreviations, 
-i.e. if {\tt extensions=noformopt} is used, please note the  following:
-if the list of abbreviations causes \haggies{}
-to crash, one needs to increase the amount of memory reserved for Java.
-This can be done by adding the \texttt{-Xmx} option to the call of Java.
-A typical setting of the variable \texttt{haggies.bin} would be
-\begin{example}
-haggies.bin=java -Xmx3g -jar \\
-\contl\ \$\{GOSAMPATH\}/haggies/haggies.jar
-\end{example}
-which assigns 3\,GB of memory to Java.
-
-In some cases the list of abbreviations is too big to
-be compiled into one subroutine. One can restrict the number of instructions for \haggies{}
-that go into a single subroutine by setting \texttt{abbrev.limit} to a positive
-number in the process card. 
-%The variable \texttt{abbrev.level}, which by default is set to 
-%\texttt{diagrams}, can be set to \texttt{groups} or \texttt{helicities}.
-
+of ten.
 
 \subsection{Grouping/summing of diagrams which share common subdiagrams}
 \label{sec:grouping_summing}
@@ -1361,7 +1203,7 @@ and zero otherwise.
 \section{Import of model files}
 \label{sec:model}
 
-The \gosam{}-2.0 package comes with the built-in model files 
+The \gosam{}-\gosamversion{} package comes with the built-in model files 
 {\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, {\tt smdiagehc},
 {\tt sm\_complex}, {\tt smdiag\_complex}, 
 where the latter two are needed in the case of complex masses and couplings, 
@@ -1769,6 +1611,18 @@ When writing a filter the one can use the predefined particle lists
 \texttt{QUARKS}, \texttt{LEPTONS}, \texttt{FERMIONS} and \texttt{BOSONS}.
 The underscore (\texttt{\_}) matches any field.
 
+In all the following functions, the variadic field arguments {\tt f1,f2,\ldots} can be of the following 
+forms:
+\begin{itemize}
+   \item Each of the field arguments {\tt f} is a single particle object or a string containing a particle 
+   name.
+   \item Each of the field arguments {\tt f} is a list or tuple, where each list or tuple contains an arbitrary 
+   number of particle objects or stings with particle names. If this syntax is used, each combination of fields
+   from different lists or tuples is tested.
+\end{itemize}
+\emph{If the field inputs do not adhere to one of these options, the filter functions might return faulty results
+without raising an exception.}
+
 A diagram object \texttt{d} has the following methods which are inteded
 to be used in filters.
 Alternative predefined functions and functors are also given.
@@ -1807,9 +1661,18 @@ Alternative predefined functions and functors are also given.
    \texttt{twospin} to filter by the $2\times$ the spin,
    \texttt{massive} to specify whether massive or massless propagators
    should be considered and \texttt{color} to filter for certain color
-   representations.\\
+   representations. Note that, if the {\tt momentum} argument is set, the 
+   crossing symmetry might be broken. GoSam might then produce faulty numbers,
+   if the {\tt --crossings} option is used in OLP mode. In this case, consider 
+   using the {\tt --no-crossings} option or the {\tt iprop\_momentum} function.\\
    $\mathtt{IPROP(\ldots)}\equiv
     \lambda\mathtt{d}.(\mathtt{d.iprop(\ldots)})$
+\item[\texttt{d.iprop(f,momentum)}] returns true if there is a propagator of the
+   given field with the given momentum in the diagram, false otherwise. This 
+   function only returns true or false instead of a number, because it automatically
+   flags the diagrams for which true is returned. The subprocesses with these
+   diagrams are not automatically used in crossings, instead the crossing symmetry
+   is tested explicitely. 
 \item[\texttt{d.chord(f,**opts)}] same as \texttt{iprop}
    but only counts loop propagators.\\
    $\mathtt{CHORD(\ldots)}\equiv
@@ -2416,22 +2279,9 @@ can be found in this directory tree.
 which are not part of the template.
 
 \marginlabel{\texttt{build}} This directory is created during
-building and installation of this package by running \texttt{setup.py}.
+building and installation of this package by running \texttt{meson setup build}.
 The files in this directory are of temporary nature and can be safely
 removed.
-
-\marginlabel{\texttt{dist}} This directory is created by running
-\texttt{setup.py} with the \texttt{sdist} or \texttt{bdist} command
-and contains the distributable package files.
-To create a tar-ball from the working copy, Please run
-\begin{example}
-\$ python setup.py sdist --formats=gztar
-\end{example}
-For more information
-please run
-\begin{example}
-\$ python setup.py --help-commands
-\end{example}
 
 \marginlabel{\texttt{examples}} This directory contains some simple examples
 of validated processes.
@@ -2440,7 +2290,7 @@ of validated processes.
 \texttt{gosam.py --olp}, which is \gosamv's implementation of the
 Binoth Les Houches interface for one-loop programs (BLHA).
 Both the original standards ~\cite{Binoth:2010xt} and the new standards 
-(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv2.0.
+(BLHA2)~\cite{Alioli:2013nda} are supported by \gosam-\gosamversion.
 
 
 
