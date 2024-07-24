@@ -6,7 +6,6 @@
 	author="The GoSam Collaboration"
 	author-email="gosam@projects.hepforge.org">
 
-	<file src="Makefile.source" class="Kinematics" />
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
 		<except if-internal="OLP_MODE" />
@@ -286,7 +285,6 @@
 	<directory src="doc">
 		<file src="axodraw.sty" class="Verbatim"/>
 		<file src="gind.ist" class="Verbatim"/>
-		<file src="Makefile.source" class="Verbatim"/>
 		<file src="Makefile" class="Kinematics"/>
 		<file src="meson.build" class="Kinematics">
 				<only if-extension="meson" />
@@ -306,7 +304,6 @@
 
 	<directory src="matrix">
 		<file src="Makefile.dep" class="Kinematics"/>
-		<file src="Makefile.source" class="Verbatim"/>
 		<file src="matrix.f90" class="Kinematics"/>
 		<file src="test.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
