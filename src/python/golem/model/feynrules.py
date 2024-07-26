@@ -879,7 +879,7 @@ class Model:
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
-		if self.all_CTvertices is not None:
+		if hasattr(self, 'all_CTvertices'):
 			max_deg = max([len(v.particles) for v in (self.all_vertices + self.all_CTvertices)])
 		else:
 			max_deg = max([len(v.particles) for v in self.all_vertices])		
