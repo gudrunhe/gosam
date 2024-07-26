@@ -19,36 +19,6 @@ def golem_path(*dir):
 			assert(tail == p)
 		return os.path.join(src_path, *dir)
 
-def gosam_contrib_path(*dir):
-	"""
-	Guesses the path where gosam.conf written by gosam-contrib
-	is installed.
-
-	Only ${prefix}/share/gosam-contrib is returned yet.
-	"""
-
-	try:
-		from golem.installation import DATA_DIR
-		# use DATA_DIR and replace last "golem" with "gosam-contrib"
-		path="gosam-contrib".join(DATA_DIR.rsplit("golem"))
-		if not os.path.exists(path):
-			# guess from LD_LIBRARY_PATH
-			ldp = os.getenv("LD_LIBRARY_PATH") or ""
-			for path in ldp.split(os.path.pathsep):
-				guess_path= os.path.abspath(os.path.join(path,os.path.pardir,"share","gosam-contrib"))
-				if os.path.exists(guess_path):
-					path=os.path.abspath(guess_path)
-					break
-
-		if not os.path.exists(path):
-			return ""
-		return os.path.join(path, *dir)
-	except ImportError:
-		# This means we work with the sources rather than
-		# from the installed version.
-		return os.path.join("", *dir)
-
-
 def get_homedir():
 	"""
 	Try to determin the user's home directory.

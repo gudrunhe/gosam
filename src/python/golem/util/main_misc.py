@@ -22,7 +22,7 @@ import golem.templates.xmltemplates
 
 from golem.util.find_libpaths import find_libraries
 
-from golem.util.path import golem_path, gosam_contrib_path
+from golem.util.path import golem_path
 from golem.util.tools import copy_file, \
 		debug, message, warning, \
 		generate_particle_lists
@@ -206,8 +206,7 @@ def find_config_files():
 		golem.conf
 	"""
 	props = golem.util.config.Properties()
-	directories = [golem_path(), gosam_contrib_path(),
-			golem.util.path.get_homedir(), os.getcwd()]
+	directories = [os.getcwd()]
 	files = [".gosam", ".golem",
 			"gosam.in", "golem.in",
 			"gosam.conf", "golem.conf"]
