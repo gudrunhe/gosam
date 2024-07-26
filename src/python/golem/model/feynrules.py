@@ -879,7 +879,10 @@ class Model:
 
 		f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
 		f.write("*---#] Parameters:\n")
-		max_deg = max([len(v.particles) for v in self.all_vertices])
+		if self.all_CTvertices is not None:
+			max_deg = max([len(v.particles) for v in (self.all_vertices + self.all_CTvertices)])
+		else:
+			max_deg = max([len(v.particles) for v in self.all_vertices])		
 		f.write("*---#[ Auxilliary Symbols:\n")
 		f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
 		f.write("*---#] Auxilliary Symbols:\n")
