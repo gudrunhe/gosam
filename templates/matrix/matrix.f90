@@ -751,6 +751,7 @@ contains
       real(ki), dimension(2:4) :: ampct[%
 @end @if %][%
 @end @if %]
+      real(ki) :: ampyukct
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -886,18 +887,20 @@ contains
             [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
                if (present(h)) then
-                  amp(3) = amp(3) -1.5_ki * CF * samplitudeyukct_h(vecs, .false., scale2, h)
+                  ampyukct = samplitudeyukct_h(vecs, .false., scale2, h)
+                  amp(3) = amp(3) -1.5_ki * CF * ampyukct
                   amp(2) = amp(2) -[%
                      @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki * CF * samplitudeyukct_h(vecs, .false., scale2, h)
+                     @end @if %]_ki * CF * ampyukct
                   if (renorm_logs) then
                      amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct_h(vecs, .true., scale2, h)
                   end if
                else
-                  amp(3) = amp(3) -1.5_ki * CF * samplitudeyukct(vecs, .false., scale2)
+                  ampyukct = samplitudeyukct(vecs, .false., scale2)
+                  amp(3) = amp(3) -1.5_ki * CF * ampyukct
                   amp(2) = amp(2) -[%
                      @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki * CF * samplitudeyukct(vecs, .false., scale2)
+                     @end @if %]_ki * CF * ampyukct
                   if (renorm_logs) then
                      amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct(vecs, .true., scale2)
                   end if
@@ -2935,6 +2938,7 @@ contains
       real(ki_qp), dimension(2:4) :: ampct[%
 @end @if %][%
 @end @if %]
+      real(ki_qp) :: ampyukct
       real(ki_qp), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -3070,18 +3074,20 @@ contains
             [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
                if (present(h)) then
-                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * samplitudeyukct_h_qp(vecs, .false., scale2, h)
+                  ampyukct = samplitudeyukct_h_qp(vecs, .false., scale2, h)
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * ampyukct
                   amp(2) = amp(2) -[%
                      @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki_qp * CF * samplitudeyukct_h_qp(vecs, .false., scale2, h)
+                     @end @if %]_ki_qp * CF * ampyukct
                   if (renorm_logs) then
                      amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_h_qp(vecs, .true., scale2, h)
                   end if
                else
-                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .false., scale2)
+                  ampyukct = samplitudeyukct_qp(vecs, .false., scale2)
+                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * ampyukct
                   amp(2) = amp(2) -[%
                      @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .false., scale2)
+                     @end @if %]_ki_qp * CF_qp * ampyukct
                   if (renorm_logs) then
                      amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .true., scale2)
                   end if
