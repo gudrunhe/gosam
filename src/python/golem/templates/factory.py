@@ -97,6 +97,7 @@ class TemplateFactory:
                      or "nlo_flags" not in opts \
                      or "heavy_quarks" not in opts \
                      or "massive_bubbles" not in opts \
+                     or "diagram_sum" not in opts \
                      or "helicity_map" not in opts \
                      or "treecache" not in opts\
                      or "ctcache" not in opts\
@@ -115,6 +116,7 @@ class TemplateFactory:
                lo_flags = opts["lo_flags"]
                nlo_flags = opts["nlo_flags"]
                massive_bubbles = opts["massive_bubbles"]
+               diagram_sum = opts["diagram_sum"]
                helicity_map = opts["helicity_map"]
                ctcache = opts["ctcache"]
                ct_signs = opts["ct_signs"]
@@ -124,7 +126,7 @@ class TemplateFactory:
                      f_template)
                template.setup(loopcache, in_particles, out_particles,
                      tree_signs, conf, heavy_quarks, lo_flags, nlo_flags,
-                     massive_bubbles, helicity_map, treecache, ctcache, ct_signs, ct_flags)
+                     massive_bubbles, diagram_sum, helicity_map, treecache, ctcache, ct_signs, ct_flags)
             elif class_name == "Kinematics":
                if "in_particles" not in opts or \
                      "out_particles" not in opts or \

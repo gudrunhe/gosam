@@ -10,7 +10,7 @@ import golem.util.tools
 class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 	def setup(self, loopcache, in_particles, out_particles, tree_signs,
-			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, helicity_map, treecache, ctcache, ct_signs, ct_flags):
+			conf, heavy_quarks, lo_flags, nlo_flags, massive_bubbles, eprops, helicity_map, treecache, ctcache, ct_signs, ct_flags):
 		self.init_kinematics(conf, in_particles, out_particles,
 				tree_signs, heavy_quarks, helicity_map, ct_signs)
 		self._loopcache = loopcache
@@ -23,6 +23,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 		self._massive_bubbles = massive_bubbles
 		self._ctcache = ctcache
 		self._diagram_flags_ct = ct_flags
+		self._eprops = eprops
 
 	def getVertexInfo(self, *args, **opts):
 		level = self._eval_string(args[0])
@@ -616,3 +617,75 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 					" ".join(diagrams[diagram_index].filter_flags))
 			yield props
 
+	def diagsum_groups(self, *args, **opts):
+		fltr = list(sorted(self._eprops.keys()))
+
+		if fltr:
+			first_name = self._setup_name("first", "is_first", opts)
+			last_name = self._setup_name("last", "is_last", opts)
+			idx_name = self._setup_name("index", "index", opts)
+			value_name = self._setup_name("var", "$_", opts)
+
+			props = Properties()
+
+			for idx, val in enumerate(fltr):
+				is_first = val == fltr[0]
+				is_last = val == fltr[-1]
+
+				props.setProperty(first_name, is_first)
+				props.setProperty(last_name, is_last)
+				props.setProperty(idx_name, idx)
+				props.setProperty(value_name, val)
+
+				yield props
+
+	def diagsum_diagrams(self, *args, **opts):
+		nopts = opts.copy()
+		for kw in ["diagsum_group","var","index"]:
+			if kw in nopts:
+				del nopts[kw]
+
+		diagrams = self._loopcache.diagrams
+		rank_lst = {}
+		nf_lst = set([])
+		top_se = set([])
+
+		if "diagsum_group" in opts:
+			ds = self._eval_int(opts["diagsum_group"], **nopts)
+			print(ds,self._eprops[ds]);
+			fltr = []
+			for idx in self._eprops[ds]:
+				fltr.append(idx)
+				rank_lst[idx] = diagrams[idx].rank()
+				if diagrams[idx].isNf():
+					nf_lst.add(idx)
+				if diagrams[idx].isMassiveQuarkSE():
+					top_se.add(idx)
+			print(fltr);
+		else:
+			raise TemplateError("[% diagsum_diagrams %] must be called per diagsum_group")
+
+		first_name = self._setup_name("first", "is_first", opts)
+		last_name = self._setup_name("last", "is_last", opts)
+		idx_name = self._setup_name("index", "index", opts)
+		value_name = self._setup_name("var", "$_", opts)
+		rank_name = self._setup_name("rank", "rank", opts)
+		nf_name = self._setup_name("nf", "is_nf", opts)
+		mqse_name = self._setup_name("mqse", "is_mqse", opts)
+
+		N = len(fltr)
+		props = Properties()
+
+		for idx, diagram_index in enumerate(fltr):
+			is_first = idx == 0
+			is_last = idx == N - 1
+
+			props.setProperty(first_name, is_first)
+			props.setProperty(last_name, is_last)
+			props.setProperty(value_name, diagram_index)
+			props.setProperty(idx_name, idx)
+			props.setProperty(rank_name, rank_lst[diagram_index])
+			props.setProperty(nf_name, diagram_index in nf_lst)
+			props.setProperty(mqse_name, diagram_index in top_se)
+
+			yield props

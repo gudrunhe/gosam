@@ -722,6 +722,9 @@ def workflow(conf):
 		lst = conf.getProperty(prop)
 		golem.util.tools.expand_parameter_list(prop, conf)
 	
+	# debuging the diagsum property:
+	conf["debug_diagsum"] = False
+
 def run_analyzer(path, conf, in_particles, out_particles):
 	generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
 	generate_virt = conf.getBooleanProperty("generate_nlo_virt")

@@ -567,6 +567,57 @@ $S^\prime=S[%
 @end @if pyxodraw %][%
 @end @if generate_eft_counterterms %]
 
+[% @if debug_diagsum %]
+\section{DEBUG: \texttt{diagsum} grouping}
+This section shows which diagrams are summed when the \texttt{diagsum} feature is used. The default is \texttt{diagsum=true}.
+
+[%
+@for diagsum_groups var=dsgrp %]
+\subsection{Metadiagram~[% dsgrp %]}
+
+This metadiagram contains [% @select count diagsum_diagrams diagsum_group=dsgrp
+ @case 1 %]one NLO diagram[%
+ @else %][% count diagsum_diagrams diagsum_group=dsgrp %] NLO diagrams[%
+ @end @select %].
+
+[%
+@if pyxodraw %][%
+@with modules pyxovirt.tex path=process %][% 
+   @for diagsum_diagrams diagsum_group=dsgrp var=DIAG index=DIAGINDEX %][%
+      @if is_first %]\begin{longtable}{cc}
+\endfirsthead
+\endhead[% 
+      @end @if %]
+%---#[ loop diagram[% DIAG %]:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[% diagram suffix=DIAG %]\\
+{\sl Diagram~[%DIAG%]}\\
+$\mathrm{rk}=[%rank%][%
+   @if is_nf %], N_f[% 
+   @end @if %]$[%
+   @if is_mqse %], MQSE[% 
+   @end @if %][%
+@if use_vertex_labels %]\\
+[% getVertexInfo loop DIAG %][%
+@end @if %]
+\end{center}
+\end{minipage}}
+[%   @if is_last %]
+\end{longtable}
+[%   @else %][%
+        @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+     @end @if %]
+%---#] loop diagram[% DIAG %]:
+[% @end @for %][%
+@end @with%][%
+@end @if pyxodraw %][%
+@end @for diagsum_groups %][%
+@end @if debug_diagsum %]
+
+
+
 \printindex
 
 \section{Related Work}
