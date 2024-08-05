@@ -652,7 +652,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
 		if "diagsum_group" in opts:
 			ds = self._eval_int(opts["diagsum_group"], **nopts)
-			print(ds,self._eprops[ds]);
 			fltr = []
 			for idx in self._eprops[ds]:
 				fltr.append(idx)
@@ -661,7 +660,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 					nf_lst.add(idx)
 				if diagrams[idx].isMassiveQuarkSE():
 					top_se.add(idx)
-			print(fltr);
 		else:
 			raise TemplateError("[% diagsum_diagrams %] must be called per diagsum_group")
 
