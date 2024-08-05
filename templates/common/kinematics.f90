@@ -354,7 +354,7 @@ contains
    @end @for %]) then[%   
    @for particles lightlike vector initial %][%
       @with eval 'k .rep. ( reference > 0 ) . 'l .rep. ( reference < 0 )
-          . reference result=refvec %]
+          . ( .abs. reference ) result=refvec %]
          select case(hel[%index%])
          case(1)
             flag[%index%] = .false.
