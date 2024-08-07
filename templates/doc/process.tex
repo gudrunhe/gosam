@@ -573,7 +573,15 @@ This section shows which diagrams are summed when the \texttt{diagsum} feature i
 
 [%
 @for diagsum_groups var=dsgrp %]
-\subsection{Metadiagram~[% dsgrp %]}
+\noindent Metadiagram~\hyperref[sec:Meta[% dsgrp %]]{[% dsgrp %]}:[% 
+@for diagsum_diagrams diagsum_group=dsgrp var=DIAG index=DIAGINDEX %][%
+@if is_last %] [% DIAG %]\\[% @else %] [% DIAG %],[% @end @if %][%
+@end @for %][%
+@end @for diagsum_groups %]
+
+[%
+@for diagsum_groups var=dsgrp %]
+\subsection{Metadiagram~[% dsgrp %]}\label{sec:Meta[% dsgrp %]}
 
 This metadiagram contains [% @select count diagsum_diagrams diagsum_group=dsgrp
  @case 1 %]one NLO diagram[%

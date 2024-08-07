@@ -200,7 +200,9 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
    props=[]
    eprops = {}
    for idx in keep:
-      props.append([idx,str(diagrams[idx].getLoopIntegral())+','+str(diagrams[idx].rank())])
+      props.append([idx,str(diagrams[idx].getLoopIntegral())
+                    +','+str(diagrams[idx].rank())
+                    +','+str(diagrams[idx].isMassiveQuarkSE())])
 
    if conf.getProperty(golem.properties.sum_diagrams):   
       for i,item in props:
