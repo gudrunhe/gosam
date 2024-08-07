@@ -6,23 +6,21 @@
     #                                                                              #
     #                                    (c) The GoSam Collaboration 2011-2024     #
     #                                                                              #
-    #        AUTHORS:                                                              #
-    #        * Gudrun Heinrich                   <gudrun.heinrich@kit.edu>         #
-    #        * Stephen Jones                     <s.jones@cern.ch>                 #
-    #        * Matthias Kerner                   <mkerner@physik.uzh.ch>           #
-    #        * Jannis Lang                       <jannis.lang@kit.edu>             #
-    #        * Vitaly Magerya                    <vitaly.magerya@tx97.net>         #
-    #        * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>     #
-    #        * Giovanni Ossola                   <gossola@citytech.cuny.edu>       #
-    #        * Tiziano Peraro                    <tiziano.peraro@unibo.it>         #
-    #        * Johannes Schlenk                  <johannes.schlenk@psi.ch>         #
-    #        * Ludovic Scyboz                    <ludovic.scyboz@physics.ox.ac.uk> #
-    #        * Francesco Tramontano              <Francesco.Tramontano@cern.ch>    #
-    #                                                                              #
-    #        FORMER AUTHORS:                                                       #
-    #        * Gavin Cullen, Hans van Deurzen, Nicolas Greiner, Stephan Jahn,      #
-    #          Gionata Luisoni, Edoardo Mirabella, Joscha Reichel, Thomas Reiter,  #
-    #          Johann Felix von Soden-Fraunhofen                                   #
+    #        AUTHORS:      
+    #        * Jens Braun                                 <jens.braun@student.kit.edu>       #
+    #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
+    #        * Gudrun Heinrich                        <gudrun.heinrich@kit.edu>            # 
+    #        * Marius Hoefer                            <marius.hoefer@kit.edu>              #
+    #        * Stephen Jones                          <stephen.jones@durham.ac.uk>   #
+    #        * Matthias Kerner                         <matthias.kerner@kit.edu>            #
+    #        * Jannis Lang                               <jannis.lang@partner.kit.edu>       #
+    #        * Vitaly Magerya                           <vitaly.magerya@tx97.net>           #
+    #                                                                                                                    #
+    #        FORMER AUTHORS:                                                                         #
+    #          Gavin Cullen, Hans van Deurzen, Nicolas Greiner, Stephan Jahn,                      #
+    #          Gionata Luisoni, Pierpaolo Mastrolia, Edoardo Mirabella, Giovanni Ossola,        #
+    #          Tiziano Peraro, Joscha Reichel, Thomas Reiter,  Johannes Schlenk,                  #
+    #          Ludovic Scyboz, Johann Felix von Soden-Fraunhofen, Francesco Tramontano  #
     #                                                                              #
     #  This program is free software: you can redistribute it and/or modify        #
     #  it under the terms of the GNU General Public License either                 #
