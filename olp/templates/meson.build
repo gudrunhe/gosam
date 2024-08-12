@@ -1,4 +1,12 @@
-project('GoSam_Process', 'fortran', version:'1.0', meson_version: '>=0.58.0', default_options: ['buildtype=release'])
+project('GoSam_Process_[% process_name %]',
+    'fortran',
+    version:'1.0',
+    meson_version: '>=0.58.0',
+    default_options: [
+        'buildtype=release',
+        'b_asneeded=false'
+        ]
+    )
 
 dependencies = []
 dependencies += dependency('avh_olo')
