@@ -7,8 +7,10 @@ from golem.model.expressions import ExpressionParser, \
 		SumExpression, SpecialExpression, PowerExpression, \
 		UnaryMinusExpression, DotExpression, IntegerExpression
 from golem.util.config import GolemConfigError
-from golem.util.tools import debug, message, error, warning, \
-		LimitedWidthOutputStream
+from golem.util.tools import LimitedWidthOutputStream
+
+import logging
+logger = logging.getLogger(__name__)
 
 # Maximal number of M-functions added to the vertices
 # in the qgraf file.
@@ -248,15 +250,15 @@ class Model:
 				<stub>.py, <stub>.hh, <stub>
 		"""
 
-		message("   Writing Python file ...")
+		logger.info("   Writing Python file ...")
 		with open(os.path.join(path, stub + ".py"), 'w') as f:
 			self.write_python_file(f)
 
-		message("   Writing QGraf file ...")
+		logger.info("   Writing QGraf file ...")
 		with open(os.path.join(path, stub), 'w') as f:
 			self.write_qgraf_file(f, stub)
 
-		message("   Writing Form file ...")
+		logger.info("   Writing Form file ...")
 		with open(os.path.join(path, stub + ".hh"), 'w') as f:
 			self.write_form_file(f)
 
@@ -1017,7 +1019,7 @@ mnemonics = {
 
 		if self.containsMajoranaFermions():
 			f.write("* Model contains Majorana Fermions:\n")
-			debug("You are working with a model " +
+			logger.debug("You are working with a model " +
 					"that contains Majorana fermions.")
 			f.write("#Define DISCARDQGRAFSIGN \"1\"\n")
 		f.write("#Define USEVERTEXPROC \"1\"\n")

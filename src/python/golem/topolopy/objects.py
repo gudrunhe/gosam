@@ -2,12 +2,14 @@
 
 import re
 import itertools
+import sys
 
 import golem.algorithms.mandelstam
 import golem.util.tools
 import golem.properties
 
-from golem.util.tools import message, error, warning, debug
+import logging
+logger = logging.getLogger(__name__)
 
 LOOPMOMENTUM = "p1"
 
@@ -203,8 +205,9 @@ class Diagram:
          return 2
 
       if rk > self.loopsize() + 1:
-         debug("{}".format(self))
-         error("Encountered diagram with rank {}, loopsize {} and rank - loopsize = {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize(), rk - self.loopsize()))
+         logger.debug("{}".format(self))
+         logger.critical("Encountered diagram with rank {}, loopsize {} and rank - loopsize = {} > 1, which GoSam is unable to handle.".format(rk, self.loopsize(), rk - self.loopsize()))
+         sys.exit("GoSam terminated due to an error")
 
       return rk
 
@@ -224,7 +227,8 @@ class Diagram:
          else:
             return tmporders[str(okey)]
       except:
-         error("'{0}' cannot be used as key in order function.".format(okey))
+         logger.critical("'{0}' cannot be used as key in order function.".format(okey))
+         sys.exit("GoSam terminated due to an error")
 
 
    def VertexInfo(self):
@@ -358,7 +362,7 @@ class Diagram:
    def iprop(self, *args, **opts):
       opts["zero"] = self._zerosum
       if "momentum" in opts:
-         warning("Using the iprop function with the 'momentum' key in the Python filter can lead to inconsistencies in the crossings. Consider running GoSam with --no-crossings or using the iprop_momentum function instead.")
+         logger.warning("Using the iprop function with the 'momentum' key in the Python filter can lead to inconsistencies in the crossings. Consider running GoSam with --no-crossings or using the iprop_momentum function instead.")
       return sum([p.match(list(args), **opts)
          for p in list(self._propagators.values())])
    
@@ -634,7 +638,8 @@ class Diagram:
             legs[k] = (-1, True)
             fnum -= 2
          else:
-            error("Cannot determine fermion flow.")
+            logger.critical("Cannot determine fermion flow.")
+            sys.exit("GoSam terminated due to an error")
 
       while fnum < 0:
          if len(flippable_m) > 0:
@@ -642,7 +647,8 @@ class Diagram:
             legs[k] = (+1, True)
             fnum += 2
          else:
-            error("Cannot determine fermion flow.")
+            logger.critical("Cannot determine fermion flow.")
+            sys.exit("GoSam terminated due to an error")
 
       p_set = []
       m_set = []
@@ -734,7 +740,8 @@ class Diagram:
          elif s == set([]) or s == set([-1,1]):
             permutation.extend([order[pair[0]], order[pair[1]]])
          else:
-            error("Ambiguous fermion flow.")
+            logger.critical("Ambiguous fermion flow.")
+            sys.exit("GoSam terminated due to an error")
 
       s = permutation_sign(permutation)
 

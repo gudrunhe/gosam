@@ -10,7 +10,6 @@ import traceback
 import golem.util.tools
 import golem.properties
 import golem.installation
-import argparse
 
 def report_crash(exc, stack, fname="gosam.crashed"):
    import os

@@ -13,12 +13,14 @@ import golem.properties
 import golem.pyxo.pyxodraw
 import golem.model.calchep
 
-from golem.util.tools import copy_file, \
-		debug, message, warning
+from golem.util.tools import copy_file
 from golem.util.path import golem_path
 from golem.util.config import GolemConfigError, split_qgrafPower
 import golem.util.tools
 import golem.util.constants as consts
+
+import logging
+logger = logging.getLogger(__name__)
 
 def diagram_count(conf, loops, cut=0):
 	"""
@@ -151,7 +153,7 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 	#if os.path.exists(output_name):
 		#os.remove(output_name)
 
-	message("QGraf is generating %s" % output_short_name)
+	logger.info("QGraf is generating %s" % output_short_name)
 
 	with open(os.path.join(path, log_name), 'w') as f:
 		try:
@@ -396,7 +398,7 @@ def run_qgraf(conf, in_particles, out_particles):
 
 	if flag_generate_lo_diagrams and diagram_count(conf, 0) == 0 \
 				and flag_generate_nlo_virt:
-		warning("There are no tree-level diagrams for your setup.\n" +
+		logger.warning("There are no tree-level diagrams for your setup.\n" +
 				"!!! YOU WILL ALWAYS GET ZERO !!!\n" +
 			  ("You probably wanted 'order=%s,NONE,%s'" % (powers[0][0], powers[0][2])) +
 			  (" instead of 'order=%s'\n" % (",".join(map(str,list(itertools.chain(*powers)))))) +

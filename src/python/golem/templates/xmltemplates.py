@@ -11,9 +11,11 @@ import golem.util.config
 import golem.templates.filter
 import golem.templates.factory
 
-from golem.util.tools import debug, message, warning, error, \
-      enumerate_helicities, encode_helicity, \
+from golem.util.tools import enumerate_helicities, encode_helicity, \
       enumerate_and_reduce_helicities
+
+import logging
+logger = logging.getLogger(__name__)
 
 def compare_version(version1, version2):
    """
@@ -92,31 +94,34 @@ class _TemplateState:
    def create_directory(self, dest):
       if os.path.exists(dest):
          if not os.path.isdir(dest):
-            error("Cannot create directory %r " % dest +
+            logger.critical("Cannot create directory %r " % dest +
                   "because it exists and is not a directory.")
+            sys.exit("GoSam terminated due to an error")
       else:
-         message("Creating directory %r ..." % dest)
+         logger.info("Creating directory %r ..." % dest)
          os.mkdir(dest)
          self.created_directories.append(dest)
 
    def delete_dir_if_empty(self, dest):
       if not os.path.exists(dest):
-         error("Cannot check if directory %r " % dest +
+         logger.critical("Cannot check if directory %r " % dest +
                "is empty because it does not exist.")
+         sys.exit("GoSam terminated due to an error")
 
       elif not os.path.isdir(dest):
-         error("Cannot check if %r " % dest +
+         logger.critical("Cannot check if %r " % dest +
                "is empty because it is not a directory.")
+         sys.exit("GoSam terminated due to an error")
       else:
          if not os.listdir(dest):
             os.rmdir(dest)
-            message("Removed empty directory %r." % dest)
+            logger.info("Removed empty directory %r." % dest)
          else:
-            message("Keeping non-empty directory %r." % dest)
+            logger.info("Keeping non-empty directory %r." % dest)
 
    def transform_template_file(self, in_file, out_file, class_name, filter, executable):
       if out_file in self.produced_files:
-         warning("File %r has been overwritten while processing %r" % \
+         logger.warning("File %r has been overwritten while processing %r" % \
                (out_file, in_file))
       else:
          self.produced_files.append(out_file)
@@ -247,7 +252,7 @@ class _TemplateState:
 
          self.props.append(extra_props)
 
-         message("Generating file %s" % env["output file name"])
+         logger.info("Generating file %s" % env["output file name"])
          self.transform_template_file(in_file, out_file, class_name, filter, executable)
          self.props.pop()
 
@@ -669,12 +674,9 @@ def transform_templates(file_name, output_path, *props, **opts):
       xmlp = create_parser(toks[0], abs_outputpath, *props, **opts)
       with open(os.path.join(*toks), 'r') as xmlf:
          xmlp.Parse(xmlf.read())
-      message("All templates processed.")
+      logger.info("All templates processed.")
 
-   except IOError as ex:
-      error("While processing templates of %r: %s" % (file_name, ex))
-   except TemplateXMLError as ex:
-      error("While processing templates of %r: %s" % (file_name, ex))
-   except xml.parsers.expat.error as ex:
-      error("While processing templates of %r: %s" % (file_name, ex))
+   except (IOError, TemplateXMLError, xml.parsers.expat.error) as ex:
+      logger.critical("While processing templates of %r: %s" % (file_name, ex))
+      sys.exit("GoSam terminated due to an error")
 

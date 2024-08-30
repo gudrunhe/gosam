@@ -4,6 +4,9 @@ import golem
 
 from golem.util.config import GolemConfigError
 
+import logging
+logger = logging.getLogger(__name__)
+
 WHITESPACE = \
 	"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0c\x0d\x0e\x0f" + \
 	"\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1b\x1c\x1d\x1e\x1f" + \
@@ -597,7 +600,8 @@ class OLPContractFile(OLPOrderFile):
 			try:
 				response = self.getProcessResponse(i)
 			except IndexError:
-				golem.util.tools.error("Response Code for process has not been set properly.")
+				logger.critical("Response Code for process has not been set properly.")
+				sys.exit("GoSam terminated due to an error")
 			if isinstance(response, list):
 				f.write("%s -> %s | %d %s\n" % (" ".join(map(str, inp)), 
 					" ".join(map(str, out)), len(response),
@@ -674,7 +678,7 @@ class SUSYLesHouchesFile:
 						setattr(self, name, block)
 						self.blocks[name] = block
 				else:
-					golem.util.tools.warning(
+					logger.warning(
 							"Skipping line %d and remainder of this BLOCK" %
 							line_number)
 					block = {}
@@ -694,10 +698,10 @@ class SUSYLesHouchesFile:
 					id = tuple(map(int, tokens))
 					block[id] = value
 				except ValueError:
-					golem.util.tools.warning(
+					logger.warning(
 							"Skipped line %d: illegal format" % line_number)
 			else:
-				golem.util.tools.warning(
+				logger.warning(
 						"Skipped line %d: missing value" % line_number)
 
 	def __getitem__(self, id):

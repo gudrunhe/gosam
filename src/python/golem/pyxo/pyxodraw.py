@@ -6,7 +6,10 @@ import os.path
 
 import golem.util.main_qgraf
 from golem.util.path import golem_path
-from golem.util.tools import debug, message, warning, getModel, load_source
+from golem.util.tools import getModel, load_source
+
+import logging
+logger = logging.getLogger(__name__)
 
 def convert_to_digits(number, digits):
 	v = abs(number)
@@ -42,7 +45,7 @@ def pyxodraw(*args, **opts):
 
 		short_name = os.path.split(arg)[-1]
 		base_name = short_name[:short_name.rindex(".")]
-		debug("Pyxodraw is trying to load module %r" % base_name,
+		logger.debug("Pyxodraw is trying to load module %r\n" % base_name +
 				"from directory: %r" % arg_path)
 		mod = load_source(base_name, arg)
 

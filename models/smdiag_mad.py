@@ -5,6 +5,9 @@ from golem.model import MODEL_OPTIONS
 import golem.util.tools
 from math import sqrt
 
+import logging
+logger = logging.getLogger(__name__)
+
 model_name = "Standard Model in Feynman Gauge (Diagonal CKM)"
 #---#[ particles:
 particles = {
@@ -775,9 +778,9 @@ def init():
    gosam_choice = int(ew_gosam_choice(input_params, icount))
    param=""
 
-   golem.util.tools.debug("GS: %r" % gosam_choice)
-   #golem.util.tools.debug("user: %r" % user_choice)
-   #golem.util.tools.debug("ewchoose: %r" % ewchoose)
+   logger.debug("GS: %r" % gosam_choice)
+   #logger.debug("user: %r" % user_choice)
+   #logger.debug("ewchoose: %r" % ewchoose)
 
    for item in list(DEFAULT.keys()):
       if item in ones:
@@ -801,8 +804,8 @@ def init():
             fval = float(sval)
             parameters[key] = sval
          except ValueError:
-            golem.util.tools.warning(
-            "Model option %s=%r not in allowed range." % (key, value),
+            logger.warning(
+            "Model option %s=%r not in allowed range.\n" % (key, value) +
             "Option ignored")
 
       elif key.lower() == "masses":

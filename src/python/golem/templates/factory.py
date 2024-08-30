@@ -9,9 +9,12 @@ import golem.templates.olp
 import golem.util.parser
 import os
 import stat
+import sys
 
-from golem.util.tools import debug, warning, error, message, \
-      copy_file
+from golem.util.tools import copy_file
+
+import logging
+logger = logging.getLogger(__name__)
 
 class TemplateFactory:
    def __init__(self):
@@ -19,7 +22,7 @@ class TemplateFactory:
 
    def process(self, in_file, out_file, class_name, props, conf, opts,
          filter=None,executable=False):
-      debug("Transforming file %r by template class %sTemplate" % 
+      logger.debug("Transforming file %r by template class %sTemplate" %
             (in_file, class_name))
 
       assert class_name is not None
@@ -193,7 +196,8 @@ class TemplateFactory:
                set_executable_bit_if_needed(out_file,executable)
 
          except golem.util.parser.TemplateError as ex:
-            error("While processing '%s': %s" % (in_file, ex))
+            logger.critical("While processing '%s': %s" % (in_file, ex))
+            sys.exit("GoSam terminated due to an error")
 
 
 def set_executable_bit_if_needed(out_file,executable):

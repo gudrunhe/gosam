@@ -16,6 +16,9 @@ except ImportError:
 
 import golem.util.path as gpath
 
+import logging
+logger = logging.getLogger(__name__)
+
 class GolemConfigError(Exception):
    def __init__(self, value):
       Exception.__init__(self, value)
@@ -989,15 +992,13 @@ class Fortran(Program):
    def getInstance(self,conf=None):
       if conf:
          for p in self.locations:
-            print("# ~~~ " + p + " usable with installed Golem95/Samurai? ... ", end=' ')
             if self.checkCompatibility(p,conf):
-               print("Yes")
+               logger.info(p + " usable with installed Golem95/Samurai? ... Yes")
                return p
             else:
-              print("No")
-         print("==> Configuration failed:")
-         print("    Libraries not with examined compiler created.")
-         sys.exit(1)
+              logger.info(p + " usable with installed Golem95/Samurai? ... No")
+         logger.critical("Configuration failed: Libraries not compiled with current compiler")
+         sys.exit("GoSam terminated due to an error")
       elif len(self.locations) > 0:
          return self.locations[0]
 
@@ -1050,7 +1051,7 @@ class Linker(Program):
                   else:
                      conf["+build.extensions"] = "linker"
                else:
-                  print("# ~~~ Found linker 'mold', but the used version of gfortran is not compatible. Using default linker.")
+                  logger.info("Found linker 'mold', but the used version of gfortran is not compatible. Using default linker.")
                break
             elif "lld" in exe:
                if gfortran_version >= 9:
@@ -1060,7 +1061,7 @@ class Linker(Program):
                   else:
                      conf["+build.extensions"] = "linker"
                else:
-                  print("# ~~~ Found linker 'lld', but the used version of gfortran is not compatible. Using default linker.")
+                  logger.info("Found linker 'lld', but the used version of gfortran is not compatible. Using default linker.")
                break
             elif "gold" in exe:
                if gfortran_version >= 5:
@@ -1070,7 +1071,7 @@ class Linker(Program):
                   else:
                      conf["+build.extensions"] = "linker"
                else:
-                  print("# ~~~ Found linker 'gold', but the used version of gfortran is not compatible. Using default linker.")
+                  logger.info("Found linker 'gold', but the used version of gfortran is not compatible. Using default linker.")
                break
 
 
@@ -1109,30 +1110,27 @@ class Configurator:
                   
          component = cls()
 
-         self.message("Searching for %s ..." % name)
+         logger.info("Searching for %s ..." % name)
          component.examine(hints)
 
          if not component.isInstalled():
             if required == REQUIRED:
                not_found.append(name)
-               self.message("Required component %s is not installed." % name)
+               logger.info("Required component %s is not installed." % name)
             else:
-               self.message("Component %s is not installed." % name)
+               logger.info("Component %s is not installed." % name)
          else:
             paths = component.getInstallationPath()
             l = len(paths)
             if l == 1:
-               self.message("Component %s has been found." % name)
-               self.message("     %s" % (paths[0]))
+               logger.info("Component %s has been found." % name)
+               logger.info("     %s" % (paths[0]))
             else:
-               self.message("Component %s has been found in %d places." %
+               logger.info("Component %s has been found in %d places." %
                      (name, l))
                for i, path in enumerate(paths):
-                  self.message("#%2d: %s" % (i+1, path))
+                  logger.info("#%2d: %s" % (i+1, path))
             self.installed_components.append(component)
-
-   def message(self, message):
-      print("# ~~~ " + message)
 
    def fail(self, message):
       print("==> Configuration failed:")

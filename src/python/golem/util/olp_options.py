@@ -9,8 +9,10 @@
 import os.path
 import golem.properties
 from golem.util.olp_objects import OLPError
-from golem.util.tools import warning
 import math
+
+import logging
+logger = logging.getLogger(__name__)
 
 __all_olp_options__ = {}
 __olp_lower_case__ = {}
@@ -203,7 +205,7 @@ def Model(values, conf, ignore_case):
 			conf[golem.properties.model] = ["FeynRules", file_name]
 			return __value_OK__
 		else:
-			warning("UFOModel which expands to '%s' does not exist." % file_name)
+			logger.warning("UFOModel which expands to '%s' does not exist." % file_name)
 			return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
 	supported_values = ["SMdiag", "SMnondiag"]
@@ -248,7 +250,7 @@ def AlphasPower(values, conf, ignore_case):
 		except ValueError:
 			return __value_ERR__ + "non-integer value encountered."
 	else:
-		warning("AlphasPower left blank in order file.")
+		logger.warning("AlphasPower left blank in order file.")
 		return __value_OK__ + " # WARNING: should not be blank."
 
 @optional_olp_option
@@ -263,7 +265,7 @@ def AlphaPower(values, conf, ignore_case):
 		except ValueError:
 			return __value_ERR__ + "non-integer value encountered."
 	else:
-		warning("AlphaPower left blank in order file.")
+		logger.warning("AlphaPower left blank in order file.")
 		return __value_OK__ + " # WARNING: should not be blank."
 
 @optional_olp_option
@@ -284,7 +286,7 @@ def WidthScheme(values, conf, ignore_case):
 	ret=expect_one_keyword(values, conf, True,
 		"olp.widthscheme", supported_values)
 	if ret == "ComplexMass":
-		warning("Complex Mass scheme not yet fully implemented!")
+		logger.warning("Complex Mass scheme not yet fully implemented!")
 	return ret
 
 
@@ -434,7 +436,7 @@ def UFOModel(values, conf, ignore_case):
 		conf[golem.properties.model] = ["FeynRules", file_name]
 		return __value_OK__
 	else:
-		warning("UFOModel which expands to '%s' does not exist." % file_name)
+		logger.warning("UFOModel which expands to '%s' does not exist." % file_name)
 		return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
 @optional_olp_option
@@ -452,7 +454,7 @@ def Parameters(values, conf, ignore_case):
 	else:
 		conf["olp.alphas"] = 0
 		conf["olp.parameters"] = parameters
-		warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+		logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
 		return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
 	return __value_OK__
 
@@ -550,7 +552,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 			contract_file.setPropertyResponseOrdered(name,
 					"Error: Unknown by OLP",lineno)
 			if not quiet:
-				warning("Line %s: Keyword '%s' unknown." % (name, lineno))
+				logger.warning("Line %s: Keyword '%s' unknown." % (name, lineno))
 			error_count += 1
 			continue
 
@@ -564,7 +566,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 		contract_file.setPropertyResponseOrdered(name, response,lineno)
 		if not contract_file.isPropertyOk(name):
 			if not quiet:
-				warning("Line %s: Option '%s' failed. %s" % (lineno, name, response))
+				logger.warning("Line %s: Option '%s' failed. %s" % (lineno, name, response))
 			error_count += 1
 	for key in __required_olp_options_default__:
 		handler=__required_olp_options_default__[key]
@@ -573,7 +575,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
 	if len(missing) > 0:
 		error_count += 1
 		if not quiet:
-			warning("Missing required options: %s" % ", ".join(missing))
+			logger.warning("Missing required options: %s" % ", ".join(missing))
 		raise OLPError("Missing required options: %s" % ", ".join(missing))
 
 	( __all_olp_options__,__olp_lower_case__,

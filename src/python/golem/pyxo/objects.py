@@ -2,7 +2,10 @@
 
 import math
 import random
-from golem.util.tools import error
+import sys
+
+import logging
+logger = logging.getLogger(__name__)
 
 def A(i, F, R=None):
 	if R is None:
@@ -293,7 +296,8 @@ class vertex:
 			elif self.vtype[1]>=1:
 				f.write("   \\GBoxc(%0.1f,%0.1f)(%s,%s)0 " % (x, y, 2*vsize, 2*vsize))
 			else:
-				error("I don't know this vertex type identifier: %s" % str(self.vtype))
+				logging.critical("I don't know this vertex type identifier: %s" % str(self.vtype))
+				sys.exit("GoSam terminated due to an error")
 		else:
 			f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
 
@@ -362,8 +366,9 @@ class propagator:
 					phi - 180.0, phi + 180.0,
 					lookup, label=label, **opts)
 		else:
-			error("don't know what to do: " +
+			logging.critical("don't know what to do: " +
 				"self.bend = %r (%s)" % (self.bend, self.bend))
+			sys.exit("GoSam terminated due to an error")
 
 
 	def setForce(self, value):

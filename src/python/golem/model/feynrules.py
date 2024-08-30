@@ -11,8 +11,10 @@ import copy
 import re
 import golem.model.expressions as ex
 
-from golem.util.tools import error, warning, message, debug, \
-		LimitedWidthOutputStream, load_source
+from golem.util.tools import LimitedWidthOutputStream, load_source
+
+import logging
+logger = logging.getLogger(__name__)
 
 LINE_STYLES = {
 		'straight': 'fermion',
@@ -92,7 +94,7 @@ class Model:
 			mname = mname.replace(os.altsep, "")
 		search_path = [ parent_path ]
 
-		message("Trying to import FeynRules model '%s' from %s" %
+		logger.info("Trying to import FeynRules model '%s' from %s" %
 				(mname, search_path[0]))
 		mod = load_ufo_files(mname, search_path)
 
@@ -177,7 +179,8 @@ class Model:
 									ctcoeff = ctcoeff.replace(ctparam.name,'0')
 							self.ctfunctions[(name+ctpart)][ctpole] = ctcoeff
 				else:
-					error("CT coupling %s is neither a dict nor str!" % c)
+					logger.critical("CT coupling %s is neither a dict nor str!" % c)
+					sys.exit("GoSam terminated due to an error")
 
 		parser = ex.ExpressionParser()
 		ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
@@ -196,7 +199,7 @@ class Model:
 		f.write("from golem.model.particle import Particle\n")
 		f.write("\nmodel_name = %r\n\n" % self.model_name)
 
-		message("      Generating particle list ...")
+		logger.info("      Generating particle list ...")
 		f.write("particles = {")
 
 		is_first = True
@@ -311,14 +314,16 @@ class Model:
 			elif p.nature == 'internal':
 				functions[name] = p.value
 			else:
-				error("Parameter's nature ('%s') not implemented." % p.nature)
+				logger.critical("Parameter's nature ('%s') not implemented." % p.nature)
+				sys.exit("GoSam terminated due to an error")
 
 			if p.type == "real":
 				types[name] = "R"
 			elif p.type == "complex":
 				types[name] = "C"
 			else:
-				error("Parameter's type ('%s') not implemented." % p.type)
+				logger.critical("Parameter's type ('%s') not implemented." % p.type)
+				sys.exit("GoSam terminated due to an error")
 		parameters['NC'] = '3.0'
 		types['NC'] = 'R'
 		parameters['Nf'] = '5.0'
@@ -341,7 +346,7 @@ class Model:
 					fval = float(sval)
 					parameters[real_key] = sval
 				except ValueError:
-					warning("Model option %s=%r not in allowed range." % (key, value),
+					logger.warning("Model option %s=%r not in allowed range.\n" % (key, value) +
 							"Option ignored")
 		specials = {}
 		for expr in shortcut_functions:
@@ -356,7 +361,7 @@ class Model:
 			functions[name] = c.value
 			types[name] = "C"
 
-		message("      Generating function list ...")
+		logger.info("      Generating function list ...")
 		f.write("functions = {")
 		fcounter = [0]
 		fsubs = {}
@@ -385,7 +390,7 @@ class Model:
 		if self.useCT:
 			types.update(self.cttypes)
 
-			message("      Generating counter term function list ...")
+			logger.info("      Generating counter term function list ...")
 			f.write("ctfunctions = {")
 			is_first = True
 			for name, value in self.ctfunctions.items():
@@ -563,7 +568,8 @@ class Model:
 			try:
 				if p.CustomSpin2Prop:
 					if not p.propagating:
-						error("Particle %s with CustomSpin2Prop has to propagate." % p.name)
+						logger.critical("Particle %s with CustomSpin2Prop has to propagate." % p.name)
+						sys.exit("GoSam terminated due to an error")
 					aux = "+2"
 			except AttributeError:
 				pass
@@ -598,7 +604,8 @@ class Model:
 		
 		for el in order_names:
 			if not(el in orders):
-				error("WARNING: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(el))
+				logger.critical("logger.warning: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(el))
+				sys.exit("GoSam terminated due to an error")
 		orders.update(order_names)
 
 		for v in self.all_vertices:
@@ -616,7 +623,7 @@ class Model:
 
 			deg = len(fields)
 			if deg >= 7:
-				warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+				logger.warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
 				continue
 				assert False
 
@@ -636,7 +643,7 @@ class Model:
 
 				if not vfunctions in vertorders:
 					if len(vertorders) > 0:
-						warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+						logger.warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
 									% (v.name, vertorders, vfunctions))
 										+ "I will split it up.")
 					vfcp = copy.deepcopy(vfunctions)
@@ -705,7 +712,7 @@ class Model:
 
 				deg = len(fields)
 				if deg >= 7:
-					warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
+					logger.warning(("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." %  (v.name, deg)))
 					continue
 					assert False
 
@@ -725,7 +732,7 @@ class Model:
 
 					if not vfunctions in vertorders:
 						if len(vertorders) > 0:
-							warning(("CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
+							logger.warning(("CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
 										% (v.name, vertorders, vfunctions))
 											+ "I will split it up.")
 						vfcp = copy.deepcopy(vfunctions)
@@ -889,7 +896,7 @@ class Model:
 		f.write("*---#] Symbol Definitions:\n")
 		if self.containsMajoranaFermions():
 			f.write("* Model contains Majorana Fermions:\n")
-			debug("You are working with a model " +
+			logger.debug("You are working with a model " +
 					"that contains Majorana fermions.")
 			f.write("#Define DISCARDQGRAFSIGN \"1\"\n")
 		f.write("#Define USEVERTEXPROC \"1\"\n")
@@ -929,7 +936,7 @@ class Model:
 					cplnames[vertorders.index(vorders)].append(coupling.name)
 				else:
 					if len(vertorders) > 0:
-						warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+						logger.warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
 									% (v.name, vertorders, vorders))
 										+ "I will split it up.")
 					vocp = copy.deepcopy(vorders)
@@ -1073,7 +1080,7 @@ class Model:
 						cplnames[vertorders.index(vorders)].append(coupling.name)
 					else:
 						if len(vertorders) > 0:
-							warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+							logger.warning(("Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
 										% (v.name, vertorders, vorders))
 											+ "I will split it up.")
 						vocp = copy.deepcopy(vorders)
@@ -1315,19 +1322,19 @@ class Model:
 		return False
 
 	def store(self, path, local_name, order_names):
-		message("  Writing Python file ...")
+		logger.info("  Writing Python file ...")
 		with open(os.path.join(path, "%s.py" % local_name), 'w') as f:
 			self.write_python_file(f)
 
-		message("  Writing QGraf file ...")
+		logger.info("  Writing QGraf file ...")
 		with open(os.path.join(path, local_name), 'w') as f:
 			self.write_qgraf_file(f, order_names)
 
-		message("  Writing Form file ...")
+		logger.info("  Writing Form file ...")
 		with open(os.path.join(path, "%s.hh" % local_name), 'w') as f:
 			self.write_form_file(f, order_names)
 
-		#message("  Writing Form CT file ...")
+		#logger.info("  Writing Form CT file ...")
 		#with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
 			#self.write_formct_file(f)
 
@@ -1672,7 +1679,8 @@ def transform_color(expr, colors, xidx):
 				elif order == [8, 3, -3]:
 					return head(indices[0], indices[2], indices[1])
 				else:
-					error("Cannot recognize color assignment at vertex: %s" % order)
+					logger.critical("Cannot recognize color assignment at vertex: %s" % order)
+					sys.exit("GoSam terminated due to an error")
 			else:
 				return head(indices[0], indices[1], indices[2])
 		if head == col_Identity:
@@ -1711,7 +1719,8 @@ def load_ufo_files(mname, mpath):
 			mfile, mpath, mdesc = imp.find_module(mname, mpath)
 			mod = imp.load_module(mname, mfile, mpath, mdesc)
 	except ImportError as exc:
-		error("Problem importing model file: %s" % exc)
+		logger.critical("Problem importing model file: %s" % exc)
+		sys.exit("GoSam terminated due to an error")
 	finally:
 		if mfile is not None:
 			mfile.close()

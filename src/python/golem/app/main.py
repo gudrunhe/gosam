@@ -1,9 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 import argparse
-import sys
-import os
 import os.path
-import getopt
 import cProfile
 import tempfile
 
@@ -13,11 +10,13 @@ import golem.util.tools
 from golem.util.config import GolemConfigError, Form
 import golem.installation
 import golem.util.constants
-from golem.util.tools import error
 
 # The following files contain routines which originally were
 # part of golem-main itself:
 from golem.util.main_misc import *
+
+import logging
+logger = logging.getLogger(__name__)
 
 def main(parser, argv=sys.argv):
    """
@@ -87,6 +86,7 @@ def main(parser, argv=sys.argv):
    parser.add_argument("config_file", nargs="+")
 
    cmd_args = parser.parse_args(argv[1:])
+   golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file)
    args = list(cmd_args.config_file)
 
    if cmd_args.report:
@@ -100,11 +100,9 @@ def main(parser, argv=sys.argv):
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
       golem.installation.GOLEM_VERSION))
 
-   message(GOLEM_FULL)
+   logger.info(GOLEM_FULL)
 
-   golem.util.tools.check_script_name(argv[0])
-
-   debug("      path: %r" % golem_path())
+   logger.debug("      path: %r" % golem_path())
 
    if cmd_args.generate_templates:
       if cmd_args.use_default_files:
@@ -121,7 +119,8 @@ def main(parser, argv=sys.argv):
 
       for fname in args:
          if os.path.exists(fname) and os.path.isdir(fname):
-            error("Cannot write to %r which denotes a directory." % fname)
+            logger.critical("Cannot write to %r which denotes a directory." % fname)
+            sys.exit("GoSam terminated due to an error")
          else:
             write_template_file(fname, defaults, cmd_args.template_format)
    elif interactive_session is not None:
@@ -138,7 +137,7 @@ def main(parser, argv=sys.argv):
          if "setup-file" in dir_info:
             args.append(dir_info["setup-file"])
       if cmd_args.merge_files:
-         golem.util.tools.warning("Merge option only with --template usable.")
+         logger.warning("Merge option only with --template usable.")
       for arg in args:
          # need the full system configuration
          # settings can be overridden in the input file
@@ -152,15 +151,13 @@ def main(parser, argv=sys.argv):
                   # args.append(dir_info["setup-file"])
                   in_file = dir_info["setup-file"]
                else:
-                  warning("The directory %r contains no file %r." % (
-                     arg, golem.util.constants.GOLEM_DIR_FILE_NAME),
-                        "This directory has been skipped.")
+                  logger.warning("The directory %r contains no file %r.\nThis directory has been skipped." % (
+                     arg, golem.util.constants.GOLEM_DIR_FILE_NAME))
                   continue
             else:
                in_file = arg
          else:
-            warning("The file or directory %r does not exist." % arg,
-               "This file or directory has been skipped.")
+            logger.warning("The file or directory %r does not exist.\nThis file or directory has been skipped." % arg)
             continue
 
          f = open(in_file, 'r')
@@ -183,7 +180,8 @@ def main(parser, argv=sys.argv):
             c.load(f)
             f.close()
          except GolemConfigError as err:
-            golem.util.tools.error("Configuration file is not sound:", str(err))
+            logger.critical("Configuration file is not sound: {}".format(str(err)))
+            sys.exit("GoSam terminated due to an error")
          finally:
             if temp_file_path:
                os.unlink(temp_file_path)
@@ -198,7 +196,7 @@ def main(parser, argv=sys.argv):
             golem.installation.GOLEM_REVISION
          c["ignore_empty_subprocess"] = cmd_args.ignore_empty_subprocess
 
-         message("Processing %r" % arg)
+         logger.info("Processing %r" % arg)
          golem.util.tools.POSTMORTEM_CFG = c
          try:
             path = golem.util.tools.process_path(c)
@@ -215,7 +213,8 @@ def main(parser, argv=sys.argv):
             write_golem_dir_file(path, in_file, c)
 
          except GolemConfigError as err:
-            golem.util.tools.error("Configuration file is not sound:", str(err))
+            logger.critical("Configuration file is not sound: {}".format(str(err)))
+            sys.exit("GoSam terminated due to an error")
       if len(args) == 0:
-         golem.util.tools.warning("No input files have been processed.")
+         logger.warning("No input files have been processed.")
 

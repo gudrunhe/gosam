@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import sys
 import golem
 import golem.util.tools
 import golem.installation
@@ -10,6 +11,9 @@ try:
    from multiprocess import Pool
 except ModuleNotFoundError:
    Pool = None
+   
+import logging
+logger = logging.getLogger(__name__)
 
 class OLPSubprocess:
    def __init__(self, id,
@@ -216,7 +220,8 @@ def get_sp_key(p_ini, p_fin, use_crossings, conf):
                   elif abs(pj[0])==5 or abs(pj[0])==6:
                      gp = 3
                   else:
-                     golem.util.tools.error("Particle pdg("+str(pj[0])+") does not belong to a known quark flavour generation!")
+                     logger.critical("Particle pdg("+str(pj[0])+") does not belong to a known quark flavour generation!")
+                     sys.exit("GoSam terminated due to an error")
                   gen_key[gp-1] = gen_key[gp-1]+1
 
          # sort to catch cases like (u ub u ub -> s sb) <-> (c cb c cb -> d db)
@@ -317,9 +322,10 @@ def derive_coupling_names(model_path, conf):
          candidates.append(canonical_name)
 
    if len(strong_couplings_found) == 0:
-      golem.util.tools.error(
-         "Invalid model file: cannot determine name of strong coupling.",
+      logger.critical(
+         "Invalid model file: cannot determine name of strong coupling.\n" +
          "Candidates are:" + ",".join(candidates))
+      sys.exit("GoSam terminated due to an error")
    else:
       for name in strong_coupling_names:
          if name in strong_couplings_found:
@@ -327,9 +333,10 @@ def derive_coupling_names(model_path, conf):
             break
 
    if len(weak_couplings_found) == 0:
-      golem.util.tools.error(
+      logger.critical(
          "Invalid model file: cannot determine name of weak coupling.",
          "Candidates are:" + ",".join(candidates))
+      sys.exit("GoSam terminated due to an error")
    else:
       for name in weak_coupling_names:
          if name in weak_couplings_found:
@@ -502,11 +509,12 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
                sp_subdir = str(sp)
                sp_process_path = os.path.join(path, sp_subdir)
                if not os.path.exists(sp_process_path):
-                  golem.util.tools.message("Creating directory %r" % sp_process_path)
+                  logger.info("Creating directory %r" % sp_process_path)
                   try:
                      os.mkdir(sp_process_path)
                   except IOError as err:
-                     golem.util.tools.error(str(err))
+                     logger.critical(str(err))
+                     sys.exit("GoSam terminated due to an error")
 
                sp_conf = sp.getConf(subprocesses_conf[int(sp)], path)
                sp_conf["golem.name"] = "GoSam"
@@ -552,7 +560,8 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
                         subprocess.removeCrossing(sp.id)
 
                except golem.util.config.GolemConfigError as err:
-                  golem.util.tools.error("Configuration file is not sound:", str(err))
+                  logger.critical("Configuration file is not sound:", str(err))
+                  sys.exit("GoSam terminated due to an error")
 
          # Regenerate process files for the original subprocess with new list of crossings
          shutil.rmtree(process_path)
@@ -592,7 +601,8 @@ def handle_subprocess(conf, subprocess, subprocess_key, subprocesses_conf, path,
             subprocess_conf))
 
    except golem.util.config.GolemConfigError as err:
-      golem.util.tools.error("Configuration file is not sound:", str(err))
+      logger.critical("Configuration file is not sound:", str(err))
+      sys.exit("GoSam terminated due to an error")
 
    subprocesses[subprocess_key] = subprocess
    subprocesses_conf_short[subprocess.id] = subprocess_conf
@@ -630,7 +640,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
       else:
          extensions[ex] = False
 
-   golem.util.tools.debug("Processing order file at %r" % order_file_name)
+   logger.debug("Processing order file at %r" % order_file_name)
    GOLEM_FULL = "GoSam %s" % ".".join(map(str,
       golem.installation.GOLEM_VERSION))
    result = 0
@@ -676,7 +686,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    file_ok = golem.util.olp_options.process_olp_options(contract_file, conf,
          ignore_case, ignore_unknown)
    if not file_ok:
-      golem.util.tools.warning(
+      logger.warning(
             "Please, check configuration and contract files for errors!")
 
    for subprocess_number,(lineo,_,_,_) in enumerate(order_file.processes_ordered()):
@@ -689,13 +699,13 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
    #---#] Read order file:
    if file_ok:
       if not os.path.exists(path):
-         golem.util.tools.message("Creating directory %r" % path)
+         logger.info("Creating directory %r" % path)
          os.mkdir(path)
 
       #---#[ Import model file once for all subprocesses:
       imodel_path = os.path.join(path, "model")
       if not os.path.exists(imodel_path):
-         golem.util.tools.message("Creating directory %r" % imodel_path)
+         logger.info("Creating directory %r" % imodel_path)
          os.mkdir(imodel_path)
       for lconf in [conf] + subprocesses_conf:
          golem.util.tools.prepare_model_files(lconf, imodel_path)
@@ -713,7 +723,7 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          for m in zero_masses:
             if m not in zero:
                zero.append(m)
-               golem.util.tools.message("Identified %s==0 (from SLHA file)" % m)
+               logger.info("Identified %s==0 (from SLHA file)" % m)
          for lconf in [conf] + subprocesses_conf:
             lconf[golem.properties.zero] = ",".join(zero)
       #---#] Constrain masses:
@@ -822,14 +832,14 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
          else:
             if "DRED" in uext:
                i = uext.index("DRED")
-               golem.util.tools.warning(
+               logger.warning(
                      ("'%s' removed from extensions. " % ext[i]) +
                      "Inconsistent with order file")
                del ext[i]
                lconf[golem.properties.extensions] = ",".join(ext)
       #---#] Select regularisation scheme:
    if "olp.massiveparticlescheme" in conf:
-      golem.util.tools.warning("UV-counterterms for massive particles are not "
+      logger.warning("UV-counterterms for massive particles are not "
             + "implemented yet.")
 
    #---#[ Iterate over subprocesses:
@@ -852,11 +862,12 @@ def process_order_file(order_file_name, f_contract, path, default_conf,
             subdir = str(subprocess)
             process_path = os.path.join(path, subdir)
             if not os.path.exists(process_path):
-               golem.util.tools.message("Creating directory %r" % process_path)
+               logger.info("Creating directory %r" % process_path)
                try:
                   os.mkdir(process_path)
                except IOError as err:
-                  golem.util.tools.error(str(err))
+                  logger.critical(str(err))
+                  sys.exit("GoSam terminated due to an error")
 
       # Now we run the loop again since all required crossings are added
 

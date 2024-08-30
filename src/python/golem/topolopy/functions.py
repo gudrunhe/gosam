@@ -1,13 +1,16 @@
 # vim: ts=3:sw=3:expandtab
 
 import os.path
+import sys
 
 import golem.properties
 
 from golem.topolopy.objects import Diagram, Propagator, Leg, LoopCache, TreeCache, CTCache
 import golem.topolopy.userlib
 from golem.util.config import GolemConfigError
-from golem.util.tools import error, warning, debug
+
+import logging
+logger = logging.getLogger(__name__)
 
 def setup_list(prop, conf):
    result = []
@@ -29,7 +32,8 @@ def setup_list(prop, conf):
             b = int(boundaries[1])+1
             c = int(boundaries[2])
          else:
-            error("Invalid range: %r" % r)
+            logger.critical("Invalid range: %r" % r)
+            sys.exit("GoSam terminated due to an error")
          result.extend(list(range(a,b,c)))
       else:
          result.append(int(r))
@@ -77,19 +81,22 @@ def setup_filter(prop, conf, model):
          fltr_mod_file=os.path.expanduser(os.path.expandvars(fltr_mod_file))
          exec(compile(open(fltr_mod_file, "rb").read(), fltr_mod_file, 'exec'), globs, globs)
       except IOError as ex:
-         error("Problems reading filter module %r: %s" %
+         logger.critical("Problems reading filter module %r: %s" %
                (fltr_mod_file, str(ex)))
+         sys.exit("GoSam terminated due to an error")
       except SyntaxError as ex:
-         error("Syntax error while reading filter module %r [%d:%d]: %s" % 
+         logger.critical("Syntax error while reading filter module %r [%d:%d]: %s" %
                (ex.filename, ex.lineno, ex.offset, ex.msg),
                ex.text)
+         sys.exit("GoSam terminated due to an error")
 
    fltr = conf.getProperty(prop)
    if len(fltr.strip()):
       try:
          return eval(fltr, globs)
       except SyntaxError as ex:
-         error("Option %s is not a valid expression" % prop)
+         logger.critical("Option %s is not a valid expression" % prop)
+         sys.exit("GoSam terminated due to an error")
    else:
       return lambda d: True
 
@@ -129,7 +136,7 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags = None):
       signs[idx] = diagram.sign()
    #   flows[idx] = diagram.fermion_flow()
 
-   debug("After analyzing tree diagrams: keeping %d, purging %d" % 
+   logger.debug("After analyzing tree diagrams: keeping %d, purging %d" %
          (len(keep), len(lose)))
 
    for idx in keep:
@@ -192,7 +199,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          lose.append(idx)
          conf["veto_crossings"] = diagram.filtered_by_momentum
 
-   debug("After analyzing loop diagrams: keeping %d, purging %d" % 
+   logger.debug("After analyzing loop diagrams: keeping %d, purging %d" %
             (len(keep_tot), len(lose)))
 
 #--- new start
@@ -223,7 +230,7 @@ def analyze_loop_diagrams(diagrams, model, conf, onshell,
          eprops[idx].append(idx)
 #--- new end
 
-   debug("After analyzing loop diagrams and diagram sum: keeping %d, purging %d" % 
+   logger.debug("After analyzing loop diagrams and diagram sum: keeping %d, purging %d" %
             (len(keep), len(lose)))
 
    conf["__max_rank__"] = max_rank
@@ -261,7 +268,7 @@ def analyze_ct_diagrams(diagrams, model, conf, filter_flags = None):
 
       signs[idx] = diagram.sign()
 
-   debug("After analyzing CT diagrams: keeping %d, purging %d" %
+   logger.debug("After analyzing CT diagrams: keeping %d, purging %d" %
          (len(keep), len(lose)))
 
    for idx in keep:

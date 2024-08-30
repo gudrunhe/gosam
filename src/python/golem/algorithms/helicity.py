@@ -2,8 +2,11 @@
 import golem.properties
 import golem.algorithms.color
 import itertools
+import sys
 from copy import deepcopy
 
+import logging
+logger = logging.getLogger(__name__)
 
 symbol_to_heli = {'0': 0, '+': +1, '-': -1,
       'k': +2, 'm': -2, 'K': +3, 'M': -3}
@@ -265,7 +268,7 @@ def parse_helicity(string, symbols=symbol_to_heli):
             "Illegal helicity: %r" % string)
    return result
 
-def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
+def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
       symmetries = conf.getProperty(golem.properties.symmetries)
       lsymmetries = [s.lower().strip() for s in symmetries]
       family = "family" in lsymmetries
@@ -303,17 +306,20 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
                            set(golem.algorithms.helicity.parse_helicity(
                                  hel.strip()).values())
                except ValueError:
-                  error("In symmetries=%s ... : '%s' is not a PDG code."
+                  logging.critical("In symmetries=%s ... : '%s' is not a PDG code."
                         % (s, pidx))
+                  sys.exit("GoSam terminated due to an error")
             else:
                try:
                   idx = int(idx) - 1
                except ValueError:
-                  error("In symmetries=%s ... : '%s' is not a particle number."
+                 logging.critical("In symmetries=%s ... : '%s' is not a particle number."
                         % (s, idx))
+                 sys.exit("GoSam terminated due to an error")
                if idx < 0 or idx >= len(in_particles) + len(out_particles):
-                  error("In symmetries=%s ... : '%d' is not in a good range."
+                  logging.critical("In symmetries=%s ... : '%d' is not in a good range."
                         % (s, idx+1))
+                  sys.exit("GoSam terminated due to an error")
 
                fixed[idx] = set(golem.algorithms.helicity.parse_helicity(
                   hel.strip()).values())
@@ -363,8 +369,9 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
 
       if flavour or family:
          if len(quarks) != len(anti_quarks):
-            error("Cannot apply 'flavour' or 'family' " +
+            logging.critical("Cannot apply 'flavour' or 'family' " +
                "symmetry to this external state.")
+            sys.exit("GoSam terminated due to an error")
 
          qi = list(quarks.keys())
          ai = list(anti_quarks.keys())
@@ -385,8 +392,9 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
 
       if lepton or generation:
          if len(leptons) != len(anti_leptons):
-            error("Cannot apply 'lepton' or 'generation' " +
+            logging.critical("Cannot apply 'lepton' or 'generation' " +
                "symmetry to this external state.")
+            sys.exit("GoSam terminated due to an error")
 
          qi = list(leptons.keys())
          ai = list(anti_leptons.keys())
@@ -457,7 +465,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles, error):
 
       return filter_function
 
-def parse_cycles(s, error):
+def parse_cycles(s):
    cycles = []
    current_cycle = None
    level = 0
@@ -468,23 +476,27 @@ def parse_cycles(s, error):
             level = 1
             current_cycle = []
          else:
-            error("Bad place for %r in permutation %r" % (token, s))
+            logger.critical("Bad place for %r in permutation %r" % (token, s))
+            sys.exit("GoSam terminated due to an error")
       elif token == ")":
          if level == 1:
             level = 0
             if len(current_cycle) > 1:
                cycles.append(current_cycle)
          else:
-            error("Bad place for %r in permutation %r" % (token, s))
+            logger.critical("Bad place for %r in permutation %r" % (token, s))
+            sys.exit("GoSam terminated due to an error")
       else:
          if level == 1:
             try:
                idx = int(token) - 1
                current_cycle.append(idx)
             except ValueError:
-               error("Unrecognized token %r in permutation %r." % (token, s))
+               logger.critical("Unrecognized token %r in permutation %r." % (token, s))
+               sys.exit("GoSam terminated due to an error")
          else:
-            error("Bad place for %r in permutation %r" % (token, s))
+            logger.critical("Bad place for %r in permutation %r" % (token, s))
+            sys.exit("GoSam terminated due to an error")
 
    return cycles
 
@@ -655,7 +667,7 @@ def group_identical_particles(conf, in_particles, out_particles):
 
    return groups, relevant_indices
 
-def generate_all_permutations(conf, groups, error):
+def generate_all_permutations(conf, groups):
    """
    Generate a set of all permutations which exchange identical particles.
 
@@ -674,7 +686,7 @@ def generate_all_permutations(conf, groups, error):
    for p in lsymmetries:
       if not p.startswith("("):
          continue
-      cycles = parse_cycles(p, error)
+      cycles = parse_cycles(p)
       user_permutations.append(permutation_from_cycles(cycles))
 
    permutation_group_factors = [ set(user_permutations) ]
@@ -698,8 +710,7 @@ def generate_all_permutations(conf, groups, error):
    return permutation_group_factors.pop()
 
 def find_symmetry_mapping(helicity, perm, relevant_indices, helicity_list, generated_helicities,
-                          conf, in_particles, out_particles, error
-                          ):
+                          conf, in_particles, out_particles):
    """
    First apply a permutation to a helicity then try to find a symmetry transformation
    onto a generated helicity.
@@ -787,7 +798,7 @@ def find_symmetry_mapping(helicity, perm, relevant_indices, helicity_list, gener
 
    return mapping
 
-def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error):
+def find_symmetry_group(helicity_list, conf, in_particles, out_particles):
    """
    Find a set of symmetry transformations which maps helicities of the
    given list onto each other.
@@ -817,7 +828,7 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
       return result
 
    groups, relevant_indices = group_identical_particles(conf, in_particles, out_particles)
-   permutation_group = generate_all_permutations(conf, groups, error)
+   permutation_group = generate_all_permutations(conf, groups)
 
    generated_helicities = []
    result = []
@@ -827,7 +838,7 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
       for perm in permutation_group:
          mapping = find_symmetry_mapping(helicity, perm, relevant_indices,
                                          helicity_list, generated_helicities,
-                                         conf, in_particles, out_particles, error)
+                                         conf, in_particles, out_particles)
          if mapping is not None:
             break
 
@@ -843,7 +854,7 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
 
    return result
 
-def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_particles, error):
+def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_particles):
    """
    Find a set of symmetry transformations which maps helicities of the
    given list onto each other. Only return symmetry transformations
@@ -890,7 +901,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
 
    # If only massless particles present, each helicity is a gauge invariant quantity => search all permutations
    if not relevant_massive_particle_indices:
-      return find_symmetry_group(helicity_list, conf, in_particles, out_particles, error)
+      return find_symmetry_group(helicity_list, conf, in_particles, out_particles)
 
    #
    #  Step 1 - get list of gauge invariant sets of helicities and pick out only the part requested by the user
@@ -936,7 +947,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
 
    # Generate all permutations
    groups, relevant_indices = group_identical_particles(conf, in_particles, out_particles)
-   all_permutations = generate_all_permutations(conf, groups, error)
+   all_permutations = generate_all_permutations(conf, groups)
 
    # Get dictionary of reference vectors
    ref_vectors = reference_vectors(conf, in_particles, out_particles, return_particle_ids=True)
@@ -976,7 +987,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
          for i_perm in individual_permutations:
             mapping = find_symmetry_mapping(helicity["helicity"], i_perm, relevant_indices, helicity_list,
                                             gauge_set_generated_helicities,
-                                            conf, in_particles, out_particles, error
+                                            conf, in_particles, out_particles
                                            )
             if mapping != None:
                mappings.append([helicity,mapping])
@@ -1012,7 +1023,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
                composed_perm = i_perm(g_perm)
                mapping = find_symmetry_mapping(helicity["helicity"], composed_perm, relevant_indices, helicity_list,
                                                generated_helicities,
-                                               conf, in_particles, out_particles, error
+                                               conf, in_particles, out_particles
                                                )
                if mapping != None:
                   count += 1
@@ -1044,7 +1055,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
          composed_perm = perm1(perm2)
          new_mapping = find_symmetry_mapping(mapping[0]["helicity"], composed_perm, relevant_indices, helicity_list,
                                    generated_helicities,
-                                   conf, in_particles, out_particles, error
+                                   conf, in_particles, out_particles
                                    )
          result[mapping[0]["index"]] = new_mapping
          mappings[ih] = [mapping[0],new_mapping]

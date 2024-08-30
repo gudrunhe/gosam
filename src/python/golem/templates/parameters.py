@@ -1,12 +1,16 @@
 # vim: ts=3:sw=3
 
 import io
+import sys
 from golem.util.config import Properties
 from golem.util.parser import Template
 import golem.util.tools
 import golem.model.expressions as ex
 from golem.model.feynrules import cmath_functions, shortcut_functions, \
 		unprefixed_symbols, sym_cmath, sym_cmplx, i_
+
+import logging
+logger = logging.getLogger(__name__)
 
 class ModelTemplate(Template):
 	"""
@@ -102,8 +106,9 @@ class ModelTemplate(Template):
 			d = len(coords)
 			if block in self._slha_blocks:
 				if d != self._slha_blocks[block]:
-					golem.util.tools.error("Incompatible entries for SLHA block %s"
+					logger.critical("Incompatible entries for SLHA block %s"
 							% block)
+					sys.exit("GoSam terminated due to an error")
 			else:
 				self._slha_blocks[block] = d
 
@@ -168,7 +173,7 @@ class ModelTemplate(Template):
 	
 		nfunctions = len(model_mod.functions)
 
-		golem.util.tools.message("Compiling functions ...")
+		logger.info("Compiling functions ...")
 
 
 		parser = golem.model.expressions.ExpressionParser()
@@ -177,18 +182,18 @@ class ModelTemplate(Template):
 		for name, value in list(model_mod.functions.items()):
 			i += 1
 			if i % 100 == 0:
-				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+				logger.info("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
 
 		if(hasattr(model_mod,'ctfunctions') and self._useCT):
-			golem.util.tools.message("Found counterterms in model ...")
+			logger.info("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
 				# We expect only 1/eps and finite terms from the CT. The 1/eps^2 of the virtual is of IR origin. The following piece of code checks if the CT is defined with additional coefficients. => Throw exception in this case?
 				ctpolesmdl = list(int(k) for k in value.keys())
 				ctpoles = [-2,-1,0]
 				if(any([k not in ctpoles for k in ctpolesmdl])):
-					golem.util.tools.warning("Counterterm parameter %s has pole coeffcients not expected at NLO!" % name)
+					logger.warning("Counterterm parameter %s has pole coeffcients not expected at NLO!" % name)
 				for ctp in ctpoles:
 					i += 1
 					if ctp in value:
@@ -199,7 +204,7 @@ class ModelTemplate(Template):
 					ctname = name+"ctpole"+pstr+str(abs(ctp))
 					functions[ctname] = expr
 
-		golem.util.tools.message("Resolving dependencies between functions ...")
+		logger.info("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 
 		nlines = len(program)
@@ -207,7 +212,7 @@ class ModelTemplate(Template):
 		props = Properties()
 		for i, name in enumerate(program):
 			if i % 100 == 0:
-				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+				logger.info("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
 			buf = io.StringIO()
@@ -234,7 +239,7 @@ class ModelTemplate(Template):
 	
 		nfunctions = len(model_mod.functions)
 
-		golem.util.tools.message("Compiling functions ...")
+		logger.info("Compiling functions ...")
 
 
 		parser = golem.model.expressions.ExpressionParser()
@@ -243,12 +248,12 @@ class ModelTemplate(Template):
 		for name, value in list(model_mod.functions.items()):
 			i += 1
 			if i % 100 == 0:
-				golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+				logger.info("  (%5d/%5d)" % (i, nfunctions))
 			expr = parser.compile(value)
 			functions[name] = expr
 	
 		if(hasattr(model_mod,'ctfunctions') and self._useCT):
-			golem.util.tools.message("Found counterterms in model ...")
+			logger.info("Found counterterms in model ...")
 			for name, value in list(model_mod.ctfunctions.items()):
 				for ctp, pcf in value.items():
 					i += 1
@@ -257,7 +262,7 @@ class ModelTemplate(Template):
 					ctname = name+"ctpole"+pstr+str(abs(ctp))
 					functions[ctname] = expr
 
-		golem.util.tools.message("Resolving dependencies between functions ...")
+		logger.info("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 		# the only difference
 		program.reverse()
@@ -267,7 +272,7 @@ class ModelTemplate(Template):
 		props = Properties()
 		for i, name in enumerate(program):
 			if i % 100 == 0:
-				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+				logger.info("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
 			buf = io.StringIO()
@@ -366,7 +371,8 @@ class ModelTemplate(Template):
 				classes[cls][varname] = coords[1:]
 
 		if len(classes) > 0 and len(yield_list) > 0:
-			golem.util.tools.error("Some SLHA block has an odd shape!")
+			logger.critical("Some SLHA block has an odd shape!")
+			sys.exit("GoSam terminated due to an error")
 
 		props = Properties()
 		if len(classes) > 0:
@@ -681,7 +687,7 @@ class ModelTemplate(Template):
 	
 		nfunctions = len(model_mod.functions)
 
-		golem.util.tools.message("Compiling functions ...")
+		logger.info("Compiling functions ...")
 		process_functions=False
 		if self._functions_fortran == {}:
 			process_functions=True
@@ -701,7 +707,7 @@ class ModelTemplate(Template):
 			for name, value in list(model_mod.functions.items()):
 				i += 1
 				if i % 100 == 0:
-					golem.util.tools.message("  (%5d/%5d)" % (i, nfunctions))
+					logger.info("  (%5d/%5d)" % (i, nfunctions))
 				expr = parser.compile(value)
 				prefix='mdl'
 				for fn in cmath_functions:
@@ -717,14 +723,14 @@ class ModelTemplate(Template):
 		else:
 			functions = self._functions_fortran
 
-		golem.util.tools.message("Resolving dependencies between functions ...")
+		logger.info("Resolving dependencies between functions ...")
 		program = golem.model.expressions.resolve_dependencies(functions)
 		nlines = len(program)
 
 		props = Properties()
 		for i, name in enumerate(program):
 			if i % 100 == 0:
-				golem.util.tools.message("   (%5d/%5d) lines" % (i, nlines))
+				logger.info("   (%5d/%5d) lines" % (i, nlines))
 
 			ast = functions[name]
 			buf =""
@@ -737,7 +743,8 @@ class ModelTemplate(Template):
 				props.setProperty(first_name, i == 0)
 				props.setProperty(last_name, i == nlines - 1)
 			except:
-				golem.util.tools.error("Could not set property in model file %s" % name)
+				logger.critical("Could not set property in model file %s" % name)
+				sys.exit("GoSam terminated due to an error")
 			yield props
 
 	def floats(self, *args, **opts):
@@ -752,7 +759,8 @@ class ModelTemplate(Template):
 				props.setProperty(float_name, name)
 				props.setProperty(value_name, local_floats[name])
 			except:
-				golem.util.tools.error("Floats not defined %s" % name)
+				logger.critical("Floats not defined %s" % name)
+				sys.exit("GoSam terminated due to an error")
 			yield props
 
 

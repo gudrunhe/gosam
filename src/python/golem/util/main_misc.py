@@ -24,7 +24,6 @@ from golem.util.find_libpaths import find_libraries
 
 from golem.util.path import golem_path
 from golem.util.tools import copy_file, \
-		debug, message, warning, \
 		generate_particle_lists
 
 from golem.util.config import GolemConfigError, split_qgrafPower
@@ -33,6 +32,9 @@ from golem.util.config import GolemConfigError, split_qgrafPower
 # part of golem-main itself:
 from golem.util.main_qgraf import *
 from golem.installation import GOLEM_VERSION, GOLEM_REVISION
+
+import logging
+logger = logging.getLogger(__name__)
 
 def create_ff_files(conf, in_particles, out_particles):
 	legs = len(in_particles) + len(out_particles)
@@ -113,7 +115,7 @@ def generate_process_files(conf, from_scratch=False):
 	run_qgraf(conf, in_particles, out_particles)
 
 	# Run the new analyzer:
-	message("Analyzing diagrams")
+	logger.info("Analyzing diagrams")
 	keep_tree, keep_virt, keep_vtot, eprops, keep_ct,  loopcache, loopcache_tot, tree_signs, flags, massive_bubbles, treecache, ctcache, ct_signs = \
 			run_analyzer(path, conf, in_particles, out_particles)
 #	keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
@@ -219,7 +221,8 @@ def find_config_files():
 					with open(full_name, 'r') as f:
 						props.load(f,avail_props)
 				except GolemConfigError as err:
-					golem.util.tools.error("Configuration file is not sound:", str(err))
+					logger.critical("Configuration file is not sound:", str(err))
+					sys.exit("GoSam terminated due to an error")
 	libpaths = find_libraries()
 	for flag in libpaths:
 		props.setProperty(flag, libpaths[flag])
@@ -235,7 +238,7 @@ def write_template_file(fname, defaults, format=None):
 	width = 70 # line width
 	tw = 3     # tab width
 
-	message("Writing template file %r" % fname)
+	logger.info("Writing template file %r" % fname)
 	script = sys.argv[0]
 	f = open(fname, "w")
 	if format is None:
@@ -356,26 +359,27 @@ def read_golem_dir_file(path):
 			with open(dir_file, 'r') as f:
 				result.load(f)
 		except GolemConfigError as err:
-			golem.util.tools.error("Configuration file is not sound:", str(err))
+			logger.critical("Configuration file is not sound:", str(err))
+			sys.exit("GoSam terminated due to an error")
 
 		ver = list(map(int,result["golem-version"].split(".")))
 
 		# be compatible between internal 1.99 releases and 2.0.*
 		if ver==[1,99] and GOLEM_VERSION[:2] == [2,0]:
-			warning("This directory has been generated with an older version "+
-				"of GoSam (%s)." % result["golem-version"],
-				"If you get compiler errors, you might need to remove all files",
+			logger.warning("This directory has been generated with an older version "+
+				"of GoSam (%s).\n" % result["golem-version"] +
+				"If you get compiler errors, you might need to remove all files\n" +
 				"including '.golem.dir' and rerun gosam.py.")
 			return result
 
 		# be compatible to older 2.0.* releases
 		if ver[:2]==[2,0] and GOLEM_VERSION[:2] == [2,0] and ver[:3]<=(GOLEM_VERSION[:3]+[0]*5)[:3]:
 			if ver[:3]!=(GOLEM_VERSION[:3]+[0]*5)[:3]:
-				warning("This directory has been generated with an older version "+
-					"of GoSam (%s)." % result["golem-version"],
-					"If you get compiler errors, you might need to remove all files",
-					"including '.golem.dir' and rerun gosam.py.")
-			return result
+				logger.warning("This directory has been generated with an older version " +
+							   "of GoSam (%s).\n" % result["golem-version"] +
+							   "If you get compiler errors, you might need to remove all files\n" +
+							   "including '.golem.dir' and rerun gosam.py.")
+				return result
 
 		for gv, v in zip(GOLEM_VERSION + [0]*5, ver):
 			if gv > v:
@@ -486,10 +490,10 @@ def workflow(conf):
 			[p for p in golem.properties.properties if p.isExperimental()]))
 	for name in conf:
 		if name in experimentals:
-			warning(
+			logger.warning(
 				("Your configuration sets the property %r " % name) +
-				"which is an undocumented and only partially tested feature.",
-				"Please, feel free to test this feature but be aware that",
+				"which is an undocumented and only partially tested feature.\n" +
+				"Please, feel free to test this feature but be aware that\n" +
 				"====== WE DON'T GUARANTEE FOR ANYTHING! =====")
 
 
@@ -554,7 +558,7 @@ def workflow(conf):
 			rp=os.path.relpath(path)
 			if not os.path.sep in rp:
 				os.mkdir(rp)
-				warning("Process path %r created." % path)
+				logger.warning("Process path %r created." % path)
 		except OSError as err:
 			raise GolemConfigError("Could not create process path: %r\r%s" % (path,err))
 
@@ -597,12 +601,12 @@ def workflow(conf):
 				red_flag = True
 				break
 		if not red_flag:
-			golem.util.tools.warning(
-					"Generating code for the virtual part without specifying",
-					"a reduction library is useless.",
-					"Please, make sure that at least one of the following",
-					"is added to 'extensions':",
-					", ".join(golem.properties.REDUCTION_EXTENSIONS),)
+			logger.warning(
+					"Generating code for the virtual part without specifying\n" +
+					"a reduction library is useless.\n" +
+					"Please, make sure that at least one of the following\n" +
+					"is added to 'extensions':\n" +
+					", ".join(golem.properties.REDUCTION_EXTENSIONS))
 			conf["gosam-auto-reduction.extensions"] = "ninja,golem95"
 	if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
 			conf["gosam-auto-reduction.extensions"]=""
@@ -615,12 +619,11 @@ def workflow(conf):
 
 
 	if len(ini) > 2:
-		warning("You specified a process with %d incoming particles." %
-					len(ini),
-				"This software has not been fully tested for processes",
-				"with more than two incoming particles."
-				"We don't say this is impossible or wrong.",
-				"",
+		logger.warning("You specified a process with %d incoming particles.\n" %
+					len(ini) +
+				"This software has not been fully tested for processes\n" +
+				"with more than two incoming particles.\n" +
+				"We don't say this is impossible or wrong.\n" +
 				"====== BUT WE DON'T GUARANTEE FOR ANYTHING! =====")
 
 	# retrive final extensions from other options
@@ -635,10 +638,10 @@ def workflow(conf):
 		ext.append("derive")
 
 	if "cdr" in ext and "dred" in ext:
-		warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
+		logger.warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
 
 	if "no-fr5" in ext:
-		warning("no-fr5 is not supported anymore.")
+		logger.warning("no-fr5 is not supported anymore.")
 
 	if not "dred" in ext:
 		ext.append("dred")
@@ -708,7 +711,7 @@ def workflow(conf):
 	for prop in golem.properties.properties:
 		lines = prop.check(conf)
 		if len(lines) > 0:
-			warning(*lines)
+			logger.warning("\n".join(lines))
 
 	conf["extensions"] = ext
 
@@ -739,7 +742,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	if generate_lo:
 		modname = consts.PATTERN_TOPOLOPY_LO
 		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading tree diagram file %r" % fname)
+		logger.debug("Loading tree diagram file %r" % fname)
 		mod_diag_lo = golem.util.tools.load_source(modname, fname)
 		if conf.getBooleanProperty("unitary_gauge"):
 			for d in mod_diag_lo.diagrams.values():
@@ -755,9 +758,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
 			if conf.getBooleanProperty("ignore_empty_subprocess"):
 				conf.setProperty("write_vanishing_amplitude", "true")
 			else:
-				golem.util.tools.error(
+				logger.critical(
 					"No remaining diagrams in subprocess {} after applying filters, use --ignore-empty-subprocess to continue anyway."
 					.format(conf["process_name"]))
+				sys.exit("GoSam terminated due to an error")
 	else:
 		keep_tree = []
 		tree_signs = {}
@@ -781,7 +785,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 
 		modname = consts.PATTERN_TOPOLOPY_VIRT
 		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading one-loop diagram file %r" % fname)
+		logger.debug("Loading one-loop diagram file %r" % fname)
 		mod_diag_virt = golem.util.tools.load_source(modname, fname)
 		if conf.getBooleanProperty("unitary_gauge"):
 			for d in mod_diag_virt.diagrams.values():
@@ -801,7 +805,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 	if generate_ct:
 		modname = consts.PATTERN_TOPOLOPY_CT
 		fname = os.path.join(path, "%s.py" % modname)
-		debug("Loading counterterm diagram file %r" % fname)
+		logger.debug("Loading counterterm diagram file %r" % fname)
 		mod_diag_ct = golem.util.tools.load_source(modname, fname)
 		if conf.getBooleanProperty("unitary_gauge"):
 			for d in mod_diag_ct.diagrams.values():

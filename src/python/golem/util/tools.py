@@ -4,6 +4,9 @@ import sys
 import os.path
 import traceback
 import re
+from copy import copy
+
+from mercurial.hgweb.common import continuereader
 
 import golem.model
 import golem.properties
@@ -14,127 +17,87 @@ from golem.util.path import golem_path
 from golem.util.config import GolemConfigError
 from golem.util.constants import MODEL_LOCAL
 
-__logger__ = []
-
-DEBUG   = 100
-MESSAGE =  50
-WARNING =  10
-ERROR   =   0
+import logging
+logger = logging.getLogger(__name__)
 
 POSTMORTEM_LOG = []
 POSTMORTEM_CFG = None
 POSTMORTEM_DO = False
 
-def add_logger(file_name=None):
-   if file_name is None:
-      logger = Logger()
-   else:
-      logger = FileLogger(file_name)
+class ColorFormatter(logging.Formatter):
+   def __init__(self, message, use_color = True, **kwargs):
+      super().__init__(message, **kwargs)
+      self.use_color = use_color
 
-   __logger__.append(logger)
-   return logger
-
-def add_logger_with_level(level, file_name=None):
-   if file_name is None:
-      logger = Logger(level)
-   else:
-      logger = FileLogger(file_name, level)
-
-   __logger__.append(logger)
-   return logger
-
-def remove_logger(logger):
-   if logger in __logger__:
-      __logger__.remove(logger)
-      return True
-   return False
-
-def debug(*messages):
-   do_message(DEBUG, "DEB", "\n".join(messages))
-
-def message(*messages):
-   POSTMORTEM_LOG.extend(messages)
-   do_message(MESSAGE, "~~~", "\n".join(messages))
-
-def warning(*messages):
-   POSTMORTEM_LOG.extend(messages)
-   do_message(WARNING, "-->", "\n".join(messages))
-
-def error(*messages):
-   POSTMORTEM_LOG.extend(messages)
-   do_message(ERROR, "==>", "\n".join(messages))
-   sys.exit("GoSam terminated due to an error")
-
-def do_message(level, prefix, message):
-   for logger in __logger__:
-      logger.message(level, prefix, message)
-
-class Logger:
-   """
-   A writer that outputs to the screen
-   """
-   def __init__(self, max_level=MESSAGE):
-      self._max_level = max_level
-
-   def format_lines(self, prefix, message):
-      lines = message.splitlines()
-      if len(lines) == 0:
-         return prefix + " (No message given)"
+   def format(self, record):
+      if self.use_color:
+         colored_record = copy(record)
+         if record.levelname == "DEBUG":
+            colored_record.levelname = ansi_style("[DEBUG]   ", fg_8bit("8"))
+         elif record.levelname == "INFO":
+            colored_record.levelname = ansi_style("[INFO]    ", fg_8bit("6"))
+         elif record.levelname == "WARNING":
+            colored_record.levelname = ansi_style("[WARNING] ", fg_8bit("3"))
+         elif record.levelname == "ERROR":
+            colored_record.levelname = ansi_style("[ERROR]   ", fg_8bit("208"))
+         elif record.levelname == "CRITICAL":
+            colored_record.levelname = ansi_style("[CRITICAL]", fg_8bit(1))
+            colored_record.msg = ansi_style(colored_record.msg, fg_8bit(1))
+         return super().format(colored_record)
       else:
-         space = " " * (len(prefix) + 1)
-         lines[0] = prefix + " " + lines[0]
-         for i in range(1, len(lines)):
-            lines[i] = space + lines[i]
+         if record.levelname == "DEBUG":
+            record.levelname = "[DEBUG]   "
+         elif record.levelname == "INFO":
+            record.levelname = "[INFO]    "
+         elif record.levelname == "WARNING":
+            record.levelname = "[WARNING] "
+         elif record.levelname == "ERROR":
+            record.levelname = "[ERROR]   "
+         elif record.levelname == "CRITICAL":
+            record.levelname = "[CRITICAL]"
+         return super().format(record)
 
-      return "\n".join(lines)
+def setup_logging(loglevel, logfile=None):
+   root_logger = logging.getLogger()
+   root_logger.setLevel(logging.NOTSET)
 
-   def write(self, aString):
-      """
-      This logger writes to the screen.
-      """
-      print(aString)
+   if loglevel != "DEBUG":
+      console_formatter = ColorFormatter("{levelname} - {message}", style="{")
+   else:
+      console_formatter = ColorFormatter("{levelname} - {message} ({funcName} in {filename}:{lineno})", style="{")
+   console_handler = logging.StreamHandler()
+   console_handler.setLevel(loglevel)
+   console_handler.setFormatter(console_formatter)
+   root_logger.addHandler(console_handler)
+   if logfile is not None:
+      if loglevel != "DEBUG":
+         file_formatter = ColorFormatter("{asctime} - {levelname} - {message}", style="{", datefmt="%H:%M:%S", use_color=False)
+      else:
+         file_formatter = ColorFormatter("{asctime} - {levelname} - {message} ({funcName} in {filename}:{lineno})",
+                                            style="{", datefmt="%H:%M:%S", use_color=False
+                                            )
+      file_handler = logging.FileHandler(logfile, mode="w")
+      file_handler.setLevel(loglevel if loglevel == "DEBUG" else "INFO")
+      file_handler.setFormatter(file_formatter)
+      root_logger.addHandler(file_handler)
 
-   def trace(self):
-      lines = []
-      count = 0
-      for f, ln, fn, txt in traceback.extract_stack():
-         count += 1
+def fg_24bit(r, g, b):
+   return "38;2;{};{};{}".format(r, g, b)
 
-      for f, ln, fn, txt in traceback.extract_stack():
-         count -= 1
-         if count <= 3:
-            break
-         root, thefile = os.path.split(f)
-         lines.append("%s[%d] (%s)" % (thefile, ln, fn))
-      lines.append(">>> %s" % txt)
-      return "\n".join(lines)
+def bg_24bit(r, g, b):
+   return "48;2;{};{};{}".format(r, g, b)
 
+def fg_8bit(n):
+   return "38;5;{}".format(n)
 
-   def message(self, level, prefix, message):
-      if level <= self._max_level:
-         theString = self.format_lines(prefix, message)
-         self.write(theString)
-         #if self._max_level >= DEBUG:
-         #   theString = self.format_lines("TRC", self.trace())
-         #   self.write(theString)
+def bg_8bit(n):
+   return "48;5;{}".format(n)
 
-
-class FileLogger(Logger):
-   """
-   A logger that writes to a file
-   """
-
-   def __init__(self, file_name, max_level=DEBUG):
-      Logger.__init__(self, max_level)
-
-      self._file = open(file_name, 'w')
-
-   def __del__(self):
-      self._file.close()
-      self._file = None
-
-   def write(self, aString):
-      self._file.write(aString + "\n")
+def ansi_style(text, codes):
+   if isinstance(codes, (list, tuple)):
+      return "\033[{}m".format(";".join(codes)) + text + "\033[0m"
+   else:
+      return "\033[{}m".format(codes) + text + "\033[0m"
 
 def copy_file(in_file, out_file):
    if not os.path.exists(in_file):
@@ -179,7 +142,7 @@ def enumerate_helicities(conf):
       zeroes = getZeroes(conf)
       in_particles, out_particles = generate_particle_lists(conf)
       fermion_filter = golem.algorithms.helicity.generate_symmetry_filter(
-            conf, zeroes, in_particles, out_particles, error)
+            conf, zeroes, in_particles, out_particles)
 
       in_particles.extend(out_particles)
 
@@ -213,7 +176,7 @@ def enumerate_and_reduce_helicities(conf):
    conf = golem.algorithms.helicity.filter_helicities(conf, in_particles, out_particles)
    helicities = [h for h in enumerate_helicities(conf)]
    group = golem.algorithms.helicity.find_gauge_invariant_symmetry_group(helicities,
-         conf, in_particles, out_particles, error)
+         conf, in_particles, out_particles)
    return group
 
 
@@ -310,14 +273,14 @@ def prepare_model_files(conf, output_path=None):
          model_path = os.path.expanduser(model_path)
          if not os.path.isabs(model_path):
             model_path = os.path.join(rel_path, model_path)
-         message("Importing FeynRules model files ...")
+         logger.info("Importing FeynRules model files ...")
          extract_model_options(conf)
          mdl = golem.model.feynrules.Model(model_path,golem.model.MODEL_OPTIONS)
          order_names = sorted(conf.getProperty(golem.properties.order_names))
          if order_names==['']:
             order_names=[]
          mdl.store(path, MODEL_LOCAL, order_names)
-         message("Done with model import.")
+         logger.info("Done with model import.")
       else:
          model_path = model_lst[0]
          model_path = os.path.expandvars(model_path)
@@ -327,17 +290,17 @@ def prepare_model_files(conf, output_path=None):
          model_name = model_lst[1]
          if model_name.isdigit():
             # This is a CalcHEP model, needs to be converted.
-            message("Importing CalcHep model files ...")
+            logger.info("Importing CalcHep model files ...")
             mdl = golem.model.calchep.Model(model_path, int(model_name))
             mdl.store(path, MODEL_LOCAL)
-            message("Done with model import.")
+            logger.info("Done with model import.")
          else:
             model = model_lst[1]
             for ext in ["", ".py", ".hh"]:
                copy_file(os.path.join(model_path, model + ext),
                   os.path.join(path, MODEL_LOCAL + ext))
    else:
-      error("Parameter 'model' cannot have more than two entries.")
+      logger.error("Parameter 'model' cannot have more than two entries.")
 
 def extract_model_options(conf):
    for opt in conf.getListProperty(golem.properties.model_options):
@@ -373,7 +336,7 @@ def getModel(conf, extra_path=None):
    extract_model_options(conf)
 
    fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
-   debug("Loading model file %r" % fname)
+   logger.debug("Loading model file %r" % fname)
 
    # --[ EW scheme management:
 
@@ -386,13 +349,13 @@ def getModel(conf, extra_path=None):
          stripped_line = line.strip()
          if stripped_line != '' and not stripped_line.startswith("#"):
             # "#@modelproperty: supports ewchoose" not found
-            debug('Model seems to not support "ewchoose".\n' +
+            logger.debug('Model seems to not support "ewchoose".\n' +
                   'If it does, add the line\n' +
                   '"#@modelproperty: supports ewchoose" to\n' +
                   'the top of %s.' % fname)
             break
          elif stripped_line == "#@modelproperty: supports ewchoose":
-            debug('Model supports "ewchoose".\n')
+            logger.debug('Model supports "ewchoose".')
             ew_supp = True
             break
          # else: pass
@@ -404,7 +367,7 @@ def getModel(conf, extra_path=None):
          "ewchoose" in conf["model.options"] ):
       golem.model.MODEL_OPTIONS["ewchoose"]=True
    elif conf["olp.ewscheme"] is not None and ew_supp == False:
-         error("EWScheme tag in orderfile incompatible with model.")
+         logger.error("EWScheme tag in orderfile incompatible with model.")
 
    # Modify EW setting for model file:
    if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
@@ -460,7 +423,7 @@ def select_olp_EWScheme(conf):
       golem.model.MODEL_OPTIONS["ewchoose"]=2
       
    if raisewarn == True:
-      warning("Warning: EWScheme setting from orderfile will override the model.options\n" + \
+      logger.warning("EWScheme setting from orderfile will override the model.options\n" + \
                  " setting from input card if incompatible!")
    # print golem.model.MODEL_OPTIONS
    return
@@ -485,21 +448,21 @@ def expand_parameter_list(prop, conf):
                count += 1
                new_values.add(param)
          if count == 0:
-            warning("No known parameters match '%s' in property '%s'."
+            logger.warning("No known parameters match '%s' in property '%s'."
                   % (value, prop))
       elif value in params:
          new_values.add(value)
       else:
          if str(prop)=="zero" and value=="mU":
-            warning("Property '%s' contains an unknown parameter name (%s)."
-                 % (prop, value),
-                 "You are probably using a different model than the built-in models",
-                 "and therefore cannot use the default value list of the 'zero' input parameter.",
-                 "To remove this warning add at least 'zero=' (or whatever is appropriate) to your input card.",
+            logger.warning("Property '%s' contains an unknown parameter name (%s).\n"
+                 % (prop, value) +
+                 "You are probably using a different model than the built-in models\n" +
+                 "and therefore cannot use the default value list of the 'zero' input parameter.\n" +
+                 "To remove this warning add at least 'zero=' (or whatever is appropriate) to your input card.\n" +
                  "The symbol has been removed from the list.")
          else:
-            warning("Property '%s' contains an unknown parameter name (%s)."
-                 % (prop, value),
+            logger.warning("Property '%s' contains an unknown parameter name (%s)\n"
+                 % (prop, value) +
                  "The symbol has been removed from the list.")
    conf.setProperty(prop, list(new_values))
 
@@ -591,7 +554,7 @@ def interpret_particle_name(p, mod):
    else:
       if name not in __latex_particle_warnings__:
          __latex_particle_warnings__.append(name)
-         warning("No LaTeX name for particle %r found." % name)
+         logger.warning("No LaTeX name for particle %r found." % name)
 
 
    return result
@@ -627,26 +590,6 @@ def diagram_count(path, suffix):
       # print "Warning: File %r not found." % fname
    return result
 
-def check_script_name(name):
-   pname, sname = os.path.split(name)
-   sbase, sext  = os.path.splitext(sname)
-   flag = False
-   if sbase.lower() == "gosam-main":
-      flag = True
-      chunk1 = ""
-      chunk2 = "It"
-   elif sbase.lower() == "gosam-init":
-      flag = True
-      chunk1 = "with the option --olp "
-      chunk2 = "Apart from that, it"
-     
-   if flag:
-      warning(
-           "The use of the script %s is obsolete." % sname,
-           "This script might be removed from any future version of GoSam.",
-           "Please, use the script gosam.py %sinstead." % chunk1,
-           "%s uses the same command line syntax as the old script." % chunk2)
-
 def process_path(conf):
    setup_file = conf.getProperty("setup-file")
    setup_dir = os.path.dirname(setup_file)
@@ -654,8 +597,9 @@ def process_path(conf):
 
    path = conf.getProperty(golem.properties.process_path)
    if path is None:
-      error("Property %r must be set in %r!" %
+      logger.critical("Property %r must be set in %r!" %
             (str(golem.properties.process_path), setup_file))
+      sys.exit("GoSam terminated due to an error")
    path = os.path.expandvars(path)
    if os.path.isabs(path):
       return path

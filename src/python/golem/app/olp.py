@@ -9,6 +9,9 @@ import argparse
 import golem
 import golem.util.tools
 
+import logging
+logger = logging.getLogger(__name__)
+
 def main(argv=sys.argv):
 	"""
 	This is the golem OLP client of GoSam for the initialization phase
@@ -87,6 +90,7 @@ def main(argv=sys.argv):
 	parser.add_argument("order_file", nargs="+")
 
 	cmd_args = parser.parse_args(argv[1:])
+	golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file)
 	args = list(cmd_args.order_file)
 
 	PAT_ASSIGN = re.compile(r'^[A-Za-z_.][-A-Za-z0-9_.]*[ \t]*=.*$',
@@ -103,26 +107,26 @@ def main(argv=sys.argv):
 	args = cmd_files
 
 
-	golem.util.tools.message("GoSam %s (OLP)" % ".".join(map(str,
+	logger.info("GoSam %s (OLP)" % ".".join(map(str,
 		golem.util.main_misc.GOLEM_VERSION)))
-	golem.util.tools.check_script_name(argv[0])
-	golem.util.tools.debug("      path: %r" % golem.util.path.golem_path())
+	logger.debug("      path: %r" % golem.util.path.golem_path())
 	
 	defaults = []
 	if not cmd_args.skip_default:
 		defaults.append(golem.util.main_misc.find_config_files())
 
 	for fname in cmd_args.config_files:
-		golem.util.tools.message("Reading configuration file %s" % fname)
+		logger.info("Reading configuration file %s" % fname)
 		try:
 			cf = golem.util.config.Properties()
 			with open(fname, 'r') as f:
 				cf.load(f)
 			defaults.append(cf)
 		except golem.util.config.GolemConfigError as ex:
-			golem.util.tools.error(
+			logger.critical(
 					"Configuration file %r could not be read: %s" % 
 					(fname, str(ex)))
+			sys.exit("GoSam terminated due to an error")
 
 	if len(cmd_properties) > 0:
 		cmd_defaults = golem.util.config.Properties()
@@ -172,9 +176,10 @@ def main(argv=sys.argv):
 					arg, cmd_args.output_file)
 
 			if os.path.exists(outp_name) and not cmd_args.force:
-				golem.util.tools.error(
+				logger.critical(
 						"Output file %r already exists. Please, remove file." %
 					outp_name)
+				sys.exit("GoSam terminated due to an error")
 			outp = open(outp_name, "w")
 			close_outp = True
 
@@ -192,14 +197,14 @@ def main(argv=sys.argv):
 				mc_name = cmd_args.mc
 			)
 		except golem.util.olp_objects.OLPError as ex:
-			golem.util.tools.warning(
+			logger.warning(
 					"Order file %r has been skipped because of errors: %s" %
 					(arg, str(ex)))
 			skipped += 1
 		except IOError as ex:
-			golem.util.tools.warning(
+			logger.warning(
 					"Order file %r could not be read." % arg)
-			golem.util.tools.warning(
+			logger.warning(
 						"Error was: %s" % ex)
 			skipped += 1
 			continue
@@ -208,10 +213,11 @@ def main(argv=sys.argv):
 				outp.close()
 
 	if skipped > 0:
-		golem.util.tools.error(
+		logger.critical(
 				"There were errors. %d file(s) skipped.\n" % skipped +
 				"See .olc file for details.")
+		sys.exit("GoSam terminated due to an error")
 	if len(args) == 0:
-		golem.util.tools.warning("No input files have been processed.")
+		logger.warning("No input files have been processed.")
 
-	golem.util.tools.message("GoSam (OLP) is done.")
+	logger.info("GoSam (OLP) is done.")

@@ -2,7 +2,10 @@
 
 import golem.model.scanner
 import golem.util.tools
-from golem.util.tools import error
+
+import sys
+import logging
+logger = logging.getLogger(__name__)
 
 class ExpressionParser:
 	"""
@@ -95,14 +98,17 @@ class ExpressionParser:
 				tokens.pop()
 				return result
 			elif tokens.name() != "":
-				error("')' expected but %s (%r) found in '%s'." %
+				logger.critical("')' expected but %s (%r) found in '%s'." %
 						(tokens.name(), tokens.token(), tokens.source()))
+				sys.exit("GoSam terminated due to an error")
 			else:
-				error("Unexpected end of expression: ')' expected in '%s'." %
+				logger.critical("Unexpected end of expression: ')' expected in '%s'." %
 						tokens.source())
+				sys.exit("GoSam terminated due to an error")
 		else:
-			error("%s (%r) encountered in %s." %
+			logger.critical("%s (%r) encountered in %s." %
 					(name, tokens.token(), tokens.source()))
+			sys.exit("GoSam terminated due to an error")
 
 	def simple_power(self, tokens):
 		name = tokens.name()
@@ -132,14 +138,17 @@ class ExpressionParser:
 				tokens.pop()
 				return result
 			elif tokens.name() != "":
-				error("')' expected but %s (%r) found in '%s'." %
+				logger.critical("')' expected but %s (%r) found in '%s'." %
 						(tokens.name(), tokens.token(), tokens.source()))
+				sys.exit("GoSam terminated due to an error")
 			else:
-				error("Unexpected end of expression: ')' expected in '%s'." %
+				logger.critical("Unexpected end of expression: ')' expected in '%s'." %
 						tokens.source())
+				sys.exit("GoSam terminated due to an error")
 		else:
-			error("%s (%r) encountered in %s." %
+			logger.critical("%s (%r) encountered in %s." %
 					(name, tokens.token(), tokens.source()))
+			sys.exit("GoSam terminated due to an error")
 
 	def simple_old(self, tokens):
 		"""
@@ -172,21 +181,25 @@ class ExpressionParser:
 				tokens.pop()
 				return result
 			elif tokens.name() != "":
-				error("')' expected but %s (%r) found in '%s'." %
+				logger.critical("')' expected but %s (%r) found in '%s'." %
 						(tokens.name(), tokens.token(), tokens.source()))
+				sys.exit("GoSam terminated due to an error")
 			else:
-				error("Unexpected end of expression: ')' expected in '%s'." %
+				logger.critical("Unexpected end of expression: ')' expected in '%s'." %
 						tokens.source())
+				sys.exit("GoSam terminated due to an error")
 		else:
-			error("%s (%r) encountered in %s." %
+			logger.critical("%s (%r) encountered in %s." %
 					(name, tokens.token(), tokens.source()))
+			sys.exit("GoSam terminated due to an error")
 
 
 
 	def symbol(self, tokens):
 		name = tokens.name()
 		if name != "symbol":
-			error("Symbol expected but %s found in %s" % (name, tokens.source()))
+			logger.error("Symbol expected but %s found in %s" % (name, tokens.source()))
+			sys.exit("GoSam terminated due to an error")
 
 		symbol = tokens.pop()
 
@@ -198,7 +211,8 @@ class ExpressionParser:
 	def argumentlist(self, tokens):
 		name = tokens.name()
 		if name != "lparen":
-			error("'(' expected but %s found in %s" % (name, tokens.source()))
+			logger.critical("'(' expected but %s found in %s" % (name, tokens.source()))
+			sys.exit("GoSam terminated due to an error")
 		tokens.pop()
 		result = []
 
@@ -207,9 +221,10 @@ class ExpressionParser:
 			arg = self.expression(tokens)
 			name = tokens.name()
 			if name != "comma" and name != "rparen":
-				error("Invalid argument list: ',' or ')' expected " +
+				logger.critical("Invalid argument list: ',' or ')' expected " +
 						("but %s ('%s') found in '%s'." %
 							(name, tokens.token(), tokens.source())))
+				sys.exit("GoSam terminated due to an error")
 			result.append(arg)
 
 			if name == "comma":
@@ -1469,12 +1484,12 @@ def resolve_dependencies(functions):
 	all_names = list(functions.keys())
 	nfunctions = len(all_names)
 	graph = {}
-	golem.util.tools.message("      * Building call graph")
+	logger.info("      * Building call graph")
 	i = 0
 	for name, expr in list(functions.items()):
 		i += 1
 		if i % 100 == 0:
-			golem.util.tools.message("         (%5d/%5d)" % (i, nfunctions))
+			logger.info("         (%5d/%5d)" % (i, nfunctions))
 		edges = []
 		for other in all_names:
 			if name == other:
@@ -1484,9 +1499,9 @@ def resolve_dependencies(functions):
 				edges.append(other)
 		graph[name] = edges
 
-	golem.util.tools.message("      * Traversing call graph")
+	logger.info("      * Traversing call graph")
 	nedges = len(graph)
-	golem.util.tools.message("         %5d edges left" % nedges)
+	logger.info("         %5d edges left" % nedges)
 
 	program = []
 	while len(graph) > 0:
@@ -1518,15 +1533,16 @@ def resolve_dependencies(functions):
 
 			problem_set = ", ".join(list(graph.keys()))
 
-			golem.util.tools.error(
+			logger.critical(
 					"Cannot resolve dependencies between functions: %s." %
 					problem_set)
+			sys.exit("GoSam terminated due to an error")
 
 		program.append(name)
 		del graph[name]
 		nedges -= 1
 		if nedges % 100 == 0:
-			golem.util.tools.message("         %5d edges left" % nedges)
+			logger.info("         %5d edges left" % nedges)
 
 		for edges in list(graph.values()):
 			if name in edges:
