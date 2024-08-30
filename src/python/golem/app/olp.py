@@ -4,151 +4,95 @@ import sys
 import os
 import os.path
 import re
+import argparse
 
 import golem
 import golem.util.tools
-
-CMD_LINE_ARGS = golem.util.tools.DEFAULT_CMD_LINE_ARGS + [
-		('c', "config=", "Overlay default config files by the specified file"),
-		('C', "no-defaults", "Do not build default configuration"),
-		('f', "force", "Overwrite contract files without asking"),
-		('e', "use-single-quotes", "Allow the use of single quotes"),
-		('E', "use-double-quotes", "Allow the use of double quotes"),
-		('b', "use-backslash", "Allow the use of backslash escapes"),
-		('i', "ignore-case", "Interpret the file case insensitive"),
-		('I', "ignore-empty-subprocess", "Write vanishing amplitude for subprocess with no remaining tree-level diagrams"),
-		('j', "jobs=", "Maximum number of workers while processing the subprocesses (requires the multiprocess package) [default: os.cpu_count()]"),
-		('x', "ignore-unknown", "Ignore unknown/unsupported options"),
-		('X', "no-crossings", "Never generate crossings [default]"),
-		('Y', "crossings", "Do generate crossings"),
-		('o', "output-file=", "Specify name of contract file."),
-		('D', "destination=", "Choose output directory [default: .]"),
-		('n', "name=", "Add a name for this OLP"),
-		('t', "templates=", "Set an alternative templates directory"),
-		('M', "mc=", "Set the name of the requesting MC program"),
-		('z', "scratch",
-			"Overwrites all existing files including Makefile.conf etc")
-	]
-
-cmd_templates = ""
-cmd_dest_dir = "."
-cmd_config_files = []
-cmd_skip_default = False
-cmd_extensions = {
-			"double_quotes": False,
-			"single_quotes": False,
-			"backslash_escape": False
-		}
-cmd_ignore_case = False
-cmd_ignore_empty_subprocess = False
-cmd_ignore_unknown = False
-cmd_force = False
-cmd_from_scratch = False
-cmd_name = ""
-cmd_use_crossings = True
-cmd_jobs = os.cpu_count()
-
-cmd_mc = "any"
-
-# %f -- full input file name (foo/baz/order.in)
-# %F -- file name (order.in)
-# %p -- path of input file (foo/baz/)
-# %s -- stem (order)
-# %e -- extension (.in)
-cmd_output_file = "%p%s.olc"
-
-def arg_handler(name, value=None):
-	global cmd_dest_dir, cmd_config_files, cmd_skip_default, \
-			cmd_extensions, cmd_ignore_case, cmd_ignore_empty_subprocess, \
-			cmd_ignore_unknown, cmd_output_file, cmd_templates, cmd_force, \
-			cmd_from_scratch, cmd_name, cmd_use_crossings, cmd_mc, cmd_jobs
-
-	if name == 'destination':
-		cmd_dest_dir = value
-		return True
-	elif name == 'scratch':
-		cmd_from_scratch = True
-		return True
-	elif name == 'config':
-		cmd_config_files.append(value)
-		return True
-	elif name == 'no-defaults':
-		cmd_skip_default = True
-		return True
-	elif name == 'no-crossings':
-		cmd_use_crossings = False
-		return True
-	elif name == 'crossings':
-		cmd_use_crossings = True
-		return True
-	elif name == 'use-single-quotes':
-		cmd_extensions["single_quotes"] = True
-		return True
-	elif name == 'use-double-quotes':
-		cmd_extensions["double_quotes"] = True
-		return True
-	elif name == 'use-backslash':
-		cmd_extensions["backslash_escape"] = True
-		return True
-	elif name == 'ignore-case':
-		cmd_ignore_case = True
-		return True
-	elif name == 'ignore-empty-subprocess':
-		cmd_ignore_empty_subprocess = True
-		return True
-	elif name == 'jobs':
-		try:
-			import multiprocess
-		except ModuleNotFoundError:
-			golem.util.tools.warning("The '-j' option was set but the 'multiprocess' module could not be imported. Running sequentially.")
-		cmd_jobs = value
-		return True
-	elif name == 'ignore-unknown':
-		cmd_ignore_unknown = True
-		return True
-	elif name == 'output-file':
-		cmd_output_file = value
-		return True
-	elif name == 'templates':
-		cmd_templates = value
-		return True
-	elif name == 'force':
-		cmd_force = True
-		return True
-	elif name == 'name':
-		cmd_name = value
-		return True
-	elif name == 'mc':
-		cmd_mc = value
-		return True
-	return False
 
 def main(argv=sys.argv):
 	"""
 	This is the golem OLP client of GoSam for the initialization phase
 	of the Binoth Accord.
-
-	Usage: gosam-init.py {options} {file or directory} {name=value}
-	-h, --help           -- prints this help screen
-	-d, --debug          -- prints out debug messages
-	-v, --verbose        -- prints out status messages
-	-w, --warn           -- prints out warnings and errors (default)
-	-q, --quiet          -- suppresses warnings and messages
-	-l, --log-file=<ARG> -- writes a log file with the current level of
-									verbosity
-
-	-------------------------------------------------------------------
-	Static variables:
-
-		CMD_LINE_ARGS  -- A list of accepted command line arguments, where
-								each entry is a triple of the form
-								(<short>, <long>, <description>)
 	"""
+	parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+									 description="GoSam OLP - An Automated One-Lop Matrix Element Generator",
+									 epilog="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+										 ".".join(map(str, golem.installation.GOLEM_VERSION)),
+										 golem.installation.GOLEM_REVISION),
+									 usage="%(prog)s [options] order_file [order_file ...]"
+									 )
+	parser.add_argument("-b", "--use-backslash", help="Allow the use of backslash escapes", action="store_true")
+	parser.add_argument("-c", "--config",
+						help="Overlay default config files by the specified file",
+						dest="config_files",
+						action="extend",
+						nargs="*"
+						)
+	parser.add_argument("-C", "--no-defaults",
+						help="Do not build default configuration",
+						action="store_true",
+						dest="skip_default"
+						)
+	parser.add_argument("-D", "--destination",
+						help="Choose output directory [default: .]",
+						dest="dest_dir",
+						default="."
+						)
+	parser.add_argument("-e", "--use-single-quotes", help="Allow the use of single quotes", action="store_true")
+	parser.add_argument("-E", "--use-double-quotes", help="Allow the use of double quotes", action="store_true")
+	parser.add_argument("-f", "--format",
+						help="Use specified format for template file",
+						choices=["None", "LaTeX"],
+						dest="template_format"
+						)
+	parser.add_argument("-i", "--ignore-case", help="Interpret the file case insensitive", action="store_true")
+	parser.add_argument("-I", "--ignore-empty-subprocess",
+						help="Write vanishing amplitude for subprocess with no remaining tree-level diagrams",
+						action="store_true",
+						dest="ignore_empty_subprocess"
+						)
+	parser.add_argument("-j", "--jobs",
+						help="Maximum number of workers used (requires the multiprocess package) [default: os.cpu_count()]",
+						action="store",
+						type=int,
+						default=os.cpu_count()
+						)
+	parser.add_argument("-l", "--log-file", help="Write to a log file with the current level of verbosity")
+	parser.add_argument("--loglevel",
+						choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+						default="WARNING",
+						help="Set the logging level"
+						)
+	parser.add_argument("-M", "--mc", help="Set the name of the requesting MC program", default="any")
+	parser.add_argument("-n", "--name", help="Add a name for this OLP", default="")
+	parser.add_argument("-o", "--output-file", help="Specify the name of the contract file", default="%p%s.olc")
+	parser.add_argument("-r", "--report", action="store_true")
+	parser.add_argument("-t", "--templates", help="Set an alternative templates directory")
+	parser.add_argument("--version",
+						action="version",
+						version="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+							".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION)
+						)
+	parser.add_argument("-x", "--ignore-unknown", help="Ignore unknown/unsupported options", action="store_true")
+	parser.add_argument("-X", "--no-crossings",
+						help="Never generate crossings",
+						action="store_false",
+						dest="use_crossings"
+						)
+	parser.add_argument("-z", "--scratch",
+						help="Overwrite all files including Makefile.conf, config.f90 etc",
+						action="store_true",
+						dest="from_scratch"
+						)
+	parser.add_argument("order_file", nargs="+")
+
+	cmd_args = parser.parse_args(argv[1:])
+	args = list(cmd_args.order_file)
 
 	PAT_ASSIGN = re.compile(r'^[A-Za-z_.][-A-Za-z0-9_.]*[ \t]*=.*$',
 			re.MULTILINE)
-	args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
-			argv=argv)
+	#args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
+	#		argv=argv)
 	cmd_properties = []
 	cmd_files = []
 	for arg in args:
@@ -165,10 +109,10 @@ def main(argv=sys.argv):
 	golem.util.tools.debug("      path: %r" % golem.util.path.golem_path())
 	
 	defaults = []
-	if not cmd_skip_default:
+	if not cmd_args.skip_default:
 		defaults.append(golem.util.main_misc.find_config_files())
 
-	for fname in cmd_config_files:
+	for fname in cmd_args.config_files:
 		golem.util.tools.message("Reading configuration file %s" % fname)
 		try:
 			cf = golem.util.config.Properties()
@@ -209,25 +153,25 @@ def main(argv=sys.argv):
 	if not default_conf["extensions"]:
 		default_conf["extensions"]=props["extensions"]
 
-	default_conf["ignore_empty_subprocess"] = cmd_ignore_empty_subprocess
+	default_conf["ignore_empty_subprocess"] = cmd_args.ignore_empty_subprocess
 	default_conf["veto_crossings"] = False
-	default_conf["n_jobs"] = cmd_jobs
+	default_conf["n_jobs"] = cmd_args.jobs
 
 	skipped = 0
 	for arg in args:
 		path = golem.util.olp.derive_output_name(
-				arg, cmd_dest_dir)
+				arg, cmd_args.dest_dir)
 		path = os.path.expandvars(path)
 		path = os.path.abspath(path)
 
-		if cmd_output_file == "-":
+		if cmd_args.output_file == "-":
 			outp = sys.stdout
 			close_outp = False
 		else:
 			outp_name = golem.util.olp.derive_output_name(
-					arg, cmd_output_file)
+					arg, cmd_args.output_file)
 
-			if os.path.exists(outp_name) and not cmd_force:
+			if os.path.exists(outp_name) and not cmd_args.force:
 				golem.util.tools.error(
 						"Output file %r already exists. Please, remove file." %
 					outp_name)
@@ -236,16 +180,16 @@ def main(argv=sys.argv):
 
 		try:
 			skipped += golem.util.olp.process_order_file(
-				arg, outp, path, default_conf, cmd_templates,
-				double_quotes=cmd_extensions["double_quotes"],
-				single_quotes=cmd_extensions["single_quotes"],
-				backslash_escape=cmd_extensions["backslash_escape"],
-				ignore_case=cmd_ignore_case,
-				ignore_unknown=cmd_ignore_unknown,
-				from_scratch=cmd_from_scratch,
-				olp_process_name = cmd_name,
-				use_crossings = cmd_use_crossings,
-				mc_name = cmd_mc
+				arg, outp, path, default_conf, cmd_args.templates,
+				double_quotes=cmd_args.use_double_quotes,
+				single_quotes=cmd_args.use_single_quotes,
+				backslash_escape=cmd_args.use_backslash,
+				ignore_case=cmd_args.ignore_case,
+				ignore_unknown=cmd_args.ignore_unknown,
+				from_scratch=cmd_args.from_scratch,
+				olp_process_name = cmd_args.name,
+				use_crossings = cmd_args.use_crossings,
+				mc_name = cmd_args.mc
 			)
 		except golem.util.olp_objects.OLPError as ex:
 			golem.util.tools.warning(

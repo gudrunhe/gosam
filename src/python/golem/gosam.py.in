@@ -10,6 +10,7 @@ import traceback
 import golem.util.tools
 import golem.properties
 import golem.installation
+import argparse
 
 def report_crash(exc, stack, fname="gosam.crashed"):
    import os
@@ -153,7 +154,7 @@ if __name__ == "__main__":
       else:
          main.main(argv)
    except SystemExit as ex:
-      if len(ex.args) > 0:
+      if len(ex.args) > 0 and ex.code != 0:
          report_crash(ex, sys.exc_info()[2])
          EXIT_CODE = 1
    except BaseException as ex:

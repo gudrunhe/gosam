@@ -3,7 +3,6 @@
 import sys
 import os.path
 import traceback
-import getopt
 import re
 
 import golem.model
@@ -21,19 +20,6 @@ DEBUG   = 100
 MESSAGE =  50
 WARNING =  10
 ERROR   =   0
-
-DEFAULT_CMD_LINE_ARGS = [
-      ('h', "help", "prints this help screen"),
-      ('d', "debug", "prints out debug messages"),
-      ('v', "verbose", "prints out status messages"),
-      ('w', "warn", "prints out warnings and errors (default)"),
-      ('q', "quiet", "suppresses warnings and messages"),
-      ('l', "log-file=",
-         "writes a log file with the current level of verbosity"),
-      ('r', "report", "generate post-mortem debug file"),
-      ('', "olp", "switch to OLP mode. Use --olp --help for more options."),
-      ('', "version", "prints the current version of GoSam")
-   ]
 
 POSTMORTEM_LOG = []
 POSTMORTEM_CFG = None
@@ -640,109 +626,6 @@ def diagram_count(path, suffix):
       pass
       # print "Warning: File %r not found." % fname
    return result
-
-def setup_arguments(cmd_line_args, handler=None, extra_msg="", argv=sys.argv):
-   """
-   Use getopt to process command line arguments.
-
-   PARAMETER
-
-   cmd_line_args -- a list of tuples (s, l, h) where
-            s = short form (one letter), e.g. 'x' for option '-x'
-            l = long form; ends with a '=' if option takes an argument
-            h = help message
-   handler -- a function (name, value=None) -> True/False
-            should return true if an argument is known, false otherwise
-   """
-   global POSTMORTEM_DO
-   short_args = ""
-   long_args = []
-   long_width = 0
-   for short_arg, long_arg, help_text in cmd_line_args:
-      if short_arg != "":
-         short_args += short_arg
-         if long_arg.endswith("="):
-            short_args += ":"
-      if long_arg != "":
-         long_args.append(long_arg)
-         if long_arg.endswith("="):
-            i = len("<ARG>")
-         else:
-            i = 0
-         if len(long_arg) + i > long_width:
-            long_width = len(long_arg) + i
-
-   help_fmt = "-%s, --%-" + str(long_width) + "s -- %s"
-   help_fmt_only_long = "--%-" + str(long_width+4) + "s -- %s"
-   help_msgs = [
-         "Usage: %s {options} %s" % (argv[0], extra_msg)
-      ]
-
-   for short_arg, long_arg, help_text in cmd_line_args:
-      if long_arg.endswith("="):
-         arg_opt = "<ARG>"
-      else:
-         arg_opt = ""
-      if short_arg:
-         help_msgs.append(help_fmt % (short_arg, long_arg + arg_opt, help_text))
-      else:
-         help_msgs.append(help_fmt_only_long % (long_arg + arg_opt, help_text))
-
-   default_logger = add_logger_with_level(WARNING)
-
-   try:
-      opts, args = getopt.gnu_getopt(argv[1:], short_args, long_args)
-   except getopt.GetoptError as err:
-      # print help information and exit:
-      error("Invalid command line argument:", str(err),
-         "use %s --help for more information" % argv[0])
-
-   verbosity = WARNING
-   for o, a in opts:
-      if o in ("-v", "--verbose"):
-         verbosity = MESSAGE
-      elif o in ("-d", "--debug"):
-         verbosity = DEBUG
-      elif o in ("-w", "--warn"):
-         verbosity = WARNING
-      elif o in ("-q", "--quiet"):
-         verbosity = ERROR
-      elif o in ("-l", "--log-file"):
-         add_logger_with_level(verbosity, a)
-      elif o in ("-h", "--help"):
-         for msg in help_msgs:
-            print(msg)
-         sys.exit()
-      elif o in ("-r", "--report"):
-         POSTMORTEM_DO = True
-      elif o in ("--version"):
-         print("GoSam %s (rev %s)" % (".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION))
-         print("Copyright (C) 2011-2017  The GoSam Collaboration")
-         print("This is free software; see the source for copying conditions.  There is NO\n" +
-               "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
-         sys.exit()
-      else:
-         if handler is None:
-            error("Unhandled command line option: %s" % o)
-         else:
-            name = o.lstrip("-")
-            if o.startswith("--"):
-               pass
-            else:
-               for s, l, h in cmd_line_args:
-                  if s == name:
-                     name = l
-                     break
-            name = name.rstrip("=")
-
-            success = handler(name, a)
-            if not success:
-               error("Unhandled command line option: %s" % o)
-
-   remove_logger(default_logger)
-   add_logger_with_level(verbosity)
-
-   return args
 
 def check_script_name(name):
    pname, sname = os.path.split(name)
