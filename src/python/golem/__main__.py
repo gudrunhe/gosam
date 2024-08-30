@@ -5,10 +5,10 @@ import golem.app.main as main
 import golem.app.olp as olp
 
 if __name__ == "__main__":
-   argv = sys.argv[:]
+    argv = sys.argv[:]
 
-   if "--olp" in argv[1:]:
-      argv.remove("--olp")
-      olp.main(argv)
-   else:
-      main.main(argv)
+    if "--olp" in argv[1:]:
+        argv.remove("--olp")
+        olp.main(argv)
+    else:
+        main.main(argv)

@@ -1,4 +1,3 @@
-
 import golem.util
 import golem.util.config
 import golem.util.main_misc
