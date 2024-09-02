@@ -70,6 +70,7 @@ def main(parser, argv=sys.argv):
     parser.add_argument(
         "-m", "--merge", help="Merge files into template", action="extend", dest="merge_files", nargs="*"
     )
+    parser.add_argument("--no-color", help="Disable colored terminal output", action="store_true")
     parser.add_argument("--olp", help="Switch to OLP mode, use '--olp --help' for more options.", action="store_true")
     parser.add_argument(
         "-p",
@@ -103,7 +104,7 @@ def main(parser, argv=sys.argv):
     parser.add_argument("config_file", nargs="+")
 
     cmd_args = parser.parse_args(argv[1:])
-    golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file)
+    golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file, not cmd_args.no_color)
     args = list(cmd_args.config_file)
 
     if cmd_args.report:
@@ -116,7 +117,7 @@ def main(parser, argv=sys.argv):
 
     GOLEM_FULL = "GoSam %s" % ".".join(map(str, golem.installation.GOLEM_VERSION))
 
-    logger.info(GOLEM_FULL)
+    print(GOLEM_FULL + " running in standalone mode")
 
     logger.debug("      path: %r" % golem_path())
 

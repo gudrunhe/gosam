@@ -2,6 +2,8 @@
 # vim: ts=3:sw=3:expandtab
 
 import sys
+import textwrap
+import os
 
 sys.path = sys.path[:1] + ["@py_install_dir@"] + sys.path[1:]
 
@@ -149,8 +151,12 @@ if __name__ == "__main__":
             report_crash(ex, sys.exc_info()[2])
             EXIT_CODE = 1
     except BaseException as ex:
-        print("===> Unexpected error: %s" % ex)
-        print(traceback.format_tb(sys.exc_info()[2])[-1])
+        print("Unexpected error: %s" % textwrap.fill(str(ex),
+                                                     width=os.get_terminal_size().columns,
+                                                     subsequent_indent=(" "*18)
+                                                     )
+              )
+        print(traceback.format_exc())
         report_crash(ex, sys.exc_info()[2])
         EXIT_CODE = 1
 

@@ -76,6 +76,7 @@ def main(argv=sys.argv):
     )
     parser.add_argument("-M", "--mc", help="Set the name of the requesting MC program", default="any")
     parser.add_argument("-n", "--name", help="Add a name for this OLP", default="")
+    parser.add_argument("--no-color", help="Disable colored terminal output", action="store_true")
     parser.add_argument("-o", "--output-file", help="Specify the name of the contract file", default="%p%s.olc")
     parser.add_argument("-r", "--report", action="store_true")
     parser.add_argument("-t", "--templates", help="Set an alternative templates directory")
@@ -100,7 +101,7 @@ def main(argv=sys.argv):
     parser.add_argument("order_file", nargs="+")
 
     cmd_args = parser.parse_args(argv[1:])
-    golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file)
+    golem.util.tools.setup_logging(cmd_args.loglevel, cmd_args.log_file, not cmd_args.no_color)
     args = list(cmd_args.order_file)
 
     PAT_ASSIGN = re.compile(r"^[A-Za-z_.][-A-Za-z0-9_.]*[ \t]*=.*$", re.MULTILINE)
@@ -115,7 +116,8 @@ def main(argv=sys.argv):
             cmd_files.append(arg)
     args = cmd_files
 
-    logger.info("GoSam %s (OLP)" % ".".join(map(str, golem.util.main_misc.GOLEM_VERSION)))
+    print("GoSam %s" % ".".join(map(str, golem.util.main_misc.GOLEM_VERSION)) + " running in OLP mode")
+
     logger.debug("      path: %r" % golem.util.path.golem_path())
 
     defaults = []

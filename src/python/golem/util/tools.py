@@ -5,8 +5,7 @@ import os.path
 import traceback
 import re
 from copy import copy
-
-from mercurial.hgweb.common import continuereader
+import textwrap
 
 import golem.model
 import golem.properties
@@ -25,15 +24,33 @@ POSTMORTEM_LOG = []
 POSTMORTEM_CFG = None
 POSTMORTEM_DO = False
 
+class CustomWrapper(textwrap.TextWrapper):
+    def wrap(self, text):
+        lines = text.splitlines()
+        wrapped_lines = [wrapped_line for line in lines for wrapped_line in super().wrap(line)]
+        if len(wrapped_lines) == 1:
+            wrapped_lines[0] = "- " + wrapped_lines[0]
+        else:
+            for i in range(len(wrapped_lines)):
+                if i == 0:
+                    wrapped_lines[i] = "┌ " + wrapped_lines[i]
+                elif i == len(wrapped_lines) - 1:
+                    wrapped_lines[i] = "           └ " + wrapped_lines[i]
+                else:
+                    wrapped_lines[i] = "           │ " + wrapped_lines[i]
+        return wrapped_lines
+
 
 class ColorFormatter(logging.Formatter):
     def __init__(self, message, use_color=True, **kwargs):
         super().__init__(message, **kwargs)
         self.use_color = use_color
+        self.wrapper = CustomWrapper(width=os.get_terminal_size().columns - 13, tabsize=4)
 
     def format(self, record):
         if self.use_color:
             colored_record = copy(record)
+            colored_record.msg = self.wrapper.fill(colored_record.msg)
             if record.levelname == "DEBUG":
                 colored_record.levelname = ansi_style("[DEBUG]   ", fg_8bit("8"))
             elif record.levelname == "INFO":
@@ -43,33 +60,34 @@ class ColorFormatter(logging.Formatter):
             elif record.levelname == "ERROR":
                 colored_record.levelname = ansi_style("[ERROR]   ", fg_8bit("208"))
             elif record.levelname == "CRITICAL":
-                colored_record.levelname = ansi_style("\a[CRITICAL]", fg_8bit(1))
+                colored_record.levelname = ansi_style("[CRITICAL]", fg_8bit(1))
                 colored_record.msg = ansi_style(colored_record.msg, fg_8bit(1))
                 # colored_record.levelname = ansi_style("\a[CRITICAL]", [fg_8bit(9), bg_8bit(15), "1", "3", "4", "6", "7"])
                 # colored_record.msg = ansi_style(colored_record.msg, [fg_8bit(9), bg_8bit(15), "1", "3", "4", "6", "7"])
             return super().format(colored_record)
         else:
+            record.msg = textwrap.fill(record.msg, width=1000)
             if record.levelname == "DEBUG":
-                record.levelname = "[DEBUG]   "
+                record.levelname = "[DEBUG]    -"
             elif record.levelname == "INFO":
-                record.levelname = "[INFO]    "
+                record.levelname = "[INFO]     -"
             elif record.levelname == "WARNING":
-                record.levelname = "[WARNING] "
+                record.levelname = "[WARNING]  -"
             elif record.levelname == "ERROR":
-                record.levelname = "[ERROR]   "
+                record.levelname = "[ERROR]    -"
             elif record.levelname == "CRITICAL":
-                record.levelname = "[CRITICAL]"
+                record.levelname = "[CRITICAL] -"
             return super().format(record)
 
 
-def setup_logging(loglevel, logfile=None):
+def setup_logging(loglevel, logfile=None, use_color=True):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.NOTSET)
 
     if loglevel != "DEBUG":
-        console_formatter = ColorFormatter("{levelname} - {message}", style="{")
+        console_formatter = ColorFormatter("{levelname} {message}", style="{", use_color=use_color)
     else:
-        console_formatter = ColorFormatter("{levelname} - {message} ({funcName} in {filename}:{lineno})", style="{")
+        console_formatter = ColorFormatter("{levelname} {message} ({funcName} in {filename}:{lineno})", style="{")
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
     console_handler.setFormatter(console_formatter)
@@ -77,11 +95,11 @@ def setup_logging(loglevel, logfile=None):
     if logfile is not None:
         if loglevel != "DEBUG":
             file_formatter = ColorFormatter(
-                "{asctime} - {levelname} - {message}", style="{", datefmt="%H:%M:%S", use_color=False
+                "{asctime} - {levelname} {message}", style="{", datefmt="%H:%M:%S", use_color=False
             )
         else:
             file_formatter = ColorFormatter(
-                "{asctime} - {levelname} - {message} ({funcName} in {filename}:{lineno})",
+                "{asctime} - {levelname} {message} ({funcName} in {filename}:{lineno})",
                 style="{",
                 datefmt="%H:%M:%S",
                 use_color=False,

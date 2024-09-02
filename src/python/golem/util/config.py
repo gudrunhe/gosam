@@ -1180,7 +1180,7 @@ class Configurator:
                 else:
                     logger.info("Component %s has been found in %d places." % (name, l))
                     for i, path in enumerate(paths):
-                        logger.info("#%2d: %s" % (i + 1, path))
+                        logger.info("\t#%2d: %s" % (i + 1, path))
                 self.installed_components.append(component)
 
     def fail(self, message):
