@@ -195,7 +195,7 @@ class ExpressionParser:
     def symbol(self, tokens):
         name = tokens.name()
         if name != "symbol":
-            logger.error("Symbol expected but %s found in %s" % (name, tokens.source()))
+            logger.critical("Symbol expected but %s found in %s" % (name, tokens.source()))
             sys.exit("GoSam terminated due to an error")
 
         symbol = tokens.pop()

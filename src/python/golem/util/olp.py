@@ -567,7 +567,7 @@ def handle_subprocess(
                                 subprocess.removeCrossing(sp.id)
 
                     except golem.util.config.GolemConfigError as err:
-                        logger.critical("Configuration file is not sound:", str(err))
+                        logger.critical("Configuration file is not sound:" + str(err))
                         sys.exit("GoSam terminated due to an error")
 
             # Regenerate process files for the original subprocess with new list of crossings
@@ -600,7 +600,7 @@ def handle_subprocess(
         helicities[subprocess.id] = list(golem.util.tools.enumerate_and_reduce_helicities(subprocess_conf))
 
     except golem.util.config.GolemConfigError as err:
-        logger.critical("Configuration file is not sound:", str(err))
+        logger.critical("Configuration file is not sound:" + str(err))
         sys.exit("GoSam terminated due to an error")
 
     subprocesses[subprocess_key] = subprocess

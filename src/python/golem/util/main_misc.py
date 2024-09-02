@@ -242,7 +242,7 @@ def find_config_files():
                     with open(full_name, "r") as f:
                         props.load(f, avail_props)
                 except GolemConfigError as err:
-                    logger.critical("Configuration file is not sound:", str(err))
+                    logger.critical("Configuration file is not sound:" + str(err))
                     sys.exit("GoSam terminated due to an error")
     libpaths = find_libraries()
     for flag in libpaths:
@@ -382,7 +382,7 @@ def read_golem_dir_file(path):
             with open(dir_file, "r") as f:
                 result.load(f)
         except GolemConfigError as err:
-            logger.critical("Configuration file is not sound:", str(err))
+            logger.critical("Configuration file is not sound:" + str(err))
             sys.exit("GoSam terminated due to an error")
 
         ver = list(map(int, result["golem-version"].split(".")))

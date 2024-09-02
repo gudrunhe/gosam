@@ -1,5 +1,5 @@
 # vim: ts=3:sw=3:expandtab
-
+import argparse
 import sys
 import os.path
 import traceback
@@ -23,6 +23,27 @@ logger = logging.getLogger(__name__)
 POSTMORTEM_LOG = []
 POSTMORTEM_CFG = None
 POSTMORTEM_DO = False
+
+
+class NLRHelpFormatter(argparse.HelpFormatter):
+    """
+    Newline respecting help formatter: same as default formatter, except that each line is wrapped separately.
+    """
+
+    def _split_lines(self, text, width):
+        wrapped_lines = []
+        for line in text.splitlines():
+            line = self._whitespace_matcher.sub(" ", line).strip()
+            wrapped_lines += textwrap.wrap(line, width)
+        return wrapped_lines
+
+    def _fill_text(self, text, width, indent):
+        wrapped_lines = []
+        for line in text.splitlines():
+            line = self._whitespace_matcher.sub(" ", line).strip()
+            wrapped_lines.append(textwrap.fill(line, width, initial_indent=indent, subsequent_indent=indent))
+        return "\n".join(wrapped_lines)
+
 
 class CustomWrapper(textwrap.TextWrapper):
     def wrap(self, text):
@@ -332,7 +353,8 @@ def prepare_model_files(conf, output_path=None):
                 for ext in ["", ".py", ".hh"]:
                     copy_file(os.path.join(model_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
     else:
-        logger.error("Parameter 'model' cannot have more than two entries.")
+        logger.critical("Parameter 'model' cannot have more than two entries.")
+        sys.exit("GoSam terminated due to an error")
 
 
 def extract_model_options(conf):
@@ -400,7 +422,8 @@ def getModel(conf, extra_path=None):
     elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
         golem.model.MODEL_OPTIONS["ewchoose"] = True
     elif conf["olp.ewscheme"] is not None and ew_supp == False:
-        logger.error("EWScheme tag in orderfile incompatible with model.")
+        logger.critical("EWScheme tag in orderfile incompatible with model.")
+        sys.exit("GoSam terminated due to an error")
 
     # Modify EW setting for model file:
     if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):

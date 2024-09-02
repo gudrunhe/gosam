@@ -20,11 +20,14 @@ def main(argv=sys.argv):
     of the Binoth Accord.
     """
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description="GoSam OLP - An Automated One-Lop Matrix Element Generator",
-        epilog="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+        formatter_class=golem.util.tools.NLRHelpFormatter,
+        description="GoSam OLP - An Automated One-Loop Matrix Element Generator",
+        epilog="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
-        ),
+        )
+        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+        + "PARTICULAR PURPOSE.",
         usage="%(prog)s [options] order_file [order_file ...]",
     )
     parser.add_argument("-b", "--use-backslash", help="Allow the use of backslash escapes", action="store_true")
@@ -46,10 +49,9 @@ def main(argv=sys.argv):
     parser.add_argument("-E", "--use-double-quotes", help="Allow the use of double quotes", action="store_true")
     parser.add_argument(
         "-f",
-        "--format",
-        help="Use specified format for template file",
-        choices=["None", "LaTeX"],
-        dest="template_format",
+        "--force",
+        help="Overwrite contract files without asking",
+        action="store_true"
     )
     parser.add_argument("-i", "--ignore-case", help="Interpret the file case insensitive", action="store_true")
     parser.add_argument(
@@ -83,9 +85,12 @@ def main(argv=sys.argv):
     parser.add_argument(
         "--version",
         action="version",
-        version="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+        version="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
-        ),
+        )
+        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+        + "PARTICULAR PURPOSE.",
     )
     parser.add_argument("-x", "--ignore-unknown", help="Ignore unknown/unsupported options", action="store_true")
     parser.add_argument(
@@ -105,8 +110,6 @@ def main(argv=sys.argv):
     args = list(cmd_args.order_file)
 
     PAT_ASSIGN = re.compile(r"^[A-Za-z_.][-A-Za-z0-9_.]*[ \t]*=.*$", re.MULTILINE)
-    # args = golem.util.tools.setup_arguments(CMD_LINE_ARGS, arg_handler,
-    # argv=argv)
     cmd_properties = []
     cmd_files = []
     for arg in args:

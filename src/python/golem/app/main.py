@@ -25,11 +25,14 @@ def main(parser, argv=sys.argv):
     This is the main program of GoSam.
     """
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description="GoSam Standalone - An Automated One-Lop Matrix Element Generator",
-        epilog="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+        formatter_class=golem.util.tools.NLRHelpFormatter,
+        description="GoSam Standalone - An Automated One-Loop Matrix Element Generator",
+        epilog="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
-        ),
+        )
+        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+        + "PARTICULAR PURPOSE.",
         usage="%(prog)s [options] config_file [config_file ...]",
     )
     parser.add_argument(
@@ -90,9 +93,12 @@ def main(parser, argv=sys.argv):
     parser.add_argument(
         "--version",
         action="version",
-        version="GoSam {} (rev {})\nCopyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.".format(
+        version="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
-        ),
+        )
+        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+        + "PARTICULAR PURPOSE.",
     )
     parser.add_argument(
         "-z",
