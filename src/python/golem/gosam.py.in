@@ -3,7 +3,7 @@
 
 import sys
 import textwrap
-import os
+import shutil
 
 sys.path = sys.path[:1] + ["@py_install_dir@"] + sys.path[1:]
 
@@ -152,7 +152,7 @@ if __name__ == "__main__":
             EXIT_CODE = 1
     except BaseException as ex:
         print("Unexpected error: %s" % textwrap.fill(str(ex),
-                                                     width=os.get_terminal_size().columns,
+                                                     width=shutil.get_terminal_size().columns,
                                                      subsequent_indent=(" "*18)
                                                      )
               )

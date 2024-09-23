@@ -38,6 +38,7 @@ def main(argv=sys.argv):
         dest="config_files",
         action="extend",
         nargs="*",
+        default=[]
     )
     parser.add_argument(
         "-C", "--no-defaults", help="Do not build default configuration", action="store_true", dest="skip_default"

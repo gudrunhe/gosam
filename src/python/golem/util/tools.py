@@ -6,6 +6,7 @@ import traceback
 import re
 from copy import copy
 import textwrap
+import shutil
 
 import golem.model
 import golem.properties
@@ -66,7 +67,7 @@ class ColorFormatter(logging.Formatter):
     def __init__(self, message, use_color=True, **kwargs):
         super().__init__(message, **kwargs)
         self.use_color = use_color
-        self.wrapper = CustomWrapper(width=os.get_terminal_size().columns - 13, tabsize=4)
+        self.wrapper = CustomWrapper(width=shutil.get_terminal_size().columns - 13, tabsize=4)
 
     def format(self, record):
         if self.use_color:
@@ -83,8 +84,6 @@ class ColorFormatter(logging.Formatter):
             elif record.levelname == "CRITICAL":
                 colored_record.levelname = ansi_style("[CRITICAL]", fg_8bit(1))
                 colored_record.msg = ansi_style(colored_record.msg, fg_8bit(1))
-                # colored_record.levelname = ansi_style("\a[CRITICAL]", [fg_8bit(9), bg_8bit(15), "1", "3", "4", "6", "7"])
-                # colored_record.msg = ansi_style(colored_record.msg, [fg_8bit(9), bg_8bit(15), "1", "3", "4", "6", "7"])
             return super().format(colored_record)
         else:
             record.msg = textwrap.fill(record.msg, width=1000)
