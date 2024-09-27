@@ -23,6 +23,13 @@ endif
 
 meson.add_dist_script('cement-version.sh', meson.project_version())
 
+if get_option('native')
+    add_global_arguments('-march=native', language: ['fortran', 'c', 'cpp'])
+    add_global_link_arguments('-march=native', language: ['fortran', 'c', 'cpp'])
+endif
+
+add_global_link_arguments('--disable-new-dtags', language: ['fortran', 'c', 'cpp'])
+
 subproject('avh_olo')
 subproject('ff')
 subproject('qcdloop')

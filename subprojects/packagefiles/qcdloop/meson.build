@@ -19,7 +19,12 @@ qcdloop_src = files(['ql/qlsolvequadratic.f', 'ql/qlB1.f', 'ql/qlinit.f', 'ql/ql
  'ql/qlspencer.f', 'ql/qlratreal.f', 'ql/qlratgam.f', 'ql/ddilog.f', 'ql/qllnrat.f',
  'ql/qlfunctions.f', 'ql/qlYcalc.f', 'ql/qlkfn.f', 'ql/qlxpicheck.f'])
 
-qcdloop = both_libraries('qcdloop', qcdloop_src, install: true, dependencies: ff)
+qcdloop = both_libraries('qcdloop',
+    qcdloop_src,
+    install: true,
+    dependencies: ff,
+    install_rpath:  get_option('prefix') / get_option('libdir')
+    )
 
 qcdloop_dep = declare_dependency(link_with: [qcdloop])
 

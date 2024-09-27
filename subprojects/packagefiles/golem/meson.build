@@ -10,7 +10,12 @@ golem95_src = files([])
 
 subdir('src')
 
-golem95 = both_libraries('golem95', golem95_src, dependencies: avh_olo, install: true)
+golem95 = both_libraries('golem95',
+    golem95_src,
+    dependencies: avh_olo,
+    install: true,
+    install_rpath:  get_option('prefix') / get_option('libdir')
+    )
 
 golem95_dep = declare_dependency(link_with: golem95)
 

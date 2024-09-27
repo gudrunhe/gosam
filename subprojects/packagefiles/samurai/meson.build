@@ -12,7 +12,12 @@ samurai_src = files([])
 
 subdir('samurai')
 
-samurai = both_libraries('samurai', samurai_src, dependencies: [avh_olo, qcdloop, golem95], install: true)
+samurai = both_libraries('samurai',
+    samurai_src,
+    dependencies: [avh_olo, qcdloop, golem95],
+    install: true,
+    install_rpath:  get_option('prefix') / get_option('libdir')
+    )
 
 samurai_dep = declare_dependency(link_with: samurai)
 

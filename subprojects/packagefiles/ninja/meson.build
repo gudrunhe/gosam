@@ -59,7 +59,8 @@ ninja = both_libraries('ninja',
     install: true,
     include_directories: ninja_includedirs,
     cpp_args: ninja_args,
-    fortran_args: ninja_args
+    fortran_args: ninja_args,
+    install_rpath:  get_option('prefix') / get_option('libdir')
     )
 
 ninja_dep = declare_dependency(link_with: ninja)
