@@ -198,6 +198,7 @@
 			<except if-internal="OLP_MODE"/>
 		</file>
 		<file src="buildcolor.py" class="Kinematics"/>
+		<file src="buildkinematics.py" class="Kinematics"/>
 		<file src="symbols.hh" class="Kinematics"/>
 		<file src="spinney.hh" class="Verbatim"/>
 		<file src="color.hh" class="Verbatim"/>
@@ -235,7 +236,6 @@
 		</file>
  		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="dipoles.f90" class="Kinematics" />
-		<file src="kinematics.f90" class="Kinematics"/>
 		<file src="rambo.f90" class="Kinematics"/>
 		<file src="util.f90" class="Kinematics"/>
 		<file src="accu.f90" class="Kinematics">
@@ -249,9 +249,6 @@
 			<except if-file="exists" in-mode="normal" />
 		</file>
 		<file src="dipoles_qp.f90" class="Kinematics" >
-		        <only if-extension="quadruple"/>
-		</file>
-		<file src="kinematics_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>
 		</file>
 		<file src="rambo_qp.f90" class="Kinematics">
@@ -272,13 +269,6 @@
 		</file>
 		<file src="generate_source.sh" class="Kinematics">
 		                <only if-extension="meson"/>
-		</file>
-		<file src="SpinorBrackets.f90" class="Kinematics">
-			<except if-internal="OLP_MODE"/>
-		</file>
-		<file src="SpinorBrackets_qp.f90" class="Kinematics">
-			<except if-internal="OLP_MODE"/>
-			<only if-extension="quadruple"/>
 		</file>
 	</directory>
 

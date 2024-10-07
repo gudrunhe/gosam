@@ -5539,7 +5539,6 @@ contains
    !---#[ spin correlated ME :
    subroutine spin_correlated_lo2(vecs, bornsc)
       use [% process_name asprefix=\_ %]kinematics
-	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
@@ -5683,7 +5682,6 @@ contains
      ! the OpenLoops (HELAS) convention for the polarization vectors.
      ! This is required by Whizard.
       use [% process_name asprefix=\_ %]kinematics
-	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
@@ -6087,7 +6085,6 @@ contains
 
    subroutine OLP_spin_correlated_lo2(vecs, ampsc)
       use [% process_name asprefix=\_ %]kinematics
-	  use SpinorBrackets
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(2*num_legs*num_legs) :: ampsc
@@ -6351,7 +6348,6 @@ contains
    function get_formfactor_lo(vecs) result(factor)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [% process_name asprefix=\_ %]kinematics
-	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor
 
@@ -6363,7 +6359,6 @@ contains
    function get_formfactor_nlo(vecs) result(factor)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
       use [% process_name asprefix=\_ %]kinematics
-	  use SpinorBrackets
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki) :: factor
 

@@ -1,4 +1,4 @@
-project('GoSam_Process_[% process_name %]',
+project('GoSam_Process[% process_name assuffix=\_%]',
     'fortran',
     version:'1.0',
     meson_version: '>=0.58.0',

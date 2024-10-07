@@ -15,7 +15,7 @@ FORM_OPT=\
 	-D OUTFILE=color \
 	-D CREATETT=1
 
-source: color.f90 model.f90 version.f90 [%
+source: color.f90 model.f90 version.f90 kinematics.f90[%
 @if extension quadruple %] color_qp.f90 model_qp.f90 [%
 @end @if extension quadruple %]
 
@@ -44,3 +44,6 @@ color.txt: ../codegen/color.frm
 	@$(FORM) $(FORM_OPT) ../codegen/coloropt.frm[%
 @end @select %]
 
+kinematics.f90:
+	@$(PYTHON) ../codegen/buildkinematics.py
+[% @if extension quadruple %]kinematics_qp.f90 : kinematics.f90[% @end @if %]

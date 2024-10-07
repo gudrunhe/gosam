@@ -598,16 +598,15 @@ contains
       use model[%
       @for subprocesses %][%
        @if is_first %]
-      use [%$_%]_kinematics, only: Spab3, Spaa_direct [%
+      use [%$_%]_kinematics, only: Spab3, Spaa [%
       @end @if %] [%
       @end @for %]
-      use SpinorBrackets
       implicit none
       real(kind=c_double), dimension(0:3), intent(in) :: p,q
       real(kind=c_double), dimension(0:7), intent(out) :: eps
       complex(kind=ki), dimension(4) :: eps_complex
 
-      eps_complex(:)=Spab3(real(q,ki), real(p,ki))/Spaa_direct(real(q,ki),real(p,ki))/sqrt2
+      eps_complex(:)=Spab3(real(q,ki), real(p,ki))/Spaa(real(q,ki),real(p,ki))/sqrt2
       eps(0)=real(eps_complex(1),c_double)
       eps(1)=real(aimag(eps_complex(1)),c_double)
       eps(2)=real(eps_complex(2),c_double)

@@ -5,10 +5,10 @@ common_gen = custom_target('common_gen',
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
-common_source += files(['accu.f90', 'config.f90', 'SpinorBrackets.f90'])
+common_source += files(['accu.f90', 'config.f90'])
 
 [% @if extension quadruple %]
-common_source += files(['accu_qp.f90', 'SpinorBrackets_qp.f90'])[%
+common_source += files(['accu_qp.f90'])[%
 @end @if %]
 
 common_source += common_gen

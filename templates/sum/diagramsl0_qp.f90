@@ -14,7 +14,6 @@ contains
    function amplitude()
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
       use [% process_name asprefix=\_ %]kinematics_qp
-      use SpinorBrackets_qp
       end function amplitude
       use [% process_name asprefix=\_ %]color_qp
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_lo_diagrams, &

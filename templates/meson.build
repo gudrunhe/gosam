@@ -37,7 +37,8 @@ add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]
 [% @end @if %]
 
 [% process_name %]_source = files([])
-subdir('common')
+hel_gen_targets = []
+
 subdir('doc')
 [%
 @for helicities generated %] 
@@ -47,6 +48,7 @@ subdir('helicity[% helicity %]')[%
 subdir('sum')[%
 @end @if %]
 subdir('matrix')
+subdir('common')
 [% @if internal OLP_MODE %]
 OLP_source += [% process_name %]_source
 [% @else %]

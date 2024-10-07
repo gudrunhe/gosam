@@ -137,6 +137,8 @@ generated_sources = [[%
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
+hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
+
 [% process_name %]_source += files(['globals.f90'[% @if extension quadruple%], 'globals_qp.f90' [% @end @if %]])
 [% process_name %]_source += files(['amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90',
                      'amplitudeh[%helicity%]_1.f90',
