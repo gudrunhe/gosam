@@ -856,13 +856,15 @@ contains
             if (renorm_beta) then
                beta0 = (11.0_ki * CA - 4.0_ki * TR * (NF + NFh)) / 6.0_ki
                amp(3) = amp(3) - lo_qcd_couplings * beta0 * amp(1)[%
+               @if finite_renorm_ehc %][%
                @for effective_higgs %][%
                @if is_ehc%]
                ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
                !amp(2) = amp(2) + (11.0_ki -2.0_ki/3.0_ki*log(scale2/mH**2)) * amp(1)
                amp(2) = amp(2) + (11.0_ki) * amp(1)[%
                @end @if %][%
-               @end @for %][%
+               @end @for %][% 
+               @end @if %][%
                @for quark_loop_masses %][%
                   @if is_first %]
                if (renorm_logs) then[%
@@ -3043,6 +3045,7 @@ contains
             if (renorm_beta) then
                beta0 = (11.0_ki_qp * CA_qp - 4.0_ki_qp * TR_qp * (NF_qp + NFh_qp)) / 6.0_ki_qp
                amp(3) = amp(3) - lo_qcd_couplings * beta0 * amp(1)[%
+               @if finite_renorm_ehc %][%
                @for effective_higgs %][%
                @if is_ehc%]
                ! Adding finite renormalization of Wilson coefficient for effective Higgs coupling
@@ -3050,6 +3053,7 @@ contains
                amp(2) = amp(2) + (11.0_ki_qp) * amp(1)[%
                @end @if %][%
                @end @for %][%
+               @end @if %][%
                @for quark_loop_masses %][%
                   @if is_first %]
                if (renorm_logs) then[%

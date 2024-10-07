@@ -5,6 +5,8 @@
 model=smehc
 model.options= Nf:5, Nfgen:1
 
+renorm_ehc=true
+
 zero=mD,mU
 one=gs,e
 

@@ -126,6 +126,7 @@ class GolemShell(golem.util.ishell.InteractiveShell):
             str(golem.properties.config_renorm_beta): ["true", "false"],
             str(golem.properties.config_renorm_yukawa): ["true", "false"],
             str(golem.properties.config_renorm_eftwilson): ["true", "false"],
+            str(golem.properties.config_renorm_ehc): ["true", "false"],
             str(golem.properties.config_nlo_prefactors): ["0", "1", "2"],
             str(golem.properties.pyxodraw): ["true", "false"],
             "!": [" file"],

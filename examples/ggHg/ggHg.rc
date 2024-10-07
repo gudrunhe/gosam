@@ -13,6 +13,10 @@ model=smehc
 # running in the fermionic loops:
 model.options= Nf:5, Nfgen:1, ewchoose:1
 
+# Turn on finite renormalisation of
+# effective Higgs-gluon couplings:
+renorm_ehc=true
+
 order=QCD, 3, 5
 
 one=gs,e

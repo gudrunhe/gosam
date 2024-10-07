@@ -573,6 +573,16 @@ def workflow(conf):
         # model is a UFO and 'order_names' contain 'NP': Can use full EFT functionality
         pass
 
+    if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
+        raise GolemConfigError(
+            "\nYou set both 'renorm_eftwilson' and 'renorm_ehc' to 'true'.\n"
+            + "The former suggests that you supply counterterms for\n"
+            + "Wilson-coefficients by means of a UFO model, while the\n"
+            + "latter turns on the hardcoded finite renormalisation of\n"
+            + "effictive Higgs-gluon couplings like in the heavy-top limit.\n"
+            + "This will probably cause some serious errors in your result,\n"
+            + "so I will not let you do that, sorry.")
+
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
 
@@ -615,6 +625,7 @@ def workflow(conf):
     conf["generate_nlo_virt"] = generate_nlo_virt
     conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_nlo_virt
     conf["generate_yuk_counterterms"] = conf.getBooleanProperty("renorm_yukawa") and generate_nlo_virt
+    conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_nlo_virt
 
     if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":
         conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"

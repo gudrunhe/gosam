@@ -1043,6 +1043,21 @@ config_renorm_eftwilson = Property(
     experimental=True,
 )
 
+config_renorm_ehc = Property(
+    "renorm_ehc",
+    """\
+   Sets the same variable in config.f90
+
+   Turns on the finite renormalisation of effective Higgs-gluon
+   vertices. Implemented for models in the heavy-top limit like
+   smehc. Should not be used when counterterms for Wilson coeffi-
+   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson').
+   """,
+    bool,
+    False,
+    experimental=True,
+)
+
 config_reduction_interoperation = Property(
     "reduction_interoperation",
     """
@@ -1513,6 +1528,7 @@ properties = [
     config_renorm_gamma5,
     config_renorm_yukawa,
     config_renorm_eftwilson,
+    config_renorm_ehc,
     config_reduction_interoperation,
     config_reduction_interoperation_rescue,
     config_samurai_scalar,
