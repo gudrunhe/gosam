@@ -18,7 +18,7 @@ id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %
 	  [field.[% name %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% antiname %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
-   (1+CYUKAWA*(1+(LOGYUK[% mass %]-1)*RENLOG));
+   (1+CYUKAWA*DELTAYUK[% mass %]);
 id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %]?, [% @end @for %][% @end @if %]
 	  [field.[% antiname %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
 	  [field.[% name %]], idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
@@ -27,7 +27,7 @@ id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %
 	  [field.[% antiname %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% name %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
-   (1+CYUKAWA*(1+(LOGYUK[% mass %]-1)*RENLOG));[%
+   (1+CYUKAWA*DELTAYUK[% mass %]);[%
 @end @for %]
 
 *---#] identify Yukawa vertices:

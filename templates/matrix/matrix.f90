@@ -751,7 +751,6 @@ contains
       real(ki), dimension(2:4) :: ampct[%
 @end @if %][%
 @end @if %]
-      real(ki) :: ampyukct
       real(ki), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -889,23 +888,11 @@ contains
             [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
                if (present(h)) then
-                  ampyukct = samplitudeyukct_h(vecs, .false., scale2, h)
-                  amp(3) = amp(3) -1.5_ki * CF * ampyukct
-                  amp(2) = amp(2) -[%
-                     @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki * CF * ampyukct
-                  if (renorm_logs) then
-                     amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct_h(vecs, .true., scale2, h)
-                  end if
+                  amp(3) = amp(3) + samplitudeyukct_h(vecs, renorm_logs, scale2, -1, h)
+                  amp(2) = amp(2) + samplitudeyukct_h(vecs, renorm_logs, scale2, 0, h)
                else
-                  ampyukct = samplitudeyukct(vecs, .false., scale2)
-                  amp(3) = amp(3) -1.5_ki * CF * ampyukct
-                  amp(2) = amp(2) -[%
-                     @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki * CF * ampyukct
-                  if (renorm_logs) then
-                     amp(2) = amp(2) -1.5_ki * CF * samplitudeyukct(vecs, .true., scale2)
-                  end if
+                  amp(3) = amp(3) + samplitudeyukct(vecs, renorm_logs, scale2, -1)
+                  amp(2) = amp(2) + samplitudeyukct(vecs, renorm_logs, scale2, 0)
                end if
             end if
             [% @end @if generate_yuk_counterterms %]
@@ -1594,7 +1581,7 @@ contains
 [% @end @if generate_eft_counterterms %]
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct :
-   function     samplitudeyukct(vecs,logs,scale2) result(amp)
+   function     samplitudeyukct(vecs,logs,scale2,eps) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -1603,6 +1590,7 @@ contains
       complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
       complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
+      integer :: eps
       logical :: logs
 
       amp = 0.0_ki[%
@@ -1645,37 +1633,37 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2)
          case (2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (3)
            ! sigma(SM + dim6 X SM + dim6) with loopcounting
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_1, ampct_2-ampct_1)
          case (4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_0, ampct_0)
@@ -1683,15 +1671,15 @@ contains
             ! sigma(dim6 X dim6)  without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (6)
             ! sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_0, ampct_0)
@@ -1700,15 +1688,15 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_2-amp0_1, ampct_2-ampct_1)
          end select[%
      @else %]
          amp0 = amplitude[% map.index %]l0()
-         ampct = amplitude[% map.index %]yukct(logs,scale2)
+         ampct = amplitude[% map.index %]yukct(logs,scale2,eps)
          heli_amp = square(amp0, ampct)[%
      @end @if %]
          if (debug_lo_diagrams) then
@@ -1732,7 +1720,7 @@ contains
    end function samplitudeyukct
    !---#] function samplitudeyukct :
    !---#[ function samplitudeyukct_h :
-   function     samplitudeyukct_h(vecs, logs, scale2, h) result(amp)
+   function     samplitudeyukct_h(vecs, logs, scale2, eps, h) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics, only: init_event
       implicit none
@@ -1742,6 +1730,7 @@ contains
       complex(ki), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
       complex(ki), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki), dimension([%num_legs%], 4) :: pvecs
+      integer :: eps
       logical :: logs
 
       amp = 0.0_ki[%
@@ -1785,37 +1774,37 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2)
          case (2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_1, ampct_2-ampct_1)
          case (4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_0, ampct_0)
@@ -1823,15 +1812,15 @@ contains
             ! sigma(dim6 X dim6)  without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0)
          case (6)
             ! sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2, ampct_2) &
             & - square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_0, ampct_0)
@@ -1840,15 +1829,15 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
-            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2)
-            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0(logs,scale2,eps)
+            ampct_1 = amplitude[% map.index %]yukct_1(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2(logs,scale2,eps)
             heli_amp = square(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square(amp0_2-amp0_1, ampct_2-ampct_1)
          end select[%
      @else %]
          amp0 = amplitude[% map.index %]l0()
-         ampct = amplitude[% map.index %]yukct(logs,scale2)
+         ampct = amplitude[% map.index %]yukct(logs,scale2,eps)
          heli_amp = square(amp0, ampct)[%
      @end @if %]
          if (debug_lo_diagrams) then
@@ -2940,7 +2929,6 @@ contains
       real(ki_qp), dimension(2:4) :: ampct[%
 @end @if %][%
 @end @if %]
-      real(ki_qp) :: ampyukct
       real(ki_qp), intent(out) :: rat2
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
@@ -3078,23 +3066,11 @@ contains
             [% @if generate_yuk_counterterms %]
             if (renorm_yukawa) then
                if (present(h)) then
-                  ampyukct = samplitudeyukct_h_qp(vecs, .false., scale2, h)
-                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * ampyukct
-                  amp(2) = amp(2) -[%
-                     @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki_qp * CF * ampyukct
-                  if (renorm_logs) then
-                     amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_h_qp(vecs, .true., scale2, h)
-                  end if
+                  amp(3) = amp(3) + samplitudeyukct_h_qp(vecs, renorm_logs, scale2, -1, h)
+                  amp(2) = amp(2) + samplitudeyukct_h_qp(vecs, renorm_logs, scale2, 0, h)
                else
-                  ampyukct = samplitudeyukct_qp(vecs, .false., scale2)
-                  amp(3) = amp(3) -1.5_ki_qp * CF_qp * ampyukct
-                  amp(2) = amp(2) -[%
-                     @if extension dred %]2.5[% @else %]2.0[%
-                     @end @if %]_ki_qp * CF_qp * ampyukct
-                  if (renorm_logs) then
-                     amp(2) = amp(2) -1.5_ki_qp * CF_qp * samplitudeyukct_qp(vecs, .true., scale2)
-                  end if
+                  amp(3) = amp(3) + samplitudeyukct_qp(vecs, renorm_logs, scale2, -1)
+                  amp(2) = amp(2) + samplitudeyukct_qp(vecs, renorm_logs, scale2, 0)
                end if
             end if
             [% @end @if generate_yuk_counterterms %]
@@ -3783,7 +3759,7 @@ contains
 [% @end @if generate_eft_counterterms %]
 [% @if generate_yuk_counterterms %]
    !---#[ function samplitudeyukct_qp :
-   function     samplitudeyukct_qp(vecs,logs,scale2) result(amp)
+   function     samplitudeyukct_qp(vecs,logs,scale2,eps) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -3792,6 +3768,7 @@ contains
       complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
       complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      integer :: eps
       logical :: logs
 
       amp = 0.0_ki_qp[%
@@ -3834,37 +3811,37 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2)
          case (2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (3)
            ! sigma(SM + dim6 X SM + dim6) with loopcounting
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_1, ampct_2-ampct_1)
          case (4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_0, ampct_0)
@@ -3872,15 +3849,15 @@ contains
             ! sigma(dim6 X dim6)  without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (6)
             ! sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_0, ampct_0)
@@ -3889,15 +3866,15 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_2-amp0_1, ampct_2-ampct_1)
          end select[%
      @else %]
          amp0 = amplitude[% map.index %]l0_qp()
-         ampct = amplitude[% map.index %]yukct_qp(logs,scale2)
+         ampct = amplitude[% map.index %]yukct_qp(logs,scale2,eps)
          heli_amp = square_qp(amp0, ampct)[%
      @end @if %]
          if (debug_lo_diagrams) then
@@ -3921,7 +3898,7 @@ contains
    end function samplitudeyukct_qp
    !---#] function samplitudeyukct_qp :
    !---#[ function samplitudeyukct_h_qp :
-   function     samplitudeyukct_h_qp(vecs, logs, scale2, h) result(amp)
+   function     samplitudeyukct_h_qp(vecs, logs, scale2, eps, h) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
       implicit none
@@ -3931,6 +3908,7 @@ contains
       complex(ki_qp), dimension(numcs) :: amp0[% @if enable_truncation_orders %]_0, amp0_1, amp0_2[% @end @if %]
       complex(ki_qp), dimension(numcs) :: ampct[% @if enable_truncation_orders %]_0, ampct_1, ampct_2[% @end @if %]
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
+      integer :: eps
       logical :: logs
 
       amp = 0.0_ki_qp[%
@@ -3974,37 +3952,37 @@ contains
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2)
          case (2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_1, ampct_2-ampct_1)
          case (4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_0, ampct_0)
@@ -4012,15 +3990,15 @@ contains
             ! sigma(dim6 X dim6)  without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2-amp0_0, ampct_2-ampct_0)
          case (6)
             ! sigma(SM X dim6) with loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2, ampct_2) &
             & - square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_0, ampct_0)
@@ -4029,15 +4007,15 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2)
-            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2)
-            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2)
+            ampct_0 = amplitude[% map.index %]yukct_0_qp(logs,scale2,eps)
+            ampct_1 = amplitude[% map.index %]yukct_1_qp(logs,scale2,eps)
+            ampct_2 = amplitude[% map.index %]yukct_2_qp(logs,scale2,eps)
             heli_amp = square_qp(amp0_2-amp0_0, ampct_2-ampct_0) &
             & - square_qp(amp0_2-amp0_1, ampct_2-ampct_1)
          end select[%
      @else %]
          amp0 = amplitude[% map.index %]l0_qp()
-         ampct = amplitude[% map.index %]yukct_qp(logs,scale2)
+         ampct = amplitude[% map.index %]yukct_qp(logs,scale2,eps)
          heli_amp = square_qp(amp0, ampct)[%
      @end @if %]
          if (debug_lo_diagrams) then
