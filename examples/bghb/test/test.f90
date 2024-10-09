@@ -155,8 +155,10 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    ! Renormalization of the Yukawa Coupling
    ! See Appendix D of:
    ! Campbell, Ellis, Maltoni, Willenbrock; hep-ph/0204093
-   amp(2) = amp(2) - 4.0_ki * amp(0)
-   amp(1) = amp(1) - 4.0_ki/3.0_ki * amp(0)
+   ! amp(2) = amp(2) - 4.0_ki * amp(0)
+   ! amp(1) = amp(1) - 4.0_ki/3.0_ki * amp(0)
+   ! NOTE: Not required anymore in GoSam3. Is now handled 
+   ! automatically by setting MSbar_yukawa=B in input file.
 
    do ic = 1, 2
       ch = channels(ic)

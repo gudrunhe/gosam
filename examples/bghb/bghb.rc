@@ -9,6 +9,8 @@ qgraf.verbatim=true=iprop[U,D,S,C,T,0,0];
 
 one=gs,e
 
+MSbar_yukawa=B
+
 model=sm
 model.options= masses: mH mT, widths: none
 
@@ -17,10 +19,3 @@ helicities=[bB=+-][+-]0B
 
 
 regularisation_scheme=cdr
-
-
-# Single Pole check is set to false
-# because Yukawa renormalization is done
-# and the result would always give a 
-# wrong single pole
-SP_check =.false.
