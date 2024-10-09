@@ -1451,6 +1451,18 @@ respect_generations = Property(
     experimental=True,
 )
 
+MSbar_yukawa = Property(
+    "MSbar_yukawa",
+    """\
+    List of Yukawa couplings which shall be renormalised in the MSbar scheme instead 
+    of the default OS scheme. Can also be used to renormalise Yukawa couplings of 
+    particles with mass set to zero while still keeping their coupling to the Higgs.
+    """,
+     list,
+     "",
+     experimental=True,
+)
+
 meson_buildtype = Property(
     "meson.buildtype",
     """\
@@ -1571,6 +1583,7 @@ properties = [
     all_mandelstam,
     flavour_groups,
     respect_generations,
+    MSbar_yukawa,
     meson_buildtype,
     meson_arch,
     unitary_gauge,

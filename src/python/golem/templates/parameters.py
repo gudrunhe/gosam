@@ -35,6 +35,9 @@ class ModelTemplate(Template):
         self._order_names = sorted(conf.getProperty(golem.properties.order_names))
         if self._order_names == [""]:
             self._order_names = []
+        self._MSbaryukawa = conf.getProperty(golem.properties.MSbar_yukawa)
+        if self._MSbaryukawa == [""]:
+            self._MSbaryukawa == []
         self._useCT = conf.getBooleanProperty("renorm_eftwilson")
 
         self._comment_chars = ["#", "!", ";"]
@@ -515,6 +518,10 @@ class ModelTemplate(Template):
 
         have_massive_filter = "massive" in args
 
+        have_OSyukawa_filter = "OSyukawa" in args
+
+        have_MSbaryukawa_filter = "MSbaryukawa" in args
+
         for name, value in list(self._particles.items()):
             props = Properties()
 
@@ -528,6 +535,12 @@ class ModelTemplate(Template):
                 continue
 
             if have_massive_filter and not value.isMassive(self._zeroes):
+                continue
+
+            if have_OSyukawa_filter and name in self._MSbaryukawa:
+                continue
+
+            if have_MSbaryukawa_filter and name not in self._MSbaryukawa:
                 continue
 
             mass = value.getMass()
