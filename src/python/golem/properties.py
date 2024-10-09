@@ -1454,9 +1454,16 @@ respect_generations = Property(
 MSbar_yukawa = Property(
     "MSbar_yukawa",
     """\
-    List of Yukawa couplings which shall be renormalised in the MSbar scheme instead 
-    of the default OS scheme. Can also be used to renormalise Yukawa couplings of 
-    particles with mass set to zero while still keeping their coupling to the Higgs.
+    List of quarks with Yukawa couplings which shall be renormalised in the MSbar 
+    scheme instead of the default OS scheme. Can also be used to renormalise Yukawa 
+    couplings of particles with mass set to zero while still keeping their coupling 
+    to the Higgs.
+
+    Examples:
+    MSbar_yukawa=B
+    -> Yukawa coupling of bottom to Higgs will be renormalised in the MSbar scheme, 
+       even if mB=0 (as long as Hbb coupling still exist)
+
     """,
      list,
      "",
