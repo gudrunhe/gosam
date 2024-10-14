@@ -1282,8 +1282,8 @@ end module [% process_name asprefix=\_ %]kinematics
 with open("kinematics.f90", "r") as file:
     kinematics_qp = file.read()
 kinematics_qp = re.sub(r"module ([\w\d\s\_]*)kinematics", r"module \1kinematics_qp", kinematics_qp)
-kinematics_qp = re.sub(r"use ([\w\d\s\_]*)config, only: ki", r"use \1config, only: ki_qp", kinematics_qp)
 kinematics_qp = re.sub(r"use ([\w\d\s\_]*)model", r"use \1model_qp", kinematics_qp)
+kinematics_qp = re.sub(r"(?<![a-zA-Z0-9])ki(?![a-zA-Z0-9])", r"ki_qp", kinematics_qp)
 with open("kinematics_qp.f90", "w") as file:
     file.write(kinematics_qp)
 [% @end @if %]

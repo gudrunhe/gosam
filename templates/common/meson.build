@@ -1,5 +1,5 @@
 generated_source = ['color.f90', 'kinematics.f90' [% @if internal OLP_MODE %][% @else %], 'version.f90', 'model.f90'[% @end @if %]]
-[% @if extension quadruple %] generated_source += ['color_qp.f90' [% @if internal OLP_MODE %][% @else %], 'model_qp.f90'[% @end @if %]][% @end @if %]
+[% @if extension quadruple %] generated_source += ['color_qp.f90', 'kinematics_qp.f90' [% @if internal OLP_MODE %][% @else %], 'model_qp.f90'[% @end @if %]][% @end @if %]
 
 [% process_name %]_common_gen = \
       custom_target('[% process_name %]_common_gen',
@@ -16,7 +16,7 @@ generated_source = ['color.f90', 'kinematics.f90' [% @if internal OLP_MODE %][% 
 
 [% @if extension quadruple %]
 [% process_name %]_source += files(['rambo_qp.f90', 'globalsl1_qp.f90',
-                     'util_qp.f90', 'kinematics_qp.f90', 'dipoles_qp.f90'])[%
+                     'util_qp.f90', 'dipoles_qp.f90'])[%
 @end @if %]
 
 [% @if internal OLP_MODE %][% @else %]
