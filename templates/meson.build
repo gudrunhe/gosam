@@ -47,8 +47,8 @@ subdir('helicity[% helicity %]')[%
 @if helsum%] 
 subdir('sum')[%
 @end @if %]
-subdir('matrix')
 subdir('common')
+subdir('matrix')
 [% @if internal OLP_MODE %]
 OLP_source += [% process_name %]_source
 [% @else %]
