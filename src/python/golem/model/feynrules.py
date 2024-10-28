@@ -818,7 +818,7 @@ class Model:
         f.write(",isCT")
         f.write(",isNP")
         f.write(";\n")
-        f.write("Symbol Lambdam1,Lambdam2,Loopfac;")
+        f.write("Symbol XNPorder,XQLorder,Xkeep;")
         f.write("\n")
         f.write("*---#] Coupling Orders:\n")
         f.write("*---#[ Fields:\n")
@@ -992,13 +992,10 @@ class Model:
                     )
                 f.write(") =")
 
-                if "NP" in vertorders[ivo].keys():
-                    if "QL" in vertorders[ivo].keys():
-                        f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vertorders[ivo]["NP"], vertorders[ivo]["QL"]))
-                    else:
-                        f.write("\n  Lambdam2^%d * (" % (vertorders[ivo]["NP"]))
-                elif "QL" in vertorders[ivo].keys():
-                    f.write("\n  Loopfac^%d * (" % (vertorders[ivo]["QL"]))
+                if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
+                    f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
+                elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
+                    f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
 
                 dummies = []
 
@@ -1134,13 +1131,10 @@ class Model:
                         )
                     f.write(") =")
 
-                    if "NP" in vertorders[ivo].keys():
-                        if "QL" in vertorders[ivo].keys():
-                            f.write("\n  Lambdam2^%d * Loopfac^%d * (" % (vertorders[ivo]["NP"], vertorders[ivo]["QL"]))
-                        else:
-                            f.write("\n  Lambdam2^%d * (" % (vertorders[ivo]["NP"]))
-                    elif "QL" in vertorders[ivo].keys():
-                        f.write("\n  Loopfac^%d * (" % (vertorders[ivo]["QL"]))
+                    if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
+                        f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
+                    elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
+                        f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
 
                     dummies = []
 

@@ -9,6 +9,7 @@
       module procedure square_0l_0l
       module procedure square_0l_1l
       module procedure square_0l_0l_mat
+      module procedure square_0l_0l_mat_interference
    end interface square
 
    interface     cond
@@ -312,5 +313,20 @@ contains
       v2 = conjg(color_vector)
       amp = real(sum(v1(:) * v2(:)), ki)
    end function  square_0l_0l_mat
+
+   pure function square_0l_0l_mat_interference(color_vector1, cmat, color_vector2) result(amp)
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: color_vector1, color_vector2
+      complex(ki), dimension(numcs,numcs), intent(in) :: cmat
+      real(ki) :: amp
+      complex(ki), dimension(numcs) :: v1, v2
+
+      v1 = matmul(cmat, color_vector1)
+      v2 = conjg(color_vector2)
+      amp = real(sum(v1(:) * v2(:)), ki)
+      v1 = matmul(cmat, color_vector2)
+      v2 = conjg(color_vector1)
+      amp = amp + real(sum(v1(:) * v2(:)), ki)
+   end function  square_0l_0l_mat_interference
    !---#] function square :
 end module [% process_name asprefix=\_ %]util

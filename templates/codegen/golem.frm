@@ -162,30 +162,34 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 [% @if is_ufo 
 %].sort
 [% @if enable_truncation_orders
-%][%
-@if eval trnco .neq. 2 %]
-Id Loopfac = 0;[%
-@end @if %]
-* Repeat Id Lambdam1^2 = Lambdam2;
+%][% @select trnco 
+@case 0 %]
+Id XNPorder = 0;
+Id XQLorder = 0;[%
+@case 1 %]
+Id XQLorder = 0;
+Multiply XNPorder;
+Id XNPorder^2 = Xkeep;
 .sort
-[% @if eval trnco .eq. 0
-%]Id Lambdam2 = 0;[%
-@end @if %][%
-@if eval trnco .eq. 1
-%]Id Lambdam2^2 = 0;
+Id XNPorder = 0;
+Id Xkeep^2 = 0;
+Id Xkeep = 1;[%
+@case 2 %]
+Id XNPorder = 0;
+Multiply XQLorder;
+Id XQLorder^2 = Xkeep;
 .sort
-Id Lambdam2 = 1;[%
-@end @if %][%
-@if eval trnco .eq. 2
-%]Id Lambdam2^2 = 0;
-Id Loopfac^2 = 0;
-.sort
-Id Lambdam2 = 1;
-Id Loopfac = 1;[%
-@end @if %][% 
-@else 
-%]Id Lambdam1 = 1;
-Id Lambdam2 = 1;[%
+Id XQLorder = 0;
+Id Xkeep^2 = 0;
+Id Xkeep = 1;[%
+@else %]
+   #message Undefined value for trnco: "[% trnco %]"
+   #terminate[%
+@end @select %]
+.sort[% 
+@else %]
+Id XNPorder = 1;
+Id XQLorder = 1;[%
 @end @if %][% 
 @end @if %]
 
