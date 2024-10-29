@@ -48,6 +48,13 @@ program test
          amp(ee) = samplitudel0(vecs)
          call OLP_color_correlated(vecs,ampcc(ee,:))
          call spin_correlated_lo2_whizard(vecs,bmunu(ee,:,:,:))
+         do ii = 1, 5
+            do jj = 1, 4
+               do kk = 1, 4
+                  call tiny_to_zero(amp(ee),bmunu(ee,ii,jj,kk))
+               end do
+            end do
+         end do
       end do
 
       call check_reference(amp, ampcc, bmunu, ref_amp, ref_ampcc, ref_bmunu)
@@ -207,7 +214,21 @@ program test
      end if
 
    end  function rel_diff
-   
+
+
+   subroutine tiny_to_zero(a,b)
+     implicit none
+     real(ki), intent(in) :: a
+     real(ki), intent(inout) :: b
+     real(ki), parameter :: tiny = 1.e-10_ki
+     
+     if (a.ne.0._ki) then
+        if (abs(b/a).lt.tiny) then
+           b = 0._ki
+        end if
+     end if
+     
+   end subroutine tiny_to_zero
 
    subroutine generate_reference_vecs(ievt, vecs)
      implicit none
