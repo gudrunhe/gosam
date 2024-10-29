@@ -996,7 +996,9 @@ class Model:
                     f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
                 elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
                     f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
-
+                else:
+                    f.write("\n  (")
+                    
                 dummies = []
 
                 brack_flag = False
@@ -1135,6 +1137,8 @@ class Model:
                         f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
                     elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
                         f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
+                    else:
+                        f.write("\n  (")
 
                     dummies = []
 
