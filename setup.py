@@ -62,9 +62,9 @@ def get_git_revision():
 			with open("PKG-INFO", "r") as f:
 				for line in f:
 					if line.startswith("Version: "):
-						return re.search('gosam-([0-9.]*)+([a-z,0-9]*)',line).group(2)
+						return re.search(r'([0-9.]*)\+([a-z,0-9]*)',line).group(2)
 					if line.startswith("Download-URL: "):
-						return re.search('gosam-([0-9.]*)+([a-z,0-9]*)',line).group(2)
+						return re.search(r'gosam-([0-9.]*)\+([a-z,0-9]*)',line).group(2)
 			raise Exception("The git repository is missing and PKG-INFO has no version")
 		except FileNotFoundError:
 			raise Exception("Neither the git repository nor the PKG-INFO file exist")
