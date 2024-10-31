@@ -22,7 +22,7 @@ import os
 # defaults:
 CONFIG_URL=r"https://raw.githubusercontent.com/gudrunhe/gosam/master/tools/gosam_install.cfg"
 DEFAULTPREFIX=os.path.join(os.getcwd(),"local")
-INSTALLER_VERSION="20210114"
+INSTALLER_VERSION="20241031"
 
 INSTALLOG_DEFAULT="installer-log.ini"
 
