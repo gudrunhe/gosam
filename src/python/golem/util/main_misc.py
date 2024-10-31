@@ -2,7 +2,6 @@
 import sys
 import os
 import os.path
-import imp
 import io
 import hashlib
 
@@ -26,7 +25,7 @@ from golem.util.find_libpaths import find_libraries
 from golem.util.path import golem_path, gosam_contrib_path
 from golem.util.tools import copy_file, \
 		debug, message, warning, \
-		generate_particle_lists
+		generate_particle_lists, load_source
 
 from golem.util.config import GolemConfigError, split_qgrafPower
 
@@ -687,7 +686,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		modname = consts.PATTERN_TOPOLOPY_LO
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading tree diagram file %r" % fname)
-		mod_diag_lo = imp.load_source(modname, fname)
+		mod_diag_lo = load_source(modname, fname)
 		conf["ehc"]=False
 		# keep_tree, tree_signs, tree_flows =
 		keep_tree, tree_signs = \
@@ -717,7 +716,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		modname = consts.PATTERN_TOPOLOPY_VIRT
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading one-loop diagram file %r" % fname)
-		mod_diag_virt = imp.load_source(modname, fname)
+		mod_diag_virt = load_source(modname, fname)
 
 		keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
 			mod_diag_virt.diagrams, model, conf, onshell, quark_masses, complex_masses,
@@ -734,7 +733,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
 		modname = consts.PATTERN_TOPOLOPY_CT
 		fname = os.path.join(path, "%s.py" % modname)
 		debug("Loading counter term diagram file %r" % fname)
-		mod_diag_ct = imp.load_source(modname, fname)
+		mod_diag_ct = load_source(modname, fname)
 		# keep_tree, tree_signs, tree_flows =
 		keep_ct, ct_signs = \
 				golem.topolopy.functions.analyze_ct_diagrams(

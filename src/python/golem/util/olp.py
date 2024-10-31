@@ -1,7 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 
 import os
-import imp
 import golem
 import golem.util.tools
 import golem.installation

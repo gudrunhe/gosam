@@ -120,7 +120,7 @@ def translate(tokens,inconfig):
         while itoken < len(tokens):
                 token = tokens[itoken]
 # special case for abbreviations
-                abbpre = re.sub("\d+", " ", token).strip()
+                abbpre = re.sub(r"\d+", " ", token).strip()
                 if abbpre in list(parameters.keys()) and  parameters[abbpre] == 'array':
                         newtoken= token + '(%s)' % tokens[itoken+2]
                         newlist.append(newtoken)

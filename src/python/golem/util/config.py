@@ -916,7 +916,7 @@ class Form(Program):
                i = lline.index("version")
                j = lline.index("(")
                lline = lline[i+len("version"):j]
-               self.version = [int(re.sub("[^0-9]", "", s))
+               self.version = [int(re.sub(r"[^0-9]", "", s))
                      for s in lline.split(".")]
             elif firstline and "form" in lline:
                # form version 4.0 prints
@@ -925,7 +925,7 @@ class Form(Program):
                   lline = lline.split(" ")[1]
                except IndexError:
                   pass
-               self.version = [int(re.sub("[^0-9]", "", s))
+               self.version = [int(re.sub(r"[^0-9]", "", s))
                      for s in lline.split(".")]
             firstline=False
 
@@ -959,7 +959,7 @@ class Fortran(Program):
             full_name = os.path.join(dir, file)
             if os.path.exists(full_name):
                for l in open(full_name):
-                  m=re.match("^\s*fc.bin=\s*([^#]+)\s*(#.*)?$",l.strip())
+                  m=re.match(r"^\s*fc.bin=\s*([^#]+)\s*(#.*)?$",l.strip())
                   if m:
                      path, prog = os.path.split(m.group(1))
                      path=path.strip()
@@ -1251,7 +1251,7 @@ def split_qgrafPower(power):
    min_length=0
    orders=[]
    couplings=set()
-   l=re.split(',|;',power)
+   l=re.split(r',|;',power)
    current_coupling=[]
    for i in l + [""]:
       if str(i).isdigit() or str(i).lower()=="none":

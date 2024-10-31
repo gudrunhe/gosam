@@ -73,12 +73,29 @@ def report_crash(exc, stack, fname="gosam.crashed"):
       )
 
 
-   if sys.platform.startswith('linux'):
-      emit("Linux",
-            libc=" ".join(platform.libc_ver()),
-            distribution="%s %s (%s)"
-               % platform.linux_distribution()
-      )
+   if sys.platform.startswith("linux"):
+        try:  # Try to use platform.linux_distribution (Python version < 3.8) to get Linux distribution
+            emit("Linux", libc=" ".join(platform.libc_ver()), distribution="%s %s (%s)" % platform.linux_distribution())
+        except AttributeError:  # The os-release files should be present for most Linux distributions as of 2012
+            try:  # Try to use platform.freedesktop_os_release (Python >= 3.10) to get Linux distribution
+                linux_distribution = platform.freedesktop_os_release()["PRETTY_NAME"]
+            except AttributeError:
+                try:  # Try to manually read the files used by platform.freedesktop_os_release (Python 3.8 and 3.9) to get
+                    # Linux distribution
+                    with open("/etc/os-release") if os.path.isfile("/etc/os-release") else open(
+                        "/usr/lib/os-release"
+                    ) as os_info_file:
+                        linux_distribution = next(
+                            (
+                                line.split("=")[-1].strip('"')
+                                for line in os_info_file.readlines()
+                                if "PRETTY_NAME" in line
+                            ),
+                            "",
+                        )
+                except FileNotFoundError:
+                    linux_distribution = "N/A"
+            emit("Linux", libc=" ".join(platform.libc_ver()), distribution="%s" % linux_distribution)
    elif sys.platform.startswith('win'):
       emit("Windows",
             version=platform.win32_ver()

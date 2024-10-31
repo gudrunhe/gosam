@@ -62,23 +62,21 @@ def get_git_revision():
 			with open("PKG-INFO", "r") as f:
 				for line in f:
 					if line.startswith("Version: "):
-						if "-" in line:
-							return re.search('gosam-([0-9.]*)-([a-z,0-9]*)',line).group(2)
+						return re.search('gosam-([0-9.]*)+([a-z,0-9]*)',line).group(2)
 					if line.startswith("Download-URL: "):
-						if "-" in line:
-							return re.search('gosam-([0-9.]*)-([a-z,0-9]*)',line).group(2)
+						return re.search('gosam-([0-9.]*)+([a-z,0-9]*)',line).group(2)
 			raise Exception("The git repository is missing and PKG-INFO has no version")
 		except FileNotFoundError:
 			raise Exception("Neither the git repository nor the PKG-INFO file exist")
 
-VERSION = "2.1.1"
+VERSION = "2.1.2"
 GIT_REVISION = get_git_revision()
-TAR_VERSION = "%s-%s" % (VERSION,GIT_REVISION)
+TAR_VERSION = "%s+%s" % (VERSION,GIT_REVISION)
 
 
 INFO = {
 		'name': 'gosam',
-		'version': VERSION,
+		'version': TAR_VERSION,
 		'author': 'The GoSam (Golem and Samurai) Collaboration',
 		'author_email': 'gosam@hepforge.org',
 		'maintainer': 'The GoSam Collaboration',

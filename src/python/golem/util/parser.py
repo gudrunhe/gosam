@@ -631,7 +631,7 @@ class Template:
             value = float(value)
             # use "%g" instead of "%f" for very small values to avoid truncation to zero
             if "format" in opts:
-               for m in re.finditer('%([-#0+hl ]*[0-9]*)(\.[0-9]*)?(f)',opts["format"],re.I):
+               for m in re.finditer(r'%([-#0+hl ]*[0-9]*)(\.[0-9]*)?(f)',opts["format"],re.I):
                   if m and m.group(3)=="f" or m.group(3)=="F":
                      try:
                         if m.group(2) and len(m.group(2))>1:
@@ -1990,7 +1990,7 @@ def select(items, k):
 
 def generate_mapping(R, k):
    """
-      Generates a mapping from tensor components \hat{C}(a_1, ..., a_k)
+      Generates a mapping from tensor components \\hat{C}(a_1, ..., a_k)
       into a one dimensional array.
 
       PARAMETER
