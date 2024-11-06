@@ -992,12 +992,15 @@ class Model:
                     )
                 f.write(") =")
 
+                # The following is used split the amplitude for the truncation options.
+                # QL>0 always implies NP>0.
+                NPQL_brack_flag = False
                 if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
                     f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
+                    NPQL_brack_flag = True
                 elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
                     f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
-                else:
-                    f.write("\n  (")
+                    NPQL_brack_flag = True
                     
                 dummies = []
 
@@ -1047,7 +1050,7 @@ class Model:
 
                 if brack_flag:
                     f.write(")")
-                if "NP" in vertorders[ivo].keys() or "QL" in vertorders[ivo].keys():
+                if NPQL_brack_flag:
                     f.write("\n)")
                 f.write(";\n")
 
@@ -1133,12 +1136,15 @@ class Model:
                         )
                     f.write(") =")
 
+                    # The following is used split the amplitude for the truncation options.
+                    # QL>0 always implies NP>0.
+                    NPQL_brack_flag = False
                     if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
                         f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
+                        NPQL_brack_flag = True
                     elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
                         f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
-                    else:
-                        f.write("\n  (")
+                        NPQL_brack_flag = True
 
                     dummies = []
 
@@ -1188,7 +1194,7 @@ class Model:
 
                     if brack_flag:
                         f.write(")")
-                    if "NP" in vertorders[ivo].keys() or "QL" in vertorders[ivo].keys():
+                    if NPQL_brack_flag:
                         f.write("\n)")
                     f.write(";\n")
 
