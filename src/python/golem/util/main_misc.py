@@ -495,8 +495,6 @@ def workflow(conf):
     fin = conf.getProperty(golem.properties.qgraf_out)
     path = golem.util.tools.process_path(conf)
 
-    powers = conf.getProperty(golem.properties.qgraf_power)
-    renorm = conf.getProperty(golem.properties.renorm)
     templates = conf.getProperty(golem.properties.template_path)
     templates = os.path.expandvars(templates)
     qgraf_options = conf.getProperty(golem.properties.qgraf_options)
@@ -532,6 +530,27 @@ def workflow(conf):
             conf.setProperty(str(p), conf.getProperty(p))
 
     # Check for incompatible configuration:
+    generate_counterterms = conf.getBooleanProperty("renorm")
+    raise_warn = False
+    warn_str = ""
+    for p in ["renorm_beta",
+        "renorm_mqwf",
+        "renorm_decoupling",
+        "renorm_mqse",
+        "renorm_logs",
+        "renorm_gamma5",
+        "renorm_yukawa",
+        "renorm_eftwilson",
+        "renorm_ehc",
+        "MSbar_yukawa"]:
+        if conf.getBooleanProperty(p) and not generate_counterterms:
+            raise_warn = True
+            warn_str = warn_str + ",\n" + p if warn_str else p
+    if raise_warn:
+        logger.warning("You explicitly turned of QCD renormalisation by setting renorm=False.\n"
+                       + "The following settings will therefore have no effect:\n"
+                       + warn_str)
+
     raise_err = False
     err_str = ""
     if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
@@ -582,6 +601,8 @@ def workflow(conf):
             + "effictive Higgs-gluon couplings like in the heavy-top limit.\n"
             + "This will probably cause some serious errors in your result,\n"
             + "so I will not let you do that, sorry.")
+    # END: Check for incompatible configuration
+
 
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
@@ -623,8 +644,9 @@ def workflow(conf):
 
     conf["generate_lo_diagrams"] = generate_lo_diagrams
     conf["generate_nlo_virt"] = generate_nlo_virt
-    conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_nlo_virt
-    conf["generate_yuk_counterterms"] = conf.getBooleanProperty("renorm_yukawa") and generate_nlo_virt
+    conf["generate_counterterms"] = generate_counterterms
+    conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_nlo_virt
+    conf["generate_yuk_counterterms"] = conf.getBooleanProperty("renorm_yukawa") and generate_counterterms and generate_nlo_virt
     conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_nlo_virt
 
     if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":

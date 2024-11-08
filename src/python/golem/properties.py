@@ -450,7 +450,7 @@ renorm = Property(
    renorm=false
    """,
     bool,
-    False,
+    True,
     experimental=True,
 )
 
