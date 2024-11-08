@@ -189,6 +189,12 @@
              true=.true.
              false=.false. %]
 
+   ! if renormalisation.eq.1 and heavy-top limit, include finite Higgs-gluon-vertex renormalisation:
+             logical :: renorm_ehc = [% renorm_ehc
+             convert=bool
+             true=.true.
+             false=.false. %]
+
    ! Switch mass counter terms for massive quarks on or off
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off

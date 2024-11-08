@@ -1051,7 +1051,10 @@ config_renorm_ehc = Property(
    Turns on the finite renormalisation of effective Higgs-gluon
    vertices. Implemented for models in the heavy-top limit like
    smehc. Should not be used when counterterms for Wilson coeffi-
-   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson').
+   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson'). 
+   CAUTION: 
+   This will only work if the number of Higgs-gluon couplings is the 
+   same for all Born diagrams!
    """,
     bool,
     False,
