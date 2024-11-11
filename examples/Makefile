@@ -54,10 +54,14 @@ runtests : $(ALL_TESTS)
 # TODO: merge ddtt+ggtt --> olp
 # TODO: write: tttt, tbWp_tree
 # TODO: include: eett_NLOCT, gggh_reduze, gggh
-SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu_autotools ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
+# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu_autotools ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
+
+SKIP_TESTS = gH_ttg_EFT_regression_test dd_ttH_EFT_regression_test pp_AAj_OLP_regression_test WpWpjj
+SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
 check_selection :
+	$(info $(SELECTED_TESTS))
 	for f in $(SELECTED_TESTS) ; do \
 		if [ -d "$$f" ] ; then \
 			printf "\033[0;32m" ; \
