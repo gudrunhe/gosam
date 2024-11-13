@@ -227,6 +227,7 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
 *   #EndIf
 *#EndIf
 
+[% @if use_MQSE %]
 #IfDef `MQSE'
   SplitArg (p1), proplorentz;
 
@@ -281,6 +282,7 @@ Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
    #EndIf
    .sort:MQSE 1.1;
 #EndIf
+[% @end @if %]
 
 #include- propagators.hh
 

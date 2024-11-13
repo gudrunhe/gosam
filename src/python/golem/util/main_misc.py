@@ -542,7 +542,8 @@ def workflow(conf):
         "renorm_yukawa",
         "renorm_eftwilson",
         "renorm_ehc",
-        "MSbar_yukawa"]:
+        "MSbar_yukawa",
+        "use_MQSE"]:
         if conf.getBooleanProperty(p) and not generate_counterterms:
             raise_warn = True
             warn_str = warn_str + ",\n" + p if warn_str else p
@@ -648,6 +649,7 @@ def workflow(conf):
     conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_nlo_virt
     conf["generate_yuk_counterterms"] = conf.getBooleanProperty("renorm_yukawa") and generate_counterterms and generate_nlo_virt
     conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_nlo_virt
+    conf["use_MQSE"] = conf.getBooleanProperty("use_MQSE")
 
     if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":
         conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
@@ -791,7 +793,7 @@ def workflow(conf):
         golem.util.tools.expand_parameter_list(prop, conf)
 
     # debuging the diagsum property:
-    conf["debug_diagsum"] = False
+    conf["debug_diagsum"] = True
 
 
 def run_analyzer(path, conf, in_particles, out_particles):

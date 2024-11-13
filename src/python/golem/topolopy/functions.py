@@ -210,14 +210,17 @@ def analyze_loop_diagrams(
     props = []
     eprops = {}
     for idx in keep:
+        props_str = str(diagrams[idx].getLoopIntegral()) \
+                    + "," \
+                    + str(diagrams[idx].rank()) 
+        if conf.getBooleanProperty("use_MQSE"):
+            props_str = props_str \
+                        + "," \
+                        + str(diagrams[idx].isMassiveQuarkSE())
         props.append(
             [
                 idx,
-                str(diagrams[idx].getLoopIntegral())
-                + ","
-                + str(diagrams[idx].rank())
-                + ","
-                + str(diagrams[idx].isMassiveQuarkSE()),
+                props_str,
             ]
         )
 

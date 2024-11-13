@@ -1473,6 +1473,19 @@ MSbar_yukawa = Property(
      experimental=True,
 )
 
+use_MQSE = Property(
+    "use_MQSE",
+    """\
+    Whether or not to scan 1-loop amplitudes for massive quark self energies and
+    insert the appropriate mass counterterm during the form step. Used mainly for
+    debugging purposes.
+
+    """,
+     bool,
+     False,
+     experimental=True,
+)
+
 meson_buildtype = Property(
     "meson.buildtype",
     """\
@@ -1594,6 +1607,7 @@ properties = [
     flavour_groups,
     respect_generations,
     MSbar_yukawa,
+    use_MQSE,
     meson_buildtype,
     meson_arch,
     unitary_gauge,

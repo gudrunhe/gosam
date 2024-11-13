@@ -604,8 +604,10 @@ This metadiagram contains [% @select count diagsum_diagrams diagsum_group=dsgrp
 {\sl Diagram~[%DIAG%]}\\
 $\mathrm{rk}=[%rank%][%
    @if is_nf %], N_f[% 
-   @end @if %]$[%
+   @end @if %]$[% 
+   @if use_MQSE %][%
    @if is_mqse %], MQSE[% 
+   @end @if %][% 
    @end @if %][%
 @if use_vertex_labels %]\\
 [% getVertexInfo loop DIAG %][%

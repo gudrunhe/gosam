@@ -731,7 +731,15 @@ contains
       @if generate_nlo_virt %]
       if (renormalisation.eq.3) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
-         deltaOS = 1.0_ki
+         deltaOS = 1.0_ki[%
+      @if use_MQSE %][% @else %]
+         print *, "ERROR: Code generated with use_MQSE=false."
+         print *, "Mass counterterms based on massive quark" 
+         print *, "self-energies not available. Please choose"
+         print *, "renormalisation != 3 or regenerate code with"
+         print *, "use_MQSE=true. Execution terminates now."
+         stop[% 
+      @end @if %]
       else 
          deltaOS = 0.0_ki
       end if
@@ -2564,7 +2572,15 @@ contains
       @if generate_nlo_virt %]
       if (renormalisation.eq.3) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
-         deltaOS = 1.0_ki_qp
+         deltaOS = 1.0_ki_qp[%
+         @if use_MQSE %][% @else %]
+            print *, "ERROR: Code generated with use_MQSE=false."
+            print *, "Mass counterterms based on massive quark" 
+            print *, "self-energies not available. Please choose"
+            print *, "renormalisation != 3 or regenerate code with"
+            print *, "use_MQSE=true. Execution terminates now."
+            stop[% 
+         @end @if %]
       else 
          deltaOS = 0.0_ki_qp
       end if
