@@ -81,6 +81,9 @@ class Particle:
     def isMassive(self, zeroes={}):
         return self.getMass(zeroes) != "0"
 
+    def hasWidth(self, zeroes={}):
+        return self.getWidth(zeroes) != "0"
+
     def getWidth(self, zeroes={}):
         if str(self._width) != "0":
             if self._width in zeroes:

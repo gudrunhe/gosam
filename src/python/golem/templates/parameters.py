@@ -473,6 +473,7 @@ class ModelTemplate(Template):
         name_name = self._setup_name("name", "name", opts)
         antiname_name = self._setup_name("antiname", "antiname", opts)
         mass_name = self._setup_name("mass", "mass", opts)
+        width_name = self._setup_name("width", "width", opts)
         massive_name = self._setup_name("massive", "is_massive", opts)
 
         color_filter = []
@@ -543,11 +544,13 @@ class ModelTemplate(Template):
             if have_MSbaryukawa_filter and name not in self._MSbaryukawa:
                 continue
 
-            mass = value.getMass()
+            mass = value.getMass() if value.isMassive(self._zeroes) else 0
+            width = value.getWidth() if value.hasWidth(self._zeroes) else 0
             antiname = value.getPartner()
 
             props.setProperty(name_name, name)
             props.setProperty(mass_name, mass)
+            props.setProperty(width_name, width)
             props.setProperty(antiname_name, antiname)
 
             yield props

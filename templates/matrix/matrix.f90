@@ -729,26 +729,12 @@ contains
       amp(1)   = 0.0_ki[%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
-      select case (renormalisation)
-      case (0)
-         ! no renormalisation
-         deltaOS = 0.0_ki
-      case (1)
-         ! fully renormalized
-         if(renorm_mqse) then
-            deltaOS = 1.0_ki
-         else
-            deltaOS = 0.0_ki
-         end if
-      case (2)
-         ! massive quark counterterms only
+      if (renormalisation.eq.3) then
+         ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki
-      case default
-         ! not implemented
-         print*, "In [% process_name asprefix=\_ %]matrix:"
-         print*, "  invalid value for renormalisation=", renormalisation
-         stop
-      end select
+      else 
+         deltaOS = 0.0_ki
+      end if
 
       if (present(h)) then[%
          @if helsum %]
@@ -783,6 +769,14 @@ contains
          end if
       case (2)
          ! massive quark counterterms only
+         renorm_mqse = .True.
+         if (present(h)) then
+            amp((/4,3,2/)) = amp((/4,3,2/)) + samplitudect_h(vecs, renorm_logs, scale2, h)
+         else
+            amp((/4,3,2/)) = amp((/4,3,2/)) + samplitudect(vecs, renorm_logs, scale2)
+         end if
+      case (3)
+         ! massive quark counterterms only, OLD IMPLEMENTATION
       case default
          ! not implemented
          print*, "In [% process_name asprefix=\_ %]matrix:"
@@ -2568,26 +2562,12 @@ contains
       amp(1)   = 0.0_ki_qp[%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
-      select case (renormalisation)
-      case (0)
-         ! no renormalisation
-         deltaOS = 0.0_ki_qp
-      case (1)
-         ! fully renormalized
-         if(renorm_mqse) then
-            deltaOS = 1.0_ki_qp
-         else
-            deltaOS = 0.0_ki_qp
-         end if
-      case (2)
-         ! massive quark counterterms only
+      if (renormalisation.eq.3) then
+         ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp
-      case default
-         ! not implemented
-         print*, "In [% process_name asprefix=\_ %]matrix:"
-         print*, "  invalid value for renormalisation=", renormalisation
-         stop
-      end select
+      else 
+         deltaOS = 0.0_ki_qp
+      end if
 
       if (present(h)) then[%
          @if helsum %]
@@ -2622,6 +2602,14 @@ contains
          end if
       case (2)
          ! massive quark counterterms only
+         renorm_mqse = .True.
+         if (present(h)) then
+            amp((/4,3,2/)) = amp((/4,3,2/)) + samplitudect_h_qp(vecs, renorm_logs, scale2, h)
+         else
+            amp((/4,3,2/)) = amp((/4,3,2/)) + samplitudect_qp(vecs, renorm_logs, scale2)
+         end if
+      case (3)
+         ! massive quark counterterms only, OLD IMPLEMENTATION         
       case default
          ! not implemented
          print*, "In [% process_name asprefix=\_ %]matrix:"
