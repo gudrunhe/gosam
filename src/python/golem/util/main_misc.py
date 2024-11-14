@@ -529,8 +529,20 @@ def workflow(conf):
         if conf.getProperty(p):
             conf.setProperty(str(p), conf.getProperty(p))
 
-    # Check for incompatible configuration:
-    generate_counterterms = conf.getBooleanProperty("renorm")
+    # Check for non-fatal incompatible configurations:
+    orders = split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
+    powers = orders[0] if orders else []
+
+    if len(powers) == 2:
+        generate_lo_diagrams = True
+        generate_nlo_virt = False       
+    elif len(powers) == 3:
+        generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
+        generate_nlo_virt = True
+    else:
+        raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
+    
+    generate_counterterms = conf.getBooleanProperty("renorm") and generate_nlo_virt
     raise_warn = False
     warn_str = ""
     for p in ["renorm_beta",
@@ -548,10 +560,11 @@ def workflow(conf):
             raise_warn = True
             warn_str = warn_str + ",\n" + p if warn_str else p
     if raise_warn:
-        logger.warning("You explicitly turned of QCD renormalisation by setting renorm=False.\n"
+        logger.warning("You explicitly turned off QCD renormalisation by setting renorm=False.\n"
                        + "The following settings will therefore have no effect:\n"
                        + warn_str)
 
+    # Check for fatal incompatible configurations:
     raise_err = False
     err_str = ""
     if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
@@ -631,17 +644,6 @@ def workflow(conf):
         raise GolemConfigError("The process path does not exist: %r" % path)
 
     check_dont_overwrite(conf)
-    orders = split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
-    powers = orders[0] if orders else []
-
-    if len(powers) == 2:
-        generate_lo_diagrams = True
-        generate_nlo_virt = False
-    elif len(powers) == 3:
-        generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
-        generate_nlo_virt = True
-    else:
-        raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
 
     conf["generate_lo_diagrams"] = generate_lo_diagrams
     conf["generate_nlo_virt"] = generate_nlo_virt

@@ -140,10 +140,10 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
 
 #call zeroes
 
-[% @if generate_nlo_virt
+[% @if generate_counterterms
 %]#If (`LOOPS' == 0 )[% @if generate_eft_counterterms %] && (`EFTCTFLG' == 0)[% @end @if %]
-#include yukawas.hh
-#call ReplaceYukawas
+#include counterterms.hh
+#call InsertCounterterms
 #EndIf[%
 @end @if %]
 

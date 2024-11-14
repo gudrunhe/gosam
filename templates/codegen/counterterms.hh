@@ -1,6 +1,6 @@
 * vim: syntax=form:expandtab:ts=3:sw=3
 
-#Procedure ReplaceYukawas
+#Procedure InsertCounterterms
 *---#[ identify Yukawa vertices:
 * NOTE: This assumes that the structure of the vertex will always be
 * quark-antiquark-Higgs or antiquark-quark-Higgs; i.e. the Higgs is
@@ -51,7 +51,7 @@ id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %
 @end @for %]
 
 *---#] identify Yukawa vertices:
-*---#[ identify massive quark propagators and take derivative wrt. mass:
+*---#[ identify massive quark propagators:
 [% @for modelparticles massive quarks %][%
 @if eval width .eq. 0 %]
 id proplorentz(1, vDUMMY1?, [% mass %], 0, 0, iv1L?, iv2L?) =
@@ -77,7 +77,7 @@ id proplorentz(1, ZERO, [% mass %], [% width %], 0, iv1L?, iv2L?) =
 		  proplorentz(1, ZERO, [% mass %], [% width %], 0, iDUMMY1, iv2L);[% 
 @end @if %]
 [% @end @for %]
-*---#] identify massive quark propagators and take derivative wrt. mass:
+*---#] identify massive quark propagators:
 *---#[ truncate at linear order in CT constant:
 
 Multiply (1-XCT);

@@ -219,7 +219,7 @@
 		                class="Integrals" >
 			<only if-option="diagsum" value="true"/>
 		</file>
-		<file src="yukawas.hh" class="Model"/>
+		<file src="counterterms.hh" class="Model"/>
 	</directory>
 
 	<directory src="codegen" dest="." usedby="qgraf">
