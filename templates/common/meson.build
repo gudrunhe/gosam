@@ -12,11 +12,13 @@ generated_source = ['color.f90', 'kinematics.f90' [% @if internal OLP_MODE %][% 
 
 [% process_name %]_source += files(['rambo.f90', 'globalsl1.f90',
                      'util.f90', 'scalar_cache.f90',
-                     'dipoles.f90', 'groups.f90'])
+                     'dipoles.f90', 'groups.f90',
+                     'counterterms.f90'])
 
 [% @if extension quadruple %]
 [% process_name %]_source += files(['rambo_qp.f90', 'globalsl1_qp.f90',
-                     'util_qp.f90', 'dipoles_qp.f90'])[%
+                     'util_qp.f90', 'dipoles_qp.f90',
+                     'counterterms_qp.f90'])[%
 @end @if %]
 
 [% @if internal OLP_MODE %][% @else %]

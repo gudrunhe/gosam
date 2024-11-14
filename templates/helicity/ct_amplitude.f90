@@ -52,31 +52,31 @@ contains
 @if generate_lo_diagrams%][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0, only: ampyukct_0 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_0, only: ampdymct_0 => amplitude_Dym[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1, only: ampyukct_1 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_1, only: ampdymct_1 => amplitude_Dym[% 
 @case 2 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2, only: ampyukct_2 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_2, only: ampdymct_2 => amplitude_Dym[% 
 @end @select %][%
 @if extension quadruple %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0_qp, only: ampyukct_0_qp => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_0_qp, only: ampdymct_0_qp => amplitude_Dym[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1_qp, only: ampyukct_1_qp => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_1_qp, only: ampdymct_1_qp => amplitude_Dym[% 
 @case 2%]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2_qp, only: ampyukct_2_qp => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_2_qp, only: ampdymct_2_qp => amplitude_Dym[% 
            @end @select %][%
 @end @if %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0, only: ampyukct => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0, only: ampdymct => amplitude_Dym[%
 @if extension quadruple %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_qp, only: ampyukct_qp => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0_qp, only: ampdymct_qp => amplitude_Dym[%
 @end @if %][%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams%][%
@@ -222,8 +222,8 @@ contains
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
-               amp(-1,:) = amp(-1,:) + ampyukct_0(renormalisation, scale2, -1)
-               amp(0,:) = amp(0,:) + ampyukct_0(renormalisation, scale2, 0)
+               amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
+               amp(0,:) = amp(0,:) + ampdymct_0(scale2, 0)
             end if[% 
      @end @if generate_yuk_counterterms %][%
      @if generate_eft_counterterms %][%
@@ -242,8 +242,8 @@ contains
      @if generate_yuk_counterterms %]
          if (corrections_are_qcd) then
          ! quark mass renormalisation
-            amp(-1,:) = amp(-1,:) + ampyukct_0(renormalisation, scale2, -1)
-            amp(0,:) = amp(0,:) + ampyukct_0(renormalisation, scale2, 0)
+            amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
+            amp(0,:) = amp(0,:) + ampdymct_0(scale2, 0)
          end if[% 
      @end @if generate_yuk_counterterms %]
       case(3)
@@ -328,8 +328,8 @@ contains
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
-               amp(-1,:) = amp(-1,:) + ampyukct_1(renormalisation, scale2, -1)
-               amp(0,:) = amp(0,:) + ampyukct_1(renormalisation, scale2, 0)
+               amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
+               amp(0,:) = amp(0,:) + ampdymct_1(scale2, 0)
             end if[% 
      @end @if generate_yuk_counterterms %][%
      @if generate_eft_counterterms %][%
@@ -348,8 +348,8 @@ contains
       @if generate_yuk_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
-            amp(-1,:) = amp(-1,:) + ampyukct_1(renormalisation, scale2, -1)
-            amp(0,:) = amp(0,:) + ampyukct_1(renormalisation, scale2, 0)
+            amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
+            amp(0,:) = amp(0,:) + ampdymct_1(scale2, 0)
          end if[% 
       @end @if generate_yuk_counterterms %]
       case(3)
@@ -434,8 +434,8 @@ contains
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
-               amp(-1,:) = amp(-1,:) + ampyukct_2(renormalisation, scale2, -1)
-               amp(0,:) = amp(0,:) + ampyukct_2(renormalisation, scale2, 0)
+               amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
+               amp(0,:) = amp(0,:) + ampdymct_2(scale2, 0)
             end if[% 
      @end @if generate_yuk_counterterms %][%
      @if generate_eft_counterterms %][%
@@ -454,8 +454,8 @@ contains
       @if generate_yuk_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
-            amp(-1,:) = amp(-1,:) + ampyukct_2(renormalisation, scale2, -1)
-            amp(0,:) = amp(0,:) + ampyukct_2(renormalisation, scale2, 0)
+            amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
+            amp(0,:) = amp(0,:) + ampdymct_2(scale2, 0)
          end if[% 
       @end @if generate_yuk_counterterms %]
       case(3)
@@ -549,8 +549,8 @@ contains
       
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
-               amp(-1,:) = amp(-1,:) + ampyukct(renormalisation, scale2, -1)
-               amp(0,:) = amp(0,:) + ampyukct(renormalisation, scale2, 0)
+               amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
+               amp(0,:) = amp(0,:) + ampdymct(scale2, 0)
             end if[% 
       @end @if generate_yuk_counterterms %][%
       @if generate_eft_counterterms %][%
@@ -569,8 +569,8 @@ contains
          @if generate_yuk_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
-            amp(-1,:) = amp(-1,:) + ampyukct(renormalisation, scale2, -1)
-            amp(0,:) = amp(0,:) + ampyukct(renormalisation, scale2, 0)
+            amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
+            amp(0,:) = amp(0,:) + ampdymct(scale2, 0)
          end if[% 
          @end @if generate_yuk_counterterms %]
       case(3)

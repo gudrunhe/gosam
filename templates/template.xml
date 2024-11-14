@@ -248,6 +248,7 @@
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
 			<except if-file="exists" in-mode="normal" />
 		</file>
+		<file src="counterterms.f90" class="Kinematics"/>
 		<file src="dipoles_qp.f90" class="Kinematics" >
 		        <only if-extension="quadruple"/>
 		</file>
@@ -263,6 +264,9 @@
 		</file>
 		<file src="globalsl1_qp.f90" class="Kinematics">
 		        <only if-extension="quadruple"/>
+		</file>
+		<file src="counterterms_qp.f90" class="Kinematics">
+				<only if-extension="quadruple"/>
 		</file>
 		<file src="meson.build" class="Kinematics">
 				<only if-extension="meson" />
