@@ -649,7 +649,8 @@ def workflow(conf):
     conf["generate_nlo_virt"] = generate_nlo_virt
     conf["generate_counterterms"] = generate_counterterms
     conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_nlo_virt
-    conf["generate_yuk_counterterms"] = conf.getBooleanProperty("renorm_yukawa") and generate_counterterms and generate_nlo_virt
+    conf["generate_ym_counterterms"] = (conf.getBooleanProperty("renorm_yukawa") or conf.getBooleanProperty("renorm_mqse")) \
+        and generate_counterterms and generate_nlo_virt
     conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_nlo_virt
     conf["use_MQSE"] = conf.getBooleanProperty("use_MQSE")
 

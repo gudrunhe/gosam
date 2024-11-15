@@ -48,7 +48,7 @@ contains
 @end @if %][%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams %][%
-@if generate_yuk_counterterms %][%
+@if generate_ym_counterterms %][%
 @if generate_lo_diagrams%][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
@@ -80,7 +80,7 @@ contains
 @end @if %][%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams%][%
-@end @if generate_yuk_counterterms %][%
+@end @if generate_ym_counterterms %][%
 @if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %][%
 @if enable_truncation_orders %]
@@ -218,14 +218,14 @@ contains
         
             amp(-1,:) = amp(-1,:) + 0.5_ki*Deltagwf_0(-1)*amp0_0()
             amp(0,:) = amp(0,:) + 0.5_ki*Deltagwf_0(0)*amp0_0()[%
-     @if generate_yuk_counterterms %]
+     @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
                amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
                amp(0,:) = amp(0,:) + ampdymct_0(scale2, 0)
             end if[% 
-     @end @if generate_yuk_counterterms %][%
+     @end @if generate_ym_counterterms %][%
      @if generate_eft_counterterms %][%
      @if eval topolopy.count.ct .gt. 0 %]
      
@@ -239,13 +239,13 @@ contains
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
       case(2)[%
-     @if generate_yuk_counterterms %]
+     @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
          ! quark mass renormalisation
             amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
             amp(0,:) = amp(0,:) + ampdymct_0(scale2, 0)
          end if[% 
-     @end @if generate_yuk_counterterms %]
+     @end @if generate_ym_counterterms %]
       case(3)
          ! quark mass renormalisation using old implementation; should never get here
          return
@@ -324,14 +324,14 @@ contains
         
             amp(-1,:) = amp(-1,:) + 0.5_ki*Deltagwf_0(-1)*amp0_1() + 0.5_ki*Deltagwf_1(-1)*amp0_0()
             amp(0,:) = amp(0,:) + 0.5_ki*Deltagwf_0(0)*amp0_1() + 0.5_ki*Deltagwf_1(0)*amp0_0()[%
-     @if generate_yuk_counterterms %]
+     @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
                amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
                amp(0,:) = amp(0,:) + ampdymct_1(scale2, 0)
             end if[% 
-     @end @if generate_yuk_counterterms %][%
+     @end @if generate_ym_counterterms %][%
      @if generate_eft_counterterms %][%
      @if eval topolopy.count.ct .gt. 0 %]
      
@@ -345,13 +345,13 @@ contains
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
       case(2)[%
-      @if generate_yuk_counterterms %]
+      @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
             amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
             amp(0,:) = amp(0,:) + ampdymct_1(scale2, 0)
          end if[% 
-      @end @if generate_yuk_counterterms %]
+      @end @if generate_ym_counterterms %]
       case(3)
          ! quark mass renormalisation using old implementation; should never get here
          return
@@ -430,14 +430,14 @@ contains
         
             amp(-1,:) = amp(-1,:) + 0.5_ki*Deltagwf_0(-1)*amp0_2() + 0.5_ki*Deltagwf_2(-1)*amp0_0()
             amp(0,:) = amp(0,:) + 0.5_ki*Deltagwf_0(0)*amp0_2()+ 0.5_ki*Deltagwf_2(0)*amp0_0()[%
-     @if generate_yuk_counterterms %]
+     @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
                amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
                amp(0,:) = amp(0,:) + ampdymct_2(scale2, 0)
             end if[% 
-     @end @if generate_yuk_counterterms %][%
+     @end @if generate_ym_counterterms %][%
      @if generate_eft_counterterms %][%
      @if eval topolopy.count.ct .gt. 0 %]
      
@@ -451,13 +451,13 @@ contains
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
       case(2)[%
-      @if generate_yuk_counterterms %]
+      @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
             amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
             amp(0,:) = amp(0,:) + ampdymct_2(scale2, 0)
          end if[% 
-      @end @if generate_yuk_counterterms %]
+      @end @if generate_ym_counterterms %]
       case(3)
          ! quark mass renormalisation using old implementation; should never get here
          return
@@ -545,14 +545,14 @@ contains
       @end @for %]
             end if[% 
       @end @if %][%
-      @if generate_yuk_counterterms %]
+      @if generate_ym_counterterms %]
       
             ! Yukawa coupling and quark mass renormalisation
             if (renorm_yukawa.or.renorm_mqse) then
                amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
                amp(0,:) = amp(0,:) + ampdymct(scale2, 0)
             end if[% 
-      @end @if generate_yuk_counterterms %][%
+      @end @if generate_ym_counterterms %][%
       @if generate_eft_counterterms %][%
       @if eval topolopy.count.ct .gt. 0 %]
       
@@ -566,13 +566,13 @@ contains
       @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
       case(2)[%
-         @if generate_yuk_counterterms %]
+         @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
             ! quark mass renormalisation
             amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
             amp(0,:) = amp(0,:) + ampdymct(scale2, 0)
          end if[% 
-         @end @if generate_yuk_counterterms %]
+         @end @if generate_ym_counterterms %]
       case(3)
          ! quark mass renormalisation using old implementation; should never get here
          return
