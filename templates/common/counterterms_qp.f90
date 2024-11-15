@@ -88,12 +88,8 @@ contains
    end function counterterm_gluonwf
 !---#] function counterterm_gluonwf:
 !---#[ function counterterm_mqwf:
-   function counterterm_mqwf(scale2) result(ct)[%
-@for particles massive quarks %][% 
-@if is_first %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp, only:[% 
-@end @if %] [% mass %][% @if is_last %][% @else %],[% @end @if %][% 
-@end @for %]
+   function counterterm_mqwf(scale2) result(ct)
+      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp
       use [% process_name asprefix=\_ %]color, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
