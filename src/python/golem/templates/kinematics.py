@@ -51,6 +51,7 @@ class KinematicsTemplate(golem.util.parser.Template):
 
         self._references = golem.algorithms.helicity.reference_vectors(conf, in_particles, out_particles)
 
+        self._name = []
         self._masses = []
         self._lightlike = []
         self._twospin = []
@@ -109,6 +110,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             return qed_sign
 
         def examine_particle(p, sign):
+            name = str(p)
             mass = p.getMass(zeroes)
             twospin = p.getSpin()
             color = sign * p.getColor()
@@ -116,6 +118,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             latex = p.getLaTeXName()
             charge = p.getCharge()
 
+            self._name.append(name)
             self._masses.append(mass)
             self._latex.append(latex)
 
@@ -668,6 +671,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             prefix = opts["prefix"]
         else:
             prefix = ""
+        name_name = self._setup_name("name", prefix + "name", opts)
         index_name = self._setup_name("index", prefix + "index", opts)
         out_index_name = self._setup_name("out_index", prefix + "out_index", opts)
         helicity_name = self._setup_name("hel", prefix + "hel", opts)
@@ -686,6 +690,7 @@ class KinematicsTemplate(golem.util.parser.Template):
         charge_name = self._setup_name("charge", prefix + "charge", opts)
 
         first_name = self._setup_name("first", prefix + "is_first", opts)
+        last_name = self._setup_name("last", prefix + "is_last", opts)
 
         is_first = True
         base = 1
@@ -744,6 +749,9 @@ class KinematicsTemplate(golem.util.parser.Template):
         else:
             end_index = self._num_in
 
+        # when using "particles" as iterator, which is the last object 
+        # depends on applied filters, so we have to run the loop twice
+        last_index = start_index
         for index in range(start_index, end_index):
             if self._lightlike[index]:
                 if "lightlike" not in mass_filter:
@@ -764,8 +772,37 @@ class KinematicsTemplate(golem.util.parser.Template):
             # if charge not in charge_filter:
             # continue
 
+            last_index = index
+            
+
+        for index in range(start_index, end_index):
+            if self._lightlike[index]:
+                if "lightlike" not in mass_filter:
+                    continue
+            else:
+                if "massive" not in mass_filter:
+                    continue
+
+            color = self._color[index]
+            if color not in color_filter:
+                continue
+
+            tspin = self._twospin[index]
+            if tspin not in spin_filter:
+                continue
+
+            charge = self._charge[index]
+            # if charge not in charge_filter:
+            # continue
+
+            if index==last_index:
+                props.setProperty(last_name, True)
+            else:
+                props.setProperty(last_name, False)
+
             props.setProperty(first_name, is_first)
             is_first = False
+            props.setProperty(name_name, self._name[index])
             props.setProperty(index_name, index + base)
             props.setProperty(mass_name, self._masses[index])
             props.setProperty(spin_name, self._spin[index])
