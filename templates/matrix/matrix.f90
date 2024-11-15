@@ -1138,9 +1138,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -1150,9 +1150,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0 + amp0_1 + amp0_2, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -1160,8 +1160,8 @@ contains
                ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:)) &
                   & + square(amp0_1, ampct_0(ieps,:))
@@ -1170,8 +1170,8 @@ contains
                ! sigma(SM + dim6 X SM + dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0 + amp0_1, ampct_0(ieps,:) + ampct_1(ieps,:))
                end do
@@ -1180,9 +1180,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -1191,8 +1191,8 @@ contains
                ! sigma(dim6 X dim6)  without loopcounting
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_1 + amp0_2, ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -1200,8 +1200,8 @@ contains
                ! sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_1(ieps,:)) &
                   & + square(amp0_1, ampct_0(ieps,:))
@@ -1209,14 +1209,14 @@ contains
             case (7)
                ! sigma(dim6 X dim6)  with loopcounting
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_1, ampct_1(ieps,:))
                end do
             end select[%
         @else %]
             amp0 = amplitude[% map.index %]l0()
-            ampct = ct_amplitude[% map.index %](logs, scale2)
+            ampct = ct_amplitude[% map.index %](scale2)
             do ieps=-1,0
                heli_amp(ieps) = square(amp0, ampct(ieps,:))
             end do[%
@@ -1298,9 +1298,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -1310,9 +1310,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0 + amp0_1 + amp0_2, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -1320,8 +1320,8 @@ contains
                ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:)) &
                   & + square(amp0_1, ampct_0(ieps,:))
@@ -1330,8 +1330,8 @@ contains
                ! sigma(SM + dim6 X SM + dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0 + amp0_1, ampct_0(ieps,:) + ampct_1(ieps,:))
                end do
@@ -1340,9 +1340,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -1351,8 +1351,8 @@ contains
                ! sigma(dim6 X dim6)  without loopcounting
                amp0_1 = amplitude[% map.index %]l0_1()
                amp0_2 = amplitude[% map.index %]l0_2()
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_1 + amp0_2, ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -1360,8 +1360,8 @@ contains
                ! sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0()
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_0 = ct_amplitude[% map.index %]_0(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_0, ampct_1(ieps,:)) &
                   & + square(amp0_1, ampct_0(ieps,:))
@@ -1369,14 +1369,14 @@ contains
             case (7)
                ! sigma(dim6 X dim6)  with loopcounting
                amp0_1 = amplitude[% map.index %]l0_1()
-               ampct_1 = ct_amplitude[% map.index %]_1(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square(amp0_1, ampct_1(ieps,:))
                end do
             end select[%
         @else %]
             amp0 = amplitude[% map.index %]l0()
-            ampct = ct_amplitude[% map.index %](logs, scale2)
+            ampct = ct_amplitude[% map.index %](scale2)
             do ieps=-1,0
                heli_amp(ieps) = square(amp0, ampct(ieps,:))
             end do[%
@@ -2972,9 +2972,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square_qp(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -2984,9 +2984,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0 + amp0_1 + amp0_2, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -2994,8 +2994,8 @@ contains
                ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:)) &
                   & + square_qp(amp0_1, ampct_0(ieps,:))
@@ -3004,8 +3004,8 @@ contains
                ! sigma(SM + dim6 X SM + dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0 + amp0_1, ampct_0(ieps,:) + ampct_1(ieps,:))
                end do
@@ -3014,9 +3014,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square_qp(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -3025,8 +3025,8 @@ contains
                ! sigma(dim6 X dim6)  without loopcounting
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_1 + amp0_2, ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -3034,8 +3034,8 @@ contains
                ! sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_1(ieps,:)) &
                   & + square_qp(amp0_1, ampct_0(ieps,:))
@@ -3043,14 +3043,14 @@ contains
             case (7)
                ! sigma(dim6 X dim6)  with loopcounting
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_1, ampct_1(ieps,:))
                end do
             end select[%
         @else %]
             amp0 = amplitude[% map.index %]l0_qp()
-            ampct = ct_amplitude[% map.index %]_qp(logs, scale2)
+            ampct = ct_amplitude[% map.index %]_qp(scale2)
             do ieps=-1,0
                heli_amp(ieps) = square_qp(amp0, ampct(ieps,:))
             end do[%
@@ -3132,9 +3132,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square_qp(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -3144,9 +3144,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0 + amp0_1 + amp0_2, ampct_0(ieps,:) + ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -3154,8 +3154,8 @@ contains
                ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_0(ieps,:) + ampct_1(ieps,:)) &
                   & + square_qp(amp0_1, ampct_0(ieps,:))
@@ -3164,8 +3164,8 @@ contains
                ! sigma(SM + dim6 X SM + dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0 + amp0_1, ampct_0(ieps,:) + ampct_1(ieps,:))
                end do
@@ -3174,9 +3174,9 @@ contains
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_1(ieps,:) + ampct_2(ieps,:)) &
                   & + square_qp(amp0_1 + amp0_2, ampct_0(ieps,:))
@@ -3185,8 +3185,8 @@ contains
                ! sigma(dim6 X dim6)  without loopcounting
                amp0_1 = amplitude[% map.index %]l0_1_qp()
                amp0_2 = amplitude[% map.index %]l0_2_qp()
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
-               ampct_2 = ct_amplitude[% map.index %]_2_qp(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
+               ampct_2 = ct_amplitude[% map.index %]_2_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_1 + amp0_2, ampct_1(ieps,:) + ampct_2(ieps,:))
                end do
@@ -3194,8 +3194,8 @@ contains
                ! sigma(SM X dim6) with loopcounting
                amp0_0 = amplitude[% map.index %]l0_0_qp()
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_0 = ct_amplitude[% map.index %]_0_qp(logs, scale2)
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_0 = ct_amplitude[% map.index %]_0_qp(scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_0, ampct_1(ieps,:)) &
                   & + square_qp(amp0_1, ampct_0(ieps,:))
@@ -3203,14 +3203,14 @@ contains
             case (7)
                ! sigma(dim6 X dim6)  with loopcounting
                amp0_1 = amplitude[% map.index %]l0_1_qp()
-               ampct_1 = ct_amplitude[% map.index %]_1_qp(logs, scale2)
+               ampct_1 = ct_amplitude[% map.index %]_1_qp(scale2)
                do ieps=-1,0
                   heli_amp(ieps) = square_qp(amp0_1, ampct_1(ieps,:))
                end do
             end select[%
         @else %]
             amp0 = amplitude[% map.index %]l0_qp()
-            ampct = ct_amplitude[% map.index %]_qp(logs, scale2)
+            ampct = ct_amplitude[% map.index %]_qp(scale2)
             do ieps=-1,0
                heli_amp(ieps) = square_qp(amp0, ampct(ieps,:))
             end do[%

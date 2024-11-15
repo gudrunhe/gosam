@@ -8,77 +8,47 @@
 contains
 
    !---#[ function amplitude:
-   function amplitude(logs,scale2) result(amp)
+   function amplitude(scale2) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[% @if extension quadruple %]_qp[% @end @if %]
-      use [% process_name asprefix=\_ %]color[% @if extension quadruple %]_qp[% @end @if %], only: TR, CF, CA, numcs
-      use [% process_name asprefix=\_ %]kinematics, only: lo_qcd_couplings, corrections_are_qcd, num_gluons
+      use [% process_name asprefix=\_ %]color[% @if extension quadruple %]_qp[% @end @if %], only: numcs
+      use [% process_name asprefix=\_ %]kinematics, only: corrections_are_qcd
       use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]config, only: &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, &
          & renorm_ehc, nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles[% @if extension quadruple %]_qp[% @end @if %], only: pi
-      use [% process_name asprefix=\_ %]counterterms, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
+      use [% process_name asprefix=\_ %]counterterms[% @if extension quadruple %]_qp[% @end @if %], only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
 @if generate_lo_diagrams %][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0, only: amp0_0 => amplitude[% 
+           %]diagramsh[%helicity%]l0_0[% @if extension quadruple %]_qp[% @end @if %], only: amp0_0 => amplitude[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1, only: amp0_1 => amplitude[% 
+           %]diagramsh[%helicity%]l0_1[% @if extension quadruple %]_qp[% @end @if %], only: amp0_1 => amplitude[% 
 @case 2%]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2, only: amp0_2 => amplitude[% 
+           %]diagramsh[%helicity%]l0_2[% @if extension quadruple %]_qp[% @end @if %], only: amp0_2 => amplitude[% 
 @end @select %][%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0_qp, only: amp0_0_qp => amplitude[% 
-@select trnco @case 1 %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1_qp, only: amp0_1_qp => amplitude[% 
-@case 2%]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2_qp, only: amp0_2_qp => amplitude[% 
-@end @select %][%
-@end @if %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0, only: amp0 => amplitude[%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_qp, only: amp0_qp => amplitude[%
-@end @if %][%
+           %]diagramsh[%helicity%]l0[% @if extension quadruple %]_qp[% @end @if %], only: amp0 => amplitude[%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams %][%
 @if generate_ym_counterterms %][%
 @if generate_lo_diagrams%][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0, only: ampdymct_0 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_0[% @if extension quadruple %]_qp[% @end @if %], only: ampdymct_0 => amplitude_Dym[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1, only: ampdymct_1 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_1[% @if extension quadruple %]_qp[% @end @if %], only: ampdymct_1 => amplitude_Dym[% 
 @case 2 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2, only: ampdymct_2 => amplitude_Dym[% 
+           %]diagramsh[%helicity%]l0_2[% @if extension quadruple %]_qp[% @end @if %], only: ampdymct_2 => amplitude_Dym[% 
 @end @select %][%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0_qp, only: ampdymct_0_qp => amplitude_Dym[% 
-@select trnco @case 1 %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1_qp, only: ampdymct_1_qp => amplitude_Dym[% 
-@case 2%]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2_qp, only: ampdymct_2_qp => amplitude_Dym[% 
-           @end @select %][%
-@end @if %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0, only: ampdymct => amplitude_Dym[%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_qp, only: ampdymct_qp => amplitude_Dym[%
-@end @if %][%
+           %]diagramsh[%helicity%]l0[% @if extension quadruple %]_qp[% @end @if %], only: ampdymct => amplitude_Dym[%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams%][%
 @end @if generate_ym_counterterms %][%
@@ -86,32 +56,17 @@ contains
 @if eval topolopy.count.ct .gt. 0 %][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_0, only: ampeftct_0 => amplitude[% 
+           %]diagramsh[%helicity%]ct_0[% @if extension quadruple %]_qp[% @end @if %], only: ampeftct_0 => amplitude[% 
            @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_1, only: ampeftct_1 => amplitude[% 
+           %]diagramsh[%helicity%]ct_1[% @if extension quadruple %]_qp[% @end @if %], only: ampeftct_1 => amplitude[% 
 @case 2%]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_2, only: ampeftct_2 => amplitude[% 
+           %]diagramsh[%helicity%]ct_2[% @if extension quadruple %]_qp[% @end @if %], only: ampeftct_2 => amplitude[% 
 @end @select %][%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_0_qp, only: ampeftct_0_qp => amplitude[% 
-@select trnco @case 1 %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_1_qp, only: ampeftct_1_qp => amplitude[% 
-@case 2%]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_2_qp, only: ampeftct_2_qp => amplitude[% 
-@end @select %][%
-@end @if %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct, only: ampeftct => amplitude[%
-@if extension quadruple %]
-      use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_qp, only: ampeftct_qp => amplitude[%
-@end @if %][%
+           %]diagramsh[%helicity%]ct[% @if extension quadruple %]_qp[% @end @if %], only: ampeftct => amplitude[%
 @end @if enable_truncation_orders %][%
 @end @if %][%
 @end @if generate_eft_counterterms %]
@@ -119,8 +74,7 @@ contains
       implicit none
       complex(ki), dimension(-1:0,numcs) :: amp
       real(ki), dimension(-1:0) ::  Deltagwf[% @if enable_truncation_orders %]_0, Deltagwf_1, Deltagwf_2[% @end @if %]
-      real(ki) :: scale2, nlo_coupling, prefac     
-      logical :: logs
+      real(ki) :: scale2, nlo_coupling, prefac
 
       ! Number of heavy quark flavours in loops.
       real(ki), parameter :: NFh = [% count quark_loop_masses %].0_ki
