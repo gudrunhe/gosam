@@ -796,7 +796,7 @@ def workflow(conf):
         golem.util.tools.expand_parameter_list(prop, conf)
 
     # debuging the diagsum property:
-    conf["debug_diagsum"] = True
+    conf["debug_diagsum"] = False
 
 
 def run_analyzer(path, conf, in_particles, out_particles):
