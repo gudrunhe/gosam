@@ -8,7 +8,7 @@
 contains
 
    !---#[ function amplitude:
-   function     amplitude(logs,scale2) result(amp)
+   function amplitude(logs,scale2) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[% @if extension quadruple %]_qp[% @end @if %]
       use [% process_name asprefix=\_ %]color[% @if extension quadruple %]_qp[% @end @if %], only: TR, CF, CA, numcs
       use [% process_name asprefix=\_ %]kinematics, only: lo_qcd_couplings, corrections_are_qcd, num_gluons
@@ -117,8 +117,8 @@ contains
 @end @if generate_eft_counterterms %]
 
       implicit none
-      complex(ki), dimension(-2:0,numcs) :: amp
-      real(ki), dimension(-2:0) ::  Deltagwf[% @if enable_truncation_orders %]_0, Deltagwf_1, Deltagwf_2[% @end @if %]
+      complex(ki), dimension(-1:0,numcs) :: amp
+      real(ki), dimension(-1:0) ::  Deltagwf[% @if enable_truncation_orders %]_0, Deltagwf_1, Deltagwf_2[% @end @if %]
       real(ki) :: scale2, nlo_coupling, prefac     
       logical :: logs
 
@@ -195,7 +195,7 @@ contains
             if (renorm_eftwilson) then
                ! account for nlo_prefactors in EFT counterterms
                prefac = 8.0_ki*pi**2/nlo_coupling
-               amp((/-2,-1,0/),:) = amp((/-2,-1,0/),:) + prefac*ampeftct_0(renorm_logs, scale2)
+               amp((/-1,0/),:) = amp((/-1,0/),:) + prefac*ampeftct_0(renorm_logs, scale2)
             end if[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
@@ -259,7 +259,7 @@ contains
             if (renorm_eftwilson) then
                ! account for nlo_prefactors in EFT counterterms
                prefac = 8.0_ki*pi**2/nlo_coupling
-               amp((/-2,-1,0/),:) = amp((/-2,-1,0/),:) + prefac*ampeftct_1(renorm_logs, scale2)
+               amp((/-1,0/),:) = amp((/-1,0/),:) + prefac*ampeftct_1(renorm_logs, scale2)
             end if[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
@@ -323,7 +323,7 @@ contains
             if (renorm_eftwilson) then
                ! account for nlo_prefactors in EFT counterterms
                prefac = 8.0_ki*pi**2/nlo_coupling
-               amp((/-2,-1,0/),:) = amp((/-2,-1,0/),:) + prefac*ampeftct_2(renorm_logs, scale2)
+               amp((/-1,0/),:) = amp((/-1,0/),:) + prefac*ampeftct_2(renorm_logs, scale2)
             end if[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
@@ -399,7 +399,7 @@ contains
             if (renorm_eftwilson) then
                ! account for nlo_prefactors in EFT counterterms
                prefac = 8.0_ki*pi**2/nlo_coupling
-               amp((/-2,-1,0/),:) = amp((/-2,-1,0/),:) + prefac*ampeftct(renorm_logs, scale2)
+               amp((/-1,0/),:) = amp((/-1,0/),:) + prefac*ampeftct(renorm_logs, scale2)
             end if[%
       @end @if %][%
       @end @if generate_eft_counterterms %]

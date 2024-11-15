@@ -19,7 +19,7 @@ contains
       use [% process_name asprefix=\_ %]color, only: TR, CA
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
-      real(ki), dimension(-2:0) :: ct
+      real(ki), dimension(-1:0) :: ct
       real(ki) :: scale2
 
       ! Number of heavy quark flavours in loops.
@@ -61,7 +61,7 @@ contains
       use [% process_name asprefix=\_ %]color, only: TR
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
-      real(ki), dimension(-2:0) :: ct
+      real(ki), dimension(-1:0) :: ct
       real(ki) :: scale2
 
       ! Number of heavy quark flavours in loops.
@@ -97,7 +97,7 @@ contains
       use [% process_name asprefix=\_ %]color, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
-      real(ki), dimension(-2:0) :: ct
+      real(ki), dimension(-1:0) :: ct
       real(ki) :: scale2
       
       ct = 0.0_ki
@@ -129,8 +129,6 @@ contains
       end if
 
       select case (eps)
-         case(-2)
-            ct = 0.0_ki
          case(-1)
             ct = -1.5_ki*CF
          case(0)
@@ -162,8 +160,6 @@ contains
       end if
 
       select case (eps)
-         case(-2)
-            ct = 0.0_ki
          case(-1)
             ct = -1.5_ki*CF
          case(0)
@@ -192,8 +188,6 @@ contains
       end if
 
       select case (eps)  
-         case(-2)
-            ct = 0.0_ki 
          case(-1)
             ct = -1.5_ki*CF
          case(0)
