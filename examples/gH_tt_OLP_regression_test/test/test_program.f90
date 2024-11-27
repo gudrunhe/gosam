@@ -223,7 +223,7 @@ contains
     integer, intent(in) :: outc, kk
     real(ki), intent(in) :: diff
 
-    write(outc,'(A31,I1,A13,E0.7)') &
+    write(outc,'(A31,I1,A13,E13.7)') &
          & "BLHA out put differs for entry ", &
          & kk, ". rel_diff = ", diff
     
@@ -271,7 +271,8 @@ contains
     
     print '(A9,I3,A1)', "    case(", ievt,")"
     do kk = 1, 6
-       print '(A15,I1,A4,E0.13,A3)', "       ref_res(", kk, ") = ", tmpres(kk), "_ki"
+       ! NOTE: E0.d specifier requires gfortran version >= 10
+       print '(A15,I1,A4,E19.13,A3)', "       ref_res(", kk, ") = ", tmpres(kk), "_ki"
     end do
     
   end subroutine generate_reference_output  

@@ -133,10 +133,10 @@ program test
              diff = 0._ki
              diff = abs(rel_diff(amp(ee,kk),ref_amp(ee,kk)))
              if(diff.gt.eps) then
-                write(6,'(A57,I1,A8,I2,A13,E0.7)') &
+                write(6,'(A57,I1,A8,I2,A13,E13.7)') &
                      & "Result 'amp' differs from reference for truncation option", &
                      & ee, ", entry ", kk, ". rel_diff = ", diff
-                write(logf,'(A57,I1,A8,I2,A13,E0.7)') &
+                write(logf,'(A57,I1,A8,I2,A13,E13.7)') &
                      & "Result 'amp' differs from reference for truncation option", &
                      & ee, ", entry ", kk, ". rel_diff = ", diff
                 success = .false.
@@ -147,10 +147,10 @@ program test
              diff = 0._ki
              diff = abs(rel_diff(irp(ee,kk),ref_irp(ee,kk)))
              if(diff.gt.eps) then
-                write(6,'(A57,I1,A8,I2,A13,E0.7)') &
+                write(6,'(A57,I1,A8,I2,A13,E13.7)') &
                      & "Result 'irp' differs from reference for truncation option", &
                      & ee, ", entry ", kk, ". rel_diff = ", diff
-                write(logf,'(A57,I1,A8,I2,A13,E0.7)') &
+                write(logf,'(A57,I1,A8,I2,A13,E13.7)') &
                      & "Result 'irp' differs from reference for truncation option", &
                      & ee, ", entry ", kk, ". rel_diff = ", diff
                 success = .false.
@@ -216,10 +216,12 @@ program test
      
      print '(A9,I3,A1)', "    case(", ievt,")"
      do ee = 0, 7
-        print '(A15,I1,A9,E0.13,A5,E0.13,A5,E0.13,A,E0.13,A6)', &
+        ! NOTE: E0.d specifier requires gfortran version >= 10
+        print '(A15,I1,A9,E19.13,A5,E19.13,A5,E19.13,A,E19.13,A6)', &
              & "       ref_amp(", ee, ",:) = (/ ", &
              & amp(ee,0), "_ki, ",amp(ee,1), "_ki, ",amp(ee,2), "_ki, ",amp(ee,3), "_ki /)"
-        print '(A15,I1,A9,E0.13,A,E0.13,A6)', &
+        ! NOTE: E0.d specifier requires gfortran version >= 10
+        print '(A15,I1,A9,E19.13,A,E19.13,A6)', &
              & "       ref_irp(", ee, ",:) = (/ ", &
              & amp(ee,2), "_ki, ",amp(ee,3), "_ki /)" 
      end do

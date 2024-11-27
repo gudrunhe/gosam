@@ -252,7 +252,7 @@ contains
     integer, intent(in) :: outc,ichan, kk
     real(ki), intent(in) :: diff
     
-    write(outc,'(A33,I1,A8,I2,A13,E0.7)') &
+    write(outc,'(A33,I1,A8,I2,A13,E13.7)') &
          & "BLHA out put differs for channel ", &
          & ichan, ", entry ", kk, ". rel_diff = ", diff
     
@@ -384,7 +384,8 @@ contains
        end select
 
        do kk = 1, 60
-          print '(A15,I1,A2,I2,A4,E0.13,A3)', "       ref_res(", ichan, ", ", kk, ") = ", tmpres(kk), "_ki"
+          ! NOTE: E0.d specifier requires gfortran version >= 10
+          print '(A15,I1,A2,I2,A4,E19.13,A3)', "       ref_res(", ichan, ", ", kk, ") = ", tmpres(kk), "_ki"
        end do
        
     end do

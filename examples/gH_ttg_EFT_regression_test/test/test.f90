@@ -140,10 +140,10 @@ program test
            diff = 0._ki
            diff = abs(rel_diff(amp(ee),ref_amp(ee)))
            if(diff.gt.eps) then
-              write(6,'(A58,I1,A13,E0.7)') &
+              write(6,'(A58,I1,A13,E13.7)') &
                    & "Result 'amp' differs from reference for truncation option ", &
                    & ee, ". rel_diff = ", diff
-              write(logf,'(A58,I1,A13,E0.7)') &
+              write(logf,'(A58,I1,A13,E13.7)') &
                    & "Result 'amp' differs from reference for truncation option ", &
                    & ee, ". rel_diff = ", diff
               success = .false.
@@ -153,10 +153,10 @@ program test
               diff = 0._ki
               diff = abs(rel_diff(ampcc(ee,kk),ref_ampcc(ee,kk)))
               if(diff.gt.eps) then
-                 write(6,'(A60,I1,A8,I2,A13,E0.7)') &
+                 write(6,'(A60,I1,A8,I2,A13,E13.7)') &
                       & "Result 'ampcc' differs from reference for truncation option ", &
                       & ee, ", entry ", kk, ". rel_diff = ", diff
-                 write(logf,'(A60,I1,A8,I2,A13,E0.7)') &
+                 write(logf,'(A60,I1,A8,I2,A13,E13.7)') &
                       & "Result 'ampcc' differs from reference for truncation option ", &
                       & ee, ", entry ", kk, ". rel_diff = ", diff
                  success = .false.
@@ -169,10 +169,10 @@ program test
                     diff = 0._ki
                     diff = abs(rel_diff(bmunu(ee,iem,mu,nu),ref_bmunu(ee,iem,mu,nu)))
                     if(diff.gt.eps) then
-                       write(6,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E0.7)') &
+                       write(6,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
                             & "Result 'bmunu' differs from reference for truncation option ", &
                             & ee, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
-                       write(logf,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E0.7)') &
+                       write(logf,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
                             & "Result 'bmunu' differs from reference for truncation option ", &
                             & ee, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
                        success = .false.
@@ -255,15 +255,18 @@ program test
      
      print '(A9,I3,A1)', "    case(", ievt,")"
      do ee = 0, 7
-        print '(A15,I1,A4,E0.13,A3)', &
+        ! NOTE: E0.d specifier requires gfortran version >= 10
+        print '(A15,I1,A4,E19.13,A3)', &
              & "       ref_amp(", ee, ") =  ", amp(ee), "_ki"
         do ii = 1, 10
-           print '(A17,I1,A1,I2,A4,E0.13,A3)', &
+           ! NOTE: E0.d specifier requires gfortran version >= 10
+           print '(A17,I1,A1,I2,A4,E19.13,A3)', &
                 & "       ref_ampcc(", ee, ",", ii, ") =  ", ampcc(ee,ii), "_ki"
         end do
         do iem = 1, 5
            do ii = 1, 4
-              print '(A17,I1,A1,I1,A1,I1,A9,E0.13,A5,E0.13,A5,E0.13,A5,E0.13,A6)', &
+              ! NOTE: E0.d specifier requires gfortran version >= 10
+              print '(A17,I1,A1,I1,A1,I1,A9,E19.13,A5,E19.13,A5,E19.13,A5,E19.13,A6)', &
                    & "       ref_bmunu(", ee, ",", iem, ",", ii, ",:) = (/ ", &
                    & bmunu(ee,iem,ii,1), "_ki, ", &
                    & bmunu(ee,iem,ii,2), "_ki, ", &
