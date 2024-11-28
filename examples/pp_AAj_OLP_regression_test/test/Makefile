@@ -1,7 +1,5 @@
-FC=gfortran
-FFLAGS=
-
 GSBASE=$(CURDIR)/..
+FC=$(shell sh $(GSBASE)/process_olp_modules/config.sh -fortcom)
 FCLAGS += $(shell $(GSBASE)/process_olp_modules/config.sh -cflags)
 LDFLAGS += $(shell $(GSBASE)/process_olp_modules/config.sh -libs)
 
