@@ -1,7 +1,6 @@
 program main
   use olp_module
   use :: iso_c_binding
-  use :: iso_varying_string
   
   implicit none
   integer, parameter :: ki = kind(1.0d0)

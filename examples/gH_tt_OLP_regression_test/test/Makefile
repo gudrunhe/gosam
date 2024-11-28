@@ -5,17 +5,13 @@ GSBASE=$(CURDIR)/..
 FCLAGS += $(shell $(GSBASE)/process_olp_modules/config.sh -cflags)
 LDFLAGS += $(shell $(GSBASE)/process_olp_modules/config.sh -libs)
 
-SRC=test_program.f90 iso_varying_string.f90
-DEPS=iso_varying_string.mod
+SRC=test_program.f90
 OBJ=${SRC:.f90=.o}
 
 run_test: $(OBJ)
 	$(FC) -o $@ $(OBJ) $(LDFLAGS)
 
-iso_varying_string.mod: iso_varying_string.f90
-	$(FC) -c iso_varying_string.f90
-
-%.o: %.f90 $(DEPS)
+%.o: %.f90
 	$(FC) $(FCLAGS) -o $@ -c $<
 
 test: test.log
