@@ -71,7 +71,7 @@ def main(parser, argv=sys.argv):
         help="Set the logging level",
     )
     parser.add_argument(
-        "-m", "--merge", help="Merge files into template", action="extend", dest="merge_files", nargs="*"
+        "-m", "--merge", help="Merge files into template", action="extend", dest="merge_files", nargs="*", default=[]
     )
     parser.add_argument("--no-color", help="Disable colored terminal output", action="store_true")
     parser.add_argument("--olp", help="Switch to OLP mode, use '--olp --help' for more options.", action="store_true")
