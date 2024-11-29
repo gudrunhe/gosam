@@ -266,7 +266,8 @@ def write_template_file(fname, defaults, format=None):
     if format is None:
         f.write("#!/usr/bin/env " + script + "\n")
     elif format == "LaTeX":
-        f.write("\\begin{description}\n")
+        f.write("\\begin{basedescript}{\\desclabelstyle{\\pushlabel}}\n")
+        f.write("\\setlength\\itemsep{30pt}\n")
     else:
         raise GolemConfigError("Unknown Format in write_template_file(..., %r)" % format)
 
@@ -308,7 +309,7 @@ def write_template_file(fname, defaults, format=None):
                 f.write("%s\n" % text)
         elif format == "LaTeX":
             f.write(
-                "\\item[\\texttt{%s}] (\\textit{%s})\n" % (str(prop).replace("_", "\\_"), stype.replace("_", "\\_"))
+                "\\item[\\colorbox{gray!30}{\\texttt{%s}}] (\\textit{%s})\n" % (str(prop).replace("_", "\\_"), stype.replace("_", "\\_"))
             )
 
         if format is None:
@@ -366,7 +367,7 @@ def write_template_file(fname, defaults, format=None):
                 value = defaults[prop]
                 f.write("%s=%s\n" % (prop, value))
     elif format == "LaTeX":
-        f.write("\\end{description}\n")
+        f.write("\\end{basedescript}\n")
     f.close()
 
 

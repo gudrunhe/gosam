@@ -1489,8 +1489,8 @@ use_MQSE = Property(
 meson_buildtype = Property(
     "meson.buildtype",
     """\
-   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option. The respective buildtypes
-   represent:
+   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option. 
+   The respective buildtypes represent:
                            Debug Symbols        Optimization level
       plain                false                plain
       debug                true                 0
@@ -1506,10 +1506,12 @@ meson_buildtype = Property(
 meson_arch = Property(
     "meson.arch",
     """\
-   CPU architecture passed to the compiler as the '-march=<arch>' option. By default, GCC generates
-   code for a generic x86-64 CPU. When using the 'native' option, GCC uses all possible instructions
-   available on the currenly used CPU. This can result in faster executing code, but may make the
-   libraries / executables unusable on other CPUs. For all possible options, see the GCC documentation.
+   CPU architecture passed to the compiler as the '-march=<arch>' option. 
+   By default, GCC generates code for a generic x86-64 CPU. When using the
+   'native' option, GCC uses all possible instructions available on the 
+   currenly used CPU. This can result in faster executing code, but may make
+   the libraries / executables unusable on other CPUs. For all possible 
+   options, see the GCC documentation.
    """,
     str,
     default="x86-64",
@@ -1517,9 +1519,10 @@ meson_arch = Property(
 
 unitary_gauge = Property(
     "unitary_gauge",
-    """
-   Use unitary gauge propagators for the massive vector bosons instead of Feynman gauge propagators.
-""",
+    """\
+   Use unitary gauge propagators for the massive vector bosons instead of 
+   Feynman gauge propagators.
+    """,
     bool,
     default=False,
 )
