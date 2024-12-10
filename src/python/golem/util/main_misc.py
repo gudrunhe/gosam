@@ -285,10 +285,12 @@ def write_template_file(fname, defaults, format=None):
                 changed = True
                 break
 
-        if prop.isExperimental() and not changed:
+        if prop.isExperimental() and not changed and not format == "LaTeX":
             continue
-        if prop.isHidden() and not changed:
+            pass
+        if prop.isHidden() and not changed and not format == "LaTeX":
             continue
+            pass
 
         if prop.getType() == str:
             stype = "text"
@@ -359,7 +361,19 @@ def write_template_file(fname, defaults, format=None):
             if prop.getDefault() is not None:
                 value = str(prop.getDefault())
                 if len(value) > 0:
-                    f.write("Default: \\verb|%s|\n" % value)
+                    f.write("Default: \\verb|%s|\n\\\\" % value)
+
+        if format == "LaTeX":
+            if prop.isHidden() is not None:
+                value = str(prop.isHidden())
+                if len(value) > 0:
+                    f.write("Hidden: \\verb|%s|\n\\\\" % value)
+
+        if format == "LaTeX":
+            if prop.isExperimental() is not None:
+                value = str(prop.isExperimental())
+                if len(value) > 0:
+                    f.write("Experimental: \\verb|%s|\n\\\\" % value)
 
     if format is None:
         for prop in defaults:
