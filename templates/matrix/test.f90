@@ -103,7 +103,7 @@ subroutine  print_parameters(scale2)
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]
 
 
-   write(*,'(A1,1x,A26)') "#", "--------- SETUP ---------"
+   write(*,'(A1,1x,A26)') "#", "--------- SETUP ----------"
    write(*,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
 
    if(convert_to_cdr) then
@@ -135,30 +135,30 @@ subroutine  print_parameters(scale2)
       end if
    end if
 
-   write(*,'(A1,1x,A25)') "#", "--- PARAMETER VALUES ---"
-   write(*,'(A1,1x,A13)') "#", "Boson masses & widths:"
-   write(*,'(A1,1x,A5,G23.16)') "#", "mZ = ", mZ
-   write(*,'(A1,1x,A5,G23.16)') "#", "mW = ", mW
-   write(*,'(A1,1x,A5,G23.16)') "#", "mH = ", mH
-   write(*,'(A1,1x,A5,G23.16)') "#", "wZ = ", wZ
-   write(*,'(A1,1x,A5,G23.16)') "#", "wW = ", wW
-   write(*,'(A1,1x,A5,G23.16)') "#", "wH = ", wH
+   write(*,'(A1,1x,A26)') "#", "---- PARAMETER VALUES ----"
+   write(*,'(A1,1x,A22)') "#", "Boson masses & widths:"
+   write(*,'(A1,1x,A7,G23.16)') "#", "mZ    =", mZ
+   write(*,'(A1,1x,A7,G23.16)') "#", "mW    =", mW
+   write(*,'(A1,1x,A7,G23.16)') "#", "mH    =", mH
+   write(*,'(A1,1x,A7,G23.16)') "#", "wZ    =", wZ
+   write(*,'(A1,1x,A7,G23.16)') "#", "wW    =", wW
+   write(*,'(A1,1x,A7,G23.16)') "#", "wH    =", wH
    write(*,'(A1,1x,A20)') "#", "Active light quarks:"
    write(*,'(A1,1x,A7,G23.16)') "#", "Nf    =", Nf
    write(*,'(A1,1x,A7,G23.16)') "#", "Nfgen =", Nfgen
-   write(*,'(A1,1x,A13)') "#", "Fermion masses & width:"
-   write(*,'(A1,1x,A7,G23.16)') "#", "mc   = ", mC
-   write(*,'(A1,1x,A7,G23.16)') "#", "mb   = ", mB
-   write(*,'(A1,1x,A7,G23.16)') "#", "mbMS = ", mBMS
-   write(*,'(A1,1x,A7,G23.16)') "#", "wb   = ", wB
-   write(*,'(A1,1x,A7,G23.16)') "#", "mt   = ", mT
-   write(*,'(A1,1x,A7,G23.16)') "#", "wt   = ", wT
-   write(*,'(A1,1x,A7,G23.16)') "#", "mtau = ", mtau
-   write(*,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
-   write(*,'(A1,1x,A25)') "#", "-------------------------"
+   write(*,'(A1,1x,A23)') "#", "Fermion masses & width:"
+   write(*,'(A1,1x,A7,G23.16)') "#", "mc    =", mC
+   write(*,'(A1,1x,A7,G23.16)') "#", "mb    =", mB
+   write(*,'(A1,1x,A7,G23.16)') "#", "mbMS  =", mBMS
+   write(*,'(A1,1x,A7,G23.16)') "#", "wb    =", wB
+   write(*,'(A1,1x,A7,G23.16)') "#", "mt    =", mT
+   write(*,'(A1,1x,A7,G23.16)') "#", "wt    =", wT
+   write(*,'(A1,1x,A7,G23.16)') "#", "mtau  =", mtau
+   write(*,'(A1,1x,A7,G23.16)') "#", "wtau  =", wtau
+   write(*,'(A1,1x,A26)') "#", "--------------------------"
    write(*,'(A1,1x,A22)') "#", "Renormalisation scale:"
-   write(*,'(A1,1x,A5,G23.16)') "#", "mu = ", sqrt(scale2)
-   write(*,'(A1,1x,A25)') "#", "-------------------------"
+   write(*,'(A1,1x,A7,G23.16)') "#", "mu    =", sqrt(scale2)
+   write(*,'(A1,1x,A26)') "#", "--------------------------"
 
 [% @else %]
    call print_parameter()
