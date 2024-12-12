@@ -51,12 +51,9 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-# TODO: merge ddtt+ggtt --> olp
-# TODO: write: tttt, tbWp_tree
-# TODO: include: eett_NLOCT, gggh_reduze, gggh
-# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu_autotools ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
+# SELECTED_TESTS = gH_tt_OLP_regression_test gH_ttg_EFT_regression_test pp_AAj_OLP_regression_test
 
-SKIP_TESTS = WpWpjj
+SKIP_TESTS = dd_ttH_EFT_regression_test
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
