@@ -5417,8 +5417,9 @@ contains
 
    
    !---#[ polarisation vectors in HELAS/MadGraph Konvention :
-   ! Note: this subroutine is a copy of wfIn_V_MG from OpenLoops2
-   ! See Appendix A.2 of KEK-91-11 (HELAS)
+   ! Note: this subroutine is a (slightly modified) copy of wfIN_V_MG from
+   ! OpenLoops2 ([1]: Eur. Phys. J. C 79 (2019) no.10, 866; arXiv:1907.13071 [hep-ph])
+   ! See Appendix A.2 of [2]: KEK-91-11 (HELAS)
   pure subroutine eps_MG(P, M, POL, EPS)
      implicit none
      real(ki), intent(in)  :: P(0:3), M
@@ -5472,7 +5473,8 @@ contains
           eb(4) =   0
           
        end if
-       
+
+       ! Note: helicities swapped compared to original publication [2]
        if (POL == -1) then
           epss = - (ea + CI * eb) * sqrt05
        else if (POL == 1) then
@@ -5498,7 +5500,7 @@ contains
      EPS(3) = epss(3)
      EPS(4) = epss(4)
 
-     ! workaround
+     ! workaround (copied from OpenLoops. Doesn't hurt to have it here.)
      EPS = EPS + small_real
      
    end subroutine eps_MG
