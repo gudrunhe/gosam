@@ -10,15 +10,15 @@ public :: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf, &
    & counterterm_yukawa_OS, counterterm_yukawa_MSbar, counterterm_mass_OS 
 
 contains
-
+ 
 !---#[ function counterterm_alphas:
    function counterterm_alphas(scale2) result(ct)
-      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp, only: NF[%
-@for quark_loop_masses %], [% $_ %][% @end @for %]
+      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp
       use [% process_name asprefix=\_ %]kinematics_qp, only: lo_qcd_couplings
       use [% process_name asprefix=\_ %]color_qp, only: TR, CA
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
       real(ki), dimension(-1:0) :: ct
       real(ki) :: scale2
 
@@ -49,18 +49,13 @@ contains
    end function counterterm_alphas
 !---#] function counterterm_alphas:
 !---#[ function counterterm_gluonwf:
-   function counterterm_gluonwf(scale2) result(ct)[%
-@for quark_loop_masses %][% 
-@if is_first %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp, only:[% 
-@end @if %] [% $_ %][% 
-@if is_last%][% @else %],[% 
-@end @if %][% 
-@end @for %]
+   function counterterm_gluonwf(scale2) result(ct)
+      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]model_qp
       use [% process_name asprefix=\_ %]kinematics_qp, only: num_gluons
       use [% process_name asprefix=\_ %]color, only: TR
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renorm_logs
       implicit none
+      complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
       real(ki), dimension(-1:0) :: ct
       real(ki) :: scale2
 
