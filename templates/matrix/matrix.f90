@@ -728,7 +728,8 @@ contains
       @else %]
       amp(1)   = 0.0_ki[%
 @end @if generate_lo_diagrams%][%
-      @if generate_nlo_virt %]
+      @if generate_nlo_virt %][%
+      @if generate_counterterms %]
       if (renormalisation.eq.3) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki[%
@@ -742,7 +743,8 @@ contains
       @end @if %]
       else 
          deltaOS = 0.0_ki
-      end if
+      end if[%
+      @end @if %]
 
       if (present(h)) then[%
          @if helsum %]
@@ -764,7 +766,8 @@ contains
       end if[%
 
          @select r2
-         @case implicit explicit off %]
+         @case implicit explicit off %][%
+      @if generate_counterterms %]
       select case (renormalisation)
       case (0)
          ! no renormalisation
@@ -783,7 +786,8 @@ contains
          print*, "In [% process_name asprefix=\_ %]matrix:"
          print*, "  invalid value for renormalisation=", renormalisation
          stop
-      end select[%
+      end select[% 
+      @end @if %][%
          @end @select r2 %][%
       @else %]
       amp(2:4) = 0.0_ki[%

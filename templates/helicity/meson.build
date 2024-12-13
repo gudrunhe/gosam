@@ -145,13 +145,14 @@ hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
                      'amplitudeh[%helicity%]_2[% @end @if %].f90', [% @if extension quadruple %],
                      'amplitudeh[%helicity%][% @if enable_truncation_orders %]_0_qp.f90',
                      'amplitudeh[%helicity%]_1_qp.f90',
-                     'amplitudeh[%helicity%]_2[% @end @if %]_qp.f90', [% @end @if %]
+                     'amplitudeh[%helicity%]_2[% @end @if %]_qp.f90', [% @end @if %][%
+                     @if generate_counterterms %]
                      'ct_amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90',
                      'ct_amplitudeh[%helicity%]_1.f90',
                      'ct_amplitudeh[%helicity%]_2[% @end @if %].f90'[% @if extension quadruple %],
                      'ct_amplitudeh[%helicity%][% @if enable_truncation_orders %]_0_qp.f90',
                      'ct_amplitudeh[%helicity%]_1_qp.f90',
-                     'ct_amplitudeh[%helicity%]_2[% @end @if %]_qp.f90' [% @end @if %]])
+                     'ct_amplitudeh[%helicity%]_2[% @end @if %]_qp.f90' [% @end @if %][% @end @if %]])
 [% process_name %]_source += files([[%
 @if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%

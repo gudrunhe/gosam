@@ -557,7 +557,7 @@ def workflow(conf):
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
     
-    generate_counterterms = conf.getBooleanProperty("renorm") and generate_nlo_virt
+    no_renorm = generate_nlo_virt and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""
     for p in ["renorm_beta",
@@ -571,7 +571,7 @@ def workflow(conf):
         "renorm_ehc",
         "MSbar_yukawa",
         "use_MQSE"]:
-        if conf.getBooleanProperty(p) and not generate_counterterms:
+        if conf.getBooleanProperty(p) and no_renorm:
             raise_warn = True
             warn_str = warn_str + ",\n" + p if warn_str else p
     if raise_warn:
@@ -659,6 +659,8 @@ def workflow(conf):
         raise GolemConfigError("The process path does not exist: %r" % path)
 
     check_dont_overwrite(conf)
+
+    generate_counterterms = conf.getBooleanProperty("renorm") and generate_nlo_virt
 
     conf["generate_lo_diagrams"] = generate_lo_diagrams
     conf["generate_nlo_virt"] = generate_nlo_virt
