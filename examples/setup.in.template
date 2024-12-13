@@ -3,7 +3,6 @@
 
 form.bin=tform
 form.tempdir=/tmp
-fc.bin=gfortran
 samurai.fcflags=`pkg-config --cflags samurai`
 samurai.ldflags= `pkg-config --libs samurai`
 golem95.fcflags=`pkg-config --cflags golem95`

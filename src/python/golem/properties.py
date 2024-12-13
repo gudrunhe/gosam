@@ -454,15 +454,6 @@ renorm = Property(
     experimental=True,
 )
 
-fc_bin = Property(
-    "fc.bin",
-    """\
-   Denotes the executable file of the Fortran90 compiler.
-   """,
-    str,
-    "gfortran",
-)
-
 python_bin = Property(
     "python.bin",
     """\
@@ -1593,7 +1584,6 @@ properties = [
     form_threads,
     form_tmp,
     form_workspace,
-    fc_bin,
     python_bin,
     version_samurai,
     r2,

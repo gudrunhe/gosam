@@ -90,7 +90,6 @@ class GolemShell(golem.util.ishell.InteractiveShell):
                 "tvormi",
             ],
             str(golem.properties.form_tmp): [" file"],
-            str(golem.properties.fc_bin): [" file", "gfortran", "g95", "ifort"],
             str(golem.properties.group_diagrams): ["true", "false"],
             str(golem.properties.extensions): [
                 "samurai",
