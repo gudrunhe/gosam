@@ -5,7 +5,8 @@
    private
 
    public :: amplitude
-contains
+contains[% 
+@if generate_counterterms %]
 
    !---#[ function amplitude:
    function amplitude(scale2) result(amp)
@@ -376,6 +377,7 @@ contains
       @end @if generate_lo_diagrams %]
 
    end function amplitude
-   !---#] function amplitude:
+   !---#] function amplitude:[% 
+@end @if generate_counterterms %]
 
 end module [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]
