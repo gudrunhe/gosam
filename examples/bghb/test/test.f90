@@ -109,8 +109,6 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use bghb_config, only: renormalisation !, &
-     !        & samurai_test, samurai_verbosity, samurai_scalar, &
-     !        & samurai_group_numerators, &
      !        & reduction_interoperation
    use bghb_model, only: mBMS, mH, sw, cw, alpha, mW, mZ
    implicit none
@@ -122,15 +120,7 @@ subroutine     setup_parameters()
    renormalisation = 1
 
    !reduction_interoperation = 0
-   !samurai_group_numerators = .true.
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 
    alpha = 1.0_ki/(4.0_ki*pi)
    mBMS = 2.937956_ki

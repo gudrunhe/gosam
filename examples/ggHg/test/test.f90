@@ -121,7 +121,6 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggHg_config, only: renormalisation, convert_to_cdr !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar
    use ggHg_model, only: GF, mH, mW, mZ, alpha, Nf, Nfgen, sqrt2, gH
    implicit none
    real(ki), parameter :: pi = 3.14159265358979323846264&

@@ -115,19 +115,11 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use gggg_config, only: renormalisation, use_sorted_sum !, &
-        !     & samurai_test, samurai_verbosity, samurai_scalar
    use gggg_model, only: Nf, Nfgen
    implicit none
 
    renormalisation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 2
 
    ! We generated the process with no fermion loops 
    Nf    = 0.0_ki

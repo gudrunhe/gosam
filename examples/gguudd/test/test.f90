@@ -97,7 +97,6 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use gguudd_config, only: renormalisation, convert_to_cdr !, &
-        !     & samurai_test, samurai_verbosity, samurai_scalar
    use gguudd_model, only: Nf, Nfgen, mT
    implicit none
 

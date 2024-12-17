@@ -3,7 +3,5 @@
 
 form.bin=tform
 form.tempdir=/tmp
-samurai.fcflags=`pkg-config --cflags samurai`
-samurai.ldflags= `pkg-config --libs samurai`
 golem95.fcflags=`pkg-config --cflags golem95`
 golem95.ldflags= `pkg-config --libs golem95`

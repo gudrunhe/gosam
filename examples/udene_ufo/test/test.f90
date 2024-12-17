@@ -112,7 +112,6 @@ end  subroutine load_reference_kinematics
 subroutine     setup_parameters()
    use udene_config, only: renormalisation, convert_to_cdr!, &
    !    & reduction_interoperation, &
-   !    & samurai_test, samurai_verbosity, samurai_scalar
    use udene_model, only: mdlWW, mdlGf, mdlaEWM1, mdlMZ, mdlaS
    implicit none
 
@@ -122,13 +121,6 @@ subroutine     setup_parameters()
 
    ! reduction_interoperation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 
    convert_to_cdr = .true.
 

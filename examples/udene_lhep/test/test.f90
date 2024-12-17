@@ -111,7 +111,6 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use udene_config, only: renormalisation !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar, &
        !      & reduction_interoperation 
    use udene_model, only: mdlMW, mdlwW, mdlSW, mdls12, mdls23, mdls13
    implicit none
@@ -126,13 +125,6 @@ subroutine     setup_parameters()
 
    renormalisation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

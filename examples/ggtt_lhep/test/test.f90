@@ -119,7 +119,6 @@ subroutine     setup_parameters()
    convert_to_cdr = .false.
 
    ! reduction_interoperation = 0
-   !samurai_group_numerators = .false.
 
    mT    = 171.2_ki
    Nf    = 5.0_ki
