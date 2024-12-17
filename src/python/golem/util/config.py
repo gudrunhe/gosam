@@ -845,36 +845,6 @@ class Ninja(Library):
         conf["ninja.ldflags"] = "-L%s -lninja" % path
 
 
-class Samurai(Library):
-    def __init__(self):
-        Library.__init__(self, "Samurai", "libsamurai")
-
-    def examine(self, hints):
-        Library.examine(self, hints)
-        if len(self.locations) > 0:
-            self.incdirs = self.findIncludeDir("gosam-contrib", "msamurai", hints, ".mod") or self.findIncludeDir(
-                "samurai", "msamurai", hints, ".mod"
-            )
-            if len(self.incdirs) == 0:
-                self.locations = []
-
-    def store(self, conf):
-        paths = self.getInstallationPath()
-        if len(paths) == 0:
-            return
-
-        path = self.undohome(paths[0])
-        incd = self.undohome(self.incdirs[0])
-
-        if "+installed.extensions" in conf:
-            conf["+installed.extensions"] += ", samurai"
-        else:
-            conf["+installed.extensions"] = "samurai"
-
-        conf["samurai.fcflags"] = "-I%s" % incd
-        conf["samurai.ldflags"] = "-L%s -lsamurai" % path
-
-
 class Golem95(Library):
     def __init__(self):
         Library.__init__(self, "Golem", "libgolem")
@@ -1031,19 +1001,16 @@ class Fortran(Program):
         if "golem95.fcflags" in conf:
             if not testCompilerLibCompatibility(p, "parametre", self.dohome(conf["golem95.fcflags"])):
                 return False
-        if "samurai.fcflags" in conf:
-            if not testCompilerLibCompatibility(p, "msamurai", self.dohome(conf["samurai.fcflags"])):
-                return False
         return True
 
     def getInstance(self, conf=None):
         if conf:
             for p in self.locations:
                 if self.checkCompatibility(p, conf):
-                    logger.info(p + " usable with installed Golem95/Samurai? ... Yes")
+                    logger.info(p + " usable with installed Golem95? ... Yes")
                     return p
                 else:
-                    logger.info(p + " usable with installed Golem95/Samurai? ... No")
+                    logger.info(p + " usable with installed Golem95? ... No")
             logger.critical("Configuration failed: Libraries not compiled with current compiler")
             sys.exit("GoSam terminated due to an error")
         elif len(self.locations) > 0:
@@ -1142,11 +1109,9 @@ class Configurator:
         def preferLibKey(x):
             if x[0] == "Golem95":
                 return "  " + x[0]
-            if x[0] == "Samurai":
-                return " " + x[0]
             return x[0]
 
-        # search first for Golem95/Samurai to find a compatible compiler
+        # search first for Golem95 to find a compatible compiler
         items.sort(key=preferLibKey)
 
         for name, required in items:

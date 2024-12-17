@@ -872,19 +872,6 @@ def process_order_file(
         # store initial symmetries infos
         start_symmetries = conf["symmetries"]
 
-        # handle case that first subprocess does not initalize samurai (LO process)
-        for subprocess in list(subprocesses.values()):
-            sp_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
-            if (
-                sp_conf["reduction_programs"]
-                and "samurai" in sp_conf["reduction_programs"]
-                and sp_conf["olp.no_loop_level"] == "False"
-            ):
-                # add samurai to first subprocess, which is called by "initgolem(true)"
-                first_subprocess = int(list(subprocesses.values())[0])
-                subprocesses_conf[first_subprocess]["initialization-auto.extensions"] = "samurai"
-                break
-
         if Pool:
             with Pool(conf.getIntegerProperty("n_jobs")) as pool:
                 sp_res = pool.map(

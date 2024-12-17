@@ -7,7 +7,6 @@ components = {
     "AVH_OneLoop": OPTIONAL,
     "QCDLoop": OPTIONAL,
     "Ninja": OPTIONAL,
-    "Samurai": OPTIONAL,
     "Golem95": OPTIONAL,
     "Fortran": OPTIONAL,
     "Form": REQUIRED,

@@ -756,7 +756,7 @@ def workflow(conf):
 
     # Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
     if "quadruple" in ext:
-        if ("ninja" not in ext) or ("samurai" in ext) or ("golem95" in ext):
+        if ("ninja" not in ext) or ("golem95" in ext):
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
                 + "in association with ninja. The gosam-contrib has to be compiled with the flag\n"
@@ -766,14 +766,6 @@ def workflow(conf):
 
     conf["reduction_interoperation"] = conf["reduction_interoperation"].upper()
     conf["reduction_interoperation_rescue"] = conf["reduction_interoperation_rescue"].upper()
-
-    if generate_nlo_virt and conf.getProperty("enable_truncation_orders"):
-        if "samurai" in ext:
-            raise GolemConfigError(
-                "The 'enable_truncation_orders' feature can only be used with ninja or golem95.\n"
-                + "Please select one of those as your redution program by setting:\n"
-                + "'reduction_programs=ninja, golem95' in the input card.\n"
-            )
 
     if "shared" in ext:
         conf["shared.fcflags"] = "-fPIC"

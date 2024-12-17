@@ -274,20 +274,6 @@ qgraf_verbatim_ct = Property(
     "",
 )
 
-version_samurai = Property(
-    "samurai.version",
-    """\
-   The version of the samurai library in use.
-
-   Example:
-   samurai.version=2.1.1
-
-   """,
-    str,
-    "2.1.1",
-    hidden=True,
-)
-
 zero = Property(
     "zero",
     """\
@@ -493,13 +479,13 @@ reduction_programs = Property(
     """\
         Specifies the reduction libraries which should be supported.
 
-        Possible values: ninja, samurai, golem95
+        Possible values: ninja golem95
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
     list,
     "ninja,golem95",
-    options=["ninja", "samurai", "golem95"],
+    options=["ninja", "golem95"],
 )
 
 polvec_method = Property(
@@ -541,7 +527,6 @@ extensions = Property(
     #                    of the files containing bad points from the MC
     #
     #   olp_daemon   --- (OLP interface only): generates a C-program providing
-    #   samurai      --- enable Samurai for the reduction
     #   ninja        --- enable Ninja for the reduction
     #   golem95      --- enable Golem95 for the reduction
     #   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
@@ -552,7 +537,7 @@ extensions = Property(
     #   example only ldflags.looptools is added to the LDFLAGS variable
     #   in the makefiles whereas the variable ldflags.qcdloop is ignored.
     #
-    #   extensions=golem95,samurai
+    #   extensions=golem95
     #
     #   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
     #   formopt      --- diagram optimization using FORM (works only with
@@ -562,7 +547,6 @@ extensions = Property(
     list,
     ",".join(DEFAULT_EXTENSIONS),
     options=[
-        "samurai",
         "golem95",
         "dred",
         "qshift",
@@ -1057,7 +1041,7 @@ config_reduction_interoperation = Property(
     """
    Default reduction library.
 
-   Possible values are: ninja, samurai, golem95
+   Possible values are: ninja, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam decide
    depending on reduction_libraries
@@ -1080,17 +1064,6 @@ config_reduction_interoperation_rescue = Property(
    """,
     str,
     -1,
-)
-
-config_samurai_scalar = Property(
-    "samurai_scalar",
-    """
-   Sets the same variable in config.f90.
-
-   See common/config.f90 for details.
-   """,
-    int,
-    2,
 )
 
 config_nlo_prefactors = Property(
@@ -1220,9 +1193,6 @@ config_PSP_chk_li1 = Property(
    PSP_chk_li1 orders smaller than the finite part, the point is
    accepted without any other check.
 
-   If Samurai is used as default reduction program, this needs to
-   be reduced to 8.
-
    The number has to be an integer.
    """,
     int,
@@ -1242,9 +1212,6 @@ config_PSP_chk_li2 = Property(
    According to the verbosity level set, such points are written to
    a file and not used when the code is interfaced to an external
    Monte Carlo using the new BLHA standards.
-
-   If Samurai is used as default reduction program, this needs to
-   be reduced to 6.
    """,
     int,
     7,
@@ -1560,7 +1527,6 @@ properties = [
     config_renorm_ehc,
     config_reduction_interoperation,
     config_reduction_interoperation_rescue,
-    config_samurai_scalar,
     config_nlo_prefactors,
     config_PSP_check,
     config_PSP_rescue,
@@ -1585,7 +1551,6 @@ properties = [
     form_tmp,
     form_workspace,
     python_bin,
-    version_samurai,
     r2,
     symmetries,
     crossings,
@@ -1606,7 +1571,7 @@ properties = [
     unitary_gauge,
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja"]
+REDUCTION_EXTENSIONS = ["golem95", "ninja"]
 
 
 def getExtensions(conf):
