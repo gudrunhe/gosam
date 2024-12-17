@@ -32,9 +32,6 @@
    public :: cond[%
 @if extension ninja %]
    public :: cond_t[%
-@end @if %][%
-@if extension samurai %]
-   public :: cmplx_sam, cmplx_ki[%
 @end @if %]
 contains
    pure function metric_tensor(mu,nu) result(d)
@@ -254,29 +251,7 @@ contains
       %]&
 !         & ",0,complex(", real(values(0)), ",", aimag(values(0)), "))"
 !   end subroutine inspect_nlo_diagram
-[%
-@if extension samurai %]
-   !---#[ function cmplx_sam:
-   pure elemental function cmplx_sam(z) result(res)
-      use precision, only: ki_sam => ki
-      implicit none
-      complex(ki), intent(in) :: z
-      complex(ki_sam) :: res
 
-      res = cmplx(real(z, ki_sam), aimag(z), ki_sam)
-   end function cmplx_sam
-   !---#] function cmplx_sam:
-   !---#[ function cmplx_ki:
-   pure elemental function cmplx_ki(z) result(res)
-      use precision, only: ki_sam => ki
-      implicit none
-      complex(ki_sam), intent(in) :: z
-      complex(ki) :: res
-
-      res = cmplx(real(z, ki), aimag(z), ki)
-   end function cmplx_ki
-   !---#] function cmplx_ki:[%
-@end @if %]
    !---#[ function square :
    pure function square_0l_0l(color_vector) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC

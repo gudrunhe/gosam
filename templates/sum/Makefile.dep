@@ -71,12 +71,6 @@ d[%$_%]l1d_qp.[%O%]: abbrevd[%$_%]_qp.[%O%][%
    @end @if extension quadruple %][%
 	   @select r2
    	@case implicit explicit off %][%
-      	@if extension samurai %]
-samurai.[%O%]: [%
-         	@for elements topolopy.keep.virt %] \
-	d[%$_%]l1.[%O%][%
-	         @end @for %][%
-   	   @end @if extension samurai %][%
 
       	@if extension golem95 %]
 golem95.[%O%]: [%
@@ -115,8 +109,6 @@ d[%$_%]l121_qp.[%O%]: abbrevd[%$_%]_qp.[%O%][%
 amplitude.[%O%]: globals.[%O%][%
 	   @select r2
 		@case implicit explicit off %][%
-	      @if extension samurai %] samurai.[%O%][%
-   	   @end @if %][%
 	      @if extension golem95 %] golem95.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja.[%O%][%
@@ -145,8 +137,6 @@ amplitude.[%O%]: globals.[%O%][%
 amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
 	   @select r2
 		@case implicit explicit off %][%
-	      @if extension samurai %] samurai_qp.[%O%][%
-   	   @end @if %][%
 	      @if extension golem95 %] golem95_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_qp.[%O%][%
@@ -181,9 +171,6 @@ amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp
    @end @if generate_lo_diagrams %][%
 	@select r2
 		@case implicit explicit off %][%
-			@if extension samurai %]
-[% process_name asprefix=\_ %]samurai.mod: samurai.[%O%][%
-			@end @if extension samurai %][%
 
 		@if extension golem95 %]
 [% process_name asprefix=\_ %]golem95.mod: golem95.[%O%][%

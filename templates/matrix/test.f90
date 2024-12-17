@@ -112,9 +112,7 @@ subroutine  print_parameters(scale2)
       write(*,'(A1,1x,A9,A4)') "#", "scheme = ", "DRED"
    end if
 
-   if(reduction_interoperation.eq.0) then
-      write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "SAMURAI"
-   else if(reduction_interoperation.eq.1) then
+   if(reduction_interoperation.eq.1) then
       write(*,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
       write(*,'(A1,1x,A15,A5)') "#", "reduction with ", "NINJA"
@@ -124,9 +122,7 @@ subroutine  print_parameters(scale2)
 
    if (reduction_interoperation_rescue.ne.reduction_interoperation.and.&
     & PSP_check.and.PSP_rescue) then
-      if(reduction_interoperation_rescue.eq.0) then
-         write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "SAMURAI"
-      else if(reduction_interoperation_rescue.eq.1) then
+      if(reduction_interoperation_rescue.eq.1) then
          write(*,'(A1,1x,A12,A7)') "#", "rescue with ", "GOLEM95"
       else if(reduction_interoperation_rescue.eq.2) then
          write(*,'(A1,1x,A12,A5)') "#", "rescue with ", "NINJA"

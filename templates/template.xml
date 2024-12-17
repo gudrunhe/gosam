@@ -330,12 +330,6 @@
 				<only if-internal="REQUIRE_FR5"/>
 				<only if-option="group" value="false"/>
 			</file>
-			<file src="samurai.f90" dest="samuraih%d.f90" arguments="helicity"
-				class="Integrals">
-				<only if-extension="samurai" />
-				<except if-option="r2" value="only" />
-				<filter name="Fortran90" width="80"/>
-			</file>
 			<file src="ninja.f90" dest="ninjah%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="ninja" />
@@ -468,11 +462,6 @@
 		<file src="globals.f90" class="Kinematics"/>
 		<file src="../form.set" dest="form.set" class="Kinematics"/>
 		<file src="amplitude.f90" class="Integrals" />
-		<file src="samurai.f90"	class="Integrals" >
-		  <only if-extension="samurai" />
-		  <except if-option="r2" value="only" />
-		  <filter name="Fortran90" width="80"/>
-		</file>
 		<file src="golem95.f90"	class="Integrals">
 				<only if-extension="golem95" />
 				<except if-option="r2" value="only" />

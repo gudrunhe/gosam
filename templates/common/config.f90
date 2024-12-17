@@ -16,7 +16,6 @@
 
    ! Options to control the interoperation between different
    ! Reduction libraries:
-   integer, parameter :: SAMURAI   = 0
    integer, parameter :: GOLEM95   = 1
    integer, parameter :: NINJA     = 2
    integer, parameter :: QUADNINJA = 4 ! experimental
@@ -26,12 +25,9 @@
    @case -1 %][%
       @if extension ninja %]NINJA[%
       @else %][%
-         @if extension samurai %]SAMURAI[%
-         @else %][%
             @if extension golem95 %]GOLEM95[%
              @else%]-1[%
             @end @if %][%
-         @end @if %][%
       @end @if %][%
    @else %][% reduction_interoperation %][%
    @end @select %]
@@ -48,12 +44,9 @@
            @case -1 %][%
               @if extension ninja %]NINJA[%
               @else %][%
-                 @if extension samurai %]SAMURAI[%
-                 @else %][%
                     @if extension golem95 %]GOLEM95[%
                      @else%]-1[%
                     @end @if %][%
-                 @end @if %][%
               @end @if %][%
            @else %]-1[%
            @end @select %][%
@@ -97,19 +90,6 @@
         olp.include_helicity_average default=true %].
    logical :: include_symmetry_factor = .[%
         olp.include_symmetry_factor default=true %].
-
-   [% @if extension samurai %]
-   ! Parameters for the initialization of samurai
-   ! they can also be set using the subroutine parse in model.f90
-   integer :: samurai_scalar = [% samurai_scalar %]
-   integer :: samurai_verbosity = 0
-   integer :: samurai_test = 3
-   ! The following parameter sets the 'istop' argument in all samurai
-   ! calls. Unless you really know what you do, you should stick to the
-   ! default value.
-   integer :: samurai_istop = 0
-   logical :: samurai_group_numerators = .true.[%
-      @end @if extension samurai %]
 
    [% @if extension ninja %]
    integer :: ninja_test = 0

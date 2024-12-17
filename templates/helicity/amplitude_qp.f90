@@ -9,10 +9,6 @@
    @select r2
    @case implicit explicit off %]
    use [% process_name asprefix=\_ %]groups[%
-      @if extension samurai %]
-   use precision, only: ki_sam => ki
-   use [% process_name asprefix=\_ %]samuraih[% helicity %][%
-      @end @if %][%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
    use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %][%
@@ -85,8 +81,7 @@ contains
 @if generate_lo_diagrams %]opt_amp0,[%
 @else %]the_col0,[%
 @end @if%]opt_perm)
-      use [% process_name asprefix=\_
-         %]config, only: include_eps_terms, include_eps2_terms, &
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: include_eps_terms, include_eps2_terms, &
       & logfile, debug_nlo_diagrams
       use [% process_name asprefix=\_
          %]globalsl1_qp, only:[%
@@ -301,15 +296,6 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    use [% process_name asprefix=\_ %]golem95[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
        %], only: reconstruct_golem95 => reconstruct_group
    use [% process_name asprefix=\_ %]groups, only: contract_golem95[%
-         @if extension samurai %], &
-      & global_coeffs => coeffs_group[% grp %], &
-      & reduce_numetens => reduce_numetens_group[% grp %][%
-         @end @if %][%
-      @end @if %][%
-      @if extension samurai %]
-   use [% process_name asprefix=\_ %]samuraih[% helicity
-      %], only: samurai_reduce => reduce_group[% grp %]
-   use options, only: samurai_out => iout[%
       @end @if %][%
       @if extension ninja %]
    use [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity
@@ -326,30 +312,16 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension golem95 %]
    type(tensrec_info_group[% grp %]), target :: coeffs
    type(form_factor) :: gres[%
-      @end @if %][%
-      @if extension samurai %]
-   complex(ki_sam), dimension(-2:0) :: tot
-   complex(ki_sam) :: totr
-   logical :: samurai_ok[% @else
-     %][% @if extension ninja %]
+      @end @if %][% @if extension ninja %]
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr[%
-      @end @if %][% @end @if %]
+      @end @if %]
 
    if(debug_nlo_diagrams) then
       write(logfile,*) "<diagram-group index='[% grp %]'>"
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)[%
-      @if extension samurai %]
-   case(0) ! use Samurai only
-      call samurai_reduce(real(scale2, ki_sam), tot, totr, ok)[%
-         @if generate_lo_diagrams %]
-      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-         @else %]
-      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-         @end @if %][%
-      @end @if %][%
       @if extension golem95 %]
    case(1) ! use Golem95 only
       call reconstruct_golem95(coeffs)
@@ -374,80 +346,11 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
          @else %]
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
          @end @if %][%
-      @end @if %][%
-      @if extension samurai %][%
-         @if extension golem95 %]
-   ! Modes which require Golem95 and Samurai
-   case(20) ! Try Samurai first, use Golem95 is samurai fails
-      call samurai_reduce(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-            @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-            @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-            @end @if %]
-         ok = .true.
-      else
-         call reconstruct_golem95(coeffs)
-         mu2_scale_par = real(scale2, ki_gol)
-         gres = contract_golem95(coeffs)[%
-            @if generate_lo_diagrams %]
-         samplitude(-2) = 2.0_ki * real(gres%A, ki)
-         samplitude(-1) = 2.0_ki * real(gres%B, ki)
-         samplitude( 0) = 2.0_ki * real(gres%C, ki)[%
-            @else %]
-         samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-         samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-         samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
-            @end @if %]
-         ok = .true.
-      end if
-   case(30) ! Tensorial Reconstruction + Samurai on numetens
-      call reconstruct_golem95(coeffs)
-      global_coeffs => coeffs
-      call reduce_numetens(real(scale2, ki_sam), tot, totr, ok)[%
-            @if generate_lo_diagrams %]
-      samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-            @else %]
-      samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-            @end @if %]
-      nullify(global_coeffs)
-   case(40) ! Tensorial Reconstruction + Samurai on numetens
-           ! + Golem95 on failure
-      call reconstruct_golem95(coeffs)
-      global_coeffs => coeffs
-      call reduce_numetens(real(scale2, ki_sam), tot, totr, samurai_ok)
-      if(samurai_ok) then[%
-            @if generate_lo_diagrams %]
-         samplitude(:) = 2.0_ki * real(tot(:), ki)[%
-            @else %]
-         samplitude(:) = cmplx(real(tot(:), ki_sam), aimag(tot(:)), ki)[%
-            @end @if %]
-         ok = .true.
-      else
-         mu2_scale_par = real(scale2, ki_gol)
-         gres = contract_golem95(coeffs)[%
-            @if generate_lo_diagrams %]
-         samplitude(-2) = 2.0_ki * real(gres%A, ki)
-         samplitude(-1) = 2.0_ki * real(gres%B, ki)
-         samplitude( 0) = 2.0_ki * real(gres%C, ki)[%
-            @else %]
-         samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-         samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-         samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)[%
-            @end @if %]
-         ok = .true.
-      end if[%
-         @end @if %][%
       @end @if %]
    case default
       print*, "Your current choice of reduction_interoperation is", &
             & reduction_interoperation
       print*, "This choice is not valid for your current setup."
-      print*, "* This code was generated [%
-      @if extension samurai %]with[%
-      @else %]without[%
-      @end @if %] support for Samurai."
       print*, "* This code was generated [%
       @if extension ninja %]with[%
       @else %]without[%

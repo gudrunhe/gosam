@@ -43,8 +43,6 @@ generated_sources += [[%
 @case implicit explicit off %][%
    @if extension golem95 %] 'golem95.f90',[%
    @end @if %][%
-   @if extension samurai %] 'samurai.f90',[%
-   @end @if %][%
    @if extension ninja %] 'ninja.f90',[%
    @end @if %][%
 @end @select %]])

@@ -368,9 +368,7 @@ means, that the rows and columns labeled by $l_1,l_2,\ldots$ should be
 removed from $S$ (likewise $r_{l_1}, r_{l_2}, \ldots$ are removed from the
 list of propagators) and $\mathcal{N}(q)$ has to be replaced by
 $\mathcal{N}(q^\prime)$.
-The maximum effective rank of a group is the rank that has to be passed
-to \textsc{Samurai} if the whole group is reduced at once; this number
-is calculated as
+The maximum effective rank of a group is calculated as
 \begin{equation}
 \max_{\text{diagrams}}\left\{(\text{rank of diagram})+
 (\text{number of pinches})\right\}.
@@ -649,12 +647,7 @@ FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd}.
 the code uses an implementation of the Laurent series expansion 
 method~\cite{Mastrolia:2012bu}
 from the library Ninja~\cite{Peraro:2014cba}.[% @end @if %]
-[% @if extension samurai %]For the reduction of the tensor integrals
-the code uses the implementation of the OPP
-method~\cite{Ossola:2006us,Ossola:2007bb}
-and extensions thereof from the package
-SAMURAI~\cite{Mastrolia:2010nb}.[%
-@end @if %][% @if extension golem95 %]For
+[% @if extension golem95 %]For
 the reduction of the tensor integrals, the code uses the 
 package GOLEM95~\cite{Guillet:2013msa,Binoth:2008uq,Cullen:2011kv}.
 The tensor coefficients are
@@ -733,28 +726,6 @@ the evaluation of the scalar integrals:
    [Erratum-ibid.\  {\bf 1211} (2012) 128]
   [\href{http://arxiv.org/abs/1203.0291}{arXiv:1203.0291 [hep-ph]}].
   %%CITATION = ARXIV:1203.0291;%%[%
-@end @if %][%
-@if extension samurai %]
-%\cite{Ossola:2006us}
-\bibitem{Ossola:2006us}
-  G.~Ossola, C.~G.~Papadopoulos, R.~Pittau,
-  ``Reducing full one-loop amplitudes to scalar integrals at the
-    integrand level,''
-  Nucl.\ Phys.\  {\bf B763 } (2007)  147-169.
-  [hep-ph/0609007].
-%\cite{Ossola:2007bb}
-\bibitem{Ossola:2007bb}
-  G.~Ossola, C.~G.~Papadopoulos, R.~Pittau,
-  ``Numerical evaluation of six-photon amplitudes,''
-  JHEP {\bf 0707 } (2007)  085.
-  [\href{http://arxiv.org/abs/0704.1271}{arXiv:0704.1271 [hep-ph]}].
-%\cite{Mastrolia:2010nb}
-\bibitem{Mastrolia:2010nb}
-  P.~Mastrolia, G.~Ossola, T.~Reiter and F.~Tramontano,
-  ``Scattering AMplitudes from Unitarity-based Reduction Algorithm at the Integrand-level,''
-  JHEP {\bf 1008} (2010) 080
-  [\href{http://arxiv.org/abs/1006.0710}{arXiv:1006.0710 [hep-ph]}].
-  %%CITATION = ARXIV:1006.0710;%%[%
 @end @if %]
 %\cite{Guillet:2013msa}
 \bibitem{Guillet:2013msa}

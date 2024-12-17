@@ -1,8 +1,5 @@
 [% ' vim: syntax=golem '
-%]module     [% process_name asprefix=\_ %]matrix[%
-@if extension samurai %]
-   use msamurai, only: initsamurai, exitsamurai[%
-@end @if %]
+%]module     [% process_name asprefix=\_ %]matrix
    use [% process_name asprefix=\_ %]util, only: square[%
 @if extension quadruple %]
    use [% process_name asprefix=\_ %]util_qp, only: square_qp => square[%
@@ -15,10 +12,7 @@
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_kfactor, reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
      & reduction_interoperation_rescue, convert_to_cdr, &
-     & EFTcount[%
-@if extension samurai %], &
-     & samurai_verbosity, samurai_test, samurai_scalar[%
-@end @if %]
+     & EFTcount
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
@@ -289,11 +283,7 @@ contains
 
 @select r2
 @case implicit explicit off %]
-      if (init_third_party) then[%
-   @if extension samurai %]
-         call initsamurai('diag',samurai_scalar,&
-         &                samurai_verbosity,samurai_test)[%
-   @end @if %]
+      if (init_third_party) then
       ! call our banner
       call banner()
       if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
@@ -361,9 +351,6 @@ contains
 @select r2
 @case implicit explicit off %]
       if (exit_third_party) then[%
-   @if extension samurai %]
-         call exitsamurai()[%
-   @end @if %][%
    @if extension golem95 %]
          call tear_down_golem95()[%
    @end @if %]

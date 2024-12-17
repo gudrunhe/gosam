@@ -12,9 +12,6 @@ project('GoSam_Process_[% process_name %]',
 dependencies = []
 dependencies += dependency('avh_olo')
 [% @if extension golem95 %]dependencies += dependency('golem95')[% @end @if %]
-[% @if extension samurai %]dependencies += dependency('samurai')
-dependencies += dependency('ff')
-dependencies += dependency('qcdloop')[% @end @if %]
 [% @if extension ninja %]dependencies += dependency('ninja')[% @end @if %]
 dep_ldflags = ''
 dep_cflags = ''

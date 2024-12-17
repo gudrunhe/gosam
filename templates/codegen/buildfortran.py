@@ -237,9 +237,6 @@ f90file.write('   implicit none\n')
 f90file.write('   private\n')
 f90file.write('\n')
 f90file.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')[%
-@if extension samurai %]
-f90file.write('   public :: numerator_samurai\n')[%
-@end @if %][%
 @if extension golem95 %]
 f90file.write('   public :: numerator_golem95\n')[%
 @end @if %][%
@@ -271,53 +268,6 @@ f90file.write('   end  function brack_1\n')
 f90file.write('\n')
 f90file.write('!---#] function brack_1:\n')
 f90file.write('!---#[ numerator interfaces:\n')[%
-@if extension samurai %]
-f90file.write('   !------#[ function numerator_samurai:\n')
-f90file.write('   function numerator_samurai(ncut,Q_ext, mu2_ext) result(numerator)\n')
-f90file.write('      use precision, only: ki_sam => ki\n')
-f90file.write('!      use [% process_name asprefix=\_ %]groups, only: &\n')
-f90file.write('!           & sign => diagram'+diag+'_sign, shift => diagram'+diag+'_shift\n')
-f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow\n')
-f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
-f90file.write('      implicit none\n')
-f90file.write('\n')
-f90file.write('      integer, intent(in) :: ncut\n')
-f90file.write('      complex(ki_sam), dimension(4), intent(in) :: Q_ext\n')[%
-@if version_newer samurai.version 2.0 %]
-f90file.write('      complex(ki_sam), intent(in) :: mu2_ext\n')[%
-@else %]
-f90file.write('      real(ki_sam), intent(in) :: mu2_ext\n')[%
-@end @if %]
-f90file.write('      complex(ki_sam) :: numerator\n')
-f90file.write('      complex(ki) :: d'+diag+'\n')
-f90file.write('\n')
-f90file.write('      ! The Q that goes into the diagram\n')
-f90file.write('      complex(ki), dimension(4) :: Q\n')
-f90file.write('      complex(ki) :: mu2\n')
-if qshift=='0':
-    f90file.write('      Q(1)  =cmplx(real('+qsign+'Q_ext(4),  ki_sam),aimag('+qsign+'Q_ext(4)),  ki)\n')
-    f90file.write('      Q(2:4)=cmplx(real('+qsign+'Q_ext(1:3),ki_sam),aimag('+qsign+'Q_ext(1:3)),ki)\n')
-else:
-    f90file.write('      real(ki), dimension(0:3) :: qshift\n')
-    f90file.write('\n')
-    f90file.write('      qshift = '+qshift+'\n')
-    f90file.write('      Q(1)  =cmplx(real('+qsign+'Q_ext(4)  -qshift(0),  ki_sam),aimag('+qsign+'Q_ext(4)),  ki)\n')
-    f90file.write('      Q(2:4)=cmplx(real('+qsign+'Q_ext(1:3)-qshift(1:3),ki_sam),aimag('+qsign+'Q_ext(1:3)),ki)\n')[%
-@select r2
-@case implicit %][%
-  @if version_newer samurai.version 2.0 %]
-f90file.write('      mu2    = cmplx(real(mu2_ext, ki), aimag(mu2_ext), ki)\n')[%
-  @else %]
-f90file.write('      mu2    = cmplx(real(mu2_ext, ki), 0.0_ki, ki)\n')[%
-  @end @if %][%
-@end @select %]
-f90file.write('      d'+diag+' = 0.0_ki\n')
-f90file.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
-f90file.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_sam)\n')
-f90file.write('   end function numerator_samurai\n')
-f90file.write('   !------#] function numerator_samurai:\n')[%
-@end @if %][%
 @if extension golem95 %]
 f90file.write('   !------#[ function numerator_golem95:\n')
 f90file.write('   function numerator_golem95(Q_ext, mu2_ext) result(numerator)\n')
@@ -407,9 +357,6 @@ f90file_qp.write('   implicit none\n')
 f90file_qp.write('   private\n')
 f90file_qp.write('\n')
 f90file_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')[%
-@if extension samurai %]
-f90file_qp.write('   public :: numerator_samurai\n')[%
-@end @if %][%
 @if extension golem95 %]
 f90file_qp.write('   public :: numerator_golem95\n')[%
 @end @if %][%
@@ -441,53 +388,6 @@ f90file_qp.write('   end  function brack_1\n')
 f90file_qp.write('\n')
 f90file_qp.write('!---#] function brack_1:\n')
 f90file_qp.write('!---#[ numerator interfaces:\n')[%
-@if extension samurai %]
-f90file_qp.write('   !------#[ function numerator_samurai:\n')
-f90file_qp.write('   function numerator_samurai(ncut,Q_ext, mu2_ext) result(numerator)\n')
-f90file_qp.write('      use precision, only: ki_sam => ki\n')
-f90file_qp.write('!      use [% process_name asprefix=\_ %]groups_qp, only: &\n')
-f90file_qp.write('!           & sign => diagram'+diag+'_sign, shift => diagram'+diag+'_shift\n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow\n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp\n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
-f90file_qp.write('      implicit none\n')
-f90file_qp.write('\n')
-f90file_qp.write('      integer, intent(in) :: ncut\n')
-f90file_qp.write('      complex(ki_sam), dimension(4), intent(in) :: Q_ext\n')[%
-@if version_newer samurai.version 2.0 %]
-f90file_qp.write('      complex(ki_sam), intent(in) :: mu2_ext\n')[%
-@else %]
-f90file_qp.write('      real(ki_sam), intent(in) :: mu2_ext\n')[%
-@end @if %]
-f90file_qp.write('      complex(ki_sam) :: numerator\n')
-f90file_qp.write('      complex(ki) :: d'+diag+'\n')
-f90file_qp.write('\n')
-f90file_qp.write('      ! The Q that goes into the diagram\n')
-f90file_qp.write('      complex(ki), dimension(4) :: Q\n')
-f90file_qp.write('      complex(ki) :: mu2\n')
-if qshift=='0':
-    f90file_qp.write('      Q(1)  =cmplx(real('+qsign+'Q_ext(4),  ki_sam),aimag('+qsign+'Q_ext(4)),  ki)\n')
-    f90file_qp.write('      Q(2:4)=cmplx(real('+qsign+'Q_ext(1:3),ki_sam),aimag('+qsign+'Q_ext(1:3)),ki)\n')
-else:
-    f90file_qp.write('      real(ki), dimension(0:3) :: qshift\n')
-    f90file_qp.write('\n')
-    f90file_qp.write('      qshift = '+qshift+'\n')
-    f90file_qp.write('      Q(1)  =cmplx(real('+qsign+'Q_ext(4)  -qshift(0),  ki_sam),aimag('+qsign+'Q_ext(4)),  ki)\n')
-    f90file_qp.write('      Q(2:4)=cmplx(real('+qsign+'Q_ext(1:3)-qshift(1:3),ki_sam),aimag('+qsign+'Q_ext(1:3)),ki)\n')[%
-@select r2
-@case implicit %][%
-  @if version_newer samurai.version 2.0 %]
-f90file_qp.write('      mu2    = cmplx(real(mu2_ext, ki), aimag(mu2_ext), ki)\n')[%
-  @else %]
-f90file_qp.write('      mu2    = cmplx(real(mu2_ext, ki), 0.0_ki, ki)\n')[%
-  @end @if %][%
-@end @select %]
-f90file_qp.write('      d'+diag+' = 0.0_ki\n')
-f90file_qp.write('      d'+diag+' = (cond(epspow.eq.0,brack_1,Q,mu2))\n')
-f90file_qp.write('      numerator = cmplx(real(d'+diag+', ki), aimag(d'+diag+'), ki_sam)\n')
-f90file_qp.write('   end function numerator_samurai\n')
-f90file_qp.write('   !------#] function numerator_samurai:\n')[%
-@end @if %][%
 @if extension golem95 %]
 f90file_qp.write('   !------#[ function numerator_golem95:\n')
 f90file_qp.write('   function numerator_golem95(Q_ext, mu2_ext) result(numerator)\n')
