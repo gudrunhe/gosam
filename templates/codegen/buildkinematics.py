@@ -145,7 +145,6 @@ with open("kinematics.f90", "w") as outfile:
     outfile.write(r"""module     [% process_name asprefix=\_ %]kinematics
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
-   use [% process_name asprefix=\_ %]scalar_cache
    implicit none
    save
 
@@ -406,9 +405,8 @@ contains
       complex(ki) :: N[%index%]
       logical :: flag[%index%][%
 @end @for %]
-      
-      call invalidate_cache()[%
-@for particles %]
+
+[% @for particles %]
       k[%index%] = vecs([%index%],:)[%
 @end @for particles %][%
 @for instructions %][%

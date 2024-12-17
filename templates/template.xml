@@ -242,7 +242,6 @@
 			<except if-internal="OLP_MODE"/>
 		</file>
 		<file src="groups.f90" class="Integrals"/>
-		<file src="scalar_cache.f90" class="Integrals"/>
 		<file src="globalsl1.f90" class="Kinematics"/>
 		<file src="custompropagator.f90" class="Model">
 			<only if-internal="CUSTOM_SPIN2_PROP"/>
