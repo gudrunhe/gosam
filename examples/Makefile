@@ -51,7 +51,7 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu_autotools ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
+# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
 
 SKIP_TESTS = WpWpjj
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
