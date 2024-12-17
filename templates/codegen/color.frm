@@ -27,7 +27,11 @@ CFunctions c;
 					Global T`I'T`J' = 
 					#Do c1=1,`NUMCS'
 						#Do c2=1,`NUMCS'
+[%@select abbrev.color @case none %]
+							+ c(`c1',`c2') * propcolor(`I', `J')
+[%@case form%]
 							+ T(`I',`J')*c(`c1',`c2') * propcolor(`I', `J')
+[%@end @select%]
 						#EndDo
 					#EndDo
 					;
