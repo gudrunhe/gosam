@@ -440,15 +440,6 @@ renorm = Property(
     experimental=True,
 )
 
-python_bin = Property(
-    "python.bin",
-    """\
-   Denotes the executable file of Python
-   """,
-    str,
-    "python3",
-)
-
 formopt_level = Property(
     "formopt.level",
     """\
@@ -1550,7 +1541,6 @@ properties = [
     form_threads,
     form_tmp,
     form_workspace,
-    python_bin,
     r2,
     symmetries,
     crossings,
