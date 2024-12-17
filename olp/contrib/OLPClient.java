@@ -271,8 +271,6 @@ public class OLPClient
 		OLPClient client = new OLPClient();
 		System.out.println(client.who());
 
-		client.setOption("samurai_scalar", 2);
-
 		momenta[0] = 7.0;
 		momenta[3] = 7.0;
 		momenta[5] = 7.0;

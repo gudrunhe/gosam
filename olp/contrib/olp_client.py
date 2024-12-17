@@ -107,7 +107,6 @@ if __name__ == "__main__":
 
 	olp = OLPClient()
 	print(olp.who())
-	olp["samurai_scalar"] = 2
 	res = olp.EvalSubProcess(0,
 			[7.0,  0.0,  0.0,  7.0, 0.0,
 			 7.0,  0.0,  0.0, -7.0, 0.0,

@@ -33,11 +33,7 @@ int main(int argc, char** argv)
 		printf("Connected with %s\n", name);
 		if(name != NULL) free(name);
 
-		int stat = client.setOption("samurai_scalar", 2);
-		if (stat != 200)
-			printf("Could not set samurai_scalar\n");
-		else
-			client.restart();
+		client.restart();
 
 		client(0, 4, mom, 2.7, 1, par, r);
 

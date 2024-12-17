@@ -34,12 +34,7 @@ outdict=translatefile(options.input,config)
 # Write model.f90 file
 modelfile.write('module     model\n')
 modelfile.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile.write('   use config, only: ki')[$
-@if extension samurai $]
-modelfile.write(', &\n')
-modelfile.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
-modelfile.write('   & samurai_group_numerators, samurai_istop')[$
-@end @if $]
+modelfile.write('   use config, only: ki')
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, EFTcount, reduction_interoperation, &\n')
 modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
@@ -51,11 +46,7 @@ modelfile.write(', ewchoice')[$
 @end @select$]
 modelfile.write('\n   implicit none\n')
 modelfile.write('\n')
-modelfile.write('   private :: ki\n')[$
-@if extension samurai $]
-modelfile.write('   private :: samurai_scalar, samurai_verbosity, samurai_test\n')
-modelfile.write('   private :: samurai_group_numerators, samurai_istop\n')[$
-@end @if $]
+modelfile.write('   private :: ki\n')
 modelfile.write('   private :: renormalisation, EFTcount, reduction_interoperation\n')
 modelfile.write('   private :: reduction_interoperation_rescue\n')
 modelfile.write('   private :: deltaOS, nlo_prefactors\n')
@@ -99,12 +90,8 @@ modelfile.write('   integer, parameter, private :: line_length = [$buffer_length
 #   ' what is our longest extra name ?
 #   ' 0   0    1    1    2    2
 #   ' 1---5----0----5----0----5
-#   ' samurai_group_numerators
 #   ' reduction_interoperation
-#   ' samurai_verbatim
 #   ' renormalisation
-#   ' samurai_scalar
-#   ' samurai_test
 #   '
 #   ' ==> the longest is 24
 #
@@ -174,9 +161,7 @@ modelfile.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"CDR\"
 modelfile.write("   else\n")
 modelfile.write("      write(unit,'(A1,1x,A9,A4)') \"#\", \"scheme = \", \"DRED\"\n")
 modelfile.write("   end if\n")
-modelfile.write("   if(reduction_interoperation.eq.0) then\n")
-modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"SAMURAI\"\n")
-modelfile.write("   else if(reduction_interoperation.eq.1) then\n")
+modelfile.write("   if(reduction_interoperation.eq.1) then\n")
 modelfile.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"GOLEM95\"\n")
 modelfile.write("   else if(reduction_interoperation.eq.2) then\n")
 modelfile.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"NINJA\"\n")
@@ -184,9 +169,7 @@ modelfile.write("   else if(reduction_interoperation.eq.3) then\n")
 modelfile.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"PJFRY\"\n")
 modelfile.write("   end if\n")
 modelfile.write("   if(reduction_interoperation_rescue.ne.reduction_interoperation) then\n")
-modelfile.write("      if(reduction_interoperation_rescue.eq.0) then\n")
-modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"SAMURAI\"\n")
-modelfile.write("      else if(reduction_interoperation_rescue.eq.1) then\n")
+modelfile.write("      if(reduction_interoperation_rescue.eq.1) then\n")
 modelfile.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"GOLEM95\"\n")
 modelfile.write("      else if(reduction_interoperation_rescue.eq.2) then\n")
 modelfile.write("         write(unit,'(A1,1x,A15,A15)') \"#\", \"    --> rescue \", \"NINJA\"\n")
@@ -419,44 +402,7 @@ modelfile.write("         if (ierr .ne. 0) then\n")
 modelfile.write("            stat = 1\n")
 modelfile.write("            return\n")
 modelfile.write("         end if\n")
-modelfile.write("         reduction_interoperation = int(re)\n")[$
-@if extension samurai $]
-modelfile.write("      elseif (name .eq. \"samurai_scalar\") then\n")
-modelfile.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile.write("         if (ierr .ne. 0) then\n")
-modelfile.write("            stat = 1\n")
-modelfile.write("            return\n")
-modelfile.write("         end if\n")
-modelfile.write("         samurai_scalar = int(re)\n")
-modelfile.write("      elseif (name .eq. \"samurai_verbosity\") then\n")
-modelfile.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile.write("         if (ierr .ne. 0) then\n")
-modelfile.write("            stat = 1\n")
-modelfile.write("            return\n")
-modelfile.write("         end if\n")
-modelfile.write("         samurai_verbosity = int(re)\n")
-modelfile.write("      elseif (name .eq. \"samurai_test\") then\n")
-modelfile.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile.write("         if (ierr .ne. 0) then\n")
-modelfile.write("            stat = 1\n")
-modelfile.write("            return\n")
-modelfile.write("         end if\n")
-modelfile.write("         samurai_test = int(re)\n")
-modelfile.write("      elseif (name .eq. \"samurai_istop\") then\n")
-modelfile.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile.write("         if (ierr .ne. 0) then\n")
-modelfile.write("            stat = 1\n")
-modelfile.write("            return\n")
-modelfile.write("         end if\n")
-modelfile.write("         samurai_istop = int(re)\n")
-modelfile.write("      elseif (name .eq. \"samurai_group_numerators\") then\n")
-modelfile.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile.write("         if (ierr .ne. 0) then\n")
-modelfile.write("            stat = 1\n")
-modelfile.write("            return\n")
-modelfile.write("         end if\n")
-modelfile.write("         samurai_group_numerators = (int(re).ne.0)\n")[$
-@end @if $]
+modelfile.write("         reduction_interoperation = int(re)\n")
 modelfile.write("      elseif (any(names .eq. name)) then\n")
 modelfile.write("         do nidx=1,size(names)\n")
 modelfile.write("            if (names(nidx) .eq. name) exit\n")
@@ -1045,38 +991,6 @@ modelfile.write("            reduction_interoperation = int(re)\n")
 modelfile.write("         else\n")
 modelfile.write("            ierr=0 !FAIL\n")
 modelfile.write("         end if\n")
-[$@if extension samurai $]
-modelfile.write("      elseif (name .eq. \"samurai_scalar\") then\n")
-modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile.write("            samurai_scalar = int(re)\n")
-modelfile.write("         else\n")
-modelfile.write("            ierr=0 !FAIL\n")
-modelfile.write("         end if\n")
-modelfile.write("      elseif (name .eq. \"samurai_verbosity\") then\n")
-modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile.write("            samurai_verbosity = int(re)\n")
-modelfile.write("         else\n")
-modelfile.write("            ierr=0 !FAIL\n")
-modelfile.write("         end if\n")
-modelfile.write("      elseif (name .eq. \"samurai_test\") then\n")
-modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile.write("            samurai_test = int(re)\n")
-modelfile.write("         else\n")
-modelfile.write("            ierr=0 !FAIL\n")
-modelfile.write("         end if\n")
-modelfile.write("      elseif (name .eq. \"samurai_istop\") then\n")
-modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile.write("            samurai_istop = int(re)\n")
-modelfile.write("         else\n")
-modelfile.write("            ierr=0 !FAIL\n")
-modelfile.write("         end if\n")
-modelfile.write("      elseif (name .eq. \"samurai_group_numerators\") then\n")
-modelfile.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile.write("            samurai_group_numerators = (int(re).ne.0)\n")
-modelfile.write("         else\n")
-modelfile.write("            ierr=0 !FAIL\n")
-modelfile.write("         end if\n")
-[$@end @if $]
 modelfile.write("     elseif (any(names .eq. name)) then\n")
 modelfile.write("         do nidx=1,size(names)\n")
 modelfile.write("            if (names(nidx) .eq. name) exit\n")
@@ -1502,12 +1416,7 @@ outdict=translatefile(options.input,config)
 # Write model.f90 file
 modelfile_qp.write('module     model_qp\n')
 modelfile_qp.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile_qp.write('   use config, only: ki => ki_qp')[$
-@if extension samurai $]
-modelfile_qp.write(', &\n')
-modelfile_qp.write('   & samurai_scalar, samurai_verbosity, samurai_test, &\n')
-modelfile_qp.write('   & samurai_group_numerators, samurai_istop')[$
-@end @if $]
+modelfile_qp.write('   use config, only: ki => ki_qp')
 modelfile_qp.write(', &\n')
 modelfile_qp.write('   & renormalisation, EFTcount, reduction_interoperation, &\n')
 modelfile_qp.write('   & reduction_interoperation_rescue, deltaOS, &\n')
@@ -1519,11 +1428,7 @@ modelfile_qp.write(', ewchoice')[$
 @end @select$]
 modelfile_qp.write('\n   implicit none\n')
 modelfile_qp.write('\n')
-modelfile_qp.write('   private :: ki\n')[$
-@if extension samurai $]
-modelfile_qp.write('   private :: samurai_scalar, samurai_verbosity, samurai_test\n')
-modelfile_qp.write('   private :: samurai_group_numerators, samurai_istop\n')[$
-@end @if $]
+modelfile_qp.write('   private :: ki\n')
 modelfile_qp.write('   private :: renormalisation, EFTcount, reduction_interoperation\n')
 modelfile_qp.write('   private :: reduction_interoperation_rescue\n')
 modelfile_qp.write('   private :: deltaOS, nlo_prefactors\n')
@@ -1559,12 +1464,8 @@ modelfile_qp.write('   integer, parameter, private :: line_length = [$buffer_len
 #   ' what is our longest extra name ?
 #   ' 0   0    1    1    2    2
 #   ' 1---5----0----5----0----5
-#   ' samurai_group_numerators
 #   ' reduction_interoperation
-#   ' samurai_verbatim
 #   ' renormalisation
-#   ' samurai_scalar
-#   ' samurai_test
 #   '
 #   ' ==> the longest is 24
 #
@@ -1634,9 +1535,7 @@ modelfile_qp.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"CD
 modelfile_qp.write("   else\n")
 modelfile_qp.write("      write(unit,'(A1,1x,A9,A4)') \"#\", \"scheme = \", \"DRED\"\n")
 modelfile_qp.write("   end if\n")
-modelfile_qp.write("   if(reduction_interoperation.eq.0) then\n")
-modelfile_qp.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"SAMURAI\"\n")
-modelfile_qp.write("   else if(reduction_interoperation.eq.1) then\n")
+modelfile_qp.write("   if(reduction_interoperation.eq.1) then\n")
 modelfile_qp.write("      write(unit,'(A1,1x,A15,A7)') \"#\", \"reduction with \", \"GOLEM95\"\n")
 modelfile_qp.write("   else if(reduction_interoperation.eq.2) then\n")
 modelfile_qp.write("      write(unit,'(A1,1x,A15,A15)') \"#\", \"reduction with \", \"NINJA\"\n")
@@ -1644,9 +1543,7 @@ modelfile_qp.write("   else if(reduction_interoperation.eq.3) then\n")
 modelfile_qp.write("      write(unit,'(A1,1x,A15,A5)') \"#\", \"reduction with \", \"PJFRY\"\n")
 modelfile_qp.write("   end if\n")
 modelfile_qp.write("   if(reduction_interoperation_rescue.ne.reduction_interoperation) then\n")
-modelfile_qp.write("      if(reduction_interoperation_rescue.eq.0) then\n")
-modelfile_qp.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"SAMURAI\"\n")
-modelfile_qp.write("      else if(reduction_interoperation_rescue.eq.1) then\n")
+modelfile_qp.write("      if(reduction_interoperation_rescue.eq.1) then\n")
 modelfile_qp.write("         write(unit,'(A1,1x,A15,A7)') \"#\", \"    --> rescue \", \"GOLEM95\"\n")
 modelfile_qp.write("      else if(reduction_interoperation_rescue.eq.2) then\n")
 modelfile_qp.write("         write(unit,'(A1,1x,A15,A15)') \"#\", \"    --> rescue \", \"NINJA\"\n")
@@ -1879,44 +1776,7 @@ modelfile_qp.write("         if (ierr .ne. 0) then\n")
 modelfile_qp.write("            stat = 1\n")
 modelfile_qp.write("            return\n")
 modelfile_qp.write("         end if\n")
-modelfile_qp.write("         reduction_interoperation = int(re)\n")[$
-@if extension samurai $]
-modelfile_qp.write("      elseif (name .eq. \"samurai_scalar\") then\n")
-modelfile_qp.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile_qp.write("         if (ierr .ne. 0) then\n")
-modelfile_qp.write("            stat = 1\n")
-modelfile_qp.write("            return\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("         samurai_scalar = int(re)\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_verbosity\") then\n")
-modelfile_qp.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile_qp.write("         if (ierr .ne. 0) then\n")
-modelfile_qp.write("            stat = 1\n")
-modelfile_qp.write("            return\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("         samurai_verbosity = int(re)\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_test\") then\n")
-modelfile_qp.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile_qp.write("         if (ierr .ne. 0) then\n")
-modelfile_qp.write("            stat = 1\n")
-modelfile_qp.write("            return\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("         samurai_test = int(re)\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_istop\") then\n")
-modelfile_qp.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile_qp.write("         if (ierr .ne. 0) then\n")
-modelfile_qp.write("            stat = 1\n")
-modelfile_qp.write("            return\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("         samurai_istop = int(re)\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_group_numerators\") then\n")
-modelfile_qp.write("         re = parsereal(value, ierr, lnr)\n")
-modelfile_qp.write("         if (ierr .ne. 0) then\n")
-modelfile_qp.write("            stat = 1\n")
-modelfile_qp.write("            return\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("         samurai_group_numerators = (int(re).ne.0)\n")[$
-@end @if $]
+modelfile_qp.write("         reduction_interoperation = int(re)\n")
 modelfile_qp.write("      elseif (any(names .eq. name)) then\n")
 modelfile_qp.write("         do nidx=1,size(names)\n")
 modelfile_qp.write("            if (names(nidx) .eq. name) exit\n")
@@ -2505,38 +2365,7 @@ modelfile_qp.write("            reduction_interoperation = int(re)\n")
 modelfile_qp.write("         else\n")
 modelfile_qp.write("            ierr=0 !FAIL\n")
 modelfile_qp.write("         end if\n")
-[$@if extension samurai $]
-modelfile_qp.write("      elseif (name .eq. \"samurai_scalar\") then\n")
-modelfile_qp.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile_qp.write("            samurai_scalar = int(re)\n")
-modelfile_qp.write("         else\n")
-modelfile_qp.write("            ierr=0 !FAIL\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_verbosity\") then\n")
-modelfile_qp.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile_qp.write("            samurai_verbosity = int(re)\n")
-modelfile_qp.write("         else\n")
-modelfile_qp.write("            ierr=0 !FAIL\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_test\") then\n")
-modelfile_qp.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile_qp.write("            samurai_test = int(re)\n")
-modelfile_qp.write("         else\n")
-modelfile_qp.write("            ierr=0 !FAIL\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_istop\") then\n")
-modelfile_qp.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile_qp.write("            samurai_istop = int(re)\n")
-modelfile_qp.write("         else\n")
-modelfile_qp.write("            ierr=0 !FAIL\n")
-modelfile_qp.write("         end if\n")
-modelfile_qp.write("      elseif (name .eq. \"samurai_group_numerators\") then\n")
-modelfile_qp.write("         if ( real(int(re),ki) == re .and. im == 0.0_ki ) then\n")
-modelfile_qp.write("            samurai_group_numerators = (int(re).ne.0)\n")
-modelfile_qp.write("         else\n")
-modelfile_qp.write("            ierr=0 !FAIL\n")
-modelfile_qp.write("         end if\n")
-[$@end @if $]
+
 modelfile_qp.write("     elseif (any(names .eq. name)) then\n")
 modelfile_qp.write("         do nidx=1,size(names)\n")
 modelfile_qp.write("            if (names(nidx) .eq. name) exit\n")
