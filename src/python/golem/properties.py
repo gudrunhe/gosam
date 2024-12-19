@@ -83,9 +83,7 @@ model = Property(
    prtcls<number>.mdl and vars<number>.mdl in the directory <path>.
    These files need to be in CalcHEP/CompHEP format.
 
-   Format 4) expects files according to the new FeynRules Python
-   interface in the directory specified by <path>.
-   (Not fully implemented yet)
+   Format 4) expects a UFO model in the directory specified by <path>.
    """,
     list,
     "smdiag",
@@ -98,7 +96,7 @@ model_options = Property(
    property.
 
    For builtin models, the option "ewchoose"
-   selects automatically the EW scheme based.
+   automatically selects the EW scheme used.
    """,
     list,
     "ewchoose",
@@ -386,8 +384,9 @@ template_path = Property(
     "templates",
     """\
    Path pointing to the directory containing the template
-   files for the process. If not set, golem uses the directory
-   <golem_path>/templates.
+   files for the process. If not set, GoSam uses the directory
+   <gosam_git_path>/templates, where <gosam_git_path> is the 
+   path into which the GoSam git has been cloned.
 
    The directory must contain a file called 'template.xml'
    """,
@@ -664,6 +663,10 @@ filter_lo_diagrams = Property(
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
+   * d.order(coupling) = total power of diagrams with respect to specified 
+      coupling. Only works whit UFO models. The coupling must be defined 
+      in the UFO model's coupling_orders.py and listed in the 'order_names'
+      property of the GoSam config/runcard.
 
    Note: Using d.iprop(field, momentum="...") in olp-mode can lead to 
          inconsistencies in the automatically generated crossings. This
@@ -985,10 +988,12 @@ config_renorm_yukawa = Property(
     """\
    Sets the same variable in config.f90
 
-   Enables renormalization of Yukawa coupling.
-   NOTE: Works only in case overall renormalization is possible
+   Enables renormalization of Yukawa coupling. Two schemes are
+   possible: On-Shell and MSbar.
 
-   QCD only, works only with built-in model files.
+   QCD only.
+
+   See also: MSbar_yukawa
    """,
     bool,
     True,
@@ -1019,8 +1024,9 @@ config_renorm_ehc = Property(
    smehc. Should not be used when counterterms for Wilson coeffi-
    cients are supplyed by means of a UFO model (see 'renorm_eft_wilson'). 
    CAUTION: 
-   This will only work if the number of Higgs-gluon couplings is the 
-   same for all Born diagrams!
+   This will only work if the Higgs-gluon vertices factorize from the 
+   amplitude, i.e. the number of Higgs-gluon couplings is the same for 
+   all Born diagrams!
    """,
     bool,
     False,
@@ -1416,6 +1422,7 @@ MSbar_yukawa = Property(
     -> Yukawa coupling of bottom to Higgs will be renormalised in the MSbar scheme, 
        even if mB=0 (as long as Hbb coupling still exist)
 
+    See also: renorm_yukawa
     """,
      list,
      "",
