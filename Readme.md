@@ -4,7 +4,7 @@
     # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
     #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                     #
     #                                                                              #
-    #                                    (c) The GoSam Collaboration 2011-2024     #
+    #                                    (c) The GoSam Collaboration 2011-2025     #
     #                                                                              #
     #        AUTHORS:                                                              #
     #        * Jens Braun                       <jens.braun@student.kit.edu>       #

@@ -14,17 +14,14 @@ PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
 
 AUTHORS = {
-    "Gudrun Heinrich": ["gudrun@mpp.mpg.de"],
-    "Stephen Jones": ["s.jones@cern.ch"],
-    "Matthias Kerner": ["mkerner@physik.uzh.ch"],
-    "Jannis Lang": ["jannis.lang@kit.edu"],
-    "Vitaly Magerya": ["vitaly.magerya@tx97.net"],
-    "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
-    "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
-    "Tiziano Peraro": ["peraro@mpp.mpg.de"],
-    "Johannes Schlenk": ["johannes.schlenk@psi.ch"],
-    "Ludovic Scyboz": ["ludovic.scyboz@physics.ox.ac.uk"],
-    "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"],
+    "Jens Braun": ["jens.braun@student.kit.edu"],
+    "Benjamin Campillo Aveleira": ["benjamin.campillo@kit.edu"],
+    "Gudrun Heinrich": ["gudrun.heinrich@kit.edu"],
+    "Marius Hoefer": ["marius.hoefer@kit.edu"],
+    "Stephen Jones": ["stephen.jones@durham.ac.uk"],
+    "Matthias Kerner": ["matthias.kerner@kit.edu"],
+    "Jannis Lang": ["jannis.lang@partner.kit.edu"],
+    "Vitaly Magerya": ["vitaly.magerya@tx97.net"]
 }
 
 FORMER_AUTHORS = {
@@ -33,10 +30,16 @@ FORMER_AUTHORS = {
     "Nicolas Greiner": ["greiner@mpp.mpg.de"],
     "Stephan Jahn": ["sjahn@mpp.mpg.de"],
     "Gionata Luisoni": ["luisonig@mpp.mpg.de"],
+    "Pierpaolo Mastrolia": ["Pierpaolo.Mastrolia@cern.ch"],
     "Edoardo Mirabella": ["mirabell@mpp.mpg.de"],
+    "Giovanni Ossola": ["gossola@citytech.cuny.edu"],
+    "Tiziano Peraro": ["peraro@mpp.mpg.de"],
     "Joscha Reichel": ["joscha@mpp.mpg.de"],
     "Thomas Reiter": ["reiterth@mpp.mpg.de"],
+    "Johannes Schlenk": ["johannes.schlenk@psi.ch"],
+    "Ludovic Scyboz": ["ludovic.scyboz@physics.ox.ac.uk"],
     "Johann Felix von Soden-Fraunhofen": ["jfsoden@mpp.mpg.de"],
+    "Francesco Tramontano": ["Francesco.Tramontano@cern.ch"],
 }
 
 
@@ -97,7 +100,7 @@ CLINES = [
     "Matrix Element Generator",
     "Version %s Rev: %s" % (".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION),
     "",
-    "(c) The GoSam Collaboration 2011-2021",
+    "(c) The GoSam Collaboration 2011-2025",
     "",
 ]
 
