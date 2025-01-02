@@ -474,7 +474,7 @@ reduction_programs = Property(
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
     list,
-    "ninja,golem95",
+    "ninja",
     options=["ninja", "golem95"],
 )
 
