@@ -63,6 +63,21 @@ class CustomWrapper(textwrap.TextWrapper):
         return wrapped_lines
 
 
+class DuplicationFilter(logging.Filter):
+    def __init__(self):
+        self.previous_logs = None
+
+    def filter(self, record):
+        current_log = (record.module, record.levelno, record.getMessage())
+        if not self.previous_logs:
+            self.previous_logs = [current_log]
+        else:
+            if current_log in self.previous_logs:
+                return False
+            else:
+                self.previous_logs.append(current_log)
+        return True
+
 class ColorFormatter(logging.Formatter):
     def __init__(self, message, use_color=True, **kwargs):
         super().__init__(message, **kwargs)
@@ -111,6 +126,7 @@ def setup_logging(loglevel, logfile=None, use_color=True):
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
     console_handler.setFormatter(console_formatter)
+    console_handler.addFilter(DuplicationFilter())
     root_logger.addHandler(console_handler)
     if logfile is not None:
         if loglevel != "DEBUG":
@@ -127,6 +143,7 @@ def setup_logging(loglevel, logfile=None, use_color=True):
         file_handler = logging.FileHandler(logfile, mode="w")
         file_handler.setLevel(loglevel if loglevel == "DEBUG" else "INFO")
         file_handler.setFormatter(file_formatter)
+        file_handler.addFilter(DuplicationFilter())
         root_logger.addHandler(file_handler)
 
 
