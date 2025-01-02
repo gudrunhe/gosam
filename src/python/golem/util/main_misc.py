@@ -630,6 +630,11 @@ def workflow(conf):
             + "effictive Higgs-gluon couplings like in the heavy-top limit.\n"
             + "This will probably cause some serious errors in your result,\n"
             + "so I will not let you do that, sorry.")
+    
+    if not golem.installation.WITH_GOLEM:
+        if 'golem95' in conf["reduction_programs"].split(","):
+            raise GolemConfigError("The configuration requests 'golem95' as reduction library," + 
+                                    "but GoSam was build without Golem. Please reinstall GoSam with support for Golem.")
     # END: Check for incompatible configuration
 
 
@@ -759,8 +764,7 @@ def workflow(conf):
         if ("ninja" not in ext) or ("golem95" in ext):
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
-                + "in association with ninja. The gosam-contrib has to be compiled with the flag\n"
-                + "'--enable-quadninja'. Please select only ninja as reduction program by setting:\n"
+                + "in association with ninja. Please select only ninja as reduction program by setting:\n"
                 + "'reduction_programs=ninja' in the input card.\n"
             )
 

@@ -31,9 +31,9 @@ endif
 add_global_link_arguments('--disable-new-dtags', language: ['fortran', 'c', 'cpp'])
 
 subproject('avh_olo')
-subproject('ff')
-subproject('qcdloop')
-subproject('golem95')
+if get_option('golem95')
+    subproject('golem95')
+endif
 subproject('ninja')
 subproject('qgraf')
 subproject('form')

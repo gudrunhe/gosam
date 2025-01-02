@@ -1,9 +1,0 @@
-[wrap-file]
-source_url=https://qcdloop.fnal.gov/QCDLoop-1.98.tar.gz
-source_filename=QCDLoop-1.98.tar.gz
-directory=QCDLoop-1.98
-source_hash=917ba1daa6d526937a93e0e0b3392103660efdeef2880a0d9188bdc0ad9c0035
-patch_directory=qcdloop
-
-[provide]
-dependency_names = qcdloop

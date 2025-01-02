@@ -17,3 +17,4 @@ INFO = {
 
 GOLEM_VERSION = [@major_version@,@minor_version@,@patch_version@]
 GOLEM_REVISION = '@VCS_TAG@'
+WITH_GOLEM = @WITH_GOLEM@

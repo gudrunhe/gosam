@@ -1,9 +1,0 @@
-[wrap-file]
-source_url=https://www.nikhef.nl/~t68/ff/ff.tar.gz
-source_filename=ff.tar.gz
-lead_directory_missing=true
-source_hash=3f7d7acc86b414dea9217b3cb011cbdf472b502a2f2523b693e342c75d79892b
-patch_directory=ff
-
-[provide]
-dependency_names = ff

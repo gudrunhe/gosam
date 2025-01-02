@@ -16,7 +16,8 @@ installation_py = configure_file(
         'major_version': meson.project_version().split('-')[0].split('.')[0],
         'minor_version': meson.project_version().split('-')[0].split('.')[1],
         'patch_version': meson.project_version().split('-')[0].split('.')[2],
-        'VCS_TAG': meson.project_version().split('-')[1]
+        'VCS_TAG': meson.project_version().split('-')[1],
+        'WITH_GOLEM': get_option('golem95')
     },
     install: true,
     install_dir: python.get_install_dir() / 'golem'

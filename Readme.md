@@ -6,21 +6,22 @@
     #                                                                              #
     #                                    (c) The GoSam Collaboration 2011-2024     #
     #                                                                              #
-    #        AUTHORS:      
-    #        * Jens Braun                                 <jens.braun@student.kit.edu>       #
+    #        AUTHORS:                                                              #
+    #        * Jens Braun                       <jens.braun@student.kit.edu>       #
     #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
-    #        * Gudrun Heinrich                        <gudrun.heinrich@kit.edu>            # 
-    #        * Marius Hoefer                            <marius.hoefer@kit.edu>              #
-    #        * Stephen Jones                          <stephen.jones@durham.ac.uk>   #
-    #        * Matthias Kerner                         <matthias.kerner@kit.edu>            #
-    #        * Jannis Lang                               <jannis.lang@partner.kit.edu>       #
-    #        * Vitaly Magerya                           <vitaly.magerya@tx97.net>           #
-    #                                                                                                                    #
-    #        FORMER AUTHORS:                                                                         #
-    #          Gavin Cullen, Hans van Deurzen, Nicolas Greiner, Stephan Jahn,                      #
-    #          Gionata Luisoni, Pierpaolo Mastrolia, Edoardo Mirabella, Giovanni Ossola,        #
-    #          Tiziano Peraro, Joscha Reichel, Thomas Reiter,  Johannes Schlenk,                  #
-    #          Ludovic Scyboz, Johann Felix von Soden-Fraunhofen, Francesco Tramontano  #
+    #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          # 
+    #        * Marius Hoefer                    <marius.hoefer@kit.edu>            #
+    #        * Stephen Jones                    <stephen.jones@durham.ac.uk>       #
+    #        * Matthias Kerner                  <matthias.kerner@kit.edu>          #
+    #        * Jannis Lang                      <jannis.lang@partner.kit.edu>      #
+    #        * Vitaly Magerya                   <vitaly.magerya@tx97.net>          #
+    #                                                                              #
+    #        FORMER AUTHORS:                                                       #
+    #          Gavin Cullen, Hans van Deurzen, Nicolas Greiner, Stephan Jahn,      #
+    #          Gionata Luisoni, Pierpaolo Mastrolia, Edoardo Mirabella,            #
+    #          Giovanni Ossola, Tiziano Peraro, Joscha Reichel, Thomas Reiter,     #
+    #          Johannes Schlenk, Ludovic Scyboz, Johann Felix von Soden-Fraunhofen,#
+    #          Francesco Tramontano                                                #
     #                                                                              #
     #  This program is free software: you can redistribute it and/or modify        #
     #  it under the terms of the GNU General Public License either                 #
@@ -44,7 +45,7 @@ GoSam is a general one-loop evaluator for matrix elements.
 The program produces Fortran 90 code from a given process
 description by evaluating Feynman diagrams and translating
 the associated one-loop diagrams into code suitable for the
-evaluation with Ninja, Golem95 and/or Samurai.
+evaluation with Ninja and/or Golem95.
 
 # Prerequisites
 * Installing GoSam and it's dependencies as well as building the generated Fortran code requires the 
@@ -52,7 +53,7 @@ evaluation with Ninja, Golem95 and/or Samurai.
 * Running GoSam requires at least Python version 3.7, to run the Python code in parallel additionally the `multiprocess` 
 package is required (available from [PyPI](https://pypi.org/project/multiprocess/)).
 * To compile the dependencies and the generated code, a sufficiently modern Fortran compiler is required.
-* Building GoSam with support for quadruple precision requires QuadNinja, which in turn requires `libquadmath`
+* Building GoSam with support for quadruple precision requires QuadNinja, which in turn requires `libquadmath`.
 
 # Installation
 
@@ -70,14 +71,11 @@ meson install -C build
 will download, build and install 
 [QGRAF](http://cfif.tecnico.ulisboa.pt/~paulo/qgraf.html), 
 [Form](https://www.nikhef.nl/~form/), 
-[ff](http://www.nikhef.nl/~t68/ff/), 
-[OneLOop](https://helac-phegas.web.cern.ch/OneLOop.html), 
 [QCDLoop](http://qcdloop.fnal.gov/), 
-[Golem95](http://golem.hepforge.org/), 
-[Samurai](https://samurai.hepforge.org/), 
+[Golem95](http://golem.hepforge.org/) (optional),
 [Ninja](https://ninja.hepforge.org/)
-and GoSam. By optionally setting `-Doption=value`, the default build options can be altered. The full list of build
-options is available by running `meson configure` in the `build` directory after running `meson setup`.
+and GoSam. By default, only `Ninja` is installed. By optionally setting `-Doption=value`, the default build options can be altered. 
+The full list of build options is available by running `meson configure` in the `build` directory after running `meson setup`.
 To avoid collisions with possible other installations of some of said programs, everything is installed into
 a subfolder, e.g. `<prefix>/lib/GoSam/`. To set up the runtime environment for GoSam, a script
 `<prefix>/bin/GoSam/gosam_setup_env.sh` is generated to update the required environment variables. It can be loaded with
@@ -97,6 +95,9 @@ source <prefix>/bin/GoSam/gosam_setup_env.sh
 > [!NOTE]
 > By default, QuadNinja is built alongside Ninja. If this is undesired, QuadNinja can be disabled by setting 
 > `-Dquadninja=false` during setup.
+
+> [!NOTE]
+> By default, only Ninja is installed. If desired, Golem95 can be enabled by setting `-Dgolem95=true` during setup.
 
 # Running GoSam
 Running GoSam generally consists of two steps, the first one being the preparation of the process directory.

@@ -1,4 +1,11 @@
 option(
+    'golem95',
+    type: 'boolean',
+    value: false,
+    description: 'Build `Golem95` as additional integral reduction library'
+    )
+
+option(
     'quadninja',
     type: 'boolean',
     value: true,
