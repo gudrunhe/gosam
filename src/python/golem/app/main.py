@@ -50,13 +50,6 @@ def main(parser, argv=sys.argv):
         dest="template_format",
     )
     parser.add_argument(
-        "-i",
-        "--interactive",
-        help="Start an interactive session (not supported anymore)",
-        action="store_true",
-        dest="interactive",
-    )
-    parser.add_argument(
         "-I",
         "--ignore-empty-subprocess",
         help="Write vanishing amplitude for subprocess with no remaining tree-level diagrams",
@@ -116,11 +109,6 @@ def main(parser, argv=sys.argv):
     if cmd_args.report:
         golem.util.tools.POSTMORTEM_DO = True
 
-    if cmd_args.interactive:
-        interactive_session = golem.shell.GolemShell()
-    else:
-        interactive_session = None
-
     GOLEM_FULL = "GoSam %s" % ".".join(map(str, golem.installation.GOLEM_VERSION))
 
     print(GOLEM_FULL + " running in standalone mode")
@@ -146,14 +134,6 @@ def main(parser, argv=sys.argv):
                 sys.exit("GoSam terminated due to an error")
             else:
                 write_template_file(fname, defaults, cmd_args.template_format)
-    elif interactive_session is not None:
-        flag = True
-        for arg in args:
-            flag = interactive_session.event("load %s" % arg)
-            if not flag:
-                interactive_session.reset()
-        if flag:
-            interactive_session.run()
     else:
         if len(args) == 0:
             dir_info = read_golem_dir_file(os.getcwd())

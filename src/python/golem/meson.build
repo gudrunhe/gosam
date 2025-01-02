@@ -39,4 +39,4 @@ gosam_config_py = configure_file(
     install_dir: get_option('prefix') / get_option('bindir')
 )
 
-python.install_sources('__init__.py', '__main__.py', 'properties.py', 'shell.py', subdir: 'golem')
+python.install_sources('__init__.py', '__main__.py', 'properties.py', subdir: 'golem')
