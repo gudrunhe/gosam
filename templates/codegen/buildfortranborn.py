@@ -257,7 +257,6 @@ f90file_qp.write('               print *, \"ERROR: In function bornamplitude: un
 f90file_qp.write('               stop\n')
 f90file_qp.write('         end select\n')
 f90file_qp.write('      else\n')
-f90file_qp.write('         logs = .false.\n')
 f90file_qp.write('         XCT = 0.0_ki\n')
 f90file_qp.write('         CYUKAWA = 0.0_ki\n')
 f90file_qp.write('         CMASS = 0.0_ki\n')

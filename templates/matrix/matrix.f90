@@ -3331,25 +3331,25 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
          case(1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
          case(2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
@@ -3357,38 +3357,38 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0 + amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
          case(5)
             ! sigma(dim6 X dim6) without loopcounting
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2)
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2)
          case(6)
             ! sigma(SM X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(7)
             ! sigma(dim6 X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_1)
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          end select[%
      @else %][% 'if not enable_truncation_orders' %]
@@ -3618,25 +3618,25 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
          case(1)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
          case(2)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(3)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
@@ -3644,45 +3644,45 @@ contains
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0 + amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(4)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
          case(5)
             ! sigma(dim6 X dim6) without loopcounting
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2) &
-            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2)
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2) &
+            &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2)
          case(6)
             ! sigma(SM X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki),my_ok,rational2,amp0_1) &
-            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_0)
+            heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
+            &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
          case(7)
             ! sigma(dim6 X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki),my_ok,rational2,amp0_1)
+            heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
             heli_amp(0) = heli_amp(0) + square_qp(amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex         
          end select[%
      @else %][% 'if not enable_truncation_orders' %]
-         heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki),my_ok,rational2)[%
+         heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
      if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki))
+      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
       heli_amp(0) = heli_amp(0) + fr
      end if
      ok = ok .and. my_ok
@@ -3791,7 +3791,7 @@ contains
         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
       if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki))
+         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
          heli_amp(0) = heli_amp(0) + fr
       end if
       ok = ok .and. my_ok

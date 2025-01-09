@@ -406,7 +406,7 @@
 			      <only if-option="enable_truncation_orders" value="true" />
 			  </file>
 			</foreach>
-			<file src="ct_amplitude.f90" dest="ct_amplitudeh%d_qp.f90"
+			<file src="ct_amplitude_qp.f90" dest="ct_amplitudeh%d_qp.f90"
 				arguments="helicity" class="Integrals">
 				<only if-extension="quadruple" />
 				<only if-option="renorm" value="true" />

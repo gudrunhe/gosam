@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem '
- %]module    [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
+ %]module    [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp
    implicit none
    private
 
@@ -10,46 +10,46 @@ contains[%
 
    !---#[ function amplitude:
    function amplitude(scale2) result(amp)
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
-      use [% process_name asprefix=\_ %]color, only: numcs
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
+      use [% process_name asprefix=\_ %]color_qp, only: numcs
       use [% process_name asprefix=\_ %]kinematics, only: corrections_are_qcd
       use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]config, only: &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, &
          & renorm_ehc, nlo_prefactors
-      use [% process_name asprefix=\_ %]dipoles, only: pi
-      use [% process_name asprefix=\_ %]counterterms, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
+      use [% process_name asprefix=\_ %]dipoles_qp, only: pi
+      use [% process_name asprefix=\_ %]counterterms_qp, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
 @if generate_lo_diagrams %][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0, only: amp0_0 => amplitude[%
+           %]diagramsh[%helicity%]l0_0_qp, only: amp0_0 => amplitude[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1, only: amp0_1 => amplitude[%
+           %]diagramsh[%helicity%]l0_1_qp, only: amp0_1 => amplitude[% 
 @case 2%]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2, only: amp0_2 => amplitude[%
+           %]diagramsh[%helicity%]l0_2_qp, only: amp0_2 => amplitude[% 
 @end @select %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0, only: amp0 => amplitude[%
+           %]diagramsh[%helicity%]l0_qp, only: amp0 => amplitude[%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams %][%
 @if generate_ym_counterterms %][%
 @if generate_lo_diagrams%][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_0, only: ampdymct_0 => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0_0_qp, only: ampdymct_0 => amplitude_Dym[% 
 @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_1, only: ampdymct_1 => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0_1_qp, only: ampdymct_1 => amplitude_Dym[% 
 @case 2 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0_2, only: ampdymct_2 => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0_2_qp, only: ampdymct_2 => amplitude_Dym[% 
 @end @select %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]l0, only: ampdymct => amplitude_Dym[%
+           %]diagramsh[%helicity%]l0_qp, only: ampdymct => amplitude_Dym[%
 @end @if enable_truncation_orders %][%
 @end @if generate_lo_diagrams%][%
 @end @if generate_ym_counterterms %][%
@@ -57,17 +57,17 @@ contains[%
 @if eval topolopy.count.ct .gt. 0 %][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_0, only: ampeftct_0 => amplitude[%
+           %]diagramsh[%helicity%]ct_0_qp, only: ampeftct_0 => amplitude[% 
            @select trnco @case 1 %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_1, only: ampeftct_1 => amplitude[%
+           %]diagramsh[%helicity%]ct_1_qp, only: ampeftct_1 => amplitude[% 
 @case 2%]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct_2, only: ampeftct_2 => amplitude[%
+           %]diagramsh[%helicity%]ct_2_qp, only: ampeftct_2 => amplitude[% 
 @end @select %][%
 @else %]
       use [% process_name asprefix=\_
-           %]diagramsh[%helicity%]ct, only: ampeftct => amplitude[%
+           %]diagramsh[%helicity%]ct_qp, only: ampeftct => amplitude[%
 @end @if enable_truncation_orders %][%
 @end @if %][%
 @end @if generate_eft_counterterms %]
@@ -380,4 +380,4 @@ contains[%
    !---#] function amplitude:[% 
 @end @if generate_counterterms %]
 
-end module [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]
+end module [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp

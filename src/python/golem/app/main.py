@@ -4,7 +4,6 @@ import os.path
 import cProfile
 import tempfile
 
-import golem.shell
 import golem.util.config
 import golem.util.tools
 from golem.util.config import GolemConfigError, Form
