@@ -737,13 +737,6 @@ def workflow(conf):
         conf["olp.irregularisation"] = "CDR"
 
     # We need to put out an error if we specify formopt and some other extensions
-    if "topolynomial" in ext:
-        raise GolemConfigError(
-            "Your configuration has select the extension 'topolynomial' \n"
-            "and optimization by FORM 'formopt'. "
-            + "The two options are not compatible. \nPlease change your input "
-            + "card (remove topolynomial or add noformopt) and re-run."
-        )
     if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
         raise GolemConfigError("formopt only supported with abbrev.level=diagram\n")
 

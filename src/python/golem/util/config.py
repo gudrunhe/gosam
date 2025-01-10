@@ -926,8 +926,6 @@ class Form(Program):
 
     def store(self, conf):
         conf["form.bin"] = self.undohome(self.getInstance())
-        # if version_compare(self.version, [4,0]) >= 0:
-        #   conf["+form.extensions"] = "topolynomial"
 
 
 class Fortran(Program):

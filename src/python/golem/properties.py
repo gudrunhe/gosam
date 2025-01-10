@@ -508,8 +508,6 @@ extensions = Property(
     #   olp_daemon   --- (OLP interface only): generates a C-program providing
     #   ninja        --- enable Ninja for the reduction
     #   golem95      --- enable Golem95 for the reduction
-    #   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
-    #                    not compatible with the formopt option.
     #   qshift       --- apply the shift of Q already at the FORM level
     #   numpolvec    --- evaluate polarisation vectors numerically
     #   One option which is affected by this is LDFLAGS. In the following
@@ -527,7 +525,6 @@ extensions = Property(
         "golem95",
         "dred",
         "qshift",
-        "topolynomial",
         "qcdloop",
         "avh_olo",
         "looptools",

@@ -34,16 +34,7 @@ off statistics;
 #Define FR5 "defined"[%
 @end @if %]
 
-#Define EXTRAPAT "EXSYM"[%
-@if extension topolynomial %]
-#If (`VERSION_' >= 4) && (`SUBVERSION_' >= 0)
-   #Define USETOPOLYNOMIAL "1"
-#Else
-   #Define USETOPOLYNOMIAL "0"
-#EndIf[%
-@else %]
-#Define USETOPOLYNOMIAL "0"[%
-@end @if %]
+#Define EXTRAPAT "EXSYM"
 
 [%
 @if extension tracify %]
@@ -86,10 +77,6 @@ Function SmQt;
 [% @if diagsum %]Symbol Nfrat;[%
 @end @if %]
 
-
-#If `USETOPOLYNOMIAL'
-   ExtraSymbols,underscore,`EXTRAPAT';
-#EndIf
 
 #include- color.hh
 .global
