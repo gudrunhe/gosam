@@ -8,18 +8,9 @@ generated_sources += [[%
    @end @if %][%
 @end @if generate_lo_diagrams %][%
 @if generate_nlo_virt %][%
-   @select abbrev.level
-   @case helicity %]
-	'abbrev.f90',[%
-   @case group %][%
-      @for groups var=grp %]
-	'abbrevg[%grp%].f90',[%
-      @end @for %][%
-   @case diagram %][%
       @for elements topolopy.keep.virt %]
 	'abbrevd[%$_%].f90',[%
       @end @for %][%
-   @end @select %][%
    @for elements topolopy.keep.virt %]
 	'd[%$_%]l1.f90',[%
       @if internal GENERATE_DERIVATIVES %] 'd[%$_%]l1d.f90',[%

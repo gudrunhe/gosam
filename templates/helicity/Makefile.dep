@@ -7,20 +7,6 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 @if helsum %][%
 @else %][%
    @if generate_nlo_virt %][%
-      @select abbrev.level
-      @case helicity %]
-abbrevh[%helicity%].[%O%]: globals.[%O%][%
-            @for elements topolopy.keep.virt %]
-d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][%
-            @end @for %][%
-      @case group %][%
-         @for groups var=grp %]
-abbrevg[%grp%]h[%helicity%].[%O%]: globals.[%O%][%
-               @for diagrams group=grp%]
-d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
-               @end @for %][%
-         @end @for %][%
-      @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
@@ -38,22 +24,7 @@ d[%$_%]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
 	           @end @if %][%
 	 @end @if %][%
          @end @for %][%
-      @end @select %][%
 @if extension quadruple %][%
-      @select abbrev.level
-      @case helicity %]
-abbrevh[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-            @for elements topolopy.keep.virt %]
-d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevh[%helicity%]_qp.[%O%][%
-            @end @for %][%
-      @case group %][%
-         @for groups var=grp %]
-abbrevg[%grp%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-               @for diagrams group=grp%]
-d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
-               @end @for %][%
-         @end @for %][%
-      @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
@@ -71,7 +42,6 @@ d[%$_%]h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 	           @end @if %][%
 	 @end @if %][%
          @end @for %][%
-      @end @select %][%
    @end @if extension quadruple %][%
 
       	@if extension golem95 %][%
@@ -165,18 +135,9 @@ amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagram
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
-         @select abbrev.level
-         @case helicity %] \
-			abbrevh[%helicity%].[%O%][%
-         @case group %][%
-            @for groups var=grp %] \
-			abbrevg[%grp%]h[%helicity%].[%O%][%
-            @end @for %][%
-         @case diagram %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
             @end @for %][%
-         @end @select %][%
       @end @if %][%
 @end @if helsum %][%
 @end @for %][%
@@ -196,18 +157,9 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
-         @select abbrev.level
-         @case helicity %] \
-			abbrevh[%helicity%].[%O%][%
-         @case group %][%
-            @for groups var=grp %] \
-			abbrevg[%grp%]h[%helicity%].[%O%][%
-            @end @for %][%
-         @case diagram %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]h[%helicity%].[%O%][%
             @end @for %][%
-         @end @select %][%
       @end @if %][%
 @end @if helsum %][%
 @end @if %][%
@@ -227,18 +179,9 @@ amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_d
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
-         @select abbrev.level
-         @case helicity %] \
-			abbrevh[%helicity%]_qp.[%O%][%
-         @case group %][%
-            @for groups var=grp %] \
-			abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
-            @end @for %][%
-         @case diagram %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
             @end @for %][%
-         @end @select %][%
       @end @if %][%
 @end @if helsum %][%
 @end @for %][%
@@ -256,18 +199,9 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 			@end @if %][%
 		@end @if %][%
 		@if generate_nlo_virt %][%
-         @select abbrev.level
-         @case helicity %] \
-			abbrevh[%helicity%]_qp.[%O%][%
-         @case group %][%
-            @for groups var=grp %] \
-			abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
-            @end @for %][%
-         @case diagram %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
             @end @for %][%
-         @end @select %][%
       @end @if %][%
 @end @if helsum %][%
 @end @if %][%
@@ -357,14 +291,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 		@end @if %][%
 		@end @if extension ninja %][%
    @if generate_nlo_virt %][%
-      @select abbrev.level
-      @case helicity %]
-[% process_name asprefix=\_ %]abbrevh[%helicity%].mod: abbrevh[%helicity%].[%O%] [%
-      @case group %][%
-         @for groups var=grp %]
-[% process_name asprefix=\_ %]abbrevg[%grp%]h[%helicity%].mod: abbrevg[%grp%]h[%helicity%].[%O%][%
-         @end @for %][%
-      @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
@@ -382,16 +308,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 	           @end @if %][%
 	 @end @if %][%
          @end @for %][%
-      @end @select %][%
       @if extension quadruple %][%
-      @select abbrev.level
-      @case helicity %]
-[% process_name asprefix=\_ %]abbrevh[%helicity%]_qp.mod: abbrevh[%helicity%]_qp.[%O%] [%
-      @case group %][%
-         @for groups var=grp %]
-[% process_name asprefix=\_ %]abbrevg[%grp%]h[%helicity%]_qp.mod: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
-         @end @for %][%
-      @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
@@ -409,7 +326,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 	           @end @if %][%
 	 @end @if %][%
          @end @for %][%
-      @end @select %][%
    @end @if extension quadruple %][%
    @end @if generate_nlo_virt%][%
 	@if enable_truncation_orders %][%

@@ -53,19 +53,13 @@ DIAGRAMS_VIRT=[%
 TXT_VIRT=$(subst .f90,.txt,$(DIAGRAMS_VIRT))
 
 ABB_VIRT=[%
-   @select abbrev.level
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%].f90[%
       @end @for %][%
-   @end @select %][%
   @if extension quadruple %][%
-   @select abbrev.level
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%]_qp.f90[%
       @end @for %][%
-   @end @select %][%
 @end @if extension quadruple %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 [% @else %]
@@ -117,8 +111,7 @@ d[%$_%]l1.txt: d[%$_%]l1.prc
 			@if internal DERIVATIVES_AT_ZERO %] \
 		-D DERIVATIVESATZERO=1[%
 			@end @if %] \
-		../codegen/finaloptimization.frm[%
-	   @select abbrev.level @case diagram %]
+		../codegen/finaloptimization.frm
 [% @if internal GENERATE_DERIVATIVES %]
 d[%$_%]l1d.txt : d[%$_%]l1.txt
 	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity sum
@@ -270,7 +263,6 @@ d[%$_%]l121.f90[% @if extension quadruple %] d[%$_%]l121_qp.f90[% @end @if %]: d
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%
 @end @if generate_nlo_virt %]

@@ -90,23 +90,12 @@ contains
 @if generate_nlo_virt %][%
 @if helsum %][%
 @else %][%
-   @select abbrev.level
-   @case helicity %]
-      use [% process_name asprefix=\_
-      %]abbrevh[%helicity %]_qp, only: init_abbrev[%
-   @case diagram %][%
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
       %]abbrevd[%$_%][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[%helicity%]_qp, only: init_abbrevd[%$_%] => init_abbrev[%
          @end @for %][%
       @end @for %][%
-   @case group %][%
-      @for groups var=grp %]
-      use [% process_name asprefix=\_
-      %]abbrevg[%grp%]h[%helicity%]_qp, only: init_abbrevg[%grp%] => init_abbrev[%
-      @end @for %][%
-   @end @select %][%
 @end @if %][%
 @end @if %][%
 @if generate_lo_diagrams %]
@@ -159,11 +148,6 @@ contains
 @if generate_nlo_virt %][%
 @if helsum %][%
 @else %][%
-
-   @select abbrev.level
-   @case helicity %]
-      call init_abbrev()[%
-   @case diagram %][%
       @for groups var=grp %][%
          @for diagrams group=grp %][%
             @if use_flags_1 %]
@@ -175,17 +159,6 @@ contains
          @end @if %][%
          @end @for %][%
       @end @for %][%
-   @case group %][%
-      @for groups var=grp %][%
-            @if use_flags_1 %]
-      if(evaluate_virt_group([%grp%])) then[%
-            @end @if %]
-        call init_abbrevg[%grp%]()[%
-            @if use_flags_1 %]
-      endif[%
-         @end @if %][%
-      @end @for %][%
-   @end @select %][%
 
 
    @select r2

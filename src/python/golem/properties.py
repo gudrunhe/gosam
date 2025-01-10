@@ -788,21 +788,6 @@ abbrev_limit = Property(
     "500",
 )
 
-abbrev_level = Property(
-    "abbrev.level",
-    """\
-   The level at which abbreviations are generated. The value should be
-   one of (with the default formopt extension, only diagram is supported):
-      helicity       generates files helicity<X>/abbrevh<X>.f90
-      group          generates files helicity<X>/abbrevg<G>h<X>.f90
-      diagram        generates files helicity<X>/abbrevd<D>h<X>.f90
-   """,
-    str,
-    "diagram",
-    options=["helicity", "group", "diagram"],
-    hidden=True,
-)
-
 r2 = Property(
     "r2",
     """\
@@ -1521,7 +1506,6 @@ properties = [
     reference_vectors,
     abbrev_color,
     abbrev_limit,
-    abbrev_level,
     template_path,
     qgraf_bin,
     form_bin,

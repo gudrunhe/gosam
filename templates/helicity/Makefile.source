@@ -140,29 +140,13 @@ TXT_VIRT=$(subst .f90,.txt,$(DIAGRAMS_VIRT))
 ABB_VIRT=[%
 @if helsum %][%
 @else %][%
-   @select abbrev.level
-   @case helicity %]abbrevh[%helicity%][% @if enable_truncation_orders %]_0.f90 abbrevh[%helicity%]_1.f90 abbrevh[%helicity%]_2[% @end @if %].f90[%
-   @case group %][%
-      @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%][% @if enable_truncation_orders %]_0.f90 abbrevg[%grp%]h[%helicity%]_1.f90 abbrevg[%grp%]h[%helicity%]_2[% @end @if %].f90[%
-      @end @for %][%
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%][% @if enable_truncation_orders %]_0h[%helicity%].f90 abbrevd[%$_%]_1h[%helicity%].f90 abbrevd[%$_%]_2[% @end @if %]h[%helicity%].f90[%
       @end @for %][%
-   @end @select %][%
   @if extension quadruple %][%
-   @select abbrev.level
-   @case helicity %]abbrevh[%helicity%][% @if enable_truncation_orders %]_0_qp.f90 abbrevh[%helicity%]_1_qp.f90 abbrevh[%helicity%]_2[% @end @if %]_qp.f90[%
-   @case group %][%
-      @for groups var=grp %] \
-	abbrevg[%grp%]h[%helicity%][% @if enable_truncation_orders %]_0_qp.f90 abbrevg[%grp%]h[%helicity%]_2_qp.f90 abbrevg[%grp%]h[%helicity%]_2[% @end @if %]_qp.f90[%
-      @end @for %][%
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%][% @if enable_truncation_orders %]_0h[%helicity%]_qp.f90 abbrevd[%$_%]_1h[%helicity%]_qp.f90 abbrevd[%$_%]_2[% @end @if %]h[%helicity%]_qp.f90[%
       @end @for %][%
-   @end @select %][%
  @end @if extension quadruple %][%
 @end @if helsum %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
@@ -451,8 +435,7 @@ d[%$_%]_[% efto %]h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D DERIVATIVESATZERO=1[%
 			@end @if %] \
 		../codegen/finaloptimization.frm[%
-                @end @if helsum %][%
-	   @select abbrev.level @case diagram %]
+                @end @if helsum %]
 	@touch d[%$_%]_[% efto %]h[%helicity%]l1-stamp
 d[%$_%]_[% efto %]h[%helicity%]l1-stamp: d[%$_%]_[% efto %]h[%helicity%]l1.txt[%
 @if internal GENERATE_DERIVATIVES %]
@@ -620,8 +603,7 @@ d[%$_%]_[% efto %]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]_[% 
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-                @end @if helsum %][%
-		@end @select %]
+                @end @if helsum %]
 [% @end @for %]
 [% @else %]
 
@@ -672,8 +654,7 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D DERIVATIVESATZERO=1[%
 			@end @if %] \
 		../codegen/finaloptimization.frm[%
-                @end @if helsum %][%
-	   @select abbrev.level @case diagram %]
+                @end @if helsum %]
 	@touch d[%$_%]h[%helicity%]l1-stamp
 d[%$_%]h[%helicity%]l1-stamp: d[%$_%]h[%helicity%]l1.txt[%
 @if internal GENERATE_DERIVATIVES %]
@@ -841,8 +822,7 @@ d[%$_%]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-                @end @if helsum %][%
-		@end @select %]
+                @end @if helsum %]
 [% @end @if %][%
 	@end @for diagrams %][%
 @end @for groups %][%

@@ -736,10 +736,6 @@ def workflow(conf):
     if conf["regularisation_scheme"] == "cdr" or "cdr" in ext:
         conf["olp.irregularisation"] = "CDR"
 
-    # We need to put out an error if we specify formopt and some other extensions
-    if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
-        raise GolemConfigError("formopt only supported with abbrev.level=diagram\n")
-
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
         if ("ninja" not in ext) or ("golem95" in ext):

@@ -16,7 +16,6 @@ one=gs,e
 
 helicities=++++
 
-abbrev.level=diagram
 filter.nlo= lambda d: not d.isScaleless()
 
 regularisation_scheme=cdr

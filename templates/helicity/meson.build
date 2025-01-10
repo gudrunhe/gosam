@@ -11,18 +11,9 @@ generated_sources = [[%
         @end @if generate_eft_counterterms %][%
         @if helsum %][% @else %][%
             @if generate_nlo_virt %][%
-                @select abbrev.level
-                    @case helicity %]
-                        'abbrevh[%helicity%].f90'[% @if extension quadruple%], 'abbrevh[%helicity%].f90' [% @end @if %],[%
-                    @case group %][%
-                        @for groups var=grp %]
-                            'abbrevg[%grp%]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevg[%grp%]h[%helicity%].f90' [% @end @if %],[%
-                        @end @for %][%
-                    @case diagram %][%
                         @for elements topolopy.keep.virt %]
                             'abbrevd[%$_%]_[% efto %]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]_[% efto %]h[%helicity%].f90' [% @end @if %],[%
                         @end @for %][%
-                @end @select %][%
                 @for elements topolopy.keep.virt %]
                     'd[%$_%]_[% efto %]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1_qp.f90' [% @end @if %],[%
                     @if internal GENERATE_DERIVATIVES %] 'd[%$_%]_[% efto %]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
@@ -45,18 +36,9 @@ generated_sources = [[%
     @end @if generate_eft_counterterms %][%
     @if helsum %][% @else %][%
         @if generate_nlo_virt %][%
-            @select abbrev.level
-                @case helicity %]
-	                'abbrevh[%helicity%].f90'[% @if extension quadruple%], 'abbrevh[%helicity%]_qp.f90' [% @end @if %],[%
-                @case group %][%
-                    @for groups var=grp %]
-	                    'abbrevg[%grp%]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevg[%grp%]h[%helicity%]_qp.f90' [% @end @if %],[%
-                    @end @for %][%
-                @case diagram %][%
                     @for elements topolopy.keep.virt %]
 	                    'abbrevd[%$_%]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]h[%helicity%]_qp.f90' [% @end @if %],[%
                     @end @for %][%
-            @end @select %][%
             @for elements topolopy.keep.virt %]
                 'd[%$_%]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1_qp.f90' [% @end @if %],[%
                 @if internal GENERATE_DERIVATIVES %] 'd[%$_%]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
