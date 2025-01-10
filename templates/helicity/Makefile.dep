@@ -10,44 +10,32 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
       @select abbrev.level
       @case helicity %]
 abbrevh[%helicity%].[%O%]: globals.[%O%][%
-	      @select r2
-			@case implicit explicit off %][%
             @for elements topolopy.keep.virt %]
 d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevh[%helicity%].[%O%][%
             @end @for %][%
-			@end @select %][%
       @case group %][%
          @for groups var=grp %]
 abbrevg[%grp%]h[%helicity%].[%O%]: globals.[%O%][%
-	         @select r2
-   			@case implicit explicit off %][%
                @for diagrams group=grp%]
 d[%$_%]_0h[%helicity%]l1.[%O%]: abbrevg[%grp%]h[%helicity%].[%O%][%
                @end @for %][%
-				@end @select %][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
-abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%]: globals.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%]: globals.[%O%]
 d[%$_%]_[% efto %]h[%helicity%]l1.[%O%]: abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 d[%$_%]_[% efto %]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
          @end @for %][%
 	 @else %]
-abbrevd[%$_%]h[%helicity%].[%O%]: globals.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+abbrevd[%$_%]h[%helicity%].[%O%]: globals.[%O%]
 d[%$_%]h[%helicity%]l1.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 d[%$_%]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 	 @end @if %][%
          @end @for %][%
       @end @select %][%
@@ -55,50 +43,36 @@ d[%$_%]h[%helicity%]l1d.[%O%]: abbrevd[%$_%]h[%helicity%].[%O%][%
       @select abbrev.level
       @case helicity %]
 abbrevh[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-	      @select r2
-			@case implicit explicit off %][%
             @for elements topolopy.keep.virt %]
 d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevh[%helicity%]_qp.[%O%][%
             @end @for %][%
-			@end @select %][%
       @case group %][%
          @for groups var=grp %]
 abbrevg[%grp%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-	         @select r2
-   			@case implicit explicit off %][%
                @for diagrams group=grp%]
 d[%$_%]_0h[%helicity%]l1_qp.[%O%]: abbrevg[%grp%]h[%helicity%]_qp.[%O%][%
                @end @for %][%
-				@end @select %][%
          @end @for %][%
       @case diagram %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
-abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%]: globals_qp.[%O%]
 d[%$_%]_[% efto %]h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 d[%$_%]_[% efto %]h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 	 @end @for %][%
 	 @else %]
-abbrevd[%$_%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+abbrevd[%$_%]h[%helicity%]_qp.[%O%]: globals_qp.[%O%]
 d[%$_%]h[%helicity%]l1_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 d[%$_%]h[%helicity%]l1d_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 	 @end @if %][%
          @end @for %][%
       @end @select %][%
    @end @if extension quadruple %][%
-	   @select r2
-   	@case implicit explicit off %][%
 
       	@if extension golem95 %][%
 	@if enable_truncation_orders %][%
@@ -172,7 +146,6 @@ d[%$_%]h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 	@end @if %][%
         @end @if extension quadruple %][%
 	@end @if extension ninja %][%
-	@end @select %][%
    @end @if generate_nlo_virt%][%
 @end @if helsum %][%
 	@if enable_truncation_orders %][%
@@ -180,15 +153,12 @@ d[%$_%]h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %].[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
-	   @select r2
-		@case implicit explicit off %][%
 	      @if extension golem95 %] golem95_[% efto %]h[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_[% efto %]h[%helicity%].[%O%][%
                  @if extension quadruple %] ninja_[% efto %]h[%helicity%]_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
-		@end @select %][%
 	   @if generate_lo_diagrams %] \
 			diagramsl0_[% efto %].[%O%][%
 		   @if internal REQUIRE_FR5 %] diagramsl0_[% efto %]fr5.[%O%][%
@@ -214,15 +184,12 @@ amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagram
 amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
-	   @select r2
-		@case implicit explicit off %][%
 	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninjah[%helicity%].[%O%][%
                  @if extension quadruple %] ninjah[%helicity%]_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
-		@end @select %][%
 	   @if generate_lo_diagrams %] \
 			diagramsl0.[%O%][%
 		   @if internal REQUIRE_FR5 %] diagramsl0fr5.[%O%][%
@@ -250,13 +217,10 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
 amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %]_qp.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
-	   @select r2
-		@case implicit explicit off %][%
 	      @if extension golem95 %] golem95_[% efto %]h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_[% efto %]h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-		@end @select %][%
 	   @if generate_lo_diagrams %] \
 			diagramsl0_[% efto %]_qp.[%O%][%
 		   @if internal REQUIRE_FR5 %] diagramsl0_[% efto %]fr5_qp.[%O%][%
@@ -282,13 +246,10 @@ amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_d
 amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
-	   @select r2
-		@case implicit explicit off %][%
 	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninjah[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-		@end @select %][%
 	   @if generate_lo_diagrams %] \
 			diagramsl0_qp.[%O%][%
 		   @if internal REQUIRE_FR5 %] diagramsl0fr5_qp.[%O%][%
@@ -349,8 +310,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
    @end @if generate_lo_diagrams %][%
 @if helsum %][%
 @else %][%
-	@select r2
-		@case implicit explicit off %][%
 
 		@if extension golem95 %][%
 		@if enable_truncation_orders %][%
@@ -397,7 +356,6 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 		@end @if extension quadruple %][%
 		@end @if %][%
 		@end @if extension ninja %][%
-	@end @select %][%
    @if generate_nlo_virt %][%
       @select abbrev.level
       @case helicity %]
@@ -410,24 +368,18 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%].mod: abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%].mod: abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%]
 [% process_name asprefix=\_ %]d[%$_%]_[% efto %]h[%helicity%]l1.mod: d[%$_%]_[% efto %]h[%helicity%]l1.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 [% process_name asprefix=\_ %]d[%$_%]_[% efto %]h[%helicity%]l1d.mod: d[%$_%]_[% efto %]h[%helicity%]l1d.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 		@end @for %][%
 	 @else %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod: abbrevd[%$_%]h[%helicity%].[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%].mod: abbrevd[%$_%]h[%helicity%].[%O%]
 [% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1.mod: d[%$_%]h[%helicity%]l1.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 [% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1d.mod: d[%$_%]h[%helicity%]l1d.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 	 @end @if %][%
          @end @for %][%
       @end @select %][%
@@ -443,24 +395,18 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.mod: abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.mod: abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%]
 [% process_name asprefix=\_ %]d[%$_%]_[% efto %]h[%helicity%]l1_qp.mod: d[%$_%]_[% efto %]h[%helicity%]l1_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 [% process_name asprefix=\_ %]d[%$_%]_[% efto %]h[%helicity%]l1d_qp.mod: d[%$_%]_[% efto %]h[%helicity%]l1d_qp.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 		@end @for %][%
 	 @else %]
-[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%]_qp.mod: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
-	         @select r2
-   			@case implicit explicit off %]
+[% process_name asprefix=\_ %]abbrevd[%$_%]h[%helicity%]_qp.mod: abbrevd[%$_%]h[%helicity%]_qp.[%O%]
 [% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1_qp.mod: d[%$_%]h[%helicity%]l1_qp.[%O%][%
             	@if internal GENERATE_DERIVATIVES %]
 [% process_name asprefix=\_ %]d[%$_%]h[%helicity%]l1d_qp.mod: d[%$_%]h[%helicity%]l1d_qp.[%O%][%
 	           @end @if %][%
-	      	@end @select %][%
 	 @end @if %][%
          @end @for %][%
       @end @select %][%

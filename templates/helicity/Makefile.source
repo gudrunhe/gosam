@@ -86,8 +86,6 @@ DIAGRAMS_VIRT=[%
       @end @if %][%
    @end @for %][%
 @else %][%
-@select r2
-@case implicit explicit off %][%
    @for elements topolopy.keep.virt %][%
    @if enable_truncation_orders %][%
    @for each 0 1 2 var=efto %] \
@@ -135,19 +133,9 @@ DIAGRAMS_VIRT=[%
    @end @if %][%
    @end @if %][%
    @end @for %][%
-@end @select %][%
 @end @if %]
 
-TXT_VIRT=[%
-@select r2
-@case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
-@case only %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%][% @if enable_truncation_orders %]_0h[%helicity%]l1.abb \
-	d[%$_%]_1h[%helicity%]l1.abb \
-	d[%$_%]_2[% @end @if %]h[%helicity%]l1.abb[%
-   @end @for %][%
-@end @select %]
+TXT_VIRT=$(subst .f90,.txt,$(DIAGRAMS_VIRT))
 
 ABB_VIRT=[%
 @if helsum %][%

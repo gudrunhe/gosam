@@ -304,7 +304,6 @@
 			<file src="ninja.f90" dest="ninjah%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="ninja" />
-				<except if-option="r2" value="only" />
 				<except if-option="enable_truncation_orders" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
@@ -314,7 +313,6 @@
 				  arguments="trnco,helicity"
 				  class="Integrals">
 			      <only if-extension="ninja" />
-			      <except if-option="r2" value="only" />
 			      <only if-option="enable_truncation_orders" value="true" />
 			      <filter name="Fortran90" width="80"/>
 			  </file>
@@ -322,7 +320,6 @@
 			<file src="golem95.f90" dest="golem95h%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="golem95" />
-				<except if-option="r2" value="only" />
 				<except if-option="enable_truncation_orders" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
@@ -332,7 +329,6 @@
 				  arguments="trnco,helicity"
 				  class="Integrals">
 			      <only if-extension="golem95" />
-			      <except if-option="r2" value="only" />
 			      <only if-option="enable_truncation_orders" value="true" />
 			      <filter name="Fortran90" width="80"/>
 			  </file>
@@ -401,7 +397,6 @@
 				class="Integrals">
 				<only if-extension="ninja" />
 				<only if-extension="quadruple" />
-				<except if-option="r2" value="only" />
 				<except if-option="enable_truncation_orders" value="true" />
 				<filter name="Fortran90" width="80"/>
 			</file>
@@ -412,7 +407,6 @@
 				  class="Integrals">
 			      <only if-extension="ninja" />
 			      <only if-extension="quadruple" />
-			      <!-- <except if-option="r2" value="only" /> -->
 			      <only if-option="enable_truncation_orders" value="true" />
 			      <filter name="Fortran90" width="80"/>
 			  </file>
@@ -435,7 +429,6 @@
 		<file src="amplitude.f90" class="Integrals" />
 		<file src="golem95.f90"	class="Integrals">
 				<only if-extension="golem95" />
-				<except if-option="r2" value="only" />
 				<except if-option="enable_truncation_orders" value="true" />
 				<filter name="Fortran90" width="80"/>
 		</file>
@@ -445,14 +438,12 @@
 			arguments="trnco"
 			class="Integrals">
 		    <only if-extension="golem95" />
-		    <except if-option="r2" value="only" />
 		    <only if-option="enable_truncation_orders" value="true" />
 		    <filter name="Fortran90" width="80"/>
 		  </file>
 		</foreach>
 		<file src="ninja.f90" class="Integrals">
 				<only if-extension="ninja" />
-				<except if-option="r2" value="only" />
 				<except if-option="enable_truncation_orders" value="true" />
 				<filter name="Fortran90" width="80"/>
 		</file>
@@ -462,7 +453,6 @@
 			arguments="trnco"
 			class="Integrals">
 		    <only if-extension="ninja" />
-		    <!-- <except if-option="r2" value="only" /> -->
 		    <only if-option="enable_truncation_orders" value="true" />
 		    <filter name="Fortran90" width="80"/>
 		  </file>
@@ -480,7 +470,6 @@
 		<file src="ninja_qp.f90" class="Integrals">
 		  <only if-extension="ninja" />
 		  <only if-extension="quadruple" />
-		  <except if-option="r2" value="only" />
 		  <except if-option="enable_truncation_orders" value="true" />
 		  <filter name="Fortran90" width="80"/>
 		</file>
@@ -491,7 +480,6 @@
 			class="Integrals">
 		    <only if-extension="ninja" />
 		    <only if-extension="quadruple" />
-		    <!-- <except if-option="r2" value="only" /> -->
 		    <only if-option="enable_truncation_orders" value="true" />
 		    <filter name="Fortran90" width="80"/>
 		  </file>

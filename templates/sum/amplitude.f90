@@ -3,9 +3,7 @@
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color, only: numcs[%
-@if generate_nlo_virt %][%
-   @select r2
-   @case implicit explicit off %]
+@if generate_nlo_virt %]
    use [% process_name asprefix=\_ %]groups[%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
@@ -15,7 +13,6 @@
    use ninjago_module, only: ki_nin
    use [% process_name asprefix=\_ %]ninja[%
       @end @if %][%
-   @end @select %][%
 @end @if %]
    [% @if internal CUSTOM_SPIN2_PROP
    %]use [% process_name asprefix=\_ %]custompropagator[% @end @if %]
@@ -63,11 +60,8 @@ contains
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0, only: amplitudeh[%helicity%]l0 => amplitude[%
    @end @for %][%
-@end @if %][%
-@select r2 @case only %][%
-@else %]
-      use [% process_name asprefix=\_ %]groups[%
-@end @select %]
+@end @if %]
+      use [% process_name asprefix=\_ %]groups
       implicit none
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
@@ -165,33 +159,6 @@ contains
       samplitude( 0) = samp_part(0, 0) + samp_part(1,-1) + samp_part(2,-2)
       samplitude(-1) = samp_part(0,-1) + samp_part(1,-2)
       samplitude(-2) = samp_part(0,-2)[%
-   @case off %]
-      epspow=0
-      samplitude(:) = 0.0_ki[%
-      @for repeat maxloopsize shift=1 var=ls %][%
-         @for groups loopsize=ls var=grp %][%
-            @if use_flags_1 %]
-      if(evaluate_virt_group([% grp %])) then[%
-            @end @if %]
-         call evaluate_group[% grp %](scale2, acc, acc_ok)
-         ok = ok .and. acc_ok
-         samplitude(:) = samplitude(:) + acc[%
-            @if use_flags_1 %]
-      end if[%
-            @end @if %][%
-         @end @for groups %][%
-      @end @for %][%
-   @case only %]
-      samplitude(-2:-1) = 0.0_ki
-      if(debug_nlo_diagrams) then
-         write(logfile,'(A22,G24.16,A6,G24.16,A4)') &
-         & "<result name='r2' re='", real(rat2, ki), &
-         &                 "' im='", aimag(rat2), "' />"
-      end if
-      samplitude(0) = [%
-      @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
-      @else %]rat2[%
-      @end @if %][%
    @case explicit %]
       epspow=0
       samplitude(-2) = 0.0_ki
@@ -227,8 +194,6 @@ contains
 @end @if generate_nlo_virt %]
    end function samplitude
    !---#] function samplitude:[%
-@select r2
-@case implicit explicit off %][%
    @for groups var=grp %]
 !---#[ subroutine evaluate_group[% grp %]:
 subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
@@ -332,6 +297,5 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    end if
 end subroutine evaluate_group[% grp %]
 !---#] subroutine evaluate_group[% grp %]:[%
-   @end @for groups %][%
-@end @select %]
+   @end @for groups %]
 end module [% process_name asprefix=\_ %]amplitude

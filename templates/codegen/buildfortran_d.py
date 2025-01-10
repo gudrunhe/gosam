@@ -130,20 +130,14 @@ f90file.write(' \n')
 f90file.write('contains \n')
 for irank in range(1,rank+2):
 	f90file.write('!---#[ function brack_%s: \n' % irank)
-	f90file.write('   function brack_%s(Q' % irank[%
-      @select r2
-      @case implicit explicit %]+ ', mu2'[%
-      @end @select %]+') result(brack)\n')
+	f90file.write('   function brack_%s(Q' % irank+ ', mu2'+') result(brack)\n')
 	f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model \n')
 	f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 	f90file.write('      use [% process_name asprefix=\_ %]color \n')
 	f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 	f90file.write('      implicit none \n')
-	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
-      @select r2
-      @case implicit explicit %]
-	f90file.write('      complex(ki), intent(in) :: mu2\n')[%
-      @end @select %]
+	f90file.write('      complex(ki), dimension(4), intent(in) :: Q\n')
+	f90file.write('      complex(ki), intent(in) :: mu2\n')
 	f90file.write('      complex(ki), dimension('+str(acd_maxl[irank-1])+') :: acd'+diag+'\n')
 	f90file.write('      complex(ki) :: brack\n')
 
@@ -219,9 +213,7 @@ f90file.write('      t1 = 0\n')
 for irank in range(1,rank+2):
 	jtem = str(irank - 1)
 	f90file.write('      if(deg.eq.%s) then\n' % jtem )
-	[%@select r2 @case explicit implicit %]
 	brackstr = 'brack_%s' % str(irank) 
-	[%@end @select %]
 	wstr = '         numerator = cond(epspow.eq.t1,%s,Q,mu2)\n' % brackstr
 	f90file.write(wstr)
 	f90file.write('         return\n')
@@ -545,20 +537,14 @@ f90file_qp.write(' \n')
 f90file_qp.write('contains \n')
 for irank in range(1,rank+2):
 	f90file_qp.write('!---#[ function brack_%s: \n' % irank)
-	f90file_qp.write('   function brack_%s(Q' % irank[%
-      @select r2
-      @case implicit explicit %]+ ', mu2'[%
-      @end @select %]+') result(brack)\n')
+	f90file_qp.write('   function brack_%s(Q' % irank+ ', mu2'+') result(brack)\n')
 	f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
 	f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 	f90file_qp.write('      implicit none \n')
-	f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q\n')[%
-      @select r2
-      @case implicit explicit %]
-	f90file_qp.write('      complex(ki), intent(in) :: mu2\n')[%
-      @end @select %]
+	f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q\n')
+	f90file_qp.write('      complex(ki), intent(in) :: mu2\n')
 	f90file_qp.write('      complex(ki), dimension('+str(acd_maxl[irank-1])+') :: acd'+diag+'\n')
 	f90file_qp.write('      complex(ki) :: brack\n')
 
@@ -634,9 +620,7 @@ f90file_qp.write('      t1 = 0\n')
 for irank in range(1,rank+2):
 	jtem = str(irank - 1)
 	f90file_qp.write('      if(deg.eq.%s) then\n' % jtem )
-	[%@select r2 @case explicit implicit %]
 	brackstr = 'brack_%s' % str(irank)
-	[%@end @select %]
 	wstr = '         numerator = cond(epspow.eq.t1,%s,Q,mu2)\n' % brackstr
 	f90file_qp.write(wstr)
 	f90file_qp.write('         return\n')

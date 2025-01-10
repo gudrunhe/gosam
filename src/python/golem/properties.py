@@ -814,11 +814,10 @@ r2 = Property(
    implicit    -- mu^2 terms are kept in the numerator and reduced
                   at runtime
    explicit    -- mu^2 terms are reduced analytically
-   off         -- all mu^2 terms are set to zero
    """,
     str,
     "explicit",
-    options=["implicit", "explicit", "off", "only"],
+    options=["implicit", "explicit"],
 )
 
 crossings = Property(

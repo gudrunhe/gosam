@@ -514,7 +514,6 @@ def workflow(conf):
     templates = os.path.expandvars(templates)
     qgraf_options = conf.getProperty(golem.properties.qgraf_options)
 
-    r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
     # Prepare a copy of the setup file in the property [% user.setup %]
     buf = io.StringIO()
     conf.store(
@@ -682,7 +681,7 @@ def workflow(conf):
     # qgraf_options.append("onshell")
     # conf[golem.properties.qgraf_options] = ",".join(qgraf_options)
 
-    if generate_nlo_virt and not r2only:
+    if generate_nlo_virt:
         # Check if a suitable extension for the reduction is available
         red_flag = False
         ext = golem.properties.getExtensions(conf)
@@ -745,12 +744,10 @@ def workflow(conf):
             + "The two options are not compatible. \nPlease change your input "
             + "card (remove topolynomial or add noformopt) and re-run."
         )
-    if "r2_only" in ext:
-        raise GolemConfigError("r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
     if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
         raise GolemConfigError("formopt only supported with abbrev.level=diagram\n")
 
-    # Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
+    # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
         if ("ninja" not in ext) or ("golem95" in ext):
             raise GolemConfigError(

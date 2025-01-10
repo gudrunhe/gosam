@@ -279,10 +279,7 @@ contains
 
       if(.not. corrections_are_qcd) then
          PSP_check = .false.
-      end if[%
-
-@select r2
-@case implicit explicit off %]
+      end if
       if (init_third_party) then
       ! call our banner
       call banner()
@@ -318,8 +315,7 @@ contains
             enddo
          end if
       end if
-      end if[%
-@end @select %]
+      end if
 
       call init_functions()
       call init_color()
@@ -331,12 +327,9 @@ contains
    !---#] subroutine initgolem :
    !---#[ subroutine exitgolem :
    subroutine     exitgolem(is_last)[%
-@select r2
-@case implicit explicit off %][%
    @if extension golem95 %]
       use [% process_name asprefix=\_ %]groups, only: tear_down_golem95[%
-   @end @if %][%
-@end @select %]
+   @end @if %]
       implicit none
       logical, optional, intent(in) :: is_last
 
@@ -346,10 +339,7 @@ contains
          exit_third_party = is_last
       else
          exit_third_party = .true.
-      end if[%
-
-@select r2
-@case implicit explicit off %]
+      end if
       if (exit_third_party) then[%
    @if extension golem95 %]
          call tear_down_golem95()[%
@@ -358,8 +348,7 @@ contains
             write(42,'(A6)')  "</run>"
             close(unit=42)
          endif
-      end if[%
-@end @select %]
+      end if
    end subroutine exitgolem
    !---#] subroutine exitgolem :
 
@@ -751,9 +740,6 @@ contains
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
          @end @if %]
       end if[%
-
-         @select r2
-         @case implicit explicit off %][%
       @if generate_counterterms %]
       select case (renormalisation)
       case (0)
@@ -775,13 +761,9 @@ contains
          stop
       end select[% 
       @end @if %][%
-         @end @select r2 %][%
       @else %]
       amp(2:4) = 0.0_ki[%
       @end @if%][%
-
-      @select r2
-      @case implicit explicit off %][%
 		@if generate_nlo_virt %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
@@ -797,8 +779,7 @@ contains
            &        + num_gluons * 1.0_ki/6.0_ki * CA)[%
          @end @if extension dred %]
       end if[%
-		@end @if %][%
-      @end @select r2 %]
+		@end @if %]
       if (present(ok)) ok = my_ok
 
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
@@ -2586,10 +2567,7 @@ contains
          @else %]
          amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
          @end @if %]
-      end if[%
-
-         @select r2
-         @case implicit explicit off %]
+      end if
       select case (renormalisation)
       case (0)
          ! no renormalisation
@@ -2609,13 +2587,9 @@ contains
          print*, "  invalid value for renormalisation=", renormalisation
          stop
       end select[%
-         @end @select r2 %][%
       @else %]
       amp(2:4) = 0.0_ki_qp[%
       @end @if%][%
-
-      @select r2
-      @case implicit explicit off %][%
 		@if generate_nlo_virt %]
       if (convert_to_cdr) then
          ! Scheme conversion for infrared structure
@@ -2631,8 +2605,7 @@ contains
            &        + num_gluons * 1.0_ki_qp/6.0_ki_qp * CA_qp)[%
          @end @if extension dred %]
       end if[%
-		@end @if %][%
-      @end @select r2 %]
+		@end @if %]
       if (present(ok)) ok = my_ok
 
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then

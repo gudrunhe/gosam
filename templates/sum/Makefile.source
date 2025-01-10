@@ -27,8 +27,6 @@ FORM_OPT=-D PROCESSPATH=.. \
 
 [% @if generate_nlo_virt %]
 DIAGRAMS_VIRT=[%
-@select r2
-@case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.f90[%
 	   @if extension quadruple %] \
@@ -50,17 +48,9 @@ DIAGRAMS_VIRT=[%
         d[%$_%]l121_qp.f90[%
       @end @if %][%
       @end @if %][%
-   @end @for %][%
-@end @select %]
+   @end @for %]
 
-TXT_VIRT=[%
-@select r2
-@case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
-@case only %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]l1.abb[%
-   @end @for %][%
-@end @select %]
+TXT_VIRT=$(subst .f90,.txt,$(DIAGRAMS_VIRT))
 
 ABB_VIRT=[%
    @select abbrev.level

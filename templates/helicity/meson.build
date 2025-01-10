@@ -97,22 +97,18 @@ hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
 @if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%
         @if helsum%][% @else%][%
-            @select r2 @case implicit explicit off %][%
                 @if extension golem95 %] 'golem95_[% efto %]h[%helicity%].f90',[%
                 @end @if %][%
                 @if extension ninja %] 'ninja_[% efto %]h[%helicity%].f90'[% @if extension quadruple%], 'ninja_[% efto %]h[%helicity%]_qp.f90' [% @end @if %],[%
                 @end @if %][%
-            @end @select %][%
         @end @if helsum %][%
     @end @for %][%
 @else %][%
     @if helsum%][% @else %][%
-        @select r2 @case implicit explicit off %][%
            @if extension golem95 %] 'golem95h[%helicity%].f90',[%
            @end @if %][%
            @if extension ninja %] 'ninjah[%helicity%].f90'[% @if extension quadruple%], 'ninjah[%helicity%]_qp.f90' [% @end @if %][%
            @end @if %][%
-        @end @select %][%
     @end @if helsum %][%
 @end @if enable_truncation_orders %]])
 [% process_name %]_source += [% process_name %]_helicity[%helicity%]_gen

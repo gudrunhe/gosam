@@ -117,7 +117,7 @@ F diag1,...,diag`DIAGRAMCOUNT';
 #EndIf[%
 @end @if %][%
 @select r2
-@case explicit only %]
+@case explicit %]
 #If `LOOPS' == 1
    #include- r2.hh
    #include- r2integrals.hh
@@ -636,36 +636,6 @@ Local d`DIAG'R2 = 0;[%
    #call ReduceDiagramR2(`DIAG')
 .sort 5.5;
    UnHide diagram`DIAG';[%
-@case off %]
-* R2 term is discarded:
-* All terms in the numerator which come with a \epsilon or \mu^2
-* are set to zero.
-   Brackets eps, Qt2;
-.sort 5.3;
-   Id eps = 0;
-   Id Qt2 = 0;
-.sort 5.3;[%
-@case only %]
-* R2 term only:
-* All terms in the numerator which come with a \epsilon or \mu^2
-* are replaced by explicit expressions. Everything else is discarded.
-   Brackets eps, Qt2;
-.sort 5.3;
-   Local d`DIAG'R2 = 
-      + diagram`DIAG'[eps] * fDUMMY1(eps)
-      + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
-      + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2)
-      + diagram`DIAG'[Qt2^3] * fDUMMY1(Qt2^3);
-   Id eps = 0;
-   Id Qt2 = 0;
-   Id fDUMMY1(eps?) = eps;
-
-   If(count(eps,1,Qt2,1)==0) Discard;
-.sort 5.4;
-   Hide diagram`DIAG';
-   #call ReduceDiagramR2(`DIAG')
-.sort 5.5;
-   UnHide diagram`DIAG';[%
 @else %]
    #message Undefined value for r2: "[% r2 %]"
    #terminate[%
@@ -915,7 +885,8 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
    #EndIf
 #EndIf
 .end[%
-@case only off %]
-# message 'FORM optimization implemented only with r2=explicit/implicit!!'
+@else %]
+   #message Undefined value for r2: "[% r2 %]"
+   #terminate
 .end[%
 @end @select %]

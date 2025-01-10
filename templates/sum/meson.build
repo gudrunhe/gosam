@@ -39,12 +39,9 @@ generated_sources += [[%
                 )
 
 [% process_name %]_source += files(['globals.f90', 'amplitude.f90',[%
-@select r2
-@case implicit explicit off %][%
    @if extension golem95 %] 'golem95.f90',[%
    @end @if %][%
    @if extension ninja %] 'ninja.f90',[%
-   @end @if %][%
-@end @select %]])
+   @end @if %]])
 
 [% process_name %]_source += [% process_name %]_sum_gen

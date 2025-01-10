@@ -11,11 +11,8 @@ rambo.[%O%]: config.[%O%] model.[%O%]
 globalsl1.[%O%]: config.[%O%] color.[%O%]
 util.[%O%]: config.[%O%] color.[%O%]
 kinematics.[%O%]: config.[%O%] model.[%O%]
-dipoles.[%O%]: config.[%O%] color.[%O%] model.[%O%] kinematics.[%O%][%
-	@select r2
-	@case implicit explicit off %]
+dipoles.[%O%]: config.[%O%] color.[%O%] model.[%O%] kinematics.[%O%]
 groups.[%O%]: config.[%O%] model.[%O%] kinematics.[%O%] globalsl1.[%O%][%
-	@end @select %][%
    @if internal CUSTOM_SPIN2_PROP %]
 custompropagator.[%O%]: config.[%O%] model.[%O%][%
    @end @if %][%
