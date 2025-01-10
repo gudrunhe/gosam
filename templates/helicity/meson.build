@@ -1,42 +1,12 @@
 generated_sources = [[%
 @if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%
-        @if generate_lo_diagrams %][%
-            @if group %]
-	            'diagramsl0_[% efto %].f90'[% @if extension quadruple%], 'diagramsl0_[% efto %]_qp.f90' [% @end @if %],[%
-            @else %][%
-                @for elements topolopy.keep.tree %]
-	                'd[%$_%]_[% efto %]h[%helicity%]l0.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l0_qp.f90' [% @end @if %],[%
-                @end @for %][%
-            @end @if %][%
-            @if internal REQUIRE_FR5 %][%
-                @if group %]
-	                'diagramsl0_[% efto %]fr5.f90'[% @if extension quadruple%], 'diagramsl0_[% efto %]fr5_qp.f90' [% @end @if %],[%
-                @else %][%
-                    @for elements topolopy.keep.tree %]
-	                    'd[%$_%]_[% efto %]h[%helicity%]l0fr5.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l0fr5_qp.f90' [% @end @if %],[%
-                    @end @for %][%
-                @end @if %][%
-            @end @if %][%
+        @if generate_lo_diagrams %]
+	            'diagramsl0_[% efto %].f90'[% @if extension quadruple%], 'diagramsl0_[% efto %]_qp.f90' [% @end @if %],[% 
         @end @if generate_lo_diagrams %][%
         @if generate_eft_counterterms %][%
-        @if eval topolopy.count.ct .gt. 0 %][%
-            @if group %]
-	            'diagramsct_[% efto %].f90'[% @if extension quadruple%], 'diagramsct_[% efto %]_qp.f90' [% @end @if %],[%
-            @else %][%
-                @for elements topolopy.keep.ct %]
-	                'd[%$_%]_[% efto %]h[%helicity%]ct.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]ct_qp.f90' [% @end @if %],[%
-                @end @for %][%
-            @end @if %][%
-            @if internal REQUIRE_FR5 %][%
-                @if group %]
-	                'diagramsct_[% efto %]fr5.f90'[% @if extension quadruple%], 'diagramsct_[% efto %]fr5_qp.f90' [% @end @if %],[%
-                @else %][%
-                    @for elements topolopy.keep.ct %]
-	                    'd[%$_%]_[% efto %]h[%helicity%]ctfr5.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]ctfr5_qp.f90' [% @end @if %],[%
-                    @end @for %][%
-                @end @if %][%
-            @end @if %][% 
+        @if eval topolopy.count.ct .gt. 0 %]
+	            'diagramsct_[% efto %].f90'[% @if extension quadruple%], 'diagramsct_[% efto %]_qp.f90' [% @end @if %],[% 
         @end @if %][%
         @end @if generate_eft_counterterms %][%
         @if helsum %][% @else %][%
@@ -65,42 +35,12 @@ generated_sources = [[%
         @end @if helsum %][%
     @end @for %][%
 @else %][%
-    @if generate_lo_diagrams %][%
-        @if group %]
-	        'diagramsl0.f90'[% @if extension quadruple%], 'diagramsl0_qp.f90' [% @end @if %],[%
-        @else %][%
-            @for elements topolopy.keep.tree %]
-	            'd[%$_%]h[%helicity%]l0.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l0_qp.f90' [% @end @if %],[%
-            @end @for %][%
-        @end @if %][%
-        @if internal REQUIRE_FR5 %][%
-            @if group %]
-	            'diagramsl0fr5.f90',[%
-            @else %][%
-                @for elements topolopy.keep.tree %]
-                    'd[%$_%]h[%helicity%]l0fr5.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l0fr5_qp.f90' [% @end @if %],[%
-                @end @for %][%
-            @end @if %][%
-        @end @if %][%
+    @if generate_lo_diagrams %]
+	        'diagramsl0.f90'[% @if extension quadruple%], 'diagramsl0_qp.f90' [% @end @if %],[% 
     @end @if generate_lo_diagrams %][%
     @if generate_eft_counterterms %][%
-    @if eval topolopy.count.ct .gt. 0 %][%
-        @if group %]
-	        'diagramsct.f90'[% @if extension quadruple%], 'diagramsct_qp.f90' [% @end @if %],[%
-        @else %][%
-            @for elements topolopy.keep.ct %]
-	            'd[%$_%]h[%helicity%]ct.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]ct_qp.f90' [% @end @if %],[%
-            @end @for %][%
-        @end @if %][%
-        @if internal REQUIRE_FR5 %][%
-            @if group %]
-	            'diagramsctfr5.f90',[%
-            @else %][%
-                @for elements topolopy.keep.ct %]
-                    'd[%$_%]h[%helicity%]ctfr5.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]ctfr5_qp.f90' [% @end @if %],[%
-                @end @for %][%
-            @end @if %][%
-        @end @if %][% 
+    @if eval topolopy.count.ct .gt. 0 %]
+	        'diagramsct.f90'[% @if extension quadruple%], 'diagramsct_qp.f90' [% @end @if %],[% 
     @end @if %][%
     @end @if generate_eft_counterterms %][%
     @if helsum %][% @else %][%

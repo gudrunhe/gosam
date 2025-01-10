@@ -394,16 +394,6 @@ template_path = Property(
     "",
 )
 
-group_diagrams = Property(
-    "group",
-    """\
-   Flag whether or not the tree-level diagrams should be grouped
-   into a single file.
-   """,
-    bool,
-    True,
-)
-
 sum_diagrams = Property(
     "diagsum",
     """\
@@ -1501,7 +1491,6 @@ properties = [
     qgraf_verbatim,
     qgraf_verbatim_lo,
     qgraf_verbatim_nlo,
-    group_diagrams,
     sum_diagrams,
     reduction_programs,
     polvec_method,
