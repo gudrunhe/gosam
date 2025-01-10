@@ -515,7 +515,6 @@ def workflow(conf):
     qgraf_options = conf.getProperty(golem.properties.qgraf_options)
 
     r2only = conf.getProperty(golem.properties.r2).lower().strip() == "only"
-    # formopt = conf.getProperty(golem.properties.formopt)
     # Prepare a copy of the setup file in the property [% user.setup %]
     buf = io.StringIO()
     conf.store(
@@ -724,8 +723,6 @@ def workflow(conf):
     if "better_num" not in ext:
         ext.append("better_num")
 
-    if "noformopt" not in ext:
-        ext.append("formopt")
     if "noderive" not in ext:
         ext.append("derive")
 
@@ -741,23 +738,17 @@ def workflow(conf):
         conf["olp.irregularisation"] = "CDR"
 
     # We need to put out an error if we specify formopt and some other extensions
-    if "formopt" in ext:
-        if "topolynomial" in ext:
-            raise GolemConfigError(
-                "Your configuration has select the extension 'topolynomial' \n"
-                "and optimization by FORM 'formopt'. "
-                + "The two options are not compatible. \nPlease change your input "
-                + "card (remove topolynomial or add noformopt) and re-run."
-            )
-        if "r2_only" in ext:
-            raise GolemConfigError("r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
-        if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
-            raise GolemConfigError("formopt only supported with abbrev.level=diagram\n")
-    if ("ninja" in ext) and ("formopt" not in ext):
+    if "topolynomial" in ext:
         raise GolemConfigError(
-            "The ninja reduction method is only supported with formopt.\n"
-            + "Please either remove noformopt or ninja in the input card\n"
+            "Your configuration has select the extension 'topolynomial' \n"
+            "and optimization by FORM 'formopt'. "
+            + "The two options are not compatible. \nPlease change your input "
+            + "card (remove topolynomial or add noformopt) and re-run."
         )
+    if "r2_only" in ext:
+        raise GolemConfigError("r2 only not supported with extension formopt. Add the 'noformopt' extension.\n")
+    if conf["abbrev.level"] != "diagram" and conf["abbrev.level"] is not None:
+        raise GolemConfigError("formopt only supported with abbrev.level=diagram\n")
 
     # Check that is 'quadruple' is in the extensions, only Ninja with formopt is used
     if "quadruple" in ext:

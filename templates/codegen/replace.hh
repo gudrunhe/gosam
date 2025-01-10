@@ -3,7 +3,6 @@
 #procedure subscriptreplace(INRANK)
 AutoDeclare S Vec;
 AutoDeclare S dtensor;
-[% @if extension formopt %]
 #do irank=0,`INRANK'[%
 @for pairs distinct %]
    Id SUBSCRIPT(spva[%
@@ -32,7 +31,6 @@ AutoDeclare S dtensor;
    Id SUBSCRIPT(spvae[%index2%]e[%index1%],iv`irank') =Vecspvae[%index2%]e[%index1%]iv`irank';[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]
@@ -98,7 +96,6 @@ AutoDeclare S dtensor;
 #EndDo
 #EndProcedure
 #procedure subscriptreplaceinvert(INRANK)
-[% @if extension formopt %]
 #do irank=0,`INRANK'[%
 @for pairs distinct %]
 	Id Vecspva[% @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
@@ -126,7 +123,6 @@ AutoDeclare S dtensor;
    Id Vecspvae[%index2%]e[%index1%]iv`irank' = SUBSCRIPT(spvae[%index2%]e[%index1%],iv`irank');[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]
@@ -147,7 +143,6 @@ AutoDeclare S dtensor;
 #EndDo
 #EndProcedure
 #procedure qshiftdotreplace
-[% @if extension formopt %]
 AutoDeclare S dp;[%
 @for pairs distinct %]
    Id dotproduct(spva[%
@@ -176,7 +171,6 @@ AutoDeclare S dp;[%
    Id dotproduct(spvae[%index2%]e[%index1%],qshift) =dpspvae[%index2%]e[%index1%]qshift;[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]
@@ -193,8 +187,7 @@ AutoDeclare S dp;[%
    Id dotproduct(qshift,qshift) = dpqshiftqshift;
 #EndProcedure
 #procedure qshiftdotreplaceinvert
-[% @if extension formopt %][%
-@for pairs distinct %]
+[% @for pairs distinct %]
    Id dpspva[% 
 					@if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
          %][% @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]qshift = dotproduct(spva[%
@@ -221,7 +214,6 @@ AutoDeclare S dp;[%
    Id dpspvae[%index2%]e[%index1%]qshift = dotproduct(spvae[%index2%]e[%index1%],qshift);[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]
@@ -239,7 +231,6 @@ AutoDeclare S dp;[%
 
 #EndProcedure
 #procedure vecdotreplace
-[% @if extension formopt %]
 AutoDeclare S dp;
 #Do vec={vecA,vecB,vecC}
 [%
@@ -270,7 +261,6 @@ AutoDeclare S dp;
    Id dotproduct(spvae[%index2%]e[%index1%],`vec') =dpspvae[%index2%]e[%index1%]`vec';[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]
@@ -296,7 +286,6 @@ Id dotproduct(vecB,vecC) = dpvecBvecC;
 
 #EndProcedure
 #procedure vecdotreplaceinvert
-[% @if extension formopt %]
 #Do vec={vecA,vecB,vecC}[%
 @for pairs distinct %]
    Id dpspva[% 
@@ -325,7 +314,6 @@ Id dotproduct(vecB,vecC) = dpvecBvecC;
    Id dpspvae[%index2%]e[%index1%]`vec' = dotproduct(spvae[%index2%]e[%index1%],`vec');[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 [%
 @for particles %]

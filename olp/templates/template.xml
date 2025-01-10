@@ -46,23 +46,18 @@
 		</file>
 		<file src="info.frm" class="OLP" usedby="olp"/>
 		<file src="modelopt.frm" class="OLP" usedby="olp">
-			<only if-extension="formopt" />
-		</file>
+					</file>
 		<file src="func.txt" class="Model" usedby="olp"/>
 		<file src="func.hh" class="Model" usedby="olp">
-			<only if-extension="formopt" />
-		</file>
+					</file>
 		<file src="symbols.hh" class="Model" usedby="olp">
-			<only if-extension="formopt" />
-		</file>
+					</file>
 		<file src="pythonin.py" class="Multi" usedby="olp">
-			<only if-extension="formopt" />
-		</file>
+					</file>
 		<file src="t2f.py" class="Verbatim" usedby="olp"/>
 		<file src="filter.py" class="Verbatim" usedby="olp"/>
 		<file src="buildmodel.py" class="Model" usedby="olp">
-			<only if-extension="formopt" />
-		</file>
+					</file>
 		<file src="meson.build" class="OLP" usedby="olp">
 			<only if-extension="meson"/>
 		</file>

@@ -47,10 +47,7 @@ Vector ZERO, vDUMMYA;
    Vector qshift;
    CFunction fshift;
 #EndIf
-[%
-@if extension formopt %]
 CF dotproduct;
-[% @end @if %]
 
 *---#[ Process dependent symbol definitions:
 #Define LEGS "[% num_legs %]"

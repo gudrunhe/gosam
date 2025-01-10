@@ -494,7 +494,6 @@ extensions = Property(
                     an olp_module.f90 linkable with Fortran77
 
    Other extensions:
-   noformopt    --- disable diagram optimization using FORM
    gaugecheck   --- modify gauge boson wave functions to allow for
                     a limited gauge check (introduces gauge*z variables)
    customspin2prop --- replace the propagator of spin-2 particles
@@ -520,8 +519,6 @@ extensions = Property(
     #   extensions=golem95
     #
     #   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
-    #   formopt      --- diagram optimization using FORM (works only with
-    #                    abbrev.level=diagram and r2=implicit/explicit).
     #   tracify      --- transform loop momenta into traces before running
     #                    the numerics
     list,
@@ -544,12 +541,10 @@ extensions = Property(
         "f77",
         "no-fr5",
         "ninja",
-        "formopt",
         "customspin2prop",
         "shared",
         "cdr",
         "noderive",
-        "noformopt",
         "tracify",
         "better_num",
         "quadruple",
@@ -1606,7 +1601,6 @@ def setInternals(conf):
         "__OLP_MODE__",
         "__OLP_BLHA1__",
         "__OLP_BLHA2__",
-        "__FORMOPT__",
         "__GENERATE_NINJA_TRIPLE__",
         "__GENERATE_NINJA_DOUBLE__",
         "__CUSTOM_SPIN2_PROP__",
@@ -1615,8 +1609,6 @@ def setInternals(conf):
 
     conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
     conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
-
-    conf["__FORMOPT__"] = "formopt" in extensions
 
     conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
     conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions

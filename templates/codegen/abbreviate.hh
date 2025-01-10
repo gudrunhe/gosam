@@ -55,8 +55,6 @@ AutoDeclare Symbols abb`DIAG'n;
 #EndProcedure
 
 
-[% 
-@if extension formopt %]
 #Procedure OptimizeCode(R2PREFACTOR)
 
 Local tot`DIAG'=CC*diagram`DIAG'+R2*d`DIAG'R2;
@@ -149,8 +147,7 @@ L redR2`DIAG' = tot`DIAG'*replace_(CC,0,R2,1);
 .sort
 Format Normal;
 #write <`OUTFILE'.prc> "L diagram`DIAG'  = %e",redCC`DIAG';
-#EndProcedure[%
-@end @if %]
+#EndProcedure
 
 
 #Procedure WriteUnoptimized(R2PREFACTOR)

@@ -1,6 +1,5 @@
 # vim: ts=3:sw=3:expandtab
-# Input for python parser. It is here because Python needs it
-# and you specified extensions=formopt
+# Input for python parser.
 
 # we need types of parameters
 # a list of all functions
