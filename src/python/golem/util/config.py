@@ -758,25 +758,6 @@ class Program(Component):
         return self.locations[:]
 
 
-class LoopTools(Library):
-    def __init__(self):
-        Library.__init__(self, "LoopTools", "libooptools")
-
-    def store(self, conf):
-        paths = self.getInstallationPath()
-        if len(paths) == 0:
-            return
-
-        path = self.undohome(paths[0])
-
-        if "+zzz.extensions" in conf:
-            conf["+zzz.extensions"] += ", looptools"
-        else:
-            conf["+zzz.extensions"] = "looptools"
-
-        conf["+looptools.ldflags"] = "-L%s -looptools" % path
-
-
 class AVH_OneLoop(Library):
     def __init__(self):
         Library.__init__(self, "avholo", "libavh_olo")
@@ -794,26 +775,6 @@ class AVH_OneLoop(Library):
             conf["+zzz.extensions"] = "avh_olo"
 
         conf["+avh_olo.ldflags"] = "-L%s -lavh_olo" % path
-
-
-class QCDLoop(Library):
-    def __init__(self):
-        Library.__init__(self, "QCDLoop", "libqcdloop")
-
-    def store(self, conf):
-        paths = self.getInstallationPath()
-        if len(paths) == 0:
-            return
-
-        path = self.undohome(paths[0])
-
-        if "+zzz.extensions" in conf:
-            conf["+zzz.extensions"] += ", qcdloop"
-        else:
-            conf["+zzz.extensions"] = "qcdloop"
-
-        conf["+qcdloop.ldflags"] = "-L%s -lqcdloop" % path
-
 
 class Ninja(Library):
     def __init__(self):

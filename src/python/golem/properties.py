@@ -510,13 +510,6 @@ extensions = Property(
     #   golem95      --- enable Golem95 for the reduction
     #   qshift       --- apply the shift of Q already at the FORM level
     #   numpolvec    --- evaluate polarisation vectors numerically
-    #   One option which is affected by this is LDFLAGS. In the following
-    #   example only ldflags.looptools is added to the LDFLAGS variable
-    #   in the makefiles whereas the variable ldflags.qcdloop is ignored.
-    #
-    #   extensions=golem95
-    #
-    #   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
     #   tracify      --- transform loop momenta into traces before running
     #                    the numerics
     list,
@@ -524,10 +517,8 @@ extensions = Property(
     options=[
         "golem95",
         "dred",
-        "qshift",
-        "qcdloop",
+        "qshift"
         "avh_olo",
-        "looptools",
         "gaugecheck",
         "derive",
         "generate-all-helicities",

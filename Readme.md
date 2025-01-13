@@ -71,7 +71,6 @@ meson install -C build
 will download, build and install 
 [QGRAF](http://cfif.tecnico.ulisboa.pt/~paulo/qgraf.html), 
 [Form](https://www.nikhef.nl/~form/), 
-[QCDLoop](http://qcdloop.fnal.gov/), 
 [Golem95](http://golem.hepforge.org/) (optional),
 [Ninja](https://ninja.hepforge.org/)
 and GoSam. By default, only `Ninja` is installed. By optionally setting `-Doption=value`, the default build options can be altered. 

@@ -3,9 +3,7 @@
 from golem.util.config import Configurator, OPTIONAL, REQUIRED
 
 components = {
-    #              "LoopTools": OPTIONAL,
     "AVH_OneLoop": OPTIONAL,
-    "QCDLoop": OPTIONAL,
     "Ninja": OPTIONAL,
     "Golem95": OPTIONAL,
     "Fortran": OPTIONAL,
