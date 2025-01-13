@@ -517,7 +517,7 @@ extensions = Property(
     options=[
         "golem95",
         "dred",
-        "qshift"
+        "qshift",
         "avh_olo",
         "gaugecheck",
         "derive",
