@@ -938,9 +938,6 @@ def process_order_file(
         templates = golem.util.tools.golem_path("olp", "templates")
 
     ext = golem.properties.getExtensions(conf)
-    if "shared" in ext:
-        conf["shared.fcflags"] = "-fPIC"
-        conf["shared.ldflags"] = "-fPIC"
 
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:

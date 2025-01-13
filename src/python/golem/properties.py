@@ -489,7 +489,6 @@ extensions = Property(
 
    Build system related extensions:
 
-   shared       --- create shared libraries (=dynamically linkable code)
    f77          --- in combination with the BLHA interface it generates
                     an olp_module.f90 linkable with Fortran77
 
@@ -530,7 +529,6 @@ extensions = Property(
         "no-fr5",
         "ninja",
         "customspin2prop",
-        "shared",
         "cdr",
         "noderive",
         "tracify",

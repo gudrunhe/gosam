@@ -38,18 +38,10 @@ LDFLAGS="$LDFLAGS @dep_ldflags@"
 CFLAGS="$CFLAGS @dep_cflags@"
 
 [% @if internal OLP_MODE %]
-[% @if extension shared %]
-PROCESS_LDFLAGS="-L@prefix@/@libdir@ -Wl,-rpath=@prefix@/@libdir@"
-[% @else %]
 PROCESS_LDFLAGS="@prefix@/@libdir@/libgolem_olp.a"
-[% @end @if %]
 PROCESS_CFLAGS="-I@prefix@/@includedir@"
 [% @else %]
-[% @if extension shared %]
-PROCESS_LDFLAGS="-L@prefix@/@libdir@ -Wl,-rpath=@prefix@/@libdir@"
-[% @else %]
 PROCESS_LDFLAGS="@prefix@/@libdir@/libgolem_process_[% process_name %].a"
-[% @end @if %]
 
 PROCESS_CFLAGS="-I@prefix@/@includedir@"
 [% @end @if %]
@@ -74,12 +66,8 @@ while [ $# -gt 0 ]; do
       -ocflags)
               printf " $CFLAGS"
    ;;
-      -deps)[%
-	      @if extension shared %]
-	      printf ""[%
-	      @else %]
-              printf " $PROCESS_LDFLAGS"[%
-	@end @if %]
+      -deps)
+              printf " $PROCESS_LDFLAGS"
    ;;
       -name)
               printf " [% process_name%]"

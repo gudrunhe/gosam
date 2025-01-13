@@ -748,10 +748,6 @@ def workflow(conf):
     conf["reduction_interoperation"] = conf["reduction_interoperation"].upper()
     conf["reduction_interoperation_rescue"] = conf["reduction_interoperation_rescue"].upper()
 
-    if "shared" in ext:
-        conf["shared.fcflags"] = "-fPIC"
-        conf["shared.ldflags"] = "-fPIC"
-
     if conf.getBooleanProperty("helsum"):
         if not conf.getBooleanProperty("generate_lo_diagrams"):
             raise GolemConfigError(
