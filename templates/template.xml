@@ -12,15 +12,11 @@
 	</file>
 	<file src="config.sh.in" class="Kinematics" executable="yes">
 	</file>
-	<file src="meson.build" class="Kinematics">
-		<only if-extension="meson" />
-	</file>
+	<file src="meson.build" class="Kinematics"/>
 	<file src="meson_options.txt" class="Kinematics">
-		<only if-extension="meson" />
 		<except if-internal="OLP_MODE"/>
 	</file>
 	<file src="install_mod_files.py" class="Verbatim" executable="yes">
-		<only if-extension="meson"/>
 		<except if-internal="OLP_MODE"/>
 	</file>
 
@@ -241,24 +237,16 @@
 		<file src="counterterms_qp.f90" class="Kinematics">
 				<only if-extension="quadruple"/>
 		</file>
-		<file src="meson.build" class="Kinematics">
-				<only if-extension="meson" />
-		</file>
-		<file src="generate_source.sh" class="Kinematics">
-		                <only if-extension="meson"/>
-		</file>
+		<file src="meson.build" class="Kinematics"/>
+		<file src="generate_source.sh" class="Kinematics"/>
 	</directory>
 
 	<directory src="doc">
 		<file src="axodraw.sty" class="Verbatim"/>
 		<file src="gind.ist" class="Verbatim"/>
 		<file src="Makefile" class="Kinematics"/>
-		<file src="meson.build" class="Kinematics">
-				<only if-extension="meson" />
-		</file>
-		<file src="generate_doc.sh" class="Kinematics">
-			<only if-extension="meson"/>
-		</file>
+		<file src="meson.build" class="Kinematics"/>
+		<file src="generate_doc.sh" class="Kinematics"/>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
 	</directory>
@@ -286,9 +274,7 @@
 		<file src="refine_momenta.cpp" class="Kinematics">
 			<only if-extension="quadruple" />
 		</file>
-		<file src="meson.build" class="Kinematics">
-				<only if-extension="meson" />
-		</file>
+		<file src="meson.build" class="Kinematics"/>
 	</directory>
 
 	<foreach iterator="helicity">
@@ -411,12 +397,8 @@
 			      <filter name="Fortran90" width="80"/>
 			  </file>
 			</foreach>
-			<file src="meson.build" class="Kinematics">
-				<only if-extension="meson" />
-			</file>
-			<file src="generate_source.sh" class="Kinematics">
-			<only if-extension="meson"/>
-			</file>
+			<file src="meson.build" class="Kinematics"/>
+			<file src="generate_source.sh" class="Kinematics"/>
 		</directory>
 	</foreach>
 
@@ -484,11 +466,7 @@
 		    <filter name="Fortran90" width="80"/>
 		  </file>
 		</foreach>
-		<file src="meson.build" class="Kinematics">
-				<only if-extension="meson" />
-		</file>
-		<file src="generate_source.sh" class="Kinematics">
-			<only if-extension="meson"/>
-		</file>
+		<file src="meson.build" class="Kinematics"/>
+		<file src="generate_source.sh" class="Kinematics"/>
 	</directory>
 </template>

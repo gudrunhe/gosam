@@ -533,8 +533,7 @@ extensions = Property(
         "noderive",
         "tracify",
         "better_num",
-        "quadruple",
-        "meson",
+        "quadruple"
     ],
 )
 

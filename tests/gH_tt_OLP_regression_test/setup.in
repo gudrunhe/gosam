@@ -1,5 +1,4 @@
 reduction_programs=ninja
-extensions=meson
 all_mandelstam=True
 symmetries=parity
 filter.lo=lambda d: d.vertices(H,T,Tbar)==1

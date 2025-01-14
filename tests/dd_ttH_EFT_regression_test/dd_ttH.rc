@@ -20,6 +20,5 @@ filter.nlo=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
 filter.ct=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
 
 reduction_programs=ninja
-extensions=meson
 
 symmetries=parity

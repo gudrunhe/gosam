@@ -1,4 +1,3 @@
 reduction_programs=ninja
-extensions=meson
 all_mandelstam=True
 symmetries=parity

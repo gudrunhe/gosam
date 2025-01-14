@@ -25,16 +25,10 @@
 	<file src="olp_parser.y" class="Verbatim" usedby="olp">
 		<only if-internal="OLP_DAEMON"/>
 	</file>
-	<file src="meson.build" class="OLP" usedby="olp">
-		<only if-extension="meson"/>
-	</file>
+	<file src="meson.build" class="OLP" usedby="olp"/>
 	<file src="build_olp_library.sh" class="OLP" usedby="olp" executable="yes"/>
-	<file src="meson_options.txt" class="OLP" usedby="olp">
-		<only if-extension="meson"/>
-	</file>
-	<file src="install_mod_files.py" class="Verbatim" executable="yes" usedby="olp">
-		<only if-extension="meson"/>
-	</file>
+	<file src="meson_options.txt" class="OLP" usedby="olp"/>
+	<file src="install_mod_files.py" class="Verbatim" executable="yes" usedby="olp"/>
 
 	<directory src="common" usedby="olp">
 		<file src="accu.f90" class="OLP" usedby="olp"/>
@@ -58,12 +52,8 @@
 		<file src="filter.py" class="Verbatim" usedby="olp"/>
 		<file src="buildmodel.py" class="Model" usedby="olp">
 					</file>
-		<file src="meson.build" class="OLP" usedby="olp">
-			<only if-extension="meson"/>
-		</file>
-		<file src="generate_source.sh" class="OLP" usedby="olp" executable="yes">
-			<only if-extension="meson"/>
-		</file>
+		<file src="meson.build" class="OLP" usedby="olp"/>
+		<file src="generate_source.sh" class="OLP" usedby="olp" executable="yes"/>
 		<file src="Makefile.source" class="OLP" usedby="olp"/>
 	</directory>
 </template>
