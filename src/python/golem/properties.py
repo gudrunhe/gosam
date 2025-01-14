@@ -529,7 +529,6 @@ extensions = Property(
         "no-fr5",
         "ninja",
         "customspin2prop",
-        "cdr",
         "noderive",
         "tracify",
         "better_num",
