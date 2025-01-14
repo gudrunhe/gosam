@@ -12,5 +12,4 @@ order=QCD,4
 
 qgraf.options=onshell,notadpole,nosnail
 symmetries=family,generation
-extensions=better_num
 

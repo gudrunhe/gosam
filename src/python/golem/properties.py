@@ -532,7 +532,6 @@ extensions = Property(
         "cdr",
         "noderive",
         "tracify",
-        "better_num",
         "quadruple"
     ],
 )
