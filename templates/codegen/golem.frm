@@ -568,18 +568,11 @@ Local d`DIAG'R2 = 0;[%
 #EndIf
 
 
-#if `LOOPS' == 1[%
-@if extension qshift %]
-   #Call shiftmomenta(`DIAG',0)
-   Argument Spab, Spaa, Spbb, Spba;
-      #Call shiftmomenta(`DIAG',0)
-   EndArgument;[%
-@else %]
+#if `LOOPS' == 1
    Id p1 = Q;
    Argument Spab, Spaa, Spbb, Spba;
       Id p1 = Q;   
-   EndArgument;[%
-@end @if %]
+   EndArgument;
    Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
       fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);
    #call SpOpen(`LIGHTLIKE')

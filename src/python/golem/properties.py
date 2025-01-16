@@ -509,14 +509,12 @@ extensions = Property(
     #   olp_daemon   --- (OLP interface only): generates a C-program providing
     #   ninja        --- enable Ninja for the reduction
     #   golem95      --- enable Golem95 for the reduction
-    #   qshift       --- apply the shift of Q already at the FORM level
     #   numpolvec    --- evaluate polarisation vectors numerically
     list,
     ",".join(DEFAULT_EXTENSIONS),
     options=[
         "golem95",
         "dred",
-        "qshift",
         "avh_olo",
         "gaugecheck",
         "generate-all-helicities",

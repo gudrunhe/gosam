@@ -120,9 +120,7 @@ f90file.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
 # ADD MORE
 for irank in range(0,rank+1):
     f90file.write('   integer, private :: iv' + str(irank) +'\n')
-[%@if extension qshift %][% @else %]
 f90file.write('   real(ki), dimension(4), private :: qshift \n')
-[%@end @if %]
 f90file.write('   public :: derivative [%
    @if extension golem95 %], reconstruct_d' + str(diagram) + '[%
    @end @if %]\n')
@@ -168,14 +166,11 @@ f90file.write('      complex(ki) :: loc \n')
 f90file.write('      integer :: t1 \n')
 # ???
 f90file.write('      integer :: deg \n')
-f90file.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
-      @if extension qshift %][%
-      @else %]
+f90file.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')
 if qshift==0:
 	f90file.write('	     qshift(:) = 0.0_ki \n')
 else:
-	f90file.write('      qshift = %s \n' % qshift)[%
-      @end @if %]
+	f90file.write('      qshift = %s \n' % qshift)
 f90file.write('      numerator = 0.0_ki \n')
 f90file.write('      deg = 0 \n')
 for item in indices:
@@ -472,9 +467,7 @@ f90file_qp.write('   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)\n')
 # ADD MORE
 for irank in range(0,rank+1):
     f90file_qp.write('   integer, private :: iv' + str(irank) +'\n')
-[%@if extension qshift %][% @else %]
 f90file_qp.write('   real(ki), dimension(4), private :: qshift \n')
-[%@end @if %]
 f90file_qp.write('   public :: derivative [%
    @if extension golem95 %], reconstruct_d' + str(diagram) + '[%
    @end @if %]\n')
@@ -520,14 +513,11 @@ f90file_qp.write('      complex(ki) :: loc \n')
 f90file_qp.write('      integer :: t1 \n')
 # ???
 f90file_qp.write('      integer :: deg \n')
-f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
-      @if extension qshift %][%
-      @else %]
+f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')
 if qshift==0:
 	f90file_qp.write('	     qshift(:) = 0.0_ki \n')
 else:
-	f90file_qp.write('      qshift = %s \n' % qshift)[%
-      @end @if %]
+	f90file_qp.write('      qshift = %s \n' % qshift)
 f90file_qp.write('      numerator = 0.0_ki \n')
 f90file_qp.write('      deg = 0 \n')
 for item in indices:

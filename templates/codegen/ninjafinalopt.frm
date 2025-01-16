@@ -18,15 +18,12 @@ CTensor SUBSCRIPT;
 AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
-CF Wrapper;[%
-@if extension qshift%][%
-@else %]
+CF Wrapper;
   CFunction j;                                                                                                                                               
   CTensor ptens;                                                                                                                                             
   Vector Q, p1;                                                                                                                                              
   Vector qshift;                                                                                                                                             
   CFunction fshift;
-[%@end @if %]
 CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%

@@ -45,15 +45,12 @@ AutoDeclare Vector spva;
 S Nfrat;[%
 @end @if %]
 
-S sDUMMY1;[%
-@if extension qshift%][%
-@else %]
+S sDUMMY1;
   CFunction j;                                                                                                                                               
   CTensor ptens;                                                                                                                                             
   Vector Q, p1;                                                                                                                                              
   Vector qshift;                                                                                                                                             
   CFunction fshift;
-[%@end @if %]
 CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
@@ -131,16 +128,11 @@ Id Qspvae[%index2%]e[%index1%] = Q.spvae[%index2%]e[%index1%];[%
    @end @for %][%
 @end @if %]
 
-[%
-@if extension qshift %][%
-@else %]
 Id Q = p1;
 #Call shiftmomenta(`DIAG',1)
 Id fshift(0) = 0;
 Id fshift(?all) = 1;
-Id p1 = Q;[%
-@end @if %]
-
+Id p1 = Q;
 
 .sort
 Local d0diagram = diag;
