@@ -459,7 +459,9 @@ reduction_programs = Property(
     """\
         Specifies the reduction libraries which should be supported.
 
-        Possible values: ninja golem95
+        Possible values: ninja, golem95
+
+        Default: ninja
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
