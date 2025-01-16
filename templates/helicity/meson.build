@@ -15,9 +15,7 @@ generated_sources = [[%
                             'abbrevd[%$_%]_[% efto %]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]_[% efto %]h[%helicity%].f90' [% @end @if %],[%
                         @end @for %][%
                 @for elements topolopy.keep.virt %]
-                    'd[%$_%]_[% efto %]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1_qp.f90' [% @end @if %],[%
-                    @if internal GENERATE_DERIVATIVES %] 'd[%$_%]_[% efto %]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
-                    @end @if %][%
+                    'd[%$_%]_[% efto %]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1_qp.f90' [% @end @if %], 'd[%$_%]_[% efto %]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
                     @if extension ninja %] 'd[%$_%]_[% efto %]h[%helicity%]l131.f90', 'd[%$_%]_[% efto %]h[%helicity%]l132.f90', 'd[%$_%]_[% efto %]h[%helicity%]l121.f90'[%
                      @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l131_qp.f90', 'd[%$_%]_[% efto %]h[%helicity%]l132_qp.f90', 'd[%$_%]_[% efto %]h[%helicity%]l121_qp.f90' [% @end @if %],[%
                     @end @if %][%
@@ -40,9 +38,7 @@ generated_sources = [[%
 	                    'abbrevd[%$_%]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]h[%helicity%]_qp.f90' [% @end @if %],[%
                     @end @for %][%
             @for elements topolopy.keep.virt %]
-                'd[%$_%]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1_qp.f90' [% @end @if %],[%
-                @if internal GENERATE_DERIVATIVES %] 'd[%$_%]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
-                @end @if %][%
+                'd[%$_%]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1_qp.f90' [% @end @if %], 'd[%$_%]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
                 @if extension ninja %] 'd[%$_%]h[%helicity%]l131.f90', 'd[%$_%]h[%helicity%]l132.f90', 'd[%$_%]h[%helicity%]l121.f90'[%
                 @if extension quadruple%], 'd[%$_%]h[%helicity%]l131_qp.f90', 'd[%$_%]h[%helicity%]l132_qp.f90', 'd[%$_%]h[%helicity%]l121_qp.f90' [% @end @if %],[%
                 @end @if %][%

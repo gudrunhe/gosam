@@ -29,9 +29,7 @@
 		<file src="colorin.py" class="Multi"/>
 
 		<file src="filter.py" class="Verbatim"/>
-		<file src="derive.frm" class="Kinematics">
-						<only if-extension="derive" />
-		</file>
+		<file src="derive.frm" class="Kinematics"/>
 		<file src="ninja.frm" class="Kinematics">
 						<only if-extension="ninja" />
 		</file>

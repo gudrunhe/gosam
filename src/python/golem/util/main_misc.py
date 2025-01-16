@@ -719,9 +719,6 @@ def workflow(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    if "noderive" not in ext:
-        ext.append("derive")
-
     if "cdr" in ext and "dred" in ext:
         logger.warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
 

@@ -12,9 +12,7 @@ generated_sources += [[%
 	'abbrevd[%$_%].f90',[%
       @end @for %][%
    @for elements topolopy.keep.virt %]
-	'd[%$_%]l1.f90',[%
-      @if internal GENERATE_DERIVATIVES %] 'd[%$_%]l1d.f90',[%
-      @end @if %][%
+	'd[%$_%]l1.f90', 'd[%$_%]l1d.f90',%
       @if extension ninja %] 'd[%$_%]l131.f90', 'd[%$_%]l132.f90', 'd[%$_%]l121.f90',[%
       @end @if %][%
    @end @for %][%

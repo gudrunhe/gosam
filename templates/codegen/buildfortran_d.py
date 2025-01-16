@@ -146,10 +146,7 @@ for irank in range(1,rank+2):
 	f90file.write('!---#] function brack_%s: \n' % irank)
 
 f90file.write('!---#[ function derivative: \n')
-dstring='   function derivative(' + [%
-   @if internal DERIVATIVES_AT_ZERO %][%
-   @else %]'Q_ext,' + [%
-   @end @if %]'mu2,' 
+dstring='   function derivative(' + 'mu2,' 
 indices=[]
 for irank in range(0,rank):
 	dstring += 'i' + str(irank+1) +','
@@ -160,11 +157,7 @@ f90file.write(dstring)
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
 f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
-f90file.write('      implicit none \n')[%
-      @if internal DERIVATIVES_AT_ZERO %][%
-      @else %]
-f90file.write('      complex(ki), dimension(4), intent(in) :: Q_ext\n')[%
-      @end @if %]
+f90file.write('      implicit none \n')
 f90file.write('      complex(ki), intent(in) :: mu2 \n')
 for item in indices:
 	f90file.write('      integer, intent(in), optional :: i%s \n' %item)
@@ -175,31 +168,14 @@ f90file.write('      complex(ki) :: loc \n')
 f90file.write('      integer :: t1 \n')
 # ???
 f90file.write('      integer :: deg \n')
-[%
-      @if internal DERIVATIVES_AT_ZERO %]
 f90file.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
-      @else %]
-f90file.write('      ! The Q that goes into the diagram \n')
-f90file.write('      complex(ki), dimension(4) :: Q\n')[%
-      @end @if %][%
       @if extension qshift %][%
       @else %]
 if qshift==0:
 	f90file.write('	     qshift(:) = 0.0_ki \n')
 else:
 	f90file.write('      qshift = %s \n' % qshift)[%
-      @end @if %][%
-      @if internal DERIVATIVES_AT_ZERO %][%
-      @else %][%
-      @if extension qshift %]
-f90file.write('      Q(:) = Q_ext(:)\n')[%
-      @else %]
-if qshift == 0:      
-	f90file.write('      Q(:) = %s Q_ext(:)\n' % qsign)
-else:
-	f90file.write('      Q(:) = %s Q_ext(:) - qshift(:)\n' % qsign)[%
-      @end @if %][%
-@end @if %]
+      @end @if %]
 f90file.write('      numerator = 0.0_ki \n')
 f90file.write('      deg = 0 \n')
 for item in indices:
@@ -236,11 +212,8 @@ if int(loopsize) in [0,1,2,3,4,5]:
 		f90file.write('      complex(ki) :: x1,x2\n')
 	if int(loopsize)==5 and int(rank)>=6:
 		f90file.write('      complex(ki) :: x1,x2,x3\n')[%
-	@end @select %][%
-	@if internal DERIVATIVES_AT_ZERO %][%
-	@else %]
+	@end @select %]
 f90file.write('      complex(ki), dimension(4), parameter :: Q = (/czip,czip,czip,czip/)\n')[%
-	@end @if %][%
    @for repeat max_rank inclusive=true var=rk %][%
 		@if is_first%]
 if int(rank) == [% rk %]:[%
@@ -262,11 +235,7 @@ elif int(rank) == [% rk %]:[%
          @select sign @case -1 %]
 	f90file.write('-')[%
          @end @select %]
-	f90file.write('derivative(')[%
-         @if internal DERIVATIVES_AT_ZERO %][%
-         @else %]
-	f90file.write('Q,')[%
-         @end @if %]
+	f90file.write('derivative(')
 	f90file.write('czip')[%
          @for elements args delim=, %]
 	f90file.write(',[% $_ %]')[%
@@ -296,11 +265,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('cone')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -326,11 +291,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('cone')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -349,11 +310,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('-cone')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -399,11 +356,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('cone')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -422,11 +375,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('-cone')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -445,11 +394,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file.write('-')[%
                   @end @select %]
-			f90file.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file.write('Q,')[%
-                  @end @if %]
+			f90file.write('derivative(')
 			f90file.write('ctwo')[%
                   @for elements args delim=, %]
 			f90file.write(',[% $_ %]')[%
@@ -553,10 +498,7 @@ for irank in range(1,rank+2):
 	f90file_qp.write('!---#] function brack_%s: \n' % irank)
 
 f90file_qp.write('!---#[ function derivative: \n')
-dstring='   function derivative(' + [%
-   @if internal DERIVATIVES_AT_ZERO %][%
-   @else %]'Q_ext,' + [%
-   @end @if %]'mu2,'
+dstring='   function derivative(' + 'mu2,'
 indices=[]
 for irank in range(0,rank):
 	dstring += 'i' + str(irank+1) +','
@@ -567,11 +509,7 @@ f90file_qp.write(dstring)
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
-f90file_qp.write('      implicit none \n')[%
-      @if internal DERIVATIVES_AT_ZERO %][%
-      @else %]
-f90file_qp.write('      complex(ki), dimension(4), intent(in) :: Q_ext\n')[%
-      @end @if %]
+f90file_qp.write('      implicit none \n')
 f90file_qp.write('      complex(ki), intent(in) :: mu2 \n')
 for item in indices:
 	f90file_qp.write('      integer, intent(in), optional :: i%s \n' %item)
@@ -582,31 +520,14 @@ f90file_qp.write('      complex(ki) :: loc \n')
 f90file_qp.write('      integer :: t1 \n')
 # ???
 f90file_qp.write('      integer :: deg \n')
-[%
-      @if internal DERIVATIVES_AT_ZERO %]
 f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)\n')[%
-      @else %]
-f90file_qp.write('      ! The Q that goes into the diagram \n')
-f90file_qp.write('      complex(ki), dimension(4) :: Q\n')[%
-      @end @if %][%
       @if extension qshift %][%
       @else %]
 if qshift==0:
 	f90file_qp.write('	     qshift(:) = 0.0_ki \n')
 else:
 	f90file_qp.write('      qshift = %s \n' % qshift)[%
-      @end @if %][%
-      @if internal DERIVATIVES_AT_ZERO %][%
-      @else %][%
-      @if extension qshift %]
-f90file_qp.write('      Q(:) = Q_ext(:)\n')[%
-      @else %]
-if qshift == 0:
-	f90file_qp.write('      Q(:) = %s Q_ext(:)\n' % qsign)
-else:
-	f90file_qp.write('      Q(:) = %s Q_ext(:) - qshift(:)\n' % qsign)[%
-      @end @if %][%
-@end @if %]
+      @end @if %]
 f90file_qp.write('      numerator = 0.0_ki \n')
 f90file_qp.write('      deg = 0 \n')
 for item in indices:
@@ -644,10 +565,6 @@ if int(loopsize) in [0,1,2,3,4,5]:
 	if int(loopsize)==5 and int(rank)>=6:
 		f90file_qp.write('      complex(ki) :: x1,x2,x3\n')[%
 	@end @select %][%
-	@if internal DERIVATIVES_AT_ZERO %][%
-	@else %]
-f90file_qp.write('      complex(ki), dimension(4), parameter :: Q = (/czip,czip,czip,czip/)\n')[%
-	@end @if %][%
    @for repeat max_rank inclusive=true var=rk %][%
 		@if is_first%]
 if int(rank) == [% rk %]:[%
@@ -669,11 +586,7 @@ elif int(rank) == [% rk %]:[%
          @select sign @case -1 %]
 	f90file_qp.write('-')[%
          @end @select %]
-	f90file_qp.write('derivative(')[%
-         @if internal DERIVATIVES_AT_ZERO %][%
-         @else %]
-	f90file_qp.write('Q,')[%
-         @end @if %]
+	f90file_qp.write('derivative(')
 	f90file_qp.write('czip')[%
          @for elements args delim=, %]
 	f90file_qp.write(',[% $_ %]')[%
@@ -703,11 +616,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('cone')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%
@@ -733,11 +642,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('cone')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%
@@ -756,11 +661,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('-cone')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%
@@ -806,11 +707,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('cone')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%
@@ -829,11 +726,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('-cone')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%
@@ -852,11 +745,7 @@ elif int(rank) == [% rk %]:[%
                   @select sign @case -1 %]
 			f90file_qp.write('-')[%
                   @end @select %]
-			f90file_qp.write('derivative(')[%
-                  @if internal DERIVATIVES_AT_ZERO %][%
-                  @else %]
-			f90file_qp.write('Q,')[%
-                  @end @if %]
+			f90file_qp.write('derivative(')
 			f90file_qp.write('ctwo')[%
                   @for elements args delim=, %]
 			f90file_qp.write(',[% $_ %]')[%

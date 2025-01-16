@@ -517,7 +517,6 @@ extensions = Property(
         "qshift",
         "avh_olo",
         "gaugecheck",
-        "derive",
         "generate-all-helicities",
         "olp_daemon",
         "olp_badpts",
@@ -528,7 +527,6 @@ extensions = Property(
         "ninja",
         "customspin2prop",
         "cdr",
-        "noderive",
         "quadruple"
     ],
 )
@@ -1549,8 +1547,6 @@ def getExtensions(conf):
 def setInternals(conf):
     extensions = getExtensions(conf)
     conf["__INTERNALS__"] = [
-        "__GENERATE_DERIVATIVES__",
-        "__DERIVATIVES_AT_ZERO__",
         "__REGULARIZATION_DRED__",
         "__REGULARIZATION_HV__",
         "__REQUIRE_FR5__",
@@ -1570,9 +1566,6 @@ def setInternals(conf):
         "__CUSTOM_SPIN2_PROP__",
         "__EWCHOOSE__",
     ]
-
-    conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
-    conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
 
     conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
     conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions

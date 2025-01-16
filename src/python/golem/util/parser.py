@@ -1821,7 +1821,7 @@ class Template:
             k_name = self._setup_name("k", "k", opts)
             i_name = self._setup_name("i", "i", opts)
 
-            # corresponding entries in rank+2 (used with the derive extension)
+            # corresponding entries in rank+2
             kmap_name = self._setup_name("kmap", "kmap", opts)
             imap_name = self._setup_name("imap", "imap", opts)
 

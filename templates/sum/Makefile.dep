@@ -7,28 +7,21 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
    @if generate_nlo_virt %][%
          @for elements topolopy.keep.virt %]
 abbrevd[%$_%].[%O%]: globals.[%O%]
-d[%$_%]l1.[%O%]: abbrevd[%$_%].[%O%][% 
-            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]l1.[%O%]: abbrevd[%$_%].[%O%]
 d[%$_%]l1d.[%O%]: abbrevd[%$_%].[%O%][%
-	           @end @if %][%
          @end @for %][%
 @if extension quadruple %][%
          @for elements topolopy.keep.virt %]
 abbrevd[%$_%]_qp.[%O%]: globals_qp.[%O%]
-d[%$_%]l1_qp.[%O%]: abbrevd[%$_%]_qp.[%O%][%
-            	@if internal GENERATE_DERIVATIVES %]
+d[%$_%]l1_qp.[%O%]: abbrevd[%$_%]_qp.[%O%]
 d[%$_%]l1d_qp.[%O%]: abbrevd[%$_%]_qp.[%O%][%
-	           @end @if %][%
          @end @for %][%
    @end @if extension quadruple %][%
 
       	@if extension golem95 %]
 golem95.[%O%]: [%
          	@for elements topolopy.keep.virt %] \
-	d[%$_%]l1.[%O%][%
-					@if internal GENERATE_DERIVATIVES
-						%] d[%$_%]l1d.[%O%][%
-					@end @if %][%
+	d[%$_%]l1.[%O%] d[%$_%]l1d.[%O%][%
          	@end @for %][%
 	      @end @if extension golem95 %][%
 
@@ -118,18 +111,14 @@ amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp
    @if generate_nlo_virt %][%
          @for elements topolopy.keep.virt %]
 [% process_name asprefix=\_ %]abbrevd[%$_%].mod: abbrevd[%$_%].[%O%]
-[% process_name asprefix=\_ %]d[%$_%]l1.mod: d[%$_%]l1.[%O%][% 
-            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]l1.mod: d[%$_%]l1.[%O%]
 [% process_name asprefix=\_ %]d[%$_%]l1d.mod: d[%$_%]l1d.[%O%][%
-	           @end @if %][%
          @end @for %][%
       @if extension quadruple %][%
          @for elements topolopy.keep.virt %]
 [% process_name asprefix=\_ %]abbrevd[%$_%]_qp.mod: abbrevd[%$_%]_qp.[%O%]
-[% process_name asprefix=\_ %]d[%$_%]l1_qp.mod: d[%$_%]l1_qp.[%O%][%
-            	@if internal GENERATE_DERIVATIVES %]
+[% process_name asprefix=\_ %]d[%$_%]l1_qp.mod: d[%$_%]l1_qp.[%O%]
 [% process_name asprefix=\_ %]d[%$_%]l1d_qp.mod: d[%$_%]l1d_qp.[%O%][%
-	           @end @if %][%
          @end @for %][%
    @end @if extension quadruple %][%
    @end @if generate_nlo_virt%]

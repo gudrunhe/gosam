@@ -31,13 +31,11 @@ DIAGRAMS_VIRT=[%
 	d[%$_%]l1.f90[%
 	   @if extension quadruple %] \
 	d[%$_%]l1_qp.f90[%
-	   @end @if %][%
-	   @if internal GENERATE_DERIVATIVES %] \
+	   @end @if %] \
 	d[%$_%]l1d.f90[%
 	   @if extension quadruple %] \
 	d[%$_%]l1d_qp.f90[%
 	   @end @if %][%
-      @end @if %][%
    @if extension ninja %] \
     d[%$_%]l131.f90 \
     d[%$_%]l132.f90 \
@@ -81,13 +79,9 @@ d[%$_%]l1.prc:
 	@$(FORM) $(FORM_OPT) \
 		-D DIAG=[%$_%] \
 		-D LOOPS=1 \
-                -D OUTFILE=d[%$_%]l1 \[%
-@if internal GENERATE_DERIVATIVES %]
-      -D RANK=[% rank %] \[%
-         @if internal DERIVATIVES_AT_ZERO %]
+                -D OUTFILE=d[%$_%]l1 \
+      -D RANK=[% rank %] \
       -D DERIVATIVESATZERO=1 \[%
-         @end @if %][%
-@end @if%][%
 @if internal GENERATE_NINJA_TRIPLE %]
       -D RANK=[% rank %] \
       -D LOOPSIZE=[% loopsize diagram=$_ %] \[%
@@ -107,22 +101,17 @@ d[%$_%]l1.txt: d[%$_%]l1.prc
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]l1 \
 		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
+		-D RANK=[% rank %] \
+		-D DERIVATIVESATZERO=1 \
 		../codegen/finaloptimization.frm
-[% @if internal GENERATE_DERIVATIVES %]
 d[%$_%]l1d.txt : d[%$_%]l1.txt
 	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity sum
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D OUTFILE=d[%$_%]l1 \
 		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
+		-D RANK=[% rank %] \
+		-D DERIVATIVESATZERO=1 \
                 -D OUTSUFFIX=hh \
 		../codegen/derive.frm[%
    @for repeat rank inclusive=true var=rk %]
@@ -154,8 +143,7 @@ d[%$_%]l1d.f90 : d[%$_%]l1d.txt
 		--QSIGN=[%sign%] \
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%
-		@end @if %]
+		--LOOPSIZE=[% loopsize diagram=$_ %]
 [% @if extension ninja %] 
 d[%$_%]l14.txt : d[%$_%]l1.txt
 	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity sum

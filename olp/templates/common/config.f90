@@ -180,8 +180,7 @@
    ! deltaOS = 0.0_ki --> off
    ! Do not modify directly, use renormalisation=0,1,2 instead.
    real(ki) :: deltaOS = 1.0_ki
-   !---#] Renormalisation:[%
-@if internal GENERATE_DERIVATIVES %]
+   !---#] Renormalisation:
 
    ! This generated code provides the derivatives of the numerator.
    ! Therefore we have the choice between using Golem95's tens_rec
@@ -191,8 +190,7 @@
    !
    ! This option affects the calculation only if reduction_interoperation
    ! is chosen such that the tensorial reconstruction method is used.
-   logical :: tens_rec_by_derivatives = .true.[%
-@end @if %]
+   logical :: tens_rec_by_derivatives = .true.
 
    ! Determines the way GoSam treats the overall factor of alpha_(s)/2/pi
    ! in the result of an NLO amplitude.

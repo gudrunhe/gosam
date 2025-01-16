@@ -5,8 +5,6 @@
 * expansion of the numerator d`p'diagram
 
 off statistics;
-[% 
-@if internal GENERATE_DERIVATIVES %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -48,7 +46,6 @@ S Nfrat;[%
 @end @if %]
 
 S sDUMMY1;[%
-@end @if %][%
 @if extension qshift%][%
 @else %]
   CFunction j;                                                                                                                                               

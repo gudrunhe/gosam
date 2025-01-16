@@ -52,8 +52,6 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
-[% 
-@if internal GENERATE_DERIVATIVES %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -73,8 +71,6 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
-
-[%@end @if%]
 
 #define HELS "[% @for helicities generated %][%helicity%],[%
 @end @for%]"

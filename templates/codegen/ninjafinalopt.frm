@@ -1,7 +1,5 @@
 #-
 off statistics;
-[% 
-@if internal GENERATE_DERIVATIVES %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -21,23 +19,6 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;[%
-@else %][% 
-@if extension ninja %]
-Vectors Q[%
-@for particles %],k[% index %][%
-   @if is_massive %],l[% index %][%
-   @end @if %][%
-@end @for %][%
-@if internal NUMPOLVEC %][%
-   @for particles lightlike vector %],e[%index%][%
-   @end @for %][%
-@end @if %];
-Vectors vDUMMY1, vDUMMY2;
-CTensors d(symmetric);
-AutoDeclare Vectors spva;
-CF dotproduct(symmetric);
-CF Wrapper;[%
-@end @if %][% @end @if %][%
 @if extension qshift%][%
 @else %]
   CFunction j;                                                                                                                                               
