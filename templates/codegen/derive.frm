@@ -45,11 +45,6 @@ Symbol Qt2,QspQ,Qspk1,Qspk2,Qspk3,Qspl3,Qspk4,Qspl4,Qspvak1k2,Qspvak1l3,Qspvak1l
 AutoDeclare Symbol c;
 AutoDeclare Vector spva;
 S Nfrat;[%
-@end @if %][%
-@if extension tracify %]
-AutoDeclare Symbol Qeps;
-CTensor epstensor;
-Indices iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4;[%
 @end @if %]
 
 S sDUMMY1;[%
@@ -137,13 +132,6 @@ Id Qspvae[%index1%]e[%index2%] = Q.spvae[%index1%]e[%index2%];
 Id Qspvae[%index2%]e[%index1%] = Q.spvae[%index2%]e[%index1%];[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
-@if extension tracify %][%
-@for pairs %][%
-   @for particles %]
-Id Qeps[%@if is_lightlike1%]k[%@else%]l[%@end @if%][%index1%][%@if is_lightlike2%]k[%@else%]l[%@end @if%][%index2%][%@if is_lightlike%]k[%@else%]l[%@end @if%][%index%] = e_(Q,[%@if is_lightlike1%]k[%@else%]l[%@end @if%][%index1%],[%@if is_lightlike2%]k[%@else%]l[%@end @if%][%index2%],[%@if is_lightlike%]k[%@else%]l[%@end @if%][%index%]);[%
-   @end @for %][%
-@end @for %][%
 @end @if %]
 
 [%
@@ -180,10 +168,7 @@ Id d(iDUMMY1?) = 0;
 Id d_(iDUMMY1?,iDUMMY2?) = d(iDUMMY1,iDUMMY2);
 Id abb`DIAG'(sDUMMY1?) = Wrapper(abb`DIAG',sDUMMY1);
 Id vDUMMY1?(iDUMMY1?) = SUBSCRIPT(vDUMMY1, iDUMMY1);
-Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);[%
-@if extension tracify%]
-Id e_(iDUMMY1?,iDUMMY2?,iDUMMY3?,iDUMMY4?) = epstensor(iDUMMY1,iDUMMY2,iDUMMY3,iDUMMY4);[%
-@end @if %]
+Id vDUMMY1?.vDUMMY2? = dotproduct(vDUMMY1,vDUMMY2);
 .sort
 #Do p=0,`RANK'
    #write <`OUTFILE'd.`OUTSUFFIX'> "*--#[ d`p'diagram:"

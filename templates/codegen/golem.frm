@@ -36,12 +36,6 @@ off statistics;
 
 #Define EXTRAPAT "EXSYM"
 
-[%
-@if extension tracify %]
-AutoDeclare S Qeps;
-CTensor epstensor;[%
-@end @if %]
-
 #If `LOOPS' == 1
    #Define abb`DIAG' "0"
    Autodeclare Symbol Qsp;
@@ -575,61 +569,6 @@ Local d`DIAG'R2 = 0;[%
 
 
 #if `LOOPS' == 1[%
-@if extension tracify%]
-* Combine multiple spinor lines to one spinor line.
-* As a consequence, at most rank-l (where l is the
-* number of loops) tensor integrals appear.
-
-Hide d`DIAG'R2;
-
-#call SpClose()
-
-#Do left={`LIGHTLIKE'}
-  #Do right={`LIGHTLIKE'}
-    #if `right' != `left'
-      #Do X={a,b}
-        #Do Z={a,b}
-          Id Sp`X'a(?head,`left')*Spa`Z'(`right',?tail) = Sp`X'a(?head,`left')*SpDenominator(Spbb(`left',`right'))*Spbb(`left',`right')*Spa`Z'(`right',?tail);
-          #call SpClose()
-          Id Sp`X'b(?head,`left')*Spb`Z'(`right',?tail) = Sp`X'b(?head,`left')*SpDenominator(Spaa(`left',`right'))*Spaa(`left',`right')*Spb`Z'(`right',?tail);
-          #call SpClose()
-        #EndDo
-      #EndDo
-    #EndIf
-  #EndDo
-#EndDo
-
-#Do left={`LIGHTLIKE'}
-  #Do right={`LIGHTLIKE'}
-    #Do aux={`LIGHTLIKE'}
-       #if `left' != `aux'
-          #if `right' != `aux'
-             #if `right' != `left'
-                #call SpTracify(`left',`right',`aux',p1)
-             #Else
-*               If `right' == `left', we need two auxilary vectors for Spaa/Spbb
-                #Do aux2={`LIGHTLIKE'}
-                   #If `right' != `aux2'
-                      #If `aux' != `aux2'
-                         Id Spaa(`left',?chain,`right') = SpDenominator(Spbb(`right',`aux',`aux2',`left')) * trL * ProjMinus * Sm4(`left',?chain,`right',`aux',`aux2') * trR;
-                         Id Spbb(`left',?chain,`right') = SpDenominator(Spaa(`right',`aux',`aux2',`left')) * trL * ProjPlus * Sm4(`left',?chain,`right',`aux',`aux2') * trR;
-
-*                        But Spab/Spba can be closed to a trace without auxilary vectors if `left' == `right'
-                         Id Spab(`left',?chain,`right') = trL * ProjMinus * Sm4(`left',?chain) * trR;
-                         Id Spba(`left',?chain,`right') = trL * ProjPlus * Sm4(`left',?chain) * trR;
-                      #EndIf
-                   #EndIf
-                #EndDo
-             #EndIf
-          #EndIf
-       #EndIf
-     #EndDo
-  #EndDo
-#EndDo
-#call SpTrace4
-.sort:tracify;
-UnHide d`DIAG'R2;[%
-@end @if extension tracify%][%
 @if extension qshift %]
    #Call shiftmomenta(`DIAG',0)
    Argument Spab, Spaa, Spbb, Spba;
@@ -685,20 +624,7 @@ Id inv(sDUMMY1?symbol_) = (1/sDUMMY1);
 Id vDUMMY1?{`LIGHTLIKE'}.vDUMMY2?{`LIGHTLIKE'} =
    1/2 * Spa2(vDUMMY1, vDUMMY2) * Spb2(vDUMMY2, vDUMMY1);
 
-#call spsymbols[%
-@if extension tracify%]
-Argument;
-  #call spsymbols
-EndArgument;
-#If `LOOPS' == 1
-   Id e_(Q,vDUMMY1?,vDUMMY2?,vDUMMY3?) =  Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
-   Id e_(vDUMMY1?,Q,vDUMMY2?,vDUMMY3?) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
-   Id e_(vDUMMY1?,vDUMMY2?,Q,vDUMMY3?) =  Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
-   Id e_(vDUMMY1?,vDUMMY2?,vDUMMY3?,Q) = -Qeps(vDUMMY1,vDUMMY2,vDUMMY3);
-
-   Id e_(vDUMMY1?,vDUMMY2?,vDUMMY3?,vDUMMY4?) = epstensor(vDUMMY1,vDUMMY2,vDUMMY3,vDUMMY4);
-#EndIf[%
-@end @if %]
+#call spsymbols
 
 Id SpDenominator(sDUMMY1?) = (1/sDUMMY1);
 Id inv(sDUMMY1?) = (1/sDUMMY1);

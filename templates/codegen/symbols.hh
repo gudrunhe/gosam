@@ -22,11 +22,7 @@ CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
 CFunction customSpin2Prop;
 CFunction QGRAFSIGN;
 CTensor SUBSCRIPT;
-NFunction NCOrder;[%
-@if extension tracify %]
-CFunction antisymm, Qeps;
-AutoDeclare S Qeps;[%
-@end @if %]
+NFunction NCOrder;
 * formfactor(A, B) = A + B/eps
 CFunction formfactor, log;
 

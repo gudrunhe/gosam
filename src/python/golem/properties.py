@@ -509,8 +509,6 @@ extensions = Property(
     #   golem95      --- enable Golem95 for the reduction
     #   qshift       --- apply the shift of Q already at the FORM level
     #   numpolvec    --- evaluate polarisation vectors numerically
-    #   tracify      --- transform loop momenta into traces before running
-    #                    the numerics
     list,
     ",".join(DEFAULT_EXTENSIONS),
     options=[
@@ -531,7 +529,6 @@ extensions = Property(
         "customspin2prop",
         "cdr",
         "noderive",
-        "tracify",
         "quadruple"
     ],
 )
