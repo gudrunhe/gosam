@@ -149,7 +149,11 @@ def generate_process_files(conf, from_scratch=False):
     props.setProperty("templates", templates)
     props.setProperty("process_path", path)
     props.setProperty("max_rank", conf["__max_rank__"])
-    props.setProperty("write_vanishing_amplitude", "false")
+
+    if conf.getBooleanProperty("write_vanishing_amplitude"):
+        props.setProperty("write_vanishing_amplitude", "true")
+    else:
+        props.setProperty("write_vanishing_amplitude", "false")
 
     conf["__info.count.tree__"] = len(keep_tree)
     conf["__info.count.virt__"] = len(keep_virt)

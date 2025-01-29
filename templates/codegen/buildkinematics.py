@@ -508,12 +508,14 @@ contains
         else:
             spb_e = f"spb{vec}{polvec}"
         if spa_e in matches or spb_e in matches:
+            spa_e_val = re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spae_dict[spa_e][1])
+            spb_e_val = re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spae_dict[spa_e][0])
             outfile.write(f"""         if(flag{index}) then
             {spa_e} = {spae_dict[spa_e][0]}
             {spb_e} = {spae_dict[spa_e][1]}
          else
-            {spa_e} = {re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spae_dict[spa_e][1])}
-            {spb_e} = {re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spae_dict[spa_e][0])}
+            {spa_e} = {spa_e_val}
+            {spb_e} = {spb_e_val}
          end if\n""")
 
     for spa_ee in set(spaee_dict.keys()):
@@ -522,6 +524,10 @@ contains
         index2 = int(polvec2[1:])
         spb_ee = f"spbe{index2}e{index1}"
         if spa_ee in matches or spb_ee in matches:
+            spa_ee_vals = [re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spaee_dict[spa_ee][3]),
+                           re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spaee_dict[spa_ee][2])]
+            spb_ee_vals = [re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spaee_dict[spa_ee][1]),
+                           re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spaee_dict[spa_ee][0])]
             outfile.write(f"""         if(flag{index1}) then
             if(flag{index2}) then
                {spa_ee} = {spaee_dict[spa_ee][0]}
@@ -532,11 +538,11 @@ contains
             end if
          else
             if(flag{index2}) then
-               {spa_ee} = {re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spaee_dict[spa_ee][3])}
-               {spb_ee} = {re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spaee_dict[spa_ee][1])}
+               {spa_ee} = {spa_ee_vals[0]}
+               {spb_ee} = {spb_ee_vals[0]}
             else
-               {spa_ee} = {re.sub(r"Spbb\(([k|l]\d+), ([k|l]\d+)\)", r"Spaa(\2, \1)", spaee_dict[spa_ee][2])}
-               {spb_ee} = {re.sub(r"Spaa\(([k|l]\d+), ([k|l]\d+)\)", r"Spbb(\2, \1)", spaee_dict[spa_ee][0])}
+               {spa_ee} = {spa_ee_vals[1]}
+               {spb_ee} = {spb_ee_vale[1]}
             end if
          end if\n""")
 
@@ -545,12 +551,14 @@ contains
         vec = re.search(r"([k|l]\d+)", spva_e).group(1)
         index = int(polvec[1:])
         if spva_e in matches or f"spva{polvec}{vec}" in matches:
+            spva_e_val = re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvae_dict[spva_e][1])
+            spva_val = re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvae_dict[spva_e][0])
             outfile.write(f"""         if(flag{index}) then
             {spva_e} = {spvae_dict[spva_e][0]}
             {f"spva{polvec}{vec}"} = {spvae_dict[spva_e][1]}
          else
-            {spva_e} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvae_dict[spva_e][1])}
-            {f"spva{polvec}{vec}"} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvae_dict[spva_e][0])}
+            {spva_e} = {spva_e_val}
+            {f"spva{polvec}{vec}"} = {spva_val}
          end if\n""")
 
     for spva_ee in set(spvaee_dict.keys()):
@@ -558,6 +566,10 @@ contains
         index1 = int(polvec1[1:])
         index2 = int(polvec2[1:])
         if spva_ee in matches or f"spvae{index2}e{index1}" in matches:
+            spva_ee_vals = [re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][3]),
+                            re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][1])]
+            spvae_vals = [re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][2]),
+                          re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][0])]
             outfile.write(f"""         if(flag{index1}) then
             if(flag{index2}) then
                {spva_ee} = {spvaee_dict[spva_ee][0]}
@@ -568,11 +580,11 @@ contains
             end if
          else
             if(flag{index2}) then
-               {spva_ee} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][3])}
-               {f"spvae{index2}e{index1}"} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][2])}
+               {spva_ee} = {spva_ee_vals[0]}
+               {f"spvae{index2}e{index1}"} = {spvae_vals[0]}
             else
-               {spva_ee} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][1])}
-               {f"spvae{index2}e{index1}"} = {re.sub(r"Spab3_vec\(([k|l]\d+), ([k|l]\d+)\)", r"Spab3_vec(\2, \1)", spvaee_dict[spva_ee][0])}
+               {spva_ee} = {spva_ee_vals[0]}
+               {f"spvae{index2}e{index1}"} = {spvae_vals[1]}
             end if
          end if\n""")
 

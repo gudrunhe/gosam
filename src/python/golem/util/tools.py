@@ -49,7 +49,7 @@ class NLRHelpFormatter(argparse.HelpFormatter):
 class CustomWrapper(textwrap.TextWrapper):
     def wrap(self, text):
         lines = text.splitlines()
-        wrapped_lines = [wrapped_line for line in lines for wrapped_line in super().wrap(line)]
+        wrapped_lines = [wrapped_line for line in lines for wrapped_line in super(CustomWrapper, self).wrap(line)]
         if len(wrapped_lines) == 1:
             wrapped_lines[0] = "- " + wrapped_lines[0]
         else:
