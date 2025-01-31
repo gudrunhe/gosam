@@ -55,6 +55,7 @@ sym_asec = ex.SpecialExpression("asec")
 sym_acsc = ex.SpecialExpression("acsc")
 sym_conjg = ex.SpecialExpression("complexconjugate")
 sym_cmplx = ex.SpecialExpression("complex")
+sym_abs = ex.SpecialExpression("abs")
 
 sym_Nf = ex.SpecialExpression("Nf")
 sym_Nfgen = ex.SpecialExpression("Nfgen")
@@ -63,6 +64,7 @@ sym_NC = ex.SpecialExpression("NC")
 sym_if = ex.SpecialExpression("if")
 
 i_ = ex.SpecialExpression("i_")
+abs_ = ex.SpecialExpression("abs_")
 
 cmath_functions = [
     sym_exp,
@@ -84,7 +86,7 @@ cmath_functions = [
     sym_e,
 ]
 
-shortcut_functions = [sym_re, sym_im, sym_sec, sym_csc, sym_asec, sym_acsc, sym_conjg, sym_cmplx, sym_if]
+shortcut_functions = [sym_re, sym_im, sym_sec, sym_csc, sym_asec, sym_acsc, sym_conjg, sym_cmplx, sym_if, sym_abs]
 
 unprefixed_symbols = [sym_Nf, sym_Nfgen, sym_Nfrat]
 
@@ -382,6 +384,7 @@ class Model:
             expr = expr.prefixSymbolsWith(self.prefix)
             expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
             expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+            expr = expr.algsubs(sym_abs, abs_)
 
             if is_first:
                 is_first = False
@@ -415,6 +418,7 @@ class Model:
                     expr = expr.prefixSymbolsWith(self.prefix)
                     expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
                     expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                    expr = expr.algsubs(sym_abs, abs_)
 
                     if is_firstcf:
                         is_firstcf = False
