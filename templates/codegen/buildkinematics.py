@@ -542,7 +542,7 @@ contains
                {spb_ee} = {spb_ee_vals[0]}
             else
                {spa_ee} = {spa_ee_vals[1]}
-               {spb_ee} = {spb_ee_vale[1]}
+               {spb_ee} = {spb_ee_vals[1]}
             end if
          end if\n""")
 
