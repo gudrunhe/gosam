@@ -583,7 +583,7 @@ contains
                {spva_ee} = {spva_ee_vals[0]}
                {f"spvae{index2}e{index1}"} = {spvae_vals[0]}
             else
-               {spva_ee} = {spva_ee_vals[0]}
+               {spva_ee} = {spva_ee_vals[1]}
                {f"spvae{index2}e{index1}"} = {spvae_vals[1]}
             end if
          end if\n""")
