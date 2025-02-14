@@ -13,6 +13,7 @@ installation_py = configure_file(
         'prefix': get_option('prefix'),
         'datadir': get_option('datadir'),
         'libdir': get_option('libdir'),
+        'bindir': get_option('bindir'),
         'version': meson.project_version().split('-')[0],
         'major_version': meson.project_version().split('-')[0].split('.')[0],
         'minor_version': meson.project_version().split('-')[0].split('.')[1],

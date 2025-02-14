@@ -1,8 +1,7 @@
 # vim: ts=3:sw=3:expandtab
-
+import os
 from golem.util.config import Property
-from golem.util.path import golem_path
-
+from golem.installation import BIN_DIR
 
 process_name = Property(
     "process_name",
@@ -321,7 +320,7 @@ qgraf_bin = Property(
    qgraf.bin=/home/my_user_name/bin/qgraf
    """,
     str,
-    "qgraf",
+    os.path.join(BIN_DIR, "qgraf"),
 )
 
 form_bin = Property(
@@ -336,7 +335,7 @@ form_bin = Property(
       form.bin=/home/my_user_name/bin/form
    """,
     str,
-    "tform",
+    os.path.join(BIN_DIR, "tform"),
 )
 
 form_threads = Property(

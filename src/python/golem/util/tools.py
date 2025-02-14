@@ -12,6 +12,7 @@ import golem.model
 import golem.properties
 import golem.algorithms.helicity
 import golem.installation
+from golem.installation import LIB_DIR, BIN_DIR
 
 from golem.util.path import golem_path
 from golem.util.config import GolemConfigError
@@ -180,6 +181,18 @@ def copy_file(in_file, out_file):
     with open(out_file, "w") as f:
         for line in lines:
             f.write(line)
+
+def setup_env():
+    env = os.environ.copy()
+    if "PATH" in env:
+        env["PATH"] = f"{BIN_DIR}:{env['PATH']}"
+    else:
+        env["PATH"] = BIN_DIR
+    if "LD_LIBRARY_PATH" in env:
+        env["LD_LIBRARY_PATH"] = f"{LIB_DIR}:{env['LD_LIBRARY_PATH']}"
+    else:
+        env["LD_LIBRARY_PATH"] = LIB_DIR
+    return env
 
 
 def combinations(map):

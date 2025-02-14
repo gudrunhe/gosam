@@ -97,6 +97,18 @@ be found by the shell, e.g. by adding `<prefix>/bin` to `$PATH`.
 > [!NOTE]
 > By default, only Ninja is installed. If desired, Golem95 can be enabled by setting `-Dgolem95=true` during setup.
 
+# Uninstalling GoSam
+A GoSam-3 installation can be removed by running
+```console
+ninja gs-uninstall
+```
+in the `build` directory. 
+
+> [!CAUTION]
+> This will remove the GoSam installation at `<prefix>` currently specified in the `build` folder. This procedure will
+> not work if GoSam is installed and subsequently `meson configure` is called with a different `<prefix>` before
+> running `ninja gs-uninstall`.
+
 # Running GoSam
 Running GoSam generally consists of two steps, the first one being the preparation of the process directory.
 This is done by the Python program `gosam.py`. It supports two run modes, standalone mode and OLP

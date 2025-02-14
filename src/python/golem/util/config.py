@@ -1,21 +1,12 @@
 # vim: ts=3:sw=3:expandtab
 import sys
 import datetime
-
-import os
-import os.path
-import subprocess
 import re
-import tempfile
-import shutil
-import shlex
 
 try:
     import ast
 except ImportError:
     ast = None
-
-import golem.util.path as gpath
 
 import logging
 

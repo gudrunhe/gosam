@@ -14,7 +14,7 @@ import golem.properties
 import golem.pyxo.pyxodraw
 import golem.model.calchep
 
-from golem.util.tools import copy_file
+from golem.util.tools import copy_file, setup_env
 from golem.util.path import golem_path
 from golem.util.config import GolemConfigError, split_qgrafPower
 import golem.util.tools
@@ -159,7 +159,7 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 
     with open(os.path.join(path, log_name), "w") as f:
         try:
-            subprocess.call([qgraf_bin], cwd=path, stdout=f)
+            subprocess.call([qgraf_bin], cwd=path, stdout=f, env=setup_env())
         except OSError as ex:
             raise GolemConfigError(
                 (
