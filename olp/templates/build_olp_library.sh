@@ -1,1 +1,1 @@
-[% @if extension linker %]FC_LD=[% ld %] [% @end @if %]meson setup build -Dbuildtype=[% meson.buildtype %] --prefix $1 && cd build && meson compile -j [% n_jobs %] && meson install
+meson setup build -Dbuildtype=[% meson.buildtype %] --prefix $1 && cd build && meson compile -j [% n_jobs %] && meson install

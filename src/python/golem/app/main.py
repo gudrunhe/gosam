@@ -6,7 +6,7 @@ import tempfile
 
 import golem.util.config
 import golem.util.tools
-from golem.util.config import GolemConfigError, Form
+from golem.util.config import GolemConfigError
 import golem.installation
 import golem.util.constants
 

@@ -12,6 +12,7 @@ installation_py = configure_file(
     configuration : {
         'prefix': get_option('prefix'),
         'datadir': get_option('datadir'),
+        'libdir': get_option('libdir'),
         'version': meson.project_version().split('-')[0],
         'major_version': meson.project_version().split('-')[0].split('.')[0],
         'minor_version': meson.project_version().split('-')[0].split('.')[1],
@@ -28,15 +29,7 @@ gosam_py = configure_file(
     output: 'gosam.py',
     configuration: {'py_install_dir' : python.get_install_dir()},
     install: true,
-    install_dir: get_option('prefix') / get_option('bindir')
-)
-
-gosam_config_py = configure_file(
-    input: 'gosam-config.py.in',
-    output: 'gosam-config.py',
-    configuration: {'py_install_dir' : python.get_install_dir()},
-    install: true,
-    install_dir: get_option('prefix') / get_option('bindir')
+    install_dir: get_option('prefix') / get_option('bindir') / '..'
 )
 
 python.install_sources('__init__.py', '__main__.py', 'properties.py', subdir: 'golem')

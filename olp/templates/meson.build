@@ -4,9 +4,12 @@ project('GoSam_Process[% process_name assuffix=\_%]',
     meson_version: '>=0.58.0',
     default_options: [
         'buildtype=release',
-        'b_asneeded=false'
+        'b_asneeded=false',
+        'pkg_config_path=[% pkg_config_path %]'
         ]
     )
+
+pkg_env = ['PKG_CONFIG_PATH=[% pkg_config_path %]']
 
 dependencies = []
 dependencies += dependency('avh_olo')
@@ -18,9 +21,9 @@ dep_cflags = ''
 pkg_config = find_program('pkg-config')
 
 foreach d: dependencies
-    dep_ldflags += ' ' + run_command(pkg_config, '--libs', d.name(), capture: true, check: true).stdout()
+    dep_ldflags += ' ' + run_command(pkg_config, '--libs', d.name(), capture: true, check: true, env: pkg_env).stdout()
     dep_ldflags += ' -Wl,-rpath,' + d.get_variable('libdir')
-    dep_cflags += ' ' + run_command(pkg_config, '--cflags', d.name(), capture: true, check: true).stdout()
+    dep_cflags += ' ' + run_command(pkg_config, '--cflags', d.name(), capture: true, check: true, env: pkg_env).stdout()
 endforeach
 
 add_global_arguments('-w', language: 'fortran')

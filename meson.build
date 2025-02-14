@@ -17,8 +17,8 @@ endif
 
 python = import('python').find_installation()
 
-if not python.language_version().version_compare('>=3.7')
-    error('Found Python version ' + python.language_version() + ', but the minimum required version is 3.7')
+if not python.language_version().version_compare('>=3.9')
+    error('Found Python version ' + python.language_version() + ', but the minimum required version is 3.9')
 endif
 
 meson.add_dist_script('cement-version.sh', meson.project_version())
@@ -56,4 +56,17 @@ configure_file(
     },
     install: true,
     install_dir: get_option('prefix') / get_option('bindir')
+)
+
+run_target(
+    'gs-uninstall', 
+    command: find_program(files('uninstall.py')), 
+    env: {
+        'prefix': get_option('prefix'),
+        'bindir': get_option('bindir'),
+        'includedir': get_option('includedir'),
+        'libdir': get_option('libdir'),
+        'datadir': get_option('datadir'),
+        'py_dir': python.get_install_dir() / 'golem'
+    }
 )

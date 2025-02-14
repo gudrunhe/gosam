@@ -20,8 +20,6 @@ import golem.util.constants as consts
 
 import golem.templates.xmltemplates
 
-from golem.util.find_libpaths import find_libraries
-
 from golem.util.path import golem_path
 from golem.util.tools import copy_file, generate_particle_lists
 
@@ -30,7 +28,7 @@ from golem.util.config import GolemConfigError, split_qgrafPower
 # The following files contain routines which originally were
 # part of golem-main itself:
 from golem.util.main_qgraf import *
-from golem.installation import GOLEM_VERSION, GOLEM_REVISION
+from golem.installation import GOLEM_VERSION, GOLEM_REVISION, LIB_DIR
 
 import logging
 
@@ -217,8 +215,6 @@ def find_config_files():
     Searches for configuration files in the default locations.
     These are used to fill the fields of newly created input
     files by preferred defaults.
-    Use "golem.util.find_libpaths.find_libraries()"
-    to find	external library paths.
 
     The procedure looks in the following locations:
             <golem path>
@@ -248,9 +244,7 @@ def find_config_files():
                 except GolemConfigError as err:
                     logger.critical("Configuration file is not sound:" + str(err))
                     sys.exit("GoSam terminated due to an error")
-    libpaths = find_libraries()
-    for flag in libpaths:
-        props.setProperty(flag, libpaths[flag])
+    props.setProperty("pkg_config_path", os.path.join(LIB_DIR, "pkgconfig"))
     return props
 
 

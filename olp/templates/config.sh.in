@@ -8,30 +8,13 @@ fi
 
 MAKEFILECONF=$PWD/Makefile.conf
 
-FC="$(sed -n 'H
-   ${
-   g
-   s/\\[ \t]*\n[ \t]*//g
-   p
-   }' $MAKEFILECONF|\
-   grep '^[ \t]*FC[ \t?]*='|sed 's/^[ \t]*FC[ \t?]*=//')"
-LDFLAGS="$(sed -n 'H
-   ${
-   g
-   s/\\[ \t]*\n[ \t]*//g
-   p
-   }' $MAKEFILECONF|\
-   grep '^[ \t]*LDFLAGS[ \t?]*='|sed 's/^[ \t]*LDFLAGS[ \t?]*=//')"
-CFLAGS="$(sed -n 'H
-   ${
-   g
-   s/\\[ \t]*\n[ \t]*//g
-   p
-   }' $MAKEFILECONF|\
-   grep '^[ \t]*FCFLAGS[ \t?]*='|sed 's/^[ \t]*FCFLAGS[ \t?]*=//')"
-
-LDFLAGS="$LDFLAGS @dep_ldflags@"
-CFLAGS="$CFLAGS @dep_cflags@"
+FC="$(python3 -c "
+import json
+with open('$(dirname "$0")/build/meson-info/intro-compilers.json', 'r') as file:
+  print(json.load(file)['build']['fortran']['exelist'][0])"
+)"
+LDFLAGS="@dep_ldflags@"
+CFLAGS="@dep_cflags@"
 
 PROCESS_LDFLAGS="@prefix@/@libdir@/libgolem_olp.a"
 PROCESS_CFLAGS="-I@prefix@/@includedir@"

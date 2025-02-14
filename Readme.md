@@ -50,20 +50,21 @@ evaluation with Ninja and/or Golem95.
 # Prerequisites
 * Installing GoSam and it's dependencies as well as building the generated Fortran code requires the 
   [Meson](https://mesonbuild.com/Getting-meson.html) build system.
-* Running GoSam requires at least Python version 3.7, to run the Python code in parallel additionally the `multiprocess` 
-package is required (available from [PyPI](https://pypi.org/project/multiprocess/)).
+* Running GoSam requires at least Python version 3.9 (older versions of Python may work but are unsupported), to run 
+the Python code in parallel additionally the `multiprocess` package is required (available from [PyPI](https://pypi.org/project/multiprocess/)).
 * To compile the dependencies and the generated code, a sufficiently modern Fortran compiler is required.
 * Building GoSam with support for quadruple precision requires QuadNinja, which in turn requires `libquadmath`.
 
 # Installation
 
-GoSam is available from the public [GitHub repository](https://github.com/gudrunhe/gosam) and can be downloaded by 
-running 
+GoSam is available from the public [GitHub repository](https://github.com/gudrunhe/gosam) or as a release tarball. 
+
+The git repository can be downloaded by running 
 ```console
 git clone
 ```
-
-Then, in the cloned repository, running 
+The tarball is available [here](https://github.com/gudrunhe/gosam/releases).
+Then, in the cloned repository or the unpacked tarball, running 
 ```console
 meson setup build --prefix <prefix> [-Doption=value]
 meson install -C build
@@ -76,11 +77,9 @@ will download, build and install
 and GoSam. By default, only `Ninja` is installed. By optionally setting `-Doption=value`, the default build options can be altered. 
 The full list of build options is available by running `meson configure` in the `build` directory after running `meson setup`.
 To avoid collisions with possible other installations of some of said programs, everything is installed into
-a subfolder, e.g. `<prefix>/lib/GoSam/`. To set up the runtime environment for GoSam, a script
-`<prefix>/bin/GoSam/gosam_setup_env.sh` is generated to update the required environment variables. It can be loaded with
-```console
-source <prefix>/bin/GoSam/gosam_setup_env.sh
-```
+a subfolder, e.g. `<prefix>/lib/GoSam/`. Only the main script, `gosam.py`, is directly installed to `<prefix>/bin`.
+As of version 3, GoSam no longer requires an environment setup (formerly `gosam_setup_env.sh`), only `gosam.py` needs to
+be found by the shell, e.g. by adding `<prefix>/bin` to `$PATH`.
 
 > [!NOTE]
 > Running `meson install -C build` will by default use all available processor cores. If this is undesired, the number 

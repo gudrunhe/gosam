@@ -1,4 +1,5 @@
 DATA_DIR = '@prefix@/@datadir@'
+LIB_DIR = '@prefix@/@libdir@'
 INFO = {
    'name': 'gosam',
    'version': '@version@',
