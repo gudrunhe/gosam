@@ -1125,6 +1125,36 @@ config_PSP_chk_th3 = Property(
     5,
 )
 
+config_PSP_chk_th5 = Property(
+    "PSP_chk_th5",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to recompute a PSP in quadruple precision, based on
+   the precision of the finite part estimated with a rotation.
+   !!Works only for QCD and with built-in model files!!
+   !!Used only for: extensions=quadruple!!
+   """,
+    int,
+    10,
+)
+
+config_PSP_chk_th6 = Property(
+    "PSP_chk_th6",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a quadruple precision PSP as a bad point,
+   based on the precision of the finite part estimated with a
+   rotation. According to the verbosity level set, such points
+   are written to a file and not used when the code is interfaced
+   to an external Monte Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   !!Used only for: extensions=quadruple!!
+   """,
+    int,
+    7
+)
 
 config_PSP_chk_li1 = Property(
     "PSP_chk_li1",
@@ -1195,6 +1225,36 @@ config_PSP_chk_li4 = Property(
     19,
 )
 
+config_PSP_chk_li5 = Property(
+    "PSP_chk_li5",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to recompute a PSP in quadruple precision, based on
+   the precision of the finite part estimated with a rotation.
+   !!Works only for QCD and with built-in model files!!
+   !!Used only for: extensions=quadruple!!
+   """,
+    int,
+    10
+)
+
+config_PSP_chk_li6 = Property(
+    "PSP_chk_li6",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a quadruple precision PSP as a bad point,
+   based on the precision of the finite part estimated with a
+   rotation. According to the verbosity level set, such points
+   are written to a file and not used when the code is interfaced
+   to an external Monte Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+   !!Used only for: extensions=quadruple!!
+   """,
+    int,
+    7
+)
 
 config_PSP_chk_kfactor = Property(
     "PSP_chk_kfactor",
@@ -1478,11 +1538,15 @@ properties = [
     config_PSP_chk_th1,
     config_PSP_chk_th2,
     config_PSP_chk_th3,
+    config_PSP_chk_th5,
+    config_PSP_chk_th6,
     config_PSP_chk_kfactor,
     config_PSP_chk_li1,
     config_PSP_chk_li2,
     config_PSP_chk_li3,
     config_PSP_chk_li4,
+    config_PSP_chk_li5,
+    config_PSP_chk_li6,
     config_PSP_chk_method,
     reference_vectors,
     abbrev_color,
