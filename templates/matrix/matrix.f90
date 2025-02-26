@@ -352,8 +352,7 @@ contains
          endif
       end if
    end subroutine exitgolem
-   !---#] subroutine exitgolem :
-
+   !---#] subroutine exitgolem
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, prec, ok, h)[%
 @if extension quadruple %]
@@ -537,7 +536,6 @@ contains
             reduction_interoperation = reduction_interoperation_rescue
             scale2_qp = real(scale2,ki_qp)
             vecs_qp = vecs
-            ! call refine_momenta_to_qp(4,vecs,vecs_qp,2+1,scales2)
             call adjust_kinematics_qp(vecs_qp)
             call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
             call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)
@@ -638,7 +636,6 @@ contains
             reduction_interoperation = reduction_interoperation_rescue
             scale2_qp = real(scale2,ki_qp)
             vecs_qp = vecs
-            ! call refine_momenta_to_qp([%num_legs%],vecs,vecs_qp,[% count particles massive %]+1,scales2)
             call adjust_kinematics_qp(vecs_qp)
             call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
             call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)

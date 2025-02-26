@@ -269,9 +269,6 @@
 				dest="%s_matrix.f90" arguments="name"
 				class="Kinematics"/>
 		</foreach>
-		<file src="refine_momenta.cpp" class="Kinematics">
-			<only if-extension="quadruple" />
-		</file>
 		<file src="meson.build" class="Kinematics"/>
 	</directory>
 
