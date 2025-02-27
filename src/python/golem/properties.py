@@ -131,6 +131,9 @@ qgraf_power = Property(
 
    If the last number is omitted no virtual corrections are
    calculated.
+   
+   For loop induced processes, the order of the Born diagrams
+   should be specified as `NONE`.
 
    See also: qgraf.options, qgraf.verbatim
    """,
@@ -208,7 +211,15 @@ qgraf_options = Property(
    """,
     list,
     "onshell,notadpole,nosnail",
-    options=["onepi", "onshell", "nosigma", "nosnail", "notadpole", "floop", "topol"],
+    options=[
+        "onepi",
+        "onshell",
+        "nosigma",
+        "nosnail",
+        "notadpole",
+        "floop",
+        "topol",
+    ],
 )
 
 qgraf_verbatim = Property(
@@ -456,7 +467,8 @@ regularisation_scheme = Property(
 reduction_programs = Property(
     "reduction_programs",
     """\
-        Specifies the reduction libraries which should be supported.
+        Specifies the reduction libraries which should be supported. To use golem95,
+        GoSam has to be compiled with support for golem95.
 
         Possible values: ninja, golem95
 
@@ -526,7 +538,7 @@ extensions = Property(
         "ninja",
         "customspin2prop",
         "cdr",
-        "quadruple"
+        "quadruple",
     ],
 )
 
@@ -1153,7 +1165,7 @@ config_PSP_chk_th6 = Property(
    !!Used only for: extensions=quadruple!!
    """,
     int,
-    7
+    7,
 )
 
 config_PSP_chk_li1 = Property(
@@ -1236,7 +1248,7 @@ config_PSP_chk_li5 = Property(
    !!Used only for: extensions=quadruple!!
    """,
     int,
-    10
+    10,
 )
 
 config_PSP_chk_li6 = Property(
@@ -1253,7 +1265,7 @@ config_PSP_chk_li6 = Property(
    !!Used only for: extensions=quadruple!!
    """,
     int,
-    7
+    7,
 )
 
 config_PSP_chk_kfactor = Property(
@@ -1293,8 +1305,12 @@ config_PSP_chk_method = Property(
 form_factor_lo = Property(
     "form_factor_lo",
     """\
-   This option allows to define a form factor which LO results are multiplied with.
-   Example: form_factor_lo="(1000._ki**2/(1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:))))"
+   This option allows to define a form factor which LO results are 
+   multiplied with.
+   Example: 
+   form_factor_lo="(1000._ki**2/
+        (1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:)))
+   )"
    """,
     str,
     "",
@@ -1304,7 +1320,8 @@ form_factor_lo = Property(
 form_factor_nlo = Property(
     "form_factor_nlo",
     """\
-   This option allows to define a form factor which NLO/loop-induced results are multiplied with.
+   This option allows to define a form factor which NLO/loop-induced results 
+   are multiplied with.
    """,
     str,
     "",
@@ -1397,9 +1414,10 @@ flavour_groups = Property(
 respect_generations = Property(
     "respect_generations",
     """\
-   Boolean determining whether or not the quark generation should be taken into
-   account when the flavour_groups feature is used to find crossing relations among
-   olp channels. Is relevant if flavour changing vertices appear (Assuming diagonal CKM!).
+   Boolean determining whether or not the quark generation should be taken 
+   into account when the flavour_groups feature is used to find crossing 
+   relations among olp channels. Is relevant if flavour changing vertices 
+   appear (Assuming diagonal CKM!).
 
    Examples:
 
@@ -1419,34 +1437,34 @@ respect_generations = Property(
 MSbar_yukawa = Property(
     "MSbar_yukawa",
     """\
-    List of quarks with Yukawa couplings which shall be renormalised in the MSbar 
-    scheme instead of the default OS scheme. Can also be used to renormalise Yukawa 
-    couplings of particles with mass set to zero while still keeping their coupling 
-    to the Higgs.
+    List of quarks with Yukawa couplings which shall be renormalised in 
+    the MSbar scheme instead of the default OS scheme. Can also be used 
+    to renormalise Yukawa couplings of particles with mass set to zero 
+    while still keeping their coupling to the Higgs.
 
     Examples:
     MSbar_yukawa=B
-    -> Yukawa coupling of bottom to Higgs will be renormalised in the MSbar scheme, 
-       even if mB=0 (as long as Hbb coupling still exist)
+    -> Yukawa coupling of bottom to Higgs will be renormalised in the 
+       MSbar scheme, even if mB=0 (as long as Hbb coupling still exist)
 
     See also: renorm_yukawa
     """,
-     list,
-     "",
-     experimental=True,
+    list,
+    "",
+    experimental=True,
 )
 
 use_MQSE = Property(
     "use_MQSE",
     """\
-    Whether or not to scan 1-loop amplitudes for massive quark self energies and
-    insert the appropriate mass counterterm during the form step. Used mainly for
-    debugging purposes.
+    Whether or not to scan 1-loop amplitudes for massive quark self 
+    energies and insert the appropriate mass counterterm during the 
+    form step. Used mainly for debugging purposes.
 
     """,
-     bool,
-     False,
-     experimental=True,
+    bool,
+    False,
+    experimental=True,
 )
 
 meson_buildtype = Property(

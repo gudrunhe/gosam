@@ -25,7 +25,7 @@ def main(argv=sys.argv):
         epilog="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
         )
-        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "Copyright (C) 2011-2025  The GoSam Collaboration\nThis is free software; see the "
         + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
         + "PARTICULAR PURPOSE.",
         usage="%(prog)s [options] order_file [order_file ...]",
@@ -89,7 +89,7 @@ def main(argv=sys.argv):
         version="GoSam {} (rev {})\n".format(
             ".".join(map(str, golem.installation.GOLEM_VERSION)), golem.installation.GOLEM_REVISION
         )
-        + "Copyright (C) 2011-2024  The GoSam Collaboration\nThis is free software; see the "
+        + "Copyright (C) 2011-2025  The GoSam Collaboration\nThis is free software; see the "
         + "source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
         + "PARTICULAR PURPOSE.",
     )

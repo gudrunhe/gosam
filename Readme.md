@@ -7,7 +7,7 @@
     #                                    (c) The GoSam Collaboration 2011-2025     #
     #                                                                              #
     #        AUTHORS:                                                              #
-    #        * Jens Braun                       <jens.braun@student.kit.edu>       #
+    #        * Jens Braun                       <j.braun@kit.edu>                  #
     #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
     #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          # 
     #        * Marius Hoefer                    <marius.hoefer@kit.edu>            #
