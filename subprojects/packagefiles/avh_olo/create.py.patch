@@ -12,7 +12,7 @@ index 03d2f86..2fef84d 100755
 @@ -16,7 +16,7 @@ cppintf = 'no'
  ddf90mod = ''
  mpf90mod = ''
-
+ 
 -lines = open('Config','r').readlines()
 +lines = open(locdir + '/Config','r').readlines()
  for line in lines:
@@ -21,7 +21,7 @@ index 03d2f86..2fef84d 100755
 @@ -40,6 +40,136 @@ sourcef = avh_pc_olo.full( srcdir ,dpkind,qpkind,kindmod
                                    ,ddtype,qdtype,mptype
                                    ,tlevel,cppintf )
-
+ 
 +with open(sourcef, 'a') as f:
 +    f.write("""
 +      subroutine avh_olo_mu_set(mu)
