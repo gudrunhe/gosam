@@ -75,11 +75,7 @@
 
 \chapter{Introduction}
 %\section{Synopsis}
-\gosamv is a program package for the automated generation and evaluation of one-loop amplitudes, 
-within and beyond the Standard Model.
-Version 1.0 has been published in Ref.~\cite{Cullen:2011ac}, version 2.0 in Ref.~\cite{Cullen:2014yla}.
-\gosamv-2.0 can also produce spin- and colour correlated tree amplitudes.
-The program produces \fortranXC code for a given process
+\gosamv is a program package for the automated generation and evaluation of one-loop amplitudes, within and beyond the Standard Model. As of version 2.0 \gosamv is also capable of generation spin- and colour correlated tree amplitudes. Previous versions of the code have been published in Ref.~\cite{Cullen:2011ac} (v1.0) and Ref.~\cite{Cullen:2014yla} (v2.0). The reference for the current version 3.0 is Ref.~\cite{GoSam3}. The program produces \fortranXC code for a given process
 by generating Feynman diagrams and translating
 the corresponding one-loop expressions into a form where the integrand
 can be reduced and evaluated numerically with either
@@ -741,15 +737,15 @@ see section \ref{sec:complexmasses}.
 The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
 the model files {\tt smehc} and {\tt smdiagehc} contain the effective Higgs-gluon couplings.
 
-Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua} format.
+Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
 The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
 mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
 
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
 
-\subsection{Import from FeynRules}
-A model description in the UFO~\cite{Degrande:2011ua} format consists of a \texttt{Python} package
+\subsection{Import of a UFO model}
+A model description in the UFO~\cite{Degrande:2011ua,Darme:2023jdn} format consists of a \texttt{Python} package
 stored in a directory. In order to import the model into \gosam{} one needs
 to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
 in front of the directory name.

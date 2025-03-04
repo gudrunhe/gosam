@@ -640,8 +640,7 @@ the corresponding globally set values.
 
 \subsection{Production of colour-/spin correlated trees}
 
-\gosam{} can also generate  tree level amplitudes in a spin- and colour-correlated form.
-Colour correlated matrix elements are defined as
+\gosam{} can also generate  tree level amplitudes in a spin- and colour-correlated form, which can be obtained via the BLHA interface by requesting \texttt{AmplitudeType scTree} and \texttt{AmplitudeType ccTree}, respectively. Colour-correlated matrix elements are defined as
 \begin{equation}
  C_{ij}=\bra{{\cal M}}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M}}\;,
 \end{equation}
@@ -650,7 +649,7 @@ spin-correlated matrix elements can be defined as
  S_{ij}=\bra{{\cal M},-}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M},+}\;.
 \end{equation}
 The spin-correlated matrix element above (as well as the colour correlated matrix element) contains implicitly
-the sum over all other helicities, only the helicities with the indices $i$ and $j$ are fixed, i.e.
+the sum over all other helicities, only the helicities with the indices $i$ and $j$ are fixed, i.e.\footnote{Note that the spin-correlated matrix elements depend on the conventions chosen for the implementation of the polarization vectors, which can be seen by explicitly pulling out the polarization vector from the amplitude, $|{\cal M}_{i,\lambda}\rangle=\epsilon_\lambda^\mu(p_i)|{\cal M}_{i,\mu}\rangle$. Two conventions can differ by a phase and a shift proportional to the bosons momentum, $\hat{\epsilon}_\lambda^{\mu}(p_i)=e^{i\phi_\lambda}\epsilon_\lambda^\mu(p_i)+\alpha_\lambda p_i^\mu$, from which follows $\langle{\cal M}_{i,\lambda}|{\cal M}_{i,\lambda'}\rangle=e^{i(\phi_{\lambda}-\phi_{\lambda'})}\langle\hat{{\cal M}}_{i,\lambda}|\hat{{\cal M}}_{i,\lambda'}\rangle$.}
  \begin{eqnarray}
 &&\langle {\cal M}_{i,-} |{\mathbf T}_i\cdot {\mathbf T}_j |{\cal M}_{i,+}\rangle =\\
 &&\sum_{\lambda_1,...,\lambda_{i-1},\lambda_{i+1},...,\lambda_n}
@@ -663,4 +662,10 @@ which use these trees to build the dipole subtraction terms for the infrared div
 real radiation part. With these modified tree level matrix elements \gosam{} is able to generate
 all necessary building blocks for a complete NLO calculation.\\
 Such a setup has been used successfully in combination with the framework of 
-{\sc Herwig++/Matchbox}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc}.
+{\sc Herwig++/Matchbox}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc} and the Monte Carlo Program Whizard~\cite{Kilian:2007gr,Moretti:2001zz,Stienemeier:2021cse,Braun:2025hvr}.
+
+Whizard requires the spin-correlations to be passed in the form of the (real  part of the) spin-correlation tensor $B_j^{\mu\nu}$ for particle $j$, instead. It is defined by
+\begin{equation}
+   B_j^{\mu\nu} = \sum_{\lambda,\lambda'}\epsilon_h^\mu(p_j)\epsilon_{\lambda'}^{*\nu}(p_j)\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle\,,
+\end{equation}
+where again a sum over the helicities of the other particles is implicitly understood. Invoking the BLHA interface with the non-standard \texttt{AmplitudeType scTree2} newly implemented in \gosam{}-3.0 will return the relevant entries of $B_j^{\mu\nu}$ in a way which can be directly used in Whizard. Additional phase-factors in $\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle$ related to the fact that Whizard expects the polarization vectors to be defined in the conventions of~\cite{Murayama:1992gi} are taken into account automatically.
