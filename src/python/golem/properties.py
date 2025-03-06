@@ -464,6 +464,22 @@ regularisation_scheme = Property(
     "dred",
 )
 
+config_convert_to_cdr = Property(
+    "convert_to_cdr",
+    """\
+   Sets the name of the same variable in config.f90
+
+   Activates or disables the conversion of the result into the CDR 
+   regularisation scheme, when the calculation has been performed in DRED.
+
+   Does not have an effect when CDR is picked as regularisation scheme in 
+   extensions or via property 'regularisation_scheme'.
+
+   """,
+    bool,
+    False,
+)
+
 reduction_programs = Property(
     "reduction_programs",
     """\
@@ -1521,6 +1537,7 @@ properties = [
     renorm,
     sum_helicities,
     regularisation_scheme,
+    config_convert_to_cdr,
     helicities,
     qgraf_options,
     qgraf_verbatim,

@@ -717,16 +717,31 @@ def workflow(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
+    if conf["regularisation_scheme"] == "dred": 
+        if not "dred" in ext:
+            ext.append("dred")
+    elif conf["regularisation_scheme"] == "cdr":
+        if not "cdr" in ext:
+            ext.append("cdr")
+    else:
+        logger.warning("Unknown regularisation_scheme: %s -> dred is used." % str(conf["regularisation_scheme"]))
+        ext.append("dred")
+
     if "cdr" in ext and "dred" in ext:
-        logger.warning("Incompatible settings between regularisation_scheme and extensions. cdr is used.")
+        logger.warning("Incompatible settings between regularisation_scheme and extensions -> dred is used.")
+        i = ext.index("cdr")
+        del ext[i]
+
+    if "dred" in ext:
+        conf["olp.irregularisation"] = "DRED"
+    elif "cdr" in ext:
+        conf["olp.irregularisation"] = "CDR"
+    else:
+        # should never get here
+        sys.exit("GoSam terminated due to an error: neither dred nor cdr scheme!")
 
     if "no-fr5" in ext:
         logger.warning("no-fr5 is not supported anymore.")
-
-    if not "dred" in ext:
-        ext.append("dred")
-    if conf["regularisation_scheme"] == "cdr" or "cdr" in ext:
-        conf["olp.irregularisation"] = "CDR"
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
