@@ -34,7 +34,7 @@ contains
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
    @if internal REQUIRE_FR5 %]
-      use [% process_name asprefix=\_
+      !use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
    @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]
@@ -65,8 +65,8 @@ contains
       deltaZ5 = -1.0_ki * CF[%
       @end @if %]
 
-      amp5 = amplitudel0fr5()
-      amp = amp + deltaZ5 * square(amp0, amp5)
+      !amp5 = amplitudel0fr5()
+      !amp = amp + deltaZ5 * square(amp0, amp5)
       !---#] finite renormalisation of gamma5:[%
    @end @if internal REQUIRE_FR5 %][%
 @end @if generate_lo_diagrams %]

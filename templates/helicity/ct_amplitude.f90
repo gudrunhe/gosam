@@ -16,7 +16,7 @@ contains[%
       use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]config, only: &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, &
-         & renorm_ehc, nlo_prefactors
+         & renorm_ehc, renorm_gamma5, nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles, only: pi
       use [% process_name asprefix=\_ %]counterterms, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
 @if generate_lo_diagrams %][%
@@ -138,7 +138,8 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            if (renorm_yukawa.or.renorm_mqse) then
+            ! Finite renormalisation for gamma5 in cdr
+            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_0(scale2,  0)
             end if[% 
@@ -202,7 +203,8 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            if (renorm_yukawa.or.renorm_mqse) then
+            ! Finite renormalisation for gamma5 in cdr
+            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_1(scale2,  0)
             end if[% 
@@ -266,7 +268,8 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            if (renorm_yukawa.or.renorm_mqse) then
+            ! Finite renormalisation for gamma5 in cdr
+            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_2(scale2,  0)
             end if[% 
@@ -342,7 +345,8 @@ contains[%
       @if generate_ym_counterterms %]
       
             ! Yukawa coupling and quark mass renormalisation
-            if (renorm_yukawa.or.renorm_mqse) then
+            ! Finite renormalisation for gamma5 in cdr
+            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct(scale2,  0)
             end if[% 

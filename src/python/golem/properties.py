@@ -462,6 +462,7 @@ regularisation_scheme = Property(
       """,
     str,
     "dred",
+    options=["dred", "cdr"],
 )
 
 config_convert_to_cdr = Property(
@@ -1671,7 +1672,7 @@ def setInternals(conf):
     conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
     conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
+    conf["__REGULARIZATION_HV__"] = "cdr" in extensions
 
     conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
     conf["__NUMPOLVEC__"] = "numpolvec" in extensions
@@ -1688,4 +1689,5 @@ def setInternals(conf):
 
     # conf["__REQUIRE_FR5__"] = "dred" not in extensions \
     #    and "no-fr5" not in extensions
-    conf["__REQUIRE_FR5__"] = False
+    conf["__REQUIRE_FR5__"] = "cdr" in extensions
+

@@ -175,6 +175,8 @@ Id XQLorder = 1;[%
 #else
    #ifdef `FR5'
       Id deltaaxial^2 = 0;
+      Id deltaaxial = deltaaxial*XCT*CFR5;
+      Id XCT^2 = 0;
    #else
       Id deltaaxial = 0;
    #endif
@@ -417,14 +419,14 @@ EndArgument;
 EndArgument;[% @end @if %]
 
 
-#IfDef `FR5'
-   #If `LOOPS'==0
-      Brackets deltaaxial;
-.sort:split fin ren 1;
-      Local diagram`DIAG'fr = diagram`DIAG'[deltaaxial];
-      Id deltaaxial = 0;
-   #EndIf
-#EndIf
+* #IfDef `FR5'
+*   #If `LOOPS'==0
+*      Brackets deltaaxial;
+* .sort:split fin ren 1;
+*       Local diagram`DIAG'fr = diagram`DIAG'[deltaaxial];
+*       Id deltaaxial = 0;
+*    #EndIf
+* #EndIf
 
 #Call lightconedecomp
 Argument SpDenominator;

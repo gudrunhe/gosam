@@ -31,7 +31,7 @@ Symbols m, TR, NC, NA, eps(-2:2), sign1, ..., sign4;
 Symbol sqrt2, Sqrt2, sqrt3, Sqrt3, scale2;
 Symbol deltaaxial, deltaOS, deltaHV;
 
-Symbol XCT, XCT2, CYUKAWA, CMASS;
+Symbol XCT, XCT2, CYUKAWA, CMASS, CFR5;
 AutoDeclare Symbol DELTAYUK, DELTAMASS;
 
 Vector ZERO, vDUMMYA;

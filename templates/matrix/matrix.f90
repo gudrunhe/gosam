@@ -165,44 +165,44 @@
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0, [% ' '
-        %]only: samplitudeh[%helicity%]l1_0 => samplitude, &
-     &   finite_renormalisation[%helicity%]_0 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_0 => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_0 => finite_renormalisation[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_0_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_0_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_0_qp => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_0_qp => finite_renormalisation[%
       @end @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_1, [% ' '
-        %]only: samplitudeh[%helicity%]l1_1 => samplitude, &
-     &   finite_renormalisation[%helicity%]_1 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_1 => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_1 => finite_renormalisation[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_1_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_1_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_1_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_1_qp => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_1_qp => finite_renormalisation[%
       @end @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_2, [% ' '
-        %]only: samplitudeh[%helicity%]l1_2 => samplitude, &
-     &   finite_renormalisation[%helicity%]_2 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_2 => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_2 => finite_renormalisation[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_2_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_2_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_2_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_2_qp => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_2_qp => finite_renormalisation[%
       @end @if extension quadruple %][%
       @else %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%], [% ' '
-        %]only: samplitudeh[%helicity%]l1 => samplitude, &
-     &   finite_renormalisation[%helicity%] => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1 => samplitude!, &
+     !&   finite_renormalisation[%helicity%] => finite_renormalisation[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_qp => samplitude!, &
+     !&   finite_renormalisation[%helicity%]_qp => finite_renormalisation[%
       @end @if extension quadruple %][%
       @end @if %][%
       @end @if %][%
@@ -1650,10 +1650,10 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
+!     if (corrections_are_qcd .and. renorm_gamma5) then
+!      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+!      heli_amp(0) = heli_amp(0) + fr
+!     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -1758,10 +1758,10 @@ contains
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
+!      if (corrections_are_qcd .and. renorm_gamma5) then
+!         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+!         heli_amp(0) = heli_amp(0) + fr
+!      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -1934,10 +1934,10 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
+!     if (corrections_are_qcd .and. renorm_gamma5) then
+!      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+!      heli_amp(0) = heli_amp(0) + fr
+!     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -2040,10 +2040,10 @@ contains
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
+!      if (corrections_are_qcd .and. renorm_gamma5) then
+!         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
+!         heli_amp(0) = heli_amp(0) + fr
+!      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -3476,10 +3476,10 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
+!     if (corrections_are_qcd .and. renorm_gamma5) then
+!      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+!      heli_amp(0) = heli_amp(0) + fr
+!     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -3587,10 +3587,10 @@ contains
         heli_amp(-1) = square_qp(colorvec(:,-1))
         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
+!      if (corrections_are_qcd .and. renorm_gamma5) then
+!         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+!         heli_amp(0) = heli_amp(0) + fr
+!      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -3763,10 +3763,10 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
+!     if (corrections_are_qcd .and. renorm_gamma5) then
+!      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+!      heli_amp(0) = heli_amp(0) + fr
+!     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -3872,10 +3872,10 @@ contains
         heli_amp(-1) = square_qp(colorvec(:,-1))
         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
+!      if (corrections_are_qcd .and. renorm_gamma5) then
+!         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
+!         heli_amp(0) = heli_amp(0) + fr
+!      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
