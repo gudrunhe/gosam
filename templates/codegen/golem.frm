@@ -626,71 +626,32 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 
 .sort:5.2;
 
-[% @select r2 
+[% @select r2 @case explicit implicit %][%
+@else %]
+   #message Undefined value for r2: "[% r2 %]"
+   #terminate
+.end[%
+@end @select %]
+
+#If `LOOPS' == 1[% 
+@select r2 
 @case explicit %]
-#If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
    #Create <`OUTFILE'.dat>[%
 @if helsum %]
    #Call WriteUnoptimized(`R2PREFACTOR')[%
 @else %]
    #Call  OptimizeCode(`R2PREFACTOR')[%
-@end @if %]
-   #Close <`OUTFILE'.txt>
-   #Close <`OUTFILE'.dat>
-[% @if generate_eft_counterterms %]
-#ElseIf `EFTCTFLG' == 1
-   #If `BORNFLG' == 1
-   #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == 0
-        #Create <`OUTFILE'.txt>
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == -1
-        #Append <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
-	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
-        #Call OptimizeEFTCT()
-   #ElseIf `BORNFLG' == 2
-	#Create <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
-        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
-	#write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <eftctdiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
-        #Call OptimizeEFTCT()
-   #EndIf
-[% @end @if %]
-#Else
-   #If `BORNFLG' == 1
-   #Create <`OUTFILE'.txt>
-        #write <`OUTFILE'.txt> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == 0
-        #Create <`OUTFILE'.txt>
-	#write <`OUTFILE'.txt> "Id diag`DIAG'  = %e",diagram`DIAG'
-   #ElseIf `BORNFLG' == -1
-        #Append <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
-	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
-        #Call OptimizeBorn()
-   #ElseIf `BORNFLG' == 2
-	#Create <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc>
-        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#Procedure borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %]"
-	#write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "Id diag`DIAG'  = %e",diagram`DIAG'
-        #write <borndiag[% @if enable_truncation_orders %][% trnco %][% @end @if %].prc> "#EndProcedure"
-        #Call OptimizeBorn()
-   #EndIf
-#EndIf
-.end[%
+@end @if %][%
 @case implicit %]
-#If `LOOPS' == 1
    #Create <`OUTFILE'.txt>
    #Create <`OUTFILE'.dat>[%
 @if helsum %]
    #Call WriteUnoptimized(0)[%
 @else %]
    #Call  OptimizeCode(0)[%
-@end @if %]
+@end @if %][%
+@end @select %]
    #Close <`OUTFILE'.txt>
    #Close <`OUTFILE'.dat>
 [% @if generate_eft_counterterms %]
@@ -736,9 +697,4 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
         #Call OptimizeBorn()
    #EndIf
 #EndIf
-.end[%
-@else %]
-   #message Undefined value for r2: "[% r2 %]"
-   #terminate
-.end[%
-@end @select %]
+.end
