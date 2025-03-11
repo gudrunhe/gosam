@@ -853,15 +853,15 @@ contains
       select case (renormalisation)
       case (0)
          ! no renormalisation
-      case (1,2)
-         ! fully renormalized (1) or massive quark counterterms only (2): 
+      case (1,2,3)
+         ! fully renormalised (1), finite gamma5 renormalisation only (2) or massive quark counterterms only (2): 
          ! separation handled in ct_amplitude.f90 and function amplitude_Dym
          if (present(h)) then
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_h(vecs, renorm_logs, scale2, h)
          else
             amp((/3,2/)) = amp((/3,2/)) + samplitudect(vecs, renorm_logs, scale2)
          end if
-      case (3)
+      case (4)
          ! massive quark counterterms only, OLD IMPLEMENTATION
       case default
          ! not implemented
@@ -2680,15 +2680,15 @@ contains
       select case (renormalisation)
       case (0)
          ! no renormalisation
-      case (1,2)
-         ! fully renormalized (1) or massive quark counterterms only (2): 
+      case (1,2,3)
+         ! fully renormalised (1), finite gamma5 renormalisation only (2) or massive quark counterterms only (2): 
          ! separation handled in ct_amplitude.f90 and function amplitude_Dym
          if (present(h)) then
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_h_qp(vecs, renorm_logs, scale2, h)
          else
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_qp(vecs, renorm_logs, scale2)
          end if         
-      case (3)
+      case (4)
          ! massive quark counterterms only, OLD IMPLEMENTATION         
       case default
          ! not implemented

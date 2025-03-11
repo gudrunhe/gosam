@@ -156,15 +156,16 @@ contains[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
-      case(2)[%
+      case(2,3)[%
      @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
-         ! quark mass renormalisation
+            ! gamma5 finite renormalisation (2) or quark mass renormalisation (3)
+            ! -> different handling in ampdymct
             amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
             amp( 0,:) = amp( 0,:) + ampdymct_0(scale2,  0)
          end if[% 
      @end @if generate_ym_counterterms %]
-      case(3)
+      case(4)
          ! quark mass renormalisation using old implementation; should never get here
          return
       end select ! renormalisation[%
@@ -221,15 +222,16 @@ contains[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
-      case(2)[%
+      case(2,3)[%
       @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
-            ! quark mass renormalisation
+            ! gamma5 finite renormalisation (2) or quark mass renormalisation (3)
+            ! -> different handling in ampdymct
             amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
             amp( 0,:) = amp( 0,:) + ampdymct_1(scale2,  0)
          end if[% 
       @end @if generate_ym_counterterms %]
-      case(3)
+      case(4)
          ! quark mass renormalisation using old implementation; should never get here
          return
       end select ! renormalisation[%
@@ -286,20 +288,21 @@ contains[%
      @end @if %][%
      @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
-      case(2)[%
+      case(2,3)[%
       @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
-            ! quark mass renormalisation
+            ! gamma5 finite renormalisation (2) or quark mass renormalisation (3)
+            ! -> different handling in ampdymct
             amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
             amp( 0,:) = amp( 0,:) + ampdymct_2(scale2,  0)
          end if[% 
       @end @if generate_ym_counterterms %]
-      case(3)
+      case(4)
          ! quark mass renormalisation using old implementation; should never get here
          return
       end select ! renormalisation[%
 @else %]
-      ! ct_amplitude.f90 has been generated with trnco = [% trnco %]. This should dnever happen!
+      ! ct_amplitude.f90 has been generated with trnco = [% trnco %]. This should never happen!
 [% @end @select  %]
 [% @else %][% ' not enable_truncation_orders '%]
       select case (renormalisation)
@@ -363,15 +366,16 @@ contains[%
       @end @if %][%
       @end @if generate_eft_counterterms %]
          end if ! corrections_are_qcd
-      case(2)[%
+      case(2,3)[%
          @if generate_ym_counterterms %]
          if (corrections_are_qcd) then
-            ! quark mass renormalisation
+            ! gamma5 finite renormalisation (2) or quark mass renormalisation (3)
+            ! -> different handling in ampdymct
             amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
             amp( 0,:) = amp( 0,:) + ampdymct(scale2,  0)
          end if[% 
          @end @if generate_ym_counterterms %]
-      case(3)
+      case(4)
          ! quark mass renormalisation using old implementation; should never get here
          return
       end select ! renormalisation[%

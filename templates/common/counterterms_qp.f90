@@ -7,7 +7,8 @@
    private
 
 public :: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf, & 
-   & counterterm_yukawa_OS, counterterm_yukawa_MSbar, counterterm_mass_OS 
+   & counterterm_yukawa_OS, counterterm_yukawa_MSbar, counterterm_mass_OS,& 
+   & counterterm_fr5
 
 contains
  
@@ -107,7 +108,7 @@ contains
    function counterterm_yukawa_OS(renorm,eps,scale2,m) result(ct)
       use [% process_name asprefix=\_ %]color_qp, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
-         & renormalisation, renorm_logs, renorm_yukawa
+         & renorm_logs, renorm_yukawa
       implicit none
       real(ki) :: ct, scale2, m
       integer :: eps
@@ -138,7 +139,7 @@ contains
    function counterterm_yukawa_MSbar(renorm,eps) result(ct)
       use [% process_name asprefix=\_ %]color_qp, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
-         & renormalisation, renorm_logs, renorm_yukawa
+         & renorm_logs, renorm_yukawa
       implicit none
       real(ki) :: ct
       integer :: eps
@@ -166,7 +167,7 @@ contains
    function counterterm_mass_OS(renorm,eps,scale2,m) result(ct)
       use [% process_name asprefix=\_ %]color_qp, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
-         & renormalisation, renorm_logs, renorm_mqse
+         & renorm_logs, renorm_mqse
       implicit none
       real(ki) :: ct, scale2, m
       integer :: eps
@@ -195,6 +196,34 @@ contains
 
    end function counterterm_mass_OS
 !---#] function counterterm_mass_OS:
+!---#[ function counterterm_fr5:
+   function counterterm_fr5(renorm,eps) result(ct)
+      use [% process_name asprefix=\_ %]color_qp, only: CF
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
+         & renorm_gamma5
+      implicit none
+      real(ki) :: ct
+      integer :: eps      
+      logical :: renorm
+
+      ct = 0.0_ki
+
+      if (.not.(renorm.and.renorm_gamma5)) then
+         return
+      end if
+
+      select case (eps)  
+      case(-1)
+         ct = 0.0_ki
+      case(0)
+         ct = [% @if extension dred %]0.0[% @else %]-1.0[% @end @if %]_ki*CF
+      case default
+         print *, "ERROR: In function counterterm_fr5: unkown epsilon power."
+         stop
+   end select
+
+   end function counterterm_fr5
+!---#] function counterterm_fr5:
 !---#[ function reglog:
    function reglog(r)
       implicit none

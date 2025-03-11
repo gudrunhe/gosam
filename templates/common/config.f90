@@ -173,10 +173,10 @@
              true=.true.
              false=.false. %]
 
-   ! Switch mass counter terms for massive quarks on or off
+   ! Switch mass counter terms for massive quarks on or off (old way, only left for debugging)
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off
-   ! Do not modify directly, use renormalisation=0,1,2 instead.
+   ! Do not modify directly, use renormalisation=0,1,2,3,4 instead.
    real(ki) :: deltaOS = 1.0_ki
    !---#] Renormalisation:
 
