@@ -815,7 +815,7 @@ contains
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %][%
       @if generate_counterterms %]
-      if (renormalisation.eq.3) then
+      if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki[%
       @if use_MQSE %][% @else %]
@@ -2644,7 +2644,7 @@ contains
       amp(1)   = 0.0_ki_qp[%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
-      if (renormalisation.eq.3) then
+      if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp[%
          @if use_MQSE %][% @else %]
