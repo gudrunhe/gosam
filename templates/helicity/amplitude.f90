@@ -22,57 +22,8 @@
    implicit none
    private
 
-   public :: finite_renormalisation, samplitude
+   public :: samplitude
 contains
-!---#[ function finite_renormalisation:
-   function     finite_renormalisation(scale2) result(amp)
-      use [% process_name asprefix=\_ %]util, only: square
-      use [% process_name asprefix=\_ %]color, only: CF, CA
-      use [% process_name asprefix=\_ %]kinematics, only: &
-      & num_light_quarks, num_gluons[%
-@if generate_lo_diagrams %]
-      use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %], only: amplitudel0 => amplitude[%
-   @if internal REQUIRE_FR5 %]
-      !use [% process_name asprefix=\_
-      %]diagramsh[%helicity%]l0[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]fr5, only: amplitudel0fr5 => amplitude[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-      implicit none
-      real(ki), intent(in) :: scale2
-      real(ki) :: amp[%
-@if generate_lo_diagrams %][%
-   @if internal REQUIRE_FR5 %]
-      complex(ki),  dimension(numcs) :: amp0, amp5
-      real(ki) :: deltaZ5[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-      amp = 0.0_ki[%
-@if generate_lo_diagrams %][%
-   @if internal REQUIRE_FR5 %]
-      amp0 = amplitudel0()
-      !---#[ finite renormalisation of gamma5:
-      ! We need to replace gamma5 by
-      ! (1 + alpha_s/2pi deltaZ5) gamma5, where deltaZ5 is scheme
-      ! dependend. See for example
-      !    S. Weinzierl, ``Equivariant dimensional regularization,''
-      !    arXiv:hep-ph/9903380
-      ![%
-      @if extension dred %]
-      deltaZ5 = 0.0_ki * CF[%
-      @else %]
-      ! There's a factor of 2 in the square routine already.
-      deltaZ5 = -1.0_ki * CF[%
-      @end @if %]
-
-      !amp5 = amplitudel0fr5()
-      !amp = amp + deltaZ5 * square(amp0, amp5)
-      !---#] finite renormalisation of gamma5:[%
-   @end @if internal REQUIRE_FR5 %][%
-@end @if generate_lo_diagrams %]
-   end function finite_renormalisation
-   !---#] function finite_renormalisation:
-
    !---#[ function samplitude:
    function     samplitude(scale2,ok,rational2,[%
 @if generate_lo_diagrams %]opt_amp0,[%

@@ -1686,8 +1686,5 @@ def setInternals(conf):
     conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
     if not "__OLP_MODE__" in conf:
         conf["__OLP_MODE__"] = False
-
-    # conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-    #    and "no-fr5" not in extensions
     conf["__REQUIRE_FR5__"] = "cdr" in extensions
 

@@ -170,17 +170,20 @@ Id XQLorder = 1;[%
 #call ones
 #call zeroes
 
-#if `LOOPS' > 0
-   Id deltaaxial = 0;
-#else
-   #ifdef `FR5'
+[% @if generate_counterterms
+%]#If (`LOOPS' == 0 )[% @if generate_eft_counterterms %] && (`EFTCTFLG' == 0)[% @end @if %]
+   #Ifdef `FR5'
       Id deltaaxial^2 = 0;
       Id deltaaxial = deltaaxial*XCT*CFR5;
       Id XCT^2 = 0;
-   #else
+   #Else
       Id deltaaxial = 0;
-   #endif
-#endif
+   #Endif
+#Else
+   Id deltaaxial = 0;
+#EndIf[% 
+@else%]Id deltaaxial = 0;[%
+@end @if %]
 
 *---#[ Process Propagators:
 * If the mass is zero the width becomes irrelevant:
@@ -417,16 +420,6 @@ EndArgument;
 %]Argument customSpin2Prop;
    #Call kinematics
 EndArgument;[% @end @if %]
-
-
-* #IfDef `FR5'
-*   #If `LOOPS'==0
-*      Brackets deltaaxial;
-* .sort:split fin ren 1;
-*       Local diagram`DIAG'fr = diagram`DIAG'[deltaaxial];
-*       Id deltaaxial = 0;
-*    #EndIf
-* #EndIf
 
 #Call lightconedecomp
 Argument SpDenominator;

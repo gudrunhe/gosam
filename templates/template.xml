@@ -277,11 +277,6 @@
 			<file src="Makefile.dep" class="Integrals"/>
 			<file src="Makefile.source" class="Integrals"/>
 			<file src="../form.set" dest="form.set" class="Kinematics"/>
-			<!--file src="diagramsl0fr5.f90" class="Multi"-->
-				<!--only if-internal="REQUIRE_FR5"/-->
-			<!--<only if-option="group" value="false"/>-->
-			<!--NOTE: property "group does not exist anymore. Fixed behaviour now corresponds to group=True."-->	
-			<!--/file-->
 			<file src="ninja.f90" dest="ninjah%d.f90" arguments="helicity"
 				class="Integrals">
 				<only if-extension="ninja" />
