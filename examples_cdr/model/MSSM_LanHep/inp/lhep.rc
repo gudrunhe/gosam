@@ -1,0 +1,54 @@
+special gamma:(spinor,cspinor,vector).
+special gamma5:(spinor,cspinor).
+special '(1+gamma5)/2':(spinor,cspinor), '(1-gamma5)/2':(spinor,cspinor).
+special moment:(vector).
+special '__moment__start__':(vector), '__moment__end__'.
+special epsv:(vector,vector,vector,vector).
+group color:SU(3).
+repres color:(c3/c3b,c8).
+SetDefIndex(spinor,color c3, color c8, vector).
+special lambda:(color c3, color c3b, color c8).
+special f_SU3:(color c8, color c8, color c8).
+special d_SU3:(color c8, color c8, color c8).
+special eps_c3: (color c3,  color c3,  color c3), 
+        eps_c3b:(color c3b, color c3b, color c3b).
+let deriv=-i*moment.
+special deriv5.
+let '__deriv__start__'=-i*'__moment__start__'.
+let tau1={{0,1},{1,0}}, tau2={{0,i},{-i,0}}, tau3={{1,0},{0,-1}}.
+let tau={tau1,tau2,tau3}.
+let taup=(tau1+i*tau2)/Sqrt2.
+let taum=(tau1-i*tau2)/Sqrt2.
+let taupm={taup,tau3,taum}.
+let taump={taum,tau3,taup}.
+let eps =   {{{0, 0,0}, {0,0,-1}, { 0,1,0}},
+             {{0, 0,1}, {0,0, 0}, {-1,0,0}}, 
+             {{0,-1,0}, {1,0, 0}, { 0,0,0}}}.
+let epspm=  {{{0, 0,0}, {0,0,-i}, {0,i,0}},
+             {{0,0,i}, {0,0,0}, {-i,0,0}},
+             {{0,-i,0},{i,0,0}, {0,0,0}}}.
+let 	Tau1={{0,-1,0},{-1,0,1},{0,1,0}}/Sqrt2,
+	Tau2={{0,-i,0},{i,0,i},{0,-i,0}}/Sqrt2,
+	Tau3={{1,0,0},{0,0,0},{0,0,-1}}.
+let Tau={Tau1,Tau2,Tau3}.
+let Taup=(Tau1+i*Tau2)/Sqrt2, Taum=(Tau1-i*Tau2)/Sqrt2.
+let Taupm={Taup,Tau3,Taum}.
+let Taump={Taum,Tau3,Taup}.
+
+option TexFileStart=[
+		'\\documentstyle[12pt]{article}',
+ 		'\\textwidth 17cm',
+		'\\textheight 25cm',
+		'\\hoffset -3cm',
+		'\\voffset -1cm',
+		'\\pagestyle{empty}',
+ 		'\\begin{document}',
+		'\\begin{center}',0 ],
+       TexFileEnd=[0,
+		'\\end{center}',
+		'\\end{document}',0].
+
+ 
+do_if FeynArts==1.
+read 'feynarts.rc'.
+end_if.

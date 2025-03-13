@@ -1,0 +1,46 @@
+ <momentum index='1' inout='in'>
+<component name='E' value='   298.1784802407391    '/>
+<component name='x' value='   0.000000000000000    '/>
+<component name='y' value='   0.000000000000000    '/>
+<component name='z' value='   298.1784802407391    '/>
+<component name='m' value='   0.000000000000000    '/>
+ <!-- k1.k1 =    0.0000000000000000      -->
+ </momentum>
+ <momentum index='2' inout='in'>
+<component name='E' value='   298.1784802407391    '/>
+<component name='x' value='   0.000000000000000    '/>
+<component name='y' value='   0.000000000000000    '/>
+<component name='z' value='  -298.1784802407391    '/>
+<component name='m' value='   0.000000000000000    '/>
+ <!-- k2.k2 =    0.0000000000000000      -->
+ </momentum>
+ <momentum index='3' inout='out'>
+<component name='E' value='   311.2788555489983    '/>
+<component name='x' value='  -282.5683232719408    '/>
+<component name='y' value='  -20.78378501781600    '/>
+<component name='z' value='   31.50718768013484    '/>
+<component name='m' value='   125.0000000000000    '/>
+ <!-- k3.k3 =    15625.000000000033      -->
+ </momentum>
+ <momentum index='4' inout='out'>
+<component name='E' value='   285.0781049324800    '/>
+<component name='x' value='   282.5683232719408    '/>
+<component name='y' value='   20.78378501781600    '/>
+<component name='z' value='  -31.50718768013484    '/>
+<component name='m' value='   0.000000000000000    '/>
+ <!-- k4.k4 =    5.1159076974727213E-012 -->
+ </momentum>
+ <!-- es12 =    355641.62431470741      -->
+ <!-- es23 =   -188797.84283559842      -->
+ <!-- es3 =    15625.000000000000      -->
+ GOSAM     AMP(0):          1.9317529871250099E-004
+ GOSAM     AMP(1)/AMP(0):   6.0963529516066348     
+ GOSAM     AMP(2)/AMP(0):   12.160134391476799     
+ GOSAM     AMP(3)/AMP(0):  -8.9999999999999698     
+ REFERENCE AMP(0):          1.9317529871617576E-004
+ REFERENCE AMP(1)/AMP(0):   13.195495732443119     
+ REFERENCE AMP(2)/AMP(0):   12.160134391476900     
+ REFERENCE AMP(3)/AMP(0):  -9.0000000000000000     
+==>    Comparison of NLO/finite part failed!
+DIFFERENCE 0.7360E+00
+@@@ FAILURE @@@

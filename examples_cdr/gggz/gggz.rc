@@ -1,0 +1,23 @@
+process_name=gggz
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=21,21
+out=21,23
+
+order=QCD, NONE, 3
+
+# The reference calculation has been done for a (u,d)-quark
+# doublet in the loop.
+# The second filter ensures that all bubbles
+# (which are zero by color) are removed.
+qgraf.verbatim=\
+   true=iprop[S,C,B,T,0,0];\\n\\\n\
+   true=chord[U,D,3,4];
+
+one=gs,e
+zero=w*, mD
+
+helicities=+-++,+-+-,+-+0
+
+regularisation_scheme=cdr

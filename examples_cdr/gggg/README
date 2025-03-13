@@ -1,0 +1,13 @@
+This directory contains a comparison of the four gluon amplitude
+
+g(k1)+g(k2) -> g(k3)+g(k4)
+
+for Nf=0. The reference result has been taken from [1], where it is
+Example 3.
+
+
+References
+[1] T. Binoth, J.-Ph. Guillet, G. Heinrich,
+    ``Algebraic evaluation of rational polynomials in one-loop amplitudes,''
+    JHEP 02 (2007) 013, ISSN 1126-6708, arXiv:hep-ph/0609054
+

@@ -1,0 +1,25 @@
+process_name=gggH
+process_path=virtual
+
+in=21, 21
+out=21, 25
+
+order=QCD, NONE, 3
+model=smdiag_complex
+model.options=ewchoose:1,mBMS:0,mB:0,wZ:0,wH:0,wT:0,wW:0,wB:0
+
+one=gs
+zero=wH,wT
+
+# No other particles than gluons, Higgs and
+# one quark flavour [t] running in the loops:
+qgraf.verbatim=true=iprop[A,Z,U,D,C,S,B,H,0,0];
+qgraf.options=onshell,notadpole,nosnail
+
+nlo_prefactors=0
+
+PSP_rescue=1
+PSP_chk_method=Rotation
+polvec=explicit
+extensions=quadruple,olp_badpts
+regularisation_scheme=cdr
