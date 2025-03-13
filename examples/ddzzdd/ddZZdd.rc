@@ -24,4 +24,5 @@ qgraf.options=onshell,notadpole,nosnail
 # one quark flavour [d] running in the loops:
 qgraf.verbatim=true=iprop[H,T,0,0];
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_cdr=true
