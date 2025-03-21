@@ -734,6 +734,12 @@ def workflow(conf):
         i = ext.index("cdr")
         del ext[i]
 
+    if "cdr" in ext and conf.getProperty("r2") != "explicit":
+        raise GolemConfigError(
+                "When using the CDR regularisation scheme, only explicit construction of the R2 terms is permitted. "
+                + "Please use DRED as regularisation scheme or switch to r2=explict." 
+            )
+
     if "dred" in ext:
         conf["olp.irregularisation"] = "DRED"
     elif "cdr" in ext:
