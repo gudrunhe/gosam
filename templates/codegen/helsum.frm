@@ -42,7 +42,7 @@ Symbol Qt2,QspQ[%
 AutoDeclare Symbol c;
 AutoDeclare Vector spva;
 S Nfrat;
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -61,7 +61,7 @@ Vectors Q[%
    @for particles lightlike vector %],e[%index%][%
    @end @for %][%
 @end @if %];
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
