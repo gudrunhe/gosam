@@ -719,6 +719,33 @@ def workflow(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
+    # check if the ir regularisation scheme is specified in OLP file
+    # -> overwrites settings in *.rc or *.in files
+    if conf["olp.extensions"] is not None:
+        ir_scheme_warn = False
+        if "CDR" in conf["olp.extensions"]:
+            olpir = "CDR"
+            if conf["regularisation_scheme"] == "dred":
+                ir_scheme_warn = True
+                conf["regularisation_scheme"] = "cdr"
+            if "dred" in ext:
+                ir_scheme_warn = True
+                i = ext.index("dred")
+                del ext[i]
+                ext.append("cdr")
+        if "DRED" in conf["olp.extensions"]:
+            olpir = "DRED"
+            if conf["regularisation_scheme"] == "cdr":
+                ir_scheme_warn = True
+                conf["regularisation_scheme"] = "dred"
+            if "cdr" in ext:
+                ir_scheme_warn = True
+                i = ext.index("cdr")
+                del ext[i]
+                ext.append("dred")
+        if ir_scheme_warn:
+            logger.warning("OLP setting for IR regularisation scheme overrides config. Is now %s." % olpir)
+
     if conf["regularisation_scheme"] == "dred": 
         if not "dred" in ext:
             ext.append("dred")
