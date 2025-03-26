@@ -15,6 +15,6 @@ zero=mdlMb,mdlMc,mdlMs,mdlwtop
 one=mdlEE,mdlGG
 
 filter.nlo=lambda d: not d.isScaleless()
-r2=implicit
+r2=explicit
 debug=nlo
 regularisation_scheme=cdr

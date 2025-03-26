@@ -176,24 +176,35 @@ subroutine     compute_reference_result(subprocess, amp)
    implicit none
    integer, intent(in) :: subprocess
    real(ki), dimension(0:3), intent(out) :: amp
-
+   integer :: num_light_quarks, num_gluons
+   real(ki), parameter :: CA = 3._ki, CF = 4._ki/3._ki 
+   
    if (subprocess .eq. 0) then
       ! process g g -> h d d~
       amp(0) =   0.5677813961826772E-06_ki
       amp(1) =  66.66351423714880_ki
       amp(2) = -16.58166333155296_ki
       amp(3) =  -8.666666666666572_ki
+      num_light_quarks = 2
+      num_gluons = 2
    else if (subprocess .eq. 1) then
       ! process d d~ -> h u u~
       amp(0) =   0.1011096724203530E-06_ki
       amp(1) =  33.95216267342636_ki
       amp(2) = -13.86492928341135_ki
       amp(3) =  -5.333333333333357_ki
+      num_light_quarks = 4
+      num_gluons = 0
    else
       write(logf,*) "ERROR: Invalid subprocess for reference result selected"
       success = .false.
    end if
 
+   ! Reference result in dred -> convert to cdr
+   amp(1) = amp(1) - (&
+        &          num_light_quarks * 0.5d0 * CF &
+        &        + num_gluons * 1.0d0/6.0d0 * CA)
+   
    do ic = 1, 2
       ch = channels(ic)
       write(ch,'(A10,1x,A16,1x,G23.16)') "REFERENCE,", "LO:", amp(0)
