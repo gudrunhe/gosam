@@ -1,0 +1,20 @@
+process_name=qqtth
+process_path=virtual
+
+# PDG codes # d-Quark: 1 # H-Boson: 25 # t-Quark: 6
+in=1,-1
+out=25,6,-6
+
+order=QCD, 2, 4
+
+filter.lo= lambda d: d.vertices(Tbar,T,H) >=1
+filter.nlo= lambda d: d.vertices(Tbar,T,H) >=1
+
+one=
+zero=me,mmu,mtau,wtau,mU,mD,mC,mS,wB,wT,wW,wZ,mB,mBMS
+
+model=smdiag
+
+regularisation_scheme=cdr
+nlo_prefactors=2
+renormalisation=1

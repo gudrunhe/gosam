@@ -19,9 +19,9 @@ CFunction dcolor(symmetric), dcolor8(symmetric);
 			f(idx1C8?,idx2C8?,idx3C8?) =
 		T(idx3C8,idx1C3,idx2C3)*i_*TR*NC;
 * Star-Triangle relation T-T-T
-	Id T(idx1C8, idx1C3, idx2C3) *
-			T(idx2C8, idx2C3, idx3C3) *
-			T(idx1C8,idx3C3,idx4C3) =
+	Id T(idx1C8?, idx1C3?, idx2C3?) *
+			T(idx2C8?, idx2C3?, idx3C3?) *
+			T(idx1C8?,idx3C3?,idx4C3?) =
 		- T(idx2C8,idx1C3,idx4C3)*TR/NC;
 #endprocedure
 

@@ -165,44 +165,36 @@
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0, [% ' '
-        %]only: samplitudeh[%helicity%]l1_0 => samplitude, &
-     &   finite_renormalisation[%helicity%]_0 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_0 => samplitude[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_0_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_0_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_0_qp => samplitude[%
       @end @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_1, [% ' '
-        %]only: samplitudeh[%helicity%]l1_1 => samplitude, &
-     &   finite_renormalisation[%helicity%]_1 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_1 => samplitude[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_1_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_1_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_1_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_1_qp => samplitude[%
       @end @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_2, [% ' '
-        %]only: samplitudeh[%helicity%]l1_2 => samplitude, &
-     &   finite_renormalisation[%helicity%]_2 => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_2 => samplitude[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_2_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_2_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_2_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_2_qp => samplitude[%
       @end @if extension quadruple %][%
       @else %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%], [% ' '
-        %]only: samplitudeh[%helicity%]l1 => samplitude, &
-     &   finite_renormalisation[%helicity%] => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1 => samplitude[%
       @if extension quadruple %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_qp, [% ' '
-        %]only: samplitudeh[%helicity%]l1_qp => samplitude, &
-     &   finite_renormalisation[%helicity%]_qp => finite_renormalisation[%
+        %]only: samplitudeh[%helicity%]l1_qp => samplitude[%
       @end @if extension quadruple %][%
       @end @if %][%
       @end @if %][%
@@ -815,7 +807,7 @@ contains
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %][%
       @if generate_counterterms %]
-      if (renormalisation.eq.3) then
+      if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki[%
       @if use_MQSE %][% @else %]
@@ -853,15 +845,15 @@ contains
       select case (renormalisation)
       case (0)
          ! no renormalisation
-      case (1,2)
-         ! fully renormalized (1) or massive quark counterterms only (2): 
+      case (1,2,3)
+         ! fully renormalised (1), finite gamma5 renormalisation only (2) or massive quark counterterms only (2): 
          ! separation handled in ct_amplitude.f90 and function amplitude_Dym
          if (present(h)) then
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_h(vecs, renorm_logs, scale2, h)
          else
             amp((/3,2/)) = amp((/3,2/)) + samplitudect(vecs, renorm_logs, scale2)
          end if
-      case (3)
+      case (4)
          ! massive quark counterterms only, OLD IMPLEMENTATION
       case default
          ! not implemented
@@ -1507,7 +1499,7 @@ contains
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      real(ki) :: fr, rational2
+      real(ki) :: rational2
 
       amp(:) = 0.0_ki
       rat2 = 0.0_ki
@@ -1650,10 +1642,6 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -1664,10 +1652,6 @@ contains
             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
         write(logfile,'(A33,E24.16,A3)') &
             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-        if (corrections_are_qcd .and. renorm_gamma5) then
-           write(logfile,'(A30,E24.16,A3)') &
-               & "<result kind='fin-ren' value='", fr, "'/>"
-        end if
         if(my_ok) then
            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
         else
@@ -1758,10 +1742,6 @@ contains
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -1772,10 +1752,6 @@ contains
              & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
          write(logfile,'(A33,E24.16,A3)') &
              & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-         if (corrections_are_qcd .and. renorm_gamma5) then
-            write(logfile,'(A30,E24.16,A3)') &
-                & "<result kind='fin-ren' value='", fr, "'/>"
-         end if
          if(my_ok) then
             write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
          else
@@ -1824,7 +1800,7 @@ contains
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      real(ki) :: fr, rational2
+      real(ki) :: rational2
 
       amp(:) = 0.0_ki
       rat2 = 0.0_ki
@@ -1934,10 +1910,6 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -1948,10 +1920,6 @@ contains
             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
         write(logfile,'(A33,E24.16,A3)') &
             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-        if (corrections_are_qcd .and. renorm_gamma5) then
-           write(logfile,'(A30,E24.16,A3)') &
-               & "<result kind='fin-ren' value='", fr, "'/>"
-        end if
         if(my_ok) then
            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
         else
@@ -2040,10 +2008,6 @@ contains
         heli_amp(-1) = square(colorvec(:,-1))
         heli_amp(-2) = square(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -2054,10 +2018,6 @@ contains
              & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
          write(logfile,'(A33,E24.16,A3)') &
              & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-         if (corrections_are_qcd .and. renorm_gamma5) then
-            write(logfile,'(A30,E24.16,A3)') &
-                & "<result kind='fin-ren' value='", fr, "'/>"
-         end if
          if(my_ok) then
             write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
          else
@@ -2644,7 +2604,7 @@ contains
       amp(1)   = 0.0_ki_qp[%
 @end @if generate_lo_diagrams%][%
       @if generate_nlo_virt %]
-      if (renormalisation.eq.3) then
+      if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp[%
          @if use_MQSE %][% @else %]
@@ -2680,15 +2640,15 @@ contains
       select case (renormalisation)
       case (0)
          ! no renormalisation
-      case (1,2)
-         ! fully renormalized (1) or massive quark counterterms only (2): 
+      case (1,2,3)
+         ! fully renormalised (1), finite gamma5 renormalisation only (2) or massive quark counterterms only (2): 
          ! separation handled in ct_amplitude.f90 and function amplitude_Dym
          if (present(h)) then
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_h_qp(vecs, renorm_logs, scale2, h)
          else
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_qp(vecs, renorm_logs, scale2)
          end if         
-      case (3)
+      case (4)
          ! massive quark counterterms only, OLD IMPLEMENTATION         
       case default
          ! not implemented
@@ -3333,7 +3293,7 @@ contains
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      real(ki_qp) :: fr, rational2
+      real(ki_qp) :: rational2
 
       amp(:) = 0.0_ki_qp
       rat2 = 0.0_ki_qp
@@ -3476,10 +3436,6 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -3490,10 +3446,6 @@ contains
             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
         write(logfile,'(A33,E24.16,A3)') &
             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-        if (corrections_are_qcd .and. renorm_gamma5) then
-           write(logfile,'(A30,E24.16,A3)') &
-               & "<result kind='fin-ren' value='", fr, "'/>"
-        end if
         if(my_ok) then
            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
         else
@@ -3587,10 +3539,6 @@ contains
         heli_amp(-1) = square_qp(colorvec(:,-1))
         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -3601,10 +3549,6 @@ contains
              & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
          write(logfile,'(A33,E24.16,A3)') &
              & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-         if (corrections_are_qcd .and. renorm_gamma5) then
-            write(logfile,'(A30,E24.16,A3)') &
-                & "<result kind='fin-ren' value='", fr, "'/>"
-         end if
          if(my_ok) then
             write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
          else
@@ -3653,7 +3597,7 @@ contains
       integer :: c[%
       @end @if %]
       logical :: my_ok
-      real(ki_qp) :: fr, rational2
+      real(ki_qp) :: rational2
 
       amp(:) = 0.0_ki_qp
       rat2 = 0.0_ki_qp
@@ -3763,10 +3707,6 @@ contains
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
      @end @if enable_truncation_orders %]
-     if (corrections_are_qcd .and. renorm_gamma5) then
-      fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-      heli_amp(0) = heli_amp(0) + fr
-     end if
      ok = ok .and. my_ok
      amp = amp + heli_amp
      rat2 = rat2 + rational2
@@ -3777,10 +3717,6 @@ contains
             & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
         write(logfile,'(A33,E24.16,A3)') &
             & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-        if (corrections_are_qcd .and. renorm_gamma5) then
-           write(logfile,'(A30,E24.16,A3)') &
-               & "<result kind='fin-ren' value='", fr, "'/>"
-        end if
         if(my_ok) then
            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
         else
@@ -3872,10 +3808,6 @@ contains
         heli_amp(-1) = square_qp(colorvec(:,-1))
         heli_amp(-2) = square_qp(colorvec(:,-2))[%
       @end @if enable_truncation_orders %]
-      if (corrections_are_qcd .and. renorm_gamma5) then
-         fr = finite_renormalisation[%map.index%][% @if enable_truncation_orders %]_0[% @end @if %]_qp(real(scale2,ki_qp))
-         heli_amp(0) = heli_amp(0) + fr
-      end if
       ok = ok .and. my_ok
       amp = amp + heli_amp
       rat2 = rat2 + rational2
@@ -3886,10 +3818,6 @@ contains
              & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
          write(logfile,'(A33,E24.16,A3)') &
              & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
-         if (corrections_are_qcd .and. renorm_gamma5) then
-            write(logfile,'(A30,E24.16,A3)') &
-                & "<result kind='fin-ren' value='", fr, "'/>"
-         end if
          if(my_ok) then
             write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
          else

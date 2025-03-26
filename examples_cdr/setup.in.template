@@ -1,0 +1,7 @@
+# Copy this file to setup.in in order to set
+# some common options for all examples.
+
+form.bin=tform
+form.tempdir=/tmp
+golem95.fcflags=`pkg-config --cflags golem95`
+golem95.ldflags= `pkg-config --libs golem95`

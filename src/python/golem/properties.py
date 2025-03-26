@@ -462,6 +462,23 @@ regularisation_scheme = Property(
       """,
     str,
     "dred",
+    options=["dred", "cdr"],
+)
+
+config_convert_to_cdr = Property(
+    "convert_to_cdr",
+    """\
+   Sets the name of the same variable in config.f90
+
+   Activates or disables the conversion of the result into the CDR 
+   regularisation scheme, when the calculation has been performed in DRED.
+
+   Does not have an effect when CDR is picked as regularisation scheme in 
+   extensions or via property 'regularisation_scheme'.
+
+   """,
+    bool,
+    False,
 )
 
 reduction_programs = Property(
@@ -1521,6 +1538,7 @@ properties = [
     renorm,
     sum_helicities,
     regularisation_scheme,
+    config_convert_to_cdr,
     helicities,
     qgraf_options,
     qgraf_verbatim,
@@ -1654,7 +1672,7 @@ def setInternals(conf):
     conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
     conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-    conf["__REGULARIZATION_HV__"] = not "dred" in extensions
+    conf["__REGULARIZATION_HV__"] = "cdr" in extensions
 
     conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
     conf["__NUMPOLVEC__"] = "numpolvec" in extensions
@@ -1668,7 +1686,5 @@ def setInternals(conf):
     conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
     if not "__OLP_MODE__" in conf:
         conf["__OLP_MODE__"] = False
+    conf["__REQUIRE_FR5__"] = "cdr" in extensions
 
-    # conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-    #    and "no-fr5" not in extensions
-    conf["__REQUIRE_FR5__"] = False

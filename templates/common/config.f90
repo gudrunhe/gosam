@@ -102,12 +102,10 @@
 
    ! Flag to decide if results should be converted to CDR
    ! if they are not already in that scheme
-   logical :: convert_to_cdr = [%
-   @select olp.irregularisation default=DEFAULT
-   @case DEFAULT %].false.[%
-   @case tHV CDR %].true.[%
-   @else %].false.[%
-   @end @select %]
+   logical :: convert_to_cdr = [% convert_to_cdr
+             convert=bool
+             true=.true.
+             false=.false. %]
 
    integer :: logfile = 19
 
@@ -175,10 +173,10 @@
              true=.true.
              false=.false. %]
 
-   ! Switch mass counter terms for massive quarks on or off
+   ! Switch mass counter terms for massive quarks on or off (old way, only left for debugging)
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off
-   ! Do not modify directly, use renormalisation=0,1,2 instead.
+   ! Do not modify directly, use renormalisation=0,1,2,3,4 instead.
    real(ki) :: deltaOS = 1.0_ki
    !---#] Renormalisation:
 

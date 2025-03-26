@@ -102,12 +102,10 @@
 
    ! Flag to decide if results should be converted to CDR
    ! if they are not already in that scheme
-   logical :: convert_to_cdr = [%
-   @select olp.irregularisation default=DEFAULT
-   @case DEFAULT %].false.[%
-   @case tHV CDR %].true.[%
-   @else %].false.[%
-   @end @select %]
+   logical :: convert_to_cdr = [% convert_to_cdr
+             convert=bool
+             true=.true.
+             false=.false. %]
 
    integer :: logfile = 19
 
