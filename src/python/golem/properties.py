@@ -551,7 +551,6 @@ extensions = Property(
         "olp_blha1",
         "numpolvec",
         "f77",
-        "no-fr5",
         "ninja",
         "customspin2prop",
         "cdr",

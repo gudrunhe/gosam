@@ -775,9 +775,6 @@ def workflow(conf):
         # should never get here
         sys.exit("GoSam terminated due to an error: neither dred nor cdr scheme!")
 
-    if "no-fr5" in ext:
-        logger.warning("no-fr5 is not supported anymore.")
-
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
         if ("ninja" not in ext) or ("golem95" in ext):
