@@ -436,7 +436,6 @@ renorm = Property(
    """,
     bool,
     True,
-    experimental=True,
 )
 
 formopt_level = Property(
@@ -517,44 +516,48 @@ extensions = Property(
    A list of extension names which should be activated for the
    code generation.
 
-   Build system related extensions:
-
-   f77          --- in combination with the BLHA interface it generates
-                    an olp_module.f90 linkable with Fortran77
-
-   Other extensions:
-   gaugecheck   --- modify gauge boson wave functions to allow for
-                    a limited gauge check (introduces gauge*z variables)
+   ninja        --- Use the ninja reduction library (default).
+   golem95      --- Use the golem95 reduction library (only when 
+                    enabled during setup step of GoSam installation).   
+   dred         --- Use DRED as IR regularisation scheme (default).
+   cdr          --- Use CDR as IR regularisation scheme.
+   numpolvec    --- Evaluate polarisation vectors numerically (default).
+   quadruple    --- Make a quadruple precision copy of the code (this
+                    works only with ninja).
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
-   quadruple    --- make a quadruple precision copy of the code (this
-                    works only with ninja).
+   gaugecheck   --- modify gauge boson wave functions to allow for
+                    a limited gauge check (introduces gauge*z variables)  
+   generate-all-helicities --- Do not use symmetries to relate helicity 
+                               configurations and produce separate code 
+                               for each configuration instead.
 
+   OLP interface only:
+
+   olp_daemon   --- Generates a C-program providing network access to 
+                    the amplitude.
+   olp_badpts   --- Allows to stear the numbering of the files containing 
+                    bad points from the MC.
+   olp_blha1    --- Use BLHA version 1 instead of version 2.
+   f77          --- In combination with the BLHA interface it generates
+                    an olp_module.f90 linkable with Fortran77                    
    """,
-    #   olp_badpts   --- (OLP interface only): allows to stear the numbering
-    #                    of the files containing bad points from the MC
-    #
-    #   olp_daemon   --- (OLP interface only): generates a C-program providing
-    #   ninja        --- enable Ninja for the reduction
-    #   golem95      --- enable Golem95 for the reduction
-    #   numpolvec    --- evaluate polarisation vectors numerically
     list,
     ",".join(DEFAULT_EXTENSIONS),
     options=[
+        "ninja",
         "golem95",
         "dred",
-        "avh_olo",
+        "cdr",
+        "numpolvec",
+        "quadruple", 
+        "customspin2prop",    
         "gaugecheck",
         "generate-all-helicities",
         "olp_daemon",
         "olp_badpts",
         "olp_blha1",
-        "numpolvec",
         "f77",
-        "ninja",
-        "customspin2prop",
-        "cdr",
-        "quadruple",
     ],
 )
 
@@ -803,7 +806,8 @@ r2 = Property(
    The algorithm how to treat the R2 term:
 
    implicit    -- mu^2 terms are kept in the numerator and reduced
-                  at runtime
+                  at runtime (available only when regularisation 
+                  scheme is DRED)
    explicit    -- mu^2 terms are reduced analytically
    """,
     str,
@@ -986,7 +990,6 @@ config_renorm_eftwilson = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 config_renorm_ehc = Property(
@@ -1005,7 +1008,6 @@ config_renorm_ehc = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 config_reduction_interoperation = Property(
@@ -1359,7 +1361,6 @@ order_names = Property(
    """,
     list,
     default="",
-    experimental=True,
 )
 
 enable_truncation_orders = Property(
@@ -1374,7 +1375,6 @@ enable_truncation_orders = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 use_vertex_labels = Property(
@@ -1385,7 +1385,6 @@ use_vertex_labels = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 all_mandelstam = Property(
@@ -1401,7 +1400,6 @@ all_mandelstam = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 flavour_groups = Property(
@@ -1424,7 +1422,6 @@ flavour_groups = Property(
    """,
     list,
     "",
-    experimental=True,
 )
 
 respect_generations = Property(
@@ -1447,7 +1444,6 @@ respect_generations = Property(
    """,
     bool,
     False,
-    experimental=True,
 )
 
 MSbar_yukawa = Property(
@@ -1467,7 +1463,6 @@ MSbar_yukawa = Property(
     """,
     list,
     "",
-    experimental=True,
 )
 
 use_MQSE = Property(

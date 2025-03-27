@@ -169,7 +169,7 @@ renorm=false
 \end{verbatim}
 Default: \verb|True|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{helsum}}] (\textit{true/false})
 \begin{verbatim}
 Flag whether or not 1-loop diagrams should be analytically
@@ -184,6 +184,19 @@ Sets the used regularisation scheme.
 Possible values: dred (recommended), cdr
 \end{verbatim}
 Default: \verb|dred|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{convert\_to\_cdr}}] (\textit{true/false})
+\begin{verbatim}
+Sets the name of the same variable in config.f90
+
+Activates or disables the conversion of the result into the CDR
+regularisation scheme, when the calculation has been performed in DRED.
+
+Does not have an effect when CDR is picked as regularisation scheme in
+extensions or via property 'regularisation_scheme'.
+\end{verbatim}
+Default: \verb|False|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{helicities}}] (\textit{comma separated list})
@@ -328,18 +341,31 @@ Default: \verb|numerical|
 A list of extension names which should be activated for the
 code generation.
 
-Build system related extensions:
-
-f77          --- in combination with the BLHA interface it generates
-                 an olp_module.f90 linkable with Fortran77
-
-Other extensions:
-gaugecheck   --- modify gauge boson wave functions to allow for
-                 a limited gauge check (introduces gauge*z variables)
+ninja        --- Use the ninja reduction library (default).
+golem95      --- Use the golem95 reduction library (only when
+                 enabled during setup step of GoSam installation).
+dred         --- Use DRED as IR regularisation scheme (default).
+cdr          --- Use CDR as IR regularisation scheme.
+numpolvec    --- Evaluate polarisation vectors numerically (default).
+quadruple    --- Make a quadruple precision copy of the code (this
+                 works only with ninja).
 customspin2prop --- replace the propagator of spin-2 particles
                     with a custom function (read the manual for this).
-quadruple    --- make a quadruple precision copy of the code (this
-                 works only with ninja).
+gaugecheck   --- modify gauge boson wave functions to allow for
+                 a limited gauge check (introduces gauge*z variables)
+generate-all-helicities --- Do not use symmetries to relate helicity
+                            configurations and produce separate code
+                            for each configuration instead.
+
+OLP interface only:
+
+olp_daemon   --- Generates a C-program providing network access to
+                 the amplitude.
+olp_badpts   --- Allows to stear the numbering of the files containing
+                 bad points from the MC.
+olp_blha1    --- Use BLHA version 1 instead of version 2.
+f77          --- In combination with the BLHA interface it generates
+                 an olp_module.f90 linkable with Fortran77
 \end{verbatim}
 Hidden: \verb|False|
 \\Experimental: \verb|False|
@@ -596,7 +622,7 @@ must be specified and explicitly contain 'NP'.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{renorm\_ehc}}] (\textit{true/false})
 \begin{verbatim}
 Sets the same variable in config.f90
@@ -612,7 +638,7 @@ all Born diagrams!
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{reduction\_interoperation}}] (\textit{text})
 \begin{verbatim}
 
@@ -953,7 +979,7 @@ Points to the QGraf executable.
 Example:
 qgraf.bin=/home/my_user_name/bin/qgraf
 \end{verbatim}
-Default: \verb|/itp/swift/mhoefer/Programs/GoSam3_private/SMEFT_install/bin/GoSam/qgraf|
+Default: \verb|/path/to/default/qgraf|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.bin}}] (\textit{text})
@@ -966,7 +992,7 @@ Examples:
 2) # Use non-standard location:
    form.bin=/home/my_user_name/bin/form
 \end{verbatim}
-Default: \verb|/itp/swift/mhoefer/Programs/GoSam3_private/SMEFT_install/bin/GoSam/tform|
+Default: \verb|/path/to/default/form|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.threads}}] (\textit{integer number})
@@ -1008,7 +1034,8 @@ Default: \verb|1000|
 The algorithm how to treat the R2 term:
 
 implicit    -- mu^2 terms are kept in the numerator and reduced
-               at runtime
+               at runtime (available only when regularisation
+               scheme is DRED)
 explicit    -- mu^2 terms are reduced analytically
 \end{verbatim}
 Default: \verb|explicit|
@@ -1113,7 +1140,7 @@ Example:
 order_names=QCD,NP,QL
 \end{verbatim}
 Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{enable\_truncation\_orders}}] (\textit{true/false})
 \begin{verbatim}
 Whether or not to generate extra code to assess different
@@ -1125,7 +1152,7 @@ i.e. the amplitude is squared in the naive way.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{use\_vertex\_labels}}] (\textit{true/false})
 \begin{verbatim}
 Whether or not to print the vertex label in the process.pdf. Can only
@@ -1133,7 +1160,7 @@ be activated when using a UFO model file.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{all\_mandelstam}}] (\textit{true/false})
 \begin{verbatim}
 If 'false' momentum conservation is used to reduce the set of independent
@@ -1146,7 +1173,7 @@ without using momentum conservation relations.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{flavour\_groups}}] (\textit{comma separated list})
 \begin{verbatim}
 Defines which flavours should be considered equivalent, i.e. grouped
@@ -1165,7 +1192,7 @@ flavour_groups=
 -> each flavour treated separately (default)
 \end{verbatim}
 Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{respect\_generations}}] (\textit{true/false})
 \begin{verbatim}
 Boolean determining whether or not the quark generation should be taken
@@ -1185,7 +1212,7 @@ Default is respect_generations=False.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{MSbar\_yukawa}}] (\textit{comma separated list})
 \begin{verbatim}
 List of quarks with Yukawa couplings which shall be renormalised in
@@ -1201,7 +1228,7 @@ MSbar_yukawa=B
 See also: renorm_yukawa
 \end{verbatim}
 Hidden: \verb|False|
-\\Experimental: \verb|True|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{use\_MQSE}}] (\textit{true/false})
 \begin{verbatim}
 Whether or not to scan 1-loop amplitudes for massive quark self
