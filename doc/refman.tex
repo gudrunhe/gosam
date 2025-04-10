@@ -141,9 +141,11 @@ build system. In the GoSam source directory, running
 \$ meson setup build --prefix <prefix> [-Doption=value] \\
 \$ meson install -C build
 \end{example}
-will download and install GoSam as well as all its dependencies. The optional options {\tt -Doption=value} can
+will download and install GoSam as well as all its dependencies. The options {\tt -Doption=value} can
 be used to set the build option {\tt option} to {\tt value}. A complete list of build options is available by
-running {\tt meson configure} in the build directory after setup. Notably, \golemVC is not installed by default, it can be enabled via \texttt{-Dgolem95=true}. {\tt meson configure -Doption=value} can also
+running {\tt meson configure} in the build directory after
+setup. Notably, \golemVC is not installed by default, it can be
+enabled via \texttt{-Dgolem95=true}. The command {\tt meson configure -Doption=value} can also
 be used to set a build option in an already configured build directory. To avoid collisions with existing
 installations of the dependencies, everything will be installed to the subfolder {\tt GoSam},
 e.g. {\tt <prefix>/lib/GoSam}.
@@ -213,9 +215,9 @@ The libraries are downloaded and installed during the installation of \gosam.
 Alternatively, 
 \begin{itemize}
 \item \golemVC can be downloaded from\\
-\url{https://golem.hepforge.org}.
+\url{https://github.com/gudrunhe/golem95}.
 \item \ninja can be downloaded from\\
-\url{http://ninja.hepforge.org}.
+\url{https://github.com/peraro/ninja}.
 \end{itemize}
 
 \marginlabel{\texttt{refrep.cls} (3)} The generation of documentation (optional)
@@ -318,8 +320,10 @@ PSP_rescue=True
 
 Listing \ref{lst:eett} shows the content of the process card for the considered example process, where only options differing from the default values are shown. The full list of options and their respective descriptions is available in appendix \ref{chp:process_card_options}. 
 
-The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-7. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{gs, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ is specified in this example, therefore the tree-level and one-loop diagrams will be of leading order in $g_W$. The contributing diagrams are then filtered with the \texttt{qgraf.verbatim} option, which passes its argument to the \qgraf configuration. For this example, \qgraf's \texttt{iprop} option is used to only select diagrams containing no Higgs or Z propagators.
-The following options, lines 8 and 9, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. Finally, the mixing between quarks and leptons of different generations is disabled by setting \texttt{family} and \texttt{generation} symmetries. The remaining options, lines 11 and 12, are used to enable additional debugging information and enable \gosam's rescue system. More details on the rescure system are available in section \ref{sec:rescue}.
+The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-7. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{gs, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ or $e$ is specified in this example, therefore electro-weak corrections will not be considered. The contributing diagrams are then filtered with the \texttt{qgraf.verbatim} option, which passes its argument to the \qgraf configuration. For this example, \qgraf's \texttt{iprop} option is used to only select diagrams containing no Higgs or Z propagators.
+The following options, lines 8 and 9, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program.
+Finally, the mixing between quarks and leptons of different generations is disabled by setting \texttt{family} and \texttt{generation} symmetries. The remaining options, lines 11 and 12, are used to enable additional debugging information and enable \gosam's rescue system. More details on the rescure system are available in section \ref{sec:rescue}.
+\textcolor{red}{GH: I would leave out the line ``symmetries=family,generation'' from this example. I think it is only confusing here since it has no effect.}
 
 In order to populate the specified process directory with files
 one invokes
@@ -473,7 +477,7 @@ before reduction. These lead to an important gain in efficiency, both
 when using integrand reduction methods, as well as 
 classical tensor reduction techniques. Details about the way diagrams
 are grouped can be found in~\cite{Cullen:2011ac}. This feature is
-still present when \samurai{} or \golemVC{} are used to reduce the
+still present when \golemVC{} is used to reduce the
 amplitudes.
 %, whereas it is not implemented for the new integrand
 %reduction method based on the Laurent expansion\cite{Mastrolia:2012bu}
