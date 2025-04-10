@@ -8,7 +8,6 @@ CFunction vertex;
 CFunction abbr;
 CTensor SplitLorentzIndex;
 CFunction SCREEN;
-Function NCSIGN(antisymmetric);
 CFunction csqrt;
 
 * Used in the output to keep eps and form factors together

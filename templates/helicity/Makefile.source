@@ -209,6 +209,7 @@ born_[% efto %].txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -227,6 +228,7 @@ born.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -245,6 +247,7 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -262,6 +265,7 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -288,6 +292,7 @@ born_[% efto %].txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -309,6 +314,7 @@ born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -327,6 +333,7 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -344,6 +351,7 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
+		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%

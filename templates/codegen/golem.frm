@@ -109,7 +109,11 @@ F diag1,...,diag`DIAGRAMCOUNT';
    Multiply 0;
 #endif
 
+#ifdef `SIGN'
+Id QGRAFSIGN(sDUMMY1?) = `SIGN';
+#else
 Id QGRAFSIGN(sDUMMY1?) = 1;
+#endif
 
 #call zeroes
 
@@ -342,14 +346,6 @@ repeat id d(iv1L?, iv2L?) * d(iv2L?, iv3L?) = d(iv1L, iv3L);
 
 #Call RemoveNCContainer
 
-#Do f = {`FERMIONS',}
-   #If "`f'" != ""
-      Id fDUMMY1?{UbarSpa,UbarSpb}(k`f', ?tail) =
-         NCSIGN(`f') * fDUMMY1(k`f', ?tail);
-      Id fDUMMY1?{USpa,USpb}(k`f', ?tail) =
-         fDUMMY1(k`f', ?tail) * NCSIGN(`f');
-   #EndIf
-#EndDo
 .sort:process fermions;
 
 Id SCREEN(sDUMMY1?) = sDUMMY1;[%
@@ -515,9 +511,6 @@ EndArgument;
 #call SpContractMetrics
 #call SpTrace4(`LIGHTLIKE')
 .sort:part 4;
-
-ChainIn NCSIGN;
-Id NCSIGN(`FERMIONS') = 1;
 
 #call SpContractLeviCivita(`LIGHTLIKE')
 #call SpContractMetrics

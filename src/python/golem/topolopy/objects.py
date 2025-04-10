@@ -430,21 +430,6 @@ class Diagram:
         legcount = 0
         vertices = set([])
 
-        def permutation_sign(lst):
-            N = len(lst)
-            s = 1
-
-            variant = N
-            while variant >= 1:
-                for k in range(N - 1):
-                    if lst[k] > lst[k + 1]:
-                        temp = lst[k]
-                        lst[k] = lst[k + 1]
-                        lst[k + 1] = temp
-                        s = -s
-                variant -= 1
-            return s
-
         # -------------------------------
 
         def sgn(x):
@@ -490,9 +475,10 @@ class Diagram:
         # ---#] Extract the fermionic part of the diagram:
 
         # ---#[ remove open fermion lines:
-        leg_stock = set(legs.keys())
+        leg_stock = set(sorted(legs.keys()))
         dk = list(direction.keys())
 
+        ext_legs = []
         while len(leg_stock) > 0:
             start_leg = leg_stock.pop()
             dir_sign = set([])
@@ -510,10 +496,18 @@ class Diagram:
                 dir_sign.update(direction[adj_key])
                 cursor = adj_key[1]
                 flag = cursor >= 0
+            ext_legs.append(start_leg)
+            ext_legs.append(cursor)
             leg_stock.remove(cursor)
         # ---#] remove open fermion lines:
 
-        s = 1
+        n_swap = 0
+        for i in range(len(ext_legs)):
+            for j in range(i + 1, len(ext_legs)):
+                if ext_legs[i] > ext_legs[j]:
+                    n_swap += 1
+
+        s = 1 if n_swap % 2 == 0 else -1
         while len(vertices) > 0:
             start_v = vertices.pop()
             flag = True
@@ -538,245 +532,6 @@ class Diagram:
 
         self._sign = s
 
-    def _OBSOLETE_calculate_fermion_flow(self):
-        """
-        Choose a fermion flow which minimizes the number of flips required.
-        """
-        legs = {}
-        legcount = 0
-        vertices = set([])
-
-        def permutation_sign(lst):
-            N = len(lst)
-            s = 1
-
-            variant = N
-            while variant >= 1:
-                for k in range(N - 1):
-                    if lst[k] > lst[k + 1]:
-                        temp = lst[k]
-                        lst[k] = lst[k + 1]
-                        lst[k + 1] = temp
-                        s = -s
-                variant -= 1
-            return s
-
-        # -------------------------------
-
-        def sgn(x):
-            if x >= 0:
-                return 1
-            else:
-                return -1
-
-        # -------------------------------
-
-        # ---#[ Extract the fermionic part of the diagram:
-        # adjacency = {}
-        direction = {}
-
-        for p in list(self._propagators.values()):
-            if p.sign != "-":
-                continue
-
-            vertices.add(p.v1)
-            vertices.add(p.v2)
-
-            direction[(p.v1, p.v2)] = set([1])
-            direction[(p.v2, p.v1)] = set([-1])
-
-            # if p.v1 in adjacency:
-            #   adjacency[p.v1].add(p.v2)
-            # else:
-            #   adjacency[p.v1] = set([p.v2])
-
-            # if p.v2 in adjacency:
-            #   adjacency[p.v2].add(p.v1)
-            # else:
-            #   adjacency[p.v2] = set([p.v1])
-
-        for l in list(self._in_legs.values()):
-            if abs(l.twospin) % 2 == 1:
-                legcount += 1
-
-                vertices.add(l.v)
-                direction[(-legcount, l.v)] = set([])
-                direction[(l.v, -legcount)] = set([])
-
-                legs[-legcount] = (-sgn(l.twospin), l.self_conjugate)
-                # if l.v in adjacency:
-                #   adjacency[l.v].add(-legcount)
-                # else:
-                #   adjacency[l.v] = set([-legcount])
-
-        for l in list(self._out_legs.values()):
-            if abs(l.twospin) % 2 == 1:
-                legcount += 1
-
-                vertices.add(l.v)
-                direction[(-legcount, l.v)] = set([])
-                direction[(l.v, -legcount)] = set([])
-
-                legs[-legcount] = (sgn(l.twospin), l.self_conjugate)
-                # if l.v in adjacency:
-                #   adjacency[l.v].add(-legcount)
-                # else:
-                #   adjacency[l.v] = set([-legcount])
-        # ---#] Extract the fermionic part of the diagram:
-
-        # ---#[ define reference order:
-        keys = sorted(legs.keys())
-        flippable_p = []
-        flippable_m = []
-        fnum = 0
-        for k in keys:
-            s, c = legs[k]
-            fnum += s
-            if c:
-                if s == 1:
-                    flippable_p.append(k)
-                else:
-                    flippable_m.append(k)
-
-        while fnum > 0:
-            if len(flippable_p) > 0:
-                k = flippable_p.pop()
-                legs[k] = (-1, True)
-                fnum -= 2
-            else:
-                logger.critical("Cannot determine fermion flow.")
-                sys.exit("GoSam terminated due to an error")
-
-        while fnum < 0:
-            if len(flippable_m) > 0:
-                k = flippable_m.pop()
-                legs[k] = (+1, True)
-                fnum += 2
-            else:
-                logger.critical("Cannot determine fermion flow.")
-                sys.exit("GoSam terminated due to an error")
-
-        p_set = []
-        m_set = []
-        for k in keys:
-            s, c = legs[k]
-            if s > 0:
-                p_set.append(k)
-            else:
-                m_set.append(k)
-
-        order = {}
-        for i, pair in enumerate(zip(m_set, p_set)):
-            m, p = pair
-            order[m] = 2 * i
-            order[p] = 2 * i + 1
-
-        # ---#] define reference order:
-
-        # ---#[ new ordering:
-        leg_stock = set(legs.keys())
-        leg_pairs = []
-        dk = list(direction.keys())
-
-        flow = {}
-        permutation = []
-        while len(leg_stock) > 0:
-            start_leg = leg_stock.pop()
-            dir_sign = set([])
-            flag = True
-            cursor = start_leg
-            seen = []
-            while flag:
-                seen.append(cursor)
-                if cursor > 0:
-                    vertices.remove(cursor)
-
-                adj_keys = [pair for pair in dk if pair[0] == cursor and not pair[1] in seen]
-                assert len(adj_keys) == 1
-                adj_key = adj_keys.pop()
-                dir_sign.update(direction[adj_key])
-                cursor = adj_key[1]
-                flag = cursor >= 0
-            leg_stock.remove(cursor)
-            leg_pairs.append((start_leg, cursor, dir_sign))
-
-        for i, j, s in leg_pairs:
-            signs = []
-            major = []
-            for l in [i, j]:
-                xs, xc = legs[l]
-                signs.append(xs)
-                major.append(xc)
-            if major == [False, False]:
-                if signs == [-1, 1]:
-                    pair = (i, j)
-                else:
-                    pair = (j, i)
-            elif major == [False, True]:
-                if signs[0] == -1:
-                    pair = (i, j)
-                else:
-                    pair = (j, i)
-            elif major == [True, False]:
-                if signs[1] == 1:
-                    pair = (i, j)
-                else:
-                    pair = (j, i)
-            elif major == [True, True]:
-                if signs == [-1, 1]:
-                    pair = (i, j)
-                elif signs == [1, -1]:
-                    pair = (j, i)
-                elif abs(l1) < abs(l2):
-                    pair = (i, j)
-                else:
-                    pair = (j, i)
-
-            s1, c1 = legs[pair[0]]
-            s2, c2 = legs[pair[1]]
-            if c1:
-                flow[abs(pair[0])] = -1
-            if c2:
-                flow[abs(pair[1])] = 1
-
-            if s == set([1]):
-                permutation.extend([order[i], order[j]])
-            elif s == set([-1]):
-                permutation.extend([order[j], order[i]])
-            elif s == set([]) or s == set([-1, 1]):
-                permutation.extend([order[pair[0]], order[pair[1]]])
-            else:
-                logger.critical("Ambiguous fermion flow.")
-                sys.exit("GoSam terminated due to an error")
-
-        s = permutation_sign(permutation)
-
-        while len(vertices) > 0:
-            start_v = vertices.pop()
-            flag = True
-            cursor = start_v
-            seen = []
-            while flag:
-                seen.append(cursor)
-
-                adj_keys = [pair for pair in dk if pair[0] == cursor and pair[1] not in seen]
-                ret_keys = [pair for pair in dk if pair[0] == cursor and pair[1] == start_v]
-                if len(adj_keys) > 0:
-                    adj_key = adj_keys.pop()
-                else:
-                    adj_key = ret_keys.pop()
-
-                if cursor != start_v:
-                    vertices.remove(cursor)
-
-                cursor = adj_key[1]
-                flag = cursor != start_v
-            s *= -1
-        # ---#] new ordering:
-
-        self._sign = s
-        self._fermion_flow = flow
-
     def sign(self):
         """
         Compute the relative sign of a Feynman diagram.
@@ -786,12 +541,6 @@ class Diagram:
         if self._sign == 0:
             self._calculate_fermion_sign()
         return self._sign
-
-    def _OBSOLETE_fermion_flow(self):
-        if self._sign == 0:
-            self._calculate_fermion_flow()
-
-        return self._fermion_flow
 
     def _dfs(self, v, visited, dirty, loop, lvert):
         visited.add(v)
