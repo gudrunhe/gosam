@@ -1,1 +1,0 @@
-golem95_src += files('generic_function_1p.f90')

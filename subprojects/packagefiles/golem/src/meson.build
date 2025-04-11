@@ -1,7 +1,0 @@
-subdir('form_factor')
-subdir('higherrank')
-subdir('integrals')
-subdir('interface')
-subdir('kinematic')
-subdir('module')
-subdir('numerical')

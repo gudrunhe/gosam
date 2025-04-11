@@ -1,1 +1,0 @@
-golem95_src += files(['generic_function_np.f90', 'form_factor_higher_ranks.f90'])

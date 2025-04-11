@@ -1,1 +1,0 @@
-golem95_src += files(['function_2p0m_1mi.f90', 'function_2p_m1m2.f90', 'generic_function_2p.f90'])
