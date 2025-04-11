@@ -9,7 +9,10 @@ import os.path
 import sys
 import copy
 import re
+
+import golem.model
 import golem.model.expressions as ex
+from golem.topolopy.objects import Vertex
 
 from golem.util.tools import LimitedWidthOutputStream, load_source
 
@@ -121,6 +124,30 @@ class Model:
         self.floatsd = {}
         self.floatsc = []
 
+        self.labels = {v.name + "_0": i for i, v in enumerate(self.all_vertices)}
+
+        # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
+        for i, vertex in enumerate(self.all_vertices):
+            if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
+                continue
+            maps = [trace_spin(l) for l in vertex.lorentz]
+            unique_maps = set(tuple(map) for map in maps)
+            n_structures = len(unique_maps)
+            if n_structures > 1:
+                logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                for j, unique_map in enumerate(unique_maps):
+                    structures = []
+                    for k, m in enumerate(maps):
+                        if tuple(m) == unique_map:
+                            structures.append(vertex.lorentz[j])
+                    v = copy.deepcopy(vertex)
+                    v.name = f"{vertex.name}_{j}"
+                    v.lorentz = structures
+                    self.all_vertices.append(v)
+                self.all_vertices.remove(i)
+            else:
+                vertex.spin_map = unique_maps.pop()
+
         try:
             self.all_CTparameters = mod.all_CTparameters
         except AttributeError:
@@ -201,6 +228,8 @@ class Model:
             name = l.name
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
+
+        golem.model.global_model = self
 
     def write_python_file(self, f):
         # Edit : GC- 16.11.12 now have the dictionaries
@@ -1346,6 +1375,9 @@ class Model:
         # with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
         # self.write_formct_file(f)
 
+    def vertex(self, label: str) -> Vertex:
+        return self.all_vertices[self.labels[label]]
+
 
 def canonical_field_names(p):
     pdg_code = p.pdg_code
@@ -1712,6 +1744,48 @@ def transform_color(expr, colors, xidx):
             return expr
     else:
         return expr
+
+def trace_spin(lorentz):
+    matcher = re.compile(
+        r"(?:Identity|Gamma|Gamma5|ProjM|ProjP|Sigma|C)\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)"
+    )
+    connections = set(tuple([int(x) - 1 for x in l]) for l in matcher.findall(lorentz.structure))
+    seen = [False for _ in lorentz.spins]
+    connection_map = [-1 for _ in lorentz.spins]
+
+    # Trace the leg connections by contracting the internal spin indices
+    for i in range(len(lorentz.spins)):
+        if lorentz.spins[i] > 0 and not lorentz.spins[i] % 2 == 0:
+            seen[i] = True
+            continue
+
+        cursor = i
+
+        while True:
+            changed = False
+            for c in connections:
+                if c[0] == cursor:
+                    cursor = c[1]
+                    changed = True
+                    break
+            if not changed:
+                if cursor != i:
+                    seen[cursor] = True
+                    seen[i] = True
+                    connection_map[cursor] = i + 1
+                    connection_map[i] = cursor + 1
+                break
+
+    # If the vertex does not provide explicit matching through the analytic expression and only two legs are unmatched,
+    # connect the two unmatched legs
+    unmatched = [x[0] for x in list(filter(lambda x: not x[1], enumerate(seen)))]
+    if len(unmatched) == 2:
+        seen[unmatched[0]] = True
+        seen[unmatched[1]] = True
+        connection_map[unmatched[0]] = unmatched[1] + 1
+        connection_map[unmatched[1]] = unmatched[0] + 1
+
+    return connection_map
 
 
 def load_ufo_files(mname, mpath):

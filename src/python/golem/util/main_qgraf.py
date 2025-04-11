@@ -222,7 +222,6 @@ def run_qgraf(conf, in_particles, out_particles):
     order_names = sorted(conf.getProperty(golem.properties.order_names))
     if order_names == [""]:
         order_names = []
-    use_vertex_labels = conf.getProperty(golem.properties.use_vertex_labels)
 
     topo_sty_name = os.path.join(path, topo_sty)
     topo_sty_tmp = open(topo_sty_name, "r").readlines()
@@ -232,7 +231,7 @@ def run_qgraf(conf, in_particles, out_particles):
             for el in order_names:
                 topo_sty_out.write("<back> '%s' : [%s],\n" % (el, el))
         if i == 34:
-            if use_vertex_labels:
+            if conf["is_ufo"] == "True":
                 topo_sty_out.write('<back> "[VL]",\n')
             else:
                 topo_sty_out.write('<back> " ",\n')

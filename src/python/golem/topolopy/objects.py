@@ -28,7 +28,6 @@ class Diagram:
 
         self._zerosum = {}
 
-        # self._fermion_flow = None
         self._sign = 0
 
         self.filtered_by_momentum = False
@@ -425,81 +424,81 @@ class Diagram:
         for l in list(self._out_legs.values()):
             l.substituteZero(symbols)
 
+    def _trace_fermi_line(self, start, seen):
+        to_visit = []
+        if isinstance(start, Leg):
+            initial = self._vertices[start.v]
+            incoming_ray = start.r
+        else:
+            initial = self._vertices[start.v2]
+            seen[start.index-1] = True
+            incoming_ray = start.r2
+
+        to_visit.append(initial)
+        # Walk the diagram along the fermi line
+        while len(to_visit) > 0:
+            current: Vertex = to_visit.pop()
+            if golem.model.global_model is not None: # Model with connection map
+                outgoing_ray = golem.model.global_model.vertex(current.label).spin_map[incoming_ray-1]
+                for leg in [*self._in_legs.values(), *self._out_legs.values()]:
+                    if leg.v == current.index and leg.r == outgoing_ray:
+                        return leg
+                for prop in self._propagators.values():
+                    if prop.v1 == current.index and prop.r1 == outgoing_ray:
+                        to_visit.append(self._vertices[prop.v2])
+                        incoming_ray = prop.r2
+                    elif prop.v2 == current.index and prop.r2 == outgoing_ray:
+                        to_visit.append(self._vertices[prop.v1])
+                        incoming_ray = prop.r1
+            else: # Connection map unknown, walk along first leg/propagator that is found
+                # Next propagator in the line is an external leg, return early
+                legs: list[Leg] = list(
+                    filter(
+                        lambda l: l.v == current.index,
+                        [*self._in_legs.values(), *self._out_legs.values()]
+                    )
+                )
+                for leg in legs:
+                    if leg.twospin > 0 and leg.twospin % 2 == 0:
+                        continue
+                    return leg
+                # No external leg, continue within the diagram
+                props: list[Propagator] = list(
+                    filter(
+                        lambda p: p.v1 == current.index or p.v2 == current.index,
+                        self._propagators.values()
+                    )
+                )
+                for prop in props:
+                    if seen[prop.index-1]:
+                        continue
+                    seen[prop.index-1] = True
+                    if prop.sign != "-":
+                        continue
+                    connected_vertex = self._vertices[prop.v1] if prop.v2 == current.index else self._vertices[prop.v2]
+                    if connected_vertex.index == initial.index:
+                        return connected_vertex
+                    to_visit.append(connected_vertex)
+        return initial
+
+
+
     def _calculate_fermion_sign(self):
-        legs = {}
-        legcount = 0
-        vertices = set([])
-
-        # -------------------------------
-
-        def sgn(x):
-            if x >= 0:
-                return 1
-            else:
-                return -1
-
-        # -------------------------------
-
-        # ---#[ Extract the fermionic part of the diagram:
-        direction = {}
-
-        for p in list(self._propagators.values()):
-            if p.sign != "-":
-                continue
-
-            vertices.add(p.v1)
-            vertices.add(p.v2)
-
-            direction[(p.v1, p.v2)] = set([1])
-            direction[(p.v2, p.v1)] = set([-1])
-
-        for l in list(self._in_legs.values()):
-            if abs(l.twospin) % 2 == 1:
-                legcount += 1
-
-                vertices.add(l.v)
-                direction[(-legcount, l.v)] = set([])
-                direction[(l.v, -legcount)] = set([])
-
-                legs[-legcount] = (-sgn(l.twospin), l.self_conjugate)
-
-        for l in list(self._out_legs.values()):
-            if abs(l.twospin) % 2 == 1:
-                legcount += 1
-
-                vertices.add(l.v)
-                direction[(-legcount, l.v)] = set([])
-                direction[(l.v, -legcount)] = set([])
-
-                legs[-legcount] = (sgn(l.twospin), l.self_conjugate)
-        # ---#] Extract the fermionic part of the diagram:
-
-        # ---#[ remove open fermion lines:
-        leg_stock = set(sorted(legs.keys()))
-        dk = list(direction.keys())
+        seen_propagators = [False]*len(self._propagators)
+        seen_legs = [False]*(len(self._in_legs) + len(self._out_legs))
 
         ext_legs = []
-        while len(leg_stock) > 0:
-            start_leg = leg_stock.pop()
-            dir_sign = set([])
-            flag = True
-            cursor = start_leg
-            seen = []
-            while flag:
-                seen.append(cursor)
-                if cursor > 0:
-                    vertices.remove(cursor)
-
-                adj_keys = list([pair for pair in dk if pair[0] == cursor and not pair[1] in seen])
-                assert len(adj_keys) == 1
-                adj_key = adj_keys.pop()
-                dir_sign.update(direction[adj_key])
-                cursor = adj_key[1]
-                flag = cursor >= 0
-            ext_legs.append(start_leg)
-            ext_legs.append(cursor)
-            leg_stock.remove(cursor)
-        # ---#] remove open fermion lines:
+        for leg in [*self._in_legs.values(), *self._out_legs.values()]:
+            if (seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)]
+                    or (leg.twospin > 0 and leg.twospin % 2 == 0)):
+                    continue
+            final = self._trace_fermi_line(leg, seen_propagators)
+            if isinstance(final, Vertex):
+                continue
+            seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)] = True
+            seen_legs[final.index-1 + (len(self._in_legs) if not final.ingoing else 0)] = True
+            ext_legs.append(leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0))
+            ext_legs.append(final.index-1 + (len(self._in_legs) if not final.ingoing else 0))
 
         n_swap = 0
         for i in range(len(ext_legs)):
@@ -507,30 +506,14 @@ class Diagram:
                 if ext_legs[i] > ext_legs[j]:
                     n_swap += 1
 
-        s = 1 if n_swap % 2 == 0 else -1
-        while len(vertices) > 0:
-            start_v = vertices.pop()
-            flag = True
-            cursor = start_v
-            seen = []
-            while flag:
-                seen.append(cursor)
+        n_loops = 0
+        for prop in self._propagators.values():
+            if seen_propagators[prop.index-1] or prop.sign != "-":
+                continue
+            _ = self._trace_fermi_line(prop, seen_propagators)
+            n_loops += 1
 
-                adj_keys = list([pair for pair in dk if pair[0] == cursor and pair[1] not in seen])
-                ret_keys = list([pair for pair in dk if pair[0] == cursor and pair[1] == start_v])
-                if len(adj_keys) > 0:
-                    adj_key = adj_keys.pop()
-                else:
-                    adj_key = ret_keys.pop()
-
-                if cursor != start_v:
-                    vertices.remove(cursor)
-
-                cursor = adj_key[1]
-                flag = cursor != start_v
-            s *= -1
-
-        self._sign = s
+        self._sign = 1 if (n_swap + n_loops) % 2 == 0 else -1
 
     def sign(self):
         """
