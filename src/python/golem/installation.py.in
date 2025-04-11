@@ -4,10 +4,10 @@ BIN_DIR = '@prefix@/@bindir@'
 INFO = {
    'name': 'gosam',
    'version': '@version@',
-   'author': 'The GoSam (Golem and Samurai) Collaboration',
-   'author_email': 'gosam@hepforge.org',
+   'author': 'The GoSam Collaboration',
+   'author_email': 'gosam@lists.kit.edu',
    'maintainer': 'The GoSam Collaboration',
-   'maintainer_email': 'gosam@hepforge.org',
+   'maintainer_email': 'gosam@lists.kit.edu',
    'url': 'https://github.com/gudrunhe/gosam',
    'description': 'GoSam, An Automated One-Loop Matrix Element Generator',
    'long_description': '\t\t\t\tGoSam is a matrix element generator for one-loop\n\t\t\t\tamplitudes in quantum field theories.\n\t\t\t\t',

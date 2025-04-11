@@ -4,7 +4,7 @@
 <template name="Golem-2.0 default olp template" version="1.0"
 	description="This template is used by golem-init.py"
 	author="The GoSam Collaboration"
-	author-email="gosam@projects.hepforge.org">
+	author-email="gosam@lists.kit.edu">
 
 	<file src="olp_module.f90" class="OLP" usedby="olp"/>
 	<file src="olp.h" class="OLP" usedby="olp"/>

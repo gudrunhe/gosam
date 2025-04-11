@@ -4,7 +4,7 @@
 <template name="GoSam default template" version="1.0"
 	description="This template is used by gosam.py"
 	author="The GoSam Collaboration"
-	author-email="gosam@projects.hepforge.org">
+	author-email="gosam@lists.kit.edu">
 
 	<file src="Makefile.conf" class="Kinematics">
 		<except if-file="exists" in-mode="normal" />
