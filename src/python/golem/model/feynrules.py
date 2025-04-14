@@ -124,7 +124,7 @@ class Model:
         self.floatsd = {}
         self.floatsc = []
 
-        self.labels = {v.name + "_0": i for i, v in enumerate(self.all_vertices)}
+        self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
         # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
         for i, vertex in enumerate(self.all_vertices):
@@ -1376,7 +1376,12 @@ class Model:
         # self.write_formct_file(f)
 
     def vertex(self, label: str) -> Vertex:
-        return self.all_vertices[self.labels[label]]
+        if label[-1].isdigit() and label[-2] == "_":
+            # During export into a QGRAF or FORM model file, a '_<digit>' is added. Since this only encodes splitting
+            # into unambiguous coupling power pieces, it can be ignored here
+            return self.all_vertices[self.labels[label[:-2]]]
+        else:
+            return self.all_vertices[self.labels[label]]
 
 
 def canonical_field_names(p):
