@@ -719,33 +719,6 @@ def workflow(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    # check if the ir regularisation scheme is specified in OLP file
-    # -> overwrites settings in *.rc or *.in files
-    if conf["olp.extensions"] is not None:
-        ir_scheme_warn = False
-        if "CDR" in conf["olp.extensions"]:
-            olpir = "CDR"
-            if conf["regularisation_scheme"] == "dred":
-                ir_scheme_warn = True
-                conf["regularisation_scheme"] = "cdr"
-            if "dred" in ext:
-                ir_scheme_warn = True
-                i = ext.index("dred")
-                del ext[i]
-                ext.append("cdr")
-        if "DRED" in conf["olp.extensions"]:
-            olpir = "DRED"
-            if conf["regularisation_scheme"] == "cdr":
-                ir_scheme_warn = True
-                conf["regularisation_scheme"] = "dred"
-            if "cdr" in ext:
-                ir_scheme_warn = True
-                i = ext.index("cdr")
-                del ext[i]
-                ext.append("dred")
-        if ir_scheme_warn:
-            logger.warning("OLP setting for IR regularisation scheme overrides config. Is now %s." % olpir)
-
     if conf["regularisation_scheme"] == "dred": 
         if not "dred" in ext:
             ext.append("dred")
@@ -753,8 +726,50 @@ def workflow(conf):
         if not "cdr" in ext:
             ext.append("cdr")
     else:
-        logger.warning("Unknown regularisation_scheme: %s -> dred is used." % str(conf["regularisation_scheme"]))
+        logger.warning("Unknown regularisation_scheme in config: %s -> dred is used." % str(conf["regularisation_scheme"]))
         ext.append("dred")
+
+    # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given 
+    # in config file (if present). The following behaviour is implemented:
+    #
+    # OLP  | config                       | result
+    # -----------------------------------------------------------------------
+    # CDR  | None                         | "dred" + "convert_to_cdr = True"
+    # CDR  | regularisation_scheme=dred   | "dred" + "convert_to_cdr = True"
+    # CDR  | regularisation_scheme=cdr    | "cdr"  + "convert_to_cdr = False" (only scenario with "real" cdr)
+    # CDR  | dred in extensions           | "dred" + "convert_to_cdr = True"
+    # CDR  | cdr in extensions            | "dred" + "convert_to_cdr = True"  (default for regularisation_scheme overwrites extensions)
+    # DRED | None                         | "dred" + "convert_to_cdr = False"
+    # DRED | regularisation_scheme=dred   | "dred" + "convert_to_cdr = False"
+    # DRED | regularisation_scheme=cdr    | "dred" + "convert_to_cdr = False"
+    # DRED | dred in extensions           | "dred" + "convert_to_cdr = False"
+    # DRED | cdr in extensions            | "dred" + "convert_to_cdr = False"
+
+    if conf["olp.extensions"] is not None:
+        ir_scheme_warn = False
+        if "CDR" in conf["olp.extensions"]:
+            olpir = "CDR"
+            if conf["regularisation_scheme"] == "dred" or "dred" in ext:
+                conf["convert_to_cdr"] = True
+            elif conf["regularisation_scheme"] == "cdr" or "cdr" in ext:
+                conf["convert_to_cdr"] = False
+            else:
+                # should never get here
+                sys.exit("GoSam terminated due to an error: neither dred nor cdr scheme!")
+        if "DRED" in conf["olp.extensions"]:
+            olpir = "DRED"
+            conf["convert_to_cdr"] = False
+            if conf["regularisation_scheme"] == "cdr":
+                ir_scheme_warn = True
+                conf["regularisation_scheme"] = "dred"
+            if "cdr" in ext:
+                ir_scheme_warn = True
+                i = ext.index("cdr")
+                del ext[i]
+                if "dred" not in ext:
+                    ext.append("dred") 
+        if ir_scheme_warn:
+            logger.warning("OLP setting for IR regularisation scheme overrides config. Is now %s." % olpir)
 
     if "cdr" in ext and "dred" in ext:
         logger.warning("Incompatible settings between regularisation_scheme and extensions -> dred is used.")
@@ -766,14 +781,6 @@ def workflow(conf):
                 "When using the CDR regularisation scheme, only explicit construction of the R2 terms is permitted. "
                 + "Please use DRED as regularisation scheme or switch to r2=explict." 
             )
-
-    if "dred" in ext:
-        conf["olp.irregularisation"] = "DRED"
-    elif "cdr" in ext:
-        conf["olp.irregularisation"] = "CDR"
-    else:
-        # should never get here
-        sys.exit("GoSam terminated due to an error: neither dred nor cdr scheme!")
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:

@@ -819,7 +819,7 @@ def process_order_file(
             if ir_scheme == "DRED":
                 if "DRED" not in uext:
                     lconf["olp." + str(golem.properties.extensions)] = "DRED"
-            if ir_scheme == "CDR":
+            if ir_scheme == "CDR" or ir_scheme == "tHV":
                 if "CDR" not in uext:
                     lconf["olp." + str(golem.properties.extensions)] = "CDR"
             else:
