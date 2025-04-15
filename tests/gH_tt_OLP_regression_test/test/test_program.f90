@@ -125,6 +125,7 @@ contains
     real(ki), parameter :: eps = 1e-7_ki
     real(ki) :: diff
     logical :: success, isuccess
+    logical, dimension(6) :: mismatch
     character(15) :: blha_amptype
   
     blha_amptype = "gH -> tt~: Loop"
@@ -159,31 +160,38 @@ contains
     tmpres(4) = irp(1)
     tmpres(5) = blha_res(1)
     tmpres(6) = irp(2)
+
+    mismatch = .false.
     
     do ii = 1, 6
        diff = 0._ki
        diff = abs(rel_diff(tmpres(ii),ref_res(ii)))
        if(diff.gt.eps) then
+          mismatch(ii) = .true.
           call print_deviation(6, ii, diff)
-          call print_deviation(logf, 4, diff)
-          write(6,'(A60)') "                       GoSam                      Reference"
-          write(6,'(A23,E20.13,A7,E20.13)') "Born               :   ", tmpres(1), "  vs.  ", ref_res(1)
-          write(6,'(A23,E20.13,A7,E20.13)') "Finite virtual     :   ", tmpres(2), "  vs.  ", ref_res(2)
-          write(6,'(A23,E20.13,A7,E20.13)') "Single pole virtual:   ", tmpres(3), "  vs.  ", ref_res(3)
-          write(6,'(A23,E20.13,A7,E20.13)') "Single pole IR sub.:   ", tmpres(4), "  vs.  ", ref_res(4)
-          write(6,'(A23,E20.13,A7,E20.13)') "Double pole virtual:   ", tmpres(5), "  vs.  ", ref_res(5)
-          write(6,'(A23,E20.13,A7,E20.13)') "Double pole IR sub.:   ", tmpres(6), "  vs.  ", ref_res(6)
-          write(logf,'(A60)') "                       GoSam                      Reference"
-          write(logf,'(A23,E20.13,A7,E20.13)') "Born               :   ", tmpres(1), "  vs.  ", ref_res(1)
-          write(logf,'(A23,E20.13,A7,E20.13)') "Finite virtual     :   ", tmpres(2), "  vs.  ", ref_res(2)
-          write(logf,'(A23,E20.13,A7,E20.13)') "Single pole virtual:   ", tmpres(3), "  vs.  ", ref_res(3)
-          write(logf,'(A23,E20.13,A7,E20.13)') "Single pole IR sub.:   ", tmpres(4), "  vs.  ", ref_res(4)
-          write(logf,'(A23,E20.13,A7,E20.13)') "Double pole virtual:   ", tmpres(5), "  vs.  ", ref_res(5)
-          write(logf,'(A23,E20.13,A7,E20.13)') "Double pole IR sub.:   ", tmpres(6), "  vs.  ", ref_res(6)
+          call print_deviation(logf, ii, diff)
           success = .false.
           isuccess = .false.
        end if
     end do
+
+    if(any(mismatch)) then
+       write(6,'(A60)') "                       GoSam                      Reference"
+       call print_comparison(6,"Born               :   ", tmpres(1), ref_res(1), mismatch(1))
+       call print_comparison(6,"Finite virtual     :   ", tmpres(2), ref_res(2), mismatch(2))
+       call print_comparison(6,"Single pole virtual:   ", tmpres(3), ref_res(3), mismatch(3))
+       call print_comparison(6,"Single pole IR sub.:   ", tmpres(4), ref_res(4), mismatch(4))
+       call print_comparison(6,"Double pole virtual:   ", tmpres(5), ref_res(5), mismatch(5))
+       call print_comparison(6,"Double pole IR sub.:   ", tmpres(6), ref_res(6), mismatch(6))
+       write(logf,'(A60)') "                       GoSam                      Reference"
+       call print_comparison(logf,"Born               :   ", tmpres(1), ref_res(1), mismatch(1))
+       call print_comparison(logf,"Finite virtual     :   ", tmpres(2), ref_res(2), mismatch(2))
+       call print_comparison(logf,"Single pole virtual:   ", tmpres(3), ref_res(3), mismatch(3))
+       call print_comparison(logf,"Single pole IR sub.:   ", tmpres(4), ref_res(4), mismatch(4))
+       call print_comparison(logf,"Double pole virtual:   ", tmpres(5), ref_res(5), mismatch(5))
+       call print_comparison(logf,"Double pole IR sub.:   ", tmpres(6), ref_res(6), mismatch(6))
+    end if
+       
     if(isuccess) then
        write(6,*) "OK"
        write(logf,*) "OK"
@@ -211,7 +219,7 @@ contains
     if (a.eq.0.0d0 .and. b.eq.0.0d0) then
        rel_diff = 0.0d0
     else
-       rel_diff = 2.0d0 * (a-b) / (abs(a)+abs(b))
+       rel_diff = (a-b) / b
     end if
 
   end  function rel_diff
@@ -228,6 +236,21 @@ contains
     
   end subroutine print_deviation
 
+  subroutine print_comparison(outc, metype, gsres, refres, mismatch)
+    implicit none
+    integer, intent(in) :: outc
+    real(ki), intent(in) :: gsres, refres
+    logical, intent(in) :: mismatch
+    character(23), intent(in) :: metype
+
+    if(mismatch) then
+       write(outc,'(A23,E20.13,A7,E20.13,A3)') metype, gsres, "  vs.  ", refres, "  X"
+    else
+       write(outc,'(A23,E20.13,A7,E20.13)') metype, gsres, "  vs.  ", refres
+    end if
+    
+  end subroutine print_comparison
+    
   
   subroutine generate_reference_vecs(ievt, vecs)
     implicit none

@@ -61,9 +61,6 @@ TXT_TREE_STAMP=[%
 [% @if generate_lo_diagrams %]
 SOURCE_TREE= \
 	diagramsl0[% @if enable_truncation_orders %]_0.f90 diagramsl0_1.f90 diagramsl0_2[% @end @if %].f90 $(DIAGRAMS_TREE)[%
-   @if internal REQUIRE_FR5 %] \
-	diagramsl0[% @if enable_truncation_orders %]_0fr5.f90 diagramsl0_1fr5.f90 diagramsl0_2fr5[% @end @if %].f90 $(DIAGRAMS_TREE_FR5)[%
-   @end @if %][%
    @if extension quadruple %] \
 	diagramsl0[% @if enable_truncation_orders %]_0_qp.f90 \
 	diagramsl0_1_qp.f90 \
@@ -174,9 +171,6 @@ TXT_EFTCT_STAMP=[%
 
 SOURCE_EFTCT= \
 	diagramsct[% @if enable_truncation_orders %]_0.f90 diagramsct_1.f90 diagramsct_2[% @end @if %].f90 $(DIAGRAMS_EFTCT)[%
-   @if internal REQUIRE_FR5 %] \
-	diagramsct[% @if enable_truncation_orders %]_0fr5.f90 diagramsct_1fr5.f90 diagramsct_2fr5[% @end @if %].f90 $(DIAGRAMS_EFTCT_FR5)[%
-   @end @if %][%
    @if extension quadruple %] \
 	diagramsct[% @if enable_truncation_orders %]_0_qp.f90 \
 	diagramsct_1_qp.f90 \
