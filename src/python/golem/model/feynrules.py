@@ -124,6 +124,146 @@ class Model:
         self.floatsd = {}
         self.floatsc = []
 
+        self.orders = set()
+        for c in self.all_couplings:
+            self.orders.update(list(c.order.keys()))
+
+        parser = ex.ExpressionParser()
+        ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
+        for l in self.all_lorentz:
+            name = l.name
+            structure = parser.compile(l.structure)
+            l.rank = get_rank(structure)
+
+        # #########################################################################################
+        # Check if there are any vertices with ambiguous coupling orders and if so split them up.
+        # #########################################################################################
+        checked_vertices = []
+        for vertex in self.all_vertices:
+            
+            vertex.rank = set()
+            for l in vertex.lorentz:
+                vertex.rank.add(l.rank)
+
+            if ambiguous_vertex(vertex):
+                vertices = split_vertex(vertex)
+                logger.warning(
+                            (
+                                "Vertex %s has ambiguous structure of powers and/or rank. Internally split up into: %s."
+                                % (vertex.name, ', '.join(map(str,vertices)))
+                            )
+                        )
+                for key, v in vertices.items():
+                    newv = copy.deepcopy(vertex)
+                    newv.name = v["name"]
+                    newv.particles = v["particles"]
+                    newv.color = v["color"]
+                    newv.lorentz = v["lorentz"]
+                    newv.couplings = v["couplings"]
+                    newv.rank = v["rank"]
+                    checked_vertices.append(newv)
+            else:
+                checked_vertices.append(vertex)
+
+        # #######################################################################################################
+        # Check if there are multiple vertices with the same particels and coupling orders. If so, combine them.
+        # #######################################################################################################     
+        # Step 1: check vertex legs/particles
+        seen_vertices = {}
+        for vertex in checked_vertices:
+            prtcls = str(vertex.particles)
+            if prtcls in list(seen_vertices.keys()):
+                seen_vertices[prtcls].append(vertex)
+            else:
+                seen_vertices[prtcls] = [vertex]
+        check_vertices = [v for v in seen_vertices.values() if len(v) > 1]
+
+        # Step 2: check coupling orders of vertices with same legs/particles and combine
+        for verts in check_vertices:
+            seen_vertices2 = {}
+            for v in verts:
+                # At this stage all couplings of a vertex should come with the same order, 
+                # so we can just take the first coupling. The same is tru for the rank of 
+                # its lorentz structures.
+                vord = str(v.couplings[(0,0)].order)+"_RK"+str(list(v.rank)[0])
+                if vord in list(seen_vertices2):
+                    seen_vertices2[vord].append(v)
+                else:
+                    seen_vertices2[vord] = [v]
+            join_vertices = [v for v in seen_vertices2.values() if len(v) > 1]
+
+            # loop over vertices to be joined
+            for jv in join_vertices:
+                #print("joining vertices: ",jv)
+                combv = {}              
+                combv["name"] = "V_%s_0" % 'a'.join(map(lambda v: v.name.split("_")[1],jv))
+                combv["particles"] = jv[0].particles
+                combv["color"] = []
+                combv["lorentz"] = []
+                combv["couplings"] = {}
+                # figure out the colour-lorentz key for the couplings in the merged vertex
+                # check if there are any couplings to be merged as well (i.e. when they share same colour and lorentz structures)
+                seen_couplings = {}
+                for v in jv:
+                    for coord, cpl in v.couplings.items():
+                        if v.color[coord[0]] in combv["color"]:
+                            ccoord = combv["color"].index(v.color[coord[0]])
+                        else:
+                            combv["color"].append(v.color[coord[0]])
+                            ccoord = len(combv["color"])-1
+                        if v.lorentz[coord[1]] in combv["lorentz"]:
+                            lcoord = combv["lorentz"].index(v.lorentz[coord[1]])
+                        else:
+                            combv["lorentz"].append(v.lorentz[coord[1]])
+                            lcoord = len(combv["lorentz"])-1
+                        if (ccoord,lcoord) in list(seen_couplings.keys()):
+                            seen_couplings[(ccoord,lcoord)].append(cpl)
+                        else:   
+                            seen_couplings[(ccoord,lcoord)] = [cpl]
+
+                # loop over couplings to be merged
+                for coord, jc in seen_couplings.items():
+                    if len(jc) < 2:
+                        combv["couplings"][coord] = jc[0]
+                        continue
+                    #print("joining couplings: ",jc)
+                    combc = {}
+                    combc["name"] = "GC_%s" % 'a'.join(map(lambda c: c.name.split("_")[1],jc))
+                    combc["value"] = "%s" % '+'.join(map(lambda c: "("+c.value+")",jc))
+                    # All couplings to be merged have the same order by construction.
+                    combc["order"] = jc[0].order
+                    newc = copy.deepcopy(jc[0])
+                    newc.name = combc["name"]
+                    newc.value = combc["value"]
+                    newc.order = combc["order"]
+                    self.all_couplings.append(newc)
+                    combv["couplings"][coord] = newc 
+      
+                # create the merged vertex and remove the original ones
+                newv = copy.deepcopy(jv[0])
+                newv.name = combv["name"]
+                newv.particles = combv["particles"]
+                newv.color = combv["color"]
+                newv.lorentz = combv["lorentz"]
+                newv.couplings = combv["couplings"]
+
+                logger.warning(
+                            (
+                                "Vertices %s have same external legs, coupling orders and rank. Merging them internally into: %s."
+                                % (', '.join(map(str,jv)),newv.name)
+                            )
+                        )
+
+                checked_vertices.append(newv)
+                for v in jv:
+                    checked_vertices.remove(v)
+
+        #print(self.all_vertices)
+        self.all_vertices = checked_vertices
+        #print(self.all_vertices)
+
+        # #######################################################################################################
+
         self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
         # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
@@ -221,13 +361,6 @@ class Model:
                 else:
                     logger.critical("CT coupling %s is neither a dict nor str!" % c)
                     sys.exit("GoSam terminated due to an error")
-
-        parser = ex.ExpressionParser()
-        ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
-        for l in self.all_lorentz:
-            name = l.name
-            structure = parser.compile(l.structure)
-            l.rank = get_rank(structure)
 
         golem.model.global_model = self
 
@@ -685,9 +818,10 @@ class Model:
 
                 if not vfunctions in vertorders:
                     if len(vertorders) > 0:
+                        # Note: Since the check for ambiguous vertices is now part of __init__ we should never end up here
                         logger.warning(
                             (
-                                "Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+                                "write_qgraf_file: Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
                                 % (v.name, vertorders, vfunctions)
                             )
                             + "I will split it up."
@@ -981,9 +1115,10 @@ class Model:
                     cplnames[vertorders.index(vorders)].append(coupling.name)
                 else:
                     if len(vertorders) > 0:
+                        # Note: Since the check for ambiguous vertices is now part of __init__ we should never end up here
                         logger.warning(
                             (
-                                "Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+                                "write_form_file: Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
                                 % (v.name, vertorders, vorders)
                             )
                             + "I will split it up."
@@ -1792,6 +1927,52 @@ def trace_spin(lorentz):
 
     return connection_map
 
+def ambiguous_vertex(vertex):
+    # checks if vertex has ambiguous coupling orders and/or rank  
+    cpl_orders = []
+    for coord, cpl in vertex.couplings.items():
+        #cpl_orders.append(str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank))
+        cpl_orders.append(str(cpl.order))
+    if len(set(cpl_orders)) > 1:
+        return True
+    if len(vertex.rank)>1:
+        return True 
+    return False
+
+def split_vertex(vertex):
+    # splits a vertex with ambiguous coupling orders in multiple unambiguous vertices
+    # returns a dict of the form 'vertex_identifier':'vertex', where 'vertex' is a dict
+    # again, i.e. NOT a UFO Vertex type
+    cpl_orders = {}
+    vertices = {}
+    i = -1
+    for coord, cpl in vertex.couplings.items():
+        i += 1 
+        cplord = str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank)
+        if cplord in cpl_orders.keys():
+            vn = vertex.name+"_"+str(cpl_orders[cplord])
+            if vertex.color[coord[0]] in vertices[vn]["color"]:
+                ccoord = vertices[vn]["color"].index(vertex.color[coord[0]])
+            else:
+                vertices[vn]["color"].append(vertex.color[coord[0]])
+                ccoord = len(vertices[vn]["color"])-1
+            if vertex.lorentz[coord[1]] in vertices[vn]["lorentz"]:
+                lcoord = vertices[vn]["lorentz"].index(vertex.lorentz[coord[1]])
+            else:
+                vertices[vn]["lorentz"].append(vertex.lorentz[coord[1]])
+                lcoord = len(vertices[vn]["lorentz"])-1
+            vertices[vn]["couplings"][(ccoord,lcoord)] = cpl
+        else:
+            cpl_orders[cplord] = i
+            vn = vertex.name+"_"+str(i)
+            vertices[vn] = {}
+            vertices[vn]["name"] = vn
+            vertices[vn]["particles"] = vertex.particles
+            vertices[vn]["color"] = [vertex.color[coord[0]]]
+            vertices[vn]["lorentz"] = [vertex.lorentz[coord[1]]]
+            vertices[vn]["couplings"] = {(0,0):cpl}
+            vertices[vn]["rank"] = {vertex.lorentz[coord[1]].rank}
+    return vertices
 
 def load_ufo_files(mname, mpath):
     mfile = None
