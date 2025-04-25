@@ -277,14 +277,21 @@ class Model:
                 logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
                 for j, unique_map in enumerate(unique_maps):
                     structures = []
+                    new_couplings = {}
+                    new_lcoord = 0
                     for k, m in enumerate(maps):
                         if tuple(m) == unique_map:
-                            structures.append(vertex.lorentz[j])
+                            structures.append(vertex.lorentz[k])
+                            for ccoord in range(len(vertex.color)):
+                                if (ccoord,k) in list(vertex.couplings.keys()):
+                                    new_couplings[(ccoord,new_lcoord)] = vertex.couplings[(ccoord,k)]
+                            new_lcoord += 1                                    
                     v = copy.deepcopy(vertex)
                     v.name = f"{vertex.name}_{j}"
                     v.lorentz = structures
+                    v.couplings = new_couplings
                     self.all_vertices.append(v)
-                self.all_vertices.remove(i)
+                self.all_vertices.remove(vertex)
             else:
                 vertex.spin_map = unique_maps.pop()
 
