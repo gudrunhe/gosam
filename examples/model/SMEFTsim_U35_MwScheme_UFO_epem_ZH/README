@@ -1,0 +1,6 @@
+This model has been created from the SMEFTsim [1,2] model SMEFTsim_U35_MwScheme_UFO by removing all SMEFT operators but OphiB, OphiW and OphiWB.
+The EW input scheme is [mW,mZ,Gf].
+
+[1] I. Brivio, Y. Jiang, M. Trott, The SMEFTsim package, theory and tools. JHEP 12 (2017) 070, [arXiv: 1709.06492](https://arxiv.org/abs/1709.06492). [[Inspire](https://inspirehep.net/literature/1624421)]
+
+[2] I. Brivio, SMEFTsim 3.0 -- a practical guide. [arXiv: 2012.11343](https://arxiv.org/abs/2012.11343). [[Inspire](https://inspirehep.net/literature/1837608)]
