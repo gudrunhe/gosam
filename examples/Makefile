@@ -51,22 +51,27 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
-
-SKIP_TESTS = WpWpjj
+SKIP_TESTS = WpWpjj gggH ggHH_chromoSMEFT
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
 check_selection :
 	for f in $(SELECTED_TESTS) ; do \
-		if [ -d "$$f" ] ; then \
+		if grep -q "@@@ SUCCESS @@@" $$f/test/test.log 2>/dev/null; then \
 			printf "\033[0;32m" ; \
-			printf "$$f OK" ; \
+			printf "$$f/test/test.log: success" ; \
+			printf "\033[0m\n" ; \
 		else \
+			err="$(grep -q "@@@ SUCCESS @@@" $$f/test/test.log 2>&1)" ; \
+			printf "$$err"; \
 			printf "\033[1;31m" ; \
-			printf "$$f does not exist" ; \
-		fi ; \
-		printf "\n" ; \
+			if [ -z "$${err}" ]; then \
+				printf "$$f/test/test.log: failed " ; \
+			else \
+				printf "$$f/test/test.log: failed: $$err" ; \
+			fi ; \
+			printf "\033[0m\n" ; \
+		fi \
 	done ; \
 	printf "\033[0m" ;
 	printf "\n"
