@@ -448,13 +448,14 @@ class Diagram:
                 for prop in self._propagators.values():
                     if seen_props[prop.index-1]:
                         continue
-                    seen_props[prop.index-1] = True
                     if prop.v1 == current.index and prop.r1 == outgoing_ray:
                         to_visit.append(self._vertices[prop.v2])
                         incoming_ray = prop.r2
+                        seen_props[prop.index-1] = True
                     elif prop.v2 == current.index and prop.r2 == outgoing_ray:
                         to_visit.append(self._vertices[prop.v1])
                         incoming_ray = prop.r1
+                        seen_props[prop.index-1] = True
             else: # Connection map unknown, walk along first leg/propagator that is found
                 # Next propagator in the line is an external leg, return early
                 legs: list[Leg] = list(
