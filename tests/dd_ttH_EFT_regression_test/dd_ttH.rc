@@ -22,4 +22,3 @@ filter.ct=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
 reduction_programs=ninja
 
 symmetries=parity
-convert_to_cdr=true

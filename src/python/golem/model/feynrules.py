@@ -135,6 +135,18 @@ class Model:
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
 
+        self.useCT = False
+        try:
+            self.all_CTvertices = mod.all_CTvertices
+            self.useCT = True
+        except AttributeError:
+            pass
+
+        try:
+            self.all_CTparameters = mod.all_CTparameters
+        except AttributeError:
+            pass
+
         # #########################################################################################
         # Check if there are any vertices with ambiguous coupling orders and if so split them up.
         # #########################################################################################
@@ -264,7 +276,10 @@ class Model:
 
         # #######################################################################################################
 
-        self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
+        if self.useCT:
+            self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
+        else:   
+            self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
         # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
         for i, vertex in enumerate(self.all_vertices):
@@ -295,22 +310,40 @@ class Model:
             else:
                 vertex.spin_map = unique_maps.pop()
 
-        try:
-            self.all_CTparameters = mod.all_CTparameters
-        except AttributeError:
-            pass
+        if self.useCT:
+            for i, vertex in enumerate(self.all_CTvertices):
+                if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
+                    continue
+                maps = [trace_spin(l) for l in vertex.lorentz]
+                unique_maps = set(tuple(map) for map in maps)
+                n_structures = len(unique_maps)
+                if n_structures > 1:
+                    logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                    for j, unique_map in enumerate(unique_maps):
+                        structures = []
+                        new_couplings = {}
+                        new_lcoord = 0
+                        for k, m in enumerate(maps):
+                            if tuple(m) == unique_map:
+                                structures.append(vertex.lorentz[k])
+                                for ccoord in range(len(vertex.color)):
+                                    for xcoord in range(len(vertex.loop_particles)):
+                                        if (ccoord,k,xcoord) in list(vertex.couplings.keys()):
+                                            new_couplings[(ccoord,new_lcoord,xcoord)] = vertex.couplings[(ccoord,k,xcoord)]
+                                new_lcoord += 1                                    
+                        v = copy.deepcopy(vertex)
+                        v.name = f"{vertex.name}_{j}"
+                        v.lorentz = structures
+                        v.couplings = new_couplings
+                        self.all_CTvertices.append(v)
+                    self.all_CTvertices.remove(vertex)
+                else:
+                    vertex.spin_map = unique_maps.pop()
 
-        try:
-            self.all_CTvertices = mod.all_CTvertices
-        except AttributeError:
-            pass
-
-        self.useCT = False
         # the following code block splits all_couplings into
         # two separate lists of CT and non-CT couplings
         # also fills self.ctfunctions used write_python_file
-        if hasattr(mod, "CT_vertices"):
-            self.useCT = True
+        if self.useCT:
             self.all_CTcouplings = []
             self.ctfunctions = {}
             self.cttypes = {}
@@ -1521,9 +1554,15 @@ class Model:
         if label[-1].isdigit() and label[-2] == "_":
             # During export into a QGRAF or FORM model file, a '_<digit>' is added. Since this only encodes splitting
             # into unambiguous coupling power pieces, it can be ignored here
-            return self.all_vertices[self.labels[label[:-2]]]
+            if self.useCT:
+                return (self.all_vertices+self.all_CTvertices)[self.labels[label[:-2]]]
+            else:
+                return self.all_vertices[self.labels[label[:-2]]]
         else:
-            return self.all_vertices[self.labels[label]]
+            if self.useCT:
+                return (self.all_vertices+self.all_CTvertices)[self.labels[label]]
+            else:
+                return self.all_vertices[self.labels[label]]
 
 
 def canonical_field_names(p):
