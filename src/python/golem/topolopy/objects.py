@@ -368,6 +368,10 @@ class Diagram:
         else:
             return False
 
+    def legs(self, *args, **opts):
+        opts["zero"] = self._zerosum
+        return sum([l.match(list(args), **opts) for l in [*self._in_legs.values(), *self._out_legs.values()]])
+
     def ext_legs_from_vertex(self, *args, max_legs=1, is_ingoing=None):
         nlegs = len(self._vertices) * [0]
         for leg in list(self._in_legs.values()) + list(self._out_legs.values()):

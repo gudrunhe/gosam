@@ -13,8 +13,7 @@ zero=wH,wT
 
 # No other particles than gluons, Higgs and
 # one quark flavour [t] running in the loops:
-qgraf.verbatim=true=iprop[A,Z,U,D,C,S,B,H,0,0];
-qgraf.options=onshell,notadpole,nosnail
+filter.particles=A:0,Z:0,U:0,D:0,C:0,S:0,B:0,H:0
 
 nlo_prefactors=0
 

@@ -8,7 +8,7 @@ def zero_loop(d):
           d.loopsize() == 3 and \
           d.loopvertices([A], QUARKS, QUARKS) == 1 and \
           d.loopvertices([g], QUARKS, QUARKS) == 2
-          
+
 def v_floop(d):
    """
    Closed quark loops with gauge boson attached to the loop
@@ -24,4 +24,7 @@ def b_loop(d):
    return d.chord([B,Bbar]) == d.loopsize()
 
 def madloop_filter(d):
-   return (not v_floop(d)) and (not top_loop(d)) and (not zero_loop(d))
+   return bridge_filter(d) and (not v_floop(d)) and (not top_loop(d)) and (not zero_loop(d))
+
+def bridge_filter(d):
+    return d.bridge(["Z", "A"]) > 0

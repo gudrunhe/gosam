@@ -12,10 +12,9 @@ one=gs,e
 
 helicities=-++-+-+-
 
-qgraf.verbatim=true=iprop[H,phim,phip,chi,T,0,0];
+filter.particles=H:0,phim:0,phip:0,chi:0,T:0
 
 # These parameters are not documented elsewhere because
 # usually they are set by the OLP interface
 +olp.include_color_average=false
 +olp.include_helicity_average=false
-

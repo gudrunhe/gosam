@@ -9,9 +9,8 @@ model=FeynRules, ../model/Standard_Model_UFO
 one=mdlee,mdlG
 zero=mdlMB
 
-qgraf.options=notadpole,nosnail,onshell
-qgraf.verbatim=true=iprop[part3,part4,part5,part6,part11,part13,part15,0,0];
+filter.particles=part3:0,part4:0,part5:0,part6:0,part11:0,part13:0,part15:0
 
-reduction_programs=ninja, golem95
+reduction_programs=ninja
 
 filter.nlo= lambda d: d.chord(part21) > 0

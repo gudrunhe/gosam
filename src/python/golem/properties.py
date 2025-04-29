@@ -131,7 +131,7 @@ qgraf_power = Property(
 
    If the last number is omitted no virtual corrections are
    calculated.
-   
+
    For loop induced processes, the order of the Born diagrams
    should be specified as `NONE`.
 
@@ -220,6 +220,56 @@ qgraf_options = Property(
         "floop",
         "topol",
     ],
+)
+
+filter_particles = Property(
+    "filter.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in every diagram. Multiple fields may be specified.
+
+    Example:
+
+    filter.lo.particles=u:0,d:0 # No internal u or d quarks
+    """,
+    str,
+    ""
+)
+
+filter_lo_particles = Property(
+    "filter.lo.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the LO diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+    ""
+)
+
+filter_nlo_particles = Property(
+    "filter.nlo.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the NLO diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+    ""
+)
+
+filter_ct_particles = Property(
+    "filter.ct.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the counter term diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+    ""
 )
 
 qgraf_verbatim = Property(
@@ -395,7 +445,7 @@ template_path = Property(
     """\
    Path pointing to the directory containing the template
    files for the process. If not set, GoSam uses the directory
-   <gosam_git_path>/templates, where <gosam_git_path> is the 
+   <gosam_git_path>/templates, where <gosam_git_path> is the
    path into which the GoSam git has been cloned.
 
    The directory must contain a file called 'template.xml'
@@ -469,10 +519,10 @@ config_convert_to_cdr = Property(
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the conversion of the result into the CDR 
+   Activates or disables the conversion of the result into the CDR
    regularisation scheme, when the calculation has been performed in DRED.
 
-   Does not have an effect when CDR is picked as regularisation scheme in 
+   Does not have an effect when CDR is picked as regularisation scheme in
    extensions or via property 'regularisation_scheme'.
 
    """,
@@ -517,8 +567,8 @@ extensions = Property(
    code generation.
 
    ninja        --- Use the ninja reduction library (default).
-   golem95      --- Use the golem95 reduction library (only when 
-                    enabled during setup step of GoSam installation).   
+   golem95      --- Use the golem95 reduction library (only when
+                    enabled during setup step of GoSam installation).
    dred         --- Use DRED as IR regularisation scheme (default).
    cdr          --- Use CDR as IR regularisation scheme.
    numpolvec    --- Evaluate polarisation vectors numerically (default).
@@ -527,20 +577,20 @@ extensions = Property(
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
    gaugecheck   --- modify gauge boson wave functions to allow for
-                    a limited gauge check (introduces gauge*z variables)  
-   generate-all-helicities --- Do not use symmetries to relate helicity 
-                               configurations and produce separate code 
+                    a limited gauge check (introduces gauge*z variables)
+   generate-all-helicities --- Do not use symmetries to relate helicity
+                               configurations and produce separate code
                                for each configuration instead.
 
    OLP interface only:
 
-   olp_daemon   --- Generates a C-program providing network access to 
+   olp_daemon   --- Generates a C-program providing network access to
                     the amplitude.
-   olp_badpts   --- Allows to stear the numbering of the files containing 
+   olp_badpts   --- Allows to stear the numbering of the files containing
                     bad points from the MC.
    olp_blha1    --- Use BLHA version 1 instead of version 2.
    f77          --- In combination with the BLHA interface it generates
-                    an olp_module.f90 linkable with Fortran77                    
+                    an olp_module.f90 linkable with Fortran77
    """,
     list,
     ",".join(DEFAULT_EXTENSIONS),
@@ -550,8 +600,8 @@ extensions = Property(
         "dred",
         "cdr",
         "numpolvec",
-        "quadruple", 
-        "customspin2prop",    
+        "quadruple",
+        "customspin2prop",
         "gaugecheck",
         "generate-all-helicities",
         "olp_daemon",
@@ -651,22 +701,24 @@ filter_lo_diagrams = Property(
         - massive: select only propagators with/without a non-zero mass
         - color: one of the numbers 1, 3, -3 or 8, or a list of
                  these numbers
+   * d.legs(...) = number of legs
+      same as iprop, but for external legs
    * d.iprop_momentum(field, momentum="...") = True when the diagram contains
-      a propagator of field with the specified momentum, False otherwise 
+      a propagator of field with the specified momentum, False otherwise
    * d.chord(...) = number of loop propagators with the given properties;
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
-   * d.order(coupling) = total power of diagrams with respect to specified 
-      coupling. Only works whit UFO models. The coupling must be defined 
+   * d.order(coupling) = total power of diagrams with respect to specified
+      coupling. Only works whit UFO models. The coupling must be defined
       in the UFO model's coupling_orders.py and listed in the 'order_names'
       property of the GoSam config/runcard.
 
-   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to 
+   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to
          inconsistencies in the automatically generated crossings. This
          can be circumvented by running GoSam with the option --no-crossings
          or using the iprop_momentum function, which tracks invalid crossings.
-   
+
    See also: filter.nlo, select.lo, select.nlo
    """,
     str,
@@ -806,7 +858,7 @@ r2 = Property(
    The algorithm how to treat the R2 term:
 
    implicit    -- mu^2 terms are kept in the numerator and reduced
-                  at runtime (available only when regularisation 
+                  at runtime (available only when regularisation
                   scheme is DRED)
    explicit    -- mu^2 terms are reduced analytically
    """,
@@ -1000,10 +1052,10 @@ config_renorm_ehc = Property(
    Turns on the finite renormalisation of effective Higgs-gluon
    vertices. Implemented for models in the heavy-top limit like
    smehc. Should not be used when counterterms for Wilson coeffi-
-   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson'). 
-   CAUTION: 
-   This will only work if the Higgs-gluon vertices factorize from the 
-   amplitude, i.e. the number of Higgs-gluon couplings is the same for 
+   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson').
+   CAUTION:
+   This will only work if the Higgs-gluon vertices factorize from the
+   amplitude, i.e. the number of Higgs-gluon couplings is the same for
    all Born diagrams!
    """,
     bool,
@@ -1291,7 +1343,7 @@ config_PSP_chk_kfactor = Property(
     """\
    Sets the same variable in config.f90
 
-   Threshold on the k-factor to perform a rotation check on the PSP. 
+   Threshold on the k-factor to perform a rotation check on the PSP.
    !!Works only for QCD and with built-in model files!!
    """,
     str,
@@ -1323,9 +1375,9 @@ config_PSP_chk_method = Property(
 form_factor_lo = Property(
     "form_factor_lo",
     """\
-   This option allows to define a form factor which LO results are 
+   This option allows to define a form factor which LO results are
    multiplied with.
-   Example: 
+   Example:
    form_factor_lo="(1000._ki**2/
         (1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:)))
    )"
@@ -1338,7 +1390,7 @@ form_factor_lo = Property(
 form_factor_nlo = Property(
     "form_factor_nlo",
     """\
-   This option allows to define a form factor which NLO/loop-induced results 
+   This option allows to define a form factor which NLO/loop-induced results
    are multiplied with.
    """,
     str,
@@ -1350,7 +1402,7 @@ form_factor_nlo = Property(
 order_names = Property(
     "order_names",
     """\
-   A list of additional coupling order that should be 
+   A list of additional coupling order that should be
    tracked throughout the amplitude generation. Relevant for
    correct EFT treatment. Only works in combination with UFO
    models. All couplings listed must be defined in the model's
@@ -1427,9 +1479,9 @@ flavour_groups = Property(
 respect_generations = Property(
     "respect_generations",
     """\
-   Boolean determining whether or not the quark generation should be taken 
-   into account when the flavour_groups feature is used to find crossing 
-   relations among olp channels. Is relevant if flavour changing vertices 
+   Boolean determining whether or not the quark generation should be taken
+   into account when the flavour_groups feature is used to find crossing
+   relations among olp channels. Is relevant if flavour changing vertices
    appear (Assuming diagonal CKM!).
 
    Examples:
@@ -1449,14 +1501,14 @@ respect_generations = Property(
 MSbar_yukawa = Property(
     "MSbar_yukawa",
     """\
-    List of quarks with Yukawa couplings which shall be renormalised in 
-    the MSbar scheme instead of the default OS scheme. Can also be used 
-    to renormalise Yukawa couplings of particles with mass set to zero 
+    List of quarks with Yukawa couplings which shall be renormalised in
+    the MSbar scheme instead of the default OS scheme. Can also be used
+    to renormalise Yukawa couplings of particles with mass set to zero
     while still keeping their coupling to the Higgs.
 
     Examples:
     MSbar_yukawa=B
-    -> Yukawa coupling of bottom to Higgs will be renormalised in the 
+    -> Yukawa coupling of bottom to Higgs will be renormalised in the
        MSbar scheme, even if mB=0 (as long as Hbb coupling still exist)
 
     See also: renorm_yukawa
@@ -1468,8 +1520,8 @@ MSbar_yukawa = Property(
 use_MQSE = Property(
     "use_MQSE",
     """\
-    Whether or not to scan 1-loop amplitudes for massive quark self 
-    energies and insert the appropriate mass counterterm during the 
+    Whether or not to scan 1-loop amplitudes for massive quark self
+    energies and insert the appropriate mass counterterm during the
     form step. Used mainly for debugging purposes.
 
     """,
@@ -1481,7 +1533,7 @@ use_MQSE = Property(
 meson_buildtype = Property(
     "meson.buildtype",
     """\
-   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option. 
+   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option.
    The respective buildtypes represent:
                            Debug Symbols        Optimization level
       plain                false                plain
@@ -1498,11 +1550,11 @@ meson_buildtype = Property(
 meson_arch = Property(
     "meson.arch",
     """\
-   CPU architecture passed to the compiler as the '-march=<arch>' option. 
+   CPU architecture passed to the compiler as the '-march=<arch>' option.
    By default, GCC generates code for a generic x86-64 CPU. When using the
-   'native' option, GCC uses all possible instructions available on the 
+   'native' option, GCC uses all possible instructions available on the
    currenly used CPU. This can result in faster executing code, but may make
-   the libraries / executables unusable on other CPUs. For all possible 
+   the libraries / executables unusable on other CPUs. For all possible
    options, see the GCC documentation.
    """,
     str,
@@ -1512,7 +1564,7 @@ meson_arch = Property(
 unitary_gauge = Property(
     "unitary_gauge",
     """\
-   Use unitary gauge propagators for the massive vector bosons instead of 
+   Use unitary gauge propagators for the massive vector bosons instead of
    Feynman gauge propagators.
     """,
     bool,
@@ -1535,6 +1587,10 @@ properties = [
     config_convert_to_cdr,
     helicities,
     qgraf_options,
+    filter_particles,
+    filter_lo_particles,
+    filter_nlo_particles,
+    filter_ct_particles,
     qgraf_verbatim,
     qgraf_verbatim_lo,
     qgraf_verbatim_nlo,
@@ -1683,4 +1739,3 @@ def setInternals(conf):
     if not "__OLP_MODE__" in conf:
         conf["__OLP_MODE__"] = False
     conf["__REQUIRE_FR5__"] = "cdr" in extensions
-

@@ -16,7 +16,7 @@ zero=mU,mD,mS,mC,mB,me,mmu
 qgraf.options=onshell,notadpole,nosnail
 
 # No Higgs propagators
-qgraf.verbatim=true=iprop[H,0,0];
+filter.particles=H:0
 
 symmetries=family
 

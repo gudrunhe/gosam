@@ -8,7 +8,7 @@ model=sm
 
 order=QCD, 2
 
-qgraf.verbatim=true=chord[U,S,C,0,0];
+filter.particles=U:0,S:0,C:0
 
 one=gs,e
 zero=me,mU,mD,mS

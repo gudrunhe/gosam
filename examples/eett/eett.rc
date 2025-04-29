@@ -9,7 +9,7 @@ order=QCD, 0, 2
 
 model=sm
 
-qgraf.verbatim=true=chord[U,S,C,B,0,0];\\n\\\ntrue=iprop[H,chi,0,0];
+filter.particles=U:0,S:0,C:0,B:0,H:0,chi:0
 
 helicities=[dD=+-]D[+-][+-]
 

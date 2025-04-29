@@ -189,6 +189,23 @@ def format_qgraf_verbatim(conf, prop):
         result.append(lhs + sep)
     return "\n".join(result)
 
+def format_particle_verbatim(filter_str):
+    if filter_str is None:
+        return ""
+    particle_counts: dict[str, int] = {
+        restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
+        for restriction in filter_str.split(",")
+    }
+    filter_dict = {}
+    for p, count in particle_counts.items():
+        if count in filter_dict:
+            filter_dict[count].append(p)
+        else:
+            filter_dict[count] = [p]
+    return "\n".join(
+        f"true=iprop[{','.join(particles)},{count},{count}];" for count, particles in filter_dict.items()
+    )
+
 
 def run_qgraf(conf, in_particles, out_particles):
     path = golem.util.tools.process_path(conf)
@@ -213,6 +230,8 @@ def run_qgraf(conf, in_particles, out_particles):
         # Should never happen but is not considered an error either.
         # nothing to do
         return
+
+    verbatim += format_particle_verbatim(conf.getProperty("filter.particles")) + "\n"
 
     # These are our default file names:
     pyxo_sty = "pyxo.sty"
@@ -303,6 +322,8 @@ def run_qgraf(conf, in_particles, out_particles):
         if conf["is_ufo"] == "True":
             new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
+        new_verbatim += format_particle_verbatim(conf.getProperty("filter.lo.particles")) + "\n"
+
         write_qgraf_dat(
             path, form_sty, consts.MODEL_LOCAL, output_name, options, new_verbatim, in_particles, out_particles, 0
         )
@@ -346,6 +367,8 @@ def run_qgraf(conf, in_particles, out_particles):
         if conf["is_ufo"] == "True":
             new_verbatim = new_verbatim + "\ntrue=vsum[isCT,0,0];\n"
 
+        new_verbatim += format_particle_verbatim(conf.getProperty("filter.nlo.particles")) + "\n"
+
         write_qgraf_dat(
             path, form_sty, consts.MODEL_LOCAL, output_name, options, new_verbatim, in_particles, out_particles, 1
         )
@@ -386,6 +409,8 @@ def run_qgraf(conf, in_particles, out_particles):
             )
         else:
             new_verbatim = verbatim + "\n" + verbatim_ct + "\ntrue=vsum[isCT,1,1];\n"
+
+        new_verbatim += format_particle_verbatim(conf.getProperty("filter.ct.particles")) + "\n"
 
         write_qgraf_dat(
             path, form_sty, consts.MODEL_LOCAL, output_name, options, new_verbatim, in_particles, out_particles, 0

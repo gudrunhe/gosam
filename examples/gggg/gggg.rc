@@ -8,8 +8,7 @@ out=21,21
 order=QCD, 2, 4
 
 # We only want the pure gauge theory part, no quarks
-qgraf.verbatim=\
-true=iprop[U,D,S,C,B,T,0,0];
+filter.particles=U:0,D:0,S:0,C:0,B:0,T:0
 
 
 one=gs,e

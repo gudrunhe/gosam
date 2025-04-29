@@ -9,6 +9,7 @@ one=gs
 zero=mB,mU,mD,wW,me
 helicities=-+-+-+
 
-qgraf.verbatim=true = iprop[Wp,2,100];true = iprop[T,1,100];true = chord[Wp,0,0];true = bridge[g,0,0];
+filter.lo=lambda d: d.iprop(["Wp", "Wm"]) > 1 and d.iprop("T") > 0 and d.chord("Wp") == 0 and d.bridge("g") == 0
+filter.nlo=lambda d: d.iprop(["Wp", "Wm"]) > 1 and d.iprop("T") > 0 and d.chord("Wp") == 0 and d.bridge("g") == 0
 
 regularisation_scheme=cdr

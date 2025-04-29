@@ -11,8 +11,7 @@ one=e
 
 helicities=++--, +++-, ++++
 
-qgraf.verbatim=\
-true=iprop[U,D,S,C,B,T,mum,taum,Wp,Wm,phim,phip,ghA,ghWp,ghWm,0,0];
+filter.particles=U:0,D:0,S:0,C:0,B:0,T:0,mum:0,taum:0,Wp:0,Wm:0,phim:0,phip:0,ghA:0,ghWp:0,ghWm:0
 
 extensions=gaugecheck
 
