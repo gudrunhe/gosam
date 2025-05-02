@@ -1,0 +1,17 @@
+process_name=uu_uu
+process_path=virtual
+
+model=FeynRules, ../model/QCD_4F_UFO
+
+in=9000001,-9000001
+out=9000001,-9000001
+
+order=QCD, 2, 4
+
+order_names=QCD,NP
+
+all_mandelstam=True
+
+reduction_programs=ninja
+
+symmetries=parity

@@ -276,12 +276,8 @@ class Model:
 
         # #######################################################################################################
 
-        if self.useCT:
-            self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
-        else:   
-            self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
-
         # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
+        split_vertices = {}
         for i, vertex in enumerate(self.all_vertices):
             if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
                 continue
@@ -290,6 +286,7 @@ class Model:
             n_structures = len(unique_maps)
             if n_structures > 1:
                 logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                vertices = []
                 for j, unique_map in enumerate(unique_maps):
                     structures = []
                     new_couplings = {}
@@ -305,12 +302,17 @@ class Model:
                     v.name = f"{vertex.name}_{j}"
                     v.lorentz = structures
                     v.couplings = new_couplings
-                    self.all_vertices.append(v)
-                self.all_vertices.remove(vertex)
+                    v.spin_map = unique_map
+                    vertices.append(v)
+                split_vertices[i] = vertices
             else:
                 vertex.spin_map = unique_maps.pop()
+        for i, vertices in sorted(split_vertices.items(), reverse=True):
+            self.all_vertices.pop(i)
+            self.all_vertices.extend(vertices)
 
         if self.useCT:
+            split_vertices = {}
             for i, vertex in enumerate(self.all_CTvertices):
                 if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
                     continue
@@ -319,6 +321,7 @@ class Model:
                 n_structures = len(unique_maps)
                 if n_structures > 1:
                     logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                    vertices = []
                     for j, unique_map in enumerate(unique_maps):
                         structures = []
                         new_couplings = {}
@@ -335,10 +338,19 @@ class Model:
                         v.name = f"{vertex.name}_{j}"
                         v.lorentz = structures
                         v.couplings = new_couplings
-                        self.all_CTvertices.append(v)
-                    self.all_CTvertices.remove(vertex)
+                        v.spin_map = unique_map
+                        vertices.append(v)
+                    split_vertices[i] = vertices
                 else:
                     vertex.spin_map = unique_maps.pop()
+            for i, vertices in sorted(split_vertices.items(), reverse=True):
+                self.all_CTvertices.pop(i)
+                self.all_CTvertices.extend(vertices)
+
+        if self.useCT:
+            self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
+        else:
+            self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
         # the following code block splits all_couplings into
         # two separate lists of CT and non-CT couplings
@@ -842,7 +854,7 @@ class Model:
                 continue
                 assert False
 
-            flip = spins[0] == 1 and spins[2] == 1
+            #flip = spins[0] == 1 and spins[2] == 1
 
             vfunctions = {}
             vertorders = []
@@ -876,9 +888,9 @@ class Model:
                 is_first = True
 
                 xfields = afields[:]
-                if flip:
-                    xfields[0] = afields[1]
-                    xfields[1] = afields[0]
+                #if flip:
+                #    xfields[0] = afields[1]
+                #    xfields[1] = afields[0]
 
                 for field in xfields:
                     if is_first:
@@ -937,7 +949,7 @@ class Model:
                     continue
                     assert False
 
-                flip = spins[0] == 1 and spins[2] == 1
+                #flip = spins[0] == 1 and spins[2] == 1
 
                 vfunctions = {}
                 vertorders = []
@@ -970,9 +982,9 @@ class Model:
                     is_first = True
 
                     xfields = afields[:]
-                    if flip:
-                        xfields[0] = afields[1]
-                        xfields[1] = afields[0]
+                    #if flip:
+                    #    xfields[0] = afields[1]
+                    #    xfields[1] = afields[0]
 
                     for field in xfields:
                         if is_first:
@@ -1168,13 +1180,13 @@ class Model:
                     cplnames.append([coupling.name])
 
             for ivo in range(len(vertorders)):
-                flip = spins[0] == 1 and spins[2] == 1
+                #flip = spins[0] == 1 and spins[2] == 1
                 deg = len(particles)
 
                 xidx = list(range(deg))
-                if flip:
-                    xidx[0] = 1
-                    xidx[1] = 0
+                #if flip:
+                #    xidx[0] = 1
+                #    xidx[1] = 0
 
                 fold_name = "(%s) %s Vertex" % (v.name + "_" + str(ivo), " -- ".join(names))
                 f.write("*---#[ %s:\n" % fold_name)
@@ -1312,13 +1324,13 @@ class Model:
                         cplnames.append([coupling.name])
 
                 for ivo in range(len(vertorders)):
-                    flip = spins[0] == 1 and spins[2] == 1
+                    #flip = spins[0] == 1 and spins[2] == 1
                     deg = len(particles)
 
                     xidx = list(range(deg))
-                    if flip:
-                        xidx[0] = 1
-                        xidx[1] = 0
+                    #if flip:
+                    #    xidx[0] = 1
+                    #    xidx[1] = 0
 
                     fold_name = "(%s) %s CTVertex" % (v.name + "_" + str(ivo), " -- ".join(names))
                     f.write("*---#[ %s:\n" % fold_name)
