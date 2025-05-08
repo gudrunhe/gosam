@@ -1,3 +1,6 @@
-mdlCphiG=0.1
-mdlCbphi=0.2
+mdlCphiG=-0.23324
+mdlCbphi=1.232
 mdlLam=0.000001
+mdlMH=125
+mdlMQB=4.7
+mdlymb=4.7

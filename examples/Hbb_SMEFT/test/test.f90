@@ -1,14 +1,16 @@
 program test
-   use Hbb_SMEFT_config, only: ki, logfile, EFTcount
+   use Hbb_SMEFT_config, only: ki, logfile, EFTcount, renormalisation, nlo_prefactors
    use Hbb_SMEFT_model
    use Hbb_SMEFT_matrix, only: samplitude, initgolem, exitgolem
 
    implicit none
-   integer :: ievt, ierr, prec
+   integer :: ievt, ierr, prec, ieft
+   integer, parameter, dimension(0:3) :: eftc = (/0,1,4,5/)
    real(ki), dimension(3, 4) :: vecs
-   real(ki), dimension(0:3) :: amp, gsres, refres, diff
+   real(ki), dimension(0:3,0:3) :: gsres, refres, diff
    real(ki) :: scale2, sqrts
    real(ki), parameter :: eps = 1.0e-10_ki
+   character(len=45), dimension(0:3) :: truncation_order
    
    ! log and output
    integer, parameter :: logf = 27
@@ -28,84 +30,64 @@ program test
 
    call initgolem()
 
+   renormalisation=1
+   nlo_prefactors=0
+   
    scale2 = mdlMH/2._ki
 
    vecs(1,:) = (/mdlMH,0._ki,0._ki,0._ki/)
    vecs(2,:) = (/mdlMH/2._ki,0._ki,0._ki,sqrt(mdlMH**2/4._ki-mdlMQB**2)/)
    vecs(3,:) = (/mdlMH/2._ki,0._ki,0._ki,-sqrt(mdlMH**2/4._ki-mdlMQB**2)/)
 
-   ! (SM x SM) + (SM x dim-6)
-   EFTcount = 0
-   call samplitude(vecs, scale2, amp, prec)
-   gsres(0) = amp(0)
-   refres(0) = analytic_amp()
-   write(unit=6,fmt="(A42)") "Truncation order (SM x SM) + (SM x dim-6):"
-   write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
-        & "GoSam:", gsres(0), &
-        & "Analytical:", refres(0), &
-        & "Ratio:", gsres(0)/refres(0)
-
-   ! (SM + dim-6) x (SM + dim-6)
-   EFTcount = 1
-   call samplitude(vecs, scale2, amp, prec)
-   gsres(1) = amp(0)
-   refres(1) = analytic_amp()
-   write(unit=6,fmt="(A45)") "Truncation order (SM + dim-6) x (SM + dim-6):"
-   write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
-        & "GoSam:", gsres(1), &
-        & "Analytical:", refres(1), &
-        & "Ratio:", gsres(1)/refres(1)
-
-   ! (SM x dim-6)
-   EFTcount = 4
-   call samplitude(vecs, scale2, amp, prec)
-   gsres(2) = amp(0)
-   refres(2) = analytic_amp()
-   write(unit=6,fmt="(A30)") "Truncation order (SM x dim-6):"
-   write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
-        & "GoSam:", gsres(2), &
-        & "Analytical:", refres(2), &
-        & "Ratio:", gsres(2)/refres(2)   
+   truncation_order = [character(len=45) :: &
+        & "Truncation order (SM x SM) + (SM x dim-6):", &
+        & "Truncation order (SM + dim-6) x (SM + dim-6):", &
+        & "Truncation order (SM x dim-6):", &
+        & "Truncation order (dim-6 x dim-6):" ]
    
-   ! (dim-6) x (dim-6)
-   EFTcount = 5
-   call samplitude(vecs, scale2, amp, prec)
-   gsres(3) = amp(0)
-   refres(3) = analytic_amp()
-   write(unit=6,fmt="(A33)") "Truncation order (dim-6 x dim-6):"
-   write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
-        & "GoSam:", gsres(3), &
-        & "Analytical:", refres(3), &
-        & "Ratio:", gsres(3)/refres(3)
-
+   do ieft = 0, 3
+      EFTcount = eftc(ieft)
+      call samplitude(vecs, scale2, gsres(ieft,:), prec)
+      call analytic_amp(refres(ieft,:))
+      write(unit=6,fmt="(A45)") NEW_LINE('a'), truncation_order(ieft)
+      write(unit=6,fmt="((14x,A11,3(15x,A11)))") &
+           & "Born       ", "finite part", "single pole", "double pole"
+      write(unit=6,fmt="((A11,4(3x,E23.16E3)))") &
+           & "GoSam:     ", gsres(ieft,0), gsres(ieft,1), gsres(ieft,2), gsres(ieft,3)
+      write(unit=6,fmt="((A11,4(3x,E23.16E3)))") &
+           & "Analytical:", refres(ieft,0), refres(ieft,1), refres(ieft,2), refres(ieft,3)
+      write(unit=6,fmt="((A11,4(3x,E23.16E3)))") &
+           & "Ratio:     ", gsres(ieft,0)/refres(ieft,0), gsres(ieft,1)/refres(ieft,1), &
+           & gsres(ieft,2)/refres(ieft,2), gsres(ieft,3)/refres(ieft,3), NEW_LINE('a')
+   end do
    
    diff = abs(rel_diff(gsres, refres))
    
-   if (diff(0) .gt. eps) then
+   if (diff(0,0) .gt. eps) then
       write(unit=logf,fmt="(A3,1x,A59)") "==>", &
            & "Comparison of (SM x SM) + (SM x dim-6) (EFTcount=0) failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0,0)
       success = .false.
    end if
 
-   if (diff(1) .gt. eps) then
+   if (diff(0,1) .gt. eps) then
       write(unit=logf,fmt="(A3,1x,A62)") "==>", &
            & "Comparison of (SM + dim-6) x (SM + dim-6) (EFTcount=1) failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(1)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0,1)
       success = .false.
    end if
 
-   if (diff(2) .gt. eps) then
+   if (diff(0,2) .gt. eps) then
       write(unit=logf,fmt="(A3,1x,A47)") "==>", &
            & "Comparison of (SM x dim-6) (EFTcount=4) failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(2)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0,2)
       success = .false.
    end if
 
-   if (diff(3) .gt. eps) then
+   if (diff(0,3) .gt. eps) then
       write(unit=logf,fmt="(A3,1x,A50)") "==>", &
            & "Comparison of (dim-6) x (dim-6) (EFTcount) failed!"
-      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(3)
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0,3)
       success = .false.
    end if
 
@@ -122,14 +104,14 @@ program test
  contains
    
 
-function analytic_amp() result(amp)
+subroutine analytic_amp(amp)
   use Hbb_SMEFT_model
   use Hbb_SMEFT_config, only: EFTcount
   implicit none
-  real(ki) :: amp
-  real(ki) :: coeffSM
-  real(ki) :: coeffbphi, coeffphiG
-  real(ki) :: coeffbphibphi, coeffbphiphiG, coeffphiGphiG
+  real(ki), dimension(0:3), intent(out) :: amp
+  real(ki), dimension(0:3) :: coeffSM
+  real(ki), dimension(0:3) :: coeffbphi, coeffphiG
+  real(ki), dimension(0:3) :: coeffbphibphi, coeffbphiphiG, coeffphiGphiG
   
   coeffSM = analytic_coeff_SM()
   coeffbphi = analytic_coeff_cbphi()
@@ -157,74 +139,174 @@ function analytic_amp() result(amp)
      stop
   end select
   
-end function analytic_amp
+end subroutine analytic_amp
 
 
 function analytic_coeff_SM() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: tau, amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
 
-  tau = 4._ki*mdlMQB**2/mdlMH**2
+  xb = x()
+
+  amp = 0._ki
   
-  amp = sqrt(8._ki)*mdlGf*NC*mdlymb**2*mdlMH**2*(1._ki-tau)
+  amp(0) = sqrt(8._ki)*mdlGf*CA*mdlymb**2*mdlMH**2*(xb+1._ki)**2/(xb-1._ki)**2
+  
+  amp(1) = 0._ki
+  
+  amp(2) = 2._ki*real(sqrt(8._ki)*mdlGf*CA*CF*mdlymb**2*mdlMH**2 &
+       & *(xb+1._ki)/(xb-1._ki)**3*(1._ki - xb**2 + (xb**2 + 1._ki) * zlog(xb)))
+  
+  amp(3) = 0._ki
   
 end function analytic_coeff_SM
 
 
 function analytic_coeff_cbphi() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: tau, amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
 
-  tau = 4._ki*mdlMQB**2/mdlMH**2
+  xb = x()
+
+  amp = 0._ki
   
-  amp = -2._ki*sqrt(sqrt(2._ki))*NC*mdlymb*mdlMH**2*(1._ki-tau)/sqrt(mdlGf)
+  amp(0) = -2._ki*2._ki**0.25_ki/sqrt(mdlGf)*CA*mdlymb*mdlMH**2*(xb+1._ki)**2/(xb-1._ki)**2
+
+  amp(1) = 0._ki
+  
+  amp(2) = 2._ki*real(-2._ki*2._ki**0.25_ki/sqrt(mdlGf)*CA*CF*mdlymb*mdlMH**2 &
+       & *(xb+1._ki)/(xb-1._ki)**3*(1._ki - xb**2 + (xb**2 + 1._ki) * zlog(xb)))
+  
+  amp(3) = 0._ki
   
 end function analytic_coeff_cbphi
 
 
 function analytic_coeff_cphiG() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb, mdlMQB
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
+
+  xb = x()
 
   amp = 0._ki
+
+  amp(0) = 0._ki
+
+  amp(1) = 0._ki
+  
+  ! amp(2) = 2._ki*real(-12._ki*mdlMH**2*mdlymb*CA*CF &
+  !      & *( mdlMH*sqrt(-xb) + (xb-1._ki)*mdlymb )) &
+  !      & *(xb+1._ki)**2/(xb-1._ki)**3
+
+  amp(2) = 2._ki*real(-12._ki*mdlymb*CA*CF &
+       & *(4._ki*mdlMQB**2-mdlMH**2)) &
+       & *(mdlMQB - mdlymb)
+  ! NOTE that this is EXACTLY zero when the particle mass equals the Yukawa mass!
+
+  amp(3) = 0._ki
   
 end function analytic_coeff_cphiG
 
 
 function analytic_coeff_cbphicbphi() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: tau, amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
 
-  tau = 4._ki*mdlMQB**2/mdlMH**2
-  
-  amp = NC*mdlMH**2*(1._ki-tau)/(2._ki*mdlGf**2)
+  xb = x()
+
+  amp = 0._ki
+
+  amp(0) = CA*mdlMH**2/(2._ki*mdlGf**2)*(xb+1._ki)**2/(xb-1._ki)**2
+
+  amp(1) = 0._ki
+
+  amp(2) = 2._ki*real(CA*CF*mdlMH**2/(2._ki*mdlGf**2) &
+       & *(xb+1._ki)/(xb-1._ki)**3*(1._ki - xb**2 + (xb**2 + 1._ki) * zlog(xb)))
+
+  amp(3) = 0._ki
   
 end function analytic_coeff_cbphicbphi
 
 
 function analytic_coeff_cbphicphiG() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
+
+  xb = x()  
 
   amp = 0._ki
+
+  amp(0) = 0._ki
+
+  amp(1) = 0._ki
+
+  ! amp(2) = 2._ki*real(3._ki*2._ki**0.75_ki*mdlMH**2*CA*CF/mdlGf**0.75_ki &
+  !      & *( mdlMH*sqrt(-xb) + (xb-1._ki)*mdlymb )) &
+  !      & *(xb+1._ki)**2/(xb-1._ki)**3
+
+  amp(2) = 2._ki*real(3._ki*2._ki**0.75_ki*CA*CF/mdlGf**0.75_ki &
+       & *(4._ki*mdlMQB**2-mdlMH**2)) &
+       & *(mdlMQB - mdlymb)
+  ! NOTE that this is EXACTLY zero when the particle mass equals the Yukawa mass!
+  
+  amp(3) = 0._ki
+
   
 end function analytic_coeff_cbphicphiG
 
 
 function analytic_coeff_cphiGcphiG() result(amp)
-  use Hbb_SMEFT_model
+  use Hbb_SMEFT_model, only: mdlMH, mdlGf, mdlymb
+  use Hbb_SMEFT_color, only: CA, CF
   implicit none
-  real(ki) :: amp
+  real(ki), dimension(0:3) :: amp
+  real(ki) :: xb
+
+  !xb = x()
 
   amp = 0._ki
   
 end function analytic_coeff_cphiGcphiG
 
+
+function x()
+  use Hbb_SMEFT_model
+  implicit none
+  real(ki) :: x, tau
+
+  tau = 4._ki*mdlMQB**2/mdlMH**2
+  x = (sqrt(1._ki-tau)-1._ki)/(sqrt(1._ki-tau)+1._ki)
+  
+end function x
+
+
+function zlog(a) result(l)
+  implicit none
+  real(ki) :: a
+  complex(ki) :: l
+
+  if (a.gt.0) then
+     l = COMPLEX(log(a),0)
+  else if (a.lt.0) then
+     l = COMPLEX(log(abs(a)),1)
+  end if
+  
+end function zlog
 
 pure elemental function rel_diff(a, b)
    implicit none

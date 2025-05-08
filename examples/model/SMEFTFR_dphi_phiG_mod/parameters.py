@@ -289,3 +289,20 @@ I8a33 = Parameter(name = 'I8a33',
                   value = '0+ ymtau',
                   texname = '\\text{I8a33}')
 
+ytau = Parameter(name = 'ytau',
+                   nature = 'internal',
+                   type = 'real',
+                   value = 'cmath.sqrt(cmath.sqrt(8)*Gf)*ymtau',
+                   texname = '\\text{ytau}')
+
+yb = Parameter(name = 'yb',
+                   nature = 'internal',
+                   type = 'real',
+                   value = 'cmath.sqrt(cmath.sqrt(8)*Gf)*ymb',
+                   texname = '\\text{yb}')
+
+yt = Parameter(name = 'yt',
+                   nature = 'internal',
+                   type = 'real',
+                   value = 'cmath.sqrt(cmath.sqrt(8)*Gf)*ymt',
+                   texname = '\\text{yt}')

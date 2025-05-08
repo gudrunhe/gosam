@@ -28,7 +28,7 @@ CphiG_CT = CTParameter(name = 'CphiG_CT',
 Cbphi_CT = CTParameter(name = 'Cbphi_CT',
                      type = 'real',
                      value = {
-                     -1:'aS/2/cmath.pi*(-2*Cbphi+16*CphiG)',
-                     0:{'const': 'dred*aS/2/cmath.pi*(-2/3*Cbphi+16/3*CphiG)', 'log': 'aS/2/cmath.pi*(-2*Cbphi+16*CphiG)'}
+                     -1:'aS/2/cmath.pi*(-2*Cbphi+8*yb*CphiG)',
+                     0:{'const': 'dred*aS/2/cmath.pi*(-2/3*Cbphi+8/3*yb*CphiG)', 'log': 'aS/2/cmath.pi*(-2*Cbphi+8*yb*CphiG)'}
                      },
                      texname = '\\delta\\text{Cbphi\\_CT}')
