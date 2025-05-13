@@ -9,10 +9,10 @@
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
-     & PSP_chk_th2, PSP_chk_th3, PSP_chk_th5, PSP_chk_th6, &
+     & PSP_chk_th2, PSP_chk_th3, PSP_chk_th4, PSP_chk_th5, &
      & PSP_chk_kfactor, reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
-     & PSP_chk_li5, PSP_chk_li6, &
+     & PSP_chk_li5, &
      & reduction_interoperation_rescue, convert_to_cdr, &
      & EFTcount
    use [% process_name asprefix=\_ %]kinematics, only: &
@@ -345,27 +345,261 @@ contains
       end if
    end subroutine exitgolem
    !---#] subroutine exitgolem
+
+   !---#[ subroutine pole_check :
+   subroutine     pole_check(vecs, scale2, amp, irp, prec, icheck, ok, h)
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(1:4), intent(in) :: amp
+      real(ki) :: kfac
+      real(ki), dimension(2:3), intent(out) :: irp
+      integer, intent(inout) :: prec
+      integer, intent(inout) :: icheck
+      logical, intent(inout), optional :: ok
+      integer, intent(in), optional :: h
+      integer spprec1, fpprec1
+      kfac=0.0_ki
+      irp=0.0_ki
+      spprec1 = 18
+      fpprec1 = 18[%
+@if anymember LoopInduced PSP_chk_method ignore_case=true %]
+      ! poles should be zero for loop-induced processes
+      write(*,*) '--performing pole_check (loop-induced)--' ! COMMENT
+      if(amp(2) .ne. 0.0_ki .and. amp(3) .ne. 0.0_ki) then
+        spprec1 = -int(log10(abs((amp(3)/amp(2)))))
+      endif
+      if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
+         icheck=2                                                           ! ROTATION
+      end if
+      if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
+         icheck=3
+         fpprec1=-10        ! Set -10 as finite part precision
+      end if[%
+@else %]
+      ! poles should match IR subtraction prediction
+      write(*,*) '--performing pole_check (ir_subtraction)--' ! COMMENT
+      call ir_subtraction(vecs, scale2, irp, h)
+      if((amp(3)-irp(2)) .ne. 0.0_ki) then      ! single pole vs IR prediction
+         spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
+      endif
+      if(amp(1) .ne. 0.0_ki) then                                           ! NLO/LO
+         kfac = abs(amp(2)/amp(1))
+      else
+         kfac = 0.0_ki
+      endif
+      if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
+           .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
+      if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+         icheck=3
+         fpprec1=-10        ! Set -10 as finite part precision
+      endif[%
+@end @if anymember LoopInduced PSP_chk_method ignore_case=true %]
+      prec = min(prec,spprec1,fpprec1)
+      if(icheck.eq.1) write(*,*) 'passed pole_check', amp(2), amp(3), irp(2), kfac, spprec1, fpprec1, prec ! COMMENT
+      if(icheck.eq.2) write(*,*) 'failed pole_check (=> rotation)', amp(2), amp(3), irp(2), kfac, spprec1, fpprec1, prec ! COMMENT
+      if(icheck.eq.3) write(*,*) 'failed pole_check (=> rescue)', amp(2), amp(3), irp(2), kfac, spprec1, fpprec1, prec ! COMMENT
+   end subroutine pole_check
+   !---#] subroutine pole_check
+
+   !---#[ subroutine rotation_check
+   subroutine     rotation_check(vecs, scale2, amp, amprot, prec, icheck, ok, h)
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%num_legs%], 4) :: vecsrot
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(1:4), intent(in) :: amp
+      real(ki), dimension(1:4), intent(out) :: amprot
+      real(ki) :: rat2, angle
+      integer, intent(inout) :: prec
+      integer, intent(inout) :: icheck
+      logical, intent(inout), optional :: ok
+      integer, intent(in), optional :: h
+      integer fpprec1
+      integer irot
+      amprot=0.0_ki
+      angle = 1.234_ki
+      fpprec1 = 18
+      !****************************************
+      !   Step 1 - check double vs double_rot
+      !****************************************
+      write(*,*) '--double/double rot test---' ! COMMENT
+      do irot = 1,[%num_legs%]
+         vecsrot(irot,1) = vecs(irot,1)
+         vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
+         vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+         vecsrot(irot,4) = vecs(irot,4)
+      enddo
+      call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
+      if((amprot(2)-amp(2)) .ne. 0.0_ki) then
+         fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
+      else
+         fpprec1 = 16
+      endif[%
+      @if anymember PoleRotation PSP_chk_method ignore_case=true %]
+      icheck=1                                                       ! ACCEPTED
+      if(fpprec1.lt.PSP_chk_th3) icheck=3                            ! RESCUE[%
+      @else %]
+      icheck=1                                                       ! ACCEPTED
+      if(fpprec1.lt.PSP_chk_li3) icheck=3                            ! RESCUE[%
+      @end @if %]
+      prec = fpprec1
+      if(icheck.eq.1) write(*,*) 'passed double vs double_rot', amp(2), amprot(2), fpprec1, prec ! COMMENT
+      if(icheck.eq.3) write(*,*) 'failed double vs double_rot', amp(2), amprot(2), fpprec1, prec ! COMMENT
+   end subroutine rotation_check
+   !---#] subroutine rotation_check[%
+   @if extension quadruple %]
+
+   !---#[ subroutine rescue_qp
+   subroutine     rescue_qp(vecs, scale2, amp, ampdef, amprot, ampres, ampresrot, prec, icheck, ok, h)
+      use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
+      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki_qp), dimension([%num_legs%], 4) :: vecs_qp
+      real(ki), dimension([%num_legs%], 4) :: vecsrot
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(1:4), intent(inout) :: amp
+      real(ki), dimension(1:4), intent(out) :: ampdef
+      real(ki), dimension(1:4), intent(in) :: amprot
+      real(ki), dimension(1:4), intent(out) :: ampres
+      real(ki), dimension(1:4), intent(out) :: ampresrot
+      real(ki_qp), dimension(1:4) :: amp_qp, amprot_qp
+      real(ki_qp) :: scale2_qp, rat2_qp
+      real(ki) :: rat2, angle
+      integer, intent(inout) :: prec
+      integer, intent(inout) :: icheck
+      logical, intent(inout), optional :: ok
+      integer, intent(in), optional :: h
+      integer spprec1, fpprec1, spprec2, fpprec2
+      integer tmp_red_int, irot
+      ampdef=amp ! store amp, will be updated by rescue system
+      ampres=0.0_ki
+      ampresrot=0.0_ki
+      angle = 1.234_ki
+      tmp_red_int = reduction_interoperation
+      reduction_interoperation = reduction_interoperation_rescue
+      !******************************************************************
+      !   Step 2 - double/double_rot do not agree to PSP_chk_th/li5 digits
+      !            compute quad
+      !******************************************************************
+      write(*,*) '--double does not agree with double_rot, computing quad--', amp(2), amprot(2) ! COMMENT
+      scale2_qp = real(scale2,ki_qp)
+      vecs_qp = vecs
+      call adjust_kinematics_qp(vecs_qp)
+      call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
+      ampres = real(amp_qp,ki)
+      amp=ampres ! update amplitude
+
+      !******************************************************************
+      !   Step 2a - check double vs quad, double_rot vs quad
+      !******************************************************************
+      if((ampdef(2)-amp(2)) .ne. 0.0_ki) then
+         fpprec1 = -int(log10(abs((ampdef(2)-amp(2))/((ampdef(2)+amp(2))/2.0_ki))))
+      endif
+      if((amprot(2)-amp(2)) .ne. 0.0_ki) then
+         fpprec2 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
+      endif[%
+      @if anymember PoleRotation PSP_chk_method ignore_case=true %]
+      icheck=1                                                       ! ACCEPTED
+      if(fpprec1.lt.PSP_chk_th4) icheck=3                            ! RESCUE
+      if(fpprec2.lt.PSP_chk_th4) icheck=3                            ! RESCUE[%
+      @else %]
+      icheck=1                                                       ! ACCEPTED
+      if(fpprec1.lt.PSP_chk_li4) icheck=3                            ! RESCUE
+      if(fpprec2.lt.PSP_chk_li4) icheck=3                            ! RESCUE[%
+      @end @if %]
+      prec = min(fpprec1,fpprec2)
+      if(icheck.eq.1) write(*,*) 'passed double/double_rot vs quad', amp(2), amprot(2), amp_qp(2), fpprec1, fpprec2, prec ! COMMENT
+      if(icheck.eq.3) write(*,*) 'failed double/double_rot vs quad', amp(2), amprot(2), amp_qp(2), fpprec1, fpprec2, prec ! COMMENT
+
+      !******************************************************************
+      !   Step 3 - double/double_rot do not agree with quad to
+      !            PSP_chk_li4 digits compute quad_rot
+      !******************************************************************
+      if(icheck.eq.3) then
+         scale2_qp = real(scale2,ki_qp)
+         do irot = 1,[%num_legs%]
+            vecsrot(irot,1) = vecs(irot,1)
+            vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
+            vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+            vecsrot(irot,4) = vecs(irot,4)
+         enddo
+         vecs_qp = vecsrot
+         call adjust_kinematics_qp(vecs_qp)
+         call samplitudel01_qp(vecs_qp, scale2_qp, amprot_qp, rat2_qp, ok, h)
+         ampresrot = real(amprot_qp,ki)
+         if((ampresrot(2)-amp(2)) .ne. 0.0_ki) then
+            fpprec1 = -int(log10(abs((ampresrot(2)-amp(2))/((ampresrot(2)+amp(2))/2.0_ki))))
+         else
+            fpprec1 = 16
+         endif[%
+         @if anymember PoleRotation PSP_chk_method ignore_case=true %]
+         icheck=1                                                       ! ACCEPTED
+         if(fpprec1.lt.PSP_chk_th5) icheck=3                            ! RESCUE[%
+         @else %]
+         icheck=1                                                       ! ACCEPTED
+         if(fpprec1.lt.PSP_chk_li5) icheck=3                            ! RESCUE[%
+         @end @if %]
+         prec = fpprec1
+         if(icheck.eq.1) write(*,*) 'passed quad vs quad_rot', amp(2), amprot(2), amp_qp(2), amprot_qp(2), prec ! COMMENT
+         if(icheck.eq.3) write(*,*) 'failed quad vs quad_rot', amp(2), amprot(2), amp_qp(2), amprot_qp(2), prec ! COMMENT
+      endif
+      reduction_interoperation = tmp_red_int
+   end subroutine rescue_qp
+   !---#] subroutine rescue_qp[%
+   @else %]
+
+   !---#[ subroutine rescue
+   subroutine     rescue(vecs, scale2, amp, ampdef, amprot, ampres, ampresrot, prec, icheck, ok, h)
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), intent(in) :: scale2
+      real(ki), dimension(1:4), intent(inout) :: amp
+      real(ki), dimension(1:4), intent(out) :: ampdef
+      real(ki), dimension(1:4), intent(in) :: amprot
+      real(ki), dimension(1:4), intent(out) :: ampres
+      real(ki), dimension(1:4), intent(out) :: ampresrot
+      real(ki) :: rat2, kfac, zero, angle
+      real(ki), dimension(2:3) :: irp
+      integer, intent(inout) :: prec
+      integer, intent(inout) :: icheck
+      logical, intent(inout), optional :: ok
+      integer, intent(in), optional :: h
+      integer spprec1, fpprec1, spprec2, fpprec2
+      integer tmp_red_int, i, irot
+      ! COMPUTE AMPLITUDE WITH reduction_interoperation_rescue
+      write(*,*) '--double does not agree with double_rot, computing with reduction_interoperation_rescue--', amp(2), amprot(2), reduction_interoperation, reduction_interoperation_rescue ! COMMENT
+      tmp_red_int = reduction_interoperation
+      reduction_interoperation = reduction_interoperation_rescue
+      ampdef=amp ! store amp, will be updated by rescue system
+      ampres=0.0_ki
+      ampresrot=0.0_ki
+      call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
+      amp=ampres
+      ! sets prec, icheck
+      call pole_check(vecs, scale2, amp, irp, prec, icheck, ok, h)
+      if(icheck.eq.2) then
+         ! sets ampresrot, prec, icheck
+         call rotation_check(vecs, scale2, amp, ampresrot, prec, icheck, ok, h)
+      endif
+      if(icheck.eq.1) write(*,*) 'passed rescue', amp(2), amprot(2), ampres(2), ampresrot(2), prec ! COMMENT
+      if(icheck.eq.3) write(*,*) 'failed rescue', amp(2), amprot(2), ampres(2), ampresrot(2), prec ! COMMENT
+      reduction_interoperation = reduction_interoperation_rescue
+   end subroutine rescue
+   !---#] subroutine rescue[%
+   @end @if extension quadruple %]
+
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, prec, ok, h)[%
 @if extension quadruple %]
-      ! use [% process_name asprefix=\_ %]kinematics, only: adjust_kinematics
-      use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
 @end @if extension quadruple %]
       implicit none
-      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs[%
-@if extension quadruple %]
-      real(ki_qp), dimension([%num_legs%], 4) :: vecs_qp[%
-@end @if extension quadruple %]
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), dimension([%num_legs%], 4) :: vecsrot
       real(ki), intent(in) :: scale2
-      real(ki), dimension(1:4), intent(out) :: amp[%
-@if extension quadruple %]
-      real(ki_qp), dimension(1:4) :: amp_qp, amprot_qp
-      real(ki_qp), dimension(2:3) :: irp_qp
-      real(ki_qp) :: scale2_qp, rat2_qp
-      real(ki), dimension(0:[% count particles massive %]) :: scales2[%
-@end @if extension quadruple %]
+      real(ki), dimension(1:4), intent(out) :: amp
       real(ki), dimension(1:4) :: ampdef, amprot, ampres, ampresrot
       real(ki) :: rat2, kfac, zero, angle
       real(ki), dimension(2:3) :: irp
@@ -373,349 +607,82 @@ contains
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       integer spprec1, fpprec1, spprec2, fpprec2
-      integer tmp_red_int, icheck, i, irot
+      integer icheck, i, irot
       ampdef=0.0_ki
       amprot=0.0_ki
       ampres=0.0_ki
       ampresrot=0.0_ki
-      icheck = 1
+      icheck=1[%
+      @if anymember PoleRotation PSP_chk_method ignore_case=true %]
+      icheck=1 ! do pole followed by rotation (PSP_chk_method=PoleRotation)[%
+      @end @if %][%
+      @if anymember LoopInduced PSP_chk_method ignore_case=true %]
+      icheck=1 ! do pole followed by rotation (PSP_chk_method=LoopInduced)[%
+      @end @if %][%
+      @if anymember Rotation PSP_chk_method ignore_case=true %]
+      icheck=2 ! do rotation in all cases (PSP_chk_method=Rotation)[%
+      @end @if %]
       angle = 1.234_ki
-      spprec1 = 18
-      spprec2 = 18
-      fpprec1 = 18
-      fpprec2 = 18[%
-@if extension quadruple %]
-      scales2(:) = (/0.0_ki[%
-@for particles massive %], &
-     &              [%mass%][%
-@end @for %]/)
-      tmp_red_int = reduction_interoperation
-      if(reduction_interoperation.eq.4) then
-         PSP_check=.true.
-         PSP_rescue=.true.
-         icheck = 3
-      else
-         call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
-         amp = ampdef
-      endif[%
-@else %]
-      if(reduction_interoperation.eq.reduction_interoperation_rescue) &
-           & PSP_rescue=.false.
-      tmp_red_int = reduction_interoperation
+      prec = 18
+      if(reduction_interoperation.eq.reduction_interoperation_rescue) then
+         write(*,*) '--reduction_interoperation is reduction_interoperation_rescue, disabling rescue--'! COMMENT
+         PSP_rescue=.false.
+      endif
       call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
-      amp = ampdef[%
-@end @if extension quadruple %]
+      amp = ampdef
       ! RESCUE SYSTEM
-      if(PSP_check) then[%
-              @if anymember PoleRotation PSP_chk_method ignore_case=true %][%
-@if extension quadruple %]
-         if(icheck.eq.1) then[%
-@end @if %]
-         call ir_subtraction(vecs, scale2, irp, h)
-         if((ampdef(3)-irp(2)) .ne. 0.0_ki) then
-            spprec1 = -int(log10(abs((ampdef(3)-irp(2))/irp(2))))
-         else
-            spprec1 = 16
+      if(PSP_check) then
+         if(icheck.eq.1) then
+            ! sets prec, icheck
+            call pole_check(vecs, scale2, amp, irp, prec, icheck, ok, h)
          endif
-         if(ampdef(1) .ne. 0.0_ki) then
-            kfac = abs(ampdef(2)/ampdef(1))
-         else
-            kfac = 0.0_ki
-         endif[%
-         @if extension quadruple %]
-         if(spprec1.lt.PSP_chk_th1) then                                       ! RESCUE
-            icheck=3
+         if(icheck.eq.2.or.(icheck.eq.3.and.PSP_rescue)) then
+            ! sets amprot, prec, icheck
+            call rotation_check(vecs, scale2, amp, amprot, prec, icheck, ok, h)
          endif
-         prec = min(spprec1,fpprec1)
-         endif ! end if(icheck.eq.1)[%
-         @else %]
-         if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
-              .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
-         if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
-            icheck=3
-            fpprec1=-10        ! Set -10 as finite part precision
-         endif[%
-         @end @if extension quadruple %][%
-         @elif anymember Rotation PSP_chk_method ignore_case=true %]
-         icheck=2 ! do rotation in all cases (PSP_chk_method=Rotation)[%
-         @else %][%
-         @if extension quadruple %]
-         if(icheck.eq.1) then[%
-         @end @if %]
-         ! CHECK ON THE POLE:
-         ! poles should be zero for loop-induced processes
-         if(ampdef(2) .ne. 0.0_ki .and. ampdef(3) .ne. 0.0_ki) then
-            spprec1 = -int(log10(abs((ampdef(3)/ampdef(2)))))
-         else
-            spprec1 = 18
-         endif
-         kfac = 0.0_ki[%
-         @if extension quadruple %]
-         ! If precision of the pole is below the desired one, discard or switch to quad (if PSP_rescue = .true.):
-         if(spprec1.lt.PSP_chk_li1) then                                       ! RESCUE
-            icheck=3
-            fpprec1=-10        ! Set -10 as finite part precision
-         endif
-         ! CHECK ON ROTATED AMPLITUDE (uncomment the following lines and comment the ones above for the check on the pole)
-         ! do irot = 1,[%num_legs%]
-         !    vecsrot(irot,1) = vecs(irot,1)
-         !    vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-         !    vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-         !    vecsrot(irot,4) = vecs(irot,4)
-         ! enddo
-         ! call adjust_kinematics(vecsrot)
-         ! call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
-         ! if((ampresrot(2)-ampdef(2)) .ne. 0.0_ki) then
-         !    fpprec1 = -int(log10(abs((ampresrot(2)-ampdef(2))/((ampresrot(2)+ampdef(2))/2.0_ki))))
-         ! else
-         !    fpprec1 = 16
-         ! endif
-         ! kfac = 0.0_ki
-         ! if(fpprec1.lt.PSP_chk_li2) then      ! RESCUE
-         !    icheck=3
-         !    fpprec1=-10        ! Set -10 as finite part precision
-         ! endif
-         prec = min(spprec1,fpprec1)
-         endif ! end if(icheck.eq.1)[%
-         @else %]
-         if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
-            icheck=2 ! ROTATION
-         end if
-         if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
-            icheck=3
-            fpprec1=-10        ! Set -10 as finite part precision
-         end if[%
-         @end @if extension quadruple %][%
-         @end @if %][%
-         @if extension quadruple %]
-         !****************************************
-         !   Step 1 - check double vs double_rot
-         !****************************************
-         if(icheck.eq.2) then
-            !write(*,*) '--double/quad rot test---'
-            do irot = 1,[%num_legs%]
-               vecsrot(irot,1) = vecs(irot,1)
-               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-               vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-               vecsrot(irot,4) = vecs(irot,4)
-            enddo
-            call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
-            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
-            else
-               fpprec1 = 16
-            endif[%
-            @if anymember PoleRotation PSP_chk_method ignore_case=true %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th5) icheck=3                            ! RESCUE[%
-            @else %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_li5) icheck=3                            ! RESCUE[%
-            @end @if %]
-
-            !if(icheck.eq.1) write(*,*) 'passed double vs double_rot', amp(2), amprot(2), fpprec1
-            !if(icheck.eq.3) write(*,*) 'failed double vs double_rot', amp(2), amprot(2), fpprec1
-         endif
-         prec = min(spprec1,fpprec1)
-
-         !******************************************************************
-         !   Step 2 - double/double_rot do not agree to PSP_chk_li5 digits
-         !            compute quad
-         !******************************************************************
-         if(icheck.eq.3.and.PSP_rescue) then
-            !write(*,*) 'double does not agree with double_rot, computing quad', amp(2), amprot(2)
-            icheck = 1
-            reduction_interoperation = reduction_interoperation_rescue
-            scale2_qp = real(scale2,ki_qp)
-            vecs_qp = vecs
-            call adjust_kinematics_qp(vecs_qp)
-            call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
-            call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)
-            ampres = real(amp_qp,ki)
-            irp = real(irp_qp,ki)
-            amp=ampres
-
-            !******************************************************************
-            !   Step 2a - check double vs quad, double_rot vs quad
-            !******************************************************************
-            if((ampdef(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec1 = -int(log10(abs((ampdef(2)-amp(2))/((ampdef(2)+amp(2))/2.0_ki))))
-            endif
-            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec2 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
-            endif[%
-            @if anymember PoleRotation PSP_chk_method ignore_case=true %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th6) icheck=3                            ! RESCUE
-            if(fpprec2.lt.PSP_chk_th6) icheck=3                            ! RESCUE[%
-            @else %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_li6) icheck=3                            ! RESCUE
-            if(fpprec2.lt.PSP_chk_li6) icheck=3                            ! RESCUE[%
-            @end @if %]
-
-            reduction_interoperation = tmp_red_int
-            prec = min(fpprec1,fpprec2)
-
-            !if(icheck.eq.1) write(*,*) 'passed double/double_rot vs quad', amp(2), amprot(2), amp_qp(2), fpprec1, fpprec2
-            !if(icheck.eq.3) write(*,*) 'failed double/double_rot vs quad', amp(2), amprot(2), amp_qp(2), fpprec1, fpprec2
-         endif
-
-         !******************************************************************
-         !   Step 3 - double/double_rot do not agree with quad to
-         !            PSP_chk_li6 digits compute quad_rot
-         !******************************************************************
-         if(icheck.eq.3.and.PSP_rescue) then
-            reduction_interoperation = reduction_interoperation_rescue
-            scale2_qp = real(scale2,ki_qp)
-            do irot = 1,[%num_legs%]
-               vecsrot(irot,1) = vecs(irot,1)
-               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-               vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-               vecsrot(irot,4) = vecs(irot,4)
-            enddo
-            vecs_qp = vecsrot
-            call adjust_kinematics_qp(vecs_qp)
-            call samplitudel01_qp(vecs_qp, scale2_qp, amprot_qp, rat2_qp, ok, h)
-            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec1 = -int(log10(abs((amprot_qp(2)-amp(2))/((amprot_qp(2)+amp(2))/2.0_ki))))
-            else
-               fpprec1 = 16
-            endif[%
-            @if anymember PoleRotation PSP_chk_method ignore_case=true %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th5) icheck=3                            ! RESCUE[%
-            @else %]
-            icheck=1                                                       ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_li5) icheck=3                            ! RESCUE[%
-            @end @if %]
-
-            reduction_interoperation = tmp_red_int
-            prec = fpprec1
-
-            !if(icheck.eq.1) write(*,*) 'passed quad vs quad_rot', amp(2), amprot(2), amp_qp(2), amprot_qp(2), fpprec1
-            !if(icheck.eq.3) write(*,*) 'failed quad vs quad_rot', amp(2), amprot(2), amp_qp(2), amprot_qp(2), fpprec1
-         endif
-
-         [% @else %]
-         if(icheck.eq.2) then
-            do irot = 1,[%num_legs%]
-               vecsrot(irot,1) = vecs(irot,1)
-               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-               vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-               vecsrot(irot,4) = vecs(irot,4)
-            enddo
-            call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
-            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
-            else
-               fpprec1 = 16
-            endif[%
-            @if anymember PoleRotation PSP_chk_method ignore_case=true %]
-            if(fpprec1.ge.PSP_chk_th3) icheck=1                            ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_th3) icheck=3                            ! RESCUE[%
-            @else %]
-            if(fpprec1.ge.PSP_chk_li3) icheck=1                            ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_li3) icheck=3                            ! RESCUE[%
-            @end @if %]
-         endif
-         prec = min(spprec1,fpprec1)[%
-         @end @if extension quadruple %]
-
          if(icheck.eq.3.and.PSP_rescue) then[%
-            @if extension quadruple %]
-            icheck = 1
-            reduction_interoperation = reduction_interoperation_rescue
-            scale2_qp = real(scale2,ki_qp)
-            vecs_qp = vecs
-            call adjust_kinematics_qp(vecs_qp)
-            call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
-            call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)
-            ampres = real(amp_qp,ki)
-            irp = real(irp_qp,ki)[%
-            @else %]
-            icheck=1
-            reduction_interoperation = reduction_interoperation_rescue
-            call samplitudel01(vecs, scale2, ampres, rat2, ok, h)[%
-            @end @if %]
-            amp=ampres[%
-            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
-            if((ampres(3)-irp(2)) .ne. 0.0_ki) then
-               spprec2 = -int(log10(abs((ampres(3)-irp(2))/irp(2))))
-            else
-               spprec2 = 16
-            endif
-            if(ampres(1) .ne. 0.0_ki) then
-               kfac = abs(ampres(2)/ampres(1))
-            else
-               kfac = 0.0_ki
-            endif
-            ! if(spprec2.lt.PSP_chk_th1.and.spprec2.ge.PSP_chk_th2 &
-            !      .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) icheck=2 ! ROTATION
-            ! if(spprec2.lt.PSP_chk_th2) then                                       ! DISCARD
-            if(spprec2.lt.PSP_chk_th3 &
-                 .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then ! DISCARD
-               icheck=3
-               fpprec2=-10        ! Set -10 as finite part precision
-            endif[%
-            @else %]
-            ! poles should be zero for loop-induced processes
-            if(ampres(2) .ne. 0.0_ki .and. ampres(3) .ne. 0.0_ki) then
-               spprec2 = -int(log10(abs(ampres(3)/ampres(2))))
-            else
-               spprec2 = 16
-            endif
-            kfac = 0.0_ki
-            if(spprec2.lt.PSP_chk_li4) then ! DISCARD
-               icheck=3
-               fpprec2=-10        ! Set -10 as finite part precision
-            endif[%
-            @end @if %]
-            ! if(icheck.eq.2) then
-            !    do irot = 1,[%num_legs%]
-            !       vecsrot(irot,1) = vecs(irot,1)
-            !       vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-            !       vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-            !       vecsrot(irot,4) = vecs(irot,4)
-            !    enddo
-            !    ! call adjust_kinematics(vecsrot)
-            !    call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
-            !    if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
-            !       fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
-            !    else
-            !       fpprec2 = 16
-            !    endif[%
-            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
-            !    if(fpprec2.ge.PSP_chk_th3) icheck=1                         ! ACCEPTED
-            !    if(fpprec2.lt.PSP_chk_th3) icheck=3                         ! DISCARD[%
-            @else %]
-            !    if(fpprec2.ge.PSP_chk_li3) icheck=1                         ! ACCEPTED
-            !    if(fpprec2.lt.PSP_chk_li3) icheck=3                         ! DISCARD[%
-            @end @if %]
-            ! endif
-            reduction_interoperation = tmp_red_int
-            prec = min(spprec2,fpprec2)
+         @if extension quadruple %]
+            ! sets amp, prec, icheck
+            call rescue_qp(vecs, scale2, amp, ampdef, amprot, ampres, ampresrot, prec, icheck, ok, h)[%
+         @else %]
+            ! sets amp, ampres, ampresrot, prec, icheck
+            call rescue(vecs, scale2, amp, ampdef, amprot, ampres, ampresrot, prec, icheck, ok, h)[%
+         @end @if extension quadruple %]
          endif
+
+         if(icheck.eq.3) then
+            ! RESCUE SYSTEM HAS FAILED
+            fpprec2=-10        ! Set -10 as finite part precision       ! DISCARD
+            prec=min(prec,fpprec2)
+         endif
+
+         if(icheck.eq.1) write(*,*) '--point passed--', amp(2), prec ! COMMENT
+         if(icheck.eq.3) write(*,*) '--point failed--', amp(2), prec ! COMMENT
 
          if(icheck.eq.3.and.PSP_verbosity) then
             write(42,'(2x,A7)')"<event>"
             write(42,'(4x,A15,A[% process_name asstringlength=\ %],A3)') &
                  &  "<process name='","[% process_name %]","'/>"[%
            @if anymember PoleRotation Rotation PSP_chk_method ignore_case=true %]
-            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A3)') &
+            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds th1='", PSP_chk_th1, &
                  &                "' th2='", PSP_chk_th2, &
-                 &                "' th3='", PSP_chk_th3,"'/>"[%
+                 &                "' th3='", PSP_chk_th3, &
+                 &                "' th4='", PSP_chk_th4, &
+                 &                "' th5='", PSP_chk_th5,"'/>"[%
            @else %]
-            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
+            write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds li1='", PSP_chk_li1, &
                  &                "' li2='", PSP_chk_li2, &
                  &                "' li3='", PSP_chk_li3, &
-                 &                "' li4='", PSP_chk_li4,"'/>"[% @end @if %]
+                 &                "' li4='", PSP_chk_li4, &
+                 &                "' li5='", PSP_chk_li5,"'/>"[%
+            @end @if %]
             write(42,'(4x,A16,D23.16,A3)') &
                  &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec1 sp='", spprec1, "' fp='", fpprec1, "'/>"
+
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec2 sp='", spprec2, "' fp='", fpprec2, "'/>"
             write(42,'(4x,A10,D23.16,A3)') &
@@ -723,7 +690,9 @@ contains
             write(42,'(4x,A10,D23.16,A3)') &
                  &  "<rat2 r2='", rat2, "'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
-                 &  "<amp       sp='", ampdef(3)   ,"' ir='", irp(2),"' fp='", ampdef(2)   ,"'/>"
+                 &  "<amp       sp='", amp(3)   ,"' ir='", irp(2),"' fp='", amp(2)   ,"'/>"
+            write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
+                 &  "<ampdef    sp='", ampdef(3)   ,"' ir='", irp(2),"' fp='", ampdef(2)   ,"'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &
                  &  "<amprot    sp='", amprot(3)   ,"' ir='", irp(2),"' fp='", amprot(2)   ,"'/>"
             write(42,'(4x,A15,D23.16,A6,D23.16,A6,D23.16,A3)') &

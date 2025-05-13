@@ -1163,11 +1163,14 @@ config_PSP_chk_th1 = Property(
     """\
    Sets the same variable in config.f90
 
-   Threshold to activate accept the point without further
-   treatments. The number has to be an integer indicating the
-   wished minimum number of digits accuracy on the pole. For poles
-   more precise than this threshold the finite part is not checked.
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the single pole. The number has to be 
+   an integer indicating the desired minimum number of digits 
+   accuracy on the single pole. For poles more precise than this 
+   threshold the finite part is not checked.
    !!Works only for QCD and with built-in model files!!
+   
+   The number has to be an integer.
    """,
     int,
     8,
@@ -1178,14 +1181,16 @@ config_PSP_chk_th2 = Property(
     """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based of the precision
-   of the pole.  Points with precision less than this threshold are
-   directly reprocessed with the rescue system (if available), or
-   declared as unstable. According to the verbosity level set, such
-   points are written to a file and not used when the code is
-   interfaced to an external Monte Carlo using the new BLHA
-   standards.
+   Threshold to declare a PSP as a bad point, based of the precision
+   of the single pole. Points with precision less than this 
+   threshold are directly reprocessed with the rescue system (if 
+   available), or declared as unstable. According to the verbosity 
+   level set, such points are written to a file and not used when 
+   the code is interfaced to an external Monte Carlo using the new 
+   BLHA standards.
    !!Works only for QCD and with built-in model files!!
+   
+   The number has to be an integer.
    """,
     int,
     3,
@@ -1196,15 +1201,37 @@ config_PSP_chk_th3 = Property(
     """\
    Sets the same variable in config.f90
 
-   Threshold to declare a PSP as bad point, based on the precision
-   of the finite part estimated with a rotation. According to the
-   verbosity level set, such points are written to a file and not
-   used when the code is interfaced to an external Monte Carlo
-   using the new BLHA standards.
+   Threshold to declare a PSP as a bad point, based on the precision
+   of the finite part estimated with a rotation. Points with 
+   precision less than this threshold are directly reprocessed 
+   with the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written 
+   to a file and not used when the code is interfaced to an 
+   external Monte Carlo using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
+   
+   The number has to be an integer.
    """,
     int,
     5,
+)
+
+config_PSP_chk_th4 = Property(
+    "PSP_chk_th4",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the finite part estimated by 
+   comparing the normal and rotated double precision 
+   evaluations against a quadruple precision evaluation.
+   !!Works only for QCD and with built-in model files!!
+   !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
+   """,
+    int,
+    10,
 )
 
 config_PSP_chk_th5 = Property(
@@ -1212,27 +1239,16 @@ config_PSP_chk_th5 = Property(
     """\
    Sets the same variable in config.f90
 
-   Threshold to recompute a PSP in quadruple precision, based on
-   the precision of the finite part estimated with a rotation.
-   !!Works only for QCD and with built-in model files!!
-   !!Used only for: extensions=quadruple!!
-   """,
-    int,
-    10,
-)
-
-config_PSP_chk_th6 = Property(
-    "PSP_chk_th6",
-    """\
-   Sets the same variable in config.f90
-
    Threshold to declare a quadruple precision PSP as a bad point,
-   based on the precision of the finite part estimated with a
-   rotation. According to the verbosity level set, such points
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated quadruple precision 
+   evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
    """,
     int,
     7,
@@ -1244,95 +1260,97 @@ config_PSP_chk_li1 = Property(
    Sets the same variable in config.f90. For loop-induced
    processes, it is used instead of PSP_chk_th1.
 
-   It is precision of the pole part (which should be zero) in
-   comparison to the finite part. If the pole part is at least
-   PSP_chk_li1 orders smaller than the finite part, the point is
-   accepted without any other check.
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the single pole (which should be 
+   zero). The number has to be an integer indicating the desired 
+   minimum number of digits  accuracy on the single pole. For 
+   poles more precise than this  threshold the finite part is 
+   not checked.
+   !!Works only for QCD and with built-in model files!!
 
    The number has to be an integer.
    """,
     int,
-    16,
+    8,
 )
 
 config_PSP_chk_li2 = Property(
     "PSP_chk_li2",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th2.
+   processes, it is used instead of PSP_chk_th1.
 
-   Threshold to declare a PSP as bad point, based of the precision
-   of the pole in comparison to the finite part. Points with
-   precision less than this threshold are directly reprocessed with
-   the rescue system (if available), or declared as unstable.
-   According to the verbosity level set, such points are written to
-   a file and not used when the code is interfaced to an external
-   Monte Carlo using the new BLHA standards.
+   Threshold to declare a PSP as a bad point, based of the precision
+   of the single pole. Points with precision less than this 
+   threshold are directly reprocessed with the rescue system (if 
+   available), or declared as unstable. According to the verbosity 
+   level set, such points are written to a file and not used when 
+   the code is interfaced to an external Monte Carlo using the new 
+   BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+
+   The number has to be an integer.
    """,
     int,
-    7,
+    3,
 )
 
 config_PSP_chk_li3 = Property(
     "PSP_chk_li3",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th3.
+   processes, it is used instead of PSP_chk_th1.
 
-   Threshold to declare a PSP as bad point, based on the precision
-   of the finite part estimated with a rotation. Points with
-   precision less than this threshold are reprocessed with the
-   rescue system (if available) or declared as unstable.  According
-   to the verbosity level set, such points are written to a file
-   and not used when the code is interfaced to an external Monte
-   Carlo using the new BLHA standards.
+   Threshold to declare a PSP as a bad point, based on the precision
+   of the finite part estimated with a rotation. Points with 
+   precision less than this threshold are directly reprocessed 
+   with the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written 
+   to a file and not used when the code is interfaced to an 
+   external Monte Carlo using the new BLHA standards.
+   !!Works only for QCD and with built-in model files!!
+
+   The number has to be an integer.
    """,
     int,
-    6,
+    5,
 )
 
 config_PSP_chk_li4 = Property(
     "PSP_chk_li4",
     """\
-   Sets the same variable in config.f90. Similar to PSP_chk_li2,
-   but for the rescue system (by default Golem95).
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th1.
 
-   Threshold to declare a PSP as bad point in the rescue system,
-   based on the precision of the pole part in comparison to the
-   finite part. According to the verbosity level set, such points
-   are written to a file and not used when the code is interfaced
-   to an external Monte Carlo using the new BLHA standards.
-   """,
-    int,
-    19,
-)
-
-config_PSP_chk_li5 = Property(
-    "PSP_chk_li5",
-    """\
-   Sets the same variable in config.f90
-
-   Threshold to recompute a PSP in quadruple precision, based on
-   the precision of the finite part estimated with a rotation.
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the finite part estimated by 
+   comparing the normal and rotated double precision 
+   evaluations against a quadruple precision evaluation.
    !!Works only for QCD and with built-in model files!!
    !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
    """,
     int,
     10,
 )
 
-config_PSP_chk_li6 = Property(
-    "PSP_chk_li6",
+config_PSP_chk_li5 = Property(
+    "PSP_chk_li5",
     """\
-   Sets the same variable in config.f90
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th1.
 
    Threshold to declare a quadruple precision PSP as a bad point,
-   based on the precision of the finite part estimated with a
-   rotation. According to the verbosity level set, such points
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated quadruple precision 
+   evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
    !!Works only for QCD and with built-in model files!!
    !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
    """,
     int,
     7,
@@ -1624,15 +1642,14 @@ properties = [
     config_PSP_chk_th1,
     config_PSP_chk_th2,
     config_PSP_chk_th3,
+    config_PSP_chk_th4,
     config_PSP_chk_th5,
-    config_PSP_chk_th6,
     config_PSP_chk_kfactor,
     config_PSP_chk_li1,
     config_PSP_chk_li2,
     config_PSP_chk_li3,
     config_PSP_chk_li4,
     config_PSP_chk_li5,
-    config_PSP_chk_li6,
     config_PSP_chk_method,
     reference_vectors,
     abbrev_color,
