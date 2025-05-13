@@ -483,7 +483,7 @@ contains
       vecs(:,3) = real(momenta(3::5),ki)
       vecs(:,4) = real(momenta(4::5),ki)
 
-      [% @if eval ( cr.amplitudetype .ne. "scTree2" )
+      [% @if eval ( sp.num_in .eq. 2 .and. cr.amplitudetype .ne. "scTree2" )
       %]call boost_to_cms(vecs)[%
       @else
       %]! For whizard we need the spin correlated tree in the lab frame,

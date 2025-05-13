@@ -7,6 +7,8 @@ import golem
 import golem.util.tools
 import golem.installation
 
+from golem.util.config import GolemConfigError
+
 try:
     from multiprocess import Pool
 except ModuleNotFoundError:
@@ -363,80 +365,77 @@ def get_qgraf_power(conf):
     qcd_name = "QCD"
     qed_name = "QED"
 
-    if alpha_power is None:
-        if alphas_power is None:
-            # No powers are specified, ambiguous:
-            return []
-        else:
-            # Only alphas_power present:
-            try:
-                ipower = int(alphas_power)
-            except ValueError:
-                return []
-
-            if notreelevel:
-                treepower = "NONE"
+    if notreelevel:
+        if nolooplevel:
+            raise GolemConfigError("Neither tree or loop contributions are requested")
+        if correction_type == "QCD":
+            if alphas_power is not None:
+                qcd_tree_power = "NONE"
+                qcd_loop_power = int(alphas_power)
             else:
-                treepower = ipower
-
-            if correction_type == "QCD" and not nolooplevel:
-                if notreelevel:
-                    return [qcd_name, treepower, ipower]
-                else:
-                    return [qcd_name, treepower, ipower + 2]
-            elif correction_type == "EW" and not nolooplevel:
-                return [qcd_name, treepower, ipower]
-            elif nolooplevel:
-                return [qcd_name, treepower]
+                raise GolemConfigError("Requested QCD corrections without specifying strong coupling order")
+            if alpha_power is not None:
+                ew_tree_power = int(alpha_power)
+                ew_loop_power = int(alpha_power)
+            else:
+                ew_tree_power = None
+                ew_loop_power = None
+        elif correction_type == "EW":
+            if alpha_power is not None:
+                ew_tree_power = "NONE"
+                ew_loop_power = int(alpha_power)
+            else:
+                raise GolemConfigError("Requested QCD corrections without specifying strong coupling order")
+            if alphas_power is not None:
+                qcd_tree_power = int(alphas_power)
+                qcd_loop_power = int(alphas_power)
+            else:
+                qcd_tree_power = None
+                qcd_loop_power = None
+        else:
+            raise GolemConfigError(f"Unknown correction type {correction_type}")
     else:
-        if alphas_power is None:
-            # Only alpha_power present:
-            try:
-                ipower = int(alpha_power)
-            except ValueError:
-                return []
-
-            if notreelevel:
-                treepower = "NONE"
-            else:
-                treepower = ipower
-
-            if correction_type == "QCD" and not nolooplevel:
-                return [qed_name, treepower, ipower]
-            elif correction_type == "EW" and not nolooplevel:
-                return [qed_name, treepower, ipower + 2]
-            elif nolooplevel:
-                return [qcd_name, treepower]
+        if alphas_power is not None:
+            qcd_tree_power = int(alphas_power)
         else:
-            try:
-                iepower = int(alpha_power)
-                icpower = int(alphas_power)
-            except ValueError:
-                return []
+            qcd_tree_power = None
+        if alpha_power is not None:
+            ew_tree_power = int(alpha_power)
+        else:
+            ew_tree_power = None
+        if nolooplevel:
+            qcd_loop_power = None
+            ew_loop_power = None
+        else:
+            if correction_type == "EW":
+                if ew_tree_power is None:
+                    raise GolemConfigError("Requested EW corrections without specifying electroweak coupling order")
+                else:
+                    ew_loop_power = ew_tree_power + 2
+                qcd_loop_power = qcd_tree_power
+            elif correction_type == "QCD":
+                if qcd_tree_power is None:
+                    raise GolemConfigError("Requested QCD corrections without specifying strong coupling order")
+                else:
+                    qcd_loop_power = qcd_tree_power + 2
+                ew_loop_power = ew_tree_power
+            else:
+                raise GolemConfigError(f"Unknown correction type {correction_type}")
 
-            if correction_type == "QCD":
-                if notreelevel:
-                    treepower = "NONE"
-                else:
-                    treepower = icpower
-                if not nolooplevel:
-                    if notreelevel:
-                        return [qcd_name, treepower, icpower, qed_name, iepower, iepower]
-                    else:
-                        return [qcd_name, treepower, icpower + 2, qed_name, iepower, iepower]
-                else:
-                    return [qcd_name, treepower, qed_name, alpha_power]
-            elif correction_type == "EW" or correction_type == "QED":
-                if notreelevel:
-                    treepower = "NONE"
-                else:
-                    treepower = iepower
-                if not notreelevel:
-                    return [qed_name, treepower, iepower + 2, qcd_name, icpower, icpower]
-                else:
-                    return [qed_name, treepower, qcd_name, icpower]
+    if qcd_tree_power is not None:
+        qcd_powers = [qcd_name, qcd_tree_power]
+        if qcd_loop_power is not None:
+            qcd_powers.append(qcd_loop_power)
+    else:
+        qcd_powers = []
+    if ew_tree_power is not None:
+        ew_powers = [qed_name, ew_tree_power]
+        if ew_loop_power is not None:
+            ew_powers.append(ew_loop_power)
+    else:
+        ew_powers = []
 
-    return []
+    return [*qcd_powers, *ew_powers]
 
 
 def derive_zero_masses(model_path, slha_file, conf):

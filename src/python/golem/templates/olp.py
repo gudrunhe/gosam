@@ -32,6 +32,7 @@ class OLPTemplate(golem.util.parser.Template):
         index_name = self._setup_name("index", prefix + "index", opts)
         path_name = self._setup_name("path", prefix + "path", opts)
         name_name = self._setup_name("var", prefix + "$_", opts)
+        numin_name = self._setup_name("num_in", prefix + "num_in", opts)
         numlegs_name = self._setup_name("num_legs", prefix + "num_legs", opts)
         numhelis_name = self._setup_name("num_helicities", prefix + "num_helicities", opts)
         helsum_name = self._setup_name("helsum", prefix + "helsum", opts)
@@ -46,6 +47,7 @@ class OLPTemplate(golem.util.parser.Template):
             props[id_name] = int(subprocess)
             props[name_name] = str(subprocess)
             props[path_name] = subprocess.process_path
+            props[numin_name] = len(subprocess.p_ini)
             props[numlegs_name] = subprocess.num_legs
             props[numhelis_name] = subprocess.num_helicities
             props[helsum_name] = props.getBooleanProperty("helsum")

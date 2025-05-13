@@ -542,13 +542,14 @@ def workflow(conf):
 
     # Check for non-fatal incompatible configurations:
     orders = split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
-    powers = orders[0] if orders else []
+    if orders is None:
+        orders = []
 
-    if len(powers) == 2:
+    if all(len(p) == 2 for p in orders):
         generate_lo_diagrams = True
         generate_nlo_virt = False       
-    elif len(powers) == 3:
-        generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
+    elif all(len(p) == 3 for p in orders):
+        generate_lo_diagrams = not any(str(p[1]).strip().lower() == "none" for p in orders)
         generate_nlo_virt = True
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
@@ -784,7 +785,7 @@ def workflow(conf):
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
-        if ("ninja" not in ext) or ("golem95" in ext):
+        if ("ninja" not in conf["reduction_programs"]) or ("golem95" in conf["reduction_programs"]):
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
                 + "in association with ninja. Please select only ninja as reduction program by setting:\n"
