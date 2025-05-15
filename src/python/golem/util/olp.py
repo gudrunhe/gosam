@@ -8,6 +8,7 @@ import golem.util.tools
 import golem.installation
 
 from golem.util.config import GolemConfigError
+from golem.util.main_misc import fill_config
 
 try:
     from multiprocess import Pool
@@ -830,6 +831,8 @@ def process_order_file(
         # ---#] Select regularisation scheme:
     if "olp.massiveparticlescheme" in conf:
         logger.warning("UV-counterterms for massive particles are not " + "implemented yet.")
+
+    fill_config(conf)
 
     # ---#[ Iterate over subprocesses:
     subdivide = conf.getProperty("olp.subdivide", "no").lower() in ["yes", "true", "1"]

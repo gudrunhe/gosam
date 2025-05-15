@@ -489,14 +489,11 @@ def check_dont_overwrite(conf):
                 + "you need to remove the file %r in that directory." % consts.GOLEM_DIR_FILE_NAME
             )
 
-
-def workflow(conf):
+def fill_config(conf):
     """
-    Creates additional properties which determine the workflow
-    later in the program.
-
-    Also does some checks whether the combination of properties
-    makes sense.
+    Checks whether the combination of properties in the given config
+    makes sense and sets additional properties based on the given
+    ones.
 
     The additional properties are:
 
@@ -504,13 +501,9 @@ def workflow(conf):
     generate_lo_diagrams
     generate_eft_counterterms
     """
+
     ini = conf.getProperty(golem.properties.qgraf_in)
     fin = conf.getProperty(golem.properties.qgraf_out)
-    path = golem.util.tools.process_path(conf)
-
-    templates = conf.getProperty(golem.properties.template_path)
-    templates = os.path.expandvars(templates)
-    qgraf_options = conf.getProperty(golem.properties.qgraf_options)
 
     # Prepare a copy of the setup file in the property [% user.setup %]
     buf = io.StringIO()
@@ -547,27 +540,27 @@ def workflow(conf):
 
     if all(len(p) == 2 for p in orders):
         generate_lo_diagrams = True
-        generate_nlo_virt = False       
+        generate_nlo_virt = False
     elif all(len(p) == 3 for p in orders):
         generate_lo_diagrams = not any(str(p[1]).strip().lower() == "none" for p in orders)
         generate_nlo_virt = True
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
-    
+
     no_renorm = generate_nlo_virt and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""
     for p in ["renorm_beta",
-        "renorm_mqwf",
-        "renorm_decoupling",
-        "renorm_mqse",
-        "renorm_logs",
-        "renorm_gamma5",
-        "renorm_yukawa",
-        "renorm_eftwilson",
-        "renorm_ehc",
-        "MSbar_yukawa",
-        "use_MQSE"]:
+              "renorm_mqwf",
+              "renorm_decoupling",
+              "renorm_mqse",
+              "renorm_logs",
+              "renorm_gamma5",
+              "renorm_yukawa",
+              "renorm_eftwilson",
+              "renorm_ehc",
+              "MSbar_yukawa",
+              "use_MQSE"]:
         if conf.getBooleanProperty(p) and no_renorm:
             raise_warn = True
             warn_str = warn_str + ",\n" + p if warn_str else p
@@ -618,6 +611,7 @@ def workflow(conf):
         # model is a UFO and 'order_names' contain 'NP': Can use full EFT functionality
         pass
 
+
     if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
         raise GolemConfigError(
             "\nYou set both 'renorm_eftwilson' and 'renorm_ehc' to 'true'.\n"
@@ -627,13 +621,12 @@ def workflow(conf):
             + "effictive Higgs-gluon couplings like in the heavy-top limit.\n"
             + "This will probably cause some serious errors in your result,\n"
             + "so I will not let you do that, sorry.")
-    
+
     if not golem.installation.WITH_GOLEM:
         if 'golem95' in conf["reduction_programs"].split(","):
-            raise GolemConfigError("The configuration requests 'golem95' as reduction library," + 
-                                    "but GoSam was build without Golem. Please reinstall GoSam with support for Golem.")
-    # END: Check for incompatible configuration
-
+            raise GolemConfigError("The configuration requests 'golem95' as reduction library," +
+                                   "but GoSam was build without Golem. Please reinstall GoSam with support for Golem.")
+        # END: Check for incompatible configuration
 
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
@@ -646,21 +639,6 @@ def workflow(conf):
                 conf["gosam-auto-reduction.extensions"] = p + "," + conf["gosam-auto-reduction.extensions"]
             else:
                 conf["gosam-auto-reduction.extensions"] = p
-
-    # Check if path exists. If it doesn't, try to create it
-    if not os.path.exists(path):
-        try:
-            rp = os.path.relpath(path)
-            if not os.path.sep in rp:
-                os.mkdir(rp)
-                logger.warning("Process path %r created." % path)
-        except OSError as err:
-            raise GolemConfigError("Could not create process path: %r\r%s" % (path, err))
-
-    if not os.path.exists(path):
-        raise GolemConfigError("The process path does not exist: %r" % path)
-
-    check_dont_overwrite(conf)
 
     generate_counterterms = conf.getBooleanProperty("renorm") and generate_nlo_virt
 
@@ -677,10 +655,6 @@ def workflow(conf):
 
     if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":
         conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
-
-    # if ("onshell" not in qgraf_options) and ("offshell" not in qgraf_options):
-    # qgraf_options.append("onshell")
-    # conf[golem.properties.qgraf_options] = ",".join(qgraf_options)
 
     if generate_nlo_virt:
         # Check if a suitable extension for the reduction is available
@@ -720,7 +694,7 @@ def workflow(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    if conf["regularisation_scheme"] == "dred": 
+    if conf["regularisation_scheme"] == "dred":
         if not "dred" in ext:
             ext.append("dred")
     elif conf["regularisation_scheme"] == "cdr":
@@ -730,7 +704,7 @@ def workflow(conf):
         logger.warning("Unknown regularisation_scheme in config: %s -> dred is used." % str(conf["regularisation_scheme"]))
         ext.append("dred")
 
-    # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given 
+    # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
     # in config file (if present). The following behaviour is implemented:
     #
     # OLP  | config                       | result
@@ -768,7 +742,7 @@ def workflow(conf):
                 i = ext.index("cdr")
                 del ext[i]
                 if "dred" not in ext:
-                    ext.append("dred") 
+                    ext.append("dred")
         if ir_scheme_warn:
             logger.warning("OLP setting for IR regularisation scheme overrides config. Is now %s." % olpir)
 
@@ -780,7 +754,7 @@ def workflow(conf):
     if "cdr" in ext and conf.getProperty("r2") != "explicit":
         raise GolemConfigError(
                 "When using the CDR regularisation scheme, only explicit construction of the R2 terms is permitted. "
-                + "Please use DRED as regularisation scheme or switch to r2=explict." 
+                + "Please use DRED as regularisation scheme or switch to r2=explict."
             )
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
@@ -820,16 +794,36 @@ def workflow(conf):
 
     conf["extensions"] = ext
 
+    # debuging the diagsum property:
+    conf["debug_diagsum"] = False
+
+def workflow(conf):
+    """
+    Creates additional properties which determine the workflow
+    later in the program.
+    """
+    fill_config(conf)
+    check_dont_overwrite(conf)
+    path = golem.util.tools.process_path(conf)
+    # Check if path exists. If it doesn't, try to create it
+    if not os.path.exists(path):
+        try:
+            rp = os.path.relpath(path)
+            if not os.path.sep in rp:
+                os.mkdir(rp)
+                logger.warning("Process path %r created." % path)
+        except OSError as err:
+            raise GolemConfigError("Could not create process path: %r\r%s" % (path, err))
+
+    if not os.path.exists(path):
+        raise GolemConfigError("The process path does not exist: %r" % path)
+
     # the following commands will need to import 'model.py'
     # here we create it:
     golem.util.tools.prepare_model_files(conf)
 
     for prop in [golem.properties.zero, golem.properties.one]:
-        lst = conf.getProperty(prop)
         golem.util.tools.expand_parameter_list(prop, conf)
-
-    # debuging the diagsum property:
-    conf["debug_diagsum"] = False
 
 
 def run_analyzer(path, conf, in_particles, out_particles):
