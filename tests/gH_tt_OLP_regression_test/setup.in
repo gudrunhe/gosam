@@ -3,4 +3,3 @@ all_mandelstam=True
 symmetries=parity
 filter.lo=lambda d: d.vertices(H,T,Tbar)==1
 filter.nlo=lambda d: d.vertices(H,T,Tbar)==1
-convert_to_cdr=true

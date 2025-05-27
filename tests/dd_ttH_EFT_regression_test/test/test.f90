@@ -15,7 +15,7 @@ program test
    real(ki), dimension(5,4) :: vecs
    real(ki), dimension(0:7,0:3) :: amp, ref_amp
    real(ki), dimension(0:7,2:3) :: irp, ref_irp
-   integer, dimension(1:8) :: eftc
+   integer, dimension(0:7) :: eftc
 
    open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
    if(ierr .eq. 0) then
@@ -85,7 +85,7 @@ program test
    subroutine check_reference(amp, irp, ref_amp, ref_irp)
      implicit none
      integer, parameter :: logf = 27
-     integer, dimension(2,4) ::eftc, eft2
+     integer, dimension(2,4) ::eftc, eftc2
      integer :: ee, ee2, ii, jj, kk
      real(ki), dimension(0:7,0:3), intent(in) :: amp, ref_amp
      real(ki), dimension(0:7,2:3), intent(in) :: irp, ref_irp

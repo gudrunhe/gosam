@@ -1,4 +1,3 @@
 reduction_programs=ninja
 all_mandelstam=True
 symmetries=parity
-convert_to_cdr=true
