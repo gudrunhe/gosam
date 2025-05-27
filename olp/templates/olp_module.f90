@@ -29,8 +29,8 @@ contains
            & PSP_chk_th1 => PSP_chk_th1, &
            & PSP_chk_th2 => PSP_chk_th2, &
            & PSP_chk_th3 => PSP_chk_th3, &
+           & PSP_chk_th4 => PSP_chk_th4, &
            & PSP_chk_th5 => PSP_chk_th5, &
-           & PSP_chk_th6 => PSP_chk_th6, &
            & PSP_chk_kfactor => PSP_chk_kfactor[%
       @else %]
            & PSP_chk_li1 => PSP_chk_li1, &
@@ -101,8 +101,8 @@ contains
       ! PSP_chk_th1 = [% PSP_chk_th1 default=8 %]
       ! PSP_chk_th2 = [% PSP_chk_th2 default=3 %]
       ! PSP_chk_th3 = [% PSP_chk_th3 default=5 %]
-      ! PSP_chk_th5 = [% PSP_chk_th5 default=10 %]
-      ! PSP_chk_th6 = [% PSP_chk_th6 default=7 %]
+      ! PSP_chk_th4 = [% PSP_chk_th4 default=10 %]
+      ! PSP_chk_th5 = [% PSP_chk_th5 default=7 %]
       ! PSP_chk_kfactor = [% PSP_chk_kfactor default=10000.0d0 %][%
       @if internal OLP_BADPTSFILE_NUMBERING %]
       if(stage.lt.0) then[%

@@ -110,7 +110,7 @@
    integer :: logfile = 19
 
    ! Parameter determining the SMEFT counting
-   integer :: EFTcount = 3
+   integer :: EFTcount = 1
 
    !---#[ Renormalisation:
    ! Parameter to switch UV-Counterterms on or off
@@ -173,10 +173,10 @@
              true=.true.
              false=.false. %]
 
-   ! Switch mass counter terms for massive quarks on or off
+   ! Switch mass counter terms for massive quarks on or off (old way, only left for debugging)
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off
-   ! Do not modify directly, use renormalisation=0,1,2 instead.
+   ! Do not modify directly, use renormalisation=0,1,2,3,4 instead.
    real(ki) :: deltaOS = 1.0_ki
    !---#] Renormalisation:
 
@@ -228,11 +228,11 @@
    ! Number of good digits in virtual amplitude:[%
    @if generate_lo_diagrams %][% @else %]
    ! not used (tree-level not available):[% @end @if %]
-   integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
-   integer :: PSP_chk_th2 = [% PSP_chk_th2 %]
-   integer :: PSP_chk_th3 = [% PSP_chk_th3 %]
-   integer :: PSP_chk_th5 = [% PSP_chk_th5 %] ! digits required double vs double_rot OR quad vs quad_rot
-   integer :: PSP_chk_th6 = [% PSP_chk_th6 %] ! digits required double/double_rot vs quad
+   integer :: PSP_chk_th1 = [% PSP_chk_th1 %] ! pole-check (th1 < r => accept)
+   integer :: PSP_chk_th2 = [% PSP_chk_th2 %] ! pole-check (th2 < r < th1 => rotation, r < th2 => rescue)
+   integer :: PSP_chk_th3 = [% PSP_chk_th3 %] ! double/double rotation (th3 < r => accept, r < th3 => rescue)
+   integer :: PSP_chk_th4 = [% PSP_chk_th4 %] ! double/quad rotation (th4 < r => accept, r < th4 => discard) 
+   integer :: PSP_chk_th5 = [% PSP_chk_th5 %] ! quad/quad_rot rotation (th5 < r => accept, r < th5 => discard)
 
    real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
    [% @if generate_lo_diagrams %]
@@ -240,12 +240,11 @@
    @else %]
    ! used instead:[%
    @end @if %]
-   integer :: PSP_chk_li1 = [% PSP_chk_li1 %]
-   integer :: PSP_chk_li2 = [% PSP_chk_li2 %]
-   integer :: PSP_chk_li3 = [% PSP_chk_li3 %]
-   integer :: PSP_chk_li4 = [% PSP_chk_li4 %]
-   integer :: PSP_chk_li5 = [% PSP_chk_li5 %] ! digits required double vs double_rot OR quad vs quad_rot
-   integer :: PSP_chk_li6 = [% PSP_chk_li6 %] ! digits required double/double_rot vs quad
+   integer :: PSP_chk_li1 = [% PSP_chk_li1 %] ! pole-check (li1 < r => accept)
+   integer :: PSP_chk_li2 = [% PSP_chk_li2 %] ! pole-check (li2 < r < li1 => rotation, r < li2 => rescue)
+   integer :: PSP_chk_li3 = [% PSP_chk_li3 %] ! double/double rotation (li3 < r => accept, r < li3 => rescue)
+   integer :: PSP_chk_li4 = [% PSP_chk_li4 %] ! double/quad rotation (li4 < r => accept, r < li4 => discard)
+   integer :: PSP_chk_li5 = [% PSP_chk_li5 %] ! quad/quad_rot rotation (li5 < r => accept, r < li5 => discard)
 
 [%
 @if ewchoose %]
