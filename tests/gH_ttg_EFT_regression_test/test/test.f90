@@ -17,7 +17,8 @@ program test
    real(ki), dimension(0:7) :: amp, ref_amp
    real(ki), dimension(0:7,10) :: ampcc, ref_ampcc
    real(ki), dimension(0:7,5,4,4) :: bmunu, ref_bmunu
-   
+   integer, dimension(0:7) :: eftc
+
    open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
    if(ierr .eq. 0) then
       call parse(10)
@@ -43,8 +44,10 @@ program test
 
       scale2 = (100._ki)**2
 
+      eftc = (/1,2,11,12,3,4,13,14/)
+
       do ee = 0, 7 
-         EFTcount = ee
+         EFTcount = eftc(ee)
          amp(ee) = samplitudel0(vecs)
          call OLP_color_correlated(vecs,ampcc(ee,:))
          call spin_correlated_lo2_whizard(vecs,bmunu(ee,:,:,:))
@@ -89,8 +92,8 @@ program test
    subroutine check_reference(amp, ampcc, bmunu, ref_amp, ref_ampcc, ref_bmunu)
      implicit none
      integer, parameter :: logf = 27
-     integer, dimension(2,4) ::eftc
-     integer :: ee, ii, jj, kk, iem, mu, nu
+     integer, dimension(2,4) ::eftc, eftc2
+     integer :: ee, ee2, ii, jj, kk, iem, mu, nu
      real(ki), dimension(0:7), intent(in) :: amp, ref_amp
      real(ki), dimension(0:7,10), intent(in) :: ampcc, ref_ampcc
      real(ki), dimension(0:7,5,4,4), intent(in) :: bmunu, ref_bmunu
@@ -99,8 +102,11 @@ program test
      logical :: success, isuccess
      character(33), dimension(0:7) :: truncations
      
+     ! NOTE: numbering of EFTcount options has changed since rev 3518ed0! 
      eftc(1,:) = (/0,1,4,5/)
      eftc(2,:) = (/2,3,6,7/)
+     eftc2(1,:) = (/1,2,3,4/)
+     eftc2(2,:) = (/11,12,13,14/)
 
      truncations = (/ &
           & "sigma(SM X SM) + sigma(SM X dim6)", &
@@ -135,17 +141,18 @@ program test
         do jj = 1, 4
            isuccess = .true.
            ee = eftc(ii,jj)
-           write(6,'(A18,I1,A2,A33,A1)') "Truncation option ", ee, " (", truncations(ee), ")"
-           write(logf,'(A18,I1,A2,A33,A1)') "Truncation option ", ee, " (", truncations(ee), ")"
+           ee2 = eftc2(ii,jj)
+           write(6,'(A18,I2,A2,A33,A1)') "Truncation option ", ee2, " (", truncations(ee), ")"
+           write(logf,'(A18,I2,A2,A33,A1)') "Truncation option ", ee2, " (", truncations(ee), ")"
            diff = 0._ki
            diff = abs(rel_diff(amp(ee),ref_amp(ee)))
            if(diff.gt.eps) then
-              write(6,'(A58,I1,A13,E13.7)') &
+              write(6,'(A58,I2,A13,E13.7)') &
                    & "Result 'amp' differs from reference for truncation option ", &
-                   & ee, ". rel_diff = ", diff
-              write(logf,'(A58,I1,A13,E13.7)') &
+                   & ee2, ". rel_diff = ", diff
+              write(logf,'(A58,I2,A13,E13.7)') &
                    & "Result 'amp' differs from reference for truncation option ", &
-                   & ee, ". rel_diff = ", diff
+                   & ee2, ". rel_diff = ", diff
               success = .false.
               isuccess = .false.
            end if
@@ -153,12 +160,12 @@ program test
               diff = 0._ki
               diff = abs(rel_diff(ampcc(ee,kk),ref_ampcc(ee,kk)))
               if(diff.gt.eps) then
-                 write(6,'(A60,I1,A8,I2,A13,E13.7)') &
+                 write(6,'(A60,I2,A8,I2,A13,E13.7)') &
                       & "Result 'ampcc' differs from reference for truncation option ", &
-                      & ee, ", entry ", kk, ". rel_diff = ", diff
-                 write(logf,'(A60,I1,A8,I2,A13,E13.7)') &
+                      & ee2, ", entry ", kk, ". rel_diff = ", diff
+                 write(logf,'(A60,I2,A8,I2,A13,E13.7)') &
                       & "Result 'ampcc' differs from reference for truncation option ", &
-                      & ee, ", entry ", kk, ". rel_diff = ", diff
+                      & ee2, ", entry ", kk, ". rel_diff = ", diff
                  success = .false.
                  isuccess = .false.
               end if
@@ -169,12 +176,12 @@ program test
                     diff = 0._ki
                     diff = abs(rel_diff(bmunu(ee,iem,mu,nu),ref_bmunu(ee,iem,mu,nu)))
                     if(diff.gt.eps) then
-                       write(6,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
+                       write(6,'(A60,I2,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
                             & "Result 'bmunu' differs from reference for truncation option ", &
-                            & ee, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
-                       write(logf,'(A60,I1,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
+                            & ee2, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
+                       write(logf,'(A60,I2,A10,I1,A9,I1,A1,I1,A14,E13.7)') &
                             & "Result 'bmunu' differs from reference for truncation option ", &
-                            & ee, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
+                            & ee2, ", emitter ", iem, ", entry (", mu, ",", nu, "). rel_diff = ", diff
                        success = .false.
                        isuccess = .false.
                     end if

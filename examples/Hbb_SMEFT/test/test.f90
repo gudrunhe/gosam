@@ -5,12 +5,12 @@ program test
 
    implicit none
    integer :: ievt, ierr, prec, ieft
-   integer, parameter, dimension(0:3) :: eftc = (/0,1,4,5/)
+   integer, parameter, dimension(0:4) :: eftc = (/0,1,2,3,4/)
    real(ki), dimension(3, 4) :: vecs
-   real(ki), dimension(0:3,0:3) :: gsres, refres, gsirp, diff
+   real(ki), dimension(0:4,0:3) :: gsres, refres, gsirp, diff
    real(ki) :: scale2, sqrts
    real(ki), parameter :: eps = 1.0e-10_ki
-   character(len=45), dimension(0:3) :: truncation_order
+   character(len=45), dimension(0:4) :: truncation_order, truncation_order2 
    
    ! log and output
    integer, parameter :: logf = 27
@@ -40,16 +40,23 @@ program test
    vecs(3,:) = (/mdlMH/2._ki,0._ki,0._ki,-sqrt(mdlMH**2/4._ki-mdlMQB**2)/)
 
    truncation_order = [character(len=45) :: &
+        & "Truncation order (SM x SM):", &
         & "Truncation order (SM x SM) + (SM x dim-6):", &
         & "Truncation order (SM + dim-6) x (SM + dim-6):", &
         & "Truncation order (SM x dim-6):", &
         & "Truncation order (dim-6 x dim-6):" ]
+   truncation_order2 = [character(len=45) :: &
+        & "truncation order (SM x SM):", &
+        & "truncation order (SM x SM) + (SM x dim-6):", &
+        & "truncation order (SM + dim-6) x (SM + dim-6):", &
+        & "truncation order (SM x dim-6):", &
+        & "truncation order (dim-6 x dim-6):" ]   
 
    gsres = 0._ki
    gsirp = 0._ki
    refres = 0._ki
    
-   do ieft = 0, 3
+   do ieft = 0, 4
       EFTcount = eftc(ieft)
       call samplitude(vecs, scale2, gsres(ieft,:), prec)
       call ir_subtraction(vecs,scale2, gsirp(ieft,2:3))
@@ -70,8 +77,8 @@ program test
       diff(ieft,:) = abs(rel_diff(gsres(ieft,:), refres(ieft,:)))
 
       if (any(diff(ieft,:) .gt. eps)) then
-         write(unit=logf,fmt="(A3,1x,A59)") "==>", &
-              & "Comparison of (SM x SM) + (SM x dim-6) (EFTcount=0) failed!"
+         write(unit=logf,fmt="(A3,1x,A13,1x,A45,1x,A7)") "==>", &
+              & "Comparison of", truncation_order(ieft), "failed!"
          write(unit=logf,fmt="((15x,A11,3(15x,A11)))") &
               & "Born       ", "finite part", "single pole", "double pole"
          write(unit=logf,fmt="((A12,4(3x,E23.16E3)))") &
@@ -158,15 +165,17 @@ subroutine analytic_amp(scale2,amp)
   
   select case(EFTcount)
   case(0)
-     amp = coeffSM + (mdlcbphi*coeffbphi + mdlcphiG*coeffphiG)*mdlLam
+     amp = coeffSM
   case(1)
+     amp = coeffSM + (mdlcbphi*coeffbphi + mdlcphiG*coeffphiG)*mdlLam
+  case(2)
      amp = coeffSM + (mdlcbphi*coeffbphi + mdlcphiG*coeffphiG)*mdlLam &
           & + (mdlcbphi*mdlcbphi*coeffbphibphi &
           & + mdlcbphi*mdlcphiG*coeffbphiphiG &
           & + mdlcphiG*mdlcphiG*coeffphiGphiG)*mdlLam**2
-  case(4)
+  case(3)
      amp = (mdlcbphi*coeffbphi + mdlcphiG*coeffphiG)*mdlLam
-  case(5)
+  case(4)
      amp = (mdlcbphi*mdlcbphi*coeffbphibphi &
           & + mdlcbphi*mdlcphiG*coeffbphiphiG &
           & + mdlcphiG*mdlcphiG*coeffphiGphiG)*mdlLam**2    

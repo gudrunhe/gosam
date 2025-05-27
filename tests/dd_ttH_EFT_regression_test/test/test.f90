@@ -15,7 +15,8 @@ program test
    real(ki), dimension(5,4) :: vecs
    real(ki), dimension(0:7,0:3) :: amp, ref_amp
    real(ki), dimension(0:7,2:3) :: irp, ref_irp
-   
+   integer, dimension(1:8) :: eftc
+
    open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
    if(ierr .eq. 0) then
       call parse(10)
@@ -41,8 +42,10 @@ program test
 
       scale2 = (100._ki)**2
 
+      eftc = (/1,2,11,12,3,4,13,14/)
+
       do ee = 0, 7 
-         EFTcount = ee
+         EFTcount = eftc(ee)
          call samplitude(vecs, scale2, amp(ee,:), prec)
          call ir_subtraction(vecs, scale2, irp(ee,:))
          !print *, amp(ee,:)
@@ -82,8 +85,8 @@ program test
    subroutine check_reference(amp, irp, ref_amp, ref_irp)
      implicit none
      integer, parameter :: logf = 27
-     integer, dimension(2,4) ::eftc
-     integer :: ee, ii, jj, kk
+     integer, dimension(2,4) ::eftc, eft2
+     integer :: ee, ee2, ii, jj, kk
      real(ki), dimension(0:7,0:3), intent(in) :: amp, ref_amp
      real(ki), dimension(0:7,2:3), intent(in) :: irp, ref_irp
      real(ki), parameter :: eps = 1e-7_ki
@@ -91,8 +94,11 @@ program test
      logical :: success, isuccess
      character(33), dimension(0:7) :: truncations
      
+     ! NOTE: numbering of EFTcount options has changed since rev 3518ed0! 
      eftc(1,:) = (/0,1,4,5/)
      eftc(2,:) = (/2,3,6,7/)
+     eftc2(1,:) = (/1,2,3,4/)
+     eftc2(2,:) = (/11,12,13,14/)
 
      truncations = (/ &
           & "sigma(SM X SM) + sigma(SM X dim6)", &
@@ -127,18 +133,19 @@ program test
         do jj = 1, 4
            isuccess = .true.
            ee = eftc(ii,jj)
-           write(6,'(A18,I1,A2,A33,A1)') "Truncation option ", ee, " (", truncations(ee), ")"
-           write(logf,'(A18,I1,A2,A33,A1)') "Truncation option ", ee, " (", truncations(ee), ")"
+           ee2 = eftc2(ii,jj)
+           write(6,'(A18,I2,A2,A33,A1)') "Truncation option ", ee2, " (", truncations(ee), ")"
+           write(logf,'(A18,I2,A2,A33,A1)') "Truncation option ", ee2, " (", truncations(ee), ")"
            do kk = 0, 3
              diff = 0._ki
              diff = abs(rel_diff(amp(ee,kk),ref_amp(ee,kk)))
              if(diff.gt.eps) then
-                write(6,'(A57,I1,A8,I2,A13,E13.7)') &
+                write(6,'(A57,I2,A8,I2,A13,E13.7)') &
                      & "Result 'amp' differs from reference for truncation option", &
-                     & ee, ", entry ", kk, ". rel_diff = ", diff
-                write(logf,'(A57,I1,A8,I2,A13,E13.7)') &
+                     & ee2, ", entry ", kk, ". rel_diff = ", diff
+                write(logf,'(A57,I2,A8,I2,A13,E13.7)') &
                      & "Result 'amp' differs from reference for truncation option", &
-                     & ee, ", entry ", kk, ". rel_diff = ", diff
+                     & ee2, ", entry ", kk, ". rel_diff = ", diff
                 success = .false.
                 isuccess = .false.
              end if
@@ -147,12 +154,12 @@ program test
              diff = 0._ki
              diff = abs(rel_diff(irp(ee,kk),ref_irp(ee,kk)))
              if(diff.gt.eps) then
-                write(6,'(A57,I1,A8,I2,A13,E13.7)') &
+                write(6,'(A57,I2,A8,I2,A13,E13.7)') &
                      & "Result 'irp' differs from reference for truncation option", &
-                     & ee, ", entry ", kk, ". rel_diff = ", diff
-                write(logf,'(A57,I1,A8,I2,A13,E13.7)') &
+                     & ee2, ", entry ", kk, ". rel_diff = ", diff
+                write(logf,'(A57,I2,A8,I2,A13,E13.7)') &
                      & "Result 'irp' differs from reference for truncation option", &
-                     & ee, ", entry ", kk, ". rel_diff = ", diff
+                     & ee2, ", entry ", kk, ". rel_diff = ", diff
                 success = .false.
                 isuccess = .false.
              end if

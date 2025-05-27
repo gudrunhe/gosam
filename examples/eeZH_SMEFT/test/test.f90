@@ -8,7 +8,7 @@ program test
    implicit none
    integer :: ievt, ierr, prec
    real(ki), dimension(4, 4) :: vecs
-   real(ki), dimension(0:3) :: amp, gsres, refres, diff
+   real(ki), dimension(0:4) :: amp, gsres, refres, diff
    real(ki) :: scale2, sqrts
    real(ki), parameter :: eps = 1.0e-10_ki
    
@@ -39,78 +39,96 @@ program test
 
    scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
-   ! (SM x SM) + (SM x dim-6)
+   ! (SM x SM)
    EFTcount = 0
    call samplitude(vecs, scale2, amp, prec)
    gsres(0) = amp(0)
    refres(0) = analytic_amp(vecs)
-   write(unit=6,fmt="(A42)") "Truncation order (SM x SM) + (SM x dim-6):"
+   write(unit=6,fmt="(A27)") "Truncation order (SM x SM):"
    write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
         & "GoSam:", gsres(0), &
         & "Analytical:", refres(0), &
         & "Ratio:", gsres(0)/refres(0)
 
-   ! (SM + dim-6) x (SM + dim-6)
+   ! (SM x SM) + (SM x dim-6)
    EFTcount = 1
    call samplitude(vecs, scale2, amp, prec)
    gsres(1) = amp(0)
    refres(1) = analytic_amp(vecs)
-   write(unit=6,fmt="(A45)") "Truncation order (SM + dim-6) x (SM + dim-6):"
+   write(unit=6,fmt="(A42)") "Truncation order (SM x SM) + (SM x dim-6):"
    write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
         & "GoSam:", gsres(1), &
         & "Analytical:", refres(1), &
         & "Ratio:", gsres(1)/refres(1)
 
-   ! (SM x dim-6)
-   EFTcount = 4
+   ! (SM + dim-6) x (SM + dim-6)
+   EFTcount = 2
    call samplitude(vecs, scale2, amp, prec)
    gsres(2) = amp(0)
    refres(2) = analytic_amp(vecs)
-   write(unit=6,fmt="(A30)") "Truncation order (SM x dim-6):"
+   write(unit=6,fmt="(A45)") "Truncation order (SM + dim-6) x (SM + dim-6):"
    write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
         & "GoSam:", gsres(2), &
         & "Analytical:", refres(2), &
-        & "Ratio:", gsres(2)/refres(2)   
-   
-   ! (dim-6) x (dim-6)
-   EFTcount = 5
+        & "Ratio:", gsres(2)/refres(2)
+
+   ! (SM x dim-6)
+   EFTcount = 3
    call samplitude(vecs, scale2, amp, prec)
    gsres(3) = amp(0)
    refres(3) = analytic_amp(vecs)
-   write(unit=6,fmt="(A33)") "Truncation order (dim-6 x dim-6):"
+   write(unit=6,fmt="(A30)") "Truncation order (SM x dim-6):"
    write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
         & "GoSam:", gsres(3), &
         & "Analytical:", refres(3), &
-        & "Ratio:", gsres(3)/refres(3)
+        & "Ratio:", gsres(3)/refres(3)   
+   
+   ! (dim-6) x (dim-6)
+   EFTcount = 4
+   call samplitude(vecs, scale2, amp, prec)
+   gsres(4) = amp(0)
+   refres(4) = analytic_amp(vecs)
+   write(unit=6,fmt="(A33)") "Truncation order (dim-6 x dim-6):"
+   write(unit=6,fmt="(A6,1x,E23.16E3,3x,A11,1x,E23.16E3,3x,A6,1x,F18.16,/)") &
+        & "GoSam:", gsres(4), &
+        & "Analytical:", refres(4), &
+        & "Ratio:", gsres(4)/refres(4)
 
    
    diff = abs(rel_diff(gsres, refres))
    
    if (diff(0) .gt. eps) then
       write(unit=logf,fmt="(A3,1x,A59)") "==>", &
-           & "Comparison of (SM x SM) + (SM x dim-6) (EFTcount=0) failed!"
+           & "Comparison of (SM x SM) (EFTcount=0) failed!"
       write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(0)
       success = .false.
    end if
 
    if (diff(1) .gt. eps) then
-      write(unit=logf,fmt="(A3,1x,A62)") "==>", &
-           & "Comparison of (SM + dim-6) x (SM + dim-6) (EFTcount=1) failed!"
+      write(unit=logf,fmt="(A3,1x,A59)") "==>", &
+           & "Comparison of (SM x SM) + (SM x dim-6) (EFTcount=1) failed!"
       write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(1)
       success = .false.
    end if
 
    if (diff(2) .gt. eps) then
-      write(unit=logf,fmt="(A3,1x,A47)") "==>", &
-           & "Comparison of (SM x dim-6) (EFTcount=4) failed!"
+      write(unit=logf,fmt="(A3,1x,A62)") "==>", &
+           & "Comparison of (SM + dim-6) x (SM + dim-6) (EFTcount=2) failed!"
       write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(2)
       success = .false.
    end if
 
    if (diff(3) .gt. eps) then
-      write(unit=logf,fmt="(A3,1x,A50)") "==>", &
-           & "Comparison of (dim-6) x (dim-6) (EFTcount) failed!"
+      write(unit=logf,fmt="(A3,1x,A47)") "==>", &
+           & "Comparison of (SM x dim-6) (EFTcount=3) failed!"
       write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(3)
+      success = .false.
+   end if
+
+   if (diff(4) .gt. eps) then
+      write(unit=logf,fmt="(A3,1x,A52)") "==>", &
+           & "Comparison of (dim-6) x (dim-6) (EFTcount=4) failed!"
+      write(unit=logf,fmt="(A10,1x,E10.4)") "DIFFERENCE:", diff(4)
       success = .false.
    end if
 
@@ -152,8 +170,10 @@ function analytic_amp(vecs) result(amp)
   
   select case(EFTcount)
   case(0)
-     amp = coeffSM + (mdlcHB*coeffHB + mdlcHW*coeffHW + mdlcHWB*coeffHWB)/mdlLambdaSMEFT**2
+     amp = coeffSM
   case(1)
+     amp = coeffSM + (mdlcHB*coeffHB + mdlcHW*coeffHW + mdlcHWB*coeffHWB)/mdlLambdaSMEFT**2
+  case(2)
      amp = coeffSM + (mdlcHB*coeffHB + mdlcHW*coeffHW + mdlcHWB*coeffHWB)/mdlLambdaSMEFT**2 &
           & + (mdlcHB*mdlcHB*coeffHBHB &
           & + mdlcHB*mdlcHW*coeffHBHW &
@@ -161,9 +181,9 @@ function analytic_amp(vecs) result(amp)
           & + mdlcHW*mdlcHW*coeffHWHW &
           & + mdlcHW*mdlcHWB*coeffHWHWB &
           & + mdlcHWB*mdlcHWB*coeffHWBHWB )/mdlLambdaSMEFT**4
-  case(4)
+  case(3)
      amp = (mdlcHB*coeffHB + mdlcHW*coeffHW + mdlcHWB*coeffHWB)/mdlLambdaSMEFT**2
-  case(5)
+  case(4)
      amp = (mdlcHB*mdlcHB*coeffHBHB &
           & + mdlcHB*mdlcHW*coeffHBHW &
           & + mdlcHB*mdlcHWB*coeffHBHWB &
