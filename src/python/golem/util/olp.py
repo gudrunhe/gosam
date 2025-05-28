@@ -646,6 +646,17 @@ def process_order_file(
     conf = golem.util.config.Properties()
     conf += default_conf
 
+    try:
+        config_ir_scheme = default_conf["regularisation_scheme"].upper()
+    except AttributeError:
+        config_ir_scheme = None
+
+    ext_ir_scheme = None
+    if "dred" in default_conf["extensions"]:
+        ext_ir_scheme = "DRED"
+    elif "cdr" in default_conf["extensions"]:
+        ext_ir_scheme = "CDR"
+
     if "olp_process_name" in opts:
         olp_process_name = opts["olp_process_name"].strip().lower()
     else:
@@ -813,21 +824,76 @@ def process_order_file(
         # ---#] Setup couplings :
         # ---#[ Select regularisation scheme:
         for lconf in [conf] + subprocesses_conf:
+
+            # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
+            # in config file (if present). The following behaviour is implemented:
+            #
+            # OLP  | config (from e.g. golem.in) | result
+            # -----------------------------------------------------------------------
+            # CDR  | None                         | "dred" + "convert_to_cdr = True"
+            # CDR  | regularisation_scheme=cdr    | "cdr"  + "convert_to_cdr = False" 
+            # CDR  | cdr in extensions            | "cdr"  + "convert_to_cdr = False"
+            # DRED | None                         | "dred" + "convert_to_cdr = False"
+            # DRED | regularisation_scheme=dred   | "dred" + "convert_to_cdr = False"
+            # DRED | dred in extensions           | "dred" + "convert_to_cdr = False"
+            # DRED | convert_to_cdr=True          | "dred" + "convert_to_cdr = True"
+            # 
+            #
+            # In case of mismatch execution is terminated.
+            #
+            # OLP  | config (from e.g. golem.in) | result
+            # -----------------------------------------------------------------------
+            # CDR  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
+            # CDR  | dred in extensions           | mismatch -> ERROR (terminate)
+            # DRED | regularisation_scheme=cdr    | mismatch -> ERROR (terminate)
+            # DRED | cdr in extensions            | mismatch -> ERROR (terminate)
+
             ir_scheme = lconf["olp.irregularisation"]
             ext = lconf.getListProperty(golem.properties.extensions)
             uext = [s.upper() for s in ext]
+
+            mismatch_schemes = [False, None]
+
             if ir_scheme == "DRED":
+                if config_ir_scheme != None:
+                    if config_ir_scheme != "DRED":
+                        mismatch_schemes = [True, config_ir_scheme]
+                if ext_ir_scheme != None:
+                    if ext_ir_scheme != "DRED":
+                        mismatch_schemes = [True, ext_ir_scheme]
                 if "DRED" not in uext:
                     lconf["olp." + str(golem.properties.extensions)] = "DRED"
-            if ir_scheme == "CDR" or ir_scheme == "tHV":
-                if "CDR" not in uext:
-                    lconf["olp." + str(golem.properties.extensions)] = "CDR"
+            elif ir_scheme == "CDR" or ir_scheme == "tHV":
+                if config_ir_scheme == None and ext_ir_scheme == None:
+                    if "DRED" not in uext:
+                        lconf["olp." + str(golem.properties.extensions)] = "DRED"
+                    lconf["convert_to_cdr"] = True   
+                elif config_ir_scheme != None:
+                    if config_ir_scheme != "CDR":
+                        mismatch_schemes = [True, config_ir_scheme]
+                    else:
+                        if "CDR" not in uext:
+                            lconf["olp." + str(golem.properties.extensions)] = "CDR"
+                        lconf["convert_to_cdr"] = False
+                elif ext_ir_scheme != None:
+                    if ext_ir_scheme != "CDR":
+                        mismatch_schemes = [True, ext_ir_scheme]
+                    else:
+                        if "CDR" not in uext:
+                            lconf["olp." + str(golem.properties.extensions)] = "CDR"
+                        lconf["convert_to_cdr"] = False
+
             else:
-                if "DRED" in uext:
-                    i = uext.index("DRED")
-                    logger.warning(("'%s' removed from extensions. " % ext[i]) + "Inconsistent with order file")
-                    del ext[i]
-                    lconf[golem.properties.extensions] = ",".join(ext)
+                logger.critical("BLHA-file does not specify IRregularisation!")
+                sys.exit("GoSam terminated due to an error")
+
+            if mismatch_schemes[0]:
+                logger.critical(
+                    "IR regularisation scheme specified in BLHA-file conflicts with " \
+                    "scheme specified in config file(s)\n %r:\n %r vs. %r" \
+                            % (default_conf["extra_setup-file"],ir_scheme,mismatch_schemes[1]))
+                sys.exit("GoSam terminated due to an error")
+
         # ---#] Select regularisation scheme:
     if "olp.massiveparticlescheme" in conf:
         logger.warning("UV-counterterms for massive particles are not " + "implemented yet.")

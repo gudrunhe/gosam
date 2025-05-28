@@ -116,7 +116,7 @@ def main(parser, argv=sys.argv):
 
     if cmd_args.generate_templates:
         if cmd_args.use_default_files:
-            defaults = find_config_files()
+            defaults, default_files = find_config_files()
         else:
             defaults = golem.util.config.Properties()
         if len(args) == 0:
@@ -143,7 +143,7 @@ def main(parser, argv=sys.argv):
         for arg in args:
             # need the full system configuration
             # settings can be overridden in the input file
-            c = find_config_files()
+            c, c_files = find_config_files()
 
             if os.path.exists(arg):
                 if not os.path.isfile(arg):

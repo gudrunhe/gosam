@@ -233,6 +233,7 @@ def find_config_files():
     props = golem.util.config.Properties()
     directories = [os.getcwd()]
     files = [".gosam", ".golem", "gosam.in", "golem.in", "gosam.conf", "golem.conf"]
+    files_found = []
     avail_props = list(map(str, [p for p in golem.properties.properties]))
     for dir in directories:
         for file in files:
@@ -241,11 +242,12 @@ def find_config_files():
                 try:
                     with open(full_name, "r") as f:
                         props.load(f, avail_props)
+                    files_found.append(os.path.abspath(file))
                 except GolemConfigError as err:
                     logger.critical("Configuration file is not sound:" + str(err))
                     sys.exit("GoSam terminated due to an error")
     props.setProperty("pkg_config_path", os.path.join(LIB_DIR, "pkgconfig"))
-    return props
+    return props, files_found
 
 
 def write_template_file(fname, defaults, format=None):
@@ -703,48 +705,6 @@ def fill_config(conf):
     else:
         logger.warning("Unknown regularisation_scheme in config: %s -> dred is used." % str(conf["regularisation_scheme"]))
         ext.append("dred")
-
-    # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
-    # in config file (if present). The following behaviour is implemented:
-    #
-    # OLP  | config                       | result
-    # -----------------------------------------------------------------------
-    # CDR  | None                         | "dred" + "convert_to_cdr = True"
-    # CDR  | regularisation_scheme=dred   | "dred" + "convert_to_cdr = True"
-    # CDR  | regularisation_scheme=cdr    | "cdr"  + "convert_to_cdr = False" (only scenario with "real" cdr)
-    # CDR  | dred in extensions           | "dred" + "convert_to_cdr = True"
-    # CDR  | cdr in extensions            | "dred" + "convert_to_cdr = True"  (default for regularisation_scheme overwrites extensions)
-    # DRED | None                         | "dred" + "convert_to_cdr = False"
-    # DRED | regularisation_scheme=dred   | "dred" + "convert_to_cdr = False"
-    # DRED | regularisation_scheme=cdr    | "dred" + "convert_to_cdr = False"
-    # DRED | dred in extensions           | "dred" + "convert_to_cdr = False"
-    # DRED | cdr in extensions            | "dred" + "convert_to_cdr = False"
-
-    if conf["olp.extensions"] is not None:
-        ir_scheme_warn = False
-        if "CDR" in conf["olp.extensions"]:
-            olpir = "CDR"
-            if conf["regularisation_scheme"] == "dred" or "dred" in ext:
-                conf["convert_to_cdr"] = True
-            elif conf["regularisation_scheme"] == "cdr" or "cdr" in ext:
-                conf["convert_to_cdr"] = False
-            else:
-                # should never get here
-                sys.exit("GoSam terminated due to an error: neither dred nor cdr scheme!")
-        if "DRED" in conf["olp.extensions"]:
-            olpir = "DRED"
-            conf["convert_to_cdr"] = False
-            if conf["regularisation_scheme"] == "cdr":
-                ir_scheme_warn = True
-                conf["regularisation_scheme"] = "dred"
-            if "cdr" in ext:
-                ir_scheme_warn = True
-                i = ext.index("cdr")
-                del ext[i]
-                if "dred" not in ext:
-                    ext.append("dred")
-        if ir_scheme_warn:
-            logger.warning("OLP setting for IR regularisation scheme overrides config. Is now %s." % olpir)
 
     if "cdr" in ext and "dred" in ext:
         logger.warning("Incompatible settings between regularisation_scheme and extensions -> dred is used.")

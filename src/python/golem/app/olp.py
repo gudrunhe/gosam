@@ -126,7 +126,8 @@ def main(argv=sys.argv):
 
     defaults = []
     if not cmd_args.skip_default:
-        defaults.append(golem.util.main_misc.find_config_files())
+        default_c, default_files = golem.util.main_misc.find_config_files()
+        defaults.append(default_c)
 
     for fname in cmd_args.config_files:
         logger.info("Reading configuration file %s" % fname)
@@ -135,6 +136,7 @@ def main(argv=sys.argv):
             with open(fname, "r") as f:
                 cf.load(f)
             defaults.append(cf)
+            default_files.append(os.path.abspath(fname))
         except golem.util.config.GolemConfigError as ex:
             logger.critical("Configuration file %r could not be read: %s" % (fname, str(ex)))
             sys.exit("GoSam terminated due to an error")
@@ -150,6 +152,8 @@ def main(argv=sys.argv):
 
     default_conf = golem.util.config.Properties()
     props = golem.util.config.Properties()
+
+    default_conf["extra_setup-file"] = default_files
 
     ## This fills in the defaults where no option is given:
     for p in golem.properties.properties:
