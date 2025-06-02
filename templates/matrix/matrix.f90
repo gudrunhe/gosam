@@ -13,7 +13,7 @@
      & PSP_chk_kfactor, reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
      & PSP_chk_li5, &
-     & reduction_interoperation_rescue, convert_to_cdr, &
+     & reduction_interoperation_rescue, convert_to_thv, &
      & EFTcount
    use [% process_name asprefix=\_ %]kinematics, only: &
        in_helicities, symmetry_factor, num_legs, &
@@ -854,7 +854,7 @@ contains
       amp(2:4) = 0.0_ki[%
       @end @if%][%
 		@if generate_nlo_virt %]
-      if (convert_to_cdr) then
+      if (convert_to_thv) then
          ! Scheme conversion for infrared structure
          ! Reference:
          ! S. Catani, M. H. Seymour, Z. Trocsanyi,
@@ -2866,7 +2866,7 @@ contains
       amp(2:4) = 0.0_ki_qp[%
       @end @if%][%
 		@if generate_nlo_virt %]
-      if (convert_to_cdr) then
+      if (convert_to_thv) then
          ! Scheme conversion for infrared structure
          ! Reference:
          ! S. Catani, M. H. Seymour, Z. Trocsanyi,

@@ -696,26 +696,46 @@ def fill_config(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    if conf["regularisation_scheme"] == "dred":
-        if not "dred" in ext:
-            ext.append("dred")
-    elif conf["regularisation_scheme"] == "cdr":
-        if not "cdr" in ext:
-            ext.append("cdr")
-    else:
-        logger.warning("Unknown regularisation_scheme in config: %s -> dred is used." % str(conf["regularisation_scheme"]))
-        ext.append("dred")
+    # check consistency of regularisation schemes in setup file 
+    # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
+    if not conf["__OLP_MODE__"]:
+        mismatch_schemes = [False, None]
+    
+        if conf["regularisation_scheme"] == "dred":
+            if "thv" in ext:
+                mismatch_schemes = [True, "thv"]
+            if not "dred" in ext:
+                ext.append("dred")
+        elif conf["regularisation_scheme"] == "thv":
+            if "dred" in ext:
+                mismatch_schemes = [True, "dred"]
+            if not "thv" in ext:
+                ext.append("thv")
+        else:
+            logger.critical(
+                    "Unknown regularisation_scheme in config: %s" % str(conf["regularisation_scheme"])
+                )
+            sys.exit("GoSam terminated due to an error")
+    
+        if mismatch_schemes[0]:
+            logger.critical(
+                    "Incompatible settings between regularisation_scheme and extensions: "
+                    + "%r vs. %r" % (conf["regularisation_scheme"],mismatch_schemes[1])
+                )
+            sys.exit("GoSam terminated due to an error")
+    
+        if "thv" in ext and "dred" in ext:
+            logger.critical(
+                    "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
+                )
+            sys.exit("GoSam terminated due to an error")
 
-    if "cdr" in ext and "dred" in ext:
-        logger.warning("Incompatible settings between regularisation_scheme and extensions -> dred is used.")
-        i = ext.index("cdr")
-        del ext[i]
-
-    if "cdr" in ext and conf.getProperty("r2") != "explicit":
-        raise GolemConfigError(
-                "When using the CDR regularisation scheme, only explicit construction of the R2 terms is permitted. "
+    if "thv" in ext and conf.getProperty("r2") != "explicit":
+        logger.critical(
+                "When using the tHV regularisation scheme, only explicit construction of the R2 terms is permitted. "
                 + "Please use DRED as regularisation scheme or switch to r2=explict."
             )
+        sys.exit("GoSam terminated due to an error")
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:

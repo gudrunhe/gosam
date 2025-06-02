@@ -506,23 +506,24 @@ formopt_level = Property(
 regularisation_scheme = Property(
     "regularisation_scheme",
     """\
-         Sets the used regularisation scheme.
-         Possible values: dred (recommended), cdr
+         Sets the used regularisation scheme, dimensional reduction (DRED) 
+         or t'Hooft-Veltman (tHV).
+         Possible values: dred (recommended), thv
       """,
     str,
     "dred",
-    options=["dred", "cdr"],
+    options=["dred", "thv"],
 )
 
-config_convert_to_cdr = Property(
-    "convert_to_cdr",
+config_convert_to_thv = Property(
+    "convert_to_thv",
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the conversion of the result into the CDR
-   regularisation scheme, when the calculation has been performed in DRED.
+   Activates or disables the conversion of the result into the t'Hooft-Veltman 
+   (tHV) regularisation scheme, when the calculation has been performed in DRED.
 
-   Does not have an effect when CDR is picked as regularisation scheme in
+   Does not have an effect when tHV is picked as regularisation scheme in
    extensions or via property 'regularisation_scheme'.
 
    """,
@@ -570,7 +571,7 @@ extensions = Property(
    golem95      --- Use the golem95 reduction library (only when
                     enabled during setup step of GoSam installation).
    dred         --- Use DRED as IR regularisation scheme (default).
-   cdr          --- Use CDR as IR regularisation scheme.
+   thv          --- Use tHV as IR regularisation scheme.
    numpolvec    --- Evaluate polarisation vectors numerically (default).
    quadruple    --- Make a quadruple precision copy of the code (this
                     works only with ninja).
@@ -598,7 +599,7 @@ extensions = Property(
         "ninja",
         "golem95",
         "dred",
-        "cdr",
+        "thv",
         "numpolvec",
         "quadruple",
         "customspin2prop",
@@ -1602,7 +1603,7 @@ properties = [
     renorm,
     sum_helicities,
     regularisation_scheme,
-    config_convert_to_cdr,
+    config_convert_to_thv,
     helicities,
     qgraf_options,
     filter_particles,
@@ -1741,7 +1742,7 @@ def setInternals(conf):
     conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
     conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-    conf["__REGULARIZATION_HV__"] = "cdr" in extensions
+    conf["__REGULARIZATION_HV__"] = "thv" in extensions
 
     conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
     conf["__NUMPOLVEC__"] = "numpolvec" in extensions
@@ -1755,4 +1756,4 @@ def setInternals(conf):
     conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
     if not "__OLP_MODE__" in conf:
         conf["__OLP_MODE__"] = False
-    conf["__REQUIRE_FR5__"] = "cdr" in extensions
+    conf["__REQUIRE_FR5__"] = "thv" in extensions

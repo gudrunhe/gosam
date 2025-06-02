@@ -38,7 +38,7 @@ modelfile.write('   use config, only: ki')
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, EFTcount, reduction_interoperation, &\n')
 modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
-modelfile.write('   & nlo_prefactors, convert_to_cdr')[$
+modelfile.write('   & nlo_prefactors, convert_to_thv')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $]
 modelfile.write(', ewchoice')[$
@@ -156,8 +156,8 @@ modelfile.write("\n")
 modelfile.write("   write(unit,'(A1,1x,A26)') \"#\", \"--------- SETUP ---------\"\n")
 modelfile.write("   write(unit,'(A1,1x,A11,I2)') \"#\", \"EFTcount = \", EFTcount\n")
 modelfile.write("   write(unit,'(A1,1x,A18,I2)') \"#\", \"renormalisation = \", renormalisation\n")
-modelfile.write("   if(convert_to_cdr) then\n")
-modelfile.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"CDR\"\n")
+modelfile.write("   if(convert_to_thv) then\n")
+modelfile.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"tHV\"\n")
 modelfile.write("   else\n")
 modelfile.write("      write(unit,'(A1,1x,A9,A4)') \"#\", \"scheme = \", \"DRED\"\n")
 modelfile.write("   end if\n")
@@ -1420,7 +1420,7 @@ modelfile_qp.write('   use config, only: ki => ki_qp')
 modelfile_qp.write(', &\n')
 modelfile_qp.write('   & renormalisation, EFTcount, reduction_interoperation, &\n')
 modelfile_qp.write('   & reduction_interoperation_rescue, deltaOS, &\n')
-modelfile_qp.write('   & nlo_prefactors, convert_to_cdr')[$
+modelfile_qp.write('   & nlo_prefactors, convert_to_thv')[$
 @select modeltype @case sm smdiag sm_complex smdiag_complex smehc smdiagehc $][$
 @if ewchoose $]
 modelfile_qp.write(', ewchoice')[$
@@ -1530,8 +1530,8 @@ modelfile_qp.write("\n")
 modelfile_qp.write("   write(unit,'(A1,1x,A26)') \"#\", \"--------- SETUP ---------\"\n")
 modelfile_qp.write("   write(unit,'(A1,1x,A11,I2)') \"#\", \"EFTcount = \", EFTcount\n")
 modelfile_qp.write("   write(unit,'(A1,1x,A18,I2)') \"#\", \"renormalisation = \", renormalisation\n")
-modelfile_qp.write("   if(convert_to_cdr) then\n")
-modelfile_qp.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"CDR\"\n")
+modelfile_qp.write("   if(convert_to_thv) then\n")
+modelfile_qp.write("      write(unit,'(A1,1x,A9,A3)') \"#\", \"scheme = \", \"tHV\"\n")
 modelfile_qp.write("   else\n")
 modelfile_qp.write("      write(unit,'(A1,1x,A9,A4)') \"#\", \"scheme = \", \"DRED\"\n")
 modelfile_qp.write("   end if\n")

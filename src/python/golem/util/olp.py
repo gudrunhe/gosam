@@ -652,10 +652,25 @@ def process_order_file(
         config_ir_scheme = None
 
     ext_ir_scheme = None
+    if "dred" in default_conf["extensions"] and "thv" in default_conf["extensions"]:
+        logger.critical(
+                        "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
+                    )
+        sys.exit("GoSam terminated due to an error")
     if "dred" in default_conf["extensions"]:
         ext_ir_scheme = "DRED"
-    elif "cdr" in default_conf["extensions"]:
-        ext_ir_scheme = "CDR"
+    if "thv" in default_conf["extensions"]:
+        ext_ir_scheme = "THV"
+
+    # check consistency of regularisation schemes in setup file (if present)
+    if config_ir_scheme != None and ext_ir_scheme != None:
+        if config_ir_scheme != ext_ir_scheme:
+            logger.critical(
+                        "Incompatible settings between regularisation_scheme and extensions: "
+                        + "%r vs. %r" % (config_ir_scheme,ext_ir_scheme)
+                    )
+            sys.exit("GoSam terminated due to an error")
+
 
     if "olp_process_name" in opts:
         olp_process_name = opts["olp_process_name"].strip().lower()
@@ -830,68 +845,69 @@ def process_order_file(
             #
             # OLP  | config (from e.g. golem.in) | result
             # -----------------------------------------------------------------------
-            # CDR  | None                         | "dred" + "convert_to_cdr = True"
-            # CDR  | regularisation_scheme=cdr    | "cdr"  + "convert_to_cdr = False" 
-            # CDR  | cdr in extensions            | "cdr"  + "convert_to_cdr = False"
-            # DRED | None                         | "dred" + "convert_to_cdr = False"
-            # DRED | regularisation_scheme=dred   | "dred" + "convert_to_cdr = False"
-            # DRED | dred in extensions           | "dred" + "convert_to_cdr = False"
-            # DRED | convert_to_cdr=True          | "dred" + "convert_to_cdr = True"
+            # tHV  | None                         | "dred" + "convert_to_thv = True"
+            # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False" 
+            # tHV  | thv in extensions            | "thv"  + "convert_to_thv = False"
+            # DRED | None                         | "dred" + "convert_to_thv = False"
+            # DRED | regularisation_scheme=dred   | "dred" + "convert_to_thv = False"
+            # DRED | dred in extensions           | "dred" + "convert_to_thv = False"
+            # DRED | convert_to_thv=True          | "dred" + "convert_to_thv = True"
             # 
             #
             # In case of mismatch execution is terminated.
             #
             # OLP  | config (from e.g. golem.in) | result
             # -----------------------------------------------------------------------
-            # CDR  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
-            # CDR  | dred in extensions           | mismatch -> ERROR (terminate)
-            # DRED | regularisation_scheme=cdr    | mismatch -> ERROR (terminate)
-            # DRED | cdr in extensions            | mismatch -> ERROR (terminate)
+            # tHV  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
+            # tHV  | dred in extensions           | mismatch -> ERROR (terminate)
+            # DRED | regularisation_scheme=thv    | mismatch -> ERROR (terminate)
+            # DRED | thv in extensions            | mismatch -> ERROR (terminate)
 
-            ir_scheme = lconf["olp.irregularisation"]
+            ir_scheme = lconf["olp.irregularisation"].upper()
             ext = lconf.getListProperty(golem.properties.extensions)
             uext = [s.upper() for s in ext]
 
+            # check BLHA regularisation scheme vs regularisation_scheme or extensions in setup file (if present)
             mismatch_schemes = [False, None]
 
-            if ir_scheme == "DRED":
-                if config_ir_scheme != None:
-                    if config_ir_scheme != "DRED":
-                        mismatch_schemes = [True, config_ir_scheme]
-                if ext_ir_scheme != None:
-                    if ext_ir_scheme != "DRED":
-                        mismatch_schemes = [True, ext_ir_scheme]
-                if "DRED" not in uext:
-                    lconf["olp." + str(golem.properties.extensions)] = "DRED"
-            elif ir_scheme == "CDR" or ir_scheme == "tHV":
-                if config_ir_scheme == None and ext_ir_scheme == None:
-                    if "DRED" not in uext:
-                        lconf["olp." + str(golem.properties.extensions)] = "DRED"
-                    lconf["convert_to_cdr"] = True   
-                elif config_ir_scheme != None:
-                    if config_ir_scheme != "CDR":
-                        mismatch_schemes = [True, config_ir_scheme]
-                    else:
-                        if "CDR" not in uext:
-                            lconf["olp." + str(golem.properties.extensions)] = "CDR"
-                        lconf["convert_to_cdr"] = False
-                elif ext_ir_scheme != None:
-                    if ext_ir_scheme != "CDR":
-                        mismatch_schemes = [True, ext_ir_scheme]
-                    else:
-                        if "CDR" not in uext:
-                            lconf["olp." + str(golem.properties.extensions)] = "CDR"
-                        lconf["convert_to_cdr"] = False
+            if ir_scheme == "CDR":
+                logger.warning("GoSam results are returned in the t'Hooft-Veltman scheme,\n" \
+                "which differs from requested CDR scheme at O(eps). For \n"
+                "ordinary NLO calculations this should not be a problem.")
+                ir_scheme = "THV"
 
-            else:
-                logger.critical("BLHA-file does not specify IRregularisation!")
-                sys.exit("GoSam terminated due to an error")
+            if config_ir_scheme != None:
+                if config_ir_scheme != ir_scheme:
+                    mismatch_schemes = [True, config_ir_scheme]
+
+            if ext_ir_scheme != None:
+                if ext_ir_scheme != ir_scheme:
+                    mismatch_schemes = [True, ext_ir_scheme]
 
             if mismatch_schemes[0]:
                 logger.critical(
                     "IR regularisation scheme specified in BLHA-file conflicts with " \
                     "scheme specified in config file(s)\n %r:\n %r vs. %r" \
                             % (default_conf["extra_setup-file"],ir_scheme,mismatch_schemes[1]))
+                sys.exit("GoSam terminated due to an error")
+
+            # choose behaviour according to table above
+            if ir_scheme == "DRED":
+                if "DRED" not in uext:
+                    lconf["olp." + str(golem.properties.extensions)] = "DRED"
+            elif ir_scheme == "THV":
+                if config_ir_scheme == None and ext_ir_scheme == None:
+                    if "DRED" not in uext:
+                        lconf["olp." + str(golem.properties.extensions)] = "DRED"
+                    lconf["convert_to_thv"] = True   
+                else: 
+                    # at this point we can be sure that at least one of config_ir_scheme or 
+                    # ext_ir_scheme equal "tHV" because of the check above
+                    if "tHV" not in uext:
+                        lconf["olp." + str(golem.properties.extensions)] = "tHV"
+                    lconf["convert_to_thv"] = False
+            else:
+                logger.critical("BLHA-file does not specify IRregularisation!")
                 sys.exit("GoSam terminated due to an error")
 
         # ---#] Select regularisation scheme:

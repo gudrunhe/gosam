@@ -138,7 +138,7 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            ! Finite renormalisation for gamma5 in cdr
+            ! Finite renormalisation for gamma5 in tHV
             if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_0(scale2,  0)
@@ -204,7 +204,7 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            ! Finite renormalisation for gamma5 in cdr
+            ! Finite renormalisation for gamma5 in tHV
             if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_1(scale2,  0)
@@ -270,7 +270,7 @@ contains[%
      @if generate_ym_counterterms %]
      
             ! Yukawa coupling and quark mass renormalisation
-            ! Finite renormalisation for gamma5 in cdr
+            ! Finite renormalisation for gamma5 in tHV
             if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_2(scale2,  0)
@@ -348,7 +348,7 @@ contains[%
       @if generate_ym_counterterms %]
       
             ! Yukawa coupling and quark mass renormalisation
-            ! Finite renormalisation for gamma5 in cdr
+            ! Finite renormalisation for gamma5 in tHV
             if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct(scale2,  0)

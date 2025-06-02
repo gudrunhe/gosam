@@ -95,7 +95,7 @@
 
 subroutine  print_parameters(scale2)
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renormalisation, &
-        convert_to_cdr, reduction_interoperation, &
+        convert_to_thv, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    implicit none
@@ -106,8 +106,8 @@ subroutine  print_parameters(scale2)
    write(*,'(A1,1x,A26)') "#", "--------- SETUP ----------"
    write(*,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
 
-   if(convert_to_cdr) then
-      write(*,'(A1,1x,A9,A3)') "#", "scheme = ", "CDR"
+   if(convert_to_thv) then
+      write(*,'(A1,1x,A9,A3)') "#", "scheme = ", "tHV"
    else
       write(*,'(A1,1x,A9,A4)') "#", "scheme = ", "DRED"
    end if
