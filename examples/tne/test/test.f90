@@ -125,7 +125,7 @@ subroutine     setup_parameters()
    ! reduction_interoperation=0
 
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

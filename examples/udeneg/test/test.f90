@@ -114,7 +114,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use udeneg_config, only: renormalisation, convert_to_cdr !, &
+   use udeneg_config, only: renormalisation, convert_to_thv !, &
    use udeneg_model, only: mW, wW, mZ, Nf, Nfgen, VUD, CVDU
    implicit none
 
@@ -131,7 +131,7 @@ subroutine     setup_parameters()
    Nf = 5
    Nfgen = 5
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

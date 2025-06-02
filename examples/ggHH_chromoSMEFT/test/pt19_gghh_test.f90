@@ -150,7 +150,7 @@ program test
 
 subroutine  print_parameters(scale2)
    use pt19_gghh_config, only: renormalisation, &
-        convert_to_cdr, reduction_interoperation, &
+        convert_to_thv, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
    use pt19_gghh_model
    implicit none

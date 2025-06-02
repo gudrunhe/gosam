@@ -117,7 +117,7 @@ subroutine     setup_parameters()
 
    renormalisation = 1
    renorm_logs = .true.
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 
    mT    = 171.2_ki
    Nf    = 5.0_ki

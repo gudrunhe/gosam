@@ -21,7 +21,7 @@ qgraf.verbatim=true=iprop[H,0,0];
 symmetries=family
 
 regularisation_scheme=dred
-convert_to_cdr=true
+convert_to_thv=true
 r2=implicit
 
 extensions=gaugecheck

@@ -116,7 +116,7 @@ subroutine     setup_parameters()
 
    renormalisation = 1
    renorm_logs = .true.
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 
    ! reduction_interoperation = 0
 

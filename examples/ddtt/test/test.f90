@@ -110,7 +110,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ddtt_config, only: renormalisation, convert_to_cdr !, &
+   use ddtt_config, only: renormalisation, convert_to_thv !, &
    use ddtt_model, only: Nf, Nfgen, mT
    implicit none
 
@@ -122,7 +122,7 @@ subroutine     setup_parameters()
    Nf    = 5.0_ki
    Nfgen = 1.0_ki
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

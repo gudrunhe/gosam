@@ -118,14 +118,14 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use graviton_config, only: renormalisation, convert_to_cdr , &
+   use graviton_config, only: renormalisation, convert_to_thv , &
              & nlo_prefactors !, &
    implicit none
 
    !renormalisation = 1
 
 
-   !convert_to_cdr = .false.
+   !convert_to_thv = .false.
    nlo_prefactors = 0
 
 end subroutine setup_parameters

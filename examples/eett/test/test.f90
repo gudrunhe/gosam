@@ -118,7 +118,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_cdr !, &
+   use eett_config, only: renormalisation, convert_to_thv !, &
        !      & reduction_interoperation
    use eett_model, only: Nf, Nfgen, mT, mZ, wZ, mW
    use analytic, only: include_Z
@@ -145,7 +145,7 @@ subroutine     setup_parameters()
 
    include_Z = .true.
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

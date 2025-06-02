@@ -121,14 +121,14 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use stop_config, only: renormalisation, convert_to_cdr , &
+   use stop_config, only: renormalisation, convert_to_thv , &
              & nlo_prefactors !, &
    implicit none
 
    renormalisation = 1
 
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
    nlo_prefactors = 2
 
 end subroutine setup_parameters

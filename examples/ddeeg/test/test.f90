@@ -164,7 +164,7 @@ subroutine     setup_parameters()
    Nf = 5.0_ki
    Nfgen = 5.0_ki
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

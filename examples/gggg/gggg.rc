@@ -18,4 +18,4 @@ helicities=++++
 filter.nlo= lambda d: not d.isScaleless()
 
 regularisation_scheme=dred
-convert_to_cdr=true
+convert_to_thv=true

@@ -110,7 +110,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use udene_config, only: renormalisation, convert_to_cdr!, &
+   use udene_config, only: renormalisation, convert_to_thv!, &
    !    & reduction_interoperation, &
    use udene_model, only: mdlWW, mdlGf, mdlaEWM1, mdlMZ, mdlaS
    implicit none
@@ -122,7 +122,7 @@ subroutine     setup_parameters()
    ! reduction_interoperation = 1
 
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
 
 
    pi = 4.0_ki * atan(1.0_ki)

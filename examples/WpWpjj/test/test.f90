@@ -126,7 +126,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use wpwpjj_config, only: renormalisation, convert_to_cdr !, &
+   use wpwpjj_config, only: renormalisation, convert_to_thv !, &
    use wpwpjj_model, only: Nf, Nfgen, mW, wW
    implicit none
 
@@ -138,7 +138,7 @@ subroutine     setup_parameters()
    Nf    = 5.0_ki
    Nfgen = 5.0_ki
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

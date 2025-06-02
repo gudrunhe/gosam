@@ -25,4 +25,4 @@ zero=mU,mD,me
 helicities=-+-++, -+-+-
 
 regularisation_scheme=dred
-convert_to_cdr=true
+convert_to_thv=true

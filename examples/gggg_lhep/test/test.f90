@@ -1,6 +1,6 @@
 program test
 use gggg_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams, &
-         & convert_to_cdr
+         & convert_to_thv
 use gggg_matrix, only: initgolem, exitgolem
 use gggg_kinematics, only: inspect_kinematics, init_event
 implicit none
@@ -124,7 +124,7 @@ subroutine     setup_parameters()
    ! We generated the process with no fermion loops 
    Nf    = 0.0_ki
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
 end subroutine setup_parameters
 
 subroutine     compute_golem_result(vecs, scale2, amp)

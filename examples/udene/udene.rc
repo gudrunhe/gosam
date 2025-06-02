@@ -25,6 +25,6 @@ one=gs,e
 helicities=+--+
 
 regularisation_scheme=dred
-convert_to_cdr=true
+convert_to_thv=true
 
 polvec=explicit

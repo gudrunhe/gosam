@@ -120,7 +120,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ggHg_config, only: renormalisation, convert_to_cdr !, &
+   use ggHg_config, only: renormalisation, convert_to_thv !, &
    use ggHg_model, only: GF, mH, mW, mZ, alpha, Nf, Nfgen, sqrt2, gH
    implicit none
    real(ki), parameter :: pi = 3.14159265358979323846264&
@@ -137,7 +137,7 @@ subroutine     setup_parameters()
    Nf    = 5
    Nfgen = 1
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

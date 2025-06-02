@@ -32,4 +32,4 @@ filter.particles=A:0,Z:0,U:0,C:0,S:0,B:0,H:0
 filter.nlo= lambda d: not d.isScaleless()
 
 regularisation_scheme=dred
-convert_to_cdr=true
+convert_to_thv=true
