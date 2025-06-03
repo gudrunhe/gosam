@@ -745,6 +745,8 @@ Other models can be imported most easily in the {\tt UFO} (Universal FeynRules O
 The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
 mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
 
+In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the {\tt UFO} format. See section~\ref{sec:EFT} for more details.
+
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
 
@@ -1237,6 +1239,81 @@ Furthermore, the following predefined filters exist:
 %% BLHA.tex is a separate file, was used for the version 1.0 manual
 \input{blha-guide}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{SMEFT and HEFT calculations with GoSam}
+\label{sec:EFT}
+
+
+\section{Truncation orders in SMEFT}
+SMEFT is an expansion in inverse powers of the scale of new physics $\Lambda$,
+\begin{align}
+   \mathcal{L} &= \mathcal{L}_\mathrm{SM} + \sum_{d>4}\sum_{i_d}\frac{C^d_{i_d}}{\Lambda^d}O^d_{i_d}\,,\label{eq:SMEFTLag}
+\end{align}
+where $d$ denotes the canonical dimension of the operators $O^d_{i_d}$, with corresponding Wilson coefficients $C^d_{i_d}$. In the following we will neglect $d=5$ terms\footnote{There are only two lepton-number-violating operators. Experimental findings suggest them to be extremely suppressed.} and truncate the SMEFT expansion at $d=6$ (dim-6). Any amplitude derived from the Lagrangian~(\ref{eq:SMEFTLag}) can then be written as
+\begin{align}
+   \mathcal{M}_i &= \mathcal{M}_i^{\mathrm{SM}} + \frac{\mathcal{M}_i^{6}}{\Lambda^2} \qquad i=\text{tree}\,,\text{1-loop}\,.
+\end{align}
+Physical quantities depend on the square of such amplitudes, which immediately raises the question of how to truncate such squares. Schematically for tree- and loop-induced processes,
+\begin{align}
+   \left|\mathcal{M}_i\right|^2 &= \left|\mathcal{M}_i^{\mathrm{SM}}\right|^2 + \frac{2\,\mathrm{Re}\left\{\mathcal{M}_i^{\mathrm{SM}\,\dagger}\mathcal{M}_i^{6}\right\}}{\Lambda^2} + \frac{\left|\mathcal{M}_i^{6}\right|^2}{\Lambda^4}\,.
+\end{align}
+For genuine 1-loop corrections it is understood that the square is actually an interference with the Born amplitude. The last term in above expression is technically of the same order in $\Lambda$ as an interference between a dim-4 (SM) and a dim-8 contribution. The latter is not included in the model (and won't be handled correctly by \gosam when doing so), so consequently the $\text{dim-6}^2$ term should be dropped in a consistent treatment. On the other hand however, only taking the $\Lambda^{-2}$ (linear) interference term into account can lead to negative cross-sections for certain pathological points in the EFT parameter space, which is purely an artifact of the truncation. For this reason it is sometimes desirable to keep the $\text{dim-6}^2$ (quadratic) term.
+
+\gosam enables to user to choose between different truncation options by setting \texttt{enable\_truncation\_orders=true} in the process card, provided the process setup and model used meet some requirements:
+\begin{itemize}
+   \item The model is provided in the UFO format.
+   \item The model's $d=6$ SMEFT couplings specify \texttt{NP=1} in their \texttt{order} attribute. Note that \texttt{NP} is the conventional name for BSM/new physics orders in the UFO format. Some SMEFT models might assign \texttt{NP=2} to the $d=6$ terms instead. In this case the user should adjust the model accordingly.
+   \item The \gosam process file has to specify the property \texttt{order\_names=NP}. Additional order names, like e.g. \texttt{QCD} or \texttt{QED} are optional.
+\end{itemize}
+The desired truncation order can be selected by means of the variable \texttt{EFTcount}. Possible values are shown in table~\ref{tab:EFTcount}
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{c|l|l}
+   \texttt{EFTcount} & truncation & \\
+\hline
+   0 & $\text{SM}^2$ & pure SM\\
+   1 & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
+   2 & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
+   3 & $\text{SM}\otimes\text{dim-6}$ & linear coefficient\\
+   4 & $\text{dim-6}^2$ & quadratic coefficient
+\end{tabular}
+\caption{Possible choices for the variable \texttt{EFTcount} and corresponding truncation. $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$.}
+\label{tab:EFTcount}
+\renewcommand{\arraystretch}{1.0}
+\end{table}
+
+A special remark has to be made about double, or in general multiple, insertions of dim-6 operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies as there is an intricate interplay between diagrams with multiple insertions of dim-6 operators and those diagrams with higher dimensional ($d>6$) operators which are technically of the same order. To avoid such problems and to set up a consistent SMEFT calculation the user should use the \python diagram filters to single out diagrams with at most one SMEFT vertex:
+\begin{lstlisting}[gobble=3,%
+     basicstyle=\ttfamily]
+1  filter.lo=lambda d: d.order('NP')<=1
+2  filter.nlo=lambda d: d.order('NP')<=1
+\end{lstlisting}
+
+
+\textcolor{red}{MH: Say something about loop counting? EFTcount options 11 through 14}
+
+
+%
+%
+%
+%
+% \begin{align}
+%    \left|\mathcal{M}_i\right|^2 &= \underbrace{\underbrace{\underbrace{\left|\mathcal{M}_i^{\mathrm{SM}}\right|^2}_{\texttt{EFTcount=0}} + \overbrace{\frac{2\,\mathrm{Re}\left\{\mathcal{M}_i^{\mathrm{SM}\,\dagger}\mathcal{M}_i^{6}\right\}}{\Lambda^2}}^{\texttt{EFTcount=3}}}_{\texttt{EFTcount=1}} + \overbrace{\frac{\left|\mathcal{M}_i^{6}\right|^2}{\Lambda^4}}^{\texttt{EFTcount=4}}}_{\texttt{EFTcount=2}}
+% \end{align}
+%
+% \begin{multline}
+%    2\,\mathrm{Re}\left\{\mathcal{M}_\mathrm{tree}^\dagger\,\mathcal{M}_\mathrm{1-loop}\right\} \\[5pt]
+%       = 2\,\mathrm{Re}\left\{\mathcal{M}_\mathrm{tree}^{\mathrm{SM}\,\dagger}\,\mathcal{M}_\mathrm{1-loop}^{\mathrm{SM}}\right\}\hspace{100pt}\\[5pt]
+%       + \frac{2\,\mathrm{Re}\left\{\mathcal{M}_\mathrm{tree}^{\mathrm{SM}\,\dagger}\,\mathcal{M}_\mathrm{1-loop}^{6} + \mathcal{M}_\mathrm{tree}^{6\,\dagger}\,\mathcal{M}_\mathrm{1-loop}^{\mathrm{SM}}\right\}}{\Lambda^2}\\[5pt]
+%       + \frac{2\,\mathrm{Re}\left\{\mathcal{M}_\mathrm{tree}^{6\,\dagger}\,\mathcal{M}_\mathrm{1-loop}^{6}\right\}}{\Lambda^4}
+% \end{multline}
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
