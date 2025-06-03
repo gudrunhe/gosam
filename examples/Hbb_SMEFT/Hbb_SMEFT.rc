@@ -4,7 +4,7 @@ process_path=virtual
 in=H
 out=b,b~
 
-model=FeynRules, ../model/SMEFTFR_dphi_phiG_mod
+model=FeynRules, ../model/SMEFTFR_dphi_phiG
 
 order_names=QCD,NP
 enable_truncation_orders=True
