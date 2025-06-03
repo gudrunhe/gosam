@@ -51,7 +51,7 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-SKIP_TESTS = WpWpjj gggH ggHH_chromoSMEFT
+SKIP_TESTS = WpWpjj gggH
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
@@ -83,7 +83,7 @@ runselected : printselected $(SELECTED_TESTS)
 printselected :
 	@echo "SELECTED TESTS: " $(SELECTED_TESTS)
 
-LO_TESTS = ddzzdd eeZH_SMEFT gguudd tttt
+LO_TESTS = ddzzdd eeZH_SMEFT gggg_tree gguudd tttt
 
 .PHONY : runlo
 runlo : printlo $(LO_TESTS)
@@ -92,7 +92,7 @@ runlo : printlo $(LO_TESTS)
 printlo :
 	@echo "SELECTED LO TESTS: " $(LO_TESTS)
 
-NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing ddzg_crossing dgdg eett eettg_SMEFT eett_lhep eeuu gggg gggg_lhep gggg_tree ggHg ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary udhud_unitary uudd uu_graviton_yy WpWpjj
+NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eettg_SMEFT eett_lhep eeuu gggg gggg_lhep ggHg ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary uudd uu_graviton_yy WpWpjj
 
 .PHONY : runnlo
 runlo : printnlo $(NLO_TESTS)

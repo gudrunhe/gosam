@@ -51,8 +51,6 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-# SELECTED_TESTS = bghb ggtt ggtt_ufo eeuu ggHg gggg_tree gggg gggz hyy s-channel_single-top udene
-
 SKIP_TESTS = gggH
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
@@ -84,3 +82,30 @@ runselected : printselected $(SELECTED_TESTS)
 .PHONY : printselected
 printselected :
 	@echo "SELECTED TESTS: " $(SELECTED_TESTS)
+
+LO_TESTS = ddzzdd gggg_tree gguudd tttt
+
+.PHONY : runlo
+runlo : printlo $(LO_TESTS)
+
+.PHONY : printlo
+printlo :
+	@echo "SELECTED LO TESTS: " $(LO_TESTS)
+
+NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eett_lhep eeuu gggg gggg_lhep gggg_tree ggHg ggtt ggtt_lhep ggtt_ufo qqtth s-channel_single-top tne udene udeneg udene_lhep uudd uu_graviton_yy
+
+.PHONY : runnlo
+runlo : printnlo $(NLO_TESTS)
+
+.PHONY : printnlo
+printnlo :
+	@echo "SELECTED NLO TESTS: " $(NLO_TESTS)
+
+LOOPINDUCED_TESTS = gggH gggz hyy hyy_all_helicities hyy_olp yyyy
+
+.PHONY : runloopinduced
+runloopinduced : printloopinduced $(LOOPINDUCED_TESTS)
+
+.PHONY : printloopinduced
+printloopinduced :
+	@echo "SELECTED LOOP INDUCED TESTS: " $(LOOPINDUCED_TESTS)
