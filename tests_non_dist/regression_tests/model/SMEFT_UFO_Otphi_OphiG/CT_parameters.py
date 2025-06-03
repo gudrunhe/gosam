@@ -14,7 +14,7 @@ CphiG_CT = CTParameter(name = 'CphiG_CT',
                   type = 'real',
                   value = {
                      -1: 'aS/2/cmath.pi*(-7/2*CphiG)',
-                     0: {'const': 'dred*aS/2/cmath.pi*(CphiG/2)', 'log': 'aS/2/cmath.pi*(-7/2*CphiG)'}
+                     0: 'dred*aS/2/cmath.pi*(CphiG/2)'
                   },
                   texname = '\\delta\\text{CphiG\\_CT}')
 
@@ -22,6 +22,6 @@ Cuphi3x3_CT = CTParameter(name = 'Cuphi3x3_CT',
                      type = 'real',
                      value = {
                      -1:'aS/2/cmath.pi*(-2*Cuphi3x3+16*CphiG)',
-                     0:{'const': 'dred*aS/2/cmath.pi*(-2/3*Cuphi3x3+16/3*CphiG)', 'log': 'aS/2/cmath.pi*(-2*Cuphi3x3+16*CphiG)'}
+                     0:'dred*aS/2/cmath.pi*(-2/3*Cuphi3x3+16/3*CphiG)'
                      },
                      texname = '\\delta\\text{Cuphi3x3\\_CT}')

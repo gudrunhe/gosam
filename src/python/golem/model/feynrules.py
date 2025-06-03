@@ -145,7 +145,11 @@ class Model:
         try:
             self.all_CTparameters = mod.all_CTparameters
         except AttributeError:
-            pass
+            if self.useCT:
+                logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
+                sys.exit("GoSam terminated due to an error")
+            else:
+                pass   
 
         # #########################################################################################
         # Check if there are any vertices with ambiguous coupling orders and if so split them up.
@@ -195,7 +199,7 @@ class Model:
             seen_vertices2 = {}
             for v in verts:
                 # At this stage all couplings of a vertex should come with the same order, 
-                # so we can just take the first coupling. The same is tru for the rank of 
+                # so we can just take the first coupling. The same is true for the rank of 
                 # its lorentz structures.
                 vord = str(v.couplings[(0,0)].order)+"_RK"+str(list(v.rank)[0])
                 if vord in list(seen_vertices2):
@@ -270,9 +274,7 @@ class Model:
                 for v in jv:
                     checked_vertices.remove(v)
 
-        #print(self.all_vertices)
         self.all_vertices = checked_vertices
-        #print(self.all_vertices)
 
         # #######################################################################################################
 
@@ -368,23 +370,14 @@ class Model:
             # construct the CT dictionary representing the Laurent expansion
             for c in self.all_CTcouplings:
                 name = self.prefix + c.name.replace("_", "")
-                self.ctfunctions[(name + "const")] = {}
-                self.ctfunctions[(name + "log")] = {}
-                self.cttypes[(name + "const")] = "C"
-                self.cttypes[(name + "log")] = "C"
+                self.ctfunctions[name] = {}
+                self.cttypes[name] = "C"
                 if isinstance(c.value, dict):
                     # the value of the coupling is a dictionary representing the Laurent expansion
                     # => split const from log terms, if present
-                    for ctpart in ["const", "log"]:
-                        for ctpole in list(c.value.keys()):
-                            if isinstance(c.value[ctpole], dict):
-                                ctcoeff = c.value[ctpole][ctpart]
-                            else:
-                                if ctpart == "const":
-                                    ctcoeff = c.value[ctpole]
-                                else:
-                                    ctcoeff = "0"
-                            self.ctfunctions[(name + ctpart)][ctpole] = ctcoeff
+                    for ctpole in list(c.value.keys()):
+                        ctcoeff = c.value[ctpole]
+                        self.ctfunctions[name][ctpole] = ctcoeff                    
                 elif isinstance(c.value, str):
                     # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
                     CTparams = [
@@ -394,22 +387,13 @@ class Model:
 
                     for ctparam in CTparams:
                         CTpoles = CTpoles.union(set(ctparam.value.keys()))
-
-                    for ctpart in ["const", "log"]:
-                        for ctpole in CTpoles:
-                            ctcoeff = c.value
-                            for ctparam in CTparams:
-                                if ctpole in ctparam.value:
-                                    if isinstance(ctparam.value[ctpole], dict):
-                                        ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole][ctpart])
-                                    else:
-                                        if ctpart == "const":
-                                            ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole])
-                                        else:
-                                            ctcoeff = ctcoeff.replace(ctparam.name, "0")
-                                else:
-                                    ctcoeff = ctcoeff.replace(ctparam.name, "0")
-                            self.ctfunctions[(name + ctpart)][ctpole] = ctcoeff
+              
+                    for ctpole in CTpoles:
+                        ctcoeff = c.value
+                        for ctparam in CTparams:
+                            if ctpole in ctparam.value:
+                                ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole])
+                        self.ctfunctions[name][ctpole] = ctcoeff
                 else:
                     logger.critical("CT coupling %s is neither a dict nor str!" % c)
                     sys.exit("GoSam terminated due to an error")
