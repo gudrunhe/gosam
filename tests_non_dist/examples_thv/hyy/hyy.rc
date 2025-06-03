@@ -1,0 +1,26 @@
+process_name=hyy
+process_path=virtual
+
+in=H
+out=gamma, gamma
+order=QED, NONE, 3
+model=smdiag
+model.options= mW: 80.398, mZ: 91.1876, alpha: 0.00729735299
+
+one=e,gs
+zero=mU,mD,mS,mC,mB,w*
+
+helicities=0++
+
+r2=explicit
+
+filter.particles=U:0,D:0,S:0,C:0,B:0,em:0,mum:0,taum:0
+
+reduction_programs=ninja, golem95
+
+reference-vectors=2:3,3:2
+filter.nlo={ \
+   'fermionic': CHORD(T) == LOOPSIZE, \
+   'bosonic':   CHORD(T) != LOOPSIZE \
+}
+regularisation_scheme=thv

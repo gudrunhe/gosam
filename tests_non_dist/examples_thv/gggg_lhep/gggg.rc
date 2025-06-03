@@ -1,0 +1,22 @@
+process_name=gggg
+process_path=virtual
+
+# PDG codes # Gluon: 21
+in=21,21
+out=21,21
+model.options=
+
+order=QCD, 2, 4
+
+# We only want the pure gauge theory part, no quarks
+filter.particles=part1:0,part2:0,part3:0,part4:0,part5:0,part6:0
+
+one=mdlGG,mdlEE
+
+helicities=++++
+
+model=../model/Standard_Model_LanHep, 4
+
+filter.nlo= lambda d: not d.isScaleless()
+
+regularisation_scheme=thv

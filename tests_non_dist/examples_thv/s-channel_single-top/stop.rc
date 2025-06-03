@@ -1,0 +1,15 @@
+process_name=stop
+process_path=virtual
+in=u,d~
+out=ne,e+,b,b~
+model=smdiag
+model.options= mW: 80.45, mZ: 91.18, mT:170.9, wT: 1.5, GF:0.00001166390
+order=gs,0,2
+one=gs
+zero=mB,mU,mD,wW,me
+helicities=-+-+-+
+
+filter.lo=lambda d: d.iprop(["Wp", "Wm"]) > 1 and d.iprop("T") > 0 and d.chord("Wp") == 0 and d.bridge("g") == 0
+filter.nlo=lambda d: d.iprop(["Wp", "Wm"]) > 1 and d.iprop("T") > 0 and d.chord("Wp") == 0 and d.bridge("g") == 0
+
+regularisation_scheme=thv
