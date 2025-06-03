@@ -102,7 +102,7 @@
 
    ! Flag to decide if results should be converted to tHV
    ! if they are not already in that scheme
-   logical :: convert_to_cdr = [% convert_to_thv
+   logical :: convert_to_thv = [% convert_to_thv
              convert=bool
              true=.true.
              false=.false. %]
