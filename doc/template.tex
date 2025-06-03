@@ -180,20 +180,21 @@ Default: \verb|False|
 \\Experimental: \verb|True|
 \\\item[\colorbox{gray!30}{\texttt{regularisation\_scheme}}] (\textit{text})
 \begin{verbatim}
-Sets the used regularisation scheme.
-Possible values: dred (recommended), cdr
+Sets the used regularisation scheme, dimensional reduction (DRED)
+or t'Hooft-Veltman (tHV).
+Possible values: dred (recommended), thv
 \end{verbatim}
 Default: \verb|dred|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{convert\_to\_cdr}}] (\textit{true/false})
+\\\item[\colorbox{gray!30}{\texttt{convert\_to\_thv}}] (\textit{true/false})
 \begin{verbatim}
 Sets the name of the same variable in config.f90
 
-Activates or disables the conversion of the result into the CDR
-regularisation scheme, when the calculation has been performed in DRED.
+Activates or disables the conversion of the result into the t'Hooft-Veltman
+(tHV) regularisation scheme, when the calculation has been performed in DRED.
 
-Does not have an effect when CDR is picked as regularisation scheme in
+Does not have an effect when tHV is picked as regularisation scheme in
 extensions or via property 'regularisation_scheme'.
 \end{verbatim}
 Default: \verb|False|
@@ -266,6 +267,44 @@ Please, refer to the QGraf documentation for details.
 \end{verbatim}
 Default: \verb|onshell,notadpole,nosnail|
 \\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter.particles}}] (\textit{text})
+\begin{verbatim}
+Restrict the number of internal propagators with the given field
+in every diagram. Multiple fields may be specified.
+
+Example:
+
+filter.lo.particles=u:0,d:0 # No internal u or d quarks
+\end{verbatim}
+Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter.lo.particles}}] (\textit{text})
+\begin{verbatim}
+Restrict the number of internal propagators with the given field
+in the LO diagrams. Multiple fields may be specified.
+
+See also filter.particles.
+\end{verbatim}
+Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter.nlo.particles}}] (\textit{text})
+\begin{verbatim}
+Restrict the number of internal propagators with the given field
+in the NLO diagrams. Multiple fields may be specified.
+
+See also filter.particles.
+\end{verbatim}
+Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter.ct.particles}}] (\textit{text})
+\begin{verbatim}
+Restrict the number of internal propagators with the given field
+in the counter term diagrams. Multiple fields may be specified.
+
+See also filter.particles.
+\end{verbatim}
+Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim}}] (\textit{text})
 \begin{verbatim}
@@ -345,7 +384,7 @@ ninja        --- Use the ninja reduction library (default).
 golem95      --- Use the golem95 reduction library (only when
                  enabled during setup step of GoSam installation).
 dred         --- Use DRED as IR regularisation scheme (default).
-cdr          --- Use CDR as IR regularisation scheme.
+thv          --- Use tHV as IR regularisation scheme.
 numpolvec    --- Evaluate polarisation vectors numerically (default).
 quadruple    --- Make a quadruple precision copy of the code (this
                  works only with ninja).
@@ -456,6 +495,8 @@ The following methods of the diagram class can be used:
      - massive: select only propagators with/without a non-zero mass
      - color: one of the numbers 1, 3, -3 or 8, or a list of
               these numbers
+* d.legs(...) = number of legs
+   same as iprop, but for external legs
 * d.iprop_momentum(field, momentum="...") = True when the diagram contains
    a propagator of field with the specified momentum, False otherwise
 * d.chord(...) = number of loop propagators with the given properties;
@@ -729,11 +770,14 @@ Default: \verb|False|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Threshold to activate accept the point without further
-treatments. The number has to be an integer indicating the
-wished minimum number of digits accuracy on the pole. For poles
-more precise than this threshold the finite part is not checked.
+Threshold to accept a PSP point without further treatment,
+based on the precision of the single pole. The number has to be
+an integer indicating the desired minimum number of digits
+accuracy on the single pole. For poles more precise than this
+threshold the finite part is not checked.
 !!Works only for QCD and with built-in model files!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|8|
 \\Hidden: \verb|False|
@@ -742,14 +786,16 @@ Default: \verb|8|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Threshold to declare a PSP as bad point, based of the precision
-of the pole.  Points with precision less than this threshold are
-directly reprocessed with the rescue system (if available), or
-declared as unstable. According to the verbosity level set, such
-points are written to a file and not used when the code is
-interfaced to an external Monte Carlo using the new BLHA
-standards.
+Threshold to declare a PSP as a bad point, based of the precision
+of the single pole. Points with precision less than this
+threshold are directly reprocessed with the rescue system (if
+available), or declared as unstable. According to the verbosity
+level set, such points are written to a file and not used when
+the code is interfaced to an external Monte Carlo using the new
+BLHA standards.
 !!Works only for QCD and with built-in model files!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|3|
 \\Hidden: \verb|False|
@@ -758,39 +804,50 @@ Default: \verb|3|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Threshold to declare a PSP as bad point, based on the precision
-of the finite part estimated with a rotation. According to the
-verbosity level set, such points are written to a file and not
-used when the code is interfaced to an external Monte Carlo
-using the new BLHA standards.
+Threshold to declare a PSP as a bad point, based on the precision
+of the finite part estimated with a rotation. Points with
+precision less than this threshold are directly reprocessed
+with the rescue system (if available), or declared as unstable.
+According to the verbosity level set, such points are written
+to a file and not used when the code is interfaced to an
+external Monte Carlo using the new BLHA standards.
 !!Works only for QCD and with built-in model files!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|5|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_th4}}] (\textit{integer number})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold to accept a PSP point without further treatment,
+based on the precision of the finite part estimated by
+comparing the normal and rotated double precision
+evaluations against a quadruple precision evaluation.
+!!Works only for QCD and with built-in model files!!
+!!Used only for: extensions=quadruple!!
+
+The number has to be an integer.
+\end{verbatim}
+Default: \verb|10|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_th5}}] (\textit{integer number})
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Threshold to recompute a PSP in quadruple precision, based on
-the precision of the finite part estimated with a rotation.
-!!Works only for QCD and with built-in model files!!
-!!Used only for: extensions=quadruple!!
-\end{verbatim}
-Default: \verb|10|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_th6}}] (\textit{integer number})
-\begin{verbatim}
-Sets the same variable in config.f90
-
 Threshold to declare a quadruple precision PSP as a bad point,
-based on the precision of the finite part estimated with a
-rotation. According to the verbosity level set, such points
+based on the precision of the finite part estimated by
+comparing the normal and rotated quadruple precision
+evaluations. According to the verbosity level set, such points
 are written to a file and not used when the code is interfaced
 to an external Monte Carlo using the new BLHA standards.
 !!Works only for QCD and with built-in model files!!
 !!Used only for: extensions=quadruple!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|7|
 \\Hidden: \verb|False|
@@ -810,85 +867,89 @@ Default: \verb|1000|
 Sets the same variable in config.f90. For loop-induced
 processes, it is used instead of PSP_chk_th1.
 
-It is precision of the pole part (which should be zero) in
-comparison to the finite part. If the pole part is at least
-PSP_chk_li1 orders smaller than the finite part, the point is
-accepted without any other check.
+Threshold to accept a PSP point without further treatment,
+based on the precision of the single pole (which should be
+zero). The number has to be an integer indicating the desired
+minimum number of digits  accuracy on the single pole. For
+poles more precise than this  threshold the finite part is
+not checked.
+!!Works only for QCD and with built-in model files!!
 
 The number has to be an integer.
 \end{verbatim}
-Default: \verb|16|
+Default: \verb|8|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li2}}] (\textit{integer number})
 \begin{verbatim}
 Sets the same variable in config.f90. For loop-induced
-processes, it is used instead of PSP_chk_th2.
+processes, it is used instead of PSP_chk_th1.
 
-Threshold to declare a PSP as bad point, based of the precision
-of the pole in comparison to the finite part. Points with
-precision less than this threshold are directly reprocessed with
-the rescue system (if available), or declared as unstable.
-According to the verbosity level set, such points are written to
-a file and not used when the code is interfaced to an external
-Monte Carlo using the new BLHA standards.
+Threshold to declare a PSP as a bad point, based of the precision
+of the single pole. Points with precision less than this
+threshold are directly reprocessed with the rescue system (if
+available), or declared as unstable. According to the verbosity
+level set, such points are written to a file and not used when
+the code is interfaced to an external Monte Carlo using the new
+BLHA standards.
+!!Works only for QCD and with built-in model files!!
+
+The number has to be an integer.
 \end{verbatim}
-Default: \verb|7|
+Default: \verb|3|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li3}}] (\textit{integer number})
 \begin{verbatim}
 Sets the same variable in config.f90. For loop-induced
-processes, it is used instead of PSP_chk_th3.
+processes, it is used instead of PSP_chk_th1.
 
-Threshold to declare a PSP as bad point, based on the precision
+Threshold to declare a PSP as a bad point, based on the precision
 of the finite part estimated with a rotation. Points with
-precision less than this threshold are reprocessed with the
-rescue system (if available) or declared as unstable.  According
-to the verbosity level set, such points are written to a file
-and not used when the code is interfaced to an external Monte
-Carlo using the new BLHA standards.
+precision less than this threshold are directly reprocessed
+with the rescue system (if available), or declared as unstable.
+According to the verbosity level set, such points are written
+to a file and not used when the code is interfaced to an
+external Monte Carlo using the new BLHA standards.
+!!Works only for QCD and with built-in model files!!
+
+The number has to be an integer.
 \end{verbatim}
-Default: \verb|6|
+Default: \verb|5|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li4}}] (\textit{integer number})
 \begin{verbatim}
-Sets the same variable in config.f90. Similar to PSP_chk_li2,
-but for the rescue system (by default Golem95).
+Sets the same variable in config.f90. For loop-induced
+processes, it is used instead of PSP_chk_th1.
 
-Threshold to declare a PSP as bad point in the rescue system,
-based on the precision of the pole part in comparison to the
-finite part. According to the verbosity level set, such points
-are written to a file and not used when the code is interfaced
-to an external Monte Carlo using the new BLHA standards.
-\end{verbatim}
-Default: \verb|19|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li5}}] (\textit{integer number})
-\begin{verbatim}
-Sets the same variable in config.f90
-
-Threshold to recompute a PSP in quadruple precision, based on
-the precision of the finite part estimated with a rotation.
+Threshold to accept a PSP point without further treatment,
+based on the precision of the finite part estimated by
+comparing the normal and rotated double precision
+evaluations against a quadruple precision evaluation.
 !!Works only for QCD and with built-in model files!!
 !!Used only for: extensions=quadruple!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|10|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li6}}] (\textit{integer number})
+\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li5}}] (\textit{integer number})
 \begin{verbatim}
-Sets the same variable in config.f90
+Sets the same variable in config.f90. For loop-induced
+processes, it is used instead of PSP_chk_th1.
 
 Threshold to declare a quadruple precision PSP as a bad point,
-based on the precision of the finite part estimated with a
-rotation. According to the verbosity level set, such points
+based on the precision of the finite part estimated by
+comparing the normal and rotated quadruple precision
+evaluations. According to the verbosity level set, such points
 are written to a file and not used when the code is interfaced
 to an external Monte Carlo using the new BLHA standards.
 !!Works only for QCD and with built-in model files!!
 !!Used only for: extensions=quadruple!!
+
+The number has to be an integer.
 \end{verbatim}
 Default: \verb|7|
 \\Hidden: \verb|False|
@@ -979,7 +1040,7 @@ Points to the QGraf executable.
 Example:
 qgraf.bin=/home/my_user_name/bin/qgraf
 \end{verbatim}
-Default: \verb|/path/to/default/qgraf|
+Default: \verb|/home/marius/Programs/GoSam3/SMEFT/bin/GoSam/qgraf|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.bin}}] (\textit{text})
@@ -992,7 +1053,7 @@ Examples:
 2) # Use non-standard location:
    form.bin=/home/my_user_name/bin/form
 \end{verbatim}
-Default: \verb|/path/to/default/form|
+Default: \verb|/home/marius/Programs/GoSam3/SMEFT/bin/GoSam/tform|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.threads}}] (\textit{integer number})
