@@ -806,7 +806,7 @@ def process_order_file(
                         if mass != "0" and mass not in list_zero_values and mass not in list_nonzero_values:
                             list_zero_values.append(mass)
                         width = particle.getWidth()
-                        if width != "0" and width not in list_zero_values and mass not in list_nonzero_values:
+                        if width != "0" and width not in list_zero_values and width not in list_nonzero_values:
                             list_zero_values.append(width)
             if list_zero_values:
                 if lconf["zero"]:
