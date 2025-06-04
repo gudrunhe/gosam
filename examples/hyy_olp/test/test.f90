@@ -37,12 +37,13 @@ success = .true.
 
 call OLP_Start(contract_file_name,ierr)
 
-call OLP_SetParameter("mH", 124.5_ki, 0.0_ki, ierr)
-call OLP_SetParameter("mT", 172.5_ki, 0.0_ki, ierr)
-call OLP_SetParameter("mW", 80.398_ki, 0.0_ki, ierr)
-call OLP_SetParameter("mZ", 91.1876_ki, 0.0_ki, ierr)
-call OLP_SetParameter("alpha", 0.00729735299_ki, 0.0_ki, ierr)
-call OLP_SetParameter("renormalisation", 0.0_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"mH"//c_null_char, 124.5_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"mT"//c_null_char, 172.5_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"mW"//c_null_char, 80.398_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"mZ"//c_null_char, 91.1876_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"wW"//c_null_char, 0.0_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"wZ"//c_null_char, 0.0_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"alpha"//c_null_char, 0.00729735299_ki, 0.0_ki, ierr)
 
 call load_reference_kinematics(blha_kinematics, renorm_scale)
 call compute_gosam_result(blha_kinematics, renorm_scale, gosam_amp)
@@ -113,9 +114,8 @@ subroutine     compute_gosam_result(vecs, scale, amp)
    ! factor 1/16/pi/mH for converting to width
    ! factor 2 for summing over helicities
    amp = amp * 2.0_ki / (16.0d0 * pi * mH)
-   amp = amp * alpha ** 3 / pi
 
-   write(logf,*) "GOSAM AMP(1):", amp(4)
+   write(logf,*) "GOSAM AMP(1):", amp(2)
 
    prefactor = mH**3 * GF * alpha**2 / sqrt(2.0d0) / 128.0d0 / pi**3
 

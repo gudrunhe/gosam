@@ -147,9 +147,9 @@ subroutine     compute_gosam_result(subprocess, blha_kinematics, renorm_scale, g
             &64296173026564613294187689219101164463450718816256962234900568205403877042211119289_ki
 
    if (subprocess .eq. 0) then
-      call OLP_SetParameter("Nfgen", 1.0_ki, 0.0_ki, success)
+      call OLP_SetParameter(c_char_"Nfgen"//c_null_char, 1.0_ki, 0.0_ki, success)
    else if (subprocess .eq. 1) then
-      call OLP_SetParameter("Nfgen", 2.0_ki, 0.0_ki, success)
+      call OLP_SetParameter(c_char_"Nfgen"//c_null_char, 2.0_ki, 0.0_ki, success)
    end if
 
    call OLP_EvalSubProcess(subprocess, blha_kinematics, renorm_scale,  parameters, blha_amp)
