@@ -729,6 +729,9 @@ def fill_config(conf):
                     "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
                 )
             sys.exit("GoSam terminated due to an error")
+    else:
+        ext.append(conf["olp.extensions"])
+        ext = list(set(ext))
 
     if "thv" in ext and conf.getProperty("r2") != "explicit":
         logger.critical(
