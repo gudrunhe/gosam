@@ -24,7 +24,7 @@ golem: $(PROCESS).log
 $(PROCESS).log:
 	@echo setting up virtual ...
 	@if [ ! -d virtual ]; then mkdir virtual; fi
-	$(GOSAM) --olp --destination=virtual --ignore-unknown $(PROCESS).olp -l $@
+	$(GOSAM) --olp --config=setup.in --destination=virtual --ignore-unknown $(PROCESS).olp -l $@
 
 clean:
 	rm -f $(PROCESS).in $(PROCESS).log

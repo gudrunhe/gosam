@@ -54,7 +54,7 @@ do ic = 1, 2
     write(ch,'(A58)') "----------------------------------------------------"
 end do
 
-diff = 2.0d0 * (ref_amp(1)-gosam_amp(3)) / (abs(ref_amp(1))+abs(gosam_amp(3)))
+diff = 2.0d0 * (ref_amp(1)-gosam_amp(2)) / (abs(ref_amp(1))+abs(gosam_amp(2)))
 
 if (diff .gt. eps) then
     write(unit=logf,fmt="(A3,1x,A40)") "==>", &
@@ -114,6 +114,9 @@ subroutine     compute_gosam_result(vecs, scale, amp)
    ! factor 1/16/pi/mH for converting to width
    ! factor 2 for summing over helicities
    amp = amp * 2.0_ki / (16.0d0 * pi * mH)
+   ! we have set e=1 in the calculation.
+   ! furthermore we factored out alpha/2/pi in the amplitude
+   amp = amp * alpha ** 3 / pi
 
    write(logf,*) "GOSAM AMP(1):", amp(2)
 
