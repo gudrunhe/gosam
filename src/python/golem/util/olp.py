@@ -773,10 +773,10 @@ def process_order_file(
 
             lconf["__excludedParticles__"] = None
 
-            # TODO: check if massless list is complete
-            possible_massless_particles = set(list(range(1, 6)) + [11, 13])
             set_massiveParticles = set()
+            list_default_zero_values = default_conf["zero"].split(",") if default_conf["zero"] else []
             list_zero_values = []
+            list_nonzero_values = []
             if lconf["__OLP_BLHA2__"] == "True":  # only supported in BLHA2
                 for i in (
                     [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] else []
@@ -786,18 +786,27 @@ def process_order_file(
                         if particle.getPDGCode() == i:
                             set_massiveParticles.add(particle.getPDGCode())
                             set_massiveParticles.add(-particle.getPDGCode())
+                            mass = particle.getMass()
+                            if mass != "0":
+                                if mass in list_default_zero_values:
+                                    logger.critical(
+                                        "BLHA-file specifies particle %r (PDG %r) as massive, which\n" \
+                                        " conficts with 'zero' list provided in config file(s)\n %r."
+                                        % (str(particle),particle.getPDGCode(),default_conf["extra_setup-file"]))
+                                    sys.exit("GoSam terminated due to an error")
+                                list_nonzero_values.append(mass)
+                            width = particle.getWidth()
+                            if width != "0":
+                                list_nonzero_values.append(width)
 
                 for n in model.particles:
                     particle = model.particles[n]
-                    if (
-                        not particle.getPDGCode() in set_massiveParticles
-                        and abs(particle.getPDGCode()) in possible_massless_particles
-                    ):
+                    if particle.getPDGCode() not in set_massiveParticles:
                         mass = particle.getMass()
-                        if mass != "0" and mass not in list_zero_values:
+                        if mass != "0" and mass not in list_zero_values and mass not in list_nonzero_values:
                             list_zero_values.append(mass)
                         width = particle.getWidth()
-                        if width != "0" and width not in list_zero_values:
+                        if width != "0" and width not in list_zero_values and mass not in list_nonzero_values:
                             list_zero_values.append(width)
             if list_zero_values:
                 if lconf["zero"]:
@@ -843,7 +852,7 @@ def process_order_file(
             # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
             # in config file (if present). The following behaviour is implemented:
             #
-            # OLP  | config (from e.g. golem.in) | result
+            # OLP  | config (from e.g. golem.in)  | result
             # -----------------------------------------------------------------------
             # tHV  | None                         | "dred" + "convert_to_thv = True"
             # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False" 
@@ -856,7 +865,7 @@ def process_order_file(
             #
             # In case of mismatch execution is terminated.
             #
-            # OLP  | config (from e.g. golem.in) | result
+            # OLP  | config (from e.g. golem.in)  | result
             # -----------------------------------------------------------------------
             # tHV  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
             # tHV  | dred in extensions           | mismatch -> ERROR (terminate)
