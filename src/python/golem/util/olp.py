@@ -792,7 +792,7 @@ def process_order_file(
                                     logger.critical(
                                         "BLHA-file specifies particle %r (PDG %r) as massive, which\n" \
                                         " conficts with 'zero' list provided in config file(s)\n %r."
-                                        % (str(particle),particle.getPDGCode(),default_conf["extra_setup-file"]))
+                                        % (str(particle),particle.getPDGCode(),default_conf["extra_setup_file"]))
                                     sys.exit("GoSam terminated due to an error")
                                 list_nonzero_values.append(mass)
                             width = particle.getWidth()
@@ -897,7 +897,7 @@ def process_order_file(
                 logger.critical(
                     "IR regularisation scheme specified in BLHA-file conflicts with " \
                     "scheme specified in config file(s)\n %r:\n %r vs. %r" \
-                            % (default_conf["extra_setup-file"],ir_scheme,mismatch_schemes[1]))
+                            % (default_conf["extra_setup_file"],ir_scheme,mismatch_schemes[1]))
                 sys.exit("GoSam terminated due to an error")
 
             # choose behaviour according to table above

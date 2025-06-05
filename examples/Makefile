@@ -51,7 +51,7 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-SKIP_TESTS = WpWpjj gggH
+SKIP_TESTS = WpWpjj
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection

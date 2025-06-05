@@ -153,7 +153,7 @@ def main(argv=sys.argv):
     default_conf = golem.util.config.Properties()
     props = golem.util.config.Properties()
 
-    default_conf["extra_setup-file"] = default_files
+    default_conf["extra_setup_file"] = default_files
 
     ## This fills in the defaults where no option is given:
     for p in golem.properties.properties:
