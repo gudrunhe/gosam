@@ -1164,6 +1164,7 @@ modelfile.write("      call ewschemechoice(ewchoice)\n")[$
 @end @select $]
 newfcs = re.sub(r"ctpolem([0-9]*)",r"(-\1)",outdict["Functions"])
 newfcs = re.sub(r"ctpolep([0-9]*)",r"(\1)",newfcs)
+newfcs = re.sub(r"([^a-zA-Z0-9]abs)_",r"\1",newfcs)
 modelfile.write("%s" % newfcs)
 modelfile.write("end subroutine init_functions\n")
 modelfile.write("!---#] subroutine init_functions:\n")
