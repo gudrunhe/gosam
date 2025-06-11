@@ -630,6 +630,18 @@ def fill_config(conf):
                                    "but GoSam was build without Golem. Please reinstall GoSam with support for Golem.")
         # END: Check for incompatible configuration
 
+
+    # Discard all diagrams with double insertions, when truncation orders 
+    # are used. Is also done later in golem.frm, but doing it here reduces 
+    # the number of generated diagrams and speeds up the calculation.
+    if conf.getBooleanProperty("enable_truncation_orders"):
+        for fltr in ["lo","nlo","ct"]:
+            if conf["filter."+fltr] is None:
+                conf["filter."+fltr] = "filter."+fltr+"=lambda d: d.order('NP')<=1"
+            else:
+                conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
+
+
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
 
