@@ -1020,6 +1020,8 @@ class Model:
             f.write(",%s" % el)
         f.write(",isCT")
         f.write(",isNP")
+        f.write(",V")
+        f.write(",CTV")
         f.write(";\n")
         f.write("Symbol XNPorder,XQLorder,Xkeep;")
         f.write("\n")
@@ -1178,6 +1180,8 @@ class Model:
                 f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
                 for el in order_names:
                     f.write(", %s%d" % (el, vertorders[ivo][el]))
+                if v.name is not None:
+                    f.write(f", {v.name}_{ivo}")
                 colors = []
                 for i in xidx:
                     p = particles[i]
@@ -1322,6 +1326,8 @@ class Model:
                     f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
                     for el in order_names:
                         f.write(", %s%d" % (el, vertorders[ivo][el]))
+                    if v.name is not None:
+                        f.write(f", {v.name}_{ivo}")
                     colors = []
                     for i in xidx:
                         p = particles[i]

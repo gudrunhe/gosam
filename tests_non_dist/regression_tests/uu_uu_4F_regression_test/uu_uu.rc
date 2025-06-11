@@ -6,12 +6,10 @@ model=FeynRules, ../model/QCD_4F_UFO
 in=9000001,-9000001
 out=9000001,-9000001
 
-order=QCD, 2, 4
+order=QCD, 2
 
 order_names=QCD,NP
 
-all_mandelstam=True
-
 reduction_programs=ninja
 
-symmetries=parity
+nlo_prefactors=0

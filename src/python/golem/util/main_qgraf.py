@@ -268,6 +268,7 @@ def run_qgraf(conf, in_particles, out_particles):
             if len(order_names) > 0:
                 for el in order_names:
                     form_sty_out.write("<back> %s[%s],\n" % (el, el))
+            form_sty_out.write("<back> [VL],\n")
         form_sty_out.write(form_sty_tmp[i])
     form_sty_out.close()
 
