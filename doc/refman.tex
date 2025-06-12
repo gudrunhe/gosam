@@ -1526,7 +1526,7 @@ element in QCD is calculated in the $\overline{\mathrm{MS}}$ scheme as
 \left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}=
 \frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
 \cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q})
++{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}) \label{eq:Conventions:nlo_matrix_element}
 \end{equation}
 The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
 appearing in the squared tree-level matrix element. \gosamv{} will
@@ -1558,6 +1558,28 @@ definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
 \right](g_1^{n_1}\cdots g_q^{n_q})
 %+{\mathcal{O}}(\varepsilon)
 \end{equation}
+
+\section{The \texttt{nlo\_prefactor} option}
+\label{sec:nlo_prefactors}
+In the one-loop amplitude defined in equation \eqref{eq:Conventions:nlo_matrix_element}, a factor of $\alpha_x/2\pi$ is \emph{not} included in the coefficients $c_{-2}$, $c_{-1}$ and $c_0$. The choice of what prefactor is pulled out of the one-loop amplitude is controlled by the \texttt{nlo\_prefactor} option, which has the three choices
+\begin{eqnarray}
+   A_0 = \frac{\alpha_x}{2\pi}, \qquad A_1 = \frac{1}{8 \pi^2} \quad \text{and} \quad A_2 = 1.
+\end{eqnarray}
+For \texttt{nlo\_prefactor = i}, the squared amplitude at one-loop level is then defined as
+\begin{equation}
+   \left|\mathcal{M}\right|^2_{\text{1-loop}}=
+A_i\ \frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}).
+\end{equation}
+The default choice of this option depends on the mode \gosam is running in:
+\begin{itemize}
+   \item In standalone mode, the default choice is \texttt{nlo\_prefactor = 0}
+   \item In OLP mode, the default choice is \texttt{nlo\_prefactor = 2}
+\end{itemize}
+In the case of OLP mode, the default choice of the prefactor is mandated by the BLHA convention. The prefactor can still be changed by explicitly setting the \texttt{nlo\_prefactor} option, but please keep in mind that doing this \emph{violates the BLHA standard}.
+
+In the case of a loop-induced process, the prefactor is pulled out of each appearing one-loop amplitude piece, resulting in an overall prefactor of $A_i^2$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Explicit reduction of the $R_2$ terms}
