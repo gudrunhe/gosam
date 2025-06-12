@@ -19,7 +19,7 @@ contains[%
          & renorm_ehc, renorm_gamma5, nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]counterterms_qp, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
            %]diagramsh[%helicity%]l0_0_qp, only: amp0_0 => amplitude[% 
@@ -34,9 +34,9 @@ contains[%
       use [% process_name asprefix=\_
            %]diagramsh[%helicity%]l0_qp, only: amp0 => amplitude[%
 @end @if enable_truncation_orders %][%
-@end @if generate_lo_diagrams %][%
+@end @if generate_tree_diagrams %][%
 @if generate_ym_counterterms %][%
-@if generate_lo_diagrams%][%
+@if generate_tree_diagrams%][%
 @if enable_truncation_orders %]
       use [% process_name asprefix=\_
            %]diagramsh[%helicity%]l0_0_qp, only: ampdymct_0 => amplitude_Dym[% 
@@ -51,7 +51,7 @@ contains[%
       use [% process_name asprefix=\_
            %]diagramsh[%helicity%]l0_qp, only: ampdymct => amplitude_Dym[%
 @end @if enable_truncation_orders %][%
-@end @if generate_lo_diagrams%][%
+@end @if generate_tree_diagrams%][%
 @end @if generate_ym_counterterms %][%
 @if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %][%
@@ -107,7 +107,7 @@ contains[%
          nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
 @end @select %]
       end if
-[% @if generate_lo_diagrams %][%
+[% @if generate_tree_diagrams %][%
 @if enable_truncation_orders %][%
 @select trnco @case 0 %]
       select case (renormalisation)
@@ -382,7 +382,7 @@ contains[%
       @end @if enable_truncation_orders %][%
       @else %]
       ! No tree level present[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
 
    end function amplitude
    !---#] function amplitude:[% 

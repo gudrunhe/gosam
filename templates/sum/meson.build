@@ -1,13 +1,13 @@
 generated_sources += [[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @if group %][%
    @else %][% 
       @for elements topolopy.keep.tree %]
 	'd[%$_%]l0.f90',[%
       @end @for %][%
    @end @if %][%
-@end @if generate_lo_diagrams %][%
-@if generate_nlo_virt %][%
+@end @if generate_tree_diagrams %][%
+@if generate_loop_diagrams %][%
       @for elements topolopy.keep.virt %]
 	'abbrevd[%$_%].f90',[%
       @end @for %][%
@@ -16,7 +16,7 @@ generated_sources += [[%
       @if extension ninja %] 'd[%$_%]l131.f90', 'd[%$_%]l132.f90', 'd[%$_%]l121.f90',[%
       @end @if %][%
    @end @for %][%
-@end @if generate_nlo_virt %]]
+@end @if generate_loop_diagrams %]]
 
 [% process_name %]_sum_gen = \
       custom_target('[% process_name %]_sum_gen',

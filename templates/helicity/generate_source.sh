@@ -11,4 +11,4 @@ if [ -f Makefile.source ];
 	then
 		make -f Makefile.source > /dev/null;
 fi
-cp [% @if generate_lo_diagrams %]diagramsl0*.f90 [% @end @if generate_lo_diagrams %] [% @if generate_eft_counterterms %]diagramsct*.f90 [% @end @if generate_eft_counterterms %] [% @if generate_nlo_virt %]d*h*.f90 abbrev*h*.f90[% @end @if generate_nlo_virt %] "${OUTDIR}" 2>/dev/null || :
+cp [% @if generate_tree_diagrams %]diagramsl0*.f90 [% @end @if generate_tree_diagrams %] [% @if generate_eft_counterterms %]diagramsct*.f90 [% @end @if generate_eft_counterterms %] [% @if generate_loop_diagrams %]d*h*.f90 abbrev*h*.f90[% @end @if generate_loop_diagrams %] "${OUTDIR}" 2>/dev/null || :

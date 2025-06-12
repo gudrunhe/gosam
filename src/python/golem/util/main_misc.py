@@ -88,7 +88,7 @@ def generate_process_files(conf, from_scratch=False):
     # OBSOLETE:
     ## we only need the ff-<n>.hh files if we create the virtual amplitude
     ## and if we use the extension 'golem95':
-    ##flag_create_ff_files = conf.getBooleanProperty("generate_nlo_virt") \
+    ##flag_create_ff_files = conf.getBooleanProperty("generate_loop_diagrams") \
     ##		and "golem95" in extensions
     flag_create_ff_files = False
 
@@ -499,8 +499,8 @@ def fill_config(conf):
 
     The additional properties are:
 
-    generate_nlo_virt
-    generate_lo_diagrams
+    generate_loop_diagrams
+    generate_tree_diagrams
     generate_eft_counterterms
     """
 
@@ -541,15 +541,15 @@ def fill_config(conf):
         orders = []
 
     if all(len(p) == 2 for p in orders):
-        generate_lo_diagrams = True
-        generate_nlo_virt = False
+        generate_tree_diagrams = True
+        generate_loop_diagrams = False
     elif all(len(p) == 3 for p in orders):
-        generate_lo_diagrams = not any(str(p[1]).strip().lower() == "none" for p in orders)
-        generate_nlo_virt = True
+        generate_tree_diagrams = not any(str(p[1]).strip().lower() == "none" for p in orders)
+        generate_loop_diagrams = True
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
 
-    no_renorm = generate_nlo_virt and not conf.getBooleanProperty("renorm")
+    no_renorm = generate_loop_diagrams and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""
     for p in ["renorm_beta",
@@ -654,23 +654,23 @@ def fill_config(conf):
             else:
                 conf["gosam-auto-reduction.extensions"] = p
 
-    generate_counterterms = conf.getBooleanProperty("renorm") and generate_nlo_virt
+    generate_counterterms = conf.getBooleanProperty("renorm") and generate_loop_diagrams
 
-    conf["generate_lo_diagrams"] = generate_lo_diagrams
-    conf["generate_nlo_virt"] = generate_nlo_virt
+    conf["generate_tree_diagrams"] = generate_tree_diagrams
+    conf["generate_loop_diagrams"] = generate_loop_diagrams
     conf["generate_counterterms"] = generate_counterterms
-    conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_nlo_virt
+    conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_loop_diagrams
     conf["generate_ym_counterterms"] = (conf.getBooleanProperty("renorm_yukawa") \
                                         or conf.getBooleanProperty("renorm_mqse") \
                                         or conf.getBooleanProperty("renorm_gamma5")) \
-        and generate_counterterms and generate_nlo_virt
-    conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_nlo_virt
+        and generate_counterterms and generate_loop_diagrams
+    conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_loop_diagrams
     conf["use_MQSE"] = conf.getBooleanProperty("use_MQSE")
 
     if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":
-        conf["PSP_chk_method"] = "PoleRotation" if generate_lo_diagrams else "LoopInduced"
+        conf["PSP_chk_method"] = "PoleRotation" if generate_tree_diagrams else "LoopInduced"
 
-    if generate_nlo_virt:
+    if generate_loop_diagrams:
         # Check if a suitable extension for the reduction is available
         red_flag = False
         ext = golem.properties.getExtensions(conf)
@@ -687,7 +687,7 @@ def fill_config(conf):
                 + ", ".join(golem.properties.REDUCTION_EXTENSIONS)
             )
             conf["gosam-auto-reduction.extensions"] = "ninja,golem95"
-    if not generate_nlo_virt and conf["gosam-auto-reduction.extensions"]:
+    if not generate_loop_diagrams and conf["gosam-auto-reduction.extensions"]:
         conf["gosam-auto-reduction.extensions"] = ""
 
     if not conf["reduction_interoperation"]:
@@ -765,7 +765,7 @@ def fill_config(conf):
     conf["reduction_interoperation_rescue"] = conf["reduction_interoperation_rescue"].upper()
 
     if conf.getBooleanProperty("helsum"):
-        if not conf.getBooleanProperty("generate_lo_diagrams"):
+        if not conf.getBooleanProperty("generate_tree_diagrams"):
             raise GolemConfigError(
                 'The "helsum" feature is not implemented for loop-induced processes.\n'
                 + 'Set "helsum=false" for the selected process.\n'
@@ -822,8 +822,8 @@ def workflow(conf):
 
 
 def run_analyzer(path, conf, in_particles, out_particles):
-    generate_lo = conf.getBooleanProperty("generate_lo_diagrams")
-    generate_virt = conf.getBooleanProperty("generate_nlo_virt")
+    generate_lo = conf.getBooleanProperty("generate_tree_diagrams")
+    generate_virt = conf.getBooleanProperty("generate_loop_diagrams")
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
 
     model = golem.util.tools.getModel(conf)

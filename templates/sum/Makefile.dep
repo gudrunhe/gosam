@@ -4,7 +4,7 @@ OBJEXT ?=o
 OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 # Module Dependencies:[%
 @for each $(OBJEXTG) var=O %][%
-   @if generate_nlo_virt %][%
+   @if generate_loop_diagrams %][%
          @for elements topolopy.keep.virt %]
 abbrevd[%$_%].[%O%]: globals.[%O%]
 d[%$_%]l1.[%O%]: abbrevd[%$_%].[%O%]
@@ -47,7 +47,7 @@ d[%$_%]l121_qp.[%O%]: abbrevd[%$_%]_qp.[%O%][%
 	@end @for %][%
         @end @if extension quadruple %][%
 	@end @if extension ninja %][%
-   @end @if generate_nlo_virt%]
+   @end @if generate_loop_diagrams%]
 amplitude.[%O%]: globals.[%O%][%
 	      @if extension golem95 %] golem95.[%O%][%
    	   @end @if %][%
@@ -55,24 +55,24 @@ amplitude.[%O%]: globals.[%O%][%
                  @if extension quadruple %] ninja_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0.[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%].[%O%][%
             @end @for %][%
       @end @if %][%
 @if extension quadruple %]
-amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
+amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_tree_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
 	      @if extension golem95 %] golem95_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_qp.[%O%][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0_qp.[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]_qp.[%O%][%
             @end @for %][%
@@ -81,12 +81,12 @@ amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp
 @end @for %][%
 
 @for each $(OBJEXTG) var=O %][%
-   @if generate_lo_diagrams %]
+   @if generate_tree_diagrams %]
 [% process_name asprefix=\_ %]diagramsl0.mod: diagramsl0.[%O%][%
    @for elements topolopy.keep.tree %]
 [% process_name asprefix=\_ %]d[%$_%]l0.mod: d[%$_%]l0.[%O%][%
    @end @for %][%
-   @end @if generate_lo_diagrams %][%
+   @end @if generate_tree_diagrams %][%
 
 		@if extension golem95 %]
 [% process_name asprefix=\_ %]golem95.mod: golem95.[%O%][%
@@ -108,7 +108,7 @@ amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp
 			@end @for %][%
 		@end @if extension quadruple %][%
 		@end @if extension ninja %][%
-   @if generate_nlo_virt %][%
+   @if generate_loop_diagrams %][%
          @for elements topolopy.keep.virt %]
 [% process_name asprefix=\_ %]abbrevd[%$_%].mod: abbrevd[%$_%].[%O%]
 [% process_name asprefix=\_ %]d[%$_%]l1.mod: d[%$_%]l1.[%O%]
@@ -121,7 +121,7 @@ amplitude_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp
 [% process_name asprefix=\_ %]d[%$_%]l1d_qp.mod: d[%$_%]l1d_qp.[%O%][%
          @end @for %][%
    @end @if extension quadruple %][%
-   @end @if generate_nlo_virt%]
+   @end @if generate_loop_diagrams%]
 [% process_name asprefix=\_ %]amplitude.mod: amplitude.[%O%]
 [% process_name asprefix=\_ %]globals.mod: globals.[%O%][%
 @if extension quadruple %]

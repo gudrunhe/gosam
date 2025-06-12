@@ -6,7 +6,7 @@ OBJEXTG=[%@if extension autotools %]lo[% @else %]$(OBJEXT)[%@end @if%]
 @for each $(OBJEXTG) var=O %][%
 @if helsum %][%
 @else %][%
-   @if generate_nlo_virt %][%
+   @if generate_loop_diagrams %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 	 @for each 0 1 2 var=efto %]
@@ -102,11 +102,11 @@ d[%$_%]h[%helicity%]l121_qp.[%O%]: abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
 	@end @if %][%
         @end @if extension quadruple %][%
 	@end @if extension ninja %][%
-   @end @if generate_nlo_virt%][%
+   @end @if generate_loop_diagrams%][%
 @end @if helsum %][%
 	@if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
-amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %].[%O%][% @end @if %][%
+amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_tree_diagrams %] diagramsl0_[% efto %].[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	      @if extension golem95 %] golem95_[% efto %]h[%helicity%].[%O%][%
@@ -115,10 +115,10 @@ amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagram
                  @if extension quadruple %] ninja_[% efto %]h[%helicity%]_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0_[% efto %].[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]_[% efto %]h[%helicity%].[%O%][%
             @end @for %][%
@@ -126,7 +126,7 @@ amplitudeh[%helicity%]_[% efto %].[%O%]: globals.[%O%][% @if generate_lo_diagram
 @end @if helsum %][%
 @end @for %][%
 @else %]
-amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagramsl0.[%O%][% @end @if %][%
+amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_tree_diagrams %] diagramsl0.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	      @if extension golem95 %] golem95h[%helicity%].[%O%][%
@@ -135,10 +135,10 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
                  @if extension quadruple %] ninjah[%helicity%]_qp.[%O%][%
 		 @end @if %][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0.[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]h[%helicity%].[%O%][%
             @end @for %][%
@@ -148,17 +148,17 @@ amplitudeh[%helicity%].[%O%]: globals.[%O%][% @if generate_lo_diagrams %] diagra
 @if extension quadruple %][%
 @if enable_truncation_orders %][%
 @for each 0 1 2 var=efto %]
-amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_[% efto %]_qp.[%O%][% @end @if %][%
+amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_tree_diagrams %] diagramsl0_[% efto %]_qp.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	      @if extension golem95 %] golem95_[% efto %]h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninja_[% efto %]h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0_[% efto %]_qp.[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.[%O%][%
             @end @for %][%
@@ -166,17 +166,17 @@ amplitudeh[%helicity%]_[% efto %]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_d
 @end @if helsum %][%
 @end @for %][%
 @else %]
-amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
+amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_tree_diagrams %] diagramsl0_qp.[%O%][% @end @if %][%
 @if helsum %][%
 @else %][%
 	      @if extension golem95 %] golem95h[%helicity%]_qp.[%O%][%
    	   @end @if %][%
 	      @if extension ninja %] ninjah[%helicity%]_qp.[%O%][%
    	   @end @if %][%
-	   @if generate_lo_diagrams %] \
+	   @if generate_tree_diagrams %] \
 			diagramsl0_qp.[%O%][%
 		@end @if %][%
-		@if generate_nlo_virt %][%
+		@if generate_loop_diagrams %][%
             @for elements topolopy.keep.virt %] \
 			abbrevd[%$_%]h[%helicity%]_qp.[%O%][%
             @end @for %][%
@@ -187,7 +187,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 @end @for %][%
 
 @for each $(OBJEXTG) var=O %][%
-   @if generate_lo_diagrams %][%
+   @if generate_tree_diagrams %][%
    @if enable_truncation_orders %][%
    @for each 0 1 2 var=efto %]   
 [% process_name asprefix=\_ %]diagramsh[% helicity %]l0_[% efto %].mod: diagramsl0_[% efto %].[%O%][%
@@ -213,7 +213,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
    @end @for %][%
    @end @if extension quadruple %][%
    @end @if %][%
-   @end @if generate_lo_diagrams %][%
+   @end @if generate_tree_diagrams %][%
 @if helsum %][%
 @else %][%
 
@@ -262,7 +262,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 		@end @if extension quadruple %][%
 		@end @if %][%
 		@end @if extension ninja %][%
-   @if generate_nlo_virt %][%
+   @if generate_loop_diagrams %][%
          @for elements topolopy.keep.virt %][%
 	 @if enable_truncation_orders %][%
 		@for each 0 1 2 var=efto %]
@@ -291,7 +291,7 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_lo_diagrams %] 
 	 @end @if %][%
          @end @for %][%
    @end @if extension quadruple %][%
-   @end @if generate_nlo_virt%][%
+   @end @if generate_loop_diagrams%][%
 	@if enable_truncation_orders %][%
 	@for each 0 1 2 var=efto %]
 [% process_name asprefix=\_ %]amplitudeh[% helicity %]_[% efto %].mod: amplitudeh[%helicity%]_[% efto %].[%O%][%

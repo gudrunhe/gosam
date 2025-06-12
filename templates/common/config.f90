@@ -226,7 +226,7 @@
              false=.false. %]
 
    ! Number of good digits in virtual amplitude:[%
-   @if generate_lo_diagrams %][% @else %]
+   @if generate_tree_diagrams %][% @else %]
    ! not used (tree-level not available):[% @end @if %]
    integer :: PSP_chk_th1 = [% PSP_chk_th1 %] ! pole-check (th1 < r => accept)
    integer :: PSP_chk_th2 = [% PSP_chk_th2 %] ! pole-check (th2 < r < th1 => rotation, r < th2 => rescue)
@@ -235,7 +235,7 @@
    integer :: PSP_chk_th5 = [% PSP_chk_th5 %] ! quad/quad_rot rotation (th5 < r => accept, r < th5 => discard)
 
    real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
-   [% @if generate_lo_diagrams %]
+   [% @if generate_tree_diagrams %]
    ! not used in this process (process is not loop-induced):[%
    @else %]
    ! used instead:[%

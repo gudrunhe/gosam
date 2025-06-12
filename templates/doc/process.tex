@@ -302,7 +302,7 @@ For the definition of tensor states, please refer to the document
 @end @for %]
 \end{align}
 
-[% @if generate_lo_diagrams %]
+[% @if generate_tree_diagrams %]
 \section{Tree Diagrams}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-0.log}
 
@@ -337,9 +337,9 @@ For the definition of tensor states, please refer to the document
       @end @for %][%
    @end @with%][% 
 @end @if pyxodraw %][%
-@end @if generate_lo_diagrams %]
+@end @if generate_tree_diagrams %]
 
-[% @if generate_nlo_virt %]
+[% @if generate_loop_diagrams %]
 \section{One-Loop Diagrams}
 \subsection*{General Information}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-1.log}
@@ -527,7 +527,7 @@ $S^\prime=S[%
 @end @with%][%
 @end @if pyxodraw %][%
 @end @for groups %][%
- @end @if generate_nlo_virt %]
+ @end @if generate_loop_diagrams %]
  [% @if generate_eft_counterterms %]
 \section{Counterterm Diagrams}
 \lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-ct.log}

@@ -1051,14 +1051,14 @@ def process_order_file(
     powers = orders[0] if orders else []
 
     if len(powers) == 2:
-        generate_lo_diagrams = True
-        generate_nlo_virt = False
+        generate_tree_diagrams = True
+        generate_loop_diagrams = False
     elif len(powers) == 3:
-        generate_lo_diagrams = str(powers[1]).strip().lower() != "none"
-        generate_nlo_virt = True
+        generate_tree_diagrams = str(powers[1]).strip().lower() != "none"
+        generate_loop_diagrams = True
 
-    conf["generate_lo_diagrams"] = generate_lo_diagrams
-    conf["generate_nlo_virt"] = generate_nlo_virt
+    conf["generate_tree_diagrams"] = generate_tree_diagrams
+    conf["generate_loop_diagrams"] = generate_loop_diagrams
 
     if "ewchoose" in golem.model.MODEL_OPTIONS:
         conf.setProperty("ewchoose", str(golem.model.MODEL_OPTIONS["ewchoose"]))

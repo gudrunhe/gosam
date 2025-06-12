@@ -40,13 +40,13 @@ def diagram_count(conf, loops, cut=0):
     ext = ".hh"
 
     if loops == 0:
-        present = conf.getBooleanProperty("generate_lo_diagrams")
+        present = conf.getBooleanProperty("generate_tree_diagrams")
         if present:
             fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_LO + ext)]
         else:
             return 0
     elif loops == 1:
-        present = conf.getBooleanProperty("generate_nlo_virt")
+        present = conf.getBooleanProperty("generate_loop_diagrams")
         if present:
             fnames = [os.path.join(path, consts.PATTERN_DIAGRAMS_NLO_VIRT + ext)]
         else:
@@ -219,14 +219,14 @@ def run_qgraf(conf, in_particles, out_particles):
     templates = conf.getProperty(golem.properties.template_path)
     templates = os.path.expandvars(templates)
 
-    flag_generate_nlo_virt = conf.getBooleanProperty("generate_nlo_virt")
-    flag_generate_lo_diagrams = conf.getBooleanProperty("generate_lo_diagrams")
+    flag_generate_loop_diagrams = conf.getBooleanProperty("generate_loop_diagrams")
+    flag_generate_tree_diagrams = conf.getBooleanProperty("generate_tree_diagrams")
     flag_draw_diagrams = conf.getProperty(golem.properties.pyxodraw)
     flag_topolopy = True
 
     flag_generate_eft_counterterms = conf.getBooleanProperty("generate_eft_counterterms")
 
-    if not (flag_generate_nlo_virt or flag_generate_lo_diagrams or flag_generate_eft_counterterms):
+    if not (flag_generate_loop_diagrams or flag_generate_tree_diagrams or flag_generate_eft_counterterms):
         # Should never happen but is not considered an error either.
         # nothing to do
         return
@@ -304,7 +304,7 @@ def run_qgraf(conf, in_particles, out_particles):
         templates = golem_path("templates")
 
     # ----------------- LO PART -------------------------------------------
-    if flag_generate_lo_diagrams:
+    if flag_generate_tree_diagrams:
         output_name = consts.PATTERN_DIAGRAMS_LO + form_ext
         log_name = consts.PATTERN_DIAGRAMS_LO + log_ext
 
@@ -349,7 +349,7 @@ def run_qgraf(conf, in_particles, out_particles):
             run_qgraf_dat(conf, output_name, log_name)
 
     # ----------------- VIRTUAL PART --------------------------------------
-    if flag_generate_nlo_virt:
+    if flag_generate_loop_diagrams:
         output_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + form_ext
         log_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + log_ext
 
@@ -443,7 +443,7 @@ def run_qgraf(conf, in_particles, out_particles):
     # if os.path.exists(full_name):
     # os.remove(full_name)
 
-    if flag_generate_lo_diagrams and diagram_count(conf, 0) == 0 and flag_generate_nlo_virt:
+    if flag_generate_tree_diagrams and diagram_count(conf, 0) == 0 and flag_generate_loop_diagrams:
         logger.warning(
             "There are no tree-level diagrams for your setup.\n"
             + "!!! YOU WILL ALWAYS GET ZERO !!!\n"

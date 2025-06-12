@@ -58,7 +58,7 @@ TXT_TREE_STAMP=[%
 		d[%$_%]_2[% @end @if %]h[%helicity%]l0-stamp[%
    @end @for %]
 
-[% @if generate_lo_diagrams %]
+[% @if generate_tree_diagrams %]
 SOURCE_TREE= \
 	diagramsl0[% @if enable_truncation_orders %]_0.f90 diagramsl0_1.f90 diagramsl0_2[% @end @if %].f90 $(DIAGRAMS_TREE)[%
    @if extension quadruple %] \
@@ -69,7 +69,7 @@ SOURCE_TREE= \
 [% @else %]
 SOURCE_TREE=
 [% @end @if %]
-[% @if generate_nlo_virt %]
+[% @if generate_loop_diagrams %]
 DIAGRAMS_VIRT=[%
 @if helsum %][%
    @for elements topolopy.keep.virt %] \
@@ -145,7 +145,7 @@ SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
-[% @end @if generate_nlo_virt %]
+[% @end @if generate_loop_diagrams %]
 [% @if generate_eft_counterterms %][%
 @if eval topolopy.count.ct .gt. 0 %]
 
@@ -379,7 +379,7 @@ diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: bor
 @end @if %][% @end @for %]
 
 [%
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 [% @if enable_truncation_orders %][%
@@ -802,7 +802,7 @@ d[%$_%]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1
 	@end @if enable_truncation_orders  %][%
 @end @for diagrams %][%
 @end @for groups %][%
-@end @if generate_nlo_virt %]
+@end @if generate_loop_diagrams %]
 
 [% @if generate_eft_counterterms %][%
 @for elements topolopy.keep.ct %][%

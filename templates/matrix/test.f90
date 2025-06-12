@@ -60,7 +60,7 @@
       call ir_subtraction(vecs, scale2, irp)
       if(ievt.eq.NEVT) then
          call print_parameters(scale2)[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "LO:", amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, finite part:", &
              &    amp(1)/amp(0)
@@ -73,7 +73,7 @@
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, single pole:", amp(2)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, double pole:", amp(3)
 [% @end @if %]
-[% @if generate_lo_diagrams %]
+[% @if generate_tree_diagrams %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  single pole:", &
             & irp(2)/amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "IR,  double pole:", &

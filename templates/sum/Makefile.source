@@ -25,7 +25,7 @@ FORM_OPT=-D PROCESSPATH=.. \
 	 -p ..:../codegen \
 	 -M -q
 
-[% @if generate_nlo_virt %]
+[% @if generate_loop_diagrams %]
 DIAGRAMS_VIRT=[%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.f90[%
@@ -64,14 +64,14 @@ SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
-[% @end @if generate_nlo_virt %]
+[% @end @if generate_loop_diagrams %]
 
 .PHONY: source
 .SUFFIXES:
 all_source: $(SOURCE_VIRT)
 
 [% 
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 d[%$_%]l1.prc:
@@ -92,7 +92,7 @@ d[%$_%]l1.prc:
 @end @if%]
 
 [% 
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
@@ -253,6 +253,6 @@ d[%$_%]l121.f90[% @if extension quadruple %] d[%$_%]l121_qp.f90[% @end @if %]: d
 		@end @if %][%
 	@end @for diagrams %][%
 @end @for groups %][%
-@end @if generate_nlo_virt %]
+@end @if generate_loop_diagrams %]
 
 

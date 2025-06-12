@@ -5,7 +5,7 @@ module     [% process_name asprefix=\_ %]globalsl1
 
    private
 
-   [% @if generate_lo_diagrams %]
+   [% @if generate_tree_diagrams %]
    ! amp0 is used to store the LO amplitude between the calls
    ! for one kinematics.
    complex(ki), dimension(numcs[%@if helsum%],0:max(0[%@for helicities generated%],&

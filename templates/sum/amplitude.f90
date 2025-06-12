@@ -3,7 +3,7 @@
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki, &
        & reduction_interoperation
    use [% process_name asprefix=\_ %]color, only: numcs[%
-@if generate_nlo_virt %]
+@if generate_loop_diagrams %]
    use [% process_name asprefix=\_ %]groups[%
       @if extension golem95 %]
    use precision_golem, only: ki_gol => ki
@@ -23,7 +23,7 @@
 contains
    !---#[ function samplitude:
    function     samplitude(scale2,ok,rational2,[%
-@if generate_lo_diagrams %]opt_amp0,[%
+@if generate_tree_diagrams %]opt_amp0,[%
 @else %]the_col0,[%
 @end @if%]opt_perm)
       use [% process_name asprefix=\_
@@ -31,12 +31,12 @@ contains
       & logfile, debug_nlo_diagrams
       use [% process_name asprefix=\_
          %]globalsl1, only:[%
-@if generate_lo_diagrams %] amp0,[%
+@if generate_tree_diagrams %] amp0,[%
 @else %] col0,[%
 @end @if %]perm, use_perm, epspow
       use [% process_name asprefix=\_ %]globals, &
      & only: init_lo, rat2[%
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
       @for groups var=grp %][%
          @for diagrams group=grp %]
       use [% process_name asprefix=\_
@@ -44,7 +44,7 @@ contains
          @end @for %][%
       @end @for %][%
 @end @if %][%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for helicities generated %]
       use [% process_name asprefix=\_
       %]diagramsh[%helicity%]l0, only: amplitudeh[%helicity%]l0 => amplitude[%
@@ -55,18 +55,18 @@ contains
       real(ki), intent(in) :: scale2
       logical, intent(out) :: ok
       real(ki), intent(out) :: rational2[%
-@if generate_lo_diagrams %]
+@if generate_tree_diagrams %]
       complex(ki), dimension(numcs,0:max(0,[%@for helicities generated%][%@if is_first%][%@else%],[%@end @if%][%helicity%][%@end @for%])), intent(in), optional :: opt_amp0[%
 @else %]
       integer, intent(in) :: the_col0[%
 @end @if %]
       integer, dimension(numcs), intent(in), optional :: opt_perm
-      [% @if generate_lo_diagrams %]real(ki)[% @else 
+      [% @if generate_tree_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(-2:0) :: samplitude
 
-      [% @if generate_lo_diagrams %]real(ki)[% @else 
+      [% @if generate_tree_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(-2:0) :: acc
-      [% @if generate_lo_diagrams %]real(ki)[% @else 
+      [% @if generate_tree_diagrams %]real(ki)[% @else 
       %]complex(ki)[% @end @if %], dimension(0:2,-2:0) :: samp_part
 
       logical :: acc_ok
@@ -75,7 +75,7 @@ contains
       rational2 = 0.0_ki
 
       samplitude(:) = 0.0_ki[%
-@if generate_lo_diagrams %]
+@if generate_tree_diagrams %]
       if (present(opt_amp0)) then
          amp0 = opt_amp0
       else[%
@@ -95,7 +95,7 @@ contains
 
       rat2 = (0.0_ki, 0.0_ki)
       call init_lo()[%
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
       @for groups var=grp %][%
          @for diagrams group=grp %][%
             @if use_flags_1 %]
@@ -141,11 +141,11 @@ contains
          & "<result name='r2' re='", real(rat2, ki), &
          &                 "' im='", aimag(rat2), "' />"
       end if[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       rational2 = 2.0_ki * real(rat2, ki)[%
       @end @if %]
       samplitude(0) = [%
-      @if generate_lo_diagrams %]2.0_ki * real(rat2, ki)[%
+      @if generate_tree_diagrams %]2.0_ki * real(rat2, ki)[%
       @else %]rat2[%
       @end @if %][%
       @for repeat maxloopsize shift=1 var=ls %][%
@@ -164,7 +164,7 @@ contains
    @end @select %][%
 @else %]
       samplitude(:) = (0.0_ki, 0.0_ki)[%
-@end @if generate_nlo_virt %]
+@end @if generate_loop_diagrams %]
    end function samplitude
    !---#] function samplitude:[%
    @for groups var=grp %]
@@ -185,7 +185,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
    real(ki)[%
       @else %]
    complex(ki)[%
@@ -208,7 +208,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       call reconstruct_golem95(coeffs)
       mu2_scale_par = real(scale2, ki_gol)
       gres = contract_golem95(coeffs)[%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
       samplitude(-2) = 2.0_ki * real(gres%A, ki)
       samplitude(-1) = 2.0_ki * real(gres%B, ki)
       samplitude( 0) = 2.0_ki * real(gres%C, ki)[%
@@ -222,7 +222,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
       @if extension ninja %]
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)[%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
       samplitude(:) = 2.0_ki * real(tot(:), ki)[%
          @else %]
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)[%
@@ -243,7 +243,7 @@ subroutine     evaluate_group[% grp %](scale2,samplitude,ok)
    end select
 
    if(debug_nlo_diagrams) then[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       write(logfile,'(A33,E24.16,A3)') &
          & "<result kind='nlo-finite' value='", samplitude(0), "'/>"
       write(logfile,'(A33,E24.16,A3)') &

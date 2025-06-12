@@ -31,7 +31,7 @@
 @end @if extension quadruple %][%
 @if helsum %][%
    @for helicities generated %][%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
@@ -55,7 +55,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
             @end @if %][%
       @end @if enable_truncation_orders %][%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
       @if generate_counterterms %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
@@ -111,7 +111,7 @@
    @end @if %][%
 @else %][% ' not helsum ' %][%
    @for helicities generated %][%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0, only: amplitude[%helicity%]l0_0 => amplitude
@@ -135,7 +135,7 @@
         %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
       @if generate_counterterms %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
@@ -161,7 +161,7 @@
       @end @if extension quadruple %][%
       @end @if enable_truncation_orders %][%
       @end @if generate_counterterms %][%
-      @if generate_nlo_virt %][%
+      @if generate_loop_diagrams %][%
       @if enable_truncation_orders %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0, [% ' '
@@ -784,7 +784,7 @@ contains
          call inspect_kinematics(logfile)
       end if
 
-[% @if generate_lo_diagrams %]
+[% @if generate_tree_diagrams %]
       if (present(h)) then
          amp(1) = samplitudel0_h(vecs, h)
       else
@@ -792,8 +792,8 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki[%
-@end @if generate_lo_diagrams%][%
-      @if generate_nlo_virt %][%
+@end @if generate_tree_diagrams%][%
+      @if generate_loop_diagrams %][%
       @if generate_counterterms %]
       if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
@@ -816,14 +816,14 @@ contains
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
          @else %][%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
          amp((/4,3,2/)) = samplitudel1_h(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
          @else %]
          amp((/4,3,2/)) = samplitudel1_h(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
          @end @if %][%
          @end @if %]
       else[%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling[%
          @else %]
          amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
@@ -853,7 +853,7 @@ contains
       @else %]
       amp(2:4) = 0.0_ki[%
       @end @if%][%
-		@if generate_nlo_virt %]
+		@if generate_loop_diagrams %]
       if (convert_to_thv) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -891,11 +891,11 @@ contains
       amp(1) = amp(1) * get_formfactor_lo(vecs)[%@end @if %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
       amp(2:4) = amp(2:4) * get_formfactor_nlo(vecs)[%@end @if %][%
-      @if generate_nlo_virt %]
+      @if generate_loop_diagrams %]
       select case(nlo_prefactors)
       case(0)
          ! The result is already in its desired form[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       case(1)
          amp(2:4) = amp(2:4) * nlo_coupling
       case(2)
@@ -922,7 +922,7 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki[%
-  @if generate_lo_diagrams %][%
+  @if generate_tree_diagrams %][%
   @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1027,7 +1027,7 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki)
       end if[%
-   @end @if generate_lo_diagrams %]
+   @end @if generate_tree_diagrams %]
    end function samplitudel0
    !---#] function samplitudel0 :
    !---#[ function samplitudel0_h :
@@ -1042,7 +1042,7 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki[%
-  @if generate_lo_diagrams %]
+  @if generate_tree_diagrams %]
       select case(h) [%
   @for helicities %]
       case ([%helicity%])
@@ -1148,7 +1148,7 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki)
       end if[%
-   @end @if generate_lo_diagrams %]
+   @end @if generate_tree_diagrams %]
    end function samplitudel0_h
    !---#] function samplitudel0_h :
    [% @if generate_counterterms %]
@@ -1167,7 +1167,7 @@ contains
          logical, intent(in) :: logs
    
          amp = 0.0_ki[%
-     @if generate_lo_diagrams %][%
+     @if generate_tree_diagrams %][%
      @for unique_helicity_mappings %]
           !---#[ reinitialize kinematics:[%
         @for helicity_mapping shift=1 %][%
@@ -1314,7 +1314,7 @@ contains
          if (include_symmetry_factor) then
             amp = amp / real(symmetry_factor, ki)
          end if[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
       end function samplitudect
       !---#] function samplitudect :
       !---#[ function samplitudect_h :
@@ -1333,7 +1333,7 @@ contains
          logical, intent(in) :: logs
    
          amp = 0.0_ki[%
-     @if generate_lo_diagrams %]
+     @if generate_tree_diagrams %]
         select case(h) [%
      @for helicities %]
          case ([%helicity%])
@@ -1481,7 +1481,7 @@ contains
          if (include_symmetry_factor) then
             amp = amp / real(symmetry_factor, ki)
          end if[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
       end function samplitudect_h
       !---#] function samplitudect_h :
 [% @end @if generate_counterterms %]
@@ -1500,7 +1500,7 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
@@ -1514,13 +1514,13 @@ contains
       amp(:) = 0.0_ki
       rat2 = 0.0_ki
       ok = .true.[%
-   @if generate_nlo_virt%][%
+   @if generate_loop_diagrams%][%
    @if helsum %]
       if(debug_nlo_diagrams) then
          write(logfile,*) "<helicity index='sum'>"
       end if
       call init_event(vecs)[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       heli_amp = samplitudel1summed(real(scale2,ki),my_ok,rational2)[%
       @else %]
       do c=1,numcs
@@ -1550,7 +1550,7 @@ contains
          end if[%
    @else %][% 'if not helsum' %][%
    @for unique_helicity_mappings %][%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -1674,7 +1674,7 @@ contains
         write(logfile,*) "</helicity>"
      end if[%
      @end @for current_helicities %][%
-      @else %][% 'if not generate_lo_diagrams' %]
+      @else %][% 'if not generate_tree_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
@@ -1855,10 +1855,10 @@ contains
          write(logfile,*) "</helicity>"
       end if[%
       @end @for current_helicities %][%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
    @end @for unique_helicity_mappings %][%
    @end @if helsum %][%
-   @end @if generate_nlo_virt %]
+   @end @if generate_loop_diagrams %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -1886,7 +1886,7 @@ contains
       real(ki), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
@@ -1900,14 +1900,14 @@ contains
       amp(:) = 0.0_ki
       rat2 = 0.0_ki
       ok = .true.[%
-   @if generate_nlo_virt%]
+   @if generate_loop_diagrams%]
       select case(h)[%
    @for helicities%]
       case ([%helicity%])
          if(debug_nlo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]'>"
          end if[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -2026,7 +2026,7 @@ contains
         end if
         write(logfile,*) "</helicity>"
      end if[%
-      @else %][% 'if not generate_lo_diagrams' %]
+      @else %][% 'if not generate_tree_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
@@ -2205,10 +2205,10 @@ contains
          end if
          write(logfile,*) "</helicity>"
       end if[%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
    @end @for helicities %]
    end select[%
-   @end @if generate_nlo_virt %]
+   @end @if generate_loop_diagrams %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki)
       end if
@@ -2269,7 +2269,7 @@ contains
         oper = insertion_operator_qed(real(scale2,ki), vecs)
       endif
       amp(:) = 0.0_ki[%
-  @if generate_lo_diagrams %][%
+  @if generate_tree_diagrams %][%
   @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -2532,7 +2532,7 @@ contains
         oper = insertion_operator_qed(real(scale2,ki), vecs)
       endif
       amp(:) = 0.0_ki[%
-  @if generate_lo_diagrams %]
+  @if generate_tree_diagrams %]
       select case(h) [%
   @for helicities %]
       case ([%helicity%])
@@ -2800,7 +2800,7 @@ contains
          call inspect_kinematics(logfile)
       end if
 
-[% @if generate_lo_diagrams %]
+[% @if generate_tree_diagrams %]
       if (present(h)) then
          amp(1) = samplitudel0_h_qp(vecs, h)
       else
@@ -2808,8 +2808,8 @@ contains
       end if[%
       @else %]
       amp(1)   = 0.0_ki_qp[%
-@end @if generate_lo_diagrams%][%
-      @if generate_nlo_virt %]
+@end @if generate_tree_diagrams%][%
+      @if generate_loop_diagrams %]
       if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp[%
@@ -2830,14 +2830,14 @@ contains
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
          @else %][%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
          amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
          @else %]
          amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
          @end @if %][%
          @end @if %]
       else[%
-         @if generate_lo_diagrams %]
+         @if generate_tree_diagrams %]
          amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling[%
          @else %]
          amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
@@ -2865,7 +2865,7 @@ contains
       @else %]
       amp(2:4) = 0.0_ki_qp[%
       @end @if%][%
-		@if generate_nlo_virt %]
+		@if generate_loop_diagrams %]
       if (convert_to_thv) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -2903,11 +2903,11 @@ contains
       amp(1) = amp(1) * get_formfactor_lo(vecs)[%@end @if %][%
       @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]
       amp(2:4) = amp(2:4) * get_formfactor_nlo(vecs)[%@end @if %][%
-      @if generate_nlo_virt %]
+      @if generate_loop_diagrams %]
       select case(nlo_prefactors)
       case(0)
          ! The result is already in its desired form[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       case(1)
          amp(2:4) = amp(2:4) * nlo_coupling
       case(2)
@@ -2934,7 +2934,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki_qp[%
-  @if generate_lo_diagrams %][%
+  @if generate_tree_diagrams %][%
   @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -3039,7 +3039,7 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki_qp)
       end if[%
-   @end @if generate_lo_diagrams %]
+   @end @if generate_tree_diagrams %]
    end function samplitudel0_qp
    !---#] function samplitudel0_qp :
    !---#[ function samplitudel0_h_qp :
@@ -3054,7 +3054,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs
 
       amp = 0.0_ki_qp[%
-  @if generate_lo_diagrams %]
+  @if generate_tree_diagrams %]
       select case(h) [%
   @for helicities %]
       case ([%helicity%])
@@ -3160,7 +3160,7 @@ contains
       if (include_symmetry_factor) then
          amp = amp / real(symmetry_factor, ki_qp)
       end if[%
-   @end @if generate_lo_diagrams %]
+   @end @if generate_tree_diagrams %]
    end function samplitudel0_h_qp
    !---#] function samplitudel0_h_qp :
    [% @if generate_counterterms %]
@@ -3179,7 +3179,7 @@ contains
          logical, intent(in) :: logs
    
          amp = 0.0_ki_qp[%
-     @if generate_lo_diagrams %][%
+     @if generate_tree_diagrams %][%
      @for unique_helicity_mappings %]
           !---#[ reinitialize kinematics:[%
         @for helicity_mapping shift=1 %][%
@@ -3326,7 +3326,7 @@ contains
          if (include_symmetry_factor) then
             amp = amp / real(symmetry_factor, ki_qp)
          end if[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
       end function samplitudect_qp
       !---#] function samplitudect_qp :
       !---#[ function samplitudect_h_qp :
@@ -3345,7 +3345,7 @@ contains
          logical, intent(in) :: logs
    
          amp = 0.0_ki_qp[%
-     @if generate_lo_diagrams %]
+     @if generate_tree_diagrams %]
         select case(h) [%
      @for helicities %]
          case ([%helicity%])
@@ -3493,7 +3493,7 @@ contains
          if (include_symmetry_factor) then
             amp = amp / real(symmetry_factor, ki_qp)
          end if[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
       end function samplitudect_h_qp
       !---#] function samplitudect_h_qp :
 [% @end @if generate_counterterms %]   
@@ -3512,7 +3512,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
@@ -3526,13 +3526,13 @@ contains
       amp(:) = 0.0_ki_qp
       rat2 = 0.0_ki_qp
       ok = .true.[%
-   @if generate_nlo_virt%][%
+   @if generate_loop_diagrams%][%
    @if helsum %]
       if(debug_nlo_diagrams) then
          write(logfile,*) "<helicity index='sum'>"
       end if
       call init_event(vecs)[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
       heli_amp = samplitudel1summed_qp(real(scale2,ki_qp),my_ok,rational2)[%
       @else %]
       do c=1,numcs
@@ -3562,7 +3562,7 @@ contains
          end if[%
    @else %][% 'if not helsum' %][%
    @for unique_helicity_mappings %][%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -3686,7 +3686,7 @@ contains
         write(logfile,*) "</helicity>"
      end if[%
      @end @for current_helicities %][%
-      @else %][% 'if not generate_lo_diagrams' %]
+      @else %][% 'if not generate_tree_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
@@ -3867,10 +3867,10 @@ contains
          write(logfile,*) "</helicity>"
       end if[%
       @end @for current_helicities %][%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
    @end @for unique_helicity_mappings %][%
    @end @if helsum %][%
-   @end @if generate_nlo_virt %]
+   @end @if generate_loop_diagrams %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki_qp)
       end if
@@ -3898,7 +3898,7 @@ contains
       real(ki_qp), dimension([%num_legs%], 4) :: pvecs[%
       @end @if %]
       real(ki_qp), dimension(-2:0) :: amp, heli_amp[%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
@@ -3912,14 +3912,14 @@ contains
       amp(:) = 0.0_ki_qp
       rat2 = 0.0_ki_qp
       ok = .true.[%
-   @if generate_nlo_virt%]
+   @if generate_loop_diagrams%]
       select case(h)[%
    @for helicities%]
       case ([%helicity%])
          if(debug_nlo_diagrams) then
             write(logfile,*) "<helicity index='[% helicity %]'>"
          end if[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -4038,7 +4038,7 @@ contains
         end if
         write(logfile,*) "</helicity>"
      end if[%
-      @else %][% 'if not generate_lo_diagrams' %]
+      @else %][% 'if not generate_tree_diagrams' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
@@ -4217,10 +4217,10 @@ contains
          end if
          write(logfile,*) "</helicity>"
       end if[%
-      @end @if generate_lo_diagrams %][%
+      @end @if generate_tree_diagrams %][%
    @end @for helicities %]
    end select[%
-   @end @if generate_nlo_virt %]
+   @end @if generate_loop_diagrams %]
       if (include_helicity_avg_factor) then
          amp = amp / real(in_helicities, ki_qp)
       end if
@@ -4278,7 +4278,7 @@ contains
         oper = insertion_operator_qed_qp(real(scale2,ki_qp), vecs)
       endif
       amp(:) = 0.0_ki_qp[%
-  @if generate_lo_diagrams %][%
+  @if generate_tree_diagrams %][%
   @for unique_helicity_mappings %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -4540,7 +4540,7 @@ contains
         oper = insertion_operator_qed_qp(real(scale2,ki_qp), vecs)
       endif
       amp(:) = 0.0_ki_qp[%
-  @if generate_lo_diagrams %]
+  @if generate_tree_diagrams %]
       select case(h) [%
   @for helicities %]
       case ([%helicity%])
@@ -4806,7 +4806,7 @@ contains
      @if is_last %]/)[%
      @end @if %][%
   @end @for %][%
-  @if generate_lo_diagrams %][%
+  @if generate_tree_diagrams %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -4910,13 +4910,13 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %][%
-      @if generate_lo_diagrams %][%
+      @if generate_tree_diagrams %][%
       @else %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
       integer :: c
       logical :: my_ok
       real(ki) :: rational2, scale2[%
-      @end @if generate_lo_diagrams %]
+      @end @if generate_tree_diagrams %]
       ampcc(:) = 0.0_ki[%
      @for repeat 1 num_legs inclusive=true %][%
         @if is_first %]
@@ -4927,7 +4927,7 @@ contains
         @end @if %][%
      @end @for %][%
    @if helsum %][%
-   @if generate_lo_diagrams %][%
+   @if generate_tree_diagrams %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -5030,7 +5030,7 @@ contains
      @end @if enable_truncation_orders %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
-  @else %][% 'if not generate_lo_diagrams' %]
+  @else %][% 'if not generate_tree_diagrams' %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
@@ -5038,7 +5038,7 @@ contains
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc)[%
-  @end @if generate_lo_diagrams%][% 
+  @end @if generate_tree_diagrams%][% 
   @else %][% 'if not helsum' %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
@@ -5071,7 +5071,7 @@ contains
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
       !---#] reinitialize kinematics:[%
-         @if generate_lo_diagrams %][%
+         @if generate_tree_diagrams %][%
          @if enable_truncation_orders %]
          select case (EFTcount)
             ! amplitude*_0 -> SM
@@ -5141,7 +5141,7 @@ contains
             color_vector = amplitude[%map.index%]l0()
             call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
          @end @if enable_truncation_orders %][%
-         @else %][% 'if not generate_lo_diagrams' %]
+         @else %][% 'if not generate_tree_diagrams' %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
@@ -5149,7 +5149,7 @@ contains
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
-         @end @if generate_lo_diagrams %]
+         @end @if generate_tree_diagrams %]
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
   @end @for helicities %][%
@@ -5178,7 +5178,7 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       complex(ki), dimension(4,4) :: tens
       complex(ki) :: pp, pm, mp, mm[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -5187,7 +5187,7 @@ contains
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%][%
    @end @for %][%
-@end @if generate_lo_diagrams %]
+@end @if generate_tree_diagrams %]
 
       [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the spin_correlated_lo2  subroutine with the"
@@ -5204,7 +5204,7 @@ contains
       write(*,*) "without the 'helsum' option"[%
    @else %]
       !---#[ Initialize helicity amplitudes :[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -5305,7 +5305,7 @@ contains
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
       end if[%
-@end @if generate_lo_diagrams %][%
+@end @if generate_tree_diagrams %][%
 @end @if helsum %]
    end subroutine spin_correlated_lo2
 
@@ -5321,7 +5321,7 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       complex(ki), dimension(4,4) :: tens
       complex(ki) :: pp, pm, mp, mm[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -5331,7 +5331,7 @@ contains
       complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
       complex(ki) :: phasefac[%index%][%
    @end @for %][%
-@end @if generate_lo_diagrams %]
+@end @if generate_tree_diagrams %]
 
       bornsc(:,:,:) = 0.0_ki[%
    @if helsum %]
@@ -5340,7 +5340,7 @@ contains
       write(*,*) "without the 'helsum' option"[%
    @else %]
       !---#[ Initialize helicity amplitudes :[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -5723,7 +5723,7 @@ contains
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
       end if[%
-@end @if generate_lo_diagrams %][%
+@end @if generate_tree_diagrams %][%
 @end @if helsum %]
    end subroutine spin_correlated_lo2_whizard
 
@@ -5736,7 +5736,7 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       integer :: i
       complex(ki) :: pm, mp[%
-@if generate_lo_diagrams %][%
+@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -5758,7 +5758,7 @@ contains
       integer :: c
       logical :: my_ok
       real(ki) :: rational2, scale2[%
-@end @if generate_lo_diagrams %]
+@end @if generate_tree_diagrams %]
 
       [% @if enable_truncation_orders %]
       write(*,*) "Warning:  you are using the  OLP_spin_correlated_lo2 subroutine with"
@@ -5800,7 +5800,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:[%
-             @if generate_lo_diagrams %]
+             @if generate_tree_diagrams %]
       heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
              @else %]
       ! For loop induced diagrams the scale should not matter
@@ -5809,7 +5809,7 @@ contains
          colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[%
-             @end @if generate_lo_diagrams %][%
+             @end @if generate_tree_diagrams %][%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]

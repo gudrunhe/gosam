@@ -25,7 +25,7 @@ contains
       @end @for %]
       use config, only: PSP_rescue => PSP_rescue, &
            & PSP_verbosity => PSP_verbosity, &[%
-      @if generate_lo_diagrams %]
+      @if generate_tree_diagrams %]
            & PSP_chk_th1 => PSP_chk_th1, &
            & PSP_chk_th2 => PSP_chk_th2, &
            & PSP_chk_th3 => PSP_chk_th3, &
@@ -398,7 +398,7 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
-      use config, only: ki, [% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
+      use config, only: ki, [% @if generate_tree_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
       use model, only: parseline[%
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
       use [% sp.$_ %]_kinematics, only: boost_to_cms
@@ -522,7 +522,7 @@ contains
       if(present(acc)) then
          acc=10.0_ki**(-prec) ! point accuracy
       else
-         if(prec.lt.[% @if generate_lo_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %] .and. PSP_check) then
+         if(prec.lt.[% @if generate_tree_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %] .and. PSP_check) then
             ! Give back a Nan so that point is discarded
             zero = log(1.0_ki)[%
             @if eval ( cr.amplitudetype .eq. "scTree2" )%]
