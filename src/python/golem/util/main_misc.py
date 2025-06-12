@@ -502,6 +502,7 @@ def fill_config(conf):
     generate_loop_diagrams
     generate_tree_diagrams
     generate_eft_counterterms
+    is_loopinduced
     """
 
     ini = conf.getProperty(golem.properties.qgraf_in)
@@ -543,9 +544,11 @@ def fill_config(conf):
     if all(len(p) == 2 for p in orders):
         generate_tree_diagrams = True
         generate_loop_diagrams = False
+        is_loopinduced = False
     elif all(len(p) == 3 for p in orders):
         generate_tree_diagrams = not any(str(p[1]).strip().lower() == "none" for p in orders)
         generate_loop_diagrams = True
+        is_loopinduced = not generate_tree_diagrams
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
 
@@ -574,45 +577,75 @@ def fill_config(conf):
     # Check for fatal incompatible configurations:
     raise_err = False
     err_str = ""
+    err_count = 0
     if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
         # model is not a UFO
         if conf.getProperty("order_names"):
             raise_err = True
             err_str = err_str + ", order_names" if err_str else "order_names"
+            err_count += 1
         if conf.getBooleanProperty("enable_truncation_orders"):
             raise_err = True
             err_str = err_str + ", enable_truncation_orders" if err_str else "enable_truncation_orders"
+            err_count += 1
         if conf.getBooleanProperty("renorm_eftwilson"):
             raise_err = True
             err_str = err_str + ", renorm_eftwilson" if err_str else "renorm_eftwilson"
+            err_count += 1
         if conf.getBooleanProperty("use_vertex_labels"):
             raise_err = True
             err_str = err_str + ", use_vertex_labels" if err_str else "use_vertex_labels"
+            err_count += 1
+        if conf.getBooleanProperty("loop_suppressed_Born"):
+            raise_err = True
+            err_str = err_str + ", loop_suppressed_Born" if err_str else "loop_suppressed_Born"
+            err_count += 1
         if raise_err:
-            raise GolemConfigError(
-                "The properties '{0}'".format(err_str)
-                + " which you set in your configuration are only compatible"
-                + " with a UFO model, but you did not use one."
-            )
+            if err_count > 1:
+                raise GolemConfigError(
+                    "The properties '{0}'".format(err_str)
+                    + " which you set in your configuration are only compatible"
+                    + " with a UFO model, but you did not use one."
+                )
+            else:
+                raise GolemConfigError(
+                    "The property '{0}'".format(err_str)
+                    + " which you set in your configuration are only compatible"
+                    + " with a UFO model, but you did not use one."
+                )
     elif True if not conf.getProperty("order_names") else ("NP" not in conf.getProperty("order_names")):
         # model is a UFO, but no order_names specified or 'NP' not present in 'order_names'
         # Note: whether or not 'NP' is present in UFO is checked in feynrules.py, can't be done here
         if conf.getBooleanProperty("enable_truncation_orders"):
             raise_err = True
             err_str = err_str + ", enable_truncation_orders" if err_str else "enable_truncation_orders"
+            err_count += 1
         if conf.getBooleanProperty("renorm_eftwilson"):
             raise_err = True
             err_str = err_str + ", renorm_eftwilson" if err_str else "renorm_eftwilson"
+            err_count += 1
         if raise_err:
-            raise GolemConfigError(
-                "The properties '{0}'".format(err_str)
-                + " which you set in your configuration can only be used when"
-                + " 'order_names' are specified and contain the parameter 'NP'."
-            )
+            if err_count > 1:
+                raise GolemConfigError(
+                    "The properties '{0}'".format(err_str)
+                    + " which you set in your configuration can only be used when"
+                    + " 'order_names' are specified and contain the parameter 'NP'."
+                )
+            else:
+                raise GolemConfigError(
+                    "The property '{0}'".format(err_str)
+                    + " which you set in your configuration can only be used when"
+                    + " 'order_names' are specified and contain the parameter 'NP'."
+                )
     else:
         # model is a UFO and 'order_names' contain 'NP': Can use full EFT functionality
         pass
 
+    if conf.getBooleanProperty("loop_suppressed_Born"):
+        if not is_loopinduced:
+            raise GolemConfigError(
+            "\nThe property 'loop_suppressed_Born' can only be set to\n"
+            + "'True' when calculating a loop-induced process.")
 
     if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
         raise GolemConfigError(
@@ -658,6 +691,8 @@ def fill_config(conf):
 
     conf["generate_tree_diagrams"] = generate_tree_diagrams
     conf["generate_loop_diagrams"] = generate_loop_diagrams
+    conf["is_loopinduced"] = is_loopinduced
+    conf["generate_eft_loopind"] = conf.getBooleanProperty("loop_suppressed_Born") and is_loopinduced
     conf["generate_counterterms"] = generate_counterterms
     conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_loop_diagrams
     conf["generate_ym_counterterms"] = (conf.getBooleanProperty("renorm_yukawa") \
@@ -765,7 +800,7 @@ def fill_config(conf):
     conf["reduction_interoperation_rescue"] = conf["reduction_interoperation_rescue"].upper()
 
     if conf.getBooleanProperty("helsum"):
-        if not conf.getBooleanProperty("generate_tree_diagrams"):
+        if conf.getBooleanProperty("is_loopinduced"):
             raise GolemConfigError(
                 'The "helsum" feature is not implemented for loop-induced processes.\n'
                 + 'Set "helsum=false" for the selected process.\n'
@@ -825,6 +860,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
     generate_lo = conf.getBooleanProperty("generate_tree_diagrams")
     generate_virt = conf.getBooleanProperty("generate_loop_diagrams")
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
+    generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
 
     model = golem.util.tools.getModel(conf)
 
@@ -832,7 +868,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
     virt_flags = {}
     ct_flags = {}
 
-    if generate_lo:
+    if generate_lo or generate_eftli:
         modname = consts.PATTERN_TOPOLOPY_LO
         fname = os.path.join(path, "%s.py" % modname)
         logger.debug("Loading tree diagram file %r" % fname)

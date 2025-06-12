@@ -221,12 +221,16 @@ def run_qgraf(conf, in_particles, out_particles):
 
     flag_generate_loop_diagrams = conf.getBooleanProperty("generate_loop_diagrams")
     flag_generate_tree_diagrams = conf.getBooleanProperty("generate_tree_diagrams")
+    flag_generate_eft_loopind = conf.getBooleanProperty("generate_eft_loopind")
     flag_draw_diagrams = conf.getProperty(golem.properties.pyxodraw)
     flag_topolopy = True
 
     flag_generate_eft_counterterms = conf.getBooleanProperty("generate_eft_counterterms")
 
-    if not (flag_generate_loop_diagrams or flag_generate_tree_diagrams or flag_generate_eft_counterterms):
+    if not (flag_generate_loop_diagrams 
+            or flag_generate_tree_diagrams 
+            or flag_generate_eft_counterterms
+            or flag_generate_eft_loopind):
         # Should never happen but is not considered an error either.
         # nothing to do
         return
@@ -303,18 +307,26 @@ def run_qgraf(conf, in_particles, out_particles):
     if templates is None or len(templates) == 0:
         templates = golem_path("templates")
 
-    # ----------------- LO PART -------------------------------------------
-    if flag_generate_tree_diagrams:
+    # ----------------- TREE DIAGRAMS -------------------------------------------
+    if flag_generate_tree_diagrams or flag_generate_eft_loopind:
         output_name = consts.PATTERN_DIAGRAMS_LO + form_ext
         log_name = consts.PATTERN_DIAGRAMS_LO + log_ext
 
-        if powers and powers is not None:
+        if flag_generate_tree_diagrams:
+            vsum_pow = [[po[0], po[1]] for po in powers]
+        elif flag_generate_eft_loopind:
+            vsum_pow = [[po[0], po[2]] for po in powers]
+        else:
+            # should never happen
+            pass
+
+        if vsum_pow and vsum_pow is not None:
             new_verbatim = (
                 verbatim
                 + "\n"
                 + verbatim_lo
                 + "\n"
-                + "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in powers])
+                + "".join(["true=vsum[%s,%s,%s];\n" % (po[0], po[1], po[1]) for po in vsum_pow])
             )
         else:
             new_verbatim = verbatim + "\n" + verbatim_lo
@@ -348,7 +360,7 @@ def run_qgraf(conf, in_particles, out_particles):
             )
             run_qgraf_dat(conf, output_name, log_name)
 
-    # ----------------- VIRTUAL PART --------------------------------------
+    # ----------------- LOOP DIAGRAMS --------------------------------------
     if flag_generate_loop_diagrams:
         output_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + form_ext
         log_name = consts.PATTERN_DIAGRAMS_NLO_VIRT + log_ext
@@ -393,7 +405,7 @@ def run_qgraf(conf, in_particles, out_particles):
             )
             run_qgraf_dat(conf, output_name, log_name)
 
-    # ----------------- EFT CT PART -------------------------------------------
+    # ----------------- EFT CT DIAGRAMS -------------------------------------------
     if flag_generate_eft_counterterms:
         output_name = consts.PATTERN_DIAGRAMS_CT + form_ext
         log_name = consts.PATTERN_DIAGRAMS_CT + log_ext

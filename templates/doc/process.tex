@@ -32,7 +32,26 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-\noindent This process consists of [% @select topolopy.count.tree
+\noindent [% 
+@if is_loopinduced %] This process is loop-induced and contains [% 
+@select topolopy.count.docu
+ @case 0 %]no one-loop Born diagrams[%
+ @case 1 %]one one-loop Born diagram[%
+ @else %][% topolopy.count.docu %] one-loop Born diagrams[%
+ @end @select %]. GoSam has identified [% @select count groups
+    @case 0%]no different groups[%
+    @case 1%]only one group[%
+    @else %][% count groups %] groups [%
+ @end @select %] of one-loop Born diagrams by analyzing their one-loop integrals. [% 
+ @if generate_eft_loopind %] In addition there [% 
+ @select topolopy.count.tree
+ @case 0 %]are no diagrams[%
+ @case 1 %]is one diagram[%
+ @else %]are [%topolopy.count.tree %] diagrams[%
+ @end @select %] with tree topology containing a loop-suppressed EFT operator.[%
+ @end @if %][% 
+ @else 'not is_loopinduced %] This process consists of [% 
+ @select topolopy.count.tree
  @case 0 %]no LO diagrams[%
  @case 1 %]one LO diagram[%
  @else %][% topolopy.count.tree %] tree-level diagrams[%
@@ -51,7 +70,7 @@
  @case 1 %]is one extra counterterm diagram[%
  @else %]are [%topolopy.count.ct %] extra counterterm diagrams[%
  @end @select %] from renormalisation of EFT coefficients.[%
- @end @if %]
+ @end @if %][% @end @if is_loopinduced %]
 \end{abstract}
 \newpage
 \tableofcontents
@@ -338,6 +357,43 @@ For the definition of tensor states, please refer to the document
    @end @with%][% 
 @end @if pyxodraw %][%
 @end @if generate_tree_diagrams %]
+
+[% @if generate_eft_loopind %]
+\section{EFT Diagrams with Tree Topology and Loop-Suppression}
+\lstinputlisting[title={QGraf Setup},frame=tlrb]{../diagrams-0.log}
+
+[% 
+@if pyxodraw %][%
+   @with modules pyxotree.tex path=process %][% 
+      @for elements topolopy.keep.tree var=DIAG index=DIAGINDEX %][%
+         @if is_first %]\begin{longtable}{cc}
+\endfirsthead
+\endhead[%
+         @end @if %]
+%---#[ tree diagram[% DIAG %]:
+\hbox{
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+[%diagram suffix=DIAG%]\\
+{\sl [%
+         @select tree_sign DIAG
+         @case -1 %]-[%
+         @end @select %]Diagram~[%DIAG%]}[%
+@if use_vertex_labels %]\\
+[% getVertexInfo tree DIAG %][%
+@end @if %]
+\end{center}
+\end{minipage}}
+%---#] tree diagram[% DIAG %]:[%
+         @if is_last %]
+\end{longtable}
+[%       @else %]
+[%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
+         @end @if %][% 
+      @end @for %][%
+   @end @with%][% 
+@end @if pyxodraw %][%
+@end @if generate_eft_loopind %]
 
 [% @if generate_loop_diagrams %]
 \section{One-Loop Diagrams}

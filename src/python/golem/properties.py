@@ -1590,6 +1590,16 @@ unitary_gauge = Property(
     default=False,
 )
 
+loop_suppressed_Born = Property(
+    "loop_suppressed_Born",
+    """\
+   In case of a a loop-induced process generate Born diagrams with tree 
+   topology containing loop-suppressed EFT operators.
+    """,
+    bool,
+    default=False,
+)
+
 properties = [
     process_name,
     process_path,
@@ -1679,6 +1689,7 @@ properties = [
     meson_buildtype,
     meson_arch,
     unitary_gauge,
+    loop_suppressed_Born
 ]
 
 REDUCTION_EXTENSIONS = ["golem95", "ninja"]
