@@ -644,8 +644,12 @@ def fill_config(conf):
     if conf.getBooleanProperty("loop_suppressed_Born"):
         if not is_loopinduced:
             raise GolemConfigError(
-            "\nThe property 'loop_suppressed_Born' can only be set to\n"
-            + "'True' when calculating a loop-induced process.")
+            "\nThe property 'loop_suppressed_Born' can only be set\n"
+            + "to 'True' when calculating a loop-induced process.")
+        if not conf.getProperty("order_names") or ("QL" not in conf.getProperty("order_names")):
+            raise GolemConfigError(
+            "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
+            + "when 'order_names' are specified and contain the parameter 'QL'.")
 
     if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
         raise GolemConfigError(
@@ -673,6 +677,13 @@ def fill_config(conf):
                 conf["filter."+fltr] = "filter."+fltr+"=lambda d: d.order('NP')<=1"
             else:
                 conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
+
+    # For loop-induced processed we can only have tree diagrams when they have a loop suppressed opeartor
+    if conf.getBooleanProperty("loop_suppressed_Born"):
+        if conf["filter.lo"] is None:
+            conf["filter.lo"] = "filter.lo=lambda d: d.order('QL')==1"
+        else:
+            conf["filter.lo"] = conf["filter.lo"] + " and d.order('QL')==1"
 
 
     if not conf["extensions"] and props["extensions"]:
@@ -882,7 +893,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
             mod_diag_lo.diagrams, model, conf, filter_flags=lo_flags
         )
 
-        if len(keep_tree) == 0:
+        if len(keep_tree) == 0 and not generate_eftli:
             if conf.getBooleanProperty("ignore_empty_subprocess"):
                 conf.setProperty("write_vanishing_amplitude", "true")
             else:
