@@ -1,21 +1,12 @@
 process_name=eett
 process_path=virtual
 
-# PDG codes # Gluon: 21 # Z-Boson: 23
 in=-11,11
 out=6,-6
 
 order=QCD, 0, 2
 
-model=sm
-
-filter.particles=U:0,S:0,C:0,B:0,H:0,chi:0
-
-helicities=[dD=+-]D[+-][+-]
-
 one=gs,e
-zero=mU,mD,mS,mC,mB,wT,me
+zero=wT,me
 
-reference-vectors=3:2,4:2
-
-reduction_programs=golem95
+reduction_programs=ninja,golem95

@@ -187,7 +187,10 @@ contains
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
       use, intrinsic :: iso_c_binding
-      use model, only: set_parameter => set_parameter
+      use model, only: set_parameter => set_parameter[%
+      @if extension quadruple %]
+      use model_qp, only: set_parameter_qp => set_parameter[%
+      @end @if %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
       real(kind=c_double), intent(in) :: real_part, imag_part
@@ -205,7 +208,10 @@ contains
       integer :: l;
 
       l = strlen(variable_name)
-      call set_parameter(variable_name(1:l),real_part,imag_part,success)
+      call set_parameter(variable_name(1:l),real_part,imag_part,success)[%
+      @if extension quadruple %]
+      call set_parameter_qp(variable_name(1:l),real_part,imag_part,success)[%
+      @end @if %]
       if(success==0) then ! return immediately on error
           return
       end if
@@ -436,10 +442,10 @@ contains
       %]) :: amp
       real(kind=c_double), optional :: acc
       logical, optional :: blha1_mode
-      real(kind=ki) :: zero[% 
+      real(kind=ki) :: zero[%
       @if eval olp.mc.name ~ "amcatnlo" %]
       real(kind=ki), parameter :: pi = 3.14159265358979323846264&
-           &3383279502884197169399375105820974944592307816406286209_ki[% 
+           &3383279502884197169399375105820974944592307816406286209_ki[%
       @end @if %]
       integer :: i, prec, orig_nlo_prefactors[%
       @if eval ( cr.amplitudetype .eq. "scTree2" )
@@ -470,7 +476,7 @@ contains
          if(blha1_mode) then
             ! save nlo_prefactors and restore later
             orig_nlo_prefactors=nlo_prefactors
-            nlo_prefactors=0[% 
+            nlo_prefactors=0[%
             @if eval olp.mc.name ~ "amcatnlo" %]
             ! compute g_s from alpha_s for aMC@NLO
             gs = 2.0_ki*sqrt(pi)*sqrt(parameters(1))[%
@@ -499,7 +505,7 @@ contains
       @elif eval ( cr.amplitudetype .eq. "scTree2"  ) %]
       call spin_correlated_lo2_whizard(vecs,amp);
       ok=.true.[%
-      @else 
+      @else
       %]call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok[%
       @select count elements cr.channels
       @case 1 %][%
@@ -528,7 +534,7 @@ contains
             @if eval ( cr.amplitudetype .eq. "scTree2" )%]
             ! TODO: How to handle this case for scTree2?[%
             @else%]
-            amp(2)= 1.0_ki/zero[% 
+            amp(2)= 1.0_ki/zero[%
             @if eval olp.mc.name ~ "amcatnlo" %]
             ! aMC@NLO cannot handle Nan's
             amp(2)= 0.0_ki[%
