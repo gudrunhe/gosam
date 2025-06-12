@@ -258,6 +258,11 @@
 	<directory src="matrix">
 		<file src="Makefile.dep" class="Kinematics"/>
 		<file src="matrix.f90" class="Kinematics"/>
+		<file src="matrix_dp.f90" class="Kinematics"/>
+		<file src="matrix_qp.f90" class="Kinematics">
+			<only if-extension="quadruple" />
+		</file>
+		<file src="rescue.f90" class="Kinematics"/>
 		<file src="test.f90" class="Kinematics">
 			<except if-file="exists" in-mode="normal" />
 		</file>
