@@ -14,76 +14,30 @@
      & init_functions_qp => init_functions
    use [% process_name asprefix=\_ %]color_qp, only: CA_qp => CA, CF_qp => CF, &
      & numcs, incolors[%
-@if helsum %][%
+   @if enable_truncation_orders %][%
    @for helicities generated %][%
-      @if generate_tree_diagrams %][%
-      @if enable_truncation_orders %]
+      @if generate_tree_diagrams %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]l0_0_qp => amplitude
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]l0_1_qp => amplitude
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]l0_2_qp => amplitude[%
-      @else %]
-   use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
-      @end @if enable_truncation_orders %][%
       @end @if generate_tree_diagrams %][%
-      @if generate_counterterms %][%
-      @if enable_truncation_orders %]
-   use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_0_qp, only: ct_amplitude[%helicity%]_0_qp => amplitude
-   use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_1_qp, only: ct_amplitude[%helicity%]_1_qp => amplitude
-   use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_2_qp, only: ct_amplitude[%helicity%]_2_qp => amplitude[%
-      @else %]
-   use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_qp, only: ct_amplitude[%helicity%]_qp => amplitude[%
-      @end @if enable_truncation_orders %][% 
-      @end @if generate_counterterms %][%
-   @end @for %][%
-   @if enable_truncation_orders %]
-   use [% process_name asprefix=\_
-      %]amplitude_0_qp, only: samplitudel1_0summed_qp => samplitude
-   use [% process_name asprefix=\_
-      %]amplitude_1_qp, only: samplitudel1_1summed_qp => samplitude
-   use [% process_name asprefix=\_
-      %]amplitude_2_qp, only: samplitudel1_2summed_qp => samplitude[%
-   @else %]
-   use [% process_name asprefix=\_
-      %]amplitude_qp, only: samplitudel1summed_qp => samplitude[%
-   @end @if %][%
-@else %][% ' not helsum ' %][%
-   @for helicities generated %][%
-      @if generate_tree_diagrams %][%
-      @if enable_truncation_orders %]
-   use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_0_qp, only: amplitude[%helicity%]l0_0_qp => amplitude
-   use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_1_qp, only: amplitude[%helicity%]l0_1_qp => amplitude
+      @if generate_eft_loopind %]
    use [% process_name asprefix=\_
         %]diagramsh[%helicity%]l0_2_qp, only: amplitude[%helicity%]l0_2_qp => amplitude[%
-      @else %]
-   use [% process_name asprefix=\_
-        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
-      @end @if enable_truncation_orders %][%
-      @end @if generate_tree_diagrams %][%
-      @if generate_counterterms %][%
-      @if enable_truncation_orders %]
+      @end @if generate_eft_loopind %][%
+      @if generate_counterterms %]
    use [% process_name asprefix=\_
         %]ct_amplitudeh[%helicity%]_0_qp, only: ct_amplitude[%helicity%]_0_qp => amplitude
    use [% process_name asprefix=\_
         %]ct_amplitudeh[%helicity%]_1_qp, only: ct_amplitude[%helicity%]_1_qp => amplitude
    use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_2_qp, only: ct_amplitude[%helicity%]_2_qp => amplitude[%
-      @else %]
-   use [% process_name asprefix=\_
-        %]ct_amplitudeh[%helicity%]_qp, only: ct_amplitude[%helicity%]_qp => amplitude[%
-      @end @if enable_truncation_orders %][%
+        %]ct_amplitudeh[%helicity%]_2_qp, only: ct_amplitude[%helicity%]_2_qp => amplitude[% 
       @end @if generate_counterterms %][%
-      @if generate_loop_diagrams %][%
-      @if enable_truncation_orders %]
+   @if helsum %][% @else %][%
+   @if generate_loop_diagrams %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_0_qp, [% ' '
         %]only: samplitudeh[%helicity%]l1_0_qp => samplitude
@@ -93,14 +47,44 @@
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_2_qp, [% ' '
         %]only: samplitudeh[%helicity%]l1_2_qp => samplitude[%
-      @else %]
+   @end @if generate_loop_diagrams %][% 
+   @end @if helsum%][%
+   @end @for helicities generated %][%
+   @if helsum %][%
+   @if generate_loop_diagrams %]
+   use [% process_name asprefix=\_
+      %]amplitude_0_qp, only: samplitudel1_0summed_qp => samplitude
+   use [% process_name asprefix=\_
+      %]amplitude_1_qp, only: samplitudel1_1summed_qp => samplitude
+   use [% process_name asprefix=\_
+      %]amplitude_2_qp, only: samplitudel1_2summed_qp => samplitude[%
+   @end @if generate_loop_diagrams %][% 
+   @end @if helsum%][%
+   @else %][% ' not enable_truncation_orders ' %][%
+   @for helicities generated %][%
+      @if generate_tree_diagrams %]  
+   use [% process_name asprefix=\_
+        %]diagramsh[%helicity%]l0_qp, only: amplitude[%helicity%]l0_qp => amplitude[%
+      @end @if generate_tree_diagrams %][%
+      @if generate_counterterms %]
+   use [% process_name asprefix=\_
+        %]ct_amplitudeh[%helicity%]_qp, only: ct_amplitude[%helicity%]_qp => amplitude[% 
+      @end @if generate_counterterms %][%
+   @if helsum %][% @else %][%
+   @if generate_loop_diagrams %]
    use [% process_name asprefix=\_
         %]amplitudeh[%helicity%]_qp, [% ' '
         %]only: samplitudeh[%helicity%]l1_qp => samplitude[%
-      @end @if %][%
-      @end @if %][%
-   @end @for %][%
-@end @if helsum %]
+   @end @if generate_loop_diagrams %][% 
+   @end @if helsum%][%
+   @end @for helicities generated %][%
+   @if helsum %][%
+   @if generate_loop_diagrams %]
+   use [% process_name asprefix=\_
+      %]amplitude_qp, only: samplitudel1summed_qp => samplitude[%
+   @end @if generate_loop_diagrams %][% 
+   @end @if helsum%][%
+   @end @if enable_truncation_orders %]
    use [% process_name asprefix=\_
       %]dipoles_qp, only: insertion_operator_qp => insertion_operator, &
      & insertion_operator_qed_qp => insertion_operator_qed
@@ -123,9 +107,9 @@
 [% @if eval ( .len. ( .str. form_factor_nlo ) ) .gt. 0 %]   private:: get_formfactor_nlo [% @end @if %]
 
 contains
-   
+
    !---#[ subroutine samplitudel01_qp :
-   subroutine     samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
+   subroutine samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_logs, renorm_mqse, nlo_prefactors
@@ -141,16 +125,7 @@ contains
       logical, intent(out), optional :: ok
       integer, intent(in), optional :: h
       real(ki_qp) :: nlo_coupling
-
-      complex(ki_qp), parameter :: i_ = (0.0_ki_qp, 1.0_ki_qp)
-
-      ! Number of heavy quark flavours in loops.
-      real(ki_qp), parameter :: NFh_qp = [% count quark_loop_masses %].0_ki_qp
-
       logical :: my_ok
-
-      ! used for m=0 QCD renormalisation
-      real(ki_qp) :: beta0
 
       if(corrections_are_qcd) then[%
       @select QCD_COUPLING_NAME
@@ -183,43 +158,43 @@ contains
       @else %]
       amp(1)   = 0.0_ki_qp[%
 @end @if generate_tree_diagrams%][%
-      @if generate_loop_diagrams %][%
-      @if generate_counterterms %]
+@if generate_loop_diagrams %][%
+@if generate_counterterms %]
       if (renormalisation.eq.4) then
          ! massive quark counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp[%
-         @if use_MQSE %][% @else %]
-            print *, "ERROR: Code generated with use_MQSE=false."
-            print *, "Mass counterterms based on massive quark" 
-            print *, "self-energies not available. Please choose"
-            print *, "renormalisation != 3 or regenerate code with"
-            print *, "use_MQSE=true. Execution terminates now."
-            stop[% 
-         @end @if %]
+@if use_MQSE %][% @else %]
+         print *, "ERROR: Code generated with use_MQSE=false."
+         print *, "Mass counterterms based on massive quark" 
+         print *, "self-energies not available. Please choose"
+         print *, "renormalisation != 3 or regenerate code with"
+         print *, "use_MQSE=true. Execution terminates now."
+         stop[% 
+@end @if %]
       else 
          deltaOS = 0.0_ki_qp
       end if[%
-      @end @if %]
+@end @if generate_counterterms %]
 
       if (present(h)) then[%
          @if helsum %]
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
          @else %][%
-         @if generate_tree_diagrams %]
-         amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
-         @else %]
+         @if is_loopinduced %]
          amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling[%
          @end @if %][%
          @end @if %]
       else[%
-         @if generate_tree_diagrams %]
-         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling[%
-         @else %]
+         @if is_loopinduced %]
          amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling[%
+         @else %]
+         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling[%
          @end @if %]
       end if[%
-      @if generate_counterterms %]
+@if generate_counterterms %]
       select case (renormalisation)
       case (0)
          ! no renormalisation
@@ -239,11 +214,8 @@ contains
          print*, "  invalid value for renormalisation=", renormalisation
          stop
       end select[% 
-      @end @if %][%
-      @else %]
-      amp(2:4) = 0.0_ki_qp[%
-      @end @if%][%
-		@if generate_loop_diagrams %]
+@end @if generate_counterterms %][%
+@if extension dred %]
       if (convert_to_thv) then
          ! Scheme conversion for infrared structure
          ! Reference:
@@ -251,14 +223,16 @@ contains
          ! ``Regularisation scheme independence and unitarity
          !   in QCD cross-sections,''
          ! Phys.Rev. D 55 (1997) 6819
-         ! arXiv:hep-ph/9610553[%
-         @if extension dred %]
+         ! arXiv:hep-ph/9610553
          amp(2) = amp(2) - amp(1) * (&
            &          num_light_quarks * 0.5_ki_qp * CF_qp &
-           &        + num_gluons * 1.0_ki_qp/6.0_ki_qp * CA_qp)[%
-         @end @if extension dred %]
+           &        + num_gluons * 1.0_ki_qp/6.0_ki_qp * CA_qp)
       end if[%
-		@end @if %]
+@end @if extension dred %][%
+@else %]
+      amp(2:4) = 0.0_ki[%
+@end @if generate_loop_diagrams%]
+
       if (present(ok)) ok = my_ok
 
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
@@ -285,18 +259,18 @@ contains
       select case(nlo_prefactors)
       case(0)
          ! The result is already in its desired form[%
-      @if generate_tree_diagrams %]
-      case(1)
-         amp(2:4) = amp(2:4) * nlo_coupling
-      case(2)
-         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki_qp / pi / pi[%
-      @else %]
+      @if is_loopinduced %]
       case(1)
          ! loop-induced
          amp(2:4) = amp(2:4) * nlo_coupling * nlo_coupling
       case(2)
          ! loop-induced
          amp(2:4) = amp(2:4) * (nlo_coupling / 8.0_ki_qp / pi / pi)**2[%
+      @else %]
+      case(1)
+         amp(2:4) = amp(2:4) * nlo_coupling
+      case(2)
+         amp(2:4) = amp(2:4) * nlo_coupling / 8.0_ki_qp / pi / pi[%
       @end @if %]
       end select[%@end @if %]
    end subroutine samplitudel01_qp
@@ -945,7 +919,7 @@ contains
          end if[%
    @else %][% 'if not helsum' %][%
    @for unique_helicity_mappings %][%
-      @if generate_tree_diagrams %]
+      @if generate_tree_diagrams %][% '=> not loop-induced' %]
          !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -1069,7 +1043,7 @@ contains
         write(logfile,*) "</helicity>"
      end if[%
      @end @for current_helicities %][%
-      @else %][% 'if not generate_tree_diagrams' %]
+      @else %][% 'if not generate_tree_diagrams' %][% '=> loop-induced' %]
          !---#[ reinitialize kinematics:[%
          @for helicity_mapping shift=1 %][%
             @if parity %][%
@@ -1094,10 +1068,6 @@ contains
          !---#] reinitialize kinematics:[%
       @for current_helicities %][%
       @if enable_truncation_orders %]
-         print*, "In [% process_name asprefix=\_ %]matrix: samplitudel1_qp"
-         print*, "Truncation order feature not yet supported for"
-         print*, "loop induced processes in GoSam3. Terminating."
-         stop
          select case (EFTcount)
          case(0)
             ! sigma(SM X SM)
@@ -1107,47 +1077,25 @@ contains
             heli_amp( 0) = square_qp(colorvec_0(:, 0))
             heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_0(:, 0))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_0(:, 0)) + square_qp(colorvec_0(:, -1))
-         case(1)
-            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
-            do c=1,numcs
-               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            end do
-            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1) + colorvec_2(:,-1))
-            heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2) + colorvec_2(:,-2)) &
-            &            + square_qp(colorvec_0(:,-1)) + square_qp(colorvec_0(:,-1), colorvec_1(:,-1) + colorvec_2(:,-1))
-         case(2)
-            ! sigma(SM + dim6 X SM + dim6) without loopcounting
-            do c=1,numcs
-               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            end do
-            heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1), & 
-            &                     colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2) + colorvec_2(:,-2), & 
-            &                     colorvec_0(:, 0) + colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1) + colorvec_2(:,-1))            
+         case(1,2,3,4)
+            ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
+            write(unit=*,fmt="(A56)") "EFTcount options 1, 2, 3 and 4 are not defined."
+            write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
+            stop
          case(11)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
             do c=1,numcs
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0)) & 
-            &            + 
+            heli_amp( 0) = square_qp(colorvec_0(:, 0)) + square_qp(colorvec_0(:, 0), colorvec_1(:, 0))
             heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))
             ! contributions of tree diagrams with loop-order vertex
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2)
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
@@ -1155,7 +1103,6 @@ contains
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp( 0) = square_qp(colorvec_0(:, 0) + colorvec_1(:, 0))
             heli_amp(-1) = square_qp(colorvec_0(:,-1) + colorvec_1(:,-1), & 
             &                     colorvec_0(:, 0) + colorvec_1(:, 0))
@@ -1163,41 +1110,16 @@ contains
             &                     colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2) &
-                     &          + samplitudeh[% map.index %]l1_1(real(scale2,ki_qp),my_ok,rational2,amp0_2)     
-            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)
-         case(3)
-            ! sigma(SM X dim6) without loopcounting       
-            do c=1,numcs
-               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            end do
-            heli_amp( 0) = square_qp(colorvec_0(:, 0), colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1) + colorvec_2(:,-1))
-            heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2) + colorvec_2(:,-2)) &
-            &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1) + colorvec_2(:,-1))
-         case(4)
-            ! sigma(dim6 X dim6) without loopcounting
-            do c=1,numcs
-               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
-               colorvec_2(c,:) = samplitudeh[%map.index%]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,c)
-            end do
-            heli_amp( 0) = square_qp(colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-1) = square_qp(colorvec_1(:,-1) + colorvec_2(:,-1), & 
-            &                     colorvec_1(:, 0) + colorvec_2(:, 0))
-            heli_amp(-2) = square_qp(colorvec_1(:,-2) + colorvec_2(:,-2), & 
-            &                     colorvec_1(:, 0) + colorvec_2(:, 0)) &
-            &            + square_qp(colorvec_1(:,-1) + colorvec_2(:,-1))            
+            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki_qp),my_ok,rational2,amp0_2)     
+            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)          
          case(13)
             ! sigma(SM X dim6) with loopcounting
             do c=1,numcs
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp( 0) = square_qp(colorvec_0(:, 0), colorvec_1(:, 0)) & 
             &            + 
             heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_1(:, 0)) &
@@ -1206,13 +1128,14 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2)
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             do c=1,numcs
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
+           
             heli_amp( 0) = square_qp(colorvec_1(:, 0))
             heli_amp(-1) = square_qp(colorvec_1(:,-1), & 
             &                     colorvec_1(:, 0))
@@ -1220,6 +1143,7 @@ contains
             &                     colorvec_1(:, 0)) &
             &            + square_qp(colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
+            amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = heli_amp + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)     
             heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)
          end select[%
@@ -1227,10 +1151,9 @@ contains
         do c=1,numcs
            colorvec(c,:) = samplitudeh[%map.index%]l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
         end do
-        ! ToDo: The pole pieces do not seem correct?!
         heli_amp( 0) = square_qp(colorvec(:, 0))
-        heli_amp(-1) = square_qp(colorvec(:,-1))
-        heli_amp(-2) = square_qp(colorvec(:,-2))[%
+        heli_amp(-1) = square_qp(colorvec(:,-1), colorvec(:, 0))
+        heli_amp(-2) = square_qp(colorvec(:,-2), colorvec(:, 0)) + square_qp(colorvec(:, -1))[%
       @end @if enable_truncation_orders %]
       ok = ok .and. my_ok
       amp = amp + heli_amp

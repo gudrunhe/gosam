@@ -698,7 +698,7 @@ def fill_config(conf):
             else:
                 conf["gosam-auto-reduction.extensions"] = p
 
-    generate_counterterms = conf.getBooleanProperty("renorm") and generate_loop_diagrams
+    generate_counterterms = conf.getBooleanProperty("renorm") and generate_loop_diagrams and not is_loopinduced
 
     conf["generate_tree_diagrams"] = generate_tree_diagrams
     conf["generate_loop_diagrams"] = generate_loop_diagrams
@@ -823,6 +823,11 @@ def fill_config(conf):
                 'The "helsum" feature is only implemented for explicit\n'
                 + 'polarization vectors. Please either set "helsum=false"\n'
                 + 'or "polvec=explicit" in the input card."\n'
+            )
+        if conf.getBooleanProperty("enable_truncation_orders"):
+            raise GolemConfigError(
+                'The "helsum" feature is not implemented for "enable_truncation_orders=True".\n'
+                + 'Set "helsum=false" for the selected process.\n'
             )
     else:
         if conf.getProperty("polvec") == "numerical" and not "numpolvec" in ext:
