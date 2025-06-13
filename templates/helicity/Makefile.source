@@ -66,6 +66,12 @@ SOURCE_TREE= \
 	diagramsl0_1_qp.f90 \
 	diagramsl0_2_qp[% @end @if %].f90[%
    @end @if %]
+[% @elif generate_eft_loopind %]
+SOURCE_TREE= \
+	diagramsl0_2.f90 $(DIAGRAMS_TREE)[%
+   @if extension quadruple %] \
+	diagramsl0_2_qp.f90[%
+   @end @if %]
 [% @else %]
 SOURCE_TREE=
 [% @end @if %]

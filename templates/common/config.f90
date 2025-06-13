@@ -110,7 +110,7 @@
    integer :: logfile = 19
 
    ! Parameter determining the SMEFT counting
-   integer :: EFTcount = 1
+   integer :: EFTcount = 0
 
    !---#[ Renormalisation:
    ! Parameter to switch UV-Counterterms on or off

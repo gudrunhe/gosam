@@ -23,6 +23,9 @@ generated_sources = [[%
             @end @if generate_loop_diagrams %][%
         @end @if helsum %][%
     @end @for %][%
+        @if generate_eft_loopind %]
+	            'diagramsl0_2.f90'[% @if extension quadruple%], 'diagramsl0_2_qp.f90' [% @end @if %],[% 
+        @end @if generate_eft_loopind %][%
 @else %][%
     @if generate_tree_diagrams %]
 	        'diagramsl0.f90'[% @if extension quadruple%], 'diagramsl0_qp.f90' [% @end @if %],[% 

@@ -214,6 +214,18 @@ amplitudeh[%helicity%]_qp.[%O%]: globals_qp.[%O%][% @if generate_tree_diagrams %
    @end @if extension quadruple %][%
    @end @if %][%
    @end @if generate_tree_diagrams %][%
+   @if generate_eft_loopind %]  
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_2.mod: diagramsl0_2.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l0.mod: d[%$_%]_2h[%helicity%]l0.[%O%][%
+   @end @for %][%
+   @if extension quadruple %]
+[% process_name asprefix=\_ %]diagramsh[% helicity %]l0_2_qp.mod: diagramsl0_2_qp.[%O%][%
+   @for elements topolopy.keep.tree %]
+[% process_name asprefix=\_ %]d[%$_%]_2h[%helicity%]l0_2_qp.mod: d[%$_%]_2h[%helicity%]l0_qp.[%O%][%
+   @end @for %][%
+   @end @if extension quadruple %][%
+   @end @if generate_eft_loopind %][%
 @if helsum %][%
 @else %][%
 

@@ -663,7 +663,10 @@ contains
       @if enable_truncation_orders %]
       complex(ki), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
-      @else %]
+      @else %][%
+      @if enable_truncation_orders %]
+      complex(ki), dimension(numcs) :: amp0_2[%
+      @end @if %]
       complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
@@ -926,7 +929,9 @@ contains
             &            + square(colorvec_0(:, -1)) + square(colorvec_0(:, -1), colorvec_1(:, -1))
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2)
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_0(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_0(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_0(:,-2),amp0_2)
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             do c=1,numcs
@@ -940,9 +945,10 @@ contains
             &                     colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square(colorvec_0(:,-1) + colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_2)     
+            amp0_2 = amplitude[% map.index %]l0_2()  
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_0(:, 0),amp0_2) + square(colorvec_1(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_0(:,-1),amp0_2) + square(colorvec_1(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_0(:,-2),amp0_2) + square(colorvec_1(:,-2),amp0_2)  
             heli_amp( 0) = heli_amp( 0) + square(amp0_2)          
          case(13)
             ! sigma(SM X dim6) with loopcounting
@@ -950,8 +956,7 @@ contains
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
             end do
-            heli_amp( 0) = square(colorvec_0(:, 0), colorvec_1(:, 0)) & 
-            &            + 
+            heli_amp( 0) = square(colorvec_0(:, 0), colorvec_1(:, 0))
             heli_amp(-1) = square(colorvec_0(:,-1), colorvec_1(:, 0)) &
             &            + square(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square(colorvec_0(:,-2), colorvec_1(:, 0)) &
@@ -959,7 +964,9 @@ contains
             &            + square(colorvec_0(:,-1), colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_2)
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_0(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_0(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_0(:,-2),amp0_2)
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             do c=1,numcs
@@ -973,7 +980,9 @@ contains
             &            + square(colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_2)     
+            heli_amp( 0) = heli_amp( 0) + square(colorvec_1(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square(colorvec_1(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square(colorvec_1(:,-2),amp0_2)    
             heli_amp( 0) = heli_amp( 0) + square(amp0_2)
          end select[%
       @else %][% 'if not enable_truncation_orders' %]
@@ -1705,12 +1714,16 @@ contains
          @end @if enable_truncation_orders %][%
          @else %][% 'if not generate_tree_diagrams' %]
       ! For loop induced diagrams the scale should not matter
-      scale2 = 100.0_ki
+      scale2 = 100.0_ki[%
+      @if enable_truncation_orders %]
+      write(*,*) "OLP_color_correlated_lo not implemented yet for loop-induced processed with truncation options."
+      [% @else %][% 'if not enable_truncation_orders' %]
       do c=1,numcs
          colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
+      @end @if enable_truncation_orders %][%
          @end @if generate_tree_diagrams %]
 
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%

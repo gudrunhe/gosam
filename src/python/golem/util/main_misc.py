@@ -650,6 +650,10 @@ def fill_config(conf):
             raise GolemConfigError(
             "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
             + "when 'order_names' are specified and contain the parameter 'QL'.")
+        if not conf.getBooleanProperty("enable_truncation_orders"):
+            raise GolemConfigError(
+            "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
+            + "when also 'enable_truncation_orders=True'.")
 
     if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
         raise GolemConfigError(
@@ -678,13 +682,17 @@ def fill_config(conf):
             else:
                 conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
 
-    # For loop-induced processed we can only have tree diagrams when they have a loop suppressed opeartor
+    # For loop-induced processed any tree diagram must contain a 
+    # loop suppressed operator, while loop diagrams must not.
     if conf.getBooleanProperty("loop_suppressed_Born"):
         if conf["filter.lo"] is None:
             conf["filter.lo"] = "filter.lo=lambda d: d.order('QL')==1"
         else:
             conf["filter.lo"] = conf["filter.lo"] + " and d.order('QL')==1"
-
+        if conf["filter.nlo"] is None:
+            conf["filter.nlo"] = "filter.nlo=lambda d: d.order('QL')==0"
+        else:
+            conf["filter.nlo"] = conf["filter.nlo"] + " and d.order('QL')==0"
 
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]

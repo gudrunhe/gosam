@@ -665,8 +665,11 @@ contains
       @if enable_truncation_orders %]
       complex(ki_qp), dimension(numcs) :: amp0_0, amp0_1, amp0_2[%
       @end @if %][%
-      @else %]
-      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders%]_0, colorvec_1, colorvec_2[% @end @if %]
+      @else %][%
+      @if enable_truncation_orders %]
+      complex(ki_qp), dimension(numcs) :: amp0_2[%
+      @end @if %]
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c[%
       @end @if %]
       logical :: my_ok
@@ -689,7 +692,7 @@ contains
       end do
       heli_amp( 0) = square_qp(colorvec(:, 0))
       heli_amp(-1) = square_qp(colorvec(:,-1), colorvec(:, 0))
-      heli_amp(-2) = square_qp(colorvec(:,-2), colorvec(:, 0)) + square(colorvec(:, -1))[%
+      heli_amp(-2) = square_qp(colorvec(:,-2), colorvec(:, 0)) + square_qp(colorvec(:, -1))[%
       @end @if %]
       ok = ok .and. my_ok
       amp = amp + heli_amp
@@ -927,8 +930,10 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             do c=1,numcs
@@ -942,9 +947,10 @@ contains
             &                     colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2) &
-            &        + samplitudeh[% map.index %]l1_1(real(scale2,ki_qp),my_ok,rational2,amp0_2)     
+            amp0_2 = amplitude[% map.index %]l0_2()  
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2) + square_qp(colorvec_1(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2) + square_qp(colorvec_1(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2) + square_qp(colorvec_1(:,-2),amp0_2)  
             heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)          
          case(13)
             ! sigma(SM X dim6) with loopcounting
@@ -953,15 +959,16 @@ contains
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
             heli_amp( 0) = square_qp(colorvec_0(:, 0), colorvec_1(:, 0)) & 
-            &            + 
             heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_0(real(scale2,ki_qp),my_ok,rational2,amp0_2)
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             do c=1,numcs
@@ -975,8 +982,10 @@ contains
             &                     colorvec_1(:, 0)) &
             &            + square_qp(colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2_qp()
-            heli_amp = heli_amp + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_2)     
+            amp0_2 = amplitude[% map.index %]l0_2()
+            heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),amp0_2)
+            heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),amp0_2)    
             heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)
          end select[%
       @else %][% 'if not enable_truncation_orders' %]
@@ -1147,11 +1156,11 @@ contains
             color_vectorl0_0([% $_ %]) = pcolor_0([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0, oper(:,:,1))
-               heli_amp(2) = square(color_vectorl0_0, oper(:,:,2))
+               heli_amp(1) = square_qp(color_vectorl0_0, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_0, oper(:,:,2))
             else
-               heli_amp(1) = square(color_vectorl0_0)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0)*oper(1,1,2)
             endif
          case(1)
             ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
@@ -1164,15 +1173,15 @@ contains
             color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0, oper(:,:,1)) &
-               & + square(color_vectorl0_0, oper(:,:,1), color_vectorl0_1 + color_vectorl0_2)
-               heli_amp(2) = square(color_vectorl0_0, oper(:,:,2)) &
-               & + square(color_vectorl0_0, oper(:,:,2), color_vectorl0_1 + color_vectorl0_2)
+               heli_amp(1) = square_qp(color_vectorl0_0, oper(:,:,1)) &
+               & + square_qp(color_vectorl0_0, oper(:,:,1), color_vectorl0_1 + color_vectorl0_2)
+               heli_amp(2) = square_qp(color_vectorl0_0, oper(:,:,2)) &
+               & + square_qp(color_vectorl0_0, oper(:,:,2), color_vectorl0_1 + color_vectorl0_2)
             else
-               heli_amp(1) = square(color_vectorl0_0)*oper(1,1,1) &
-               & + square(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0)*oper(1,1,2) &
-               & + square(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0)*oper(1,1,1) &
+               & + square_qp(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0)*oper(1,1,2) &
+               & + square_qp(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
             endif
          case(2)
             ! sigma(SM + dim6 X SM + dim6) without loopcounting
@@ -1185,11 +1194,11 @@ contains
             color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2, oper(:,:,1))
-               heli_amp(2) = square(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2, oper(:,:,2))
+               heli_amp(1) = square_qp(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2, oper(:,:,2))
             else
-               heli_amp(1) = square(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0 + color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
             endif
          case(11)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
@@ -1200,15 +1209,15 @@ contains
             color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0, oper(:,:,1)) &
-               & + square(color_vectorl0_0, oper(:,:,1), color_vectorl0_1)
-               heli_amp(2) = square(color_vectorl0_0, oper(:,:,2)) &
-               & + square(color_vectorl0_0, oper(:,:,2), color_vectorl0_1)
+               heli_amp(1) = square_qp(color_vectorl0_0, oper(:,:,1)) &
+               & + square_qp(color_vectorl0_0, oper(:,:,1), color_vectorl0_1)
+               heli_amp(2) = square_qp(color_vectorl0_0, oper(:,:,2)) &
+               & + square_qp(color_vectorl0_0, oper(:,:,2), color_vectorl0_1)
             else
-               heli_amp(1) = square(color_vectorl0_0)*oper(1,1,1) &
-               & + square(color_vectorl0_0, color_vectorl0_1)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0)*oper(1,1,2) &
-               & + square(color_vectorl0_0, color_vectorl0_1)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0)*oper(1,1,1) &
+               & + square_qp(color_vectorl0_0, color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0)*oper(1,1,2) &
+               & + square_qp(color_vectorl0_0, color_vectorl0_1)*oper(1,1,2)
             endif
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
@@ -1219,11 +1228,11 @@ contains
             color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0 + color_vectorl0_1, oper(:,:,1))
-               heli_amp(2) = square(color_vectorl0_0 + color_vectorl0_1, oper(:,:,2))
+               heli_amp(1) = square_qp(color_vectorl0_0 + color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_0 + color_vectorl0_1, oper(:,:,2))
             else
-               heli_amp(1) = square(color_vectorl0_0 + color_vectorl0_1)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0 + color_vectorl0_1)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0 + color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0 + color_vectorl0_1)*oper(1,1,2)
             endif
          case(3)
             ! sigma(SM X dim6) without loopcounting
@@ -1236,11 +1245,11 @@ contains
             color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0, oper(:,:,1), color_vectorl0_1 + color_vectorl0_2)
-               heli_amp(2) = square(color_vectorl0_0, oper(:,:,2), color_vectorl0_1 + color_vectorl0_2)
+               heli_amp(1) = square_qp(color_vectorl0_0, oper(:,:,1), color_vectorl0_1 + color_vectorl0_2)
+               heli_amp(2) = square_qp(color_vectorl0_0, oper(:,:,2), color_vectorl0_1 + color_vectorl0_2)
             else
-               heli_amp(1) = square(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0, color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
             endif
          case(4)
             ! sigma(dim6 X dim6) without loopcounting
@@ -1251,11 +1260,11 @@ contains
             color_vectorl0_2([% $_ %]) = pcolor_2([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_1 + color_vectorl0_2, oper(:,:,1))
-               heli_amp(2) = square(color_vectorl0_1 + color_vectorl0_2, oper(:,:,2))
+               heli_amp(1) = square_qp(color_vectorl0_1 + color_vectorl0_2, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1 + color_vectorl0_2, oper(:,:,2))
             else
-               heli_amp(1) = square(color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_1 + color_vectorl0_2)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1 + color_vectorl0_2)*oper(1,1,2)
             endif
          case(13)
             ! sigma(SM X dim6) with loopcounting
@@ -1266,11 +1275,11 @@ contains
             color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_0, oper(:,:,1), color_vectorl0_1)
-               heli_amp(2) = square(color_vectorl0_0, oper(:,:,2), color_vectorl0_1)
+               heli_amp(1) = square_qp(color_vectorl0_0, oper(:,:,1), color_vectorl0_1)
+               heli_amp(2) = square_qp(color_vectorl0_0, oper(:,:,2), color_vectorl0_1)
             else
-               heli_amp(1) = square(color_vectorl0_0, color_vectorl0_1)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_0, color_vectorl0_1)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_0, color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_0, color_vectorl0_1)*oper(1,1,2)
             endif
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
@@ -1279,11 +1288,11 @@ contains
             color_vectorl0_1([% $_ %]) = pcolor_1([% index %])[%
      @end @for %]
             if (corrections_are_qcd) then
-               heli_amp(1) = square(color_vectorl0_1, oper(:,:,1))
-               heli_amp(2) = square(color_vectorl0_1, oper(:,:,2))
+               heli_amp(1) = square_qp(color_vectorl0_1, oper(:,:,1))
+               heli_amp(2) = square_qp(color_vectorl0_1, oper(:,:,2))
             else
-               heli_amp(1) = square(color_vectorl0_1)*oper(1,1,1)
-               heli_amp(2) = square(color_vectorl0_1)*oper(1,1,2)
+               heli_amp(1) = square_qp(color_vectorl0_1)*oper(1,1,1)
+               heli_amp(2) = square_qp(color_vectorl0_1)*oper(1,1,2)
             endif
          end select[%
 @else %][% 'if not enable_truncation_orders' %]
