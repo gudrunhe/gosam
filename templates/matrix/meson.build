@@ -3,10 +3,7 @@
     [% @if extension quadruple %]'matrix_qp.f90', \
     [% @end @if%]'rescue.f90', [%
 @for crossings %] \
-	'[% $_ asprefix=\_ %]matrix.f90', \
-    '[% $_ asprefix=\_ %]matrix_dp.f90', \
-    [% @if extension quadruple %]'[% $_ asprefix=\_ %]matrix_qp.f90', \
-    [% @end @if%]'[% $_ asprefix=\_ %]rescue.f90',[%
+	'[% $_ asprefix=\_ %]matrix.f90',[%
 @end @for crossings %]])
 
 if get_option('test_executables')
