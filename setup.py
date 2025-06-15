@@ -93,7 +93,6 @@ INFO = {
 		'license': "GPLv3+",
 		'platforms': ["POSIX"],
 		'classifiers': [
-			"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 			"Development Status :: 5 - Production/Stable",
 			"Environment :: Console",
 			"Intended Audience :: Developers",
