@@ -1519,17 +1519,19 @@ The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
 $\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
 
 In the following we assume that the coupling constants\footnote{
-$e$ and $g_s$ in the standard model} have been set to one in the
+$e$ and $g_s$ in the Standard Model} have been set to one in the
 setup of \gosamv{}. This ensures that the one-loop matrix
-element in QCD is calculated in the $\overline{\mathrm{MS}}$ scheme as
-\begin{equation}
-\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}=
+element, interfered with the Born amplitude, for QCD corrections is calculated in the $\overline{\mathrm{MS}}$ scheme as
+\begin{align}
+&2{\mathrm{Re}}({\cal M}_{\mathrm{loop}}{\cal
+                M}_{\mathrm{Born}}^\dagger)=:\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}\nonumber\\
+  &=
 \frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
 \cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
 +{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}) \label{eq:Conventions:nlo_matrix_element}
-\end{equation}
+\end{align}
 The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
-appearing in the squared tree-level matrix element. \gosamv{} will
+to the powers as they appear in the squared tree-level matrix element. \gosamv{} will
 return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
 
 The conversion between different conventions for the $\Gamma$-functions
