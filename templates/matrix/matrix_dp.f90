@@ -808,7 +808,7 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
             &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
             ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki*pi*pi
+            heli_amp(0) = heli_amp(0) + square(amp0_0, amp0_2)*8._ki*pi*pi
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
@@ -818,7 +818,7 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1) &
             &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1)
             ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0 + amp0_1, amp0_2)*8._ki*pi*pi
+            heli_amp(0) = heli_amp(0) + square(amp0_0 + amp0_1, amp0_2)*8._ki*pi*pi
          case(3)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0()
@@ -842,7 +842,7 @@ contains
             heli_amp = samplitudeh[% map.index %]l1_0(real(scale2,ki),my_ok,rational2,amp0_1) &
             &        + samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_0)
             ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki*pi*pi 
+            heli_amp(0) = heli_amp(0) + square(amp0_0, amp0_2)*8._ki*pi*pi 
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
@@ -850,7 +850,7 @@ contains
             amp0_2 = amplitude[% map.index %]l0_2()
             heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
             ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_1, amp0_2)*8._ki*pi*pi
+            heli_amp(0) = heli_amp(0) + square(amp0_1, amp0_2)*8._ki*pi*pi
          end select[%
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1(real(scale2,ki),my_ok,rational2)[%
@@ -1373,7 +1373,12 @@ contains
       integer, dimension(num_legs) :: perm
       complex(ki), dimension(numcs) :: color_vector
      
-      borncc(:,:) = 0.0_ki[%
+      borncc(:,:) = 0.0_ki
+      
+      [% @if enable_truncation_orders %]
+      write(*,*) "color_correlated_lo2 not implemented yet for use with truncation options."
+      stop[% 
+      @else %][%
   @for repeat 1 num_legs inclusive=true %][%
      @if is_first %]
       perm = (/[%
@@ -1382,7 +1387,7 @@ contains
      @if is_last %]/)[%
      @end @if %][%
   @end @for %][%
-  @if generate_tree_diagrams %][%
+  @if generate_tree_diagrams %][% ' => not loop induced ' %][%
   @for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
@@ -1430,8 +1435,12 @@ contains
       end if
       if (include_symmetry_factor) then
          borncc = borncc / real(symmetry_factor, ki)
-      end if[%
-   @end @if %]
+      end if[% 
+   @else %][% ' => loop induced ' %]
+      write(*,*) "spin_correlated_lo2 not implemented yet for loop-induced processes."
+      stop[%
+   @end @if generate_tree_diagrams %][% 
+   @end @if enable_truncation_orders %]
    end subroutine color_correlated_lo2
 
 
@@ -1721,7 +1730,8 @@ contains
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki[%
       @if enable_truncation_orders %]
-      write(*,*) "OLP_color_correlated_lo not implemented yet for loop-induced processed with truncation options."
+      write(*,*) "OLP_color_correlated not implemented yet for loop-induced processes with truncation options."
+      stop
       [% @else %][% 'if not enable_truncation_orders' %]
       do c=1,numcs
          colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
@@ -1770,8 +1780,14 @@ contains
 
       bornsc(:,:,:) = 0.0_ki
 
+      [% @if enable_truncation_orders %]
+      write(*,*) "spin_correlated_lo2 not implemented yet for use with truncation options."
+      stop[% 
+      @else %]
+      
+
       !---#[ Initialize helicity amplitudes :[%
-@if generate_tree_diagrams %][%
+@if generate_tree_diagrams %][% ' => not loop induced ' %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -1797,7 +1813,7 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -1871,8 +1887,12 @@ contains
       end if
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
-      end if[%
-@end @if generate_tree_diagrams %]
+      end if[% 
+@else %][% ' => not loop induced ' %]
+      write(*,*) "spin_correlated_lo2 not implemented yet for loop-induced processes."
+      stop[%
+@end @if generate_tree_diagrams %][% 
+@end @if enable_truncation_orders%]
 
    end subroutine spin_correlated_lo2
 
@@ -1903,7 +1923,7 @@ contains
       bornsc(:,:,:) = 0.0_ki
 
       !---#[ Initialize helicity amplitudes :[%
-@if generate_tree_diagrams %][%
+@if generate_tree_diagrams %][% ' => not loop induced ' %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -2285,7 +2305,10 @@ contains
       end if
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
-      end if[%
+      end if[% 
+@else %][% ' => not loop induced ' %]
+      write(*,*) "spin_correlated_lo2_whizard not implemented yet for loop-induced processes."
+      stop[%
 @end @if generate_tree_diagrams %]
 
    end subroutine spin_correlated_lo2_whizard
@@ -2325,6 +2348,11 @@ contains
 
       ampsc(:) = 0.0_ki
 
+      [% @if enable_truncation_orders %]
+      write(*,*) "OLP_spin_correlated_lo2 not implemented yet for use with truncation options."
+      stop[% 
+      @else %]
+
       !---#[ Initialize helicity amplitudes :[%
    @for particles lightlike vector %][%
       @if is_first %][%
@@ -2352,12 +2380,12 @@ contains
             @end @for %])
       !---#] reinitialize kinematics:[%
              @if generate_tree_diagrams %]
-      heli_amp[%helicity%] = amplitude[% map.index %]l0[% @if enable_truncation_orders %]_0[% @end @if %]()[%
+      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
              @else %]
       ! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[%
              @end @if generate_tree_diagrams %][%
@@ -2398,6 +2426,8 @@ contains
       if (include_symmetry_factor) then
          ampsc = ampsc / real(symmetry_factor, ki)
       end if
+
+      [% @end @if enable_truncation_orders %]
 
    end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :

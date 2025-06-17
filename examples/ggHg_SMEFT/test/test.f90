@@ -167,7 +167,6 @@ function analytic_coeff_SM(s, t, u, ih) result(amp)
   real(ki), dimension(0:3) :: amp
   integer :: hel
   real(ki), parameter :: pi = 3.141592653589793_ki
-  complex(ki), dimension(1:3) :: dummy
   
   amp = 0._ki
   
