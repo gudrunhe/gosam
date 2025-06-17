@@ -101,7 +101,7 @@ runlo : printnlo $(NLO_TESTS)
 printnlo :
 	@echo "SELECTED NLO TESTS: " $(NLO_TESTS)
 
-LOOPINDUCED_TESTS = gggH gggz hyy hyy_all_helicities hyy_olp yyyy
+LOOPINDUCED_TESTS = gggH gggz hyy hyy_all_helicities hyy_olp yyyy ggHg_SMEFT
 
 .PHONY : runloopinduced
 runloopinduced : printloopinduced $(LOOPINDUCED_TESTS)

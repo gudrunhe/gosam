@@ -649,6 +649,7 @@ contains
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
          & debug_nlo_diagrams, logfile, renorm_gamma5
       use [% process_name asprefix=\_ %]kinematics_qp, only: init_event
+      use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       implicit none
       real(ki_qp), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
@@ -808,7 +809,8 @@ contains
             amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
             &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
+            ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
+            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki_qp*pi*pi
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
@@ -817,7 +819,8 @@ contains
             amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1) &
             &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1)
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0 + amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
+            ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
+            heli_amp(0) = heli_amp(0) + square_qp(amp0_0 + amp0_1, amp0_2)*8._ki_qp*pi*pi
          case(3)
             ! sigma(SM X dim6) without loopcounting
             amp0_0 = amplitude[% map.index %]l0_0_qp()
@@ -840,14 +843,16 @@ contains
             amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = samplitudeh[% map.index %]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1) &
             &        + samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0)
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
+            ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
+            heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki_qp*pi*pi 
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
-            heli_amp(0) = heli_amp(0) + square_qp(amp0_1, amp0_2) ! this is the contribution of tree diagrams with loop-order vertex
+            ! this is the contribution of tree diagrams with loop-order vertex, compensate for LO vs NLO prefactor
+            heli_amp(0) = heli_amp(0) + square_qp(amp0_1, amp0_2)*8._ki_qp*pi*pi
          end select[%
      @else %][% 'if not enable_truncation_orders' %]
          heli_amp = samplitudeh[% map.index %]l1_qp(real(scale2,ki_qp),my_ok,rational2)[%
@@ -930,7 +935,7 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()
+            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
@@ -947,7 +952,7 @@ contains
             &                     colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()  
+            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2) + square_qp(colorvec_1(:,-2),amp0_2)  
@@ -965,7 +970,7 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
             &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()
+            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
@@ -982,7 +987,7 @@ contains
             &                     colorvec_1(:, 0)) &
             &            + square_qp(colorvec_1(:,-1))
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()
+            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),amp0_2)    

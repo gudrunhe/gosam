@@ -1,15 +1,15 @@
 program test
-  use ggHg_SMEFT_config, only: ki, logfile, EFTcount, nlo_prefactors
+   use ggHg_SMEFT_config, only: ki, logfile, EFTcount, nlo_prefactors
    use ggHg_SMEFT_kinematics, only: dotproduct, boost_to_cms
    use ggHg_SMEFT_model
-   use ggHg_SMEFT_matrix, only: samplitude, initgolem, exitgolem, ir_subtraction, samplitudel1_h
+   use ggHg_SMEFT_matrix, only: samplitude, initgolem, exitgolem
    use ggHg_SMEFT_rambo, only: ramb
    
    implicit none
    integer :: ievt, ierr, prec, ieft
    integer, parameter, dimension(0:4) :: eftc = (/0,11,12,13,14/)
    real(ki), dimension(4,4) :: vecs
-   real(ki), dimension(0:4,0:3) :: gsres, refres, gsirp, diff
+   real(ki), dimension(0:4,0:3) :: gsres, refres, diff
    real(ki) :: scale2, sqrts
    real(ki), parameter :: eps = 1.0e-10_ki
    character(len=45), dimension(0:4) :: truncation_order, truncation_order2 
@@ -17,11 +17,6 @@ program test
    ! log and output
    integer, parameter :: logf = 27
    logical :: success
-
-   ! integer :: hel
-   ! real(ki) :: rat2, s, t, u
-   ! logical :: ok
-   ! real(ki), dimension(0:3) :: testampgs, testampref
 
    open(file="test.log", unit=logf)
    success = .true.
@@ -35,7 +30,7 @@ program test
       print*, "No file 'param.dat' found. Using defaults"
    end if
    
-   nlo_prefactors = 1
+   nlo_prefactors = 2
    
    sqrts = 500._ki
    
@@ -61,40 +56,37 @@ program test
         & "truncation order (dim-6 x dim-6):" ]   
 
    gsres = 0._ki
-   gsirp = 0._ki
    refres = 0._ki
+   diff = 999._ki
    
-   do ieft = 1, 4
+   do ieft = 0, 4
       EFTcount = eftc(ieft)
       call samplitude(vecs, scale2, gsres(ieft,:), prec)
-      call ir_subtraction(vecs,scale2, gsirp(ieft,2:3))
       call analytic_amp(vecs,refres(ieft,:))
       write(unit=6,fmt="(A45)") NEW_LINE('a'), truncation_order(ieft)
-      write(unit=6,fmt="((15x,A11,3(15x,A11)))") &
-           & "Born       ", "finite part", "single pole", "double pole"
-      write(unit=6,fmt="((A12,4(3x,E23.16E3)))") &
-           & "GoSam      :", gsres(ieft,0), gsres(ieft,1), gsres(ieft,2), gsres(ieft,3)
-      write(unit=6,fmt="((A12,4(3x,E23.16E3)))") &
-           & "Analytical :", refres(ieft,0), refres(ieft,1), refres(ieft,2), refres(ieft,3)
-      write(unit=6,fmt="((A12,52x,2(3x,E23.16E3)))") &
-           & "IR poles   :", gsirp(ieft,2), gsirp(ieft,3)
-      write(unit=6,fmt="((A12,4(3x,E23.16E3)))") &
-           & "Ratio GS/A :", gsres(ieft,0)/refres(ieft,0), gsres(ieft,1)/refres(ieft,1), &
+      write(unit=6,fmt="((3(15x,A11)))") &
+           & "finite part", "single pole", "double pole"
+      write(unit=6,fmt="((A12,3(3x,E23.16E3)))") &
+           & "GoSam      :", gsres(ieft,1), gsres(ieft,2), gsres(ieft,3)
+      write(unit=6,fmt="((A12,3(3x,E23.16E3)))") &
+           & "Analytical :", refres(ieft,1), refres(ieft,2), refres(ieft,3)
+      write(unit=6,fmt="((A12,3(3x,E23.16E3)))") &
+           & "Ratio GS/A :", gsres(ieft,1)/refres(ieft,1), &
            & gsres(ieft,2)/refres(ieft,2), gsres(ieft,3)/refres(ieft,3), NEW_LINE('a')
 
-      diff(ieft,:) = abs(rel_diff(gsres(ieft,:), refres(ieft,:)))
+      diff(ieft,1) = abs(rel_diff(gsres(ieft,1), refres(ieft,1)))
 
-      if (any(diff(ieft,:) .gt. eps)) then
+      if (diff(ieft,1) .gt. eps) then
          write(unit=logf,fmt="(A3,1x,A13,1x,A45,1x,A7)") "==>", &
               & "Comparison of", truncation_order(ieft), "failed!"
-         write(unit=logf,fmt="((15x,A11,3(15x,A11)))") &
-              & "Born       ", "finite part", "single pole", "double pole"
-         write(unit=logf,fmt="((A12,4(3x,E23.16E3)))") &
-              & "GoSam      :", gsres(ieft,0), gsres(ieft,1), gsres(ieft,2), gsres(ieft,3)
-         write(unit=logf,fmt="((A12,4(3x,E23.16E3)))") &
-              & "Analytical :", refres(ieft,0), refres(ieft,1), refres(ieft,2), refres(ieft,3)
-         write(unit=logf,fmt="((A12,4(3x,E23.16E3)))") &
-              & "DIFFERENCE :", diff(ieft,0), diff(ieft,1), diff(ieft,2), diff(ieft,3)
+         write(unit=logf,fmt="((3(15x,A11)))") &
+              & "finite part", "single pole", "double pole"
+         write(unit=logf,fmt="((A12,3(3x,E23.16E3)))") &
+              & "GoSam      :", gsres(ieft,1), gsres(ieft,2), gsres(ieft,3)
+         write(unit=logf,fmt="((A12,3(3x,E23.16E3)))") &
+              & "Analytical :", refres(ieft,1), refres(ieft,2), refres(ieft,3)
+         write(unit=logf,fmt="((A12,3x,E23.16E3))") &
+              & "DIFFERENCE :", diff(ieft,1)
          success = .false.
       end if
 
@@ -105,30 +97,13 @@ program test
    else
       write(unit=logf,fmt="(A15)") "@@@ FAILURE @@@"
    end if
-
-
-   ! EFTcount = 0
-   ! call Mandelstam(vecs,s,t,u)
-   ! testampgs = 0._ki
-   ! testampref = 0._ki
-   ! do hel = 0, 7
-   !    testampgs((/3,2,1/)) = samplitudel1_h(vecs,scale2,ok,rat2,hel)
-   !    testampref = analytic_coeff_SM(s,t,u,hel)
-   !    ! testampref = analytic_coeff_cphiG(s,t,u,hel)
-   !    ! testampref = analytic_coeff_cphiG2(s,t,u,hel)
-   !    print *, "____", hel, "____"
-   !    print *, "GS:  ", testampgs(1)
-   !    print *, "REF: ", testampref(1)
-   !    print *, "ratio: ", testampgs(1)/testampref(1)
-   !    print *, ""
-   ! end do
    
    close(unit=logf)
   
    call exitgolem()
    
  contains
-   
+ 
    
 subroutine analytic_amp(vecs,amp)
   use ggHg_SMEFT_model
@@ -136,29 +111,30 @@ subroutine analytic_amp(vecs,amp)
   implicit none
   real(ki), intent(in), dimension(4,4) :: vecs
   real(ki), dimension(0:3), intent(out) :: amp
-  real(ki), dimension(0:3) :: coeffSM, coeffphiG, coeffphiG2
-  real(ki) :: ctphi, cphiG, s, t, u
+  real(ki), dimension(0:3) :: coeffSM, coeffggh, coeffggh2
+  real(ki), parameter :: pi = 3.141592653589793_ki
+  real(ki) :: delta_ct, cggh, s, t, u
 
-  ctphi = mdlctphi*mdlLam
-  cphiG = mdlcphiG*mdlLam
+  delta_ct = -mdlctphi*mdlLam/2._ki**(5._ki/4._ki)/mdlGf**(3._ki/2._ki)/mdlymt
+  cggh = mdlcphiG*mdlLam*8._ki*pi/mdlaS/sqrt(2._ki)/mdlGf
 
   call Mandelstam(vecs,s,t,u)
 
   coeffSM = analytic_coeff_SM(s,t,u)
-  coeffphiG = analytic_coeff_cphiG(s,t,u)
-  coeffphiG2 = analytic_coeff_cphiG2(s,t,u)
+  coeffggh = analytic_coeff_cggh(s,t,u)
+  coeffggh2 = analytic_coeff_cggh2(s,t,u)
   
   select case(EFTcount)
   case(0)
      amp = coeffSM
   case(11)
-     amp = (1._ki + 2._ki*ctphi)*coeffSM + cphiG*coeffphiG
+     amp = (1._ki + 2._ki*delta_ct)*coeffSM + cggh*coeffggh
   case(12)
-     amp = (1._ki + ctphi)**2*coeffSM + (1._ki + ctphi)*cphiG*coeffphiG + cphiG**2*coeffphiG2
+     amp = (1._ki + delta_ct)**2*coeffSM + (1._ki + delta_ct)*cggh*coeffggh + cggh**2*coeffggh2
   case(13)
-     amp = 2._ki*ctphi*coeffSM + cphiG*coeffphiG
+     amp = 2._ki*delta_ct*coeffSM + cggh*coeffggh
   case(14)
-     amp = ctphi**2*coeffSM + ctphi*cphiG*coeffphiG + cphiG**2*coeffphiG2
+     amp = delta_ct**2*coeffSM + delta_ct*cggh*coeffggh + cggh**2*coeffggh2
   case default
      print *, "Unknown value for EFTcount: ", EFTcount
      stop
@@ -191,6 +167,7 @@ function analytic_coeff_SM(s, t, u, ih) result(amp)
   real(ki), dimension(0:3) :: amp
   integer :: hel
   real(ki), parameter :: pi = 3.141592653589793_ki
+  complex(ki), dimension(1:3) :: dummy
   
   amp = 0._ki
   
@@ -200,18 +177,18 @@ function analytic_coeff_SM(s, t, u, ih) result(amp)
   if (present(ih)) then
      select case(ih)
      case(3,4) ! ++-/--+ (gosam convention)
-        amp(1:3) = b(s,t,u,1)*conjg(b(s,t,u,1))*H(s,t,u,1)
+        amp(1:3) = real(b(s,t,u,1)*conjg(b(s,t,u,1)))*H(s,t,u,1)
      case(2,5) ! +-+/+-+ (gosam convention)
-        amp(1:3) = b(s,t,u,4)*conjg(b(s,t,u,4))*H(s,t,u,4)
+        amp(1:3) = real(b(s,t,u,4)*conjg(b(s,t,u,4)))*H(s,t,u,4)
      case(1,6) ! +--/-++ (gosam convention)
-        amp(1:3) = b(s,t,u,3)*conjg(b(s,t,u,3))*H(s,t,u,3)
+        amp(1:3) = real(b(s,t,u,3)*conjg(b(s,t,u,3)))*H(s,t,u,3)
      case(0,7) ! ---/+++ (gosam convention)
-        amp(1:3) = b(s,t,u,2)*conjg(b(s,t,u,2))*H(s,t,u,2)
+        amp(1:3) = real(b(s,t,u,2)*conjg(b(s,t,u,2)))*H(s,t,u,2)
      end select
   else
      do hel = 1, 4
         ! factor 2 because of parity (+++ = --- etc.)
-        amp(1:3) = amp(1:3) + 2._ki*b(s,t,u,hel)*conjg(b(s,t,u,hel))*H(s,t,u,hel)
+        amp(1:3) = amp(1:3) + 2._ki*real(b(s,t,u,hel)*conjg(b(s,t,u,hel)))*H(s,t,u,hel)
      end do
   end if
 
@@ -220,7 +197,7 @@ function analytic_coeff_SM(s, t, u, ih) result(amp)
 end function analytic_coeff_SM
 
 
-function analytic_coeff_cphiG(s, t, u, ih) result(amp)
+function analytic_coeff_cggh(s, t, u, ih) result(amp)
   use ggHg_SMEFT_model, only: mdlGf, NC, mdlaS
   use ggHg_SMEFT_color, only: incolors
   use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
@@ -234,7 +211,7 @@ function analytic_coeff_cphiG(s, t, u, ih) result(amp)
   
   amp = 0._ki
 
-  prefac = NC*(NC**2-1._ki)*4._ki*mdlaS**2
+  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
   prefac = prefac/incolors/in_helicities/symmetry_factor
   
   if (present(ih)) then
@@ -257,10 +234,10 @@ function analytic_coeff_cphiG(s, t, u, ih) result(amp)
      
   amp = prefac*amp
   
-end function analytic_coeff_cphiG
+end function analytic_coeff_cggh
 
 
-function analytic_coeff_cphiG2(s, t, u, ih) result(amp)
+function analytic_coeff_cggh2(s, t, u, ih) result(amp)
   use ggHg_SMEFT_model, only: mdlGf, NC, mdlaS
   use ggHg_SMEFT_color, only: incolors
   use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
@@ -273,31 +250,31 @@ function analytic_coeff_cphiG2(s, t, u, ih) result(amp)
   real(ki), parameter :: pi = 3.141592653589793_ki
   
   amp = 0._ki
-  
-  prefac = NC*(NC**2-1._ki)/mdlGf/sqrt(2._ki)*32_ki*pi*mdlaS
+
+  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
   prefac = prefac/incolors/in_helicities/symmetry_factor
   
   if (present(ih)) then
      select case(ih)
      case(3,4) ! ++-/--+ (gosam convention)
-        amp(1:3) = a()*H(s,t,u,1)
+        amp(1:3) = a()**2*H(s,t,u,1)
      case(2,5) ! +-+/+-+ (gosam convention)
-        amp(1:3) = a()*H(s,t,u,4)
+        amp(1:3) = a()**2*H(s,t,u,4)
      case(1,6) ! +--/-++ (gosam convention)
-        amp(1:3) = a()*H(s,t,u,3)
+        amp(1:3) = a()**2*H(s,t,u,3)
      case(0,7) ! ---/+++ (gosam convention)
-        amp(1:3) = a()*H(s,t,u,2)
+        amp(1:3) = a()**2*H(s,t,u,2)
      end select
   else
      do hel = 1, 4
         ! factor 2 because of parity (+++ = --- etc.)
-        amp(1:3) = amp(1:3) + 2._ki*a()*H(s,t,u,hel)
+        amp(1:3) = amp(1:3) + 2._ki*a()**2*H(s,t,u,hel)
      end do
   end if
   
   amp = prefac*amp
   
-end function analytic_coeff_cphiG2
+end function analytic_coeff_cggh2
 
 
 function H(s, t, u, hel)
@@ -325,8 +302,9 @@ end function H
 
 
 function a()
+  use ggHg_SMEFT_model, only: mdlGf, mdlaS
   implicit none
-  complex(ki), dimension(0:2) :: a
+  real(ki), dimension(0:2) :: a
 
   a(0) = 1._ki
   a(1) = 0._ki
@@ -370,9 +348,9 @@ function bppp(s, t, u)
   mh2 = mdlMH**2
 
   bppp = -m2/mh2/mh2*0.5_ki*(4._ki*m2-mh2)*(W2(s,m2) + W2(t,m2) + W2(u,m2) - 3._ki*W2(mh2,m2) &
-       &                      + W3(t,u,s,m2) + W3(s,t,u,m2) + W3(u,s,t,m2))
-
-  bppp(0) = bppp(0) - m2/mh2/mh2*(-4._ki*mh2)
+       &                      + W3(t,u,s,m2) + W3(s,t,u,m2) + W3(u,s,t,m2))  
+  
+  bppp(0) = bppp(0) - complex(m2/mh2/mh2*(-4._ki*mh2),0._ki)
   
 end function bppp
        
@@ -403,7 +381,7 @@ function bppm(s, t, u)
        &	 +(4._ki*m2-s)/2._ki*W3(s,u,t,m2) &
        &	 +(-6._ki*m2+s/2._ki-2._ki*t*u/s)*W3(t,s,u,m2))
 
-  bppm(0) = bppm(0) - m2/s/s*(-4._ki*s*(s*s-t*u)/t1/u1)
+  bppm(0) = bppm(0) - complex(m2/s/s*(-4._ki*s*(s*s-t*u)/t1/u1),0._ki)
   
 end function bppm
 
