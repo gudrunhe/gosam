@@ -14,7 +14,6 @@ order=QCD,NONE,3
 
 loop_suppressed_Born=True
 
-#one=mdlGS
 zero=mdlGAMH,mdlWQT
 
 filter.lo=lambda d: d.order('NP')<=1 and d.order('QL')==1 and d.vertices(part5,anti5,part25)==0

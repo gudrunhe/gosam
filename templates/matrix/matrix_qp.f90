@@ -933,12 +933,14 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_0(:, 0) + colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
-            &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))
+            &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))[% 
+@if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
-            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)[% 
+@end @if %]
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
             do c=1,numcs
@@ -950,13 +952,15 @@ contains
             &                     colorvec_0(:, 0) + colorvec_1(:, 0))
             heli_amp(-2) = square_qp(colorvec_0(:,-2) + colorvec_1(:,-2), & 
             &                     colorvec_0(:, 0) + colorvec_1(:, 0)) &
-            &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))
+            &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))[% 
+@if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2) + square_qp(colorvec_1(:,-2),amp0_2)  
-            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)          
+            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)[% 
+@end @if %]      
          case(13)
             ! sigma(SM X dim6) with loopcounting
             do c=1,numcs
@@ -968,12 +972,14 @@ contains
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-2)) &
-            &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))
+            &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))[% 
+@if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
-            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)
+            heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)[% 
+@end @if %]
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
             do c=1,numcs
@@ -985,13 +991,15 @@ contains
             &                     colorvec_1(:, 0))
             heli_amp(-2) = square_qp(colorvec_1(:,-2), & 
             &                     colorvec_1(:, 0)) &
-            &            + square_qp(colorvec_1(:,-1))
+            &            + square_qp(colorvec_1(:,-1))[% 
+@if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
             amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),amp0_2)    
-            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)
+            heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)[% 
+@end @if %]
          end select[%
       @else %][% 'if not enable_truncation_orders' %]
         do c=1,numcs
