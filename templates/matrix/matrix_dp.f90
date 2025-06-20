@@ -801,7 +801,6 @@ contains
             &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
          case(11)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
@@ -811,7 +810,6 @@ contains
             heli_amp(0) = heli_amp(0) + square(amp0_0, amp0_2)*8._ki*pi*pi
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
@@ -835,7 +833,6 @@ contains
             &        + samplitudeh[% map.index %]l1_2(real(scale2,ki),my_ok,rational2,amp0_1 + amp0_2)
          case(13)
             ! sigma(SM X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0()
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
@@ -845,7 +842,6 @@ contains
             heli_amp(0) = heli_amp(0) + square(amp0_0, amp0_2)*8._ki*pi*pi 
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_1 = amplitude[% map.index %]l0_1()
             amp0_2 = amplitude[% map.index %]l0_2()
             heli_amp = samplitudeh[% map.index %]l1_1(real(scale2,ki),my_ok,rational2,amp0_1)
@@ -917,7 +913,7 @@ contains
             heli_amp(-2) = square(colorvec_0(:,-2), colorvec_0(:, 0)) + square(colorvec_0(:, -1))
          case(1,2,3,4)
             ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
-            write(unit=*,fmt="(A56)") "EFTcount options 1, 2, 3 and 4 are not defined."
+            write(unit=*,fmt="(A74)") "EFTcount options 1, 2, 3 and 4 are not defined for loop-induced processes."
             write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
             stop
          case(11)
@@ -1492,6 +1488,7 @@ contains
 
    subroutine OLP_color_correlated(vecs,ampcc)
       use [% process_name asprefix=\_ %]kinematics, only: init_event
+      use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
@@ -1505,7 +1502,7 @@ contains
       complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %][%
       @if generate_tree_diagrams %][%
       @else %]
-      complex(ki), dimension(numcs,-2:0) :: colorvec
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c
       logical :: my_ok
       real(ki) :: rational2, scale2[%
@@ -1624,17 +1621,18 @@ contains
 @end @for helicities %][%
 @else %][% ' not generate_tree_diagrams ' %][% ' => loop-induced ' %]
    ! For loop induced diagrams the scale should not matter
-      scale2 = 100.0_ki[%
+      scale2 = 100.0_ki[% 
+@if helsum %][%
 @if enable_truncation_orders %]
-      write(*,*) "OLP_color_correlated not implemented yet for loop-induced processes with truncation options."
+      write(*,*) "Subroutine 'OLP_color_correlated' including truncation options not available for processes generated with helsum=true."
       stop
-      [% @else %][% 'if not enable_truncation_orders' %][% 
-@if helsum %]
+[% @else %][% 'if not enable_truncation_orders' %]
       do c=1,numcs
          colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
       call OLP_color_correlated_lo(color_vector,perm,ampcc)[%
+@end @if enable_truncation_orders %][%
 @else %][% ' not helsum ' %][%
 @for helicities %]
       !---#[ reinitialize kinematics:[%
@@ -1666,16 +1664,93 @@ contains
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
+      !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> dim-6 coefficient (NP=1) 
+         ! amplitude*_2 -> dim-6 loop-suppressed coefficient (QL=1)
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!   
+         case (0)
+            ! sigma(SM X SM)
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            call OLP_color_correlated_lo(color_vector_0,perm,ampcc_heli_tmp1)
+            ampcc_heli = ampcc_heli_tmp1
+         case(1,2,3,4)
+            ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
+            write(unit=*,fmt="(A74)") "EFTcount options 1, 2, 3 and 4 are not defined for loop-induced processes."
+            write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
+            stop
+         case(11)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call OLP_color_correlated_lo(color_vector_0,perm,ampcc_heli_tmp1)
+            call OLP_color_correlated_lo(color_vector_0,perm,ampcc_heli_tmp2,color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %])
+            ampcc_heli = ampcc_heli_tmp1 + ampcc_heli_tmp2
+         case(12)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call OLP_color_correlated_lo(color_vector_0+color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %],perm,ampcc_heli_tmp1)
+            ampcc_heli = ampcc_heli_tmp1
+         case (13)
+            ! sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call OLP_color_correlated_lo(color_vector_0,perm,ampcc_heli_tmp1,color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %])
+            ampcc_heli = ampcc_heli_tmp1
+         case(14)
+            ! sigma(dim6 X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call OLP_color_correlated_lo(color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %],perm,ampcc_heli_tmp1)
+            ampcc_heli = ampcc_heli_tmp1
+         end select[%
+     @else %][% 'if not enable_truncation_orders' %]
       do c=1,numcs
-         colorvec(c,:) = samplitudeh[%map.index%]l1[% @if enable_truncation_orders %]_0[% @end @if %](real(scale2,ki),my_ok,rational2,c)
+         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
       end do
       color_vector = colorvec(:,0)
-      call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)
+      call OLP_color_correlated_lo(color_vector,perm,ampcc_heli)[%
+     @end @if enable_truncation_orders %]
       ampcc(:) = ampcc(:) + ampcc_heli(:)[%
 @end @for helicities %][% 
 @end @if helsum%][%
-@end @if enable_truncation_orders %][%
 @end @if generate_tree_diagrams %]
   [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]ampcc = ampcc*get_formfactor_lo(vecs)[%@end @if %]
       if (include_helicity_avg_factor) then
