@@ -140,6 +140,16 @@ qgraf_power = Property(
     list,
 )
 
+loop_suppressed_Born = Property(
+    "loop_suppressed_Born",
+    """\
+   In case of a a loop-induced process generate Born diagrams with tree 
+   topology containing loop-suppressed EFT operators.
+    """,
+    bool,
+    default=False,
+)
+
 helicities = Property(
     "helicities",
     """\
@@ -710,8 +720,8 @@ filter_lo_diagrams = Property(
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
-   * d.order(coupling) = total power of diagrams with respect to specified
-      coupling. Only works whit UFO models. The coupling must be defined
+   * d.order(order) = total power of diagrams with respect to specified
+      coupling order. Only works whit UFO models. The order must be defined
       in the UFO model's coupling_orders.py and listed in the 'order_names'
       property of the GoSam config/runcard.
 
@@ -742,7 +752,7 @@ filter_ct_diagrams = Property(
     """\
    A python function which provides a filter for eft counterterm diagrams.
 
-   See filter.ct for more explanation.
+   See filter.lo for more explanation.
    """,
     str,
     "",
@@ -1421,11 +1431,10 @@ form_factor_nlo = Property(
 order_names = Property(
     "order_names",
     """\
-   A list of additional coupling order that should be
-   tracked throughout the amplitude generation. Relevant for
-   correct EFT treatment. Only works in combination with UFO
-   models. All couplings listed must be defined in the model's
-   coupling_orders.py file.
+   Only works in combination with UFO models.
+   A list of additional coupling orders as defined in the model's
+   coupling_orders.py file that should be tracked throughout the 
+   amplitude generation. Relevant for correct EFT treatment.
 
    Example:
    order_names=QCD,NP,QL
@@ -1590,16 +1599,7 @@ unitary_gauge = Property(
     default=False,
 )
 
-loop_suppressed_Born = Property(
-    "loop_suppressed_Born",
-    """\
-   In case of a a loop-induced process generate Born diagrams with tree 
-   topology containing loop-suppressed EFT operators.
-    """,
-    bool,
-    default=False,
-)
-
+# Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
     process_name,
     process_path,
@@ -1608,6 +1608,7 @@ properties = [
     model,
     model_options,
     qgraf_power,
+    loop_suppressed_Born,
     zero,
     one,
     renorm,
@@ -1688,8 +1689,7 @@ properties = [
     use_MQSE,
     meson_buildtype,
     meson_arch,
-    unitary_gauge,
-    loop_suppressed_Born
+    unitary_gauge
 ]
 
 REDUCTION_EXTENSIONS = ["golem95", "ninja"]

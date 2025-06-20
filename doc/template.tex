@@ -123,6 +123,14 @@ See also: qgraf.options, qgraf.verbatim
 \end{verbatim}
 Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{loop\_suppressed\_Born}}] (\textit{true/false})
+\begin{verbatim}
+In case of a a loop-induced process generate Born diagrams with tree
+topology containing loop-suppressed EFT operators.
+\end{verbatim}
+Default: \verb|False|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{zero}}] (\textit{comma separated list})
 \begin{verbatim}
 A list of symbols that should be treated as identically
@@ -503,8 +511,8 @@ The following methods of the diagram class can be used:
     the arguments are the same as in iprop
 * d.bridge(...) = number of non-loop propagators with the given
     properties; the arguments are the same as in iprop
-* d.order(coupling) = total power of diagrams with respect to specified
-   coupling. Only works whit UFO models. The coupling must be defined
+* d.order(order) = total power of diagrams with respect to specified
+   coupling order. Only works whit UFO models. The order must be defined
    in the UFO model's coupling_orders.py and listed in the 'order_names'
    property of the GoSam config/runcard.
 
@@ -529,7 +537,7 @@ Hidden: \verb|False|
 \begin{verbatim}
 A python function which provides a filter for eft counterterm diagrams.
 
-See filter.ct for more explanation.
+See filter.lo for more explanation.
 \end{verbatim}
 Hidden: \verb|False|
 \\Experimental: \verb|False|
@@ -1191,11 +1199,10 @@ Hidden: \verb|False|
 \\Experimental: \verb|True|
 \\\item[\colorbox{gray!30}{\texttt{order\_names}}] (\textit{comma separated list})
 \begin{verbatim}
-A list of additional coupling order that should be
-tracked throughout the amplitude generation. Relevant for
-correct EFT treatment. Only works in combination with UFO
-models. All couplings listed must be defined in the model's
-coupling_orders.py file.
+Only works in combination with UFO models.
+A list of additional coupling orders as defined in the model's
+coupling_orders.py file that should be tracked throughout the
+amplitude generation. Relevant for correct EFT treatment.
 
 Example:
 order_names=QCD,NP,QL
@@ -1329,14 +1336,6 @@ Default: \verb|x86-64|
 \begin{verbatim}
 Use unitary gauge propagators for the massive vector bosons instead of
 Feynman gauge propagators.
-\end{verbatim}
-Default: \verb|False|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{loop\_suppressed\_Born}}] (\textit{true/false})
-\begin{verbatim}
-In case of a a loop-induced process generate Born diagrams with tree
-topology containing loop-suppressed EFT operators.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|

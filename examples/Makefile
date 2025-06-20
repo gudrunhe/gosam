@@ -92,7 +92,7 @@ runlo : printlo $(LO_TESTS)
 printlo :
 	@echo "SELECTED LO TESTS: " $(LO_TESTS)
 
-NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eettg_SMEFT eett_lhep eeuu gggg gggg_lhep ggHg ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary uudd uu_graviton_yy WpWpjj
+NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eettg_SMEFT eett_lhep eeuu gggg gggg_lhep ggHg ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary uudd uu_graviton_yy Hbb_4F WpWpjj
 
 .PHONY : runnlo
 runlo : printnlo $(NLO_TESTS)

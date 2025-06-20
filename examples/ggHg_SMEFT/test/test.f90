@@ -1,7 +1,7 @@
 program test
    use ggHg_SMEFT_config, only: ki, logfile, EFTcount, nlo_prefactors
    use ggHg_SMEFT_kinematics, only: dotproduct, boost_to_cms
-   use ggHg_SMEFT_model
+   use ggHg_SMEFT_model, only: parse
    use ggHg_SMEFT_matrix, only: samplitude, initgolem, exitgolem
    use ggHg_SMEFT_rambo, only: ramb
    
@@ -106,14 +106,17 @@ program test
  
    
 subroutine analytic_amp(vecs,amp)
-  use ggHg_SMEFT_model
+  use ggHg_SMEFT_model, only: mdlctphi, mdlcphiG, mdlLam, &
+  &  mdlGf, mdlymt, NC, mdlaS
   use ggHg_SMEFT_config, only: EFTcount
+  use ggHg_SMEFT_color, only: incolors
+  use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
   implicit none
   real(ki), intent(in), dimension(4,4) :: vecs
   real(ki), dimension(0:3), intent(out) :: amp
   real(ki), dimension(0:3) :: coeffSM, coeffggh, coeffggh2
   real(ki), parameter :: pi = 3.141592653589793_ki
-  real(ki) :: delta_ct, cggh, s, t, u
+  real(ki) :: delta_ct, cggh, s, t, u, prefac
 
   delta_ct = -mdlctphi*mdlLam/2._ki**(5._ki/4._ki)/mdlGf**(3._ki/2._ki)/mdlymt
   cggh = mdlcphiG*mdlLam*8._ki*pi/mdlaS/sqrt(2._ki)/mdlGf
@@ -139,6 +142,11 @@ subroutine analytic_amp(vecs,amp)
      print *, "Unknown value for EFTcount: ", EFTcount
      stop
   end select
+
+  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
+  prefac = prefac/incolors/in_helicities/symmetry_factor
+
+  amp = prefac*amp
   
 end subroutine analytic_amp
  
@@ -157,21 +165,13 @@ end subroutine Mandelstam
 
 
 function analytic_coeff_SM(s, t, u, ih) result(amp)
-  use ggHg_SMEFT_model, only: mdlGf, NC, mdlaS
-  use ggHg_SMEFT_color, only: incolors
-  use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
   implicit none
   real(ki) :: s, t, u
-  real(ki) :: prefac
   integer, optional :: ih
   real(ki), dimension(0:3) :: amp
   integer :: hel
-  real(ki), parameter :: pi = 3.141592653589793_ki
   
   amp = 0._ki
-  
-  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
-  prefac = prefac/incolors/in_helicities/symmetry_factor
   
   if (present(ih)) then
      select case(ih)
@@ -190,28 +190,18 @@ function analytic_coeff_SM(s, t, u, ih) result(amp)
         amp(1:3) = amp(1:3) + 2._ki*real(b(s,t,u,hel)*conjg(b(s,t,u,hel)))*H(s,t,u,hel)
      end do
   end if
-
-  amp = prefac*amp
   
 end function analytic_coeff_SM
 
 
 function analytic_coeff_cggh(s, t, u, ih) result(amp)
-  use ggHg_SMEFT_model, only: mdlGf, NC, mdlaS
-  use ggHg_SMEFT_color, only: incolors
-  use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
   implicit none
   real(ki) :: s, t, u
-  real(ki) :: prefac
   integer, optional :: ih
   real(ki), dimension(0:3) :: amp
   integer :: hel
-  real(ki), parameter :: pi = 3.141592653589793_ki
   
   amp = 0._ki
-
-  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
-  prefac = prefac/incolors/in_helicities/symmetry_factor
   
   if (present(ih)) then
      select case(ih)
@@ -230,28 +220,18 @@ function analytic_coeff_cggh(s, t, u, ih) result(amp)
         amp(1:3) = amp(1:3) + 2._ki*2._ki*real(b(s,t,u,hel))*a()*H(s,t,u,hel)
      end do
   end if
-     
-  amp = prefac*amp
   
 end function analytic_coeff_cggh
 
 
 function analytic_coeff_cggh2(s, t, u, ih) result(amp)
-  use ggHg_SMEFT_model, only: mdlGf, NC, mdlaS
-  use ggHg_SMEFT_color, only: incolors
-  use ggHg_SMEFT_kinematics, only: in_helicities, symmetry_factor
   implicit none
   real(ki) :: s, t, u
-  real(ki) :: prefac
   integer, optional :: ih
   real(ki), dimension(0:3) :: amp
   integer :: hel
-  real(ki), parameter :: pi = 3.141592653589793_ki
   
   amp = 0._ki
-
-  prefac = NC*(NC**2-1._ki)*mdlGf*sqrt(2._ki)*mdlaS**3/2._ki/pi
-  prefac = prefac/incolors/in_helicities/symmetry_factor
   
   if (present(ih)) then
      select case(ih)
@@ -270,8 +250,6 @@ function analytic_coeff_cggh2(s, t, u, ih) result(amp)
         amp(1:3) = amp(1:3) + 2._ki*a()**2*H(s,t,u,hel)
      end do
   end if
-  
-  amp = prefac*amp
   
 end function analytic_coeff_cggh2
 
@@ -301,7 +279,6 @@ end function H
 
 
 function a()
-  use ggHg_SMEFT_model, only: mdlGf, mdlaS
   implicit none
   real(ki), dimension(0:2) :: a
 
@@ -352,7 +329,8 @@ function bppp(s, t, u)
   bppp(0) = bppp(0) - complex(m2/mh2/mh2*(-4._ki*mh2),0._ki)
   
 end function bppp
-       
+
+
 ! h->ggg: auxiliary function, summing up the different cyclic permutations
 ! of (4.25),(4.26) according to (2.5) from hep-ph/9709423 (only curly brackets),
 function bppm(s, t, u)
