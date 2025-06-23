@@ -53,7 +53,7 @@ runtests : $(ALL_TESTS)
 
 # SELECTED_TESTS = gH_tt_OLP_regression_test gH_ttg_EFT_regression_test pp_AAj_OLP_regression_test
 
-SKIP_TESTS = dd_ttH_EFT_regression_test uu_uu_4F_regression_test
+SKIP_TESTS = dd_ttH_EFT_regression_test
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
