@@ -1776,13 +1776,13 @@ contains
      ! This is required by Whizard.[% 
       @end @select %]
       use [% process_name asprefix=\_ %]kinematics
+      use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
       real(ki), dimension(num_legs, 4) :: pvecs
       complex(ki), dimension(4,4) :: tens
       complex(ki) :: pp, pm, mp, mm[%
-@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -1792,12 +1792,21 @@ contains
       complex(ki), dimension(4) :: eps[%index%][% @select sct @case 1 %], epsp[%index%], epsm[%index%]
       complex(ki) :: phasefac[%index%][% @end @select %][%
    @end @for %][%
-@end @if generate_tree_diagrams %]
+      @if generate_tree_diagrams %][%
+      @else %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2[%
+      @end @if generate_tree_diagrams %]
 
-      bornsc(:,:,:) = 0.0_ki
+      bornsc(:,:,:) = 0.0_ki[% 
+      @if generate_tree_diagrams %][% @else %][% @if helsum %]
+         write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented for loop-induced processes when helsum=true."
+      stop[% 
+      @end @if %][% @end @if %]
 
       !---#[ Initialize helicity amplitudes :[%
-@if generate_tree_diagrams %][% ' => not loop induced ' %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -1823,13 +1832,37 @@ contains
             @for particles lightlike vector %], [%hel%]1[%
             @end @for %])
       !---#] reinitialize kinematics:[%
+@if generate_tree_diagrams %][% ' => not loop-induced ' %][%
       @if enable_truncation_orders %]
          heli_amp[%helicity%]_0 = amplitude[% map.index %]l0_0()
          heli_amp[%helicity%]_1 = amplitude[% map.index %]l0_1()
          heli_amp[%helicity%]_2 = amplitude[% map.index %]l0_2()[%
       @else %]
          heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
-      @end @if %][%
+      @end @if %][% 
+@else %][% ' not generate_tree_diagrams => loop-induced' %]
+         ! For loop induced diagrams the scale should not matter
+         scale2 = 100.0_ki[%
+      @if enable_truncation_orders %]
+         do c=1,numcs
+            colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+            colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+         end do
+         heli_amp[%helicity%]_0 = colorvec_0(:,0)
+         heli_amp[%helicity%]_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            heli_amp[%helicity%]_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@else %]
+            heli_amp[%helicity%]_2 = 0._ki[% 
+@end @if %][%
+      @else %]
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+         end do
+         heli_amp[%helicity%] = colorvec(:,0)[%
+      @end @if enable_truncation_orders %][% 
+@end @if generate_tree_diagrams %][%
          @end @for helicities %][%
       @end @if is_first %][%
    @end @for %]
@@ -1875,7 +1908,8 @@ contains
       ! relevant.[%
    @for particles lightlike vector %]
       !---#[ particle [%index%] :[%
-   @if enable_truncation_orders %]
+   @if enable_truncation_orders %][%
+@if generate_tree_diagrams %][% ' => not loop-induced ' %]
       select case (EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> dim-6 coefficient (NP=1) 
@@ -2134,7 +2168,165 @@ contains
          @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
          &          + square_0l_0l_sc(heli_amp[%helicity%]_1,heli_amp[%helicity%]_1)[%
          @end @for helicities %]
-      end select[%
+      end select[% 
+@else %][% ' not generate_tree_diagrams => loop-induced' %]
+      select case (EFTcount)
+      ! amplitude*_0 -> SM
+      ! amplitude*_1 -> dim-6 coefficient (NP=1) 
+      ! amplitude*_2 -> dim-6 loop-suppressed coefficient (QL=1)   
+      ! => "without loopcounting" means that the loop-supressed vertices
+      !    are included despite their suppression! 
+      case (0)
+         ! sigma(SM X SM)
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_0,heli_amp[%helicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+      case(1,2,3,4)
+            ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
+            write(unit=*,fmt="(A74)") "EFTcount options 1, 2, 3 and 4 are not defined for loop-induced processes."
+            write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
+            stop
+      case (11)
+         ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+         ! Note: for loop-induced heli_amp_0 & heli_amp_1 = 1-loop amps, heli_amp_2 = tree (see above)
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_0)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%mhelicity%]_0)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_0,heli_amp[%helicity%]_0)&
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_0)&
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+      case (12)
+         ! sigma(SM + dim6 X SM + dim6) with loopcounting
+         ! Note: for loop-induced heli_amp_0 & heli_amp_1 = 1-loop amps, heli_amp_2 = tree (see above)
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+              &                            heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+         &                            heli_amp[%mhelicity%]_0+heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_0+heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2,&
+         &                            heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+         &                            heli_amp[%helicity%]_0+heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+      case (13)
+         ! sigma(SM X dim6) with loopcounting
+         ! Note: for loop-induced heli_amp_0 & heli_amp_1 = 1-loop amps, heli_amp_2 = tree (see above)
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2)&
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%mhelicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_0,heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)&
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,heli_amp[%helicity%]_0)[%
+         @end @for helicities %]
+      case (14)
+         ! sigma(dim6 X dim6) with loopcounting
+         ! Note: for loop-induced heli_amp_0 & heli_amp_1 = 1-loop amps, heli_amp_2 = tree (see above)
+         pp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
+              &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+              &                            heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+         pm  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+         &                            heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mp  = 0.0_ki[%
+         @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
+         @for modified_helicity modify=index to=L
+         symbol_plus=X symbol_minus=L var=mhelicity%] &
+         &          + square_0l_0l_sc(heli_amp[%mhelicity%]_1+heli_amp[%mhelicity%]_2,&
+         &                            heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for modified_helicity %][%
+         @end @for helicities %]
+         mm  = 0.0_ki[%
+         @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
+         &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
+         &                            heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
+         @end @for helicities %]
+      end select[% 
+@end @if generate_tree_diagrams %][%
    @else %][% 'if not enable_truncation_orders' %]
       pp  = 0.0_ki[%
       @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
@@ -2196,11 +2388,7 @@ contains
       end if
       if (include_symmetry_factor) then
          bornsc = bornsc / real(symmetry_factor, ki)
-      end if[% 
-@else %][% ' => not loop induced ' %]
-      write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented yet for loop-induced processes."
-      stop[%
-@end @if generate_tree_diagrams %]
+      end if
 
    end subroutine spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %]
 [% @end @for %][% ' sct loop ' %]
@@ -2213,7 +2401,6 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       integer :: i
       complex(ki) :: pm, mp[%
-@if generate_tree_diagrams %][%
    @for particles lightlike vector %][%
       @if is_first %][%
          @for helicities %]
@@ -2222,15 +2409,8 @@ contains
       @end @if is_first %]
       complex(ki), dimension(4) :: eps[%index%][%
    @end @for %][%
-@else %][%
-   @for particles lightlike vector %][%
-      @if is_first %][%
-         @for helicities %]
-      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
-         @end @for %][%
-      @end @if is_first %]
-      complex(ki), dimension(4) :: eps[%index%][%
-   @end @for %]
+@if generate_tree_diagrams %][%
+@else %]
       complex(ki), dimension(numcs,-2:0) :: colorvec
       integer :: c
       logical :: my_ok
