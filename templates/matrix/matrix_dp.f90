@@ -1768,148 +1768,13 @@ contains
 
 
    !---#[ spin correlated ME :
-   subroutine spin_correlated_lo2(vecs, bornsc)
-      use [% process_name asprefix=\_ %]kinematics
-      implicit none
-      real(ki), dimension(num_legs, 4), intent(in) :: vecs
-      real(ki), dimension(num_legs,4,4) :: bornsc
-      real(ki), dimension(num_legs, 4) :: pvecs
-      complex(ki), dimension(4,4) :: tens
-      complex(ki) :: pp, pm, mp, mm[%
-@if generate_tree_diagrams %][%
-   @for particles lightlike vector %][%
-      @if is_first %][%
-         @for helicities %]
-      complex(ki), dimension(numcs) :: heli_amp[%helicity%][%
-         @end @for %][%
-      @end @if is_first %]
-      complex(ki), dimension(4) :: eps[%index%][%
-   @end @for %][%
-@end @if generate_tree_diagrams %]
-
-      bornsc(:,:,:) = 0.0_ki
-
-      [% @if enable_truncation_orders %]
-      write(*,*) "spin_correlated_lo2 not implemented yet for use with truncation options."
-      stop[% 
-      @else %]
-      
-
-      !---#[ Initialize helicity amplitudes :[%
-@if generate_tree_diagrams %][% ' => not loop induced ' %][%
-   @for particles lightlike vector %][%
-      @if is_first %][%
-         @for helicities %]
-      !---#[ reinitialize kinematics:[%
-            @for helicity_mapping shift=1 %][%
-               @if parity %][%
-                  @select sign @case 1 %]
-      pvecs([%index%],1) = vecs([%$_%],1)
-      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
-                  @else %]
-      pvecs([%index%],1) = -vecs([%$_%],1)
-      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
-                  @end @select %][%
-               @else %][%
-                  @select sign @case 1 %]
-      pvecs([%index%],:) = vecs([%$_%],:)[%
-                  @else %]
-      pvecs([%index%],:) = -vecs([%$_%],:)[%
-                  @end @select %][%
-               @end @if %][%
-            @end @for %]
-      call init_event(pvecs[%
-            @for particles lightlike vector %], [%hel%]1[%
-            @end @for %])
-      !---#] reinitialize kinematics:
-      heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
-         @end @for helicities %][%
-      @end @if is_first %][%
-   @end @for %]
-      !---#] Initialize helicity amplitudes :
-      !---#[ Initialize polarization vectors :[%
-   @for particles lightlike vector initial %]
-      eps[%index%] = spva[% @if eval reference > 0 %]k[%reference
-		%][% @else %]l[% eval - reference %][% @end @if
-                %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
-		%][% @else %]l[% eval - reference %][% @end @if
-                %],k[%index%])/sqrt2[%
-   @end @for %][%
-   @for particles lightlike vector final %]
-      eps[%index%] = conjg(spva[%
-      @if eval reference > 0 %]k[%reference
-		%][% @else %]l[% eval - reference %][% @end @if
-                %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
-		%][% @else %]l[% eval - reference %][% @end @if
-                %],k[%index%])/sqrt2)[%
-   @end @for %]
-      !---#] Initialize polarization vectors :
-      ! Note: By omitting the imaginary parts we lose a term:
-      !   Imag(B_j(mu,nu)) = i_ * e_(k_j, mu, q_j, nu) * |Born|^2
-      ! where q_j is the reference momentum chosen for the paticle
-      ! of momentum k_j. This term should, however not be phenomenologically
-      ! relevant.[%
-   @for particles lightlike vector %]
-      !---#[ particle [%index%] :
-      pp  = 0.0_ki[%
-      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
-      &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
-      @end @for helicities %]
-      pm  = 0.0_ki[%
-      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
-         @for modified_helicity modify=index to=L
-              symbol_plus=X symbol_minus=L var=mhelicity%] &
-      &          + square_0l_0l_sc(heli_amp[%
-                         helicity%],heli_amp[%mhelicity%])[%
-         @end @for modified_helicity %][%
-      @end @for helicities %]
-      mp  = 0.0_ki[%
-      @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %][%
-         @for modified_helicity modify=index to=L
-                symbol_plus=X symbol_minus=L var=mhelicity%] &
-      &          + square_0l_0l_sc(heli_amp[%
-                          mhelicity%],heli_amp[%helicity%])[%
-         @end @for modified_helicity %][%
-      @end @for helicities %]
-      mm  = 0.0_ki[%
-      @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
-      &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
-      @end @for helicities %]
-
-      call construct_polarization_tensor(conjg(eps[%index%]),eps[%index%],tens)
-      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pp, ki)
-      call construct_polarization_tensor(conjg(eps[%index%]),conjg(eps[%index%]),tens)
-      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pm, ki)
-      call construct_polarization_tensor(eps[%index%],eps[%index%],tens)
-      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mp, ki)
-      call construct_polarization_tensor(eps[%index%],conjg(eps[%index%]),tens)
-      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)
-      !---#] particle [%index%] :[%
-   @end @for %]
-
-      [% @if eval ( .len. ( .str. form_factor_lo ) ) .gt. 0 %]bornsc = bornsc*get_formfactor_lo(vecs)[%@end @if %]
-      if (include_helicity_avg_factor) then
-         bornsc = bornsc / real(in_helicities, ki)
-      end if
-      if (include_color_avg_factor) then
-         bornsc = bornsc / incolors
-      end if
-      if (include_symmetry_factor) then
-         bornsc = bornsc / real(symmetry_factor, ki)
-      end if[% 
-@else %][% ' => not loop induced ' %]
-      write(*,*) "spin_correlated_lo2 not implemented yet for loop-induced processes."
-      stop[%
-@end @if generate_tree_diagrams %][% 
-@end @if enable_truncation_orders%]
-
-   end subroutine spin_correlated_lo2
-
-
-   subroutine spin_correlated_lo2_whizard(vecs, bornsc)
+[% @for each 0 1 var=sct %]
+   subroutine spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %](vecs, bornsc)[% 
+      @select sct @case 1 %]
      ! This is a version of the original spin_correlated_lo2, but using
      ! the OpenLoops (HELAS) convention for the polarization vectors.
-     ! This is required by Whizard.
+     ! This is required by Whizard.[% 
+      @end @select %]
       use [% process_name asprefix=\_ %]kinematics
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
@@ -1924,8 +1789,8 @@ contains
       complex(ki), dimension(numcs) :: heli_amp[%helicity%][% @if enable_truncation_orders %]_0, heli_amp[%helicity%]_1, heli_amp[%helicity%]_2[% @end @if %][%
          @end @for %][%
       @end @if is_first %]
-      complex(ki), dimension(4) :: eps[%index%], epsp[%index%], epsm[%index%]
-      complex(ki) :: phasefac[%index%][%
+      complex(ki), dimension(4) :: eps[%index%][% @select sct @case 1 %], epsp[%index%], epsm[%index%]
+      complex(ki) :: phasefac[%index%][% @end @select %][%
    @end @for %][%
 @end @if generate_tree_diagrams %]
 
@@ -1969,20 +1834,24 @@ contains
       @end @if is_first %][%
    @end @for %]
       !---#] Initialize helicity amplitudes :
-      !---#[ Initialize polarization vectors :
+      !---#[ Initialize polarization vectors :[% 
+   @select sct @case 1 %]
       ! Initializing the polarization vectors according to the OpenLoops
       ! convention as used by Whizard. Calculating the relative phasefactor
-      ! accounting for the different conventions used for the helicity amplitudes.[%
+      ! accounting for the different conventions used for the helicity amplitudes.[% 
+   @end @select %][%
    @for particles lightlike vector initial %]
       eps[%index%] = spva[% @if eval reference > 0 %]k[%reference
 		%][% @else %]l[% eval - reference %][% @end @if
                 %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
 		%][% @else %]l[% eval - reference %][% @end @if
-                %],k[%index%])/sqrt2
+                %],k[%index%])/sqrt2[% 
+   @select sct @case 1 %]
       call eps_MG(k[%index%], 0.0_ki, -1, epsm[%index%])
       call eps_MG(k[%index%], 0.0_ki, 1, epsp[%index%])
       phasefac[%index%] = (eps[%index%](2)-vecs([%index%],2)/vecs([%index%],1)*eps[%index%](1))/epsm[%index%](2)
-      phasefac[%index%] = -phasefac[%index%]**2[%
+      phasefac[%index%] = -phasefac[%index%]**2[% 
+   @end @select %][%
    @end @for %][%
    @for particles lightlike vector final %]
       eps[%index%] = conjg(spva[%
@@ -1990,11 +1859,13 @@ contains
 		%][% @else %]l[% eval - reference %][% @end @if
                 %]k[%index%]/Spaa([% @if eval reference > 0 %]k[%reference
 		%][% @else %]l[% eval - reference %][% @end @if
-                %],k[%index%])/sqrt2)
+                %],k[%index%])/sqrt2)[% 
+   @select sct @case 1 %]
       call eps_MG(k[%index%], 0.0_ki, -1, epsm[%index%])
       call eps_MG(k[%index%], 0.0_ki, 1, epsp[%index%])
       phasefac[%index%] = (eps[%index%](2)-vecs([%index%],2)/vecs([%index%],1)*eps[%index%](1))/epsm[%index%](2)
-      phasefac[%index%] = -phasefac[%index%]**2[%
+      phasefac[%index%] = -phasefac[%index%]**2[% 
+   @end @select %][%
    @end @for %]
       !---#] Initialize polarization vectors :
       ! Note: By omitting the imaginary parts we lose a term:
@@ -2291,6 +2162,16 @@ contains
       @end @for helicities %][%
       @end @if enable_truncation_orders %]
 
+      [% @select sct @case 0 %]
+      call construct_polarization_tensor(conjg(eps[%index%]),eps[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pp, ki)
+      call construct_polarization_tensor(conjg(eps[%index%]),conjg(eps[%index%]),tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pm, ki)
+      call construct_polarization_tensor(eps[%index%],eps[%index%],tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mp, ki)
+      call construct_polarization_tensor(eps[%index%],conjg(eps[%index%]),tens)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)
+      [% @case 1 %]
       pm = phasefac[%index%]*pm
       mp = conjg(phasefac[%index%])*mp
       
@@ -2301,7 +2182,8 @@ contains
       call construct_polarization_tensor(conjg(epsm[%index%]),epsp[%index%],tens)
       bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mp, ki)
       call construct_polarization_tensor(conjg(epsm[%index%]),epsm[%index%],tens)
-      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)
+      bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)[% 
+      @end @select %]
       !---#] particle [%index%] :[%
    @end @for particles lightlike vector %]
 
@@ -2316,12 +2198,12 @@ contains
          bornsc = bornsc / real(symmetry_factor, ki)
       end if[% 
 @else %][% ' => not loop induced ' %]
-      write(*,*) "spin_correlated_lo2_whizard not implemented yet for loop-induced processes."
+      write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented yet for loop-induced processes."
       stop[%
 @end @if generate_tree_diagrams %]
 
-   end subroutine spin_correlated_lo2_whizard
-
+   end subroutine spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %]
+[% @end @for %][% ' sct loop ' %]
 
    subroutine OLP_spin_correlated_lo2(vecs, ampsc)
       use [% process_name asprefix=\_ %]kinematics
