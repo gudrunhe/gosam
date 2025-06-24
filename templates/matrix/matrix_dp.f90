@@ -1346,53 +1346,69 @@ contains
 [% @end @for %][% 'fh = 0, 1 loop' %]
    
    !---#[ color correlated ME :
-   pure subroutine color_correlated_lo(color_vector,perm,res)
+   pure subroutine color_correlated_lo(color_vector1,perm,res,color_vector2)
       use [% process_name asprefix=\_ %]color, only: [%
       @for pairs colored1 colored2 ordered %][%
       @if is_first %][% @else %], &
       & [% @end @if %]T[%index1%]T[%index2%][%
       @end @for pairs %]
       implicit none
-      complex(ki), dimension(numcs), intent(in) :: color_vector
+      complex(ki), dimension(numcs), intent(in) :: color_vector1
+      complex(ki), dimension(numcs), optional, intent(in) :: color_vector2
       integer, dimension(num_legs), intent(in) :: perm
       real(ki), dimension(num_legs,num_legs), intent(out) :: res
-      res(:,:)=0.0_ki[%
+      res(:,:)=0.0_ki
+      if(present(color_vector2)) then[%
       @for pairs colored1 colored2 ordered %]
-      res(perm([%index1%]),perm([%index2%])) = square(color_vector,T[%
+      res(perm([%index1%]),perm([%index2%])) = square(color_vector1,T[%
+        index1%]T[%index2%],color_vector2)[%
+      @if eval index1 .ne. index2 %]
+      res(perm([%index2%]),perm([%index1%])) = res(perm([%index1%]),perm([%index2%]))[%
+      @end @if %][%
+      @end @for pairs %]
+      else[%
+      @for pairs colored1 colored2 ordered %]
+      res(perm([%index1%]),perm([%index2%])) = square(color_vector1,T[%
         index1%]T[%index2%])[%
       @if eval index1 .ne. index2 %]
       res(perm([%index2%]),perm([%index1%])) = res(perm([%index1%]),perm([%index2%]))[%
       @end @if %][%
       @end @for pairs %]
+      end if
    end subroutine color_correlated_lo
 
 
    subroutine     color_correlated_lo2(vecs,borncc)
       use [% process_name asprefix=\_ %]kinematics, only: init_event
+      use [% process_name asprefix=\_ %]dipoles, only: pi
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,num_legs), intent(out) :: borncc
-      real(ki), dimension(num_legs,num_legs) :: borncc_heli
+      real(ki), dimension(num_legs,num_legs) :: borncc_heli[%
+      @if enable_truncation_orders %]
+      real(ki), dimension(num_legs,num_legs) :: borncc_heli_tmp1, borncc_heli_tmp2[%
+      @end @if %]
       real(ki), dimension(num_legs, 4) :: pvecs
       integer, dimension(num_legs) :: perm
-      complex(ki), dimension(numcs) :: color_vector
-     
-      borncc(:,:) = 0.0_ki
-      
-      [% @if enable_truncation_orders %]
-      write(*,*) "color_correlated_lo2 not implemented yet for use with truncation options."
-      stop[% 
-      @else %][%
-  @for repeat 1 num_legs inclusive=true %][%
-     @if is_first %]
+      complex(ki), dimension(numcs) :: color_vector[% @if enable_truncation_orders %]_0, color_vector_1, color_vector_2[% @end @if %][%
+      @if generate_tree_diagrams %][%
+      @else %]
+      complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2[%
+      @end @if generate_tree_diagrams %]
+      borncc(:,:) = 0.0_ki[%
+     @for repeat 1 num_legs inclusive=true %][%
+        @if is_first %]
       perm = (/[%
-     @else %],[%
-     @end @if %][%$_%][%
-     @if is_last %]/)[%
-     @end @if %][%
-  @end @for %][%
-  @if generate_tree_diagrams %][% ' => not loop induced ' %][%
-  @for helicities %]
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
+     @end @for %][%
+@if generate_tree_diagrams %][% ' => not loop-induced ' %][%
+@for helicities %]
       !---#[ reinitialize kinematics:[%
      @for helicity_mapping shift=1 %][%
         @if parity %][%
@@ -1422,15 +1438,219 @@ contains
       call init_event(pvecs[%
      @for particles lightlike vector %], [%hel%]1[%
      @end @for %])
-      !---#] reinitialize kinematics:
-      color_vector = amplitude[%map.index%]l0[% @if enable_truncation_orders %]_0[% @end @if %]()
+      !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> dim-6 coefficient (NP=1) 
+         ! amplitude*_2 -> dim-6 loop-suppressed coefficient (QL=1)
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!   
+         case (0)
+            ! sigma(SM X SM)
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case (1)
+            ! sigma(SM X SM) + sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1)
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp2,color_vector_1+color_vector_2)
+            borncc_heli = borncc_heli_tmp1 + borncc_heli_tmp2
+         case(2)
+            ! sigma(SM + dim6 X SM + dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call color_correlated_lo(color_vector_0+color_vector_1+color_vector_2,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case(11)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1)
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp2,color_vector_1)
+            borncc_heli = borncc_heli_tmp1 + borncc_heli_tmp2
+         case(12)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            call color_correlated_lo(color_vector_0+color_vector_1,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case (3)
+            ! sigma(SM X dim6) without loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1,color_vector_1+color_vector_2)
+            borncc_heli = borncc_heli_tmp1
+         case(4)
+            ! sigma(dim6 X dim6) without loopcounting
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            color_vector_2 = amplitude[% map.index %]l0_2()
+            call color_correlated_lo(color_vector_1+color_vector_2,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case (13)
+            ! sigma(SM X dim6) with loopcounting
+            color_vector_0 = amplitude[% map.index %]l0_0()
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1,color_vector_1)
+            borncc_heli = borncc_heli_tmp1
+         case(14)
+            ! sigma(dim6 X dim6) with loopcounting
+            color_vector_1 = amplitude[% map.index %]l0_1()
+            call color_correlated_lo(color_vector_1,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         end select[%
+     @else %][% 'if not enable_truncation_orders' %]
+         color_vector = amplitude[%map.index%]l0()
+         call color_correlated_lo(color_vector,perm,borncc_heli)[%
+     @end @if enable_truncation_orders %][%
+      @if is_first %]
+      ! The minus is part in the definition according to PowHEG Box.
+      ! Since they use it we include it:[%
+      @end @if is_first %]
+         borncc(:,:) = borncc(:,:) - borncc_heli(:,:)[%
+  @end @for helicities %][%
+@else %][% ' not generate_tree_diagrams ' %][% ' => loop-induced ' %]
+   ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki[% 
+@if helsum %][%
+@if enable_truncation_orders %]
+      write(*,*) "Subroutine 'color_correlated_lo2' including truncation options not available for processes generated with helsum=true."
+      stop
+[% @else %][% 'if not enable_truncation_orders' %]
+      do c=1,numcs
+         colorvec(c,:) = samplitudel1summed(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call color_correlated_lo(color_vector,perm,borncc)[%
+@end @if enable_truncation_orders %][%
+@else %][% ' not helsum ' %][%
+@for helicities %]
+      !---#[ reinitialize kinematics:[%
+     @for helicity_mapping shift=1 %][%
+        @if parity %][%
+           @select sign @case 1 %]
+      pvecs([%index%],1) = vecs([%$_%],1)
+      pvecs([%index%],2:4) = -vecs([%$_%],2:4)[%
+           @else %]
+      pvecs([%index%],1) = -vecs([%$_%],1)
+      pvecs([%index%],2:4) = vecs([%$_%],2:4)[%
+           @end @select %][%
+        @else %][%
+           @select sign @case 1 %]
+      pvecs([%index%],:) = vecs([%$_%],:)[%
+           @else %]
+      pvecs([%index%],:) = -vecs([%$_%],:)[%
+           @end @select %][%
+        @end @if %][%
+     @end @for %][%
+     @for helicity_mapping shift=1 %][%
+        @if is_first %]
+      perm = (/[%
+        @else %],[%
+        @end @if %][%$_%][%
+        @if is_last %]/)[%
+        @end @if %][%
+     @end @for %]
+      call init_event(pvecs[%
+     @for particles lightlike vector %], [%hel%]1[%
+     @end @for %])
+      !---#] reinitialize kinematics:[%
+     @if enable_truncation_orders %]
+         select case (EFTcount)
+         ! amplitude*_0 -> SM
+         ! amplitude*_1 -> dim-6 coefficient (NP=1) 
+         ! amplitude*_2 -> dim-6 loop-suppressed coefficient (QL=1)
+         ! => "without loopcounting" means that the loop-supressed vertices
+         !    are included despite their suppression!   
+         case (0)
+            ! sigma(SM X SM)
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case(1,2,3,4)
+            ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
+            write(unit=*,fmt="(A74)") "EFTcount options 1, 2, 3 and 4 are not defined for loop-induced processes."
+            write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
+            stop
+         case(11)
+            ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1)
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp2,color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %])
+            borncc_heli = borncc_heli_tmp1 + borncc_heli_tmp2
+         case(12)
+            ! sigma(SM + dim6 X SM + dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call color_correlated_lo(color_vector_0+color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %],perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         case (13)
+            ! sigma(SM X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_0 = colorvec_0(:,0)
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call color_correlated_lo(color_vector_0,perm,borncc_heli_tmp1,color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %])
+            borncc_heli = borncc_heli_tmp1
+         case(14)
+            ! sigma(dim6 X dim6) with loopcounting
+            do c=1,numcs
+               colorvec_1(c,:) = samplitudeh[%map.index%]l1_1(real(scale2,ki),my_ok,rational2,c)
+            end do
+            color_vector_1 = colorvec_1(:,0)[% 
+@if generate_eft_loopind %]
+            ! contributions of tree diagrams with loop-order vertex
+            color_vector_2 = amplitude[% map.index %]l0_2()*8._ki*pi*pi[% 
+@end @if %]
+            call color_correlated_lo(color_vector_1[% @if generate_eft_loopind %]+color_vector_2[% @end @if %],perm,borncc_heli_tmp1)
+            borncc_heli = borncc_heli_tmp1
+         end select[%
+     @else %][% 'if not enable_truncation_orders' %]
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
       call color_correlated_lo(color_vector,perm,borncc_heli)[%
+     @end @if enable_truncation_orders %][%
       @if is_first %]
       ! The minus is part in the definition according to PowHEG Box.
       ! Since they use it we include it:[%
       @end @if is_first %]
       borncc(:,:) = borncc(:,:) - borncc_heli(:,:)[%
-  @end @for helicities %]
+@end @for helicities %][% 
+@end @if helsum%][%
+@end @if generate_tree_diagrams %]
       if (include_helicity_avg_factor) then
          borncc = borncc / real(in_helicities, ki)
       end if
@@ -1439,12 +1659,7 @@ contains
       end if
       if (include_symmetry_factor) then
          borncc = borncc / real(symmetry_factor, ki)
-      end if[% 
-   @else %][% ' => loop induced ' %]
-      write(*,*) "color_correlated_lo2 not implemented yet for loop-induced processes."
-      stop[%
-   @end @if generate_tree_diagrams %][% 
-   @end @if enable_truncation_orders %]
+      end if
    end subroutine color_correlated_lo2
 
 
@@ -1492,7 +1707,6 @@ contains
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
-      real(ki), dimension(num_legs,num_legs) :: borncc
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli[%
       @if enable_truncation_orders %]
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli_tmp1, ampcc_heli_tmp2[%
