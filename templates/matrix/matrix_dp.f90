@@ -1801,9 +1801,11 @@ contains
       @end @if generate_tree_diagrams %]
 
       bornsc(:,:,:) = 0.0_ki[% 
-      @if generate_tree_diagrams %][% @else %][% @if helsum %]
-         write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented for loop-induced processes when helsum=true."
+      @if generate_tree_diagrams %][% @else %][% 
+      @if helsum %]write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented for loop-induced processes when helsum=true."
       stop[% 
+      @else %]! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki[% 
       @end @if %][% @end @if %]
 
       !---#[ Initialize helicity amplitudes :[%
@@ -1840,9 +1842,7 @@ contains
       @else %]
          heli_amp[%helicity%] = amplitude[% map.index %]l0()[%
       @end @if %][% 
-@else %][% ' not generate_tree_diagrams => loop-induced' %]
-         ! For loop induced diagrams the scale should not matter
-         scale2 = 100.0_ki[%
+@else %][% ' not generate_tree_diagrams => loop-induced' %][% @if helsum %][% @else %][%
       @if enable_truncation_orders %]
          do c=1,numcs
             colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
@@ -1861,7 +1861,7 @@ contains
             colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
          end do
          heli_amp[%helicity%] = colorvec(:,0)[%
-      @end @if enable_truncation_orders %][% 
+      @end @if enable_truncation_orders %][% @end @if helsum %][% 
 @end @if generate_tree_diagrams %][%
          @end @for helicities %][%
       @end @if is_first %][%
@@ -2169,7 +2169,7 @@ contains
          &          + square_0l_0l_sc(heli_amp[%helicity%]_1,heli_amp[%helicity%]_1)[%
          @end @for helicities %]
       end select[% 
-@else %][% ' not generate_tree_diagrams => loop-induced' %]
+@else %][% ' not generate_tree_diagrams => loop-induced' %][% @if helsum %][% @else %]
       select case (EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> dim-6 coefficient (NP=1) 
@@ -2325,9 +2325,9 @@ contains
          &          + square_0l_0l_sc(heli_amp[%helicity%]_1+heli_amp[%helicity%]_2,&
          &                            heli_amp[%helicity%]_1+heli_amp[%helicity%]_2)[%
          @end @for helicities %]
-      end select[% 
+      end select[% @end @if helsum %][% 
 @end @if generate_tree_diagrams %][%
-   @else %][% 'if not enable_truncation_orders' %]
+   @else %][% 'if not enable_truncation_orders' %][% @if helsum %][% @else %]
       pp  = 0.0_ki[%
       @for helicities where=index.eq.X symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
@@ -2351,10 +2351,11 @@ contains
       mm  = 0.0_ki[%
       @for helicities where=index.eq.L symbol_plus=X symbol_minus=L %] &
       &          + square_0l_0l_sc(heli_amp[%helicity%],heli_amp[%helicity%])[%
-      @end @for helicities %][%
+      @end @for helicities %][% @end @if helsum %][%
       @end @if enable_truncation_orders %]
 
-      [% @select sct @case 0 %]
+      [% @if helsum %][% @else
+      %][% @select sct @case 0 %]
       call construct_polarization_tensor(conjg(eps[%index%]),eps[%index%],tens)
       bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * pp, ki)
       call construct_polarization_tensor(conjg(eps[%index%]),conjg(eps[%index%]),tens)
@@ -2375,7 +2376,7 @@ contains
       bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mp, ki)
       call construct_polarization_tensor(conjg(epsm[%index%]),epsm[%index%],tens)
       bornsc([%index%],:,:) = bornsc([%index%],:,:) + real(tens(:,:) * mm, ki)[% 
-      @end @select %]
+      @end @select %][% @end @if helsum %]
       !---#] particle [%index%] :[%
    @end @for particles lightlike vector %]
 
@@ -2418,11 +2419,13 @@ contains
       real(ki) :: rational2, scale2[%
 @end @if generate_tree_diagrams %]
 
-      ampsc(:) = 0.0_ki[%
-      @if generate_tree_diagrams %][% @else %]
-      ! For loop induced diagrams the scale should not matter
+      ampsc(:) = 0.0_ki[% 
+      @if generate_tree_diagrams %][% @else %][% 
+      @if helsum %]write(*,*) "spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %] not implemented for loop-induced processes when helsum=true."
+      stop[% 
+      @else %]! For loop induced diagrams the scale should not matter
       scale2 = 100.0_ki[% 
-      @end @if %]
+      @end @if %][% @end @if %]
 
       !---#[ Initialize helicity amplitudes :[%
    @for particles lightlike vector %][%
@@ -2458,7 +2461,7 @@ contains
             @else %][% ' not enable_truncation_orders ' %]
       heli_amp[%helicity%] = amplitude[% map.index %]l0()[% 
             @end @if enable_truncation_orders %][%
-            @else %][% ' not generate_tree_diagrams => loop-induced ' %][% 
+            @else %][% ' not generate_tree_diagrams => loop-induced ' %][% @if helsum %][% @else %][% 
             @if enable_truncation_orders %]
       do c=1,numcs
          colorvec_0(c,:) = samplitudeh[%map.index%]l1_0(real(scale2,ki),my_ok,rational2,c)
@@ -2477,7 +2480,7 @@ contains
          colorvec(c,:) = samplitudeh[%map.index%]l1(real(scale2,ki),my_ok,rational2,c)
       end do
       heli_amp[%helicity%] = colorvec(:, 0)[% 
-            @end @if enable_truncation_orders %][%
+            @end @if enable_truncation_orders %][% @end @if helsum %][%
             @end @if generate_tree_diagrams %][%
          @end @for helicities %][%
       @end @if is_first %][%
@@ -2604,7 +2607,7 @@ contains
          @end @for modified_helicity %][%
       @end @for helicities %]
       end select[% 
-      @else %][% ' not generate_tree_diagrams => loop-induced' %]
+      @else %][% ' not generate_tree_diagrams => loop-induced' %][% @if helsum %][% @else %]
       select case(EFTcount)
       ! amplitude*_0 -> SM
       ! amplitude*_1 -> dim-6 coefficient (NP=1) 
@@ -2679,9 +2682,9 @@ contains
                           helicity%]_1+heli_amp[%helicity%]_2)[%
          @end @for modified_helicity %][%
       @end @for helicities %]
-      end select[% 
+      end select[% @end @if helsum %][% 
       @end @if generate_tree_diagrams %][% 
-      @else %][% ' not enable_truncation_orders ' %]
+      @else %][% ' not enable_truncation_orders ' %][% @if helsum %][% @else %]
       mp  = 0.0_ki[%
       @for helicities where=index1.eq.X symbol_plus=X symbol_minus=L %][%
          @for modified_helicity modify=index1 to=L
@@ -2689,11 +2692,13 @@ contains
       &          + square_[%index1%]_[%index2%]_sc(heli_amp[%
                           mhelicity%],heli_amp[%helicity%])[%
          @end @for modified_helicity %][%
-      @end @for helicities %][% 
+      @end @for helicities %][% @end @if helsum %][% 
       @end @if enable_truncation_orders %]
 
-      ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+1)   = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs +1) + real(mp, ki)
-      ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+2) = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs + 2)  + real(aimag(mp),ki)
+      [% @if helsum %][% @else
+      %]ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+1)   = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs+2) = ampsc(2*([%index1%]-1)+2*([%index2%]-1)*num_legs + 2)  + real(aimag(mp),ki)[% 
+      @end @if %]
 
       !---#] pair [%index1%][%index2%] :
      [% @end @if %] [%
