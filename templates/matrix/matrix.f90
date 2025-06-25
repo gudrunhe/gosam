@@ -46,6 +46,31 @@
 
 contains
 
+   !---#[ C bindings:
+   subroutine intigolem_ffi() bind(C, name="[% process_name asprefix=\_ %]initgolem")
+      call initgolem()
+   end subroutine
+
+   subroutine exitgolem_ffi() bind(C, name="[% process_name asprefix=\_ %]exitgolem")
+      call exitgolem()
+   end subroutine
+
+   subroutine samplitude_ffi(vecs, scale2, amp, prec) bind(C, name="[% process_name asprefix=\_ %]samplitude")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      real(kind=c_double), dimension([%num_legs%]*4), intent(in) :: vecs
+      real(kind=c_double), intent(in) :: scale2
+      real(kind=c_double), dimension(1:4), intent(out) :: amp
+      real(ki), dimension([%num_legs%], 4) :: f_vecs
+      integer(kind=c_int), intent(out) :: prec
+      f_vecs(:,1) = real(vecs(1::4),ki)
+      f_vecs(:,2) = real(vecs(2::4),ki)
+      f_vecs(:,3) = real(vecs(3::4),ki)
+      f_vecs(:,4) = real(vecs(4::4),ki)
+      call samplitude(f_vecs, scale2, amp, prec)
+   end subroutine
+   !---#] C bindings:
+
    !---#[ subroutine banner:
    subroutine     banner()
       implicit none
@@ -232,8 +257,8 @@ contains
             prec=min(prec,fpprec2)
          endif
 
-         ! if(icheck.eq.1) write(*,*) '--point passed--', amp(2), prec 
-         ! if(icheck.eq.3) write(*,*) '--point failed--', amp(2), prec 
+         ! if(icheck.eq.1) write(*,*) '--point passed--', amp(2), prec
+         ! if(icheck.eq.3) write(*,*) '--point failed--', amp(2), prec
 
          if(icheck.eq.3.and.PSP_verbosity) then
             write(42,'(2x,A7)')"<event>"
@@ -302,7 +327,7 @@ contains
       integer, intent(in), optional :: h
 
       call samplitudel01_dp(vecs, scale2, amp, rat2, ok, h)
-   
+
    end subroutine samplitudel01
    !---#] subroutine samplitudel01 :
 
@@ -331,7 +356,7 @@ contains
 
    !---#[ function samplitudel1 :
    function     samplitudel1(vecs,scale2,ok,rat2) result(amp)
-      implicit none   
+      implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
       real(ki), intent(in) :: scale2
@@ -386,7 +411,7 @@ contains
 
    end subroutine ir_subtraction_h
    !---#] subroutine ir_subtraction_h :
-   
+
    !---#[ color correlated ME :
    subroutine color_correlated_lo2(vecs,borncc)
       implicit none
@@ -399,7 +424,7 @@ contains
       write(*,*) "the  'enable_truncation_orders' feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine OL_color_correlated instead." 
+      write(*,*) "der using the subroutine OL_color_correlated instead."
       write(*,*) "###############################################################################"
       stop
 [% @end @if enable_truncation_orders%]
@@ -430,7 +455,7 @@ contains
       write(*,*) "'enable_truncation_orders' feature switched on! This subroutine does not sup-"
       write(*,*) "sport this feature,  yet,  and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
+      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead."
       write(*,*) "###############################################################################"
       stop
 [% @end @if enable_truncation_orders%]
@@ -439,7 +464,7 @@ contains
       write(*,*) "###############################################################################"
       write(*,*) "Cannot compute spin correlation when code is generated with helsum"
       write(*,*) "If you need spin correlated amplitudes please re-generate the code"
-      write(*,*) "without the 'helsum' option" 
+      write(*,*) "without the 'helsum' option"
       write(*,*) "###############################################################################"
       stop
 [% @end @if %]
@@ -457,7 +482,7 @@ contains
       write(*,*) "###############################################################################"
       write(*,*) "Cannot compute spin correlation when code is generated with helsum"
       write(*,*) "If you need spin correlated amplitudes please re-generate the code"
-      write(*,*) "without the 'helsum' option" 
+      write(*,*) "without the 'helsum' option"
       write(*,*) "###############################################################################"
       stop
 [% @end @if %]
@@ -477,7 +502,7 @@ contains
       write(*,*) "the 'enable_truncation_orders'  feature switched on! This subroutine does not"
       write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
       write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead." 
+      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead."
       write(*,*) "###############################################################################"
       stop
 [% @end @if enable_truncation_orders%]
