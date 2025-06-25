@@ -36,8 +36,8 @@ contains
            & PSP_chk_li1 => PSP_chk_li1, &
            & PSP_chk_li2 => PSP_chk_li2, &
            & PSP_chk_li3 => PSP_chk_li3, &
+           & PSP_chk_li4 => PSP_chk_li4, &
            & PSP_chk_li5 => PSP_chk_li5, &
-           & PSP_chk_li6 => PSP_chk_li6, &
            & PSP_chk_kfactor => PSP_chk_kfactor[%
       @end @if %]
       implicit none
