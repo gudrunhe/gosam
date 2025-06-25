@@ -451,10 +451,10 @@ def run_qgraf(conf, in_particles, out_particles):
 
     # Clean up and leave
     qgraf_dat_name = os.path.join(path, "qgraf.dat")
-    # for filename in cleanup_files:
-    # full_name = os.path.join(path, filename)
-    # if os.path.exists(full_name):
-    # os.remove(full_name)
+    for filename in cleanup_files:
+     full_name = os.path.join(path, filename)
+     if os.path.exists(full_name):
+        os.remove(full_name)
 
     if flag_generate_tree_diagrams and diagram_count(conf, 0) == 0 and flag_generate_loop_diagrams:
         logger.warning(

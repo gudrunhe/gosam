@@ -34,32 +34,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-def create_ff_files(conf, in_particles, out_particles):
-    legs = len(in_particles) + len(out_particles)
-    path = golem.util.tools.process_path(conf)
-
-    for n in range(1, legs + 1):
-        f = open(os.path.join(path, "ff-%d.hh" % n), "w")
-        p = golem.algorithms.formfactors.FormFactorPrinter(f)
-
-        f.write("* vim: ts=3:sw=3\n")
-        ffset = []
-        for r in range(n + 1):
-            f.write("*---#[ Procedure TI%dr%d :\n" % (n, r))
-            ffs = p.generate(n, r)
-            ffset.extend(ffs)
-            f.write("*---#] Procedure TI%dr%d :\n" % (n, r))
-
-        f.write("*---#[ Set of Form Factors :\n")
-        if len(ffset) > 0:
-            f.write("Set FormFactors%d : " % n)
-            f.write(",\n\t".join([", ".join(ffset[i : i + 10]) for i in range(0, len(ffset), 8)]))
-            f.write(";\n")
-        f.write("*---#] Set of Form Factors :\n")
-        f.close()
-
-
 def generate_process_files(conf, from_scratch=False):
     """
     This routine is a wrapper around anything that needs to be done
@@ -84,13 +58,6 @@ def generate_process_files(conf, from_scratch=False):
 
     for name in conf:
         props[name] = conf[name]
-
-    # OBSOLETE:
-    ## we only need the ff-<n>.hh files if we create the virtual amplitude
-    ## and if we use the extension 'golem95':
-    ##flag_create_ff_files = conf.getBooleanProperty("generate_loop_diagrams") \
-    ##		and "golem95" in extensions
-    flag_create_ff_files = False
 
     if not os.path.exists(path):
         raise GolemConfigError("Process path does not exist: %s" % path)
@@ -186,10 +153,6 @@ def generate_process_files(conf, from_scratch=False):
         ct_signs=ct_signs,
         ct_flags=flags[2],
     )
-
-    if flag_create_ff_files:
-        create_ff_files(conf, in_particles, out_particles)
-
     cleanup(path)
 
 
@@ -204,10 +167,10 @@ def cleanup(path):
         for ext in ["", ".py", ".pyc", ".pyo"]:
             cleanup_files.append("model" + ext)
 
-    # for filename in cleanup_files:
-    # full_name = os.path.join(path, filename)
-    # if os.path.exists(full_name):
-    # os.remove(full_name)
+    for filename in cleanup_files:
+        full_name = os.path.join(path, filename)
+        if os.path.exists(full_name):
+            os.remove(full_name)
 
 
 def find_config_files():
