@@ -5,7 +5,6 @@ MassiveParticleScheme    OnShell
 CouplingPower QCD		 0
 CouplingPower QED        3
 EWScheme                 alphaGF
-MassiveParticles          6 23 24 25
 
 # Process definitions
 

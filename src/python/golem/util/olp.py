@@ -773,48 +773,52 @@ def process_order_file(
 
             lconf["__excludedParticles__"] = None
 
-            set_massiveParticles = set()
-            list_default_zero_values = default_conf["zero"].split(",") if default_conf["zero"] else []
-            list_zero_values = []
-            list_nonzero_values = []
-            if lconf["__OLP_BLHA2__"] == "True":  # only supported in BLHA2
-                for i in (
-                    [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] else []
-                ):
-                    for n in model.particles:
-                        particle = model.particles[n]
-                        if particle.getPDGCode() == i:
-                            set_massiveParticles.add(particle.getPDGCode())
-                            set_massiveParticles.add(-particle.getPDGCode())
-                            mass = particle.getMass()
-                            if mass != "0":
-                                if mass in list_default_zero_values:
-                                    logger.critical(
-                                        "BLHA-file specifies particle %r (PDG %r) as massive, which\n" \
-                                        " conficts with 'zero' list provided in config file(s)\n %r."
-                                        % (str(particle),particle.getPDGCode(),default_conf["extra_setup_file"]))
-                                    sys.exit("GoSam terminated due to an error")
-                                list_nonzero_values.append(mass)
-                            width = particle.getWidth()
-                            if width != "0":
-                                list_nonzero_values.append(width)
+            # Deactivated to avoid unintuitive behaviour. Particle 
+            # masses should be taken as in the model file or set to 
+            # zero (if desired) through the process card (*.in or *.rc)
 
-                for n in model.particles:
-                    particle = model.particles[n]
-                    if particle.getPDGCode() not in set_massiveParticles:
-                        mass = particle.getMass()
-                        if mass != "0" and mass not in list_zero_values and mass not in list_nonzero_values:
-                            list_zero_values.append(mass)
-                        width = particle.getWidth()
-                        if width != "0" and width not in list_zero_values and width not in list_nonzero_values:
-                            list_zero_values.append(width)
-            if list_zero_values:
-                if lconf["zero"]:
-                    lconf["zero"] = lconf["zero"] + "," + ",".join(list_zero_values)
-                else:
-                    lconf["zero"] = ",".join(list_zero_values)
+            # set_massiveParticles = set()
+            # list_default_zero_values = default_conf["zero"].split(",") if default_conf["zero"] else []
+            # list_zero_values = []
+            # list_nonzero_values = []
+            # if lconf["__OLP_BLHA2__"] == "True":  # only supported in BLHA2
+            #     for i in (
+            #         [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] else []
+            #     ):
+            #         for n in model.particles:
+            #             particle = model.particles[n]
+            #             if particle.getPDGCode() == i:
+            #                 set_massiveParticles.add(particle.getPDGCode())
+            #                 set_massiveParticles.add(-particle.getPDGCode())
+            #                 mass = particle.getMass()
+            #                 if mass != "0":
+            #                     if mass in list_default_zero_values:
+            #                         logger.critical(
+            #                             "BLHA-file specifies particle %r (PDG %r) as massive, which\n" \
+            #                             " conficts with 'zero' list provided in config file(s)\n %r."
+            #                             % (str(particle),particle.getPDGCode(),default_conf["extra_setup_file"]))
+            #                         sys.exit("GoSam terminated due to an error")
+            #                     list_nonzero_values.append(mass)
+            #                 width = particle.getWidth()
+            #                 if width != "0":
+            #                     list_nonzero_values.append(width)
 
-            lconf["__massiveParticles__"] = None
+            #     for n in model.particles:
+            #         particle = model.particles[n]
+            #         if particle.getPDGCode() not in set_massiveParticles:
+            #             mass = particle.getMass()
+            #             if mass != "0" and mass not in list_zero_values and mass not in list_nonzero_values:
+            #                 list_zero_values.append(mass)
+            #             width = particle.getWidth()
+            #             if width != "0" and width not in list_zero_values and width not in list_nonzero_values:
+            #                 list_zero_values.append(width)
+            # if list_zero_values:
+            #     if lconf["zero"]:
+            #         lconf["zero"] = lconf["zero"] + "," + ",".join(list_zero_values)
+            #     else:
+            #         lconf["zero"] = ",".join(list_zero_values)
+
+            # lconf["__massiveParticles__"] = None
 
         # ---#] Setup excluded and massive particles :
 

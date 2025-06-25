@@ -434,15 +434,23 @@ def ExcludedParticles(values, conf, ignore_case):
 
 @optional_olp_option
 def MassiveParticles(values, conf, ignore_case):
+    # Deactivated to avoid unintuitive behaviour. Particle 
+    # masses should be taken as in the model file or set to 
+    # zero (if desired) through the process card (*.in or *.rc)
+    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticles'." 
+                   + " To prevent any unintuitive behaviour this option is IGNORED! Particle masses "
+                   + "are taken as defined in the model file. If you wish to set any of them to zero "
+                   + "please provide an additional process card (*.in or *.rc file) through the "
+                   " --config flag and add the masses to the 'zero' property.")
     if conf["__OLP_BLHA2__"] == "False" or conf["__OLP_BLHA2__"] is None:
         return __value_ERR__ + " option only allowed with InterfaceVersion BLHA2."
-    massive = []
-    for p in values:
-        try:
-            massive.append(str(int(p)))
-        except ValueError:
-            return __value_ERR__ + " only PDG codes allowed."
-    conf["__massiveParticles__"] = " ".join(massive)
+    # massive = []
+    # for p in values:
+    #     try:
+    #         massive.append(str(int(p)))
+    #     except ValueError:
+    #         return __value_ERR__ + " only PDG codes allowed."
+    # conf["__massiveParticles__"] = " ".join(massive)
     return __value_OK__
 
 

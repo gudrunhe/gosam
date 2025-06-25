@@ -1,10 +1,9 @@
 InterfaceVersion         BLHA2
 CorrectionType           QCD
-IRregularisation         CDR
+IRregularisation         tHV
 MassiveParticleScheme    OnShell
 CouplingPower QCD        1
 CouplingPower QED        2
-MassiveParticles          6 15 23 24 25 
 
 
 # channel d d~ -> G G g
