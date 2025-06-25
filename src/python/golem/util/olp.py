@@ -884,7 +884,7 @@ def process_order_file(
             mismatch_schemes = [False, None]
 
             if ir_scheme == "CDR":
-                logger.warning("GoSam results are returned in the t'Hooft-Veltman scheme,\n" \
+                logger.warning("GoSam results are returned in the 't Hooft-Veltman scheme,\n" \
                 "which differs from requested CDR scheme at O(eps). For \n"
                 "ordinary NLO calculations this should not be a problem.")
                 ir_scheme = "THV"

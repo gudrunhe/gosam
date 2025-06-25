@@ -517,7 +517,7 @@ regularisation_scheme = Property(
     "regularisation_scheme",
     """\
          Sets the used regularisation scheme, dimensional reduction (DRED) 
-         or t'Hooft-Veltman (tHV).
+         or 't Hooft-Veltman (tHV).
          Possible values: dred (recommended), thv
       """,
     str,
@@ -530,7 +530,7 @@ config_convert_to_thv = Property(
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the conversion of the result into the t'Hooft-Veltman 
+   Activates or disables the conversion of the result into the 't Hooft-Veltman 
    (tHV) regularisation scheme, when the calculation has been performed in DRED.
 
    Does not have an effect when tHV is picked as regularisation scheme in
