@@ -8,7 +8,9 @@ project('GoSam',
         'includedir': get_option('includedir') + '/GoSam',
         'libdir': get_option('libdir') + '/GoSam',
         'datadir': get_option('datadir') + '/GoSam'
-    }
+    },
+    meson_version: '>=1.4',
+    license: 'GPL-3.0-or-later'
 )
 
 if not (build_machine.system() == 'linux' or build_machine.system() == 'darwin')
