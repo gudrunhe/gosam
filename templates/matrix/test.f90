@@ -59,7 +59,7 @@
       call samplitude(vecs, scale2, amp, prec)
       call ir_subtraction(vecs, scale2, irp)
       if(ievt.eq.NEVT) then
-         call print_parameters(scale2)[%
+         call print_parameters(vecs, scale2)[%
       @if generate_tree_diagrams %]
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "LO:", amp(0)
          write(*,'(A1,1x,A17,1x,G23.16)') "#", "NLO, finite part:", &
@@ -93,13 +93,15 @@
 
  contains
 
-subroutine  print_parameters(scale2)
+subroutine  print_parameters(vecs, scale2)
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renormalisation, &
         convert_to_thv, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
    implicit none
-   real(ki) :: scale2[%
+   real(ki) :: scale2
+   real(ki), dimension([%num_legs%], 4) :: vecs
+   integer :: i[%
 @select modeltype @case sm smdiag smehc sm_complex smdiag_complex %]
 
 
@@ -154,6 +156,10 @@ subroutine  print_parameters(scale2)
    write(*,'(A1,1x,A26)') "#", "--------------------------"
    write(*,'(A1,1x,A22)') "#", "Renormalisation scale:"
    write(*,'(A1,1x,A7,G23.16)') "#", "mu    =", sqrt(scale2)
+   write(*,'(A1,1x,A26)') "#", "--------------------------"
+   do i=1,[%num_legs%]
+   write(*,'(A1,1x,A2,I1,A5,4(1x, G23.16))') "#", "p(", i, ")   =", vecs(i,:)
+   enddo
    write(*,'(A1,1x,A26)') "#", "--------------------------"
 
 [% @else %]
