@@ -240,7 +240,7 @@ filter_particles = Property(
 
     Example:
 
-    filter.lo.particles=u:0,d:0 # No internal u or d quarks
+    filter.particles=u:0,d:0 # No internal u or d quarks
     """,
     str,
     ""

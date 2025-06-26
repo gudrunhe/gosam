@@ -186,7 +186,7 @@ def OperationMode(values, conf, ignore_case):
 
 @required_olp_option
 def CorrectionType(values, conf, ignore_case):
-    supported_values = ["QCD", "EW"]
+    supported_values = ["QCD", "EW", "QED"]
     return expect_one_keyword(values, conf, ignore_case, "olp.correctiontype", supported_values)
 
 

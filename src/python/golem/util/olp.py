@@ -381,7 +381,7 @@ def get_qgraf_power(conf):
             else:
                 ew_tree_power = None
                 ew_loop_power = None
-        elif correction_type == "EW":
+        elif correction_type == "EW" or correction_type == "QED":
             if alpha_power is not None:
                 ew_tree_power = "NONE"
                 ew_loop_power = int(alpha_power)
@@ -408,7 +408,7 @@ def get_qgraf_power(conf):
             qcd_loop_power = None
             ew_loop_power = None
         else:
-            if correction_type == "EW":
+            if correction_type == "EW" or correction_type == "QED":
                 if ew_tree_power is None:
                     raise GolemConfigError("Requested EW corrections without specifying electroweak coupling order")
                 else:
