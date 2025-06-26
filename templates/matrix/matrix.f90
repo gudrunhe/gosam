@@ -418,16 +418,13 @@ contains
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,num_legs), intent(out) :: borncc
 
-[% @if enable_truncation_orders %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Warning:  you are using the color_correlated_lo2 subroutine with the"
-      write(*,*) "the  'enable_truncation_orders' feature switched on! This subroutine does not"
-      write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
-      write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine OL_color_correlated instead."
-      write(*,*) "###############################################################################"
+[% @if enable_truncation_orders %][% @if generate_tree_diagrams %][% @else %][% @if helsum%]
+      write(*,*) "################################################################################"
+      write(*,*) "Warning: The subroutine color_correlated_lo2 is not available for loop-induced"
+      write(*,*) "processes generated with both 'enable_truncation_orders=true' and 'helsum=true'." 
+      write(*,*) "################################################################################"
       stop
-[% @end @if enable_truncation_orders%]
+[% @end @if helsum%][% @end @if generate_tree_diagrams %][% @end @if enable_truncation_orders%]
 
       call color_correlated_lo2_dp(vecs,borncc)
 
@@ -437,6 +434,14 @@ contains
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
+
+[% @if enable_truncation_orders %][% @if generate_tree_diagrams %][% @else %][% @if helsum%]
+      write(*,*) "################################################################################"
+      write(*,*) "Warning: The subroutine OLP_color_correlated is not available for loop-induced"
+      write(*,*) "processes generated with both 'enable_truncation_orders=true' and 'helsum=true'." 
+      write(*,*) "################################################################################"
+      stop
+[% @end @if helsum%][% @end @if generate_tree_diagrams %][% @end @if enable_truncation_orders%]
 
       call OLP_color_correlated_dp(vecs,ampcc)
 
@@ -449,25 +454,13 @@ contains
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
 
-[% @if enable_truncation_orders %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Warning:  you are using the spin_correlated_lo2  subroutine with the"
-      write(*,*) "'enable_truncation_orders' feature switched on! This subroutine does not sup-"
-      write(*,*) "sport this feature,  yet,  and might thus yield inconsitent results,"
-      write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead."
-      write(*,*) "###############################################################################"
+[% @if generate_tree_diagrams %][% @else %][% @if helsum%]
+      write(*,*) "############################################################"
+      write(*,*) "Warning: The subroutine spin_correlated_lo2 is not available"
+      write(*,*) "for loop-induced processes generated with 'helsum=true'."
+      write(*,*) "############################################################"
       stop
-[% @end @if enable_truncation_orders%]
-
-[% @if helsum %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
-      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
-      write(*,*) "without the 'helsum' option"
-      write(*,*) "###############################################################################"
-      stop
-[% @end @if %]
+[% @end @if helsum%][% @end @if generate_tree_diagrams %]
 
       call spin_correlated_lo2_dp(vecs, bornsc)
 
@@ -478,14 +471,13 @@ contains
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
 
-[% @if helsum %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
-      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
-      write(*,*) "without the 'helsum' option"
-      write(*,*) "###############################################################################"
+[% @if generate_tree_diagrams %][% @else %][% @if helsum%]
+      write(*,*) "####################################################################"
+      write(*,*) "Warning: The subroutine spin_correlated_lo2_whizard is not available"
+      write(*,*) "for loop-induced processes generated with 'helsum=true'."
+      write(*,*) "####################################################################"
       stop
-[% @end @if %]
+[% @end @if helsum%][% @end @if generate_tree_diagrams %]
 
       call spin_correlated_lo2_whizard_dp(vecs, bornsc)
 
@@ -496,25 +488,13 @@ contains
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(2*num_legs*num_legs) :: ampsc
 
-[% @if enable_truncation_orders %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Warning:  you are using the  OLP_spin_correlated_lo2 subroutine with"
-      write(*,*) "the 'enable_truncation_orders'  feature switched on! This subroutine does not"
-      write(*,*) "support this feature, yet, and might thus yield inconsitent results,"
-      write(*,*) "depending on the truncation option (EFTcount) chosen.  Please consi-"
-      write(*,*) "der using the subroutine spin_correlated_lo2_whizard instead."
-      write(*,*) "###############################################################################"
+[% @if generate_tree_diagrams %][% @else %][% @if helsum%]
+      write(*,*) "################################################################"
+      write(*,*) "Warning: The subroutine OLP_spin_correlated_lo2 is not available"
+      write(*,*) "for loop-induced processes generated with 'helsum=true'."
+      write(*,*) "################################################################"
       stop
-[% @end @if enable_truncation_orders%]
-
-[% @if helsum %]
-      write(*,*) "###############################################################################"
-      write(*,*) "Cannot compute spin correlation when code is generated with helsum"
-      write(*,*) "If you need spin correlated amplitudes please re-generate the code"
-      write(*,*) "without the 'helsum' option"
-      write(*,*) "###############################################################################"
-      stop
-[% @end @if %]
+[% @end @if helsum%][% @end @if generate_tree_diagrams %]
 
       call OLP_spin_correlated_lo2_dp(vecs, ampsc)
 
