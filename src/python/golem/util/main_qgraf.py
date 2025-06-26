@@ -152,8 +152,8 @@ def run_qgraf_dat(conf, output_short_name, log_name):
 
     output_name = os.path.join(path, output_short_name)
 
-    # if os.path.exists(output_name):
-    # os.remove(output_name)
+    if os.path.exists(output_name):
+        os.remove(output_name)
 
     logger.info("QGraf is generating %s" % output_short_name)
 

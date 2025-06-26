@@ -201,7 +201,7 @@ class Model:
                 # At this stage all couplings of a vertex should come with the same order, 
                 # so we can just take the first coupling. The same is true for the rank of 
                 # its lorentz structures.
-                vord = str(v.couplings[(0,0)].order)+"_RK"+str(list(v.rank)[0])
+                vord = str(list(v.couplings.values())[0].order)+"_RK"+str(list(v.rank)[0])
                 if vord in list(seen_vertices2):
                     seen_vertices2[vord].append(v)
                 else:
