@@ -1,4 +1,4 @@
-project('Ninja', 'cpp', 'fortran', version: '1.1.0')
+project('Ninja', 'cpp', 'fortran', version: '1.1.0', meson_version: '>=1.4')
 
 add_project_arguments('-w', language: 'fortran')
 add_project_arguments('-w', language: 'cpp')
