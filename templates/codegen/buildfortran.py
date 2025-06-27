@@ -108,8 +108,11 @@ abbfile.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
 abbfile.write('   implicit none\n')
 abbfile.write('   private\n')
-abbfile.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')
-abbfile.write('   complex(ki), public :: R2d'+diag+'\n')
+abbfile.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')[%
+@select r2
+@case explicit %]
+abbfile.write('   complex(ki), public :: R2d'+diag+'\n')[% 
+@end @select %]
 abbfile.write('\n')
 abbfile.write('   public :: init_abbrev\n')
 abbfile.write('\n')
@@ -148,7 +151,9 @@ for abb_line in outdict['Abbreviations'].split("\n"):
 		abbfile.write('\n')[%
 @else %]
 abbfile.write(outdict['Abbreviations'])[%
-@end @if %]
+@end @if %][%
+@select r2
+@case explicit %]
 abbfile.write(outdict['R2'])
 abbfile.write('\n')
 abbfile.write('      rat2 = rat2 + R2d'+diag+'\n')
@@ -156,7 +161,8 @@ abbfile.write('\n')
 abbfile.write('      if (debug_nlo_diagrams) then\n')
 abbfile.write('          write (logfile,*) "<result name=\'r2\' index=\''+diag+'\' value=\'", &\n')
 abbfile.write('          & R2d'+diag+', "\'/>"\n')
-abbfile.write('      end if\n')
+abbfile.write('      end if\n')[% 
+@end @select %]
 abbfile.write('   end subroutine\n')
 abbfile.write('end module [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 
@@ -171,8 +177,11 @@ abbfile_qp.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
 abbfile_qp.write('   implicit none\n')
 abbfile_qp.write('   private\n')
-abbfile_qp.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')
-abbfile_qp.write('   complex(ki), public :: R2d'+diag+'\n')
+abbfile_qp.write('   complex(ki), dimension('+str(abb_max)+'), public :: abb'+diag+'\n')[%
+@select r2
+@case explicit %]
+abbfile_qp.write('   complex(ki), public :: R2d'+diag+'\n')[% 
+@end @select %]
 abbfile_qp.write('\n')
 abbfile_qp.write('   public :: init_abbrev\n')
 abbfile_qp.write('\n')
@@ -211,7 +220,9 @@ for abb_line in outdict['Abbreviations'].split("\n"):
 		abbfile_qp.write('\n')[%
 @else %]
 abbfile_qp.write(outdict['Abbreviations'])[%
-@end @if %]
+@end @if %][%
+@select r2
+@case explicit %]
 abbfile_qp.write(outdict['R2'])
 abbfile_qp.write('\n')
 abbfile_qp.write('      rat2 = rat2 + R2d'+diag+'\n')
@@ -219,7 +230,8 @@ abbfile_qp.write('\n')
 abbfile_qp.write('      if (debug_nlo_diagrams) then\n')
 abbfile_qp.write('          write (logfile,*) "<result name=\'r2\' index=\''+diag+'\' value=\'", &\n')
 abbfile_qp.write('          & R2d'+diag+', "\'/>"\n')
-abbfile_qp.write('      end if\n')
+abbfile_qp.write('      end if\n')[% 
+@end @select %]
 abbfile_qp.write('   end subroutine\n')
 abbfile_qp.write('end module [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 [% @end @if extension quadruple %]

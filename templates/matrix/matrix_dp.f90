@@ -177,7 +177,7 @@ contains
       if (present(h)) then[%
          @if helsum %]
          print *, 'ERROR: Cannot select helicity when code was generated'
-         print *, 'with "helsum=1".'[%
+         print *, 'with "helsum=true".'[%
          @else %][%
          @if is_loopinduced %]
          amp((/4,3,2/)) = samplitudel1_h(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
@@ -410,7 +410,7 @@ contains
      @end @if %]
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
-                & "<result kind='lo' value='", heli_amp, "'/>"
+               & "<result kind='lo' value='", heli_amp, "'/>"
             write(logfile,*) "</helicity>"
          end if
          amp = amp + heli_amp[%
@@ -485,7 +485,7 @@ contains
   @select fh @case 1 %]
          case ([%helicity%])[% 
   @end @select %]        
-            if (debug_lo_diagrams) then
+            if (debug_nlo_diagrams) then
                write(logfile,*) "<helicity index='[% helicity %]' >"
             end if[% 
   @select fh @case 1 %]
@@ -614,9 +614,11 @@ contains
                heli_amp(ieps) = square(amp0, ampct(ieps,:))
             end do[%
         @end @if %]
-            if (debug_lo_diagrams) then
-               write(logfile,'(A25,E24.16,A3)') &
-                   & "<result kind='lo' value='", heli_amp, "'/>"
+            if (debug_nlo_diagrams) then
+               write(logfile,'(A32,E24.16,A3)') &
+                  & "<result kind='ct-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A32,E24.16,A3)') &
+                  & "<result kind='ct-single' value='", heli_amp(-1), "'/>"
                write(logfile,*) "</helicity>"
             end if
             amp = amp + heli_amp[%

@@ -1,5 +1,5 @@
 [% ' vim: syntax=golem '
-%]module     [% process_name asprefix=\_ %]matrix_qp   
+%]module     [% process_name asprefix=\_ %]matrix_qp
    use [% process_name asprefix=\_ %]util_qp, only: square_qp => square
    use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki_qp, &
      & include_helicity_avg_factor, include_color_avg_factor, &
@@ -179,7 +179,7 @@ contains
       if (present(h)) then[%
          @if helsum %]
          print *, 'ERROR: Cannot select helicity when code was generated'
-         print *, 'with "helsum=1".'[%
+         print *, 'with "helsum=true".'[%
          @else %][%
          @if is_loopinduced %]
          amp((/4,3,2/)) = samplitudel1_h_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling[%
@@ -276,7 +276,7 @@ contains
    end subroutine samplitudel01_qp
    !---#] subroutine samplitudel01_qp :
 
-[% @for each 0 1 var=fh %]
+   [% @for each 0 1 var=fh %]
    !---#[ function samplitudel0[% @select fh @case 1 %]_h[% @end @select %]_qp :
    function     samplitudel0[% @select fh @case 1 %]_h[% @end @select %]_qp(vecs[% @select fh @case 1 %], h[% @end @select %]) result(amp)
       use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: logfile
@@ -412,7 +412,7 @@ contains
      @end @if %]
          if (debug_lo_diagrams) then
             write(logfile,'(A25,E24.16,A3)') &
-                & "<result kind='lo' value='", heli_amp, "'/>"
+               & "<result kind='lo' value='", heli_amp, "'/>"
             write(logfile,*) "</helicity>"
          end if
          amp = amp + heli_amp[%
@@ -487,7 +487,7 @@ contains
   @select fh @case 1 %]
          case ([%helicity%])[% 
   @end @select %]        
-            if (debug_lo_diagrams) then
+            if (debug_nlo_diagrams) then
                write(logfile,*) "<helicity index='[% helicity %]' >"
             end if[% 
   @select fh @case 1 %]
@@ -616,9 +616,11 @@ contains
                heli_amp(ieps) = square_qp(amp0, ampct(ieps,:))
             end do[%
         @end @if %]
-            if (debug_lo_diagrams) then
-               write(logfile,'(A25,E24.16,A3)') &
-                   & "<result kind='lo' value='", heli_amp, "'/>"
+            if (debug_nlo_diagrams) then
+               write(logfile,'(A32,E24.16,A3)') &
+                  & "<result kind='ct-finite' value='", heli_amp(0), "'/>"
+               write(logfile,'(A32,E24.16,A3)') &
+                  & "<result kind='ct-single' value='", heli_amp(-1), "'/>"
                write(logfile,*) "</helicity>"
             end if
             amp = amp + heli_amp[%
@@ -803,7 +805,6 @@ contains
             &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_0 + amp0_1 + amp0_2)
          case(11)
             ! sigma(SM X SM) + sigma(SM X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
@@ -813,7 +814,6 @@ contains
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki_qp*pi*pi
          case(12)
             ! sigma(SM + dim6 X SM + dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
@@ -837,7 +837,6 @@ contains
             &        + samplitudeh[% map.index %]l1_2_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1 + amp0_2)
          case(13)
             ! sigma(SM X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_0 = amplitude[% map.index %]l0_0_qp()
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
@@ -847,7 +846,6 @@ contains
             heli_amp(0) = heli_amp(0) + square_qp(amp0_0, amp0_2)*8._ki_qp*pi*pi 
          case(14)
             ! sigma(dim6 X dim6) with loopcounting
-            ! ToDo: Normalisation factor of tree-diagram contribution
             amp0_1 = amplitude[% map.index %]l0_1_qp()
             amp0_2 = amplitude[% map.index %]l0_2_qp()
             heli_amp = samplitudeh[% map.index %]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,amp0_1)
@@ -919,7 +917,7 @@ contains
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_0(:, 0)) + square_qp(colorvec_0(:, -1))
          case(1,2,3,4)
             ! Truncation options without loop-counting => cannot be defined unambiguously for loop-induced processes
-            write(unit=*,fmt="(A56)") "EFTcount options 1, 2, 3 and 4 are not defined."
+            write(unit=*,fmt="(A74)") "EFTcount options 1, 2, 3 and 4 are not defined for loop-induced processes."
             write(unit=*,fmt="(A10,1x,I1,A44)") "You picked", EFTcount, ". Please choose 0, 11, 12, 13 or 14 instead."
             stop
          case(11)
@@ -960,7 +958,7 @@ contains
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2) + square_qp(colorvec_1(:,-2),amp0_2)  
             heli_amp( 0) = heli_amp( 0) + square_qp(amp0_2)[% 
-@end @if %]      
+@end @if %]
          case(13)
             ! sigma(SM X dim6) with loopcounting
             do c=1,numcs
@@ -1347,7 +1345,7 @@ contains
       case(2)
          amp(:) = amp(:) * nlo_coupling / 8.0_ki_qp / pi / pi
       end select
-      
+
    end subroutine ir_subtraction[% @select fh @case 1 %]_h[% @end @select %]_qp
    !---#] subroutine ir_subtraction[% @select fh @case 1 %]_h[% @end @select %]_qp :
 [% @end @for %][% 'fh = 0, 1 loop' %]
@@ -1375,4 +1373,4 @@ contains
    [% @end @if %] 
 
 
-   end module [% process_name asprefix=\_ %]matrix_qp
+end module [% process_name asprefix=\_ %]matrix_qp
