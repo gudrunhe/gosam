@@ -923,10 +923,6 @@ def process_order_file(
                 logger.critical("BLHA-file does not specify IRregularisation!")
                 sys.exit("GoSam terminated due to an error")
 
-        # ---#] Select regularisation scheme:
-    if "olp.massiveparticlescheme" in conf:
-        logger.warning("UV-counterterms for massive particles are not " + "implemented yet.")
-
     fill_config(conf)
 
     # ---#[ Iterate over subprocesses:

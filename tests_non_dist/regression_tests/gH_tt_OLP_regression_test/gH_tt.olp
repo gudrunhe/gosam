@@ -1,7 +1,6 @@
 InterfaceVersion         BLHA2
 CorrectionType           QCD
 IRregularisation         tHV
-MassiveParticleScheme    OnShell
 CouplingPower QCD        1
 CouplingPower QED        1
 

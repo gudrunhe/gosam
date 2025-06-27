@@ -1,8 +1,7 @@
 InterfaceVersion         BLHA2
 CorrectionType           EW
 IRregularisation         DRED
-MassiveParticleScheme    OnShell
-CouplingPower QCD		 0
+CouplingPower QCD        0
 CouplingPower QED        3
 EWScheme                 alphaGF
 

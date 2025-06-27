@@ -173,8 +173,15 @@ def IRsubtractionMethod(values, conf, ignore_case):
 @optional_olp_option
 def MassiveParticleScheme(values, conf, ignore_case):
     err_flag = False
-    supported_values = ["OnShell"]
-    return expect_one_keyword(values, conf, ignore_case, "olp.massiveparticlescheme", supported_values)
+    # GoSam does not support setting the mass scheme via BLHA.
+    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticleScheme'."
+                   + " This option will be IGNORED, as GoSam does not support EW renormalisation, for which"
+                   + " the scheme choice becomes relevant. If you still wish to choose something like the "
+                   + "complex-mass-scheme (at tree-level), please implement this in your model file(s). "
+                   + "For the SM you can use a built-in model: sm_complex or smdiag_complex.")
+    return __value_OK__
+    # supported_values = ["OnShell"]
+    # return expect_one_keyword(values, conf, ignore_case, "olp.massiveparticlescheme", supported_values)
 
 
 @optional_olp_option

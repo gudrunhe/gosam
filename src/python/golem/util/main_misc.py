@@ -180,9 +180,6 @@ def find_config_files():
     files by preferred defaults.
 
     The procedure looks in the following locations:
-            <golem path>
-            <guessed share/gosam-contrib path>
-            <user's home>
             <working directory>
 
     The follwing file names are considered configuration files
