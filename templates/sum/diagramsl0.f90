@@ -16,9 +16,6 @@ contains
       use [% process_name asprefix=\_ %]kinematics
       end function amplitude
       use [% process_name asprefix=\_ %]color
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_lo_diagrams, &
-        & use_sorted_sum
-      use accu, only: sorted_sum
       use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram
 
 [%

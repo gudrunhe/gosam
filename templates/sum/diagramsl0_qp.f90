@@ -16,9 +16,6 @@ contains
       use [% process_name asprefix=\_ %]kinematics_qp
       end function amplitude
       use [% process_name asprefix=\_ %]color_qp
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_lo_diagrams, &
-        & use_sorted_sum
-      use accu_qp, only: sorted_sum
       use [% process_name asprefix=\_ %]util_qp, only: inspect_lo_diagram
 
 [%
