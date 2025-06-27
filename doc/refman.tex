@@ -1677,72 +1677,170 @@ for $A_j=1$, in which case one finds
 {\Gamma(\alpha)}
 \end{equation}
 
-All  non-zero cases for 
-integrals where the rank does not exceed the number of propagators are listed
- below~\cite{Binoth:2006hk,Reiter:2009kb}
-\begin{align}
-I_1^{D,0,1}&=-\frac12 S_{11}\\
-I_1^{D,0,1;\mu_1}&=\frac12 S_{11} \cdot r_1^{\mu_1}\\
-I_2^{D,1,0}&=-\frac16\left(S_{11}+S_{12}+S_{22}\right)\\
-I_2^{D,0,1}&=1\\
-I_2^{D,0,1;\mu_1}&=-\frac12\left(r_1^{\mu_1}+r_2^{\mu_1}\right)\\
-I_2^{D,0,1;\mu_1\mu_2}&=
-\frac16\left(%
-2r_1^{\mu_1}r_1^{\mu_2}
-+r_1^{\mu_1}r_2^{\mu_2}
-+r_2^{\mu_1}r_1^{\mu_2}
-+2r_2^{\mu_1}r_2^{\mu_2}\right)\nonumber\\
-&-\frac1{12}\hat{g}^{\mu_1\mu_2}\left(S_{11}+S_{12}+S_{22}\right)\\
-I_3^{D,1,0}&=\frac12\\
-I_3^{D,1,0;\mu_1}&=-\frac16\left(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}\right)\\
-I_3^{D,0,1;\mu_1\mu_2}&=\frac14\hat{g}^{\mu_1\mu_2}\\
-I_3^{D,0,1;\mu_1\mu_2\mu_3}&=-\frac{1}{12}
-\sum_{l=1}^3\left[\hat{g}^{\bullet\bullet}r^{\bullet}\right]^{\mu_1\mu_2\mu_3}%
-\\
-I_4^{D,1,0;\mu_1\mu_2}&=\frac{1}{12}\hat{g}^{\mu_1\mu_2}\\
-I_4^{D,2,0}&=-\frac16\\
-I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4}&=\frac1{4!}\left[\hat{g}^{\bullet\bullet}%
-\hat{g}^{\bullet\bullet}\right]^{\mu_1\mu_2\mu_3\mu_4}
-\end{align}
-In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of 
-propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving 
-gravitons.  
-More details about higher rank integrals can be found in
-Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}.
-\bea
-&&I_5^{D,3}(S)=
-\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3
-}{%nl
-\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{12}\;,\\
-%
-&&I_5^{D,2;\mu_1 \mu_2}(a_1,a_2; S)=
-\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^2\;
-\hat{q}_{a_1}^{\mu_1}  \hat{q}_{a_2}^{\mu_2}}{%nl
-\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{48}\,\hat{g}^{\mu_1\mu_2}\;,\\
-%
-&&I_5^{D,1;\mu_1\cdots \mu_4}(a_1,\ldots,a_4; S)=
-\int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\tilde{k}^2\;
-\hat{q}_{a_1}^{\mu_1} \ldots \hat{q}_{a_4}^{\mu_4}}{%nl
-\prod_{j=1}^5(q_j^2-m_j^2+i\delta)}\nn\\
-&&\qquad =-\frac{1}{96}\,
-\left[\hat{g}^{\mu_1\mu_2}\hat{g}^{\mu_3\mu_4}+ \hat{g}^{\mu_1\mu_3}\hat{g}^{\mu_2\mu_4}
-+\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
-\eea
-\be
-\eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 ((r_i-r_j)^2-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
-%+{\cal O}(\eps)\;.
-\ee
-
-In the \gosam{} process card, the default is {\tt r2=explicit}, which means that 
-the rational part $R_2$ is calculated algebraically using the formulae above, 
+In the \gosam{} process card, the default is {\tt r2=explicit}, which means that
+the rational part $R_2$ is calculated algebraically using the formulae below,
 while the integrand reduction can be done in 4 dimensions.
-Choosing {\tt r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional 
+Choosing {\tt r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional
 part during the reduction.
+
+\section*{Integrals with \boldmath$r\leq D$}
+All non-zero cases (in the limit $\epsilon\to0$) for
+integrals where the rank does not exceed the number of propagators are listed
+ below~\cite{Binoth:2006hk,Reiter:2009kb}. We encounter box integrals at most; pentagons and above are all zero.
+
+\subsection*{Tadpoles}
+\begin{subequations}
+\begin{align}
+  I_1^{D,0,1} &= -\frac{1}{2}S_{11}\,,\\[10pt]
+%
+  I_1^{D,0,1;\mu_1} &= \frac{1}{2}S_{11}r_1^{\mu_1}\,.
+\end{align}
+\end{subequations}
+Note: $S_{11}=-2m_1^2$
+
+\subsection*{Bubbles}
+\begin{subequations}
+\begin{align}
+    I_2^{D,0,1} =& 1\,,\\[10pt]
+%
+    I_2^{D,0,1;\mu_1} =& -\frac{1}{2}\qty(r_1^{\mu_1}+r_2^{\mu_1})\,,\\[10pt]
+%
+    I_2^{D,0,1;\mu_1\mu_2} =& \frac{1}{6}\qty(2r_1^{\mu_1}r_1^{\mu_2}+r_1^{\mu_1}r_2^{\mu_2}+r_2^{\mu_1}r_1^{\mu_2}+2r_2^{\mu_1}r_2^{\mu_2})\notag\\
+      &-\frac{1}{12}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{12}+S_{22})\,,\\[10pt]
+%
+    I_2^{D,1,0} =& -\frac{1}{6}\qty(S_{11}+S_{12}+S_{22})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Triangles}
+\begin{subequations}
+\begin{align}
+  I_3^{D,0,1;\mu_1\mu_2} =& \frac{1}{4}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_3^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
+%
+  I_3^{D,1,0} =& \frac{1}{2}\,,\\[10pt]
+%
+  I_3^{D,1,0;\mu_1} =& -\frac{1}{6}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Boxes}
+\begin{subequations}
+\begin{align}
+  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{24}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
+%
+  I_4^{D,1,0;\mu_1\mu_2} =& \frac{1}{12}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_4^{D,2,0} =& -\frac{1}{6}\,.
+\end{align}
+\end{subequations}
+
+\section*{Integrals with \boldmath$r>D$}
+In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of
+propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving
+gravitons.
+More details about higher rank integrals can be found in
+Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}. All non-zero integrals (in the limit $\epsilon\to0$) with $r=D+1$ are implemented in \gosam and shown below. Integrals with $r>D+1$ are currently not available. We encounter pentagon integrals at most; hexagons and above are all zero.
+% \bea
+% &&I_5^{D,3}(S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3
+% }{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{12}\;,\\
+% %
+% &&I_5^{D,2;\mu_1 \mu_2}(a_1,a_2; S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^2\;
+% \hat{q}_{a_1}^{\mu_1}  \hat{q}_{a_2}^{\mu_2}}{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{48}\,\hat{g}^{\mu_1\mu_2}\;,\\
+% %
+% &&I_5^{D,1;\mu_1\cdots \mu_4}(a_1,\ldots,a_4; S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\tilde{k}^2\;
+% \hat{q}_{a_1}^{\mu_1} \ldots \hat{q}_{a_4}^{\mu_4}}{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}\nn\\
+% &&\qquad =-\frac{1}{96}\,
+% \left[\hat{g}^{\mu_1\mu_2}\hat{g}^{\mu_3\mu_4}+ \hat{g}^{\mu_1\mu_3}\hat{g}^{\mu_2\mu_4}
+% +\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
+% \eea
+% \be
+% \eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 ((r_i-r_j)^2-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
+% %+{\cal O}(\eps)\;.
+% \ee
+
+\subsection*{Tadpoles}
+\begin{subequations}
+\begin{align}
+  I_1^{D,0,1;\mu_1\mu_2} &= -\frac{1}{2}S_{11}r_1^{\mu_1}r_1^{\mu_2}+\frac{1}{16}\hat{g}^{\mu_1\mu_2}\qty(S_{11})^2\,,\\[10pt]
+%
+  I_1^{D,1,0} &= \frac{1}{8}\qty(S_{11})^2\,.
+\end{align}
+\end{subequations}
+Note: $S_{11}=-2m_1^2$
+
+\subsection*{Bubbles}
+\begin{subequations}
+\begin{align}
+    I_2^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1,j_2,j_3=1}^2\qty[r_{j_1}^\bullet r_{j_2}^\bullet r_{j_3}^\bullet]^{\mu_1\mu_2\mu_3} -\frac{1}{6}\sum_{j=1}^2\qty[r_j^\bullet r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3}\notag\\
+      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
+      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
+      =& -\frac{1}{12}(3r_1^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}+3r_2^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}\notag\\
+      &\qquad+r_1^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_1^{\mu_1}r_2^{\mu_2}r_1^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}\notag\\
+      &\qquad+r_1^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_2^{\mu_2}r_1^{\mu_3})\notag\\
+      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
+      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,,\\[10pt]
+%
+    I_2^{D,1,0;\mu_1} =& \frac{1}{4}r_1^{\mu_1}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
+      &+\frac{1}{4}r_2^{\mu_1}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
+      =& \frac{1}{12}r_1^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
+      &+\frac{1}{12}r_2^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,.%\,,\\[10pt]
+%
+% not currently implemented:
+%    I_2^{D,2,0} =& -\frac{1}{120}\qty(3S_{11}^2+2S_{12}^2+3S_{22}^2+S_{11}S_{22}+3S_{11}S_{12}+3S_{12}S_{22})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Triangles}
+\begin{subequations}
+\begin{align}
+  I_3^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{48}\sum_{j_1,j_2=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2\mu_3\mu_4} + \frac{1}{48}\sum_{j=1}^3\qty[\hat{g}^{\bullet\bullet}r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3\mu_4}\notag\\
+    &-\frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
+%
+  I_3^{D,1,0;\mu_1\mu_2} =& \frac{1}{24}\sum_{j_1,j_2=1}^3\qty[r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2} + \frac{1}{24}\sum_{j=1}^3\qty[r_j^\bullet r_j^\bullet]^{\mu_1\mu_2}\notag\\
+    &-\frac{1}{48}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
+%
+  I_3^{D,2,0} =& \frac{1}{24}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,.
+\end{align}
+\end{subequations}
+We have
+\begin{multline}
+  S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23} \\= 2\qty(r_1^2+r_2^2+r_3^2-r_1\cdot r_2-r_1\cdot r_3-r_2\cdot r_3)-4\qty(m_1^2-m_2^2-m_3^2)
+\end{multline}
+
+\subsection*{Boxes}
+\begin{subequations}
+\begin{align}
+  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5} =& -\frac{1}{96}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3\mu_4\mu_5}\,,\\[10pt]
+%
+  I_4^{D,1,0;\mu_1\mu_2\mu_3} =& -\frac{1}{48}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
+%
+  I_4^{D,2,0;\mu_1} =& \frac{1}{24}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}+r_4^{\mu_1})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Pentagons}
+\begin{subequations}
+\begin{align}
+  I_5^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6} &= \frac{1}{192}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6}\,,\\[10pt]
+%
+  I_5^{D,1,0;\mu_1\mu_2\mu_3\mu_4} &= \frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
+%
+  I_5^{D,2,0;\mu_1\mu_2} &= -\frac{1}{48}\qty[\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_5^{D,3,0} &= \frac{1}{12}\,.
+\end{align}
+\end{subequations}
 
 \chapter{The included model files}
 \label{chp:model-files}
-
-
 
 \section{Format of the model files}\label{sec:modelfiles}
 \gosamv{} expects three files for a proper model definition:
