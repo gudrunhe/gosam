@@ -364,7 +364,6 @@ zero = Property(
    See also: model, one
    """,
     list,
-    "mU,mD,mS,mC,mB,me,mmu",
 )
 
 one = Property(
