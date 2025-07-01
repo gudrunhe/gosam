@@ -114,7 +114,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use gggg_config, only: renormalisation, use_sorted_sum !, &
+   use gggg_config, only: renormalisation
    use gggg_model, only: Nf, Nfgen
    implicit none
 

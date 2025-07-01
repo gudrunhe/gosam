@@ -17,8 +17,15 @@ filter.particles=A:0,Z:0,U:0,D:0,C:0,S:0,B:0,H:0
 
 nlo_prefactors=0
 
-PSP_rescue=1
+# Tune rescue system to request very stable results > 10 digits
+PSP_rescue=true
 PSP_chk_method=Rotation
+PSP_chk_li1=10
+PSP_chk_li2=10
+PSP_chk_li3=10
+PSP_chk_li4=10
+PSP_chk_li5=10
+ 
 polvec=explicit
 extensions=quadruple,olp_badpts
 regularisation_scheme=thv

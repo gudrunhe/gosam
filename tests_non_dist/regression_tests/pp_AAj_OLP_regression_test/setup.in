@@ -1,3 +1,4 @@
 reduction_programs=ninja
 all_mandelstam=True
 symmetries=parity
+zero=mU,mD,mS,mC,mB,me,mmu
