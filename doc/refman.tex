@@ -14,6 +14,25 @@
 \input lstolp
 %\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
 %\lstset{basicstyle=\tt,backgroundcolor=\color{lstbg}}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{py}{
+   belowcaptionskip=1\baselineskip,
+   breaklines=true,
+   xleftmargin=\parindent,
+   language=python,
+   showstringspaces=false,
+   basicstyle=\footnotesize\ttfamily,
+   commentstyle=\color{codegreen},
+   keywordstyle=\color{blue},
+   numberstyle=\tiny\color{codegray},
+   stringstyle=\color{codepurple},
+}
+
 \newcommand{\gosamversion}{{3{.}0}}
 \newcommand{\gosam}{{\sc GoSam}\xspace}
 \newcommand{\gosamv}[1][\gosamversion]{{\sc GoSam}\xspace}
@@ -1104,144 +1123,48 @@ In order to maintain gauge invariance this affects the definition of the Weinber
 %\end{lstlisting}
 
 \chapter{Advanced diagram selection}
-\gosamv implements several ways of selecting subsets of diagrams:
+\gosam generates all diagrams consistent with the coupling orders and external states by default. If only a subset of these diagrams are to be considered, several ways of restricting the diagrams are provided:
 \begin{itemize}
-\item by restricting QGraf,
-\item by selecting specific diagrams by their number,
-\item by defining filters using \python.
+   \item Selecting specific diagrams by their IDs
+   \item Restricting diagrams with the \texttt{filter.particles} flags
+   \item Filtering the diagrams using \qgraf's built-in options
+   \item Filtering the diagrams using custom \python functions
 \end{itemize}
-
-\section{Restricting the generation with QGraf}
-The options for restricting the set of diagrams at the level
-of the diagram generation is the most efficient way since this
-happens already at the earliest possible stage.
-However, QGraf's built-in filters are sometimes
-too limited in order to express more advanced criteria.
-
-\gosamv{} allows one to pass information to QGraf through the option
-\texttt{qgraf.options} and through \texttt{qgraf.verbatim},
-\texttt{qgraf.verbatim.lo} and \texttt{qgraf.verbatim.nlo}.
-For the exact syntax the user is referred to the examples and 
-to the QGraf documentation.
+The four options are listed in increasing flexibility, but also increasing complexity. All mentioned process card options are described in more detail in appendix \ref{chp:process_card_options}.
 
 \section{Selecting diagrams by their number}
-An a posteriori selection 'by eye' can be achieved after all (also unwanted)
-diagrams of a process have been generated and inspected in
-\texttt{doc/process.ps}. The user can then modify the options
-\texttt{select.lo} and \texttt{select.nlo} and rerun \texttt{gosam.py}.
+The easiest way to remove some diagrams from a process is with the \texttt{select[.lo|.nlo|.ct]} options. These options take a set of diagram IDs to determine which diagrams are kept in the respective component. A convenient way to inspect the diagram IDs is \texttt{doc/process.pdf}, which contains all diagrams with their respective identifiers. After modifying the \texttt{select} options and rerunning \texttt{gosam.py}, only the specified diagrams are kept. 
 
-%This option is mainly intended for debugging purposes in large processes.
+\section{Filtering diagrams with the \texttt{filter.particles} options}
+To discard multiple diagrams based on the internal propagators, the \texttt{filter[|.lo|.nlo|.ct].particles} options can be used. These options discard diagrams which do not have the specified number of internal propagators of the given field. These options are applied at the diagram generation level and are therefore more efficient compared to an equivalent \python filter.
+
+\section{Restricting the generation with \qgraf}
+\qgraf itself also allows filtering the diagrams it generates. These options are described in the \qgraf manual and can be applied with the \texttt{qgraf.verbatim[.lo|.nlo|.ct]} options. The content of these options is written verbatim to \qgraf's input file for the respective component. 
+
+Since these filters are applied already in the first of the diagram generation, they are more efficient compared to an equivalent \python filter. Since this difference is largely insignificant on modern CPUs, it is nevertheless recommended using the \python filters.
 
 \section{Filtering diagrams in \python{}}
 \label{sec:filter}
-The user can write short \python{} functions in order to decide whether
-a specific diagram is to be taken or not. This function should return
-\texttt{True} for all diagrams which are kept, and \texttt{False} for
-all diagrams which should be discarded. These functions are passed by
-the options \texttt{filter.lo}, \texttt{filter.nlo} and \texttt{filter.ct}.
+The final implemented diagram selection option are the \python filters. They allow arbitrary diagram selection criteria by using user-supplied custom \python functions. They are supplied with the \texttt{filer[.lo|.nlo|.ct]} options, which expects a \python function \begin{lstlisting}[style=py]
+   filter(d: golem.topolopy.objects.Diagram) -> bool: ...
+\end{lstlisting}
+Diagrams for which this function returns \texttt{True} are kept, diagrams for which \texttt{False} is returned are discarded.
 
-Longer functions should be defined in an external file, which can be
-passed using \texttt{filter.module}.
+If the filter function is sufficiently simple, it can directly be supplied to the \texttt{filter} option via a \python lambda-function. If the filter function becomes too complicated, it can be moved to an external file. The name of this file can then be supplied with the \texttt{filter.module} option, after which the functions defined in this external file can be used in the \texttt{filter} options.
 
-When writing a filter the one can use the predefined particle lists
-\texttt{QUARKS}, \texttt{LEPTONS}, \texttt{FERMIONS} and \texttt{BOSONS}.
-The underscore (\texttt{\_}) matches any field.
+\subsection{Methods for diagram filtering}
+The custom filter functions receive a single \texttt{Diagram} object as input. Many convenience methods are implemented on this object to simplify the construction of filters. In the following, a field can be specified as 
+\begin{lstlisting}[style=py]
+   Field = str | Sequence[str]
+\end{lstlisting}
+where each string is the name of the respective field. If multiple field names are supplied, any field from the sequence will be tested for a match.
 
-In all the following functions, the variadic field arguments {\tt f1,f2,\ldots} can be of the following 
-forms:
-\begin{itemize}
-   \item Each of the field arguments {\tt f} is a single particle object or a string containing a particle 
-   name.
-   \item Each of the field arguments {\tt f} is a list or tuple, where each list or tuple contains an arbitrary 
-   number of particle objects or stings with particle names. If this syntax is used, each combination of fields
-   from different lists or tuples is tested.
-\end{itemize}
-\emph{If the field inputs do not adhere to one of these options, the filter functions might return faulty results
-without raising an exception.}
+\emph{Note that Python will not necessarily return an exception if this format is not respected, but the filters might not work as expected.} 
 
-A diagram object \texttt{d} has the following methods which are inteded
-to be used in filters.
-Alternative predefined functions and functors are also given.
-\begin{description}
-\item[\texttt{d.rank()}] returns the tensor rank of a diagram.\\
-   $\mathtt{RANK}\equiv\lambda\mathtt{d}.(\mathtt{d.rank()})$
-\item[\texttt{d.loopsize()}] returns the number of propagators
-   in the loop of a diagram.\\
-   $\mathtt{LOOPSIZE}\equiv\lambda\mathtt{d}.(\mathtt{d.loopsize()})$
-\item[\texttt{d.sign()}] computes the sign coming from closed
-   fermion loops.\\
-   $\mathtt{SIGN}\equiv\lambda\mathtt{d}.(\mathtt{d.sign()})$
-\item[\texttt{d.isNf()}] reports if a diagram contains a closed
-   quark loop of size two where all loop propagators are massless.\\
-   $\mathtt{NF}\equiv\lambda\mathtt{d}.(\mathtt{d.isNf()})$
-\item[\texttt{d.isMassiveQuarkSE()}] returns True if the diagram
-   contains a QCD self energy insertion at a massive quark line.\\
-   $\mathtt{MQSE}\equiv\lambda\mathtt{d}.(\mathtt{d.isMassiveQuarkSE()})$
-\item[\texttt{d.isScaleless()}] returns True if the loop integral associate
-   with this diagram carries no scale.\\
-   $\mathtt{SCALELESS}\equiv\lambda\mathtt{d}.(\mathtt{d.isScaleless()})$
-\item[\texttt{d.vertices(f1,f2,\ldots)}] returns the number of vertices
-   in the diagram with the specified fields. The arguments \texttt{f1},
-   \texttt{f2}, \dots are lists of field names.\\
-   $\mathtt{VERTICES(f1,f2,\ldots)}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.vertices(\mathtt{f1},\mathtt{f2},\ldots)})$
-\item[\texttt{d.loopvertices(f1,f2,\ldots)}]
-   same as \texttt{vertices}, but only counts vertices which have
-   loop propagators attached.\\
-   $\mathtt{LOOPVERTICES(f1,f2,\ldots)}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.loopvertices(
-    \mathtt{f1},\mathtt{f2},\ldots)})$
-\item[\texttt{d.iprop(f,**opts)}] returns the number of propagators
-   of the given fields. Optional arguments are
-   \texttt{momentum} to specify the momentum of the propagator,
-   \texttt{twospin} to filter by the $2\times$ the spin,
-   \texttt{massive} to specify whether massive or massless propagators
-   should be considered and \texttt{color} to filter for certain color
-   representations. Note that, if the {\tt momentum} argument is set, the 
-   crossing symmetry might be broken. \gosam might then produce faulty numbers,
-   if the {\tt --crossings} option is used in OLP mode. In this case, consider 
-   using the {\tt --no-crossings} option or the {\tt iprop\_momentum} function.\\
-   $\mathtt{IPROP(\ldots)}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.iprop(\ldots)})$
-\item[\texttt{d.iprop(f,momentum)}] returns true if there is a propagator of the
-   given field with the given momentum in the diagram, false otherwise. This 
-   function only returns true or false instead of a number, because it automatically
-   flags the diagrams for which true is returned. The subprocesses with these
-   diagrams are not automatically used in crossings, instead the crossing symmetry
-   is tested explicitely. 
-\item[\texttt{d.chord(f,**opts)}] same as \texttt{iprop}
-   but only counts loop propagators.\\
-   $\mathtt{CHORD(\ldots)}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.chord(\ldots)})$
-\item[\texttt{d.bridge(f,**opts)}] same as \texttt{iprop}
-   but only counts propagators which are not in a loop.\\
-   $\mathtt{BRIDGE(\ldots)}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.bridge(\ldots)})$
-\item[\texttt{d.order(order)}] returns the total power of diagrams with respect to specified
-      coupling order. Only works whit UFO models. The order must be defined
-      in the UFO model's \texttt{coupling\_orders.py} and listed in the \texttt{order\_names}
-      property of the GoSam config/runcard.
-\item[\texttt{d.QuarkBubbleMasses()}] returns a list of
-   all different masses in a closed quark loop of size two
-   or an empty list if the diagram is not a quark bubble.\\
-   $\mathtt{QBMASSES}\equiv
-    \lambda\mathtt{d}.(\mathtt{d.QuarkBubbleMasses()})$
-\end{description}
-
-Furthermore, the following predefined filters exist:
-\begin{description}
-\item[\texttt{NFGEN(f1,f2,\ldots)}] for closed quark loops of size two
-   this filter returns true only if all loop propagators belong to one
-   of the fields in the argument list. For all diagrams which are not
-   quark bubbles it returns True.
-\item[\texttt{AND(filter1,filter2,\ldots)}] returns True if all filters
-   in the argument list return True.
-\item[\texttt{OR(filter1,filter2,\ldots)}] returns True if at least one filter
-   in the argument list returns True.
-\item[\texttt{NOT(filter)}] returns True if the argument evaluates to False.
-\item[\texttt{TRUE}] always returns True.
-\item[\texttt{FALSE}] always returns False.
-\end{description}
+\subsubsection{\texttt{golem.topolopy.objects.Diagram}}
+\begin{adjustwidth}{-100pt}{0pt}
+\input{diagram_methods.tex}
+\end{adjustwidth}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BLHA.tex is a separate file, was used for the version 1.0 manual
