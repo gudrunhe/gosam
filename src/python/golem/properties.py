@@ -14,7 +14,7 @@ process_name = Property(
    and no extra underscore will be generated.
    """,
     str,
-    "",
+    "gosam_process",
 )
 
 process_path = Property(
