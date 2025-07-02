@@ -757,7 +757,7 @@ def process_order_file(
         model = golem.util.tools.getModel(model_conf, imodel_path)
 
         # zero property: convert masses and width defined through PDG code to internal parameter name 
-        # (depends on model, so model.py has to be created already)
+        # (depends on model, so model.py must have been created already)
         orig_zero = conf.getListProperty("zero")
         new_zero = []
         for z in orig_zero:

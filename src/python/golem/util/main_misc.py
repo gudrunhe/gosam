@@ -839,7 +839,7 @@ def workflow(conf):
 
 
     # zero property: convert masses and width defined through PDG code to internal parameter name 
-    # (depends on model, so model.py has to be created already)
+    # (depends on model, so model.py must have been created already)
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf["__OLP_MODE__"]:
         model = golem.util.tools.getModel(conf)
