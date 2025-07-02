@@ -837,37 +837,41 @@ def workflow(conf):
     # here we create it:
     golem.util.tools.prepare_model_files(conf)
 
-    # zero property: convert masses and width defined through PDG code to internal parameter name (depends on model)
-    model = golem.util.tools.getModel(conf)
-    orig_zero = conf.getListProperty("zero")
-    new_zero = []
-    for z in orig_zero:
-        massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)",z.lower())
-        if massmatch:
-            nz = re.sub(r"\;",r"),mass(",z.lower()).split(",")
-            new_zero.extend(nz)
-            continue
-        widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)",z.lower())
-        if widthmatch:
-            nz = re.sub(r"\;",r"),width(",z.lower()).split(",")
-            new_zero.extend(nz)
-            continue
-        new_zero.append(z)
 
-    for p in model.particles.values():
-        searchm = "mass("+str(abs(p.getPDGCode()))+")"
-        if searchm in list(map(str.lower,new_zero)):
-            new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
-            m = p.getMass()
-            if m != "0":
-                new_zero.append(m)
-        searchw = "width("+str(abs(p.getPDGCode()))+")"
-        if searchw in list(map(str.lower,new_zero)):
-            new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
-            w = p.getWidth()
-            if w != "0":
-                new_zero.append(w)
-    conf.setProperty("zero",",".join(list(set(new_zero))))
+    # zero property: convert masses and width defined through PDG code to internal parameter name 
+    # (depends on model, so model.py has to be created already)
+    # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
+    if not conf["__OLP_MODE__"]:
+        model = golem.util.tools.getModel(conf)
+        orig_zero = conf.getListProperty("zero")
+        new_zero = []
+        for z in orig_zero:
+            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)",z.lower())
+            if massmatch:
+                nz = re.sub(r"\;",r"),mass(",z.lower()).split(",")
+                new_zero.extend(nz)
+                continue
+            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)",z.lower())
+            if widthmatch:
+                nz = re.sub(r"\;",r"),width(",z.lower()).split(",")
+                new_zero.extend(nz)
+                continue
+            new_zero.append(z)
+
+        for p in model.particles.values():
+            searchm = "mass("+str(abs(p.getPDGCode()))+")"
+            if searchm in list(map(str.lower,new_zero)):
+                new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
+                m = p.getMass()
+                if m != "0":
+                    new_zero.append(m)
+            searchw = "width("+str(abs(p.getPDGCode()))+")"
+            if searchw in list(map(str.lower,new_zero)):
+                new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
+                w = p.getWidth()
+                if w != "0":
+                    new_zero.append(w)
+        conf.setProperty("zero",",".join(list(set(new_zero))))
 
     for prop in [golem.properties.zero, golem.properties.one]:
         golem.util.tools.expand_parameter_list(prop, conf)

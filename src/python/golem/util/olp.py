@@ -6,6 +6,7 @@ import sys
 import golem
 import golem.util.tools
 import golem.installation
+import re
 
 from golem.util.config import GolemConfigError
 from golem.util.main_misc import fill_config
@@ -754,6 +755,40 @@ def process_order_file(
                 model_conf.setProperty(str(p), model_conf.getProperty(p))
 
         model = golem.util.tools.getModel(model_conf, imodel_path)
+
+        # zero property: convert masses and width defined through PDG code to internal parameter name 
+        # (depends on model, so model.py has to be created already)
+        orig_zero = conf.getListProperty("zero")
+        new_zero = []
+        for z in orig_zero:
+            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)",z.lower())
+            if massmatch:
+                nz = re.sub(r"\;",r"),mass(",z.lower()).split(",")
+                new_zero.extend(nz)
+                continue
+            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)",z.lower())
+            if widthmatch:
+                nz = re.sub(r"\;",r"),width(",z.lower()).split(",")
+                new_zero.extend(nz)
+                continue
+            new_zero.append(z)
+        for p in model.particles.values():
+            searchm = "mass("+str(abs(p.getPDGCode()))+")"
+            if searchm in list(map(str.lower,new_zero)):
+                new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
+                m = p.getMass()
+                if m != "0":
+                    new_zero.append(m)
+            searchw = "width("+str(abs(p.getPDGCode()))+")"
+            if searchw in list(map(str.lower,new_zero)):
+                new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
+                w = p.getWidth()
+                if w != "0":
+                    new_zero.append(w)
+        conf.setProperty("zero",",".join(list(set(new_zero))))
+        for subconf in subprocesses_conf:
+            subconf.setProperty("zero",",".join(list(set(new_zero))))
+
 
         # ---#[ Setup excluded and massive particles :
         for lconf in [conf] + subprocesses_conf:
