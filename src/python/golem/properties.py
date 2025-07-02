@@ -347,13 +347,19 @@ zero = Property(
     """\
    A list of symbols that should be treated as identically
    zero throughout the whole calculation. All of these
-   symbols must be defined by the model file.
-   If you do not use built-in models, you probably
-   need to overwrite the default value.
+   symbols must be defined by the model file. For convenience
+   masses and widths can be set by means of PDG codes, e.g.
+   mass(1),width(1) for the down-quark mass and width, res-
+   pectively. Lists of PDG codes separated by ';' can be used 
+   in the arguments of 'mass' and 'width'.
 
    Examples:
    1) # Light masses are set to zero here:
-      zero=me,mU,mD,mS
+      zero=me,mD,mU,mS
+      OR:
+      zero=mass(11),mass(1),mass(2),mass(3)
+      OR:
+      zero=mass(11;1;2;3)
    2) # Diagonal CKM matrix:
       zero=VUS, VUB, CVDC, CVDT, \\
            VCD, VCB, CVSU, CVST, \\

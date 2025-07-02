@@ -12,7 +12,7 @@ use_vertex_labels=True
 
 order=QCD, 0
 
-zero=mdlWW,mdlWZ,mdlWH,mdlMe,mdlyme
+zero=mass(11),width(23;24;25),mdlyme
 
 filter.lo=lambda d: d.order('NP')<=1 and d.vertices('part11','anti11','part25')==0
 
