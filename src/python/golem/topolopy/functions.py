@@ -181,7 +181,7 @@ def analyze_loop_diagrams(
                     if cqm == "0" and complex_masses[len(complex_masses) - 1] != "0" and (len(complex_masses) % 2) == 1:
                         complex_masses.append(cqm)
 
-            if diagram.onshell() > 0:
+            if diagram.onshell("_") > 0:
                 lose.append(idx)
             else:
                 keep.append(idx)

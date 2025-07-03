@@ -291,10 +291,10 @@ class Diagram:
         if self.loopsize() != 2:
             return False
 
-        if self.chord(massive=True, twospin=[1, -1], color=[3, -3]) != 1:
+        if self.chord(None, massive=True, twospin=[1, -1], color=[3, -3]) != 1:
             return False
 
-        if self.chord(massive=False, twospin=[2, -2], color=[8, -8]) != 1:
+        if self.chord(None, massive=False, twospin=[2, -2], color=[8, -8]) != 1:
             return False
 
         for lv in self._loop_vertices:
@@ -353,29 +353,29 @@ class Diagram:
     def loopvertices(self, *fields):
         return sum([self._vertices[v].match(list(fields)) for v in self._loop_vertices])
 
-    def iprop(self, *args, **opts):
+    def iprop(self, field, **opts):
         opts["zero"] = self._zerosum
         if "momentum" in opts:
             logger.warning(
                 "Using the iprop function with the 'momentum' key in the Python filter can lead to inconsistencies in the crossings. Consider running GoSam with --no-crossings or using the iprop_momentum function instead."
             )
-        return sum([p.match(list(args), **opts) for p in list(self._propagators.values())])
+        return sum([p.match(field, **opts) for p in list(self._propagators.values())])
 
-    def iprop_momentum(self, *args, momentum):
-        if sum([p.match(list(args), momentum) for p in list(self._propagators.values())]):
+    def iprop_momentum(self, field, momentum):
+        if sum([p.match(field, momentum) for p in list(self._propagators.values())]):
             self.filtered_by_momentum = True
             return True
         else:
             return False
 
-    def legs(self, *args, **opts):
+    def legs(self, field, **opts):
         opts["zero"] = self._zerosum
-        return sum([l.match(list(args), **opts) for l in [*self._in_legs.values(), *self._out_legs.values()]])
+        return sum([l.match(field, **opts) for l in [*self._in_legs.values(), *self._out_legs.values()]])
 
-    def ext_legs_from_vertex(self, *args, max_legs=1, is_ingoing=None):
+    def ext_legs_from_vertex(self, field, max_legs=1, is_ingoing=None):
         nlegs = len(self._vertices) * [0]
         for leg in list(self._in_legs.values()) + list(self._out_legs.values()):
-            nlegs[leg.v - 1] += leg.match(list(args), is_ingoing=is_ingoing)
+            nlegs[leg.v - 1] += leg.match(field, is_ingoing=is_ingoing)
         if any(n > max_legs for n in nlegs):
             if is_ingoing is not None:
                 self.filtered_by_momentum = True
@@ -398,24 +398,24 @@ class Diagram:
         else:
             return False
 
-    def chord(self, *args, **opts):
+    def chord(self, field, **opts):
         opts["zero"] = self._zerosum
-        return sum([self._propagators[abs(p)].match(list(args), **opts) for p in self._loop])
+        return sum([self._propagators[abs(p)].match(field, **opts) for p in self._loop])
 
-    def bridge(self, *args, **opts):
+    def bridge(self, field, **opts):
         opts["zero"] = self._zerosum
         return sum(
             [
-                self._propagators[p].match(list(args), **opts)
+                self._propagators[p].match(field, **opts)
                 for p in set(self._propagators.keys()) - set(map(abs, self._loop))
             ]
         )
 
-    def onshell(self, *args, **opts):
+    def onshell(self, field, **opts):
         opts["zero"] = self._zerosum
         return sum(
             [
-                self._propagators[abs(p)].match(list(args), **opts) and self._propagators[abs(p)].momentum.onshell()
+                self._propagators[abs(p)].match(field, **opts) and self._propagators[abs(p)].momentum.onshell()
                 for p in set(self._propagators.keys()) - set(map(abs, self._loop))
             ]
         )
@@ -609,10 +609,10 @@ class Diagram:
         return "D(%s)" % (",".join(map(str, list(self._propagators.values()))))
 
     def isNf(self):
-        return self.loopsize() == self.chord(massive=False, twospin=[1, -1], color=[3, -3])
+        return self.loopsize() == self.chord(None, massive=False, twospin=[1, -1], color=[3, -3])
 
     def QuarkBubbleMasses(self):
-        if self.loopsize() == 2 and self.chord(massive=True, twospin=[1, -1], color=[3, -3]) == 2:
+        if self.loopsize() == 2 and self.chord(None, massive=True, twospin=[1, -1], color=[3, -3]) == 2:
             masses = set([self._propagators[abs(p)].mass for p in self._loop])
             if len(masses) > 0:
                 return list(masses)
@@ -620,7 +620,7 @@ class Diagram:
 
     def ComplexQuarkBubbleMasses(self):
         masslist = []
-        if self.loopsize() == 2 and self.chord(massive=True, twospin=[1, -1], color=[3, -3]) == 2:
+        if self.loopsize() == 2 and self.chord(None, massive=True, twospin=[1, -1], color=[3, -3]) == 2:
             for p in self._loop:
                 if len(self._propagators[abs(p)].mass) > 0 and len(self._propagators[abs(p)].width) > 0:
                     masses = self._propagators[abs(p)].mass
@@ -649,18 +649,37 @@ class DiagramComponent:
         pass
 
     def match_fields(self, rays, query):
+        if len(rays) != len(query):
+            return False
         if rays == query:
             return True
         if all(isinstance(q, (list, tuple, dict)) for q in query):
-            return (sorted(rays) in list(map(sorted, itertools.product(*query)))) or (
-                sorted(["'{}'".format(r) for r in rays]) in list(map(sorted, itertools.product(*query)))
-            )
+            for ref_fields in list(map(sorted, itertools.product(*query))):
+                for ray in rays:
+                    if ray in ref_fields:
+                        ref_fields.remove(ray)
+                    elif "'{}'".format(ray) in ref_fields:
+                        ref_fields.remove("'{}'".format(ray))
+                    elif "_" in ref_fields:
+                        ref_fields.remove("_")
+                    else:
+                        break
+                else:
+                    return True
+            return False
         elif all(isinstance(q, str) for q in query):
-            return all(
-                (r in query and rays.count(r) == query.count(r))
-                or ("'{}'".format(r) in query and rays.count("'{}'".format(r)) == query.count("'{}'".format(r)))
-                for r in rays
-            )
+            for ray in rays:
+                if ray in query:
+                    query.remove(ray)
+                elif "'{}'".format(ray) in query:
+                    query.remove("'{}'".format(ray))
+                elif "_" in query:
+                    query.remove("_")
+                else:
+                    break
+            else:
+                return True
+            return False
         else:
             return False
 
@@ -844,27 +863,23 @@ class Propagator(DiagramComponent):
         elif self.width in symbols:
             self.width = "0"
 
-    def match(self, fields, momentum=None, twospin=None, massive=None, color=None, zero=None):
-        flist = []
-        if fields is None:
+    def match(self, field, momentum=None, twospin=None, massive=None, color=None, zero=None):
+        if field is None:
             flist = None
-        elif isinstance(fields, str):
-            flist.append(fields)
-        elif "__iter__" in fields.__class__.__dict__:
-            if len(fields) == 0:
+        elif isinstance(field, str):
+            flist = [field]
+        elif "__iter__" in field.__class__.__dict__:
+            if len(field) == 0:
                 flist = None
             else:
-                if all(isinstance(l, (list, tuple, dict)) for l in fields):
-                    if len(fields) > 1:
-                        flist.extend([[str(e) for e in l] for l in fields])
-                    else:
-                        flist.extend([str(e) for e in fields[0]])
+                if all(isinstance(f, str) for f in field):
+                    flist = [field]
                 else:
-                    flist.extend([str(e) for e in fields])
+                    raise SyntaxError("Argument 'field' of function 'match' must be a string or list of strings")
         else:
-            flist.append(str(fields))
+            raise SyntaxError("Argument 'field' of function 'match' must be a string or list of strings")
 
-        if flist and not self.match_fields([self.field], flist):
+        if flist is not None and not self.match_fields([self.field], flist):
             return False
 
         if momentum is not None:
@@ -932,26 +947,23 @@ class Leg(DiagramComponent):
             self.color,
         )
 
-    def match(self, fields, is_ingoing=None, twospin=None, massive=None, color=None, zero=None):
-        flist = []
-        if fields is None:
-            flist.append(None)
-        elif isinstance(fields, str):
-            flist.append(fields)
-        elif "__iter__" in fields.__class__.__dict__:
-            if len(fields) == 0:
+    def match(self, field, is_ingoing=None, twospin=None, massive=None, color=None, zero=None):
+        if field is None:
+            flist = None
+        elif isinstance(field, str):
+            flist = [field]
+        elif "__iter__" in field.__class__.__dict__:
+            if len(field) == 0:
                 flist = None
             else:
-                if all(isinstance(l, (list, tuple, dict)) for l in fields):
-                    if len(fields) > 1:
-                        flist.extend([[str(e) for e in l] for l in fields])
-                    else:
-                        flist.extend([str(e) for e in fields[0]])
+                if all(isinstance(f, str) for f in field):
+                    flist = [field]
                 else:
-                    flist.extend([str(e) for e in fields])
+                    raise SyntaxError("Argument 'field' of function 'match' must be a string or list of strings")
         else:
-            flist.append(str(fields))
-        if not self.match_fields([self.field], flist):
+            raise SyntaxError("Argument 'field' of function 'match' must be a string or list of strings")
+
+        if flist is not None and not self.match_fields([self.field], flist):
             return False
 
         if is_ingoing is not None:

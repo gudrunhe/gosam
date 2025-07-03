@@ -191,30 +191,30 @@ class LOOPVERTICES(_CurryFunctor):
 
 
 class IPROP(_CurryFunctor):
-    def __init__(self, *args, **opts):
-        self.args = args
+    def __init__(self, field, **opts):
+        self.field = field
         self.opts = opts
 
     def __call__(self, d):
-        return d.iprop(*(self.args), **(self.opts))
+        return d.iprop(self.field, **(self.opts))
 
 
 class CHORD(_CurryFunctor):
-    def __init__(self, *args, **opts):
-        self.args = args
+    def __init__(self, field, **opts):
+        self.field = field
         self.opts = opts
 
     def __call__(self, d):
-        return d.chord(*(self.args), **(self.opts))
+        return d.chord(self.field, **(self.opts))
 
 
 class BRIDGE(_CurryFunctor):
-    def __init__(self, *args, **opts):
-        self.args = args
+    def __init__(self, field, **opts):
+        self.field = field
         self.opts = opts
 
     def __call__(self, d):
-        return d.bridge(*(self.args), **(self.opts))
+        return d.bridge(self.field, **(self.opts))
 
 
 class NFGEN(_CurryFunctor):
