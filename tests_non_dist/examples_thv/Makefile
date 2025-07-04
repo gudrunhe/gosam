@@ -51,7 +51,7 @@ $(ALL_TESTS) :
 .PHONY : runtests
 runtests : $(ALL_TESTS)
 
-SKIP_TESTS = gggH
+SKIP_TESTS = 
 SELECTED_TESTS = $(filter-out $(SKIP_TESTS),$(ALL_TESTS))
 
 .SILENT .PHONY : check_selection
@@ -95,13 +95,13 @@ printlo :
 NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eett_lhep eeuu gggg gggg_lhep gggg_tree ggHg ggtt ggtt_lhep ggtt_ufo qqtth s-channel_single-top tne udene udeneg udene_lhep uudd uu_graviton_yy
 
 .PHONY : runnlo
-runlo : printnlo $(NLO_TESTS)
+runnlo : printnlo $(NLO_TESTS)
 
 .PHONY : printnlo
 printnlo :
 	@echo "SELECTED NLO TESTS: " $(NLO_TESTS)
 
-LOOPINDUCED_TESTS = gggH gggz hyy hyy_all_helicities hyy_olp yyyy
+LOOPINDUCED_TESTS = gggH_rescue gggz hyy hyy_all_helicities hyy_olp yyyy
 
 .PHONY : runloopinduced
 runloopinduced : printloopinduced $(LOOPINDUCED_TESTS)
