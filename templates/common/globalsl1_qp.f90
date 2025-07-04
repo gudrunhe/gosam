@@ -1,5 +1,5 @@
 module     [% process_name asprefix=\_ %]globalsl1_qp
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp
    use [% process_name asprefix=\_ %]color_qp, only: numcs
    implicit none
 

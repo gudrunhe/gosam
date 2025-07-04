@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem '
  %]module    [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp
    implicit none
    private
 
@@ -10,10 +10,10 @@ contains[%
 
    !---#[ function amplitude:
    function amplitude(scale2) result(amp)
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model_qp
       use [% process_name asprefix=\_ %]color_qp, only: numcs
       use [% process_name asprefix=\_ %]kinematics, only: corrections_are_qcd
-      use [% @if internal OLP_MODE %][% @else %][% process_name %]_[% @end @if %]config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
          & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, &
          & renorm_ehc, renorm_gamma5, nlo_prefactors

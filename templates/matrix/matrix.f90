@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem '
 %]module     [% process_name asprefix=\_ %]matrix
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki, &
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_th4, PSP_chk_th5, &
      & PSP_chk_kfactor, reduction_interoperation, &
@@ -9,9 +9,9 @@
      & reduction_interoperation_rescue
    use [% process_name asprefix=\_ %]kinematics, only: &
        num_legs, corrections_are_qcd
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: init_functions[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model, only: init_functions[%
 @if extension quadruple %]
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp, only: init_functions_qp => init_functions[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model_qp, only: init_functions_qp => init_functions[%
 @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]color, only: init_color[%
 @if extension quadruple %]
@@ -30,7 +30,7 @@
 @if extension quadruple %]
    ! use [% process_name asprefix=\_ %]matrix_qp[%
 @end @if extension quadruple %]
-   use [% process_name asprefix=\_ %]rescue
+   use [% process_name asprefix=\_ %]rescue_system
    implicit none
    save
 
@@ -193,7 +193,7 @@ contains
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, prec, ok, h)[%
 @if extension quadruple %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model[%
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[%
 @end @if extension quadruple %]
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs

@@ -1,5 +1,5 @@
 module [% name asprefix=\_ %]matrix
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
    private
 
@@ -14,10 +14,10 @@ module [% name asprefix=\_ %]matrix
 contains
 
    pure function prefactor()
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
       & include_color_avg_factor, include_helicity_avg_factor, &
       & include_symmetry_factor
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: NC
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model, only: NC
       use [% process_name asprefix=\_ %]kinematics, only: &
       & in_helicities, symmetry_factor
       use [% process_name asprefix=\_ %]color, only: incolors

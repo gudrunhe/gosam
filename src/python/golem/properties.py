@@ -6,12 +6,12 @@ from golem.installation import BIN_DIR
 process_name = Property(
     "process_name",
     """\
-   A symbolic name for this process. This name will be used
-   as a prefix for the Fortran modules.
+   A symbolic name for the process. This name, appended with 
+   an underscore, will be used as a prefix for the Fortran modules.
 
-   Golem will insert an underscore after this prefix.
-   If the process name is left blank no prefix will be used
-   and no extra underscore will be generated.
+   The deafult name is 'gosam_process', but the user can also 
+   explcitly set 'process_name=', i.e. empty. In this case no prefix 
+   will be used (not recommended).
    """,
     str,
     "gosam_process",

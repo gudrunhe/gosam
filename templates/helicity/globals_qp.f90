@@ -1,6 +1,6 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]globalsh[% helicity %]_qp
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp[%
    @for repeat num_colors shift=1 %][%
       @if is_first %]
    use [% process_name asprefix=\_ %]color_qp, only:[%

@@ -58,7 +58,7 @@ f90file.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+'ct
 f90file.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].f90 \n')
 f90file.write('   ! generator: buildfortraneftct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].py \n')
 f90file.write('   use [% process_name asprefix=\_ %]color, only: numcs\n')
-f90file.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki\n')[%
+f90file.write('   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 f90file.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
@@ -73,7 +73,7 @@ f90file.write('\n')
 f90file.write('contains\n')
 f90file.write('!---#[ function amplitude:\n')
 f90file.write('   function amplitude(logs,scale2)\n')
-f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model\n')
+f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model\n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics\n')
 f90file.write('      use [% process_name asprefix=\_ %]color\n')
 f90file.write('      use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram\n')
@@ -133,7 +133,7 @@ f90file_qp.write('module     [% process_name asprefix=\_ %]diagramsh'+str(heli)+
 f90file_qp.write('   ! file: '+str(os.getcwd())+'diagramsct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortraneftct[% @if enable_truncation_orders %]_[% trnco %][% @end @if %].py \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]color_qp, only: numcs\n')
-f90file_qp.write('   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki => ki_qp\n')[%
+f90file_qp.write('   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp\n')[%
 @if internal CUSTOM_SPIN2_PROP %]
 f90file_qp.write('   use [% process_name asprefix=\_ %]custompropagator\n')[%
 @end @if %]
@@ -148,7 +148,7 @@ f90file_qp.write('\n')
 f90file_qp.write('contains\n')
 f90file_qp.write('!---#[ function amplitude:\n')
 f90file_qp.write('   function amplitude(logs,scale2)\n')
-f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp\n')
+f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model_qp\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]util_qp, only: inspect_lo_diagram\n')

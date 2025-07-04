@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem '
-%]module     [% process_name asprefix=\_ %]rescue
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
+%]module     [% process_name asprefix=\_ %]rescue_system
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
      & PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_th4, PSP_chk_th5, &
      & PSP_chk_kfactor, reduction_interoperation, &
@@ -129,7 +129,7 @@ contains
    !---#[ subroutine rescue_qp
    subroutine     rescue_qp(vecs, scale2, amp, ampdef, amprot, ampres, ampresrot, prec, icheck, ok, h)
       use [% process_name asprefix=\_ %]kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki_qp), dimension([%num_legs%], 4) :: vecs_qp
@@ -283,4 +283,4 @@ contains
    !---#] subroutine rescue[%
    @end @if extension quadruple %]
 
-end module [% process_name asprefix=\_ %]rescue
+end module [% process_name asprefix=\_ %]rescue_system

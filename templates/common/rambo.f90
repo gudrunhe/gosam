@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem
  %]module     [% process_name asprefix=\_%]rambo
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
 
    private :: ki
@@ -65,7 +65,7 @@ contains
    end subroutine boost_a
 
    subroutine     rambo_process(s, vecs, weight)
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
 
       real(ki), intent(in) :: s

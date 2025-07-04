@@ -8,7 +8,7 @@
    use precision_golem, only: ki_gol => ki
    use tens_rec[%
 @end @if golem95 %]
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki [% @if extension golem95
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki [% @if extension golem95
    %][% @end @if %]
    implicit none
    save
@@ -207,7 +207,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    use form_factor_[% $_ %]p, only: a[% $_ %]0[%
       @end @for %]
    use form_factor_type, only: form_factor, operator(+), operator(-)
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_nlo_diagrams, logfile
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: debug_nlo_diagrams, logfile
    use [% process_name asprefix=\_ %]kinematics, only:[%
       @for repeat num_legs shift=1 %][%
          @if is_first %] [% @else %], [%
@@ -218,7 +218,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
    & [%
          @end @if%][%symbol%][%
       @end @for mandelstam %]
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
    implicit none
    type(tensrec_info_group[% grp %]), intent(in) :: coeffs
    type(form_factor) :: amp, dbg_amp

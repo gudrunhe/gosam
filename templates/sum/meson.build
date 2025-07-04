@@ -18,19 +18,19 @@ generated_sources += [[%
    @end @for %][%
 @end @if generate_loop_diagrams %]]
 
-[% process_name %]_sum_gen = \
-      custom_target('[% process_name %]_sum_gen',
+[% process_name asprefix=\_ %]sum_gen = \
+      custom_target('[% process_name asprefix=\_ %]sum_gen',
               output : generated_sources,
               command : ['generate_source.sh'],
               build_by_default: true,
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()},
-              depends: [[% @for helicities generated %] [% process_name %]_helicity[% helicity %]_gen, [% @end @for helicities %]]
+              depends: [[% @for helicities generated %] [% process_name asprefix=\_ %]helicity[% helicity %]_gen, [% @end @for helicities %]]
                 )
 
-[% process_name %]_source += files(['globals.f90', 'amplitude.f90',[%
+[% process_name asprefix=\_ %]source += files(['globals.f90', 'amplitude.f90',[%
    @if extension golem95 %] 'golem95.f90',[%
    @end @if %][%
    @if extension ninja %] 'ninja.f90',[%
    @end @if %]])
 
-[% process_name %]_source += [% process_name %]_sum_gen
+[% process_name asprefix=\_ %]source += [% process_name asprefix=\_ %]sum_gen

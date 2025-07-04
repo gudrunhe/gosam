@@ -1,5 +1,5 @@
 [%' vim: syntax=golem
-'%]module     [% process_name %]_config
+'%]module     [% process_name asprefix=\_ %]config
    implicit none
 
    integer, parameter :: dbl = kind(1.0d0)
@@ -272,5 +272,5 @@
    !
    integer :: ewchoice = [% starting_choice %][%
    @end @if %]
-end module [% process_name %]_config
+end module [% process_name asprefix=\_ %]config
 

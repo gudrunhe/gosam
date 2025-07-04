@@ -36,7 +36,7 @@ add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]
 [% @end @for %] language: 'fortran')
 [% @end @if %]
 
-[% process_name %]_source = files([])
+[% process_name asprefix=\_ %]source = files([])
 hel_gen_targets = []
 
 subdir('doc')
@@ -50,10 +50,10 @@ subdir('sum')[%
 subdir('common')
 subdir('matrix')
 [% @if internal OLP_MODE %]
-OLP_source += [% process_name %]_source
+OLP_source += [% process_name asprefix=\_ %]source
 [% @else %]
 lib = both_libraries('golem_process_[% process_name %]',
-    [% process_name %]_source,
+    [% process_name asprefix=\_ %]source,
     install: true,
     dependencies: dependencies
     )

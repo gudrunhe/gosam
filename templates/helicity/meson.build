@@ -50,18 +50,18 @@ generated_sources = [[%
     @end @if helsum %][%
 @end @if enable_truncation_orders %]]
 
-[% process_name %]_helicity[%helicity%]_gen = \
-      custom_target('[% process_name %]_helicity[%helicity%]_gen',
+[% process_name asprefix=\_ %]helicity[%helicity%]_gen = \
+      custom_target('[% process_name asprefix=\_ %]helicity[%helicity%]_gen',
               output : generated_sources,
               command : ['generate_source.sh'],
               build_by_default: true,
               env: {'OUTDIR': meson.current_build_dir(), 'CURRENT_SOURCE_DIR': meson.current_source_dir()}
                 )
 
-hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
+hel_gen_targets += [% process_name asprefix=\_ %]helicity[%helicity%]_gen
 
-[% process_name %]_source += files(['globals.f90'[% @if extension quadruple%], 'globals_qp.f90' [% @end @if %]])
-[% process_name %]_source += files(['amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90',
+[% process_name asprefix=\_ %]source += files(['globals.f90'[% @if extension quadruple%], 'globals_qp.f90' [% @end @if %]])
+[% process_name asprefix=\_ %]source += files(['amplitudeh[%helicity%][% @if enable_truncation_orders %]_0.f90',
                      'amplitudeh[%helicity%]_1.f90',
                      'amplitudeh[%helicity%]_2[% @end @if %].f90', [% @if extension quadruple %]
                      'amplitudeh[%helicity%][% @if enable_truncation_orders %]_0_qp.f90',
@@ -74,7 +74,7 @@ hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
                      'ct_amplitudeh[%helicity%][% @if enable_truncation_orders %]_0_qp.f90',
                      'ct_amplitudeh[%helicity%]_1_qp.f90',
                      'ct_amplitudeh[%helicity%]_2[% @end @if %]_qp.f90' [% @end @if %][% @end @if %]])
-[% process_name %]_source += files([[%
+[% process_name asprefix=\_ %]source += files([[%
 @if enable_truncation_orders %][%
     @for each 0 1 2 var=efto %][%
         @if helsum%][% @else%][%
@@ -92,4 +92,4 @@ hel_gen_targets += [% process_name %]_helicity[%helicity%]_gen
            @end @if %][%
     @end @if helsum %][%
 @end @if enable_truncation_orders %]])
-[% process_name %]_source += [% process_name %]_helicity[%helicity%]_gen
+[% process_name asprefix=\_ %]source += [% process_name asprefix=\_ %]helicity[%helicity%]_gen

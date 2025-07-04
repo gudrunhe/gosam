@@ -1,10 +1,10 @@
 [% ' vim: syntax=golem
  %]program test
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki, logfile, nlo_prefactors
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki, logfile, nlo_prefactors
    use [% process_name asprefix=\_ %]kinematics, only: dotproduct, boost_to_cms
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model, only: parse[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model, only: parse[%
    @if extension quadruple %]
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model_qp, only: parse_qp => parse[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model_qp, only: parse_qp => parse[%
    @end @if extension quadruple %]
    use [% process_name asprefix=\_ %]matrix, only: samplitude, &
      & initgolem, exitgolem, ir_subtraction
@@ -94,10 +94,10 @@
  contains
 
 subroutine  print_parameters(vecs, scale2)
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: renormalisation, &
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: renormalisation, &
         convert_to_thv, reduction_interoperation, &
         reduction_interoperation_rescue, PSP_check, PSP_rescue
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
    implicit none
    real(ki) :: scale2
    real(ki), dimension([%num_legs%], 4) :: vecs

@@ -143,8 +143,8 @@ for file in glob.glob("../helicity*/d*h*l?.txt")\
 
 with open("kinematics.f90", "w") as outfile:
     outfile.write(r"""module     [% process_name asprefix=\_ %]kinematics
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: ki
-   use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
    implicit none
    save
 
@@ -392,10 +392,10 @@ contains
 @for particles lightlike vector %], hel[%index%][%
 @end @for %])[%
 @if internal NUMPOLVEC %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]config, only: debug_numpolvec, [% '
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: debug_numpolvec, [% '
       %]logfile[%
 @end @if %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name%]_[% @end @if %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), dimension(num_legs,4), intent(in) :: vecs[%
 @for particles lightlike vector %]
