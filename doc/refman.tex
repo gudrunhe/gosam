@@ -273,11 +273,10 @@ Below we will first describe the setup for the standalone version.
 
 
 In order to generate the matrix element for a given process, the user should
-create a process specific setup file, which we call {\em process card}. 
-
-%The syntax of this file is
-%closely related to that of Java \texttt{.properties} files.
-%\seealso{Appendix \ref{chp:appendix-template.in}}
+create a process specific setup file, which we call {\em process card}. There
+are no restrictions on the possible names or filename extensions, but the file
+must be in plain ASCII format. For historical reasons \gosam process cards often
+use the file extensions \texttt{*.in} or \texttt{*.rc}.
 
 All possible options of the process card are given in appendix \ref{chp:process_card_options} with descriptions for each option.
 The only mandatory fields are the {\tt in} and {\tt out} 
@@ -289,40 +288,13 @@ Therefore, a {\em minimal process card} can look like this:
 1  process_path=eett
 2  in=    e+, e-
 3  out=   t, t~
-4  order= gs, 0, 2
+4  order= QCD, 0, 2
 \end{lstlisting}
 
 
-\section{Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
+\section{Usage Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
 at NLO in QCD}
-
-It is recommended to generate and modify a template file for the 
-process card instead of
-starting from scratch. This can be done by invoking the shell command
-\begin{example}
-\$ gosam.py --template eett.in
-\end{example}
-This generates the file \texttt{eett.in} with some documentation
-for all defined options. Some options, e.g. the paths to the reduction libraries, 
-have been set by the installation script.
-The other options are filled with some default values,
-which also can be changed either in the individual process cards, 
-or in a global configuration file\footnote{
-For the latter, the script will search (in this order) in the \gosamv{} directory,
-in the user's home directory and in the current working directory for a file
-named `\texttt{.gosam}' or `\texttt{gosam.in}'. If one needs to adapt paths by
-hand, such a file can be generated with the command
-{\tt \$ gosam-config.py > gosam.in}}.
-
-In the following  example it is assumed that the process
-$e^+e^-\rightarrow t\bar{t}$ should be calculated to order
-$\mathcal{O}(\alpha\alpha_s)$ (virtual QCD corrections).
-%the tree-level process is of order $\mathcal{O}(\alpha))$). 
-We neglect the exchange of a $Z$ or a Higgs boson and treat the electron as massless.
-The output directory is assumed to be in the relative path
-\texttt{eett}. 
-%We only list the basic setup, detailed explanations of all options 
-%can be found in Appendix~\ref{chp:appendix-template.in}.
+In the following example we consider the calculation of the virtual QCD corrections to the process $e^+e^-\rightarrow t\bar{t}$. The process is defined in the following process card, which is a more realistic version of the minimal one given above.
 
 \begin{lstlisting}[
      numbers=left,caption={{\tt eett.rc}}, label={lst:eett},%
@@ -334,25 +306,50 @@ out=6,-6
 order=QCD, 0, 2
 one=gs,e
 zero=wT,me
+filter.particles=H:0,chi:0
 reduction_programs=ninja,golem95
 \end{lstlisting}
 
-Listing \ref{lst:eett} shows the content of the process card for the considered example process, where only options differing from the default values are shown. The full list of options and their respective descriptions is available in appendix \ref{chp:process_card_options}. 
+Here only options differing from the default values are shown. The full list of options and their respective descriptions is available in appendix \ref{chp:process_card_options}.
 
-The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-5. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{gs, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ or $e$ is specified in this example, therefore both types of diagrams will be at leading order in the electroweak couplings.
-The following options, lines 6 and 7, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program. In the next line, the width of the top is set to zero, as is the mass of the electron.
-Finally, the last line specifies which reduction backends the generated process library will support. Here, both supported backends are enabled. In such a case, the default choice on evaluation is always \texttt{ninja}. In this example, \texttt{golem95} is only used for the analytical reference calculation.
+The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-5. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{QCD, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ or $e$ is specified in this example, therefore both types of diagrams will be at leading order in the electroweak couplings.
+The following options, lines 6 to 8, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program. In the next line, the width of the top is set to zero, as is the mass of the electron. The \texttt{filter.particles} statement in line~8 suppresses the generation of diagrams with internal Higgs or Goldstone propagators. It is strictly speaking not necessary, since those diagrams will all evaluate to zero for vanishing electron mass, but by setting the filter the respective diagrams will be discarded right from the start. Finally, the last line specifies which reduction backends the generated process library will support. Here, both supported backends are enabled. In such a case, the default choice on evaluation is always \texttt{ninja}. In this example, \texttt{golem95} is only used for the analytical reference calculation.
 
 In order to populate the specified process directory with files
 one invokes
 \begin{example}
 \$ gosam.py eett.rc
 \end{example}
+After \texttt{gosam{.}py} has terminated, the build system in the process directory has to be initialized. This is done with the command
+\begin{example}
+\$ meson setup build --prefix <prefix> [-Doption=value]
+\end{example}
+where \texttt{<prefix>} is the location the process library is installed to. The option \texttt{-Ddoc=true} will generate the file \texttt{doc/process.pdf} which contains the generated diagrams and other information about the process. The option \texttt{-Dtest\_executables=true} will produce a test program to evaluate the generated amplitude at a randomly generated phase space point.
+
+After the process directory is configured, the \fortranXC source code can be generated and compiled, and the libraries be installed by executing
+\begin{example}
+\$ meson install -C <path/to/build>
+\end{example}
+where \texttt{<path/to/build>} is the relative path pointing to the directory \texttt{build} created in the previous step. The \texttt{-C} flag can be omitted when the command is started from inside \texttt{build}. By default, Meson will fully utilize the CPU for compilation. If this is undesired, instead of invoking \texttt{meson install} directly one can instead use
+\begin{example}
+\$ meson compile [-j <jobs>] -C <path/to/build>
+\end{example}
+ With the \texttt{-j} option, the number of jobs Meson will run in parallel can be set. This command will only compile the source code, so in order to install the libraries one still has to call
+ \begin{example}
+\$ meson install -C <path/to/build>
+\end{example}
+after the compilation is completed.
+
+
+\section{Generating a template process card}
+\gosam ships with a number of examples the user can, together with appendix~\ref{chp:process_card_options}, use as a reference when setting up their own process cards. As a convenience feature \gosam can also generate a template process card by invoking the command
+\begin{example}
+\$ gosam.py --template <process\_card>
+\end{example}
+where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card is therefore recommended remove from it all parameters which are kept at their default.
+
 
 \section{Process directory structure}
-
-
-
 After running \texttt{gosam.py} with an appropriate setup file, the
 process directory contains a number of files which are described below.
 
@@ -447,30 +444,6 @@ defined build options are
 
 \marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
 install all generated {\tt {.}mod} files.
-
-\section{Code generation and compilation}
-After {\tt gosam{.}py} has terminated, the build system in the process directory has to be initalized. 
-This is done with the command 
-\begin{example}
-\$ meson setup build --prefix <prefix> [-Doption=value]
-\end{example}
-where {\tt <prefix>} is the location the process library is installed to. In addition to the built-in Meson
-build options, {\tt doc} and {\tt test\_executables} can be set with the {\tt -D} option. This builds and 
-installs {\tt process{.}pdf} and the test programs respectively. The test programs evaluate the generated
-amplitude at a random phase space point and generate a log file {\tt \_debug.xml}.
-
-After the process directory is configured, the \fortranXC source code can be generated and compiled by 
-executing
-\begin{example}
-\$ meson compile [-j <jobs>]
-\end{example}
-With the {\tt -j} option, the number of jobs Meson will run in parallel can be set. By default, Meson will
-fully utilize the CPU. After the compilation is done, the generated process libraries can be installed by
-invoking 
-\begin{example}
-\$ meson install
-\end{example}
-If the default number of jobs is used, calling {\tt meson compile} can be omitted.
 
 %\subsection{Computation of Abbreviations}
 

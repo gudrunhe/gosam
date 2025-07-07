@@ -9,4 +9,6 @@ order=QCD, 0, 2
 one=gs,e
 zero=wT,me
 
+filter.particles=H:0,chi:0
+
 reduction_programs=ninja,golem95
