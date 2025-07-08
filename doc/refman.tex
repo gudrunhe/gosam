@@ -141,15 +141,15 @@ or downloaded as a release tar-ball from the {\tt GitHub} webpage.
 \subsection*{HTTP Download}
 At the URL \\
 \url{https://github.com/gudrunhe/gosam/releases}\\
-one can download the package
-\gosam-\gosamversion{} as a tar-ball. 
-one can unpack it using the command
+the package
+\gosam-\gosamversion{} can be downloaded as a tar-ball. 
+It can be can unpacked using the command
 \begin{example}
 \$ tar xzvf \packagename{}.tar.gz
 \end{example}
 
 \subsection*{Git}
-One can clone a working copy of the repository with the command
+A working copy of the repository can be cloned with the command
 \begin{example}
 \$ git clone https://github.com/gudrunhe/gosam
 \end{example}
@@ -259,7 +259,7 @@ above-mentioned software packages.
 
 
 \section{Running \gosam}
-An example of how to use \gosam to set up a process and generate the corresponding libraries is given in the next chapter in section~\ref{sec:usage}.
+An example of how to use \gosam to set up a process and generate the corresponding libraries is given in the next chapter in Section~\ref{sec:usage}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -281,7 +281,7 @@ are no restrictions on the possible names or filename extensions, but the file
 must be in plain ASCII format. For historical reasons \gosam process cards often
 use the file extensions \texttt{*.in} or \texttt{*.rc}.
 
-All possible options of the process card are given in appendix \ref{chp:process_card_options} with descriptions for each option.
+All possible options of the process card are given in Appendix \ref{chp:process_card_options} with descriptions for each option.
 The only mandatory fields are the {\tt in} and {\tt out} 
 particles, the perturbative order and the path where to store the process files.
 Therefore, a {\em minimal process card} can look like this:
@@ -313,10 +313,10 @@ filter.particles=H:0,chi:0
 reduction_programs=ninja,golem95
 \end{lstlisting}
 
-Here only options differing from the default values are shown. The full list of options and their respective descriptions is available in appendix \ref{chp:process_card_options}.
+Here only options differing from the default values are shown. The full list of options and their respective descriptions is available in Appendix \ref{chp:process_card_options}.
 
 The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-5. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{QCD, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ or $e$ is specified in this example, therefore both types of diagrams will be at leading order in the electroweak couplings.
-The following options, lines 6 to 8, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program. In the next line, the width of the top is set to zero, as is the mass of the electron. The \texttt{filter.particles} statement in line~8 suppresses the generation of diagrams with internal Higgs or Goldstone propagators. It is strictly speaking not necessary, since those diagrams will all evaluate to zero for vanishing electron mass, but by setting the filter the respective diagrams will be discarded right from the start. Finally, the last line specifies which reduction backends the generated process library will support. Here, both supported backends are enabled. In such a case, the default choice on evaluation is always \texttt{ninja}. In this example, \texttt{golem95} is only used for the analytical reference calculation.
+The following options, lines 6 to 8, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program. In the next line, the width of the top is set to zero, as is the mass of the electron. The \texttt{filter.particles} statement in line~8 suppresses the generation of diagrams with internal Higgs or Goldstone boson propagators. This is in principle not necessary, since those diagrams will all evaluate to zero for vanishing electron mass, but by setting the filter the respective diagrams will be discarded right from the start. Finally, the last line specifies which reduction backends the generated process library will support. Here, both supported backends are enabled. In such a case, the default reduction method at runtime is always \texttt{ninja}. In this example, \texttt{golem95} is only used for the analytical reference calculation.
 
 In order to populate the specified process directory with files
 one invokes
@@ -343,14 +343,16 @@ where \texttt{<path/to/build>} is the relative path pointing to the directory \t
 \end{example}
 after the compilation is completed.
 
-If \texttt{-Dtest\_executables=true} has been set during setup a test executable sampling the matrix element for a single random phase space point is now available in the subdirectory \texttt{test}.
+If \texttt{-Dtest\_executables=true} has been set during setup, a test executable sampling the matrix element for a single random phase space point is now available in the subdirectory \texttt{test}.
 
 \section{Generating a template process card}
-\gosam ships with a number of examples the user can, together with appendix~\ref{chp:process_card_options}, use as a reference when setting up their own process cards. As a convenience feature \gosam can also generate a template process card by invoking the command
+\gosam ships with a number of examples the user can
+%, together with appendix~\ref{chp:process_card_options},
+use as a reference when setting up their own process cards. As a convenience feature \gosam can also generate a template process card by invoking the command
 \begin{example}
 \$ gosam.py --template <process\_card>
 \end{example}
-where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card is therefore recommended remove from it all parameters which are kept at their default and/or are not relevant for the considered process.
+where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in Appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card it is therefore recommended to remove from it all parameters which are kept at their default and/or are not relevant for the considered process.
 
 
 \section{Process directory structure}
@@ -415,7 +417,7 @@ In more detail, the three categories of files are named as follows:\\
  d*h*l132.f90
 }
 
-When performing a calculation in SMEFT and setting\\ \texttt{enable\_truncation\_orders=true} in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j} when then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}.
+When performing a calculation in SMEFT and setting\\ \texttt{enable\_truncation\_orders=true} in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See Section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j} when then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}.
 
 \marginlabel{\tt matrix} This folder contains the code to combine
 the helicity amplitudes into a matrix element. Here one also finds
@@ -458,7 +460,7 @@ of the one-loop diagrams are factored out from the numerators and computed
 as abbreviations. 
 
 While in version 1.0 of \gosam{} the {\tt Fortran} code for the
-amplitudes was written using \haggies~\cite{Reiter:2009ts}, we now
+amplitudes was written using \haggies~\cite{Reiter:2009ts}, since version~2 we 
 use the features provided by \form{} version
 4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more
 compact code and a speed-up in amplitude evaluation of about a factor
@@ -468,12 +470,12 @@ of ten.
 \label{sec:grouping_summing}
 Already in the first release of \gosam{}, the diagrams were analyzed
 according to their kinematic matrix $S_{ij}$ and grouped together
-before reduction. These lead to an important gain in efficiency, both
+before reduction. This leads to an important gain in efficiency, both
 when using integrand reduction methods, as well as 
 classical tensor reduction techniques. Details about the way diagrams
-are grouped can be found in~\cite{Cullen:2011ac}. This feature is
-still present when \golemVC{} is used to reduce the
-amplitudes. \textcolor{red}{MH: what about ninja?}
+are grouped can be found in~\cite{Cullen:2011ac}.
+This feature is still present when \golemVC{} is used to reduce the
+amplitudes. \textcolor{red}{MH: what about ninja?}\textcolor{blue}{GH: I think it is also true for ninja. I would delete the last sentence.}
 %, whereas it is not implemented for the new integrand
 %reduction method based on the Laurent expansion\cite{Mastrolia:2012bu}
 %and explained in Section~\ref{sec:ninja}.
@@ -516,11 +518,11 @@ into one ``meta-diagram''. The default setting for this option is {\tt
 diagsum=true}.
 
 
-\paragraph{Grouping of Tree Level Diagrams}
+\paragraph{Grouping of Tree-level Diagrams}
 
 By default the expressions of all tree-level diagrams are grouped into one
 file. This has the advantage that subexpressions which appear in several
-tree-level diagrams can be reused across the amplitude. The option to turn of this feature is not available anymore as of version 3.0.
+tree-level diagrams can be reused across the amplitude. The option to turn off this feature is not available anymore as of version 3.0.
 
 \subsection{Numerical polarisation vectors}
 \label{sec:numpolvec}
@@ -694,15 +696,15 @@ The \gosam{}-\gosamversion{} package comes with the built-in model files
 {\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, {\tt smdiagehc},
 {\tt sm\_complex}, {\tt smdiag\_complex}, 
 where the latter two are needed in the case of complex masses and couplings, 
-see section \ref{sec:complexmasses}. 
+see Section \ref{sec:complexmasses}. 
 The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
 the model files {\tt smehc} and {\tt smdiagehc} contain the effective Higgs-gluon couplings.
 
-Other models can be imported most easily in the {\tt UFO} (Universal FeynRules Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
+Other models can be imported most easily in the {\tt UFO} (Universal Feynman Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
 The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
 mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
 
-In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the {\tt UFO} format. See section~\ref{sec:EFT} for more details.
+In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the {\tt UFO} format. See Section~\ref{sec:EFT} for more details.
 
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
@@ -718,19 +720,21 @@ For example, if the \texttt{Python} model files for the MSSM are in
 \begin{example}
 model= FeynRules,\$HOME/models/MSSM\_UFO
 \end{example}
-All parameters of type ``external'' defined in the UFO model's \texttt{parameter.py} file will become available as runtime parameters (see section~\ref{sec:Customization}). To distinguish them from parameters defined within \gosam directly they are prepended with the prefix \texttt{mdl}. \gosam will try to figure out the correct naming of the strong (electroweak/QED) coupling by checking if the model contains any parameter, external or internal, denoted \texttt{G}, \texttt{GG} or \texttt{GS} (\texttt{E}, \texttt{EE}, \texttt{ee}).
+All parameters of type ``external'' defined in the UFO model's \texttt{parameter.py} file will become available as runtime parameters (see Section~\ref{sec:Customization}). To distinguish them from parameters defined within \gosam directly they are prepended with the prefix \texttt{mdl}. \gosam will try to figure out the correct naming of the strong (electroweak/QED) coupling by checking if the model contains any parameter, external or internal, denoted \texttt{G}, \texttt{GG} or \texttt{GS} (\texttt{E}, \texttt{EE}, \texttt{ee}).
 
 In a UFO model each coupling is assigned a specific order, that is its power wrt. the QCD and/or QED coupling. In general more ``orders'' can be defined in the model, a feature which is useful to distinguish certain sets or classes of couplings. An example for an often used order is \texttt{NP}, which can be used to flag couplings of BSM or EFT origin. \gosam enables the user to make use of this UFO feature by means of the \python filter (see section~\ref{sec:filter}) \texttt{d.order('order')}, where \texttt{'order'} is a string denoting the name of the order parameter as defined in the UFO, e.g. \texttt{'NP'}. If the user wants to apply a filter based on a specific order, the property \texttt{order\_names} has to be declared in the process configuration file, e.g. \texttt{order\_names=NP}.
 
-\attention{\gosam is not able to handle arbitrarily large UFO models because of the limited buffer available in \qgraf. If the model is too large the user will be prompted an \qgraf error. In that case it might help to comment out vertices not contributing to the process from the UFO model files before starting \gosam.}
+\attention{\gosam is not able to handle arbitrarily large UFO models because of the limited buffer available in \qgraf. If the model is too large the user will be prompted a \qgraf error. In that case it might help to comment out vertices not contributing to the process from the UFO model files before starting \gosam.}
 
-\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.}. The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since the \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
+\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.}. The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since  \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
 \begin{align}
    i\Pi_\mathrm{gh}^{ab}(k) &= \frac{i\delta^{ab}}{k^2+i\epsilon}\,,
 \end{align}
-which corresponds to $\eta_G=+1$ in the nomenclature of~\cite{Romao:2012pq}. As the chosen sign conventions cannot easily be extracted from the UFO model it is in the responsibility of the user to provide a consistent setup.
+which corresponds to $\eta_G=+1$ in the nomenclature of~\cite{Romao:2012pq}. As the chosen sign conventions cannot easily be extracted from the UFO model it is the responsibility of the user to provide a consistent setup.
 
 \subsection{Import from LanHEP}
+\textcolor{blue}{GH: I think LanHEP is outdated and we should not support it anymore}
+
 In order to use model files generated by LanHEP the following steps
 have to be taken:
 \begin{enumerate}
@@ -887,54 +891,65 @@ certain threshold, either the point is discarded or the evaluation of the amplit
 repeated by means of a safer, albeit less efficient procedure. This procedure is
 traditionally called ``rescue system''.
 
-Apart from improvements in the stability of the reduction itself, which are provided by the new versions of \samurai{} and \golemVC, and in particular by the new reduction algorithm \ninja,  the new version of \gosam{} also has a more refined rescue system as compared to version 1.0. 
+The rescue system of \gosam-3.0 has been extended to (optionally) utilise quadruple precision to re-evaluate unstable points. The stability of a point is assessed using two tests, known as the \textit{pole test} and the \textit{rotation test}, respectively.
 
-A first commonly used approach relies on the comparison between the numerical values of the
-infrared pole coefficients computed by the one-loop program with 
-their known analytic results dictated by the universal behaviour of the 
-infrared singularities~\cite{Catani:2000ef}. We refer to this as the {\it pole test}. 
+The pole test compares the general IR prediction for the single pole of a NLO QCD amplitude, $\mathcal{S}_\mathrm{IR}$, with the singularity computed directly by \gosam, $\mathcal{S}$,
+\begin{align}
+\delta_\mathrm{pole} = \left| \frac{\mathcal{S}_\mathrm{IR} - \mathcal{S}}{{\mathcal{S}_\mathrm{IR}}} \right|.
+\end{align}
+The estimate of the number of correct digits in the result is given by $P_\mathrm{pole} = - \log_{10} ( \delta_\mathrm{pole})$.
+This stability check requires very little additional computational time as the matrix element does not need to be recomputed.
+A similar check can be used for the Born result of loop-induced processes, where the single pole is expected to vanish.
+In the loop-induced case, we define
+\begin{align}
+\delta_\mathrm{pole} = \left| \frac{\mathcal{S}}{\mathcal{A}} \right|.
+\end{align}
+where $\mathcal{A}$ is the finite part of the amplitude.
 
-The main advantages of this method are its broad applicability and the fact that it requires a negligible additional computation time. However, since not all integrals which appear in the reconstruction of the amplitude give a contribution to the double and single poles, this method often provides an overestimate of the precision, which might result in keeping  phase space points whose finite part is less precise than what is predicted by the pole test.
+The rotation test~\cite{vanDeurzen:2013saa} exploits the invariance of scattering amplitudes under an azimuthal rotation about the beam axis.
+The finite part of the amplitude, $\mathcal{A}$, is compared to the value of the amplitude obtained after rotating the input kinematics in the azimuthal plane, $\mathcal{A}_\mathrm{rot}$,
+\begin{align}
+\delta_\mathrm{rot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}} \right|.
+\end{align}
+The estimate of the number of correct digits in the result is given by $P_\mathrm{rot} = - \log_{10} ( \delta_\mathrm{rot})$.
 
-To target directly the precision of the finite part, various possibilities exist.
-Using the symmetry properties of scattering amplitudes under scaling of all physical scales,
- or alternatively the invariance under rotation of the momenta, 
- we can build pairs of points that should provide identical results, 
- both for the finite parts and for the poles, and use the difference between them 
- as an estimator of the precision. 
+The default procedure to assess the stability of a point uses a pole check followed by a rotation check.
+Firstly, $P_\mathrm{pole}$ is computed,
+\begin{enumerate}
+\item \texttt{PSP\_chk\_th1} $< P_\mathrm{pole}$ $\rightarrow$ accept point,
+\item \texttt{PSP\_chk\_th2} $< P_\mathrm{pole} < $ \texttt{PSP\_chk\_th1} $\rightarrow$ rotation test,
+\item $P_\mathrm{pole} <$ \texttt{PSP\_chk\_th2} $\rightarrow$ rescue point.
+\end{enumerate}
+If a rotation test is required, $P_\mathrm{rot}$ is computed,
+\begin{enumerate}
+\item \texttt{PSP\_chk\_th3} $< P_\mathrm{rot}$ $\rightarrow$ accept point,
+\item  $P_\mathrm{rot} <$ \texttt{PSP\_chk\_th3} $\rightarrow$ rescue point.
+\end{enumerate}
 
-The {\it scaling test}~\cite{Badger:2010nx}, is based on the properties of scaling of scattering amplitudes when all physical scales (momenta, renormalization scale, masses) are rescaled by a common multiplicative factor $x$. As shown in~\cite{Badger:2010nx}, this method provides a very good correlation between the estimated precision and the actual precision of the finite parts.
+By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
+If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
 
-The {\it rotation test}~\cite{vanDeurzen:2013saa} exploits the invariance of the scattering amplitudes under an azimuthal rotation about the beam axis, namely the direction of the initial colliding particles. Whenever the initial particles are not directed along the beam axis, one can perform a rotation of all particles by an arbitrary angle in the space of momenta. A validation of this technique, and the corresponding correlation plots, has been presented in~\cite{vanDeurzen:2013saa}.
+If \texttt{extensions=quadruple} is set during the \gosam generation phase, then the rescue system will instead recompute the amplitude in quadruple precision and calculate
+\begin{align}
+&\delta_\mathrm{qd} = 2 \left| \frac{\mathcal{A}-\mathcal{A}_\mathrm{q}}{\mathcal{A}+\mathcal{A}_\mathrm{q}} \right|,&
+&\delta_\mathrm{qdrot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}_\mathrm{q}} \right|, & \\
+&P_\mathrm{qd} = -\log_\mathrm{10}(\delta_\mathrm{q}),&
+&P_\mathrm{qdrot} = -\log_\mathrm{10}(\delta_\mathrm{qdrot}),&
+\end{align}
+where $\mathcal{A}_q$ is the finite part of the amplitude computed in quadruple precision.
+If both \texttt{PSP\_chk\_th4} $< P_\mathrm{qd}$ and \texttt{PSP\_chk\_th4} $< P_\mathrm{qdrot}$ the point is accepted.
+If this precision threshold is not met, then the input kinematics are rotated in the azimuthal plane and the amplitude is recomputed in quadruple precision, $\mathcal{A}_\mathrm{qrot}$.
+The quantities
+\begin{align}
+&\delta_\mathrm{qqrot} = 2 \left| \frac{\mathcal{A}_\mathrm{qrot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{qrot}+\mathcal{A}_\mathrm{q}} \right|,&
+&P_\mathrm{qqrot} = -\log_\mathrm{10}(\delta_\mathrm{qqrot}),&
+\end{align}
+are evaluated.
+If \texttt{PSP\_chk\_th5} $< P_\mathrm{qqrot}$ the point is accepted. 
+All remaining points are discarded and a precision of $-10$ is returned.
 
-While  the {\it scaling} and the {\it rotation test} provide a more reliable estimate of the precision of the finite parts that enter in the phase space integration, their downside is that they require two evaluations of the same matrix element, therefore leading to a doubling in the computational time.
+For loop-induced processes, the stability and rescue procedure are applied to the Born result, the thresholds \texttt{PSP\_chk\_th*} are replaced by \texttt{PSP\_chk\_li*}.
 
-%Additional methods have been proposed, within the context of integrand-reduction approaches, which target the relations between the coefficients before integration, namely the reconstructed algebraic expressions for the numerator function before integration, known as  $\N=\N$ tests~\cite{Ossola:2007ax, Mastrolia:2010nb}.
-%This kind of tests can be applied to the full amplitude (global   $\N=\N$ test) or individually within each residue of individual cuts (local $\N=\N$ test). The drawback of this technique comes from the fact that the test is applied at the level of individual diagrams, rather than on the final result summed over all diagrams, making the construction of a rescue system quite cumbersome. 
-
-For the precision analysis contained in \gosamv, and to set the trigger for the rescue system, we decided to employ  a hybrid method, that takes advantage of the computational speed of the {\it pole test}, combined with the higher reliability of the {\it rotation test}.  This hybrid method requires setting three different thresholds.
-After computing the matrix elements, \gosamv{} checks the precision  $ \delta_{pole}$ of the single pole with the {\it pole test}. Comparing the single pole 
-$\S_{IR}$ that can be obtained from the general structure of infrared singularities and the one provided by  \gosamv, which we label $\S$, we define  
-\be \label{eq:exd}
-\delta_{pole} = \left | \frac{ \S_{IR} - \S{} }{ \S_{IR}} \right |\, .
-\ee
-The corresponding estimate of the number of correct digits in the result is provided by  $P_{pole}= - \log_{10} (\delta_{pole})$. This step does not require any increase in computational time. The value of $ P_{pole}$ is then compared with two thresholds $ P_{high}$ and $ P_{low}$. 
-
-If $P_{pole} >  P_{high}$ the point is automatically accepted. Given the high quality of the computed pole, the finite part is very unlikely to be so poor that the point should be discarded.
-
-If $P_{pole} <  P_{low}$ the point is automatically discarded, or sent to the rescue system. If already the pole has a low precision, we can expect the finite part to be of the same level or worse.
- 
-In the intermediate region where $ P_{high} > P_{pole} >  P_{low}$, it is more difficult to determine the quality of the result solely based on the pole coefficients. Only in this case the point is recalculated using the {\it rotation test}, which requires additional computational time. 
-
-If we call the finite part of the amplitudes evaluated before and after the rotation $\A$ and  $\A_{rot}$ respectively,  we can define the error $ \delta_{rot}$ estimated with the rotation  as  
-\be  \label{eq:errd} \delta_{rot} =  2 \left  |\frac{ A_{rot} - A }{ A_{rot} + A} \right  |\, . \ee
-and the corresponding estimate on the number of correct digits as $P_{rot} = - \log_{10} (\delta_{rot})$.
-$P_{rot}$ provides a reliable estimate of the precision of the finite part~\cite{vanDeurzen:2013saa}, and can be compared with a threshold $P_{set}$ to decide whether the point should be accepted or discarded. 
-
-The values of the three thresholds $ P_{high} $,  $P_{low}$ and $P_{set}$ can be chosen by the user, to adjust the selection mechanism to the fluctuations in precision which occur between different processes. In the input card, $ P_{high} $,  $P_{low}$ and $P_{set}$ correspond to 
-\texttt{PSP\_chk\_th1}, \texttt{PSP\_chk\_th2} and \texttt{PSP\_chk\_th3}, 
-respectively, see section \ref{chp:setup-of-a-process}.
-It is worth to notice that the {\it rotation test} can be bypassed simply by setting the initial thresholds $P_{high}= P_{low}$. In this case the selection is performed solely on the basis of the {\it pole test}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1078,7 +1093,8 @@ Since these filters are applied already in the first of the diagram generation, 
 
 \section{Filtering diagrams in \python{}}
 \label{sec:filter}
-The final implemented diagram selection option are the \python filters. They allow arbitrary diagram selection criteria by using user-supplied custom \python functions. They are supplied with the \texttt{filer[.lo|.nlo|.ct]} options, which expects a \python function \begin{lstlisting}[style=py]
+The final implemented diagram selection option are the \python filters. They allow arbitrary diagram selection criteria by using user-supplied custom \python functions. They are supplied with the \texttt{filer[.lo|.nlo|.ct]} options, which expects a \python function
+\begin{lstlisting}[style=py]
    filter(d: golem.topolopy.objects.Diagram) -> bool: ...
 \end{lstlisting}
 Diagrams for which this function returns \texttt{True} are kept, diagrams for which \texttt{False} is returned are discarded.
@@ -2054,16 +2070,13 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 
 
 \chapter*{Conditions of use}
-    GoSam-1.0 -- An automated One-Loop matrix element generator.\\
-    Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
-    Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].\\
     
     {\bf GoSam-3.0}  \\
     Copyright (C) 2011--2025  The \gosam Collaboration
    \begin{itemize}         
       \setlength\itemsep{-0.5em}
       \item Jens Braun
-      \item Benjamin Campillo  Aveleira      
+      \item Benjamin Campillo Aveleira      
       \item Gudrun Heinrich                  
       \item Marius Hoefer
       \item Stephen Jones
@@ -2096,7 +2109,11 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 %\bf{The program is distributed under the 
 % terms and conditions of the GNU General Public License Version 3}
     We are indebted to {\bf Thomas Reiter} for his invaluable contributions 
-    to the development of GoSam-1.0.
+    to the development of GoSam-1.0.\\
+        GoSam-1.0 -- An automated One-Loop matrix element generator.\\
+    Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
+    Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].
+
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2111,21 +2128,24 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 
    
     Scientific publications prepared using the present version of
-    GoSam or any modified version of it or any code linking to
-    GoSam or parts of it should make a clear reference to the publication:
+    \gosam or any modified version of it or any code linking to
+    \gosam or parts of it should make a clear reference to the publications:
 
-    \begin{quote}
+    \begin{itemize}
  %       G. Cullen, N. Greiner, G. Heinrich, G. Luisoni, 
 %              P. Mastrolia, G. Ossola, T. Reiter,  F. Tramontano,\\
 %        ``Automated One-Loop Calculations with GoSam,''\\
 %        arXiv:1111.2034 [hep-ph]\\
 %	and \\
-        G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
+       \item  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
               P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk, 
 	      J.F.von Soden-Fraunhofen, F. Tramontano, \\
-	``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond",\\
+	``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond'',\\
 	Eur.\ Phys.\ J.\ C {\bf 74} (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
-    \end{quote}
+      \item   J.~Braun, B.~Campillo Aveleira, G.~Heinrich, M.~H\"ofer, S.P. Jones, M.~Kerner, J.~Lang, V.~Magerya, \\
+        ``One-loop calculations in Effective Field Theories with GoSam-3.0'',\\
+        arXiv:2507.xxxx.
+     \end{itemize}
 
 
 
