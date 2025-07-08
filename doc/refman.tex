@@ -157,7 +157,7 @@ This will create a folder \texttt{gosam} in your current directory.
 
 \section{Installation}
 
-The installation of \gosam and its dependencies is very simple and fully automated through the Meson
+The installation of \gosam and its dependencies is very simple and fully automated by means of the \texttt{meson}
 build system. In the \gosam source directory, running
 \begin{example}
 \$ meson setup build --prefix <prefix> [-Doption=value] \\
@@ -186,11 +186,11 @@ If a previous \texttt{build} directory exists,
 \begin{example}
 \$ meson setup --reconfigure
 \end{example}
-must be executed in the build directory in order to regenerate the build files. The new version can then be installed with 
+must be executed in the build directory in order to regenerate the build files. The new version can then be installed by running
 \begin{example}
-\$ meson install -C build
+\$ meson install
 \end{example}
-
+in the build directory.
 
 \section{Description of the components}
 
@@ -206,7 +206,7 @@ user input for the process to be calculated.
 This phase is automatically initiated when the build is started.
 \item {\bf compilation and running}: 
 a {\tt fortran} compiler and the chosen reduction libraries are used.
-This phase is initiated
+The compilation is initiated
 by  \texttt{\$ meson install}.
 \end{enumerate}
 
@@ -218,15 +218,15 @@ the tools will be required).
 \marginlabel{\qgraf (1)} \qgraf~\cite{Nogueira:1991ex}
 is required in version 3{.}1 or
 higher. 
-\qgraf will automatically be downloaded and installed during the installation of \gosam.
+\qgraf version 3.4.2 will automatically be downloaded and installed during the installation of \gosam.
 It can be also downloaded manually from
-\url{http://cfif.ist.utl.pt/~paulo/qgraf.html}.
+\url{http://cefema-gt.tecnico.ulisboa.pt/~paulo/d.html}.
 
 \marginlabel{\python (1)} \gosam requires at least {\tt Python} version 3{.}9.
 
 \marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
 version 4{.}0 or higher is required to profit from all optimisation features.
-\form will automatically be downloaded and installed during the installation of \gosam.
+\form version 4.2.1 will automatically be downloaded and installed during the installation of \gosam.
 For manual download, \form is available from
 \url{http://www.nikhef.nl/~form/}.
 
@@ -333,27 +333,28 @@ After the process directory is configured, the \fortranXC source code can be gen
 \begin{example}
 \$ meson install -C <path/to/build>
 \end{example}
-where \texttt{<path/to/build>} is the relative path pointing to the directory \texttt{build} created in the previous step. The \texttt{-C} flag can be omitted when the command is started from inside \texttt{build}. By default, Meson will fully utilize the CPU for compilation. If this is undesired, instead of invoking \texttt{meson install} directly one can instead use
+where \texttt{<path/to/build>} is the relative path pointing to the directory \texttt{build} created in the previous step. The \texttt{-C} flag can be omitted when the command is started from inside \texttt{build}. By default, \texttt{meson} will fully utilize the CPU for compilation. If this is undesired, instead of invoking \texttt{meson install} directly one can instead use
 \begin{example}
 \$ meson compile [-j <jobs>] -C <path/to/build>
 \end{example}
- With the \texttt{-j} option, the number of jobs Meson will run in parallel can be set. This command will only compile the source code, so in order to install the libraries one still has to call
+ With the \texttt{-j} option, the number of jobs \texttt{meson} will run in parallel can be set. This command will only compile the source code, so in order to install the libraries one still has to call
  \begin{example}
 \$ meson install -C <path/to/build>
 \end{example}
 after the compilation is completed.
 
+If \texttt{-Dtest\_executables=true} has been set during setup a test executable sampling the matrix element for a single random phase space point is now available in the subdirectory \texttt{test}.
 
 \section{Generating a template process card}
 \gosam ships with a number of examples the user can, together with appendix~\ref{chp:process_card_options}, use as a reference when setting up their own process cards. As a convenience feature \gosam can also generate a template process card by invoking the command
 \begin{example}
 \$ gosam.py --template <process\_card>
 \end{example}
-where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card is therefore recommended remove from it all parameters which are kept at their default.
+where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card is therefore recommended remove from it all parameters which are kept at their default and/or are not relevant for the considered process.
 
 
 \section{Process directory structure}
-After running \texttt{gosam.py} with an appropriate setup file, the
+After running \texttt{gosam.py} the
 process directory contains a number of files which are described below.
 
 \marginlabel{\tt codegen/} This directory contains files which are only
@@ -378,7 +379,7 @@ Note that the code will automatically map equivalent helicity
 configurations onto one single helicity and perform the corresponding book-keeping.
 
 Before invoking \texttt{meson install}, 
-this directory only contains the Meson and make files. After the full code
+this directory only contains the \texttt{meson} and make files, as well as a few auxiliary files. After the full code
 generation, for each diagram three classes of files are created: The
 basic algebraic expressions for the individual one-loop diagrams are
 contained in the files {\tt d*h*l1.txt} in an optimized format. The
@@ -387,7 +388,7 @@ polynomials in the loop momentum. The corresponding {\tt Fortran} files
 are {\tt d*h*l1.f90} and {\tt abbrevd*h*.f90}, where the latter
 contains the abbreviations. 
 
-Files generated with the {\tt derive} option  are
+Files generated with the {\tt derive} option (always active as of \gosam version 3.0, see section~\ref{sec:derive}) are
 named {\tt d*h*l1d.*}, while the input files
 for \ninja{}  are named {\tt d*h*l1*.*}. 
 In more detail, the three categories of files are named as follows:\\
@@ -414,6 +415,8 @@ In more detail, the three categories of files are named as follows:\\
  d*h*l132.f90
 }
 
+When performing a calculation in SMEFT and setting\\ \texttt{enable\_truncation\_orders=true} in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j} when then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}.
+
 \marginlabel{\tt matrix} This folder contains the code to combine
 the helicity amplitudes into a matrix element. Here one also finds
 the test program \texttt{test.f90}. This folder is always compiled last.
@@ -436,9 +439,9 @@ programs. For details, run
 which are global for all helicity configurations, 
 like e.g. the paths to the reduction libraries, compiler options, etc.
 
-\marginlabel{\tt meson.build} This file contains the main Meson project and library definitions.
+\marginlabel{\tt meson.build} This file contains the main \texttt{meson} project and library definitions.
 
-\marginlabel{\tt meson\_options.txt} This file contains the build options for the Meson project. The currently
+\marginlabel{\tt meson\_options.txt} This file contains the build options for the \texttt{meson} project. The currently
 defined build options are 
 \begin{itemize}
    \item[{\tt doc}] Build and install {\tt doc/process.pdf}. The default is {\tt False}.
@@ -447,8 +450,6 @@ defined build options are
 
 \marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
 install all generated {\tt {.}mod} files.
-
-%\subsection{Computation of Abbreviations}
 
 \subsection{Producing optimised code  with {\tt FORM} version 4}
 
@@ -472,12 +473,12 @@ when using integrand reduction methods, as well as
 classical tensor reduction techniques. Details about the way diagrams
 are grouped can be found in~\cite{Cullen:2011ac}. This feature is
 still present when \golemVC{} is used to reduce the
-amplitudes.
+amplitudes. \textcolor{red}{MH: what about ninja?}
 %, whereas it is not implemented for the new integrand
 %reduction method based on the Laurent expansion\cite{Mastrolia:2012bu}
 %and explained in Section~\ref{sec:ninja}.
 
-In release 2.0 an option called {\tt diagsum} combines diagrams
+As of release 2.0 an option called {\tt diagsum} combines diagrams
 which differ only by a subdiagram into one ``meta-diagram'' to be
 processed as an entity. This allows to further reduce the number of
 calls to the reduction program and therefore to increase the
@@ -501,7 +502,7 @@ the {\tt diagsum} option is set to {\tt diagsum=true}.}
 \end{figure} 
 
 
-When the option {\tt diagsum} is active, diagrams which differ only by
+When the option {\tt diagsum} is active (the default behaviour), diagrams which differ only by
 a propagator external to the loop, as is the case e.g. for the
 $Z/\gamma^\star$ propagator in QCD corrections to the production of
 $Z+$jets, are summed together before being processed
@@ -519,11 +520,7 @@ diagsum=true}.
 
 By default the expressions of all tree-level diagrams are grouped into one
 file. This has the advantage that subexpressions which appear in several
-tree-level diagrams can be reused across the amplitude. In some cases
-it can happen that the sum of all terms of the tree-level diagrams is too big
-to be compiled in one subroutine. In this case it is recommended to set
-the option \texttt{group} to \texttt{false}. 
-However, the latter can only be used in combination with the extension {\tt noformopt}.
+tree-level diagrams can be reused across the amplitude. The option to turn of this feature is not available anymore as of version 3.0.
 
 \subsection{Numerical polarisation vectors}
 \label{sec:numpolvec}
@@ -542,15 +539,10 @@ If the user wants to specify his/her preferred reference vectors,
 this can be done using the option {\tt reference-vectors=\ldots}
 in the process card.
 
-\subsection{The extension {\tt derive}}
-
+\subsection{The extension {\tt derive} ... is not an extension anymore}
+\label{sec:derive}
 The {\tt derive} feature generates code to access the tensor coefficients
-of each diagram or group of diagrams individually.
-While it has been among the possible keywords for the 
-{\tt extensions} option in \gosam-1.0 already, it now has been promoted to 
-be used by default in the context of  tensorial reconstruction~\cite{Heinrich:2010ax}.
-It improves both the speed and the
-precision of tensorial reconstruction and makes connection to other reduction methods.
+of each diagram or group of diagrams individually. It improves both the speed and the precision of tensorial reconstruction and makes connection to other reduction methods. It had been available as an option already in \gosam-1.0 and has been promoted to be used by default in the context of  tensorial reconstruction~\cite{Heinrich:2010ax} in \gosam-2.0. As of version 3.0 it is an integral part of the code and not an extension anymore. Both the keyword \texttt{derive} and its opposite \texttt{noderive} are therefore no valid options for \texttt{extensions} anymore.
 
 The idea behind it is to compute the numerator $\mathcal{N}(\hat{q})$ 
 %--- we suppress the discussion of the second argument $\mu^2$ ---
@@ -612,34 +604,8 @@ In addition there are some model independent parameters which can be found in th
 \texttt{common/config.f90}.
 %\smallskip
 
-%\begin{tabular}{l@{\quad}p{0.7\textwidth}}
-%   \texttt{samurai\_scalar} & selects a library of scalar integrals
-%   (see \samurai documentation).\\
-%   \texttt{samurai\_test} & sets a method to detect unstable points
-%   (see \samurai documentation). \\
-%   \texttt{samurai\_verbosity} & sets the verbosity level of
-%   \samurai; it should be set to zero in a production environment
-%   (see \samurai documentation).\\
-%   \texttt{renormalisation} & An integer number indicating if no
-%   renormalisation (0) or $\beta$-function renormalisation (1,
-%   QCD only) should be applied. Other values are reserved for future
-%   extensions. \\
-%   \texttt{gauge\textit{i}o} & for the external vector particle with
-%   index~$i$ (e.g. \texttt{gauge1o}, \texttt{gauge2o}\ldots),
-%   if not defined as a constant. \\
-%   \texttt{gauge\textit{i}z} & as \texttt{gauge\textit{i}o}.
-%   The polarisation vector is transformed into
-%   \begin{displaymath}
-%   \varepsilon^\mu(k_i)\to\mathtt{gauge\mathit{i}o}\cdot\varepsilon^\mu(k_i)
-%      + \mathtt{gauge\mathit{i}z}\cdot k_i^\mu
-%   \end{displaymath}
-%   This allows for a quick check of gauge invariance.
-%\end{tabular}
-
 \paragraph{Compile time parameters.}
 Other configuration options can be found in the file \texttt{common/config.f90}.
-%but require the recompilation of the source code
-%(\texttt{make clean; make compile}).
 \smallskip
 Examples of options contained in \texttt{config.f90} are
 \begin{maxipage}
@@ -651,10 +617,10 @@ Examples of options contained in \texttt{config.f90} are
     loop-diagrams is written to the output file.\\
 \texttt{include\_eps\_terms} & controls if
     terms of order $\varepsilon$ multiplying
-    poles are taken into account.\\
+    poles are taken into account. (only relevant when \texttt{r2=implicit}, see appendix~\ref{app:r2})\\
 \texttt{include\_eps2\_terms} & controls if
     terms of order $\varepsilon^2$ multiplying
-    double poles are taken into account.\\
+    double poles are taken into account. (only relevant when \texttt{r2=implicit}, see appendix~\ref{app:r2})\\
 \texttt{include\_color\_avg\_factor} & controls if the color averaging
     factor for inital state partons is multiplied to the final result.\\
 \texttt{include\_helicity\_avg\_factor} & controls if the helicity averaging
@@ -662,10 +628,7 @@ Examples of options contained in \texttt{config.f90} are
 \texttt{include\_symmetry\_factor} & controls if the symmetry
     factor for identical final state particles
     is multiplied to the final result. \\
-\texttt{use\_sorted\_sum} & controls if the diagrams are summed using
-    the algorithm Malcolm~\cite{Malcolm:1970}, which reduces the error
-    accumulated in presence of large cancellations.\\
-\texttt{tens\_rec\_by\_derivatives} & controls whether the tensorial reconstruction method is used.
+\texttt{tens\_rec\_by\_derivatives} & controls whether the tensorial reconstruction method is used. (only relevant when using \golemVC{})
 \end{tabular}
 \end{maxipage}
 
@@ -761,7 +724,7 @@ In a UFO model each coupling is assigned a specific order, that is its power wrt
 
 \attention{\gosam is not able to handle arbitrarily large UFO models because of the limited buffer available in \qgraf. If the model is too large the user will be prompted an \qgraf error. In that case it might help to comment out vertices not contributing to the process from the UFO model files before starting \gosam.}
 
-\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exits in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators}. The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since the \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
+\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.}. The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since the \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
 \begin{align}
    i\Pi_\mathrm{gh}^{ab}(k) &= \frac{i\delta^{ab}}{k^2+i\epsilon}\,,
 \end{align}
@@ -802,7 +765,7 @@ have to be taken:
 \begin{example}
    model=lanhep/ued, 7
 \end{example}
-\item The use of user defined functions (\texttt{external\_func} in LanHEP)
+\item \textcolor{red}{MH: Haggies is not supported anymore. The file \texttt{codegen/functions.out} does not exist anymore. What does that mean for this comment?} The use of user defined functions (\texttt{external\_func} in LanHEP)
    requires an adaption of the file \texttt{codegen/haggies-l0.in}. If one
    wants to use the function \texttt{double foo(double,double)} the
    following line sould be added.
@@ -911,18 +874,6 @@ can be used to distinguish between multiple spin-2 particles if necessary.
 The tensorial part of the spin-2 propagator, $B_{\mu\nu,\rho\sigma}(k,m_{\vec n})$, is treated separately 
 and should not be modified.  If the user would like to modify it, we refer to the  documentation in 
 section 6.3 of {\tt src/form/lorentz.pdf} in the \gosam{} tarball.
-
-
-
-%\section{Handling big processes}
-%Although the default settings should work for most cases, very big processes
-%in terms of the number of diagrams and the size of the expressions can cause
-%the compiler to become very slow or even to crash. In this section we discuss
-%solutions which can help to reduce the load for the compiler and to speed-up
-%the code generation. It should be mentioned that some of these measures can
-%have a negative impact on the runtime efficiency of the generated code.
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1169,7 +1120,7 @@ A special remark has to be made about double, or in general multiple, insertions
 \end{lstlisting}
 In this example we assume that the leading EFT operators are flagged by \texttt{NP=1} in the UFO model.
 
-\section{Truncation orders in SMEFT}
+\section{Truncation orders in SMEFT}\label{sec:SMEFTtruncations}
 SMEFT is an expansion in inverse powers of the scale of new physics $\Lambda$,
 \begin{align}
    \mathcal{L} &= \mathcal{L}_\mathrm{SM} + \sum_{d>4}\sum_{i_d}\frac{C^d_{i_d}}{\Lambda^d}O^d_{i_d}\,,\label{eq:SMEFTLag}
@@ -1182,7 +1133,7 @@ where $d$ denotes the canonical dimension of the operators $O^d_{i_d}$, with cor
 \end{itemize}
 
 In some cases the user might want to take into account an intrinsic loop suppression of certain operators. Couplings arising from those should be flagged by the additional order \texttt{QL=1} in the UFO model. We can now decompose any amplitude in the following way:
-\begin{align}
+\begin{align}\label{eq:amp_truncation}
    \M^\ell &= \underbrace{\M^\ell_\mathrm{SM}}_{\displaystyle\texttt{NP=0}} + \underbrace{\overbrace{\frac{\M^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=0}}  + \overbrace{\frac{\bar{\M}^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=1}}}_{\displaystyle\texttt{NP=1}}\,,
 \end{align}
 where $\ell=0,1$ denotes the type of diagram topology, tree or 1-loop. $\M^\ell_6$ is the contribution of diagrams with a single insertion of a dim-6 operator which is not loop-suppressed and $\bar{\M}^\ell_6$ contains those which are loop-suppressed\footnote{\gosam does not make any assumptions about implicit factors (e.g. couplings and/or factors of $\pi$) contained in the Wilson coefficient of loop-suppressed operators. The Wilson coefficients are taken exactly as they are defined in the UFO model and no additional loop-suppression factor is added the resulting amplitudes by \gosam.}. Starting from here there are different ways how to extend the truncation of the amplitude to physical quantities based on squared matrix elements. Currently nine different truncation options are implemented in GoSam, which will be explained in detail below. They can be chosen at runtime by means of the variable \texttt{EFTcount}. Possible values are shown in table~\ref{tab:EFTcount}
@@ -1497,7 +1448,7 @@ In the case of OLP mode, the default choice of the prefactor is mandated by the 
 In the case of a loop-induced process, the prefactor is pulled out of each appearing one-loop amplitude piece, resulting in an overall prefactor of $A_i^2$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Explicit reduction of the $R_2$ terms}
+\chapter{Explicit reduction of the $R_2$ terms}\label{app:r2}
 The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
 containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
 algebra in $D=4-2\varepsilon$ dimensions. 
