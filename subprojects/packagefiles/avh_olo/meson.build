@@ -10,7 +10,7 @@ add_project_arguments('-Wno-real-q-constant', language: 'fortran')
 avh_olo_gen = custom_target('avh_olo_gen',
     input: files(['create.py']),
     output: 'avh_olp.f90',
-    command: [find_program('python'), '@INPUT@', 'source', '@OUTPUT@']
+    command: [find_program('python3'), '@INPUT@', 'source', '@OUTPUT@']
     )
 
 avh_olo = both_libraries('avh_olo', avh_olo_gen, install: true)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # From https://github.com/mesonbuild/meson/issues/5374
 from os import environ, listdir, makedirs, walk
 from os.path import join, isdir, exists

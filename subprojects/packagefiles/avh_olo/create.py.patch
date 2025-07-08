@@ -3,8 +3,9 @@ index 03d2f86..2fef84d 100755
 --- a/create.py
 +++ b/create.py
 @@ -1,5 +1,5 @@
- #!/usr/bin/env python
+-#!/usr/bin/env python
 -import re,os,sys,subprocess
++#!/usr/bin/env python3
 +import re,os,sys,subprocess, shutil
  locdir,thisFile = os.path.split(os.path.abspath(sys.argv[0]))
  srcdir = os.path.join(locdir,'src')
