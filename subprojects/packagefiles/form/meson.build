@@ -59,12 +59,22 @@ cdata.set('SIZEOF_VOID_P', cc.sizeof('void*'))
 cdata.set('HAVE_PTHREADS', 1)
 cdata.set('UNIX', 1)
 
-if cc.sizeof('void*') == 4
-    cdata.set('ILP32', 1)
-elif cc.sizeof('long') == 3
-    cdata.set('LLP64', 1)
+int_sizes = [
+  cc.sizeof('char'),
+  cc.sizeof('short'),
+  cc.sizeof('int'),
+  cc.sizeof('long'),
+  cc.sizeof('long long'),
+  cc.sizeof('void*'),
+]
+if int_sizes == [1,2,4,4,8,4]
+  cdata.set('ILP32', 1)
+elif int_sizes == [1,2,4,4,8,8]
+  cdata.set('LLP64', 1)
+elif int_sizes == [1,2,4,8,8,8]
+  cdata.set('LP64', 1)
 else
-    cdata.set('LP64', 1)
+  error('This platform is neither ILP32, LLP64, nor LP64!')
 endif
 
 configure_file(input : 'config.h.meson',
