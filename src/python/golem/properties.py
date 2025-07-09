@@ -1141,8 +1141,6 @@ config_PSP_check = Property(
    Sets the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
-
-   !!Works only for QCD and with built-in model files!!
    """,
     bool,
     True,
@@ -1158,8 +1156,6 @@ config_PSP_rescue = Property(
    The accuracy is estimated using information on the single
    pole accuracy and on the stability of the finite part
    under rotation of the phase space point.
-
-   !!Works only for QCD and with built-in model files!!
    """,
     bool,
     False,
@@ -1173,7 +1169,6 @@ config_PSP_verbosity = Property(
    Sets the verbosity of the PSP_check.
    verbosity = False: no output
    verbosity = True : bad point are written into gs_badpts.log
-   !!Works only for QCD and with built-in model files!!
    """,
     bool,
     False,
@@ -1189,8 +1184,10 @@ config_PSP_chk_th1 = Property(
    an integer indicating the desired minimum number of digits 
    accuracy on the single pole. For poles more precise than this 
    threshold the finite part is not checked.
-   !!Works only for QCD and with built-in model files!!
-   
+
+   !!Works only with models for which ir_subtraction returns
+   the expected single pole!!
+
    The number has to be an integer.
    """,
     int,
@@ -1209,8 +1206,10 @@ config_PSP_chk_th2 = Property(
    level set, such points are written to a file and not used when 
    the code is interfaced to an external Monte Carlo using the new 
    BLHA standards.
-   !!Works only for QCD and with built-in model files!!
-   
+
+   !!Works only with models for which ir_subtraction returns
+   the expected single pole!!
+
    The number has to be an integer.
    """,
     int,
@@ -1229,8 +1228,7 @@ config_PSP_chk_th3 = Property(
    According to the verbosity level set, such points are written 
    to a file and not used when the code is interfaced to an 
    external Monte Carlo using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
-   
+
    The number has to be an integer.
    """,
     int,
@@ -1246,7 +1244,7 @@ config_PSP_chk_th4 = Property(
    based on the precision of the finite part estimated by 
    comparing the normal and rotated double precision 
    evaluations against a quadruple precision evaluation.
-   !!Works only for QCD and with built-in model files!!
+
    !!Used only for: extensions=quadruple!!
 
    The number has to be an integer.
@@ -1266,7 +1264,7 @@ config_PSP_chk_th5 = Property(
    evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
+
    !!Used only for: extensions=quadruple!!
 
    The number has to be an integer.
@@ -1287,7 +1285,9 @@ config_PSP_chk_li1 = Property(
    minimum number of digits  accuracy on the single pole. For 
    poles more precise than this  threshold the finite part is 
    not checked.
-   !!Works only for QCD and with built-in model files!!
+
+   !!Works only with models for which the single pole vanishes
+   at Born level!!
 
    The number has to be an integer.
    """,
@@ -1299,7 +1299,7 @@ config_PSP_chk_li2 = Property(
     "PSP_chk_li2",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th1.
+   processes, it is used instead of PSP_chk_th2.
 
    Threshold to declare a PSP as a bad point, based of the precision
    of the single pole. Points with precision less than this 
@@ -1308,7 +1308,9 @@ config_PSP_chk_li2 = Property(
    level set, such points are written to a file and not used when 
    the code is interfaced to an external Monte Carlo using the new 
    BLHA standards.
-   !!Works only for QCD and with built-in model files!!
+
+   !!Works only with models for which the single pole vanishes
+   at Born level!!
 
    The number has to be an integer.
    """,
@@ -1320,7 +1322,7 @@ config_PSP_chk_li3 = Property(
     "PSP_chk_li3",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th1.
+   processes, it is used instead of PSP_chk_th3.
 
    Threshold to declare a PSP as a bad point, based on the precision
    of the finite part estimated with a rotation. Points with 
@@ -1329,7 +1331,6 @@ config_PSP_chk_li3 = Property(
    According to the verbosity level set, such points are written 
    to a file and not used when the code is interfaced to an 
    external Monte Carlo using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
 
    The number has to be an integer.
    """,
@@ -1341,13 +1342,13 @@ config_PSP_chk_li4 = Property(
     "PSP_chk_li4",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th1.
+   processes, it is used instead of PSP_chk_th4.
 
    Threshold to accept a PSP point without further treatment,
    based on the precision of the finite part estimated by 
    comparing the normal and rotated double precision 
    evaluations against a quadruple precision evaluation.
-   !!Works only for QCD and with built-in model files!!
+
    !!Used only for: extensions=quadruple!!
 
    The number has to be an integer.
@@ -1360,7 +1361,7 @@ config_PSP_chk_li5 = Property(
     "PSP_chk_li5",
     """\
    Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th1.
+   processes, it is used instead of PSP_chk_th5.
 
    Threshold to declare a quadruple precision PSP as a bad point,
    based on the precision of the finite part estimated by
@@ -1368,7 +1369,7 @@ config_PSP_chk_li5 = Property(
    evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
+
    !!Used only for: extensions=quadruple!!
 
    The number has to be an integer.
@@ -1383,7 +1384,6 @@ config_PSP_chk_kfactor = Property(
    Sets the same variable in config.f90
 
    Threshold on the k-factor to perform a rotation check on the PSP.
-   !!Works only for QCD and with built-in model files!!
    """,
     str,
     1000,
