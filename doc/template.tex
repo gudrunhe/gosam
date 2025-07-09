@@ -21,7 +21,8 @@ to the working directory from which gosam.py is run.
 Example:
 process_path=/scratch/golem_processes/process1
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{in}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -34,7 +35,8 @@ Examples (Standard Model):
 2) in=e+,e-
 3) in=g,g
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{out}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -47,7 +49,8 @@ Examples (Standard Model):
 2) out=e+,e-,gamma
 3) out=b,b~,t,t~
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{model}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -122,7 +125,8 @@ should be specified as `NONE`.
 
 See also: qgraf.options, qgraf.verbatim
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{loop\_suppressed\_Born}}] (\textit{true/false})
 \begin{verbatim}
@@ -158,7 +162,8 @@ Examples:
 
 See also: model, one
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{one}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -171,7 +176,8 @@ one=gs, e
 
 See also: model, zero
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{renorm}}] (\textit{true/false})
 \begin{verbatim}
@@ -268,7 +274,8 @@ forms:
          # helicities=++--+,++---,++--0,+-+-+,+-+--,+-+-0,\
          #            -+-++,-+-+-,-+-+0,--+++,--++-,--++0
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.options}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -291,7 +298,8 @@ Example:
 
 filter.particles=u:0,d:0 # No internal u or d quarks
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.lo.particles}}] (\textit{text})
 \begin{verbatim}
@@ -300,7 +308,8 @@ in the LO diagrams. Multiple fields may be specified.
 
 See also filter.particles.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.nlo.particles}}] (\textit{text})
 \begin{verbatim}
@@ -309,7 +318,8 @@ in the NLO diagrams. Multiple fields may be specified.
 
 See also filter.particles.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.ct.particles}}] (\textit{text})
 \begin{verbatim}
@@ -318,7 +328,8 @@ in the counter term diagrams. Multiple fields may be specified.
 
 See also filter.particles.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim}}] (\textit{text})
 \begin{verbatim}
@@ -341,7 +352,8 @@ Please, refer to the QGraf documentation for details.
 
 See also: qgraf.options, order
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim.lo}}] (\textit{text})
 \begin{verbatim}
@@ -349,7 +361,8 @@ Same as qgraf.verbatim but only applied to LO diagrams.
 
 See also: qgraf.verbatim, qgraf.verbatim.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim.nlo}}] (\textit{text})
 \begin{verbatim}
@@ -357,7 +370,8 @@ Same as qgraf.verbatim but only applied to NLO diagrams.
 
 See also: qgraf.verbatim, qgraf.verbatim.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{diagsum}}] (\textit{true/false})
 \begin{verbatim}
@@ -420,14 +434,16 @@ olp_blha1    --- Use BLHA version 1 instead of version 2.
 f77          --- In combination with the BLHA interface it generates
                  an olp_module.f90 linkable with Fortran77
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{debug}}] (\textit{comma separated list})
 \begin{verbatim}
 A list of debug flags.
 Currently, the words 'lo', 'nlo' and 'all' are supported.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{select.lo}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -445,7 +461,8 @@ select.lo=1,2,5,8,50,51,52,53
 
 See also: select.nlo, filter.lo, filter.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{select.nlo}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -463,7 +480,8 @@ select.nlo=1,2,5,8,50,51,52,53
 
 See also: select.lo, filter.lo, filter.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{select.ct}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -481,7 +499,8 @@ select.ct=1,2,5,8,50,51,52,53
 
 See also: select.nlo, filter.lo, filter.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.lo}}] (\textit{text})
 \begin{verbatim}
@@ -529,7 +548,8 @@ Note: Using d.iprop(field, momentum="...") in olp-mode can lead to
 
 See also: filter.nlo, select.lo, select.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.nlo}}] (\textit{text})
 \begin{verbatim}
@@ -537,7 +557,8 @@ A python function which provides a filter for loop diagrams.
 
 See filter.lo for more explanation.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.ct}}] (\textit{text})
 \begin{verbatim}
@@ -545,7 +566,8 @@ A python function which provides a filter for eft counterterm diagrams.
 
 See filter.lo for more explanation.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.module}}] (\textit{text})
 \begin{verbatim}
@@ -579,7 +601,8 @@ class my_nlo_filter_class:
 
 See filter.lo, filter.nlo
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{renorm\_beta}}] (\textit{true/false})
 \begin{verbatim}
@@ -1016,7 +1039,8 @@ in=g,g
 out=g,g
 reference-vectors=1:2,2:3,3:4,4:1
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{abbrev.color}}] (\textit{text})
 \begin{verbatim}
@@ -1045,7 +1069,8 @@ path into which the GoSam git has been cloned.
 
 The directory must contain a file called 'template.xml'
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{qgraf.bin}}] (\textit{text})
 \begin{verbatim}
@@ -1147,7 +1172,8 @@ Possible values are:
          %+<n> refers to +n only
          %-<n> refers to -n only
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{crossings}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -1164,7 +1190,8 @@ out=2,-2
 
 crossings=dxd_uux: -1 1 > 2 -2, ud_ud: 2 1 > 2 1
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{formopt.level}}] (\textit{text})
 \begin{verbatim}
@@ -1194,14 +1221,16 @@ form_factor_lo="(1000._ki**2/
      (1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:)))
 )"
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|True|
 \\\item[\colorbox{gray!30}{\texttt{form\_factor\_nlo}}] (\textit{text})
 \begin{verbatim}
 This option allows to define a form factor which NLO/loop-induced results
 are multiplied with.
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|""|
+\\Hidden: \verb|False|
 \\Experimental: \verb|True|
 \\\item[\colorbox{gray!30}{\texttt{order\_names}}] (\textit{comma separated list})
 \begin{verbatim}
@@ -1213,7 +1242,8 @@ amplitude generation. Relevant for correct EFT treatment.
 Example:
 order_names=QCD,NP,QL
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{enable\_truncation\_orders}}] (\textit{true/false})
 \begin{verbatim}
@@ -1265,7 +1295,8 @@ flavour_groups=1:3:5,2:4
 flavour_groups=
 -> each flavour treated separately (default)
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{respect\_generations}}] (\textit{true/false})
 \begin{verbatim}
@@ -1301,7 +1332,8 @@ MSbar_yukawa=B
 
 See also: renorm_yukawa
 \end{verbatim}
-Hidden: \verb|False|
+Default: \verb|None|
+\\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{use\_MQSE}}] (\textit{true/false})
 \begin{verbatim}

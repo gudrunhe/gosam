@@ -243,7 +243,6 @@ filter_particles = Property(
     filter.particles=u:0,d:0 # No internal u or d quarks
     """,
     str,
-    ""
 )
 
 filter_lo_particles = Property(
@@ -255,7 +254,6 @@ filter_lo_particles = Property(
     See also filter.particles.
     """,
     str,
-    ""
 )
 
 filter_nlo_particles = Property(
@@ -267,7 +265,6 @@ filter_nlo_particles = Property(
     See also filter.particles.
     """,
     str,
-    ""
 )
 
 filter_ct_particles = Property(
@@ -279,7 +276,6 @@ filter_ct_particles = Property(
     See also filter.particles.
     """,
     str,
-    ""
 )
 
 qgraf_verbatim = Property(
@@ -1445,7 +1441,6 @@ order_names = Property(
    order_names=QCD,NP,QL
    """,
     list,
-    default="",
 )
 
 enable_truncation_orders = Property(
@@ -1506,7 +1501,6 @@ flavour_groups = Property(
    -> each flavour treated separately (default)
    """,
     list,
-    "",
 )
 
 respect_generations = Property(
@@ -1547,7 +1541,6 @@ MSbar_yukawa = Property(
     See also: renorm_yukawa
     """,
     list,
-    "",
 )
 
 use_MQSE = Property(

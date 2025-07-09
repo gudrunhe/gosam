@@ -323,6 +323,10 @@ def write_template_file(fname, defaults, format=None):
                 value = str(prop.getDefault())
                 if len(value) > 0:
                     f.write("Default: \\verb|%s|\n\\\\" % value)
+                else:
+                    f.write("Default: \\verb|\"\"|\n\\\\")
+            else:
+                    f.write("Default: \\verb|None|\n\\\\")
 
         if format == "LaTeX":
             if prop.isHidden() is not None:
@@ -496,6 +500,14 @@ def fill_config(conf):
     for p in golem.properties.properties:
         if conf.getProperty(p):
             conf.setProperty(str(p), conf.getProperty(p))
+
+    # Check for required properties:
+    if (True if conf.getProperty("in") is None else conf.getProperty("in")==""):
+        raise GolemConfigError("You have to specify at least one 'in' particle!")
+    if (True if conf.getProperty("out") is None else conf.getProperty("out")==""):
+        raise GolemConfigError("You have to specify at least one 'out' particle!")
+    if (True if conf.getProperty("order") is None else conf.getProperty("order")==""):
+        raise GolemConfigError("You have to specify the perturbative order of your process!")
 
     # Check for non-fatal incompatible configurations:
     orders = split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
