@@ -103,8 +103,13 @@ program test
    call exitgolem()
    
  contains
- 
-   
+
+!----------------------------------------------------------------
+! The following subroutines implement the H->ggg amplitude as in    
+! G. Buchalla, M. Hoefer and C. Mueller-Salditt - 2212.08560
+! using results from
+! J. S. Rozowsky - hep-ph/9709423
+!----------------------------------------------------------------
 subroutine analytic_amp(vecs,amp)
   use ggHg_SMEFT_model, only: mdlctphi, mdlcphiG, mdlLam, &
   &  mdlGf, mdlymt, NC, mdlaS
