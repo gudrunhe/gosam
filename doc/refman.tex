@@ -10,6 +10,7 @@
 \usepackage{mdwlist}
 \usepackage{changepage}
 \usepackage{xcolor}
+\usepackage{bold-extra}
 \input lstform
 \input lstolp
 %\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
@@ -26,29 +27,53 @@
    xleftmargin=\parindent,
    language=python,
    showstringspaces=false,
-   basicstyle=\footnotesize\ttfamily,
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
    commentstyle=\color{codegreen},
-   keywordstyle=\color{blue},
+   %keywordstyle=\color{blue},
+   keywordstyle=,
    numberstyle=\tiny\color{codegray},
    stringstyle=\color{codepurple},
+   upquote=true
+}
+
+\lstdefinestyle{form}{
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   language=form,
+   upquote=true
+}
+
+\lstdefinestyle{fortran}{
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   language=fortran,
+   upquote=true
+}
+
+\lstdefinestyle{C}{
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   language=C,
+   upquote=true
 }
 
 \newcommand{\gosamversion}{{3{.}0}}
-\newcommand{\gosam}{{\sc GoSam}\xspace}
-\newcommand{\gosamv}[1][\gosamversion]{{\sc GoSam}\xspace}
-\newcommand{\golemVC}{{\tt golem95C}\xspace}
+\newcommand{\gosam}{\textsc{GoSam}\xspace}
+\newcommand{\gosamv}[1][\gosamversion]{\textsc{GoSam}\xspace}
+\newcommand{\golemVC}{\textsc{Golem95C}\xspace}
 \newcommand{\packagename}{{gosam-\gosamversion-<revision-hash>}}
-\newcommand{\hepforge}{{\sc HepForge}\xspace}
+\newcommand{\hepforge}{\textsc{HepForge}\xspace}
 
-\newcommand{\qgraf}{{\tt QGraf}\xspace}
-\newcommand{\form}{{\tt FORM}\xspace}
-\newcommand{\python}{{\tt Python}\xspace}
-\newcommand{\fortranXC}{{\tt Fortran\,95}\xspace}
-\newcommand{\fortranMMIII}{{\tt Fortran\,2003}\xspace}
-\newcommand{\pjfry}{{\tt PJFry}\xspace}
-\newcommand{\haggies}{{\tt haggies}\xspace}
-\newcommand{\samurai}{{\sc Samurai}\xspace}
-\newcommand{\ninja}{{\sc Ninja}\xspace}
+\newcommand{\qgraf}{\textsc{QGraf}\xspace}
+\newcommand{\form}{\textsc{Form}\xspace}
+\newcommand{\python}{{Python}\xspace}
+\newcommand{\fortranXC}{\textsc{Fortran\,95}\xspace}
+\newcommand{\fortranMMIII}{\textsc{Fortran\,2003}\xspace}
+\newcommand{\pjfry}{\textsc{PJFry}\xspace}
+\newcommand{\haggies}{\textsc{Haggies}\xspace}
+\newcommand{\samurai}{\textsc{Samurai}\xspace}
+\newcommand{\ninja}{\textsc{Ninja}\xspace}
 
 \def\ket#1{|{#1}\rangle}
 \def\bra#1{\langle{#1}|}
@@ -128,7 +153,7 @@ Therefore, the user does not have to install any external programs manually.
 
 The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
 Using \gosam requires \texttt{Python}, a \texttt{fortran} compiler, a C++ compiler, \texttt{make} and the \texttt{meson} build system. It is tested with \texttt{Python} $\geq 3.9$ and \texttt{gfortran}.
-To use a different {\tt fortran} compiler and linker, the {\tt FC} and {\tt FC\_LD} environment variables can
+To use a different Fortran compiler and linker, the {\tt FC} and {\tt FC\_LD} environment variables can
 be set during the installation.
 
 
@@ -136,7 +161,7 @@ be set during the installation.
 
 The \gosam-\gosamversion{} package can either be cloned 
 via \texttt{git}
-or downloaded as a release tar-ball from the {\tt GitHub} webpage.
+or downloaded as a release tar-ball from the GitHub webpage.
 
 \subsection*{HTTP Download}
 At the URL \\
@@ -1128,8 +1153,7 @@ where each string is the name of the respective field. If multiple field names a
 \gosam does not ship with any builtin EFT models. For a calculation based on an EFT the user has to provide the model through the generic UFO interface, see section~\ref{sec:UFO}. \gosam is able to handle $n$-point vertices, with $n>4$, and 4-fermion interactions. Note that when no additional order besides the usual QCD and QED orders is specified for the vertex couplings, \gosam will treat all interactions equally, considering only their assigned power wrt. the perturbative expansion in the strong and electroweak/QED coupling. In most cases one will want to make a distinction between SM and non-SM interactions, which in UFO syntax is conventionally handled trough additional coupling orders. \gosam reserves two special order names, \texttt{NP} and \texttt{QL}. The former is used to assign an order to a coupling wrt. to the power counting of the EFT, for example factors of $1/\Lambda$ in SMEFT. The latter can be used to assign a loop-order to the coupling in cases one wants to take into account a potential loop-suppression of EFT operators, as explained in more detail in the next section.
 
 A special remark has to be made about double, or in general multiple, insertions of EFT operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies when at the same time operators of even higher dimension are missing in the model. For example, a double insertion of dimension 6 operators is at the same order as a single insertion of a dimension 8 operator. To be fully consistent both cases have to be included. The user can avoid such problems by using the \python diagram filters to single out diagrams with at most one SMEFT vertex:
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
 1  filter.lo=lambda d: d.order('NP')<=1
 2  filter.nlo=lambda d: d.order('NP')<=1
 3  filter.ct=lambda d: d.order('NP')<=1
@@ -1254,8 +1278,7 @@ In order to consistently define the process one has to distinguish two scenarios
    \item Tree-level contributions are generated by loop-suppressed EFT operators only.
 \end{enumerate}
 In the first scenario the process is not actually loop-induced, and the process can be set up in the usual way with a tree-level Born. A requirement is that the QCD and/or QED orders of the EFT operators are consistent with the \texttt{order} statement in the process configuration file. In this case all truncation orders can be defined as above, with $\M_\mathrm{SM}^0\equiv0$. Note, however, that this means that the leading contributions to the process are tree times 1-loop interferences at dim-6 and squared tree-level contributions at dim-6$^2$. The actual SM part is then only subleading in perturbation theory at 1-loop squared and will not even be calculated by \gosam. Most of the time the second scenario will be what one wants to consider. In this case the process is treated as loop-induced and the loop-suppressed EFT diagrams with tree-level topology are considered as of the same level as the 1-loop (SM-)contributions. Since \gosam cannot know a priori if such EFT diagrams exist the user has to explicitly set the flag
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
 1  loop_suppressed_Born=true
 \end{lstlisting}
 in the process card. As a consequence only the \texttt{EFTcount} options 0 and 11 to 14, that is the ones considering loop-suppression, are defined for loop-induced processes. The tree and 1-loop contributions to the process can then be written as (dropping the $\Lambda^{-2}$ as above)
@@ -1300,8 +1323,7 @@ Note that above options are still well defined when the model does not contain a
 Renormalisation in an EFT context is a non-trivial task and not fully automatized in \gosam. In general \gosam therefore provides unrenormalised amplitudes when considering an EFT. However, under certain circumstances \gosam is able to calculate the required counterterms for the 1-loop QCD renormalisation, just as in the pure SM. The necessary condition for this to work is that there are no contributions of the EFT operators to the renormalisation of SM parameters and fields. In other words, all additional UV divergences at $\mathcal{O}\left(\Lambda^{-2}\right)$ can be absorbed by renormalising the Wilson coefficients of the EFT operators alone, without the need to change the counterterms of SM objects. Internally GoSam uses its infrastructure for the generation of the Born amplitude, by replacing occurrences of Wilson coefficients within each diagram by their corresponding counterterm, $C_i\to \delta C_i$. The result is expanded in a way that ensures that each contribution to the counterterm amplitude only has a single insertion of a counterterm.
 
 The counterterms related to the Wilson coefficients have to be provided by the user. This can be done in a convenient way by means of the UFO interface, as explained in section~5.4 of the UFO2.0 manual~\cite{Darme:2023jdn}. Analogously to an ordinary \texttt{Vertex} objects a counterterm vertex \texttt{CTVertex} can be defined, which exactly originates from the replacement $C_i\to \delta C_i$ mentioned above. As an example consider a simplified version of SMEFT with just the two operators $O_{\phi G}$ and $O_{t\phi}$. The latter generates (among others) an anomalous $t\bar{t}H$ vertex, which in the UFO can be defined as
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
    V_1 = Vertex(
       name = 'V_1',
       particles = [ P.t__tilde__, P.t, P.H ],
@@ -1314,8 +1336,7 @@ The vertex has a single colour structure, the identity, and two separate Lorentz
    \delta C_{t\phi} = \frac{\alpha_s}{2\pi}\frac{(4\pi)^\epsilon}{\Gamma(1-\epsilon)}\left(\frac{\mu_R^2}{\mu_\mathrm{EFT}^2}\right)^\epsilon\\\left(\frac{1}{\epsilon}\left(-2C_{t\phi}+8y_tC_{\phi G}\right)\right. \\+ \left.1_\mathrm{DRED}\left(-\frac{2}{3}C_{t\phi}+\frac{8}{3}y_tC_{\phi G}\right)\right) + \mathcal{O}(\epsilon)\,,
 \end{multline}
 where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's default) and $1_\mathrm{DRED}=0$ in the t'Hooft-Veltman scheme. $\mu_\mathrm{EFT}$ is the scale at which the Wilson coefficients are renormalised, which can in general be different from the renormalisation scale $\mu_R$ of the strong coupling. The corresponding counterterm vertex is defined in \texttt{CT\_vertices.py}:
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
    CTV_1 = CTVertex(
       name = 'CTV_1',
       type = 'UV',
@@ -1328,24 +1349,21 @@ where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's def
 \gosam only makes use of counterterms of the type \texttt{'UV'}, while the UFO model in general can also provide $R2$ counterterms. However, those are not needed by \gosam. The counterterm vertex has the same colour and Lorentz structure as the ordinary vertex. The additional list \texttt{loop\_particles} contains information about the type of particles appearing in the loops related to the derivation of the counterterm, with the intend to give the user an extra way to filter counterterm vertices. Currently \gosam does not make use of this feature, so this list can be ignored an treated as a dummy object.
 
 The two couplings are given by
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
    UVGC_1 = Coupling(
       name = 'UVGC_672',
       value = '(complex(0,1)*Lam*(Ctphi_CT))/(2.*Gf)',
       order = {'NP':1, 'QED':1, 'QCD':2})
 \end{lstlisting}
 and
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
    UVGC_2 = Coupling(
       name = 'UVGC_177',
       value = '(Ctphi_CT*complex(0,1)*Lam)/(2.*Gf)',
       order = {'NP':1, 'QED':1, 'QCD':2})
 \end{lstlisting}
 defined in \texttt{CT\_couplings.py}. They refer to the special \texttt{CTParameter} object \texttt{Ctphi\_CT}, defined in \texttt{CT\_parameters.py}:
-\begin{lstlisting}[gobble=3,%
-     basicstyle=\ttfamily]
+\begin{lstlisting}[gobble=3,style=py]
    Ctphi_CT = CTParameter(
       name = 'Ctphi_CT',
       type = 'real',
@@ -1775,7 +1793,7 @@ the coefficients \texttt{CL} and \texttt{CR} in front of the vertices. This
 strategy is implemented by the modelfiles \texttt{models/sm}. The file
 \form{} contains a procedure \texttt{VertexConstants} which
 replaces the the vertex constants by their symbols. A QED example would be
-\begin{lstlisting}[language=form]
+\begin{lstlisting}[style=form]
 #Procedure VertexConstants
    Id CL([field.em], [field.ep], [field.ph]) = e;
    Id CR([field.em], [field.ep], [field.ph]) = e;
@@ -1785,20 +1803,20 @@ In the header of the \form{} file all model specific
 symbols and functions need to be defined. For this simple
 model we have the fields and the coupling constant as only
 new symbols.
-\begin{lstlisting}[language=form]
+\begin{lstlisting}[style=form]
 Symbols [field.em], [field.ep], [field.ph], e;
 \end{lstlisting}
 
 Instead of using the file \texttt{vertices.hh} one can also use
 his own vertex definitions. In this case the \form{} file must contain
 the definition
-\begin{lstlisting}[language=form]
+\begin{lstlisting}[style=form]
 #Define USEVERTEXPROC "1"
 \end{lstlisting}
 and it must define the procedure \texttt{ReplaceVertices}. An example
 for QED is given below.
 \begin{maxipage}
-\begin{lstlisting}[language=form]
+\begin{lstlisting}[style=form]
 #Procedure ReplaceVertices
 Identify Once vertex(iv?,
       [field.ep], idx1?, -1, k1?, idx1L1?, -1, idx1C1?,
@@ -1878,7 +1896,7 @@ refrain from modifying these files directly but make all changes to \texttt{src/
 
 In theories with Majorana fermions the model file should include the following
 line:
-\begin{lstlisting}[language=form]
+\begin{lstlisting}[style=form]
 #Define DISPOSEQGRAFSIGN "1"
 \end{lstlisting}
 

@@ -324,8 +324,10 @@ even though large parts are identical for the two BLHA versions.
 
 \subsubsection{Initialization}
 \lstset{language=[95]{Fortran}}
-The generated \gosam{} library is initialized with the call\\
-{\tt        call OLP\_Start("path/to/contract.olc",ierr)}\\
+The generated \gosam{} library is initialized with the call
+\begin{lstlisting}[style=fortran]
+       call OLP_Start("path/to/contract.olc",ierr)
+\end{lstlisting}
 The variable \texttt{ierr} should be declared as an integer. If the contract
 file is not found, \texttt{ierr} is set to a negative value. A non-negative
 value indicates success.
@@ -339,19 +341,21 @@ If the contract file contains the option
 the matrix element code tries to load the parameters from that file.
 
 \subsubsection{Setting options (optional)}
-Parameters can be passed by calling \texttt{OLP\_option}.\\
-{\tt        call OLP\_Option("name=value",ierr)}
+Parameters can be passed by calling \texttt{OLP\_option}.
+\begin{lstlisting}[style=fortran]
+       call OLP_Option("name=value",ierr)
+\end{lstlisting}
 
 Note that the initialization of derived parameters only works correctly
 if the corresponding input parameters are set with \texttt{OLP\_Option}
 \emph{before} \texttt{OLP\_Start} is called.
 
 Example:
-\begin{lstlisting}[columns=flexibel]
+\begin{lstlisting}[style=fortran]
        call OLP_Option("mZ=91.234",ierr)
        call OLP_Option("mW=80.123",ierr)
 !  at this point sin(theta_w) is not up to date.
-        call OLP_Start("path/to/contract.olc",ierr)
+       call OLP_Start("path/to/contract.olc",ierr)
 !  now sin(theta_w) is set consistently
 \end{lstlisting}
 
@@ -364,7 +368,7 @@ parameter names and  their settings.
 
 In BLHA1, the routine which returns a value for the matrix element is
 \texttt{OLP\_EvalSubProcess}:
-\begin{lstlisting}[columns=flexibel]
+\begin{lstlisting}[style=fortran]
        integer ilabel
        double precision moms(5*nlegs)
        double precision mu,params(1)
@@ -413,7 +417,7 @@ an explicit factor of $\alpha_s(\mu)/(4\pi)$.
 \subsubsection{Finalize (optional)}
 There is also a routine \texttt{OLP\_Finalize} which is only needed
 if the client code needs to call \texttt{OLP\_Start} more than once, e.g.
-\begin{lstlisting}[columns=fullflexibel]
+\begin{lstlisting}[style=fortran]
        do i=1,max_i
           write(line,'(A3,F6.3)') "mZ=", mZ(i)
           call OLP_Option(line,ierr)
@@ -436,11 +440,17 @@ The keyword {\tt InterfaceVersion}, which can take the values
 This way, if the OLP does not support one or the other, it can issue an error message and stop 
 without proceeding further.
 
-To start the run-time phase, the function\\
- {\tt OLP\_Start(char* fname, int* ierr)} is the same  as in {\tt BLHA1}.
-A new function\\
-{\tt \small OLP\_Info(char olp\_name[15],char olp\_version[15],char message[255])} 
-has been introduced
+To start the run-time phase, the function
+\begin{lstlisting}[style=C]
+OLP_Start(char* fname, int* ierr)
+\end{lstlisting}
+is the same  as in {\tt BLHA1}.
+A new function
+\begin{lstlisting}[style=C]
+OLP_Info(
+  char olp_name[15], char olp_version[15], char message[255])
+\end{lstlisting}
+has been introduced,
 which serves to keep track of the type and version of the OLP which has been used,
 and to encourage proper citation. 
 The arguments are the name of the OLP, the version, and a string which  
@@ -508,9 +518,11 @@ To avoid confusion, this requires that the characters `{\tt \&\&}' should never 
 any block or parameter name.
 
 \subsubsection{Setting parameters}
-Parameters are now passed by the subroutine \\
-{\tt OLP\_SetParameter(char*~para,double*~re,double*~im,int* ierr)},\\
-
+Parameters are now passed by the subroutine
+\begin{lstlisting}[style=C]
+OLP_SetParameter(
+  char* para, double* re, double* im, int* ierr)
+\end{lstlisting}
 where the first argument is a (pointer to a) string serving as a keyword 
 for the parameter to be set, followed by two double precision numbers
 so that complex parameters can also be passed (in case of real parameters, 
@@ -530,8 +542,11 @@ if used to define a dynamic parameter.
 
 \subsubsection{Computing the matrix element}
 
-In BLHA2, the routine which returns a value for the matrix element is\\
-{\small {\tt OLP\_EvalSubProcess2(int* i, double* pp, double* mu, double* rval, double* acc)}}
+In BLHA2, the routine which returns a value for the matrix element is
+\begin{lstlisting}[style=C]
+OLP_EvalSubProcess2(
+  int* i, double* pp, double* mu, double* rval, double* acc)
+\end{lstlisting}
 
 
 The arguments are:
