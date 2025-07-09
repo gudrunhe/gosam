@@ -191,10 +191,7 @@ contains
    !---#] subroutine exitgolem
 
    !---#[ subroutine samplitude :
-   subroutine     samplitude(vecs, scale2, amp, prec, ok, h)[%
-@if extension quadruple %]
-      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[%
-@end @if extension quadruple %]
+   subroutine     samplitude(vecs, scale2, amp, prec, ok, h)
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       real(ki), dimension([%num_legs%], 4) :: vecsrot
