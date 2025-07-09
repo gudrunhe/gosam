@@ -68,8 +68,8 @@
 \newcommand{\qgraf}{\textsc{QGraf}\xspace}
 \newcommand{\form}{\textsc{Form}\xspace}
 \newcommand{\python}{{Python}\xspace}
-\newcommand{\fortranXC}{\textsc{Fortran\,95}\xspace}
-\newcommand{\fortranMMIII}{\textsc{Fortran\,2003}\xspace}
+\newcommand{\fortranXC}{Fortran~95\xspace}
+\newcommand{\fortranMMIII}{Fortran~2003\xspace}
 \newcommand{\pjfry}{\textsc{PJFry}\xspace}
 \newcommand{\haggies}{\textsc{Haggies}\xspace}
 \newcommand{\samurai}{\textsc{Samurai}\xspace}
@@ -140,10 +140,6 @@ by lines starting with a dollar sign {\tt \$}.
 Lines that are broken for type setting reasons and should
 continue the previous line(s) start with a \contl.
 
-\python program fragments are denoted by the `\texttt{>>>}' 
-prompts, with 
-`\texttt{...}' for continuation lines.
-
 \chapter{Download and installation}
 \section{Prerequisites}
 
@@ -152,7 +148,7 @@ to successfully run \gosam.
 Therefore, the user does not have to install any external programs manually.
 
 The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
-Using \gosam requires \texttt{Python}, a \texttt{fortran} compiler, a C++ compiler, \texttt{make} and the \texttt{meson} build system. It is tested with \texttt{Python} $\geq 3.9$ and \texttt{gfortran}.
+Using \gosam requires a Python installation, a Fortran compiler, a C++ compiler, \textsc{Make}, and the \textsc{Meson} build system. It is tested with Python $\geq 3.9$ and \textsc{GNU~Fortran}.
 To use a different Fortran compiler and linker, the {\tt FC} and {\tt FC\_LD} environment variables can
 be set during the installation.
 
@@ -230,7 +226,7 @@ user input for the process to be calculated.
 \item {\bf code generation}: only \form is run.
 This phase is automatically initiated when the process is being built.
 \item {\bf compilation and running}: 
-a {\tt fortran} compiler and the chosen reduction libraries are used.
+a Fortran compiler and the chosen reduction libraries are used.
 The compilation is initiated
 by  \texttt{\$ meson install}.
 \end{enumerate}
@@ -248,7 +244,7 @@ higher.
 It can be also downloaded manually from
 \url{http://cefema-gt.tecnico.ulisboa.pt/~paulo/d.html}.
 
-\marginlabel{\python (1)} \gosam requires at least {\tt Python} version 3{.}9.
+\marginlabel{\python (1)} \gosam requires Python version 3{.}9 or newer.
 
 \marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
 version 4{.}0 or higher is required to profit from all optimisation features.
@@ -388,7 +384,7 @@ process directory contains a number of files which are described below.
 \marginlabel{\tt codegen/} This directory contains files which are only
 relevant for code ge\-ne\-ration.
 
-\marginlabel{\tt common/} Contains {\tt Fortran} files which are common to all helicity
+\marginlabel{\tt common/} Contains Fortran files which are common to all helicity
 amplitudes and to the constructed matrix element code. 
 The file {\tt config.f90} contains some global  settings, the file {\tt model.f90}
 contains the definitions and settings for the model parameters.
@@ -412,7 +408,7 @@ generation, for each diagram three classes of files are created: The
 basic algebraic expressions for the individual one-loop diagrams are
 contained in the files {\tt d*h*l1.txt} in an optimized format. The
 files {\tt d*h*l1.prc} contain the expressions of the numerators as 
-polynomials in the loop momentum. The corresponding {\tt Fortran} files
+polynomials in the loop momentum. The corresponding Fortran files
 are {\tt d*h*l1.f90} and {\tt abbrevd*h*.f90}, where the latter
 contains the abbreviations. 
 
@@ -479,13 +475,13 @@ defined build options are
 \marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
 install all generated {\tt {.}mod} files.
 
-\section{Producing optimised code  with {\tt FORM} version 4}
+\section{Producing optimised code with \textsc{Form} version 4}
 
 The constant, i.e. $q$- and $\mu^2$-independent parts of the numerators
 of the one-loop diagrams are factored out from the numerators and computed
 as abbreviations. 
 
-While in version 1.0 of \gosam{} the {\tt Fortran} code for the
+While in version 1.0 of \gosam{} the Fortran code for the
 amplitudes was written using \haggies~\cite{Reiter:2009ts}, since version~2 we 
 use the features provided by \form{} version
 4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more
@@ -721,21 +717,21 @@ see Section \ref{sec:complexmasses}.
 The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
 the model files {\tt smehc} and {\tt smdiagehc} contain the effective Higgs-gluon couplings.
 
-Other models can be imported most easily in the {\tt UFO} (Universal Feynman Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
-The model import in the {\tt UFO} format can be used in the standalone as well as the OLP 
+Other models can be imported most easily in the UFO (Universal Feynman Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
+The model import in the UFO format can be used in the standalone as well as the OLP 
 mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
 
-In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the {\tt UFO} format. See Section~\ref{sec:EFT} for more details.
+In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the UFO format. See Section~\ref{sec:EFT} for more details.
 
 Examples about how to import model files can be found in the subdirectory 
  \texttt{examples}.
 
 \subsection{Import of a UFO model}\label{sec:UFO}
-A model description in the UFO~\cite{Degrande:2011ua,Darme:2023jdn} format consists of a \texttt{Python} package
+A model description in the UFO~\cite{Degrande:2011ua,Darme:2023jdn} format consists of a Python package
 stored in a directory. In order to import the model into \gosam{} one needs
 to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
 in front of the directory name.
-For example, if the \texttt{Python} model files for the MSSM are in 
+For example, if the Python model files for the MSSM are in 
  the directory \\
  \texttt{\$HOME/models/MSSM\_UFO}, the process card must contain the line
 \begin{example}
@@ -747,7 +743,7 @@ In a UFO model each coupling is assigned a specific order, that is its power wrt
 
 \attention{\gosam is not able to handle arbitrarily large UFO models because of the limited buffer available in \qgraf. If the model is too large the user will be prompted a \qgraf error. In that case it might help to comment out vertices not contributing to the process from the UFO model files before starting \gosam.}
 
-\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.}. The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since  \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
+\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention.\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.} The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since  \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
 \begin{align}
    i\Pi_\mathrm{gh}^{ab}(k) &= \frac{i\delta^{ab}}{k^2+i\epsilon}\,,
 \end{align}
@@ -868,22 +864,22 @@ The UV cutoff $M_S$ is introduced as the effective theory approach loses its val
 needs to be enabled in the process card by \\
 {\tt extensions=customspin2propagator}.
 
-The extension works only if the model is imported from an {\tt UFO} file. 
+The extension works only if the model is imported from an UFO file. 
 The latter can  be adjusted to the needs of the particular model the 
 user would like to consider by editing the file {\tt custompropagator.f90}
 in the subdirectory {\tt common}. 
 In order to generate the latter file,
 the spin-2 particle which should get a customized propagator needs to have a
-separate attribute 'CustomSpin2Prop' in the {\tt UFO} file with a non-vanishing
+separate attribute 'CustomSpin2Prop' in the UFO file with a non-vanishing
 value:\\
 Excerpt of {\tt LED\_UFO/particle.py} with a customized propagator:
-\begin{verbatim}
+\begin{lstlisting}[style=py]
     Gr = Particle(pdg_code = 9000006,
                   name = 'Gr',
                   # ...
                   CustomSpin2Prop = 1
                  )
-\end{verbatim}
+\end{lstlisting}
 Then \gosam{} generates a the file {\tt common/custompropagator.f90} where the user needs
 to adapt the {\tt customSpin2Prop} subroutine.
 Beside the squared momentum, the {\tt customSpin2Prop} subroutine also receives the
@@ -2040,7 +2036,7 @@ The structure of the model files is discussed in more detail in
 Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
 FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
 can be found in the directory 
-\texttt{examples/model/}, as well as {\tt UFO}  files for ADD~\cite{ArkaniHamed:1998rs}
+\texttt{examples/model/}, as well as UFO files for ADD~\cite{ArkaniHamed:1998rs}
 models with large extra dimensions (LED).
 
 \marginlabel{\texttt{templates/}} Contains templates for the creation

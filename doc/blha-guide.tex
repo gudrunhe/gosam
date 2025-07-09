@@ -394,9 +394,9 @@ The components are in units of GeV.
 
 The argument \texttt{mu} is the renormalisation scale $\mu$ (not $\mu^2$!)
 in GeV. The argument {\tt params} is an array of which the first argument is
-$\alpha_s(\mu)$. Any further array entries are ignored within BLHA1\footnote{
+$\alpha_s(\mu)$. Any further array entries are ignored within BLHA1.\footnote{
 Passing more than one parameter is implemented by the \texttt{Parameters}
-option in the order file, which is  not part of the BLHA1 standard.}.
+option in the order file, which is  not part of the BLHA1 standard.}
 
 The last argument is an array of length four which is filled by the subroutine, 
 containing the result of the evaluation. The entries have as a unit some
@@ -460,7 +460,7 @@ the relevant publications, for example the bibtex identifier.
 \subsubsection{Importing external model files}
 
 The BLHA2 offers two alternative ways of model definition, denoted by 
-``keyword model" respectively ``{\tt UFO} model" in the following.
+``keyword model" respectively ``UFO model'' in the following.
 
 Model definitions offer the possibility to define some global settings 
 in the order file, which are intrinsic to the model (e.g. SM, MSSM), which 
@@ -496,18 +496,18 @@ OLP\_SetParameter}.}
 \label{tab:keywords:static}
 \end{figure}
 
-In the ``{\tt UFO} model" setup, the parameters are defined in {\tt UFO} (Universal Feynrules
+In the ``UFO model'' setup, the parameters are defined in UFO (Universal Feynrules
 Output)~\cite{Degrande:2011ua} format, which is particularly useful for
 calculations beyond the Standard Model.
-The import of the {\tt UFO} model file should be specified in the {\tt order file} 
+The import of the UFO model file should be specified in the {\tt order file} 
 by \\{\tt Model ufo:/path\_to\_ufo\_model-directory/}.
 
-The {\tt UFO}  format also provides human readable name attributes for the 
+The UFO format also provides human readable name attributes for the 
 model parameters, as well as the 
 SLHA identifiers~\cite{Skands:2003cj} which are also supported by GoSam.
-The {\tt UFO} model setup entails the use of a SLHA parameter card to initialize the runtime phase.
+The UFO model setup entails the use of a SLHA parameter card to initialize the runtime phase.
 This requires an additional keyword {\tt ParameterCard}, followed by the path to the SLHA parameter card,
-to be placed into the order file when using the {\tt UFO} model setup. 
+to be placed into the order file when using the UFO model setup. 
 The parameters which are set by reading in the SLHA parameter card do not need to be set 
 again by {\tt OLP\_SetParameter}. However, {\tt OLP\_SetParameter} needs to be used at 
 runtime for the dynamic parameters. 
@@ -670,10 +670,10 @@ which use these trees to build the dipole subtraction terms for the infrared div
 real radiation part. With these modified tree level matrix elements \gosam{} is able to generate
 all necessary building blocks for a complete NLO calculation.\\
 Such a setup has been used successfully in combination with the framework of 
-{\sc Herwig++/Matchbox}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc} and the Monte Carlo Program Whizard~\cite{Kilian:2007gr,Moretti:2001zz,Stienemeier:2021cse,Braun:2025hvr}.
+{\sc Herwig++/Matchbox}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc} and the Monte Carlo Program \textsc{Whizard}~\cite{Kilian:2007gr,Moretti:2001zz,Stienemeier:2021cse,Braun:2025hvr}.
 
-Whizard requires the spin-correlations to be passed in the form of the (real  part of the) spin-correlation tensor $B_j^{\mu\nu}$ for particle $j$, instead. It is defined by
+\textsc{Whizard} requires the spin-correlations to be passed in the form of the (real  part of the) spin-correlation tensor $B_j^{\mu\nu}$ for particle $j$, instead. It is defined by
 \begin{equation}
    B_j^{\mu\nu} = \sum_{\lambda,\lambda'}\epsilon_h^\mu(p_j)\epsilon_{\lambda'}^{*\nu}(p_j)\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle\,,
 \end{equation}
-where again a sum over the helicities of the other particles is implicitly understood. Invoking the BLHA interface with the non-standard \texttt{AmplitudeType scTree2} newly implemented in \gosam{}-3.0 will return the relevant entries of $B_j^{\mu\nu}$ in a way which can be directly used in Whizard. Additional phase-factors in $\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle$ related to the fact that Whizard expects the polarization vectors to be defined in the conventions of~\cite{Murayama:1992gi} are taken into account automatically. We remark that this convention for the spin-correlated tree matrix elements conincides with the one used by OpenLoops~\cite{Buccioni:2019sur} in its subroutine \texttt{evaluate\_scpowheg}.
+where again a sum over the helicities of the other particles is implicitly understood. Invoking the BLHA interface with the non-standard \texttt{AmplitudeType scTree2} newly implemented in \gosam{}-3.0 will return the relevant entries of $B_j^{\mu\nu}$ in a way which can be directly used in \textsc{Whizard}. Additional phase-factors in $\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle$ related to the fact that \textsc{Whizard} expects the polarization vectors to be defined in the conventions of~\cite{Murayama:1992gi} are taken into account automatically. We remark that this convention for the spin-correlated tree matrix elements conincides with the one used by OpenLoops~\cite{Buccioni:2019sur} in its subroutine \texttt{evaluate\_scpowheg}.

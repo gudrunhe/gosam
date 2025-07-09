@@ -38,7 +38,7 @@
    \vspace{0.2cm} \\
    Example:
    \begin{lstlisting}[style=py]
-    # Remove all diagrams first generation propagators with momentum "k1+k2"
+    # Remove all diagrams first generation propagators with momentum k1+k2
     lambda d: d.iprop(["U", "Ubar", "D", "Dbar"], momentum = "k1+k2") == 0
    \end{lstlisting}
    \colorbox{red!15}{\parbox{\linewidth}{\textbf{Warning}: \vspace{0.1cm}\\ \gosam relates some subprocesses to their crossing by default. Using the \texttt{momentum} keyword can break the crossing symmetry and therefore falsify the result. In this case, either run \gosam with the \texttt{no-crossings} option or use the \lstinline[style=py]|iprop_momentum| function.}}
