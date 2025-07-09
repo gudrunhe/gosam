@@ -1,8 +1,8 @@
-process_name=gggH
+process_name=ggHg
 process_path=virtual
 
 in=21, 21
-out=21, 25
+out=25, 21
 
 order=QCD, NONE, 3
 model=smdiag_complex

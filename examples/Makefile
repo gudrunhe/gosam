@@ -92,7 +92,7 @@ runlo : printlo $(LO_TESTS)
 printlo :
 	@echo "SELECTED LO TESTS: " $(LO_TESTS)
 
-NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eettg_SMEFT eett_lhep eeuu gggg gggg_lhep ggHg ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary uudd uu_graviton_yy Hbb_4F WpWpjj
+NLO_TESTS = bghb bghb_qp ddeeg ddhjj_olp ddtt ddzg_crossing dgdg eett eett_lhep eeuu gggg gggg_lhep ggHg_HTL ggtt ggtt_lhep ggtt_ufo Hbb_SMEFT qqtth s-channel_single-top tne udene udeneg udene_lhep udene_ufo udhud_unitary uudd uu_graviton_yy Hbb_4F WpWpjj udeneg_dred_vs_thv
 
 .PHONY : runnlo
 runnlo : printnlo $(NLO_TESTS)
@@ -101,7 +101,7 @@ runnlo : printnlo $(NLO_TESTS)
 printnlo :
 	@echo "SELECTED NLO TESTS: " $(NLO_TESTS)
 
-LOOPINDUCED_TESTS = gggH_rescue gggz hyy hyy_all_helicities hyy_olp yyyy ggHg_SMEFT
+LOOPINDUCED_TESTS = ggHg_rescue gggz hyy hyy_all_helicities hyy_olp yyyy ggHg_SMEFT
 
 .PHONY : runloopinduced
 runloopinduced : printloopinduced $(LOOPINDUCED_TESTS)
