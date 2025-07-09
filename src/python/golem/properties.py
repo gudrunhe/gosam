@@ -799,8 +799,17 @@ filter_module = Property(
 debug_flags = Property(
     "debug",
     """\
-   A list of debug flags.
-   Currently, the words 'lo', 'nlo' and 'all' are supported.
+   A list of debug flags. Currently, the words 'lo', 'nlo' and 'all' are 
+   supported. All debug output will be directed towards the unit specified 
+   by the compile time parameter 'logfile' defined in common/config.f90. 
+   The default is logfile=19. If no file is associated to the unit by means 
+   of the 'open' statement in the fortran code calling the process library 
+   the output is written to 'fort.<logfile>'. See the file 'test.f90' in 
+   the 'matrix' subdirectory for an example how to write the debug output 
+   into a file of your choice:
+
+   open(unit=logfile,status='unknown',action='write',file='debug.xml')
+   
    """,
     list,
     options=["nlo", "lo", "numpolvec", "all"],

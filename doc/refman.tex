@@ -228,12 +228,13 @@ and \qgraf are used. This phase is initiated by
 running \texttt{gosam.py process.in}, where {\tt process.in} contains the 
 user input for the process to be calculated.
 \item {\bf code generation}: only \form is run.
-This phase is automatically initiated when the build is started.
+This phase is automatically initiated when the process is being built.
 \item {\bf compilation and running}: 
 a {\tt fortran} compiler and the chosen reduction libraries are used.
 The compilation is initiated
 by  \texttt{\$ meson install}.
 \end{enumerate}
+The the individual steps are explained in more detail in section~\ref{sec:usage}.
 
 If you use the \gosamv package, you should be aware that
 the following programs are used.
@@ -352,7 +353,7 @@ After \texttt{gosam{.}py} has terminated, the build system in the process direct
 \begin{example}
 \$ meson setup build --prefix <prefix> [-Doption=value]
 \end{example}
-where \texttt{<prefix>} is the location the process library is installed to. The option \texttt{-Ddoc=true} will generate the file \texttt{doc/process.pdf} which contains the generated diagrams and other information about the process. The option \texttt{-Dtest\_executables=true} will produce a test program to evaluate the generated amplitude at a randomly generated phase space point.
+where \texttt{<prefix>} is the location the process library is installed to. If no prefix is given meson will try to install the libraries in \texttt{/usr/local}. The option \texttt{-Ddoc=true} will generate the file \texttt{doc/process.pdf} which contains the generated diagrams and other information about the process. The option \texttt{-Dtest\_executables=true} will produce a test program to evaluate the generated amplitude at a randomly generated phase space point.
 
 After the process directory is configured, the \fortranXC source code can be generated and compiled, and the libraries be installed by executing
 \begin{example}
@@ -478,7 +479,7 @@ defined build options are
 \marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
 install all generated {\tt {.}mod} files.
 
-\subsection{Producing optimised code  with {\tt FORM} version 4}
+\section{Producing optimised code  with {\tt FORM} version 4}
 
 The constant, i.e. $q$- and $\mu^2$-independent parts of the numerators
 of the one-loop diagrams are factored out from the numerators and computed
@@ -488,10 +489,9 @@ While in version 1.0 of \gosam{} the {\tt Fortran} code for the
 amplitudes was written using \haggies~\cite{Reiter:2009ts}, since version~2 we 
 use the features provided by \form{} version
 4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more
-compact code and a speed-up in amplitude evaluation of about a factor
-of ten.
+compact code and a speed-up in amplitude evaluation.
 
-\subsection{Grouping/summing of diagrams which share common subdiagrams}
+\section{Grouping/summing of diagrams which share common subdiagrams}
 \label{sec:grouping_summing}
 Already in the first release of \gosam{}, the diagrams were analyzed
 according to their kinematic matrix $S_{ij}$ and grouped together
@@ -499,11 +499,6 @@ before reduction. This leads to an important gain in efficiency, both
 when using integrand reduction methods, as well as 
 classical tensor reduction techniques. Details about the way diagrams
 are grouped can be found in~\cite{Cullen:2011ac}.
-This feature is still present when \golemVC{} is used to reduce the
-amplitudes. \textcolor{red}{MH: what about ninja?}\textcolor{blue}{GH: I think it is also true for ninja. I would delete the last sentence.}
-%, whereas it is not implemented for the new integrand
-%reduction method based on the Laurent expansion\cite{Mastrolia:2012bu}
-%and explained in Section~\ref{sec:ninja}.
 
 As of release 2.0 an option called {\tt diagsum} combines diagrams
 which differ only by a subdiagram into one ``meta-diagram'' to be
@@ -543,13 +538,13 @@ into one ``meta-diagram''. The default setting for this option is {\tt
 diagsum=true}.
 
 
-\paragraph{Grouping of Tree-level Diagrams}
+\subsection*{Grouping of Tree-level Diagrams}
 
 By default the expressions of all tree-level diagrams are grouped into one
 file. This has the advantage that subexpressions which appear in several
 tree-level diagrams can be reused across the amplitude. The option to turn off this feature is not available anymore as of version 3.0.
 
-\subsection{Numerical polarisation vectors}
+\section{Numerical polarisation vectors}
 \label{sec:numpolvec}
 The use of numerical polarisation vectors for massless gauge bosons
 (gluons, photons) is activated by default.  This means that the
@@ -566,7 +561,7 @@ If the user wants to specify his/her preferred reference vectors,
 this can be done using the option {\tt reference-vectors=\ldots}
 in the process card.
 
-\subsection{The extension {\tt derive} ... is not an extension anymore}
+\section{The extension {\tt derive} ... is not an extension anymore}
 \label{sec:derive}
 The {\tt derive} feature generates code to access the tensor coefficients
 of each diagram or group of diagrams individually. It improves both the speed and the precision of tensorial reconstruction and makes connection to other reduction methods. It had been available as an option already in \gosam-1.0 and has been promoted to be used by default in the context of  tensorial reconstruction~\cite{Heinrich:2010ax} in \gosam-2.0. As of version 3.0 it is an integral part of the code and not an extension anymore. Both the keyword \texttt{derive} and its opposite \texttt{noderive} are therefore no valid options for \texttt{extensions} anymore.
@@ -597,22 +592,22 @@ The number of optional indices $i_1$, $i_2$, \dots
 determine which derivative should be returned. The subroutine
 \texttt{reconstruct\_d*} also takes into account the proper symmetrisation.
 
-\subsection{Customization}\label{sec:Customization}
+\section{Customization}\label{sec:Customization}
 \paragraph{Runtime parameters.}
 Many settings can be changed without recompiling the code, by
 creating and modifying a file \texttt{matrix/param.dat}.
 This file has a very simple format:
 \begin{itemize}
-\item Lines starting with a comment character (`!', `\#', `;')
+\item Lines starting with a comment character (`\texttt{!}', `\texttt{\#}', `\texttt{;}')
       in the first column and blank lines are ignored.
 \item All other lines have the format
 \begin{example}
-\textit{name} = \textit{float}\\
-\# \textrm{or}\\
-\textit{name} = \textit{float}, \textit{float}
+name = float\\
+\# or\\
+name = float, float
 \end{example}
       where the first line defines a real number and the second
-      line defines a complex number, and \textit{name} is a defined
+      line defines a complex number, and \texttt{name} is a defined
       parameter.
 \item Whitespace is ignored but must not appear inside names or
       literals. Physical lines can not be continued nor can
@@ -638,10 +633,11 @@ Examples of options contained in \texttt{config.f90} are
 \begin{maxipage}
 \begin{tabular}{lp{0.6\textwidth}}
 \texttt{ki} & the floating point kind used throughout the calculation, the default is double precision.\\
+\texttt{logfile} & an integer specifying the output unit to which all debug output (if activated) is directed. The default is 19. If no file is associated to the unit by means of the \texttt{open} statement in the fortran code calling the process library the output is written to \texttt{fort.<logfile>}. See the file \texttt{test.f90} in the \texttt{matrix} subdirectory for an example how to write the debug output into a file of your choice.\\
 \texttt{debug\_lo\_diagrams} & controls if information about the
-    tree level diagrams is written to the output file.\\
+    tree level diagrams is written to the debug logfile (see \texttt{logfile} above).\\
 \texttt{debug\_nlo\_diagrams} & controls if information about the
-    loop-diagrams is written to the output file.\\
+    loop-diagrams is written to the debug logfile (see \texttt{logfile} above).\\
 \texttt{include\_eps\_terms} & controls if
     terms of order $\varepsilon$ multiplying
     poles are taken into account. (only relevant when \texttt{r2=implicit}, see appendix~\ref{app:r2})\\
@@ -758,7 +754,7 @@ In a UFO model each coupling is assigned a specific order, that is its power wrt
 which corresponds to $\eta_G=+1$ in the nomenclature of~\cite{Romao:2012pq}. As the chosen sign conventions cannot easily be extracted from the UFO model it is the responsibility of the user to provide a consistent setup.
 
 \subsection{Import from LanHEP}
-\textcolor{blue}{GH: I think LanHEP is outdated and we should not support it anymore}
+\attention{Since by now LanHEP also provides output in the UFO format we recommend using this format over the older LanHEP format.}
 
 In order to use model files generated by LanHEP the following steps
 have to be taken:
@@ -794,16 +790,9 @@ have to be taken:
 \begin{example}
    model=lanhep/ued, 7
 \end{example}
-\item \textcolor{red}{MH: Haggies is not supported anymore. The file \texttt{codegen/functions.out} does not exist anymore. What does that mean for this comment?} The use of user defined functions (\texttt{external\_func} in LanHEP)
-   requires an adaption of the file \texttt{codegen/haggies-l0.in}. If one
-   wants to use the function \texttt{double foo(double,double)} the
-   following line sould be added.
-\begin{example}
-@define mdlfoo : real, real -> real =\\ "foo(\%2\$s, \%3\$s)";
-\end{example}
-   The function also needs to be declared in \texttt{codegen/functions.out}
-   in the subroutine \texttt{init\_functions}
 \end{enumerate}
+
+\attention{Note that the use of user defined functions (\texttt{external\_func} in LanHEP) is not supported any longer.}
 
 
 \subsection{Propagators for spin-2 particles}
