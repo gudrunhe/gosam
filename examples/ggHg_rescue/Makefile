@@ -1,5 +1,5 @@
 
-PROCESS=gggH
+PROCESS=ggHg
 
 ifndef GOSAM
 GOSAM=gosam.py

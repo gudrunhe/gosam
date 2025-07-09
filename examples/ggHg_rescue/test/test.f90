@@ -1,7 +1,7 @@
 program     test
-   use gggH_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
-   use gggH_matrix, only: initgolem, exitgolem
-   use gggH_kinematics, only: inspect_kinematics, init_event
+   use ggHg_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
+   use ggHg_matrix, only: initgolem, exitgolem
+   use ggHg_kinematics, only: inspect_kinematics, init_event
    implicit none
 
    ! unit of the log file
@@ -91,7 +91,7 @@ program     test
 contains
 
 subroutine load_reference_kinematics(vecs, scale2)
-use gggH_kinematics, only: adjust_kinematics, dotproduct
+use ggHg_kinematics, only: adjust_kinematics, dotproduct
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
@@ -107,15 +107,16 @@ use gggH_kinematics, only: adjust_kinematics, dotproduct
    !vecs(2,3) =    0.0_ki
    !vecs(2,4) = -250.0_ki
 
-   !vecs(3,1) =  234.375000000000000000000000000_ki
+   !vecs(3,1) =  265.625000000000000000000000000_ki
    !vecs(3,2) =  0.0_ki
-   !vecs(3,3) =  229.044283320067743308883061580_ki
-   !vecs(3,4) =  49.7026850723030590511012695207_ki
+   !vecs(3,3) =  -229.044283320067743308883061580_ki
+   !vecs(3,4) =  -49.7026850723030590511012695207_ki
 
-   !vecs(4,1) =  265.625000000000000000000000000_ki
+   !vecs(4,1) =  234.375000000000000000000000000_ki
    !vecs(4,2) =  0.0_ki
-   !vecs(4,3) =  -229.044283320067743308883061580_ki
-   !vecs(4,4) =  -49.7026850723030590511012695207_ki
+   !vecs(4,3) =  229.044283320067743308883061580_ki
+   !vecs(4,4) =  49.7026850723030590511012695207_ki
+
 
    ! (* pt2: s12 =250000.00000000000, s13= -9952.7515384127764 - stable*)
    !vecs(1,1) =  250.0_ki
@@ -128,15 +129,16 @@ use gggH_kinematics, only: adjust_kinematics, dotproduct
    !vecs(2,3) =    0.0_ki
    !vecs(2,4) = -250.0_ki
 
-   !vecs(3,1) =  234.375000000000000000000000000_ki
+   !vecs(3,1) =  265.625000000000000000000000000_ki
    !vecs(3,2) =  0.0_ki
-   !vecs(3,3) =  94.5223545756265365277289694364_ki
-   !vecs(3,4) =  214.469496923174445986172261516_ki
+   !vecs(3,3) =  -94.5223545756265365277289694364_ki
+   !vecs(3,4) =  -214.469496923174445986172261516_ki
 
-   !vecs(4,1) =  265.625000000000000000000000000_ki
+   !vecs(4,1) =  234.375000000000000000000000000_ki
    !vecs(4,2) =  0.0_ki
-   !vecs(4,3) =  -94.5223545756265365277289694364_ki
-   !vecs(4,4) =  -214.469496923174445986172261516_ki
+   !vecs(4,3) =  94.5223545756265365277289694364_ki
+   !vecs(4,4) =  214.469496923174445986172261516_ki
+
 
    ! (* pt3: s12 =250000.00000000000, s13= -500 - unstable => quad)
    vecs(1,1) =  250.0_ki
@@ -149,16 +151,16 @@ use gggH_kinematics, only: adjust_kinematics, dotproduct
    vecs(2,3) =    0.0_ki
    vecs(2,4) = -250.0_ki
 
-   vecs(3,1) =  234.375000000000000000000000000_ki
+   vecs(3,1) =  265.625000000000000000000000000_ki
    vecs(3,2) =  0.0_ki
-   vecs(3,3) =  2.16504041532715958458907646670_ki
-   vecs(3,4) =  234.365000000000000000702564468_ki
+   vecs(3,3) =  -2.16504041532715958458907646670_ki
+   vecs(3,4) =  -234.365000000000000000702564468_ki
 
-   vecs(4,1) =  265.625000000000000000000000000_ki
+   vecs(4,1) =  234.375000000000000000000000000_ki
    vecs(4,2) =  0.0_ki
-   vecs(4,3) =  -2.16504041532715958458907646670_ki
-   vecs(4,4) =  -234.365000000000000000702564468_ki
-
+   vecs(4,3) =  2.16504041532715958458907646670_ki
+   vecs(4,4) =  234.365000000000000000702564468_ki
+ 
    ! (* pt4: s12 =250000.00000000000, s13= -0.000000005 - very unstable => fail)
    !vecs(1,1) =  250.0_ki
    !vecs(1,2) =    0.0_ki
@@ -170,23 +172,24 @@ use gggH_kinematics, only: adjust_kinematics, dotproduct
    !vecs(2,3) =    0.0_ki
    !vecs(2,4) = -250.0_ki
 
-   !vecs(3,1) =  234.375000000000000000000000000_ki
+   !vecs(3,1) =  265.625000000000000000000000000_ki
    !vecs(3,2) =  0.0_ki
-   !vecs(3,3) =  0.0000684653196881457522818292761907_ki
-   !vecs(3,4) =  234.374999899999999999999977751_ki
+   !vecs(3,3) =  -0.0000684653196881457522818292761907_ki
+   !vecs(3,4) =  -234.374999899999999999999977751_ki
 
-   !vecs(4,1) =  265.625000000000000000000000000_ki
+   !vecs(4,1) =  234.375000000000000000000000000_ki
    !vecs(4,2) =  0.0_ki
-   !vecs(4,3) =  -0.0000684653196881457522818292761907_ki
-   !vecs(4,4) =  -234.374999899999999999999977751_ki
+   !vecs(4,3) =  0.0000684653196881457522818292761907_ki
+   !vecs(4,4) =  234.374999899999999999999977751_ki
+
 
    scale2 = 2.0_ki * dotproduct(vecs(1,:), vecs(2,:))
 
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use gggH_config
-   use gggH_model, only: Nf, Nfgen, mT, mH, mZ, mW, GF, e
+   use ggHg_config
+   use ggHg_model, only: Nf, Nfgen, mT, mH, mZ, mW, GF, e
    implicit none
 
    ! gf == Pi*alp/(Sqrt[2]*mw^2*(1-mw^2/mz^2)
@@ -208,7 +211,7 @@ subroutine     setup_parameters()
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
-   use gggH_matrix, only: samplitude
+   use ggHg_matrix, only: samplitude
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
