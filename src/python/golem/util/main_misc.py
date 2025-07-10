@@ -319,14 +319,19 @@ def write_template_file(fname, defaults, format=None):
                         f.write("%s=%s\n" % (k, defaults.getProperty(k)))
             f.write("\n")
         elif format == "LaTeX":
-            if prop.getDefault() is not None:
-                value = str(prop.getDefault())
-                if len(value) > 0:
-                    f.write("Default: \\verb|%s|\n\\\\" % value)
-                else:
-                    f.write("Default: \\verb|\"\"|\n\\\\")
+            if str(prop) == "qgraf.bin":
+                f.write("Default: \\verb|<gosam-prefix>/bin/GoSam/qgraf|\n\\\\")
+            elif str(prop) == "form.bin":
+                f.write("Default: \\verb|<gosam-prefix>/bin/GoSam/tform|\n\\\\")
             else:
-                    f.write("Default: \\verb|None|\n\\\\")
+                if prop.getDefault() is not None:
+                    value = str(prop.getDefault())
+                    if len(value) > 0:
+                        f.write("Default: \\verb|%s|\n\\\\" % value)
+                    else:
+                        f.write("Default: \\verb|\"\"|\n\\\\")
+                else:
+                        f.write("Default: \\verb|None|\n\\\\")
 
         if format == "LaTeX":
             if prop.isHidden() is not None:

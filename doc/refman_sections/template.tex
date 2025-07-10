@@ -2,12 +2,12 @@
 \setlength\itemsep{30pt}
 \item[\colorbox{gray!30}{\texttt{process\_name}}] (\textit{text})
 \begin{verbatim}
-A symbolic name for this process. This name will be used
-as a prefix for the Fortran modules.
+A symbolic name for the process. This name, appended with
+an underscore, will be used as a prefix for the Fortran modules.
 
-Golem will insert an underscore after this prefix.
-If the process name is left blank no prefix will be used
-and no extra underscore will be generated.
+The deafult name is 'gosam_process', but the user can also
+explcitly set 'process_name=', i.e. empty. In this case no prefix
+will be used (not recommended).
 \end{verbatim}
 Default: \verb|gosam_process|
 \\Hidden: \verb|False|
@@ -21,7 +21,7 @@ to the working directory from which gosam.py is run.
 Example:
 process_path=/scratch/golem_processes/process1
 \end{verbatim}
-Default: \verb|None|
+Default: \verb|gosam_process|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{in}}] (\textit{comma separated list})
@@ -1087,7 +1087,7 @@ Points to the QGraf executable.
 Example:
 qgraf.bin=/home/my_user_name/bin/qgraf
 \end{verbatim}
-Default: \verb|/home/jens/.local/bin/GoSam/qgraf|
+Default: \verb|<gosam-prefix>/bin/GoSam/qgraf|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.bin}}] (\textit{text})
@@ -1100,7 +1100,7 @@ Examples:
 2) # Use non-standard location:
    form.bin=/home/my_user_name/bin/form
 \end{verbatim}
-Default: \verb|/home/jens/.local/bin/GoSam/tform|
+Default: \verb|<gosam-prefix>/bin/GoSam/tform|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.threads}}] (\textit{integer number})
