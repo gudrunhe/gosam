@@ -1,0 +1,69 @@
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|rank() -> int|} \vspace{0.1cm}\\
+   Return the tensor rank of a diagram.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|sign() -> int|} \vspace{0.1cm}\\
+   Return the sign of a diagram.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|isNf() -> bool|} \vspace{0.1cm}\\
+   Return \texttt{True} if the diagram contains a massless closed fermion loop of size two.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|isMassiveQuarkSE() -> bool|} \vspace{0.1cm}\\
+   Return \texttt{True} if the diagram contains a QCD self-energy insertion on a massive quark line.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|isScaleless() -> bool|} \vspace{0.1cm}\\
+   Return \texttt{True} if the diagram contains a scaleless loop integral.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|vertices(*fields: Field) -> int|} \vspace{0.1cm}\\
+   Returns the number of vertices in the diagram for which the fields match the given field patterns. \vspace{0.1cm} \\
+   Example:
+   \begin{lstlisting}[style=pykw]
+    # Remove all diagrams with u Yukawa vertices
+    lambda d: d.vertices(["U", "Ubar"], ["U", "Ubar"], "H") == 0
+   \end{lstlisting}
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|loopvertices(*fields: Field) -> int|} \vspace{0.1cm}\\
+   Same as \texttt{vertices}, but only vertices that are part of the loop are considered.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|iprop(f: Field, **opts) -> int|} \vspace{0.1cm}\\
+   Returns the number of propagators in the diagram for which the fields match the given field patterns. Additional properties of the propagators can be specified with \texttt{**opts}, only propagators matching the additional restrictions are counted. The available keywords are \\
+   \def\arraystretch{1.5}
+   \begin{tabular}{l l}
+    \colorbox{gray!30}{\lstinline[style=pykw]|momentum: str|} & Momentum of the propagator. \\
+    \colorbox{gray!30}{\lstinline[style=pykw]{twospin: int | Sequence[int]}} & Twice the spin of the propagator. \\
+    \colorbox{gray!30}{\lstinline[style=pykw]{color: int | Sequence[int]}} & Color representation of the propagator. \\
+    \colorbox{gray!30}{\lstinline[style=pykw]|massive: bool|} & Massive Propagators.
+   \end{tabular}
+   \def\arraystretch{1.0}
+   \vspace{0.2cm} \\
+   Example:
+   \begin{lstlisting}[style=pykw]
+    # Remove all diagrams first generation propagators with momentum "k1+k2"
+    lambda d: d.iprop(["U", "Ubar", "D", "Dbar"], momentum = "k1+k2") == 0
+   \end{lstlisting}
+   \attention{\gosam relates some subprocesses to their crossing by default. Using the \texttt{momentum} keyword can break the crossing symmetry and therefore falsify the result. In this case, either run \gosam with the \texttt{no-crossings} option or use the \lstinline[style=pykw]|iprop_momentum| function.}
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|iprop_momentum(f: Field, momentum: str) -> bool|} \vspace{0.1cm}\\
+   Returns \texttt{True} if the diagram contains a propagator of the given field with the given momentum. When \texttt{True} is returned, the diagram is flagged as potentially crossing symmetry violating and all subprocesses related to the one containing the current diagram are tested for crossing symmetry explicitly.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|chord(f: Field, **opts) -> int|} \vspace{0.1cm}\\
+   Same as \texttt{iprop}, but only counts loop propagators.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|bridge(f: Field, **opts) -> int|} \vspace{0.1cm}\\
+   Same as \texttt{iprop}, but only counts non-loop propagators.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|order(coupling: str) -> int|} \vspace{0.1cm}\\
+   Returns the order of the diagram in the given coupling.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|QuarkBubbleMasses() -> list[str]|} \vspace{0.1cm}\\
+   Returns a list of the propagator masses in a quark loop of size two. If the diagram does not contain such a loop, an empty list is returned.  
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{ext_legs_from_vertex(f: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
+   Returns \texttt{True} if more than \texttt{max\_legs} legs matching \texttt{f} are attached to the same vertex. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{vertex_with_external_legs(*fields: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
+   Returns \texttt{True} if more than \texttt{max\_legs} legs are attached to a vertex matching \texttt{*fields}. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
+
+   \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|loopsize() -> int|} \vspace{0.1cm}\\
+   Returns the size of the loop.
+\end{basedescript}

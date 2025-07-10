@@ -1,0 +1,68 @@
+\gosam{} contains various options to assess in real time, for each phase space point, 
+the level of precision of the corresponding one-loop matrix element. 
+Whenever a phase space point is found in which the quality of the result falls below a
+certain threshold, either the point is discarded or the evaluation of the amplitude is
+repeated by means of a safer, albeit less efficient procedure. This procedure is
+traditionally called ``rescue system''.
+
+The rescue system of \gosam-3.0 has been extended to (optionally) utilise quadruple precision to re-evaluate unstable points. The stability of a point is assessed using two tests, known as the \textit{pole test} and the \textit{rotation test}, respectively.
+
+The pole test compares the general IR prediction for the single pole of a NLO QCD amplitude, $\mathcal{S}_\mathrm{IR}$, with the singularity computed directly by \gosam, $\mathcal{S}$,
+\begin{align}
+\delta_\mathrm{pole} = \left| \frac{\mathcal{S}_\mathrm{IR} - \mathcal{S}}{{\mathcal{S}_\mathrm{IR}}} \right|.
+\end{align}
+The estimate of the number of correct digits in the result is given by $P_\mathrm{pole} = - \log_{10} ( \delta_\mathrm{pole})$.
+This stability check requires very little additional computational time as the matrix element does not need to be recomputed.
+A similar check can be used for the Born result of loop-induced processes, where the single pole is expected to vanish.
+In the loop-induced case, we define
+\begin{align}
+\delta_\mathrm{pole} = \left| \frac{\mathcal{S}}{\mathcal{A}} \right|.
+\end{align}
+where $\mathcal{A}$ is the finite part of the amplitude.
+
+The rotation test~\cite{vanDeurzen:2013saa} exploits the invariance of scattering amplitudes under an azimuthal rotation about the beam axis.
+The finite part of the amplitude, $\mathcal{A}$, is compared to the value of the amplitude obtained after rotating the input kinematics in the azimuthal plane, $\mathcal{A}_\mathrm{rot}$,
+\begin{align}
+\delta_\mathrm{rot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}} \right|.
+\end{align}
+The estimate of the number of correct digits in the result is given by $P_\mathrm{rot} = - \log_{10} ( \delta_\mathrm{rot})$.
+
+The default procedure to assess the stability of a point uses a pole check followed by a rotation check.
+Firstly, $P_\mathrm{pole}$ is computed,
+\begin{enumerate}
+\item \texttt{PSP\_chk\_th1} $< P_\mathrm{pole}$ $\rightarrow$ accept point,
+\item \texttt{PSP\_chk\_th2} $< P_\mathrm{pole} < $ \texttt{PSP\_chk\_th1} $\rightarrow$ rotation test,
+\item $P_\mathrm{pole} <$ \texttt{PSP\_chk\_th2} $\rightarrow$ rescue point.
+\end{enumerate}
+If a rotation test is required, $P_\mathrm{rot}$ is computed,
+\begin{enumerate}
+\item \texttt{PSP\_chk\_th3} $< P_\mathrm{rot}$ $\rightarrow$ accept point,
+\item  $P_\mathrm{rot} <$ \texttt{PSP\_chk\_th3} $\rightarrow$ rescue point.
+\end{enumerate}
+
+By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
+If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
+
+By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
+If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
+
+If \texttt{extensions=quadruple} is set during the \gosam generation phase, then the rescue system will instead recompute the amplitude in quadruple precision and calculate
+\begin{align}
+&\delta_\mathrm{qd} = 2 \left| \frac{\mathcal{A}-\mathcal{A}_\mathrm{q}}{\mathcal{A}+\mathcal{A}_\mathrm{q}} \right|,&
+&\delta_\mathrm{qdrot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}_\mathrm{q}} \right|, & \\
+&P_\mathrm{qd} = -\log_\mathrm{10}(\delta_\mathrm{q}),&
+&P_\mathrm{qdrot} = -\log_\mathrm{10}(\delta_\mathrm{qdrot}),&
+\end{align}
+where $\mathcal{A}_q$ is the finite part of the amplitude computed in quadruple precision.
+If both \texttt{PSP\_chk\_th4} $< P_\mathrm{qd}$ and \texttt{PSP\_chk\_th4} $< P_\mathrm{qdrot}$ the point is accepted.
+If this precision threshold is not met, then the input kinematics are rotated in the azimuthal plane and the amplitude is recomputed in quadruple precision, $\mathcal{A}_\mathrm{qrot}$.
+The quantities
+\begin{align}
+&\delta_\mathrm{qqrot} = 2 \left| \frac{\mathcal{A}_\mathrm{qrot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{qrot}+\mathcal{A}_\mathrm{q}} \right|,&
+&P_\mathrm{qqrot} = -\log_\mathrm{10}(\delta_\mathrm{qqrot}),&
+\end{align}
+are evaluated.
+If \texttt{PSP\_chk\_th5} $< P_\mathrm{qqrot}$ the point is accepted. 
+All remaining points are discarded and a precision of $-10$ is returned.
+
+For loop-induced processes, the stability and rescue procedure are applied to the Born result, the thresholds \texttt{PSP\_chk\_th*} are replaced by \texttt{PSP\_chk\_li*}.

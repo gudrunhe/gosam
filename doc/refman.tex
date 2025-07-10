@@ -1,25 +1,75 @@
-\documentclass[11pt,a4paper]{refrep}
+\documentclass[11pt,a4paper, oneside]{scrbook}
+\usepackage[T1]{fontenc}
 \usepackage{xspace}
-\usepackage[final]{remark}
 \usepackage{listings}
 \usepackage{amsmath,amssymb}
 \usepackage{physics}
-\usepackage[pdftex]{hyperref}
 \usepackage{subcaption}
 \usepackage{graphicx}
 \usepackage{mdwlist}
 \usepackage{changepage}
 \usepackage{xcolor}
+\usepackage[most]{tcolorbox}
 \usepackage{bold-extra}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+\renewcommand{\arraystretch}{1.25}
+
+\addtokomafont{disposition}{\rmfamily}
+
+\makeatletter
+\renewcommand*{\chapterlinesformat}[3]{%
+  \Ifstr{#1}{chapter}{%
+    \rule[.3\baselineskip]{\linewidth}{1pt}\par\nobreak
+  }{}%
+  \@hangfrom{#2}{#3}%
+  \Ifstr{#1}{chapter}{%
+    \rule[.3\baselineskip]{\linewidth}{1pt}\par\nobreak
+  }{}%
+}
+\renewcommand*{\chapterlineswithprefixformat}[3]{%
+  \Ifstr{#1}{chapter}{%
+    \rule[.3\baselineskip]{\linewidth}{1pt}\par\nobreak
+  }{}%
+  #2#3%
+  \Ifstr{#1}{chapter}{%
+    \rule[.3\baselineskip]{\linewidth}{1pt}\par\nobreak
+  }{}%
+}
+\makeatother
+
+\geometry{
+   a4paper,
+   left=20mm,
+   top=20mm,
+   bottom=30mm,
+   top=25mm
+}
+
 \input lstform
 \input lstolp
-%\definecolor{lstbg}{rgb}{0.9,0.9,0.9}
-%\lstset{basicstyle=\tt,backgroundcolor=\color{lstbg}}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{pykw}{
+   belowcaptionskip=1\baselineskip,
+   breaklines=true,
+   xleftmargin=\parindent,
+   language=python,
+   showstringspaces=false,
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   commentstyle=\color{codegreen},
+   keywordstyle=\color{blue},
+   numberstyle=\tiny\color{codegray},
+   stringstyle=\color{codepurple},
+   upquote=true
+}
 
 \lstdefinestyle{py}{
    belowcaptionskip=1\baselineskip,
@@ -30,7 +80,6 @@
    basicstyle=\small\ttfamily,
    columns=fullflexible,
    commentstyle=\color{codegreen},
-   %keywordstyle=\color{blue},
    keywordstyle=,
    numberstyle=\tiny\color{codegray},
    stringstyle=\color{codepurple},
@@ -58,16 +107,32 @@
    upquote=true
 }
 
+\lstdefinestyle{in}{
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   upquote=true
+}
+
+\lstdefinestyle{sh}{
+   basicstyle=\small\ttfamily,
+   columns=fullflexible,
+   language=bash,
+   upquote=true,
+   numbers=left,
+   numberstyle=\small\ttfamily
+}
+\renewcommand*\thelstnumber{\$}
+
 \newcommand{\gosamversion}{{3{.}0}}
 \newcommand{\gosam}{\textsc{GoSam}\xspace}
 \newcommand{\gosamv}[1][\gosamversion]{\textsc{GoSam}\xspace}
-\newcommand{\golemVC}{\textsc{Golem95C}\xspace}
+\newcommand{\golemVC}{\textsc{golem95C}\xspace}
 \newcommand{\packagename}{{gosam-\gosamversion-<revision-hash>}}
 \newcommand{\hepforge}{\textsc{HepForge}\xspace}
 
 \newcommand{\qgraf}{\textsc{QGraf}\xspace}
 \newcommand{\form}{\textsc{Form}\xspace}
-\newcommand{\python}{{Python}\xspace}
+\newcommand{\python}{Python\xspace}
 \newcommand{\fortranXC}{Fortran~95\xspace}
 \newcommand{\fortranMMIII}{Fortran~2003\xspace}
 \newcommand{\pjfry}{\textsc{PJFry}\xspace}
@@ -98,11 +163,16 @@
 \newcommand{\nn}{\nonumber}
 \def\eps{\epsilon}
 
-\title{{\sc GoSam}\,3.0 Manual}
+\newcommand{\attention}[1]{%
+\begin{tcolorbox}[colback=red!5!white,colframe=red!60, title=Attention]
+   #1
+\end{tcolorbox}
+}
+
+\title{\textsc{GoSam}\,3.0 Manual}
 \author{The GoSam Collaboration}
 \date{Version \today}
 
-\begin{document}
 \hypersetup{%
 	pdfborder={0 0 0},%
 	pdftitle={GoSam \gosamversion{} Manual},%
@@ -112,12 +182,10 @@
 	%pdfdisplaydoctitle
 }
 
+\begin{document}
 
-
-\begin{fullpage}
 \maketitle
 \tableofcontents
-\end{fullpage}
 
 
 \chapter{Introduction}
@@ -135,1946 +203,60 @@ about the process is also produced.
 
 %\section{Conventions}
 In this manual, shell commands 
-(for the {\tt bash} shell) are indicated
-by lines starting with a dollar sign {\tt \$}.
+(for the \texttt{bash} shell) are indicated
+by lines starting with a dollar sign \texttt{\$}.
 Lines that are broken for type setting reasons and should
 continue the previous line(s) start with a \contl.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{Download and installation}
-\section{Prerequisites}
+\input{refman_sections/download_installation.tex}
 
-The distribution of \gosam-\gosamversion{} provides all external and auxiliary programs which are necessary 
-to successfully run \gosam. 
-Therefore, the user does not have to install any external programs manually.
-
-The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
-Using \gosam requires a Python installation, a Fortran compiler, a C++ compiler, \textsc{Make}, and the \textsc{Meson} build system. It is tested with Python $\geq 3.9$ and \textsc{GNU~Fortran}.
-To use a different Fortran compiler and linker, the {\tt FC} and {\tt FC\_LD} environment variables can
-be set during the installation.
-
-
-\section{Download}
-
-The \gosam-\gosamversion{} package can either be cloned 
-via \texttt{git}
-or downloaded as a release tar-ball from the GitHub webpage.
-
-\subsection*{HTTP Download}
-At the URL \\
-\url{https://github.com/gudrunhe/gosam/releases}\\
-the package
-\gosam-\gosamversion{} can be downloaded as a tar-ball. 
-It can be can unpacked using the command
-\begin{example}
-\$ tar xzvf \packagename{}.tar.gz
-\end{example}
-
-\subsection*{Git}
-A working copy of the repository can be cloned with the command
-\begin{example}
-\$ git clone https://github.com/gudrunhe/gosam
-\end{example}
-This will create a folder \texttt{gosam} in your current directory.
-
-\section{Installation}
-
-The installation of \gosam and its dependencies is very simple and fully automated by means of the \texttt{meson}
-build system. In the \gosam source directory, running
-\begin{example}
-\$ meson setup build --prefix <prefix> [-Doption=value] \\
-\$ meson install -C build
-\end{example}
-will download and install \gosam as well as all its dependencies. The options {\tt -Doption=value} can
-be used to set the build option {\tt option} to {\tt value}. A complete list of build options is available by
-running {\tt meson configure} in the build directory after
-setup. Notably, \golemVC is not installed by default, it can be
-enabled via \texttt{-Dgolem95=true}. The command {\tt meson configure -Doption=value} can also
-be used to set a build option in an already configured build directory. To avoid collisions with existing
-installations of the dependencies, everything will be installed to the subfolder {\tt GoSam},
-e.g. {\tt <prefix>/lib/GoSam}.
-
-To run \gosam after the installation, the file \texttt{gosam.py}, located at \texttt{<prefix>/bin}, has to be found by the shell, e.g. by appending it to \texttt{\$PATH}.
-
-For the default installation, internet access is required to download the dependencies during the build process.
-
-\subsection{Updating an existing installation}
-
-If \gosam was cloned from git, it can be updated by running
-\begin{example}
-\$ git pull
-\end{example}
-If a previous \texttt{build} directory exists, 
-\begin{example}
-\$ meson setup --reconfigure
-\end{example}
-must be executed in the build directory in order to regenerate the build files. The new version can then be installed by running
-\begin{example}
-\$ meson install
-\end{example}
-in the build directory.
-
-\section{Description of the components}
-
-
-The generation of matrix element code using \gosamv can be understood
-as a three-step process. 
-\begin{enumerate}
-\item  {\bf diagram generation}: \python
-and \qgraf are used. This phase is initiated by
-running \texttt{gosam.py process.in}, where {\tt process.in} contains the 
-user input for the process to be calculated.
-\item {\bf code generation}: only \form is run.
-This phase is automatically initiated when the process is being built.
-\item {\bf compilation and running}: 
-a Fortran compiler and the chosen reduction libraries are used.
-The compilation is initiated
-by  \texttt{\$ meson install}.
-\end{enumerate}
-The the individual steps are explained in more detail in section~\ref{sec:usage}.
-
-If you use the \gosamv package, you should be aware that
-the following programs are used.
-(The numbers indicate during which phase of the code generation
-the tools will be required).
-
-\marginlabel{\qgraf (1)} \qgraf~\cite{Nogueira:1991ex}
-is required in version 3{.}1 or
-higher. 
-\qgraf version 3.4.2 will automatically be downloaded and installed during the installation of \gosam.
-It can be also downloaded manually from
-\url{http://cefema-gt.tecnico.ulisboa.pt/~paulo/d.html}.
-
-\marginlabel{\python (1)} \gosam requires Python version 3{.}9 or newer.
-
-\marginlabel{\form (2)}  \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
-version 4{.}0 or higher is required to profit from all optimisation features.
-\form version 4.2.1 will automatically be downloaded and installed during the installation of \gosam.
-For manual download, \form is available from
-\url{http://www.nikhef.nl/~form/}.
-
-\marginlabel{\ninja/\golemVC (3)}
-For one-loop calculations, at least one of these two libraries is
-required.
-The libraries are downloaded and installed during the installation of \gosam.
-Alternatively, 
-\begin{itemize}
-\item \golemVC can be downloaded from\\
-\url{https://github.com/gudrunhe/golem95}.
-\item \ninja can be downloaded from\\
-\url{https://github.com/peraro/ninja}.
-\end{itemize}
-
-\marginlabel{\texttt{refrep.cls} (3)} The generation of documentation (optional)
-is based on the \LaTeX-class \texttt{refrep}, which may not be
-present in all \LaTeX{}
-distributions. It can be downloaded from \url{http://www.ctan.org/}
-as part of the \texttt{refman} package.
-This file is only needed if one intends to run \texttt{make doc},
-which generates some documentation like drawing the diagrams, 
-listing the colour structures, etc.
-
-\attention Please note that some of these programs may have
-license policies which are different from the license
-applying to \gosamv. The authors of \gosamv do \emph{not}
-take any responsibility for any problems related to the
-above-mentioned software packages.
-
-
-\section{Running \gosam}
-An example of how to use \gosam to set up a process and generate the corresponding libraries is given in the next chapter in Section~\ref{sec:usage}.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Setup of a process}
-%\section{Introduction}
 \label{chp:setup-of-a-process}
+\input{refman_sections/setup.tex}
 
-
-\gosam{} can be used either as a standalone code producing one-loop 
-(and tree level) amplitudes, or it can be used as a {\it One Loop Provider} (OLP)
-in combination with a Monte Carlo program. 
-The usage in the latter case is described in detail in Section \ref{sec:blha}. 
-Below we will first describe the setup for the standalone version.
-
-
-In order to generate the matrix element for a given process, the user should
-create a process specific setup file, which we call {\em process card}. There
-are no restrictions on the possible names or filename extensions, but the file
-must be in plain ASCII format. For historical reasons \gosam process cards often
-use the file extensions \texttt{*.in} or \texttt{*.rc}.
-
-All possible options of the process card are given in Appendix \ref{chp:process_card_options} with descriptions for each option.
-The only mandatory fields are the {\tt in} and {\tt out} 
-particles, the perturbative order and the path where to store the process files.
-Therefore, a {\em minimal process card} can look like this:
-\begin{lstlisting}[gobble=3,%
-     numbers=left,caption={{\tt eett.in}},%
-     basicstyle=\ttfamily]
-1  process_path=eett
-2  in=    e+, e-
-3  out=   t, t~
-4  order= QCD, 0, 2
-\end{lstlisting}
-
-
-\section{Usage Example: \texorpdfstring{$e^+e^-\rightarrow t\bar{t}$}{e+e- to tt-bar}
-at NLO in QCD}\label{sec:usage}
-In the following example we consider the calculation of the virtual QCD corrections to the process $e^+e^-\rightarrow t\bar{t}$. The process is defined in the following process card, which is a more realistic version of the minimal one given above.
-
-\begin{lstlisting}[
-     numbers=left,caption={{\tt eett.rc}}, label={lst:eett},%
-     basicstyle=\ttfamily] 
-process_name=eett
-process_path=virtual
-in=-11,11
-out=6,-6
-order=QCD, 0, 2
-one=gs,e
-zero=wT,me
-filter.particles=H:0,chi:0
-reduction_programs=ninja,golem95
-\end{lstlisting}
-
-Here only options differing from the default values are shown. The full list of options and their respective descriptions is available in Appendix \ref{chp:process_card_options}.
-
-The first two lines define the name and path of the produced process library, after which the actual process definition is given in lines 3-5. Most notably, this includes the coupling order definition in line 5. This statement restricts the order in the given coupling for the tree-level and one-loop diagrams respectively. Here, \texttt{QCD, 0, 2} specifies the tree-level diagrams to be of order $g_S^0$ and the one-loop diagrams to be of order $g_S^2$. No order of $g_W$ or $e$ is specified in this example, therefore both types of diagrams will be at leading order in the electroweak couplings.
-The following options, lines 6 to 8, set some more properties of the process. Both coupling constants are set to unity symbolically, which is done by specifying them in the option \texttt{one}. This is useful if the couplings are multiplied later on as overall factors, typically by the Monte Carlo program. In the next line, the width of the top is set to zero, as is the mass of the electron. The \texttt{filter.particles} statement in line~8 suppresses the generation of diagrams with internal Higgs or Goldstone boson propagators. This is in principle not necessary, since those diagrams will all evaluate to zero for vanishing electron mass, but by setting the filter the respective diagrams will be discarded right from the start. Finally, the last line specifies which reduction backends the generated process library will support. Here, both supported backends are enabled. In such a case, the default reduction method at runtime is always \texttt{ninja}. In this example, \texttt{golem95} is only used for the analytical reference calculation.
-
-In order to populate the specified process directory with files
-one invokes
-\begin{example}
-\$ gosam.py eett.rc
-\end{example}
-After \texttt{gosam{.}py} has terminated, the build system in the process directory has to be initialized. This is done with the command
-\begin{example}
-\$ meson setup build --prefix <prefix> [-Doption=value]
-\end{example}
-where \texttt{<prefix>} is the location the process library is installed to. If no prefix is given meson will try to install the libraries in \texttt{/usr/local}. The option \texttt{-Ddoc=true} will generate the file \texttt{doc/process.pdf} which contains the generated diagrams and other information about the process. The option \texttt{-Dtest\_executables=true} will produce a test program to evaluate the generated amplitude at a randomly generated phase space point.
-
-After the process directory is configured, the \fortranXC source code can be generated and compiled, and the libraries be installed by executing
-\begin{example}
-\$ meson install -C <path/to/build>
-\end{example}
-where \texttt{<path/to/build>} is the relative path pointing to the directory \texttt{build} created in the previous step. The \texttt{-C} flag can be omitted when the command is started from inside \texttt{build}. By default, \texttt{meson} will fully utilize the CPU for compilation. If this is undesired, instead of invoking \texttt{meson install} directly one can instead use
-\begin{example}
-\$ meson compile [-j <jobs>] -C <path/to/build>
-\end{example}
- With the \texttt{-j} option, the number of jobs \texttt{meson} will run in parallel can be set. This command will only compile the source code, so in order to install the libraries one still has to call
- \begin{example}
-\$ meson install -C <path/to/build>
-\end{example}
-after the compilation is completed.
-
-If \texttt{-Dtest\_executables=true} has been set during setup, a test executable sampling the matrix element for a single random phase space point is now available in the subdirectory \texttt{test}.
-
-\section{Generating a template process card}
-\gosam ships with a number of examples the user can
-%, together with appendix~\ref{chp:process_card_options},
-use as a reference when setting up their own process cards. As a convenience feature \gosam can also generate a template process card by invoking the command
-\begin{example}
-\$ gosam.py --template <process\_card>
-\end{example}
-where \texttt{<process\_card>} is the name of the template file to be generated. The file contains all available parameters the user can set, including their documentation as presented in Appendix~\ref{chp:process_card_options}. They are initialised to their respective default value. Note that in order to define a process besides the four fields in the minimal example given above only those parameters with values different from their default have to be included in the process card. In order to improve the legibility of the process card it is therefore recommended to remove from it all parameters which are kept at their default and/or are not relevant for the considered process.
-
-
-\section{Process directory structure}
-After running \texttt{gosam.py} the
-process directory contains a number of files which are described below.
-
-\marginlabel{\tt codegen/} This directory contains files which are only
-relevant for code ge\-ne\-ration.
-
-\marginlabel{\tt common/} Contains Fortran files which are common to all helicity
-amplitudes and to the constructed matrix element code. 
-The file {\tt config.f90} contains some global  settings, the file {\tt model.f90}
-contains the definitions and settings for the model parameters.
-This directory is always compiled first.
-
-\marginlabel{\tt doc/} Contains all files (apart from
-\texttt{pyxotree.tex} and \texttt{pyxovirt.tex}) which are
-necessary for creating
-\texttt{doc/process.pdf}, which lists all Feynman diagrams of this process, 
-together with colour and helicity information.
-
-\marginlabel{\tt helicity[i]} These directories contain all files for a specific
-helicity amplitude (labelled by {\tt i}). The labeling of the helicities can be found in
-\texttt{doc/process.pdf}. 
-Note that the code will automatically map equivalent helicity 
-configurations onto one single helicity and perform the corresponding book-keeping.
-
-Before invoking \texttt{meson install}, 
-this directory only contains the \texttt{meson} and make files, as well as a few auxiliary files. After the full code
-generation, for each diagram three classes of files are created: The
-basic algebraic expressions for the individual one-loop diagrams are
-contained in the files {\tt d*h*l1.txt} in an optimized format. The
-files {\tt d*h*l1.prc} contain the expressions of the numerators as 
-polynomials in the loop momentum. The corresponding Fortran files
-are {\tt d*h*l1.f90} and {\tt abbrevd*h*.f90}, where the latter
-contains the abbreviations. 
-
-Files generated with the {\tt derive} option (always active as of \gosam version 3.0, see section~\ref{sec:derive}) are
-named {\tt d*h*l1d.*}, while the input files
-for \ninja{}  are named {\tt d*h*l1*.*}. 
-In more detail, the three categories of files are named as follows:\\
-{\tt
-\# Diagrams:\\
- d*h*l1.prc\\
- d*h*l1.txt\\
- d*h*l1.f90\\
- abbrevd*h*.f90
-
-\# Derive:\\
- d*h*l1d.hh\\
- d*h*l1d.txt\\
- d*h*l1d.f90
-
-\# Ninja:\\
- d*h*l1.hh\\
- d*h*l12.txt\\
- d*h*l13.txt\\
- d*h*l14.txt\\
- d*h*l1mu2.txt\\
- d*h*l121.f90\\
- d*h*l131.f90\\
- d*h*l132.f90
-}
-
-When performing a calculation in SMEFT and setting\\ \texttt{enable\_truncation\_orders=true} in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See Section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j} when then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}.
-
-\marginlabel{\tt matrix} This folder contains the code to combine
-the helicity amplitudes into a matrix element. Here one also finds
-the test program \texttt{test.f90}. This folder is always compiled last.
-
-\marginlabel{\tt model.hh} 
-Contains model specific definitions needed by the \form code
-which is generating the symbolic expressions for the amplitude.
-The original files from the \texttt{model/} directory of \gosamv. 
-are renamed, e.g.
-\texttt{sm} $\to$ \texttt{model}, \texttt{sm.hh} $\to$ \texttt{model.hh}.
-
-\marginlabel{\tt diagrams-[01].hh} The diagram files generated
-by \qgraf.
-
-\marginlabel{\tt config.sh} This script facilitates linking with external
-programs. For details, run
-{\tt \$ sh ./config.sh -help}.
-
-\marginlabel{\tt Makefile.conf} This files contains the settings
-which are global for all helicity configurations, 
-like e.g. the paths to the reduction libraries, compiler options, etc.
-
-\marginlabel{\tt meson.build} This file contains the main \texttt{meson} project and library definitions.
-
-\marginlabel{\tt meson\_options.txt} This file contains the build options for the \texttt{meson} project. The currently
-defined build options are 
-\begin{itemize}
-   \item[{\tt doc}] Build and install {\tt doc/process.pdf}. The default is {\tt False}.
-   \item[{\tt test\_executables}] Build and install {\tt matrix/test.f90}. The default is {\tt False}. 
-\end{itemize}
-
-\marginlabel{\tt install\_mod\_files.py} This is a utility scipt used during the installation to find and
-install all generated {\tt {.}mod} files.
-
-\section{Producing optimised code with \textsc{Form} version 4}
-
-The constant, i.e. $q$- and $\mu^2$-independent parts of the numerators
-of the one-loop diagrams are factored out from the numerators and computed
-as abbreviations. 
-
-While in version 1.0 of \gosam{} the Fortran code for the
-amplitudes was written using \haggies~\cite{Reiter:2009ts}, since version~2 we 
-use the features provided by \form{} version
-4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more
-compact code and a speed-up in amplitude evaluation.
-
-\section{Grouping/summing of diagrams which share common subdiagrams}
-\label{sec:grouping_summing}
-Already in the first release of \gosam{}, the diagrams were analyzed
-according to their kinematic matrix $S_{ij}$ and grouped together
-before reduction. This leads to an important gain in efficiency, both
-when using integrand reduction methods, as well as 
-classical tensor reduction techniques. Details about the way diagrams
-are grouped can be found in~\cite{Cullen:2011ac}.
-
-As of release 2.0 an option called {\tt diagsum} combines diagrams
-which differ only by a subdiagram into one ``meta-diagram'' to be
-processed as an entity. This allows to further reduce the number of
-calls to the reduction program and therefore to increase the
-computational speed. 
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=1.0\textwidth]{diagsum1.pdf}
-\caption{Example of diagrams sharing a common tree part, which are 
-summed when the {\tt diagsum} option is set to {\tt diagsum=true}.}
-\label{fig:diagsum_tree}
-\end{figure} 
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=1.1\textwidth]{diagsum2.pdf}
-\caption{Example of diagrams sharing a common loop propagator, 
-but with different particle content in the loop, which are summed when
-the {\tt diagsum} option is set to {\tt diagsum=true}.}
-\label{fig:diagsum_particle}
-\end{figure} 
-
-
-When the option {\tt diagsum} is active (the default behaviour), diagrams which differ only by
-a propagator external to the loop, as is the case e.g. for the
-$Z/\gamma^\star$ propagator in QCD corrections to the production of
-$Z+$jets, are summed together before being processed
-by \form{}. Similarly, diagrams which differ only by an external tree
-part, but which share exactly the same set of loop propagators, are
-summed together prior the algebraic manipulation. An example is shown
-Figure~\ref{fig:diagsum_tree}. Finally, diagrams which share the same
-set of propagators, but have different particles circulating in the
-loop, as shown in Figure~\ref{fig:diagsum_particle}, are also summed
-into one ``meta-diagram''. The default setting for this option is {\tt
-diagsum=true}.
-
-
-\subsection*{Grouping of Tree-level Diagrams}
-
-By default the expressions of all tree-level diagrams are grouped into one
-file. This has the advantage that subexpressions which appear in several
-tree-level diagrams can be reused across the amplitude. The option to turn off this feature is not available anymore as of version 3.0.
-
-\section{Numerical polarisation vectors}
-\label{sec:numpolvec}
-The use of numerical polarisation vectors for massless gauge bosons
-(gluons, photons) is activated by default.  This means that the
-various helicity configurations for the massless bosons will be
-evaluated numerically, based on the same code, rather than producing
-separate code for each helicity configuration.  In order to switch off
-this default setting,
-for example if the user would like to 
-optimize the choice of reference vectors for each helicity configuration,
-the option {\tt polvec=explicit} should be given in the process card 
-{\tt process.in}.
-In this case, \gosam{} will choose explicit reference vectors automatically.
-If the user wants to specify his/her preferred reference vectors, 
-this can be done using the option {\tt reference-vectors=\ldots}
-in the process card.
-
-\section{The extension {\tt derive} ... is not an extension anymore}
-\label{sec:derive}
-The {\tt derive} feature generates code to access the tensor coefficients
-of each diagram or group of diagrams individually. It improves both the speed and the precision of tensorial reconstruction and makes connection to other reduction methods. It had been available as an option already in \gosam-1.0 and has been promoted to be used by default in the context of  tensorial reconstruction~\cite{Heinrich:2010ax} in \gosam-2.0. As of version 3.0 it is an integral part of the code and not an extension anymore. Both the keyword \texttt{derive} and its opposite \texttt{noderive} are therefore no valid options for \texttt{extensions} anymore.
-
-The idea behind it is to compute the numerator $\mathcal{N}(\hat{q})$ 
-%--- we suppress the discussion of the second argument $\mu^2$ ---
-from a Taylor series
-\begin{equation}
-\mathcal{N}(\hat{q})=\mathcal{N}(0)
-+ \hat{q}^\mu
-  \frac{\partial}{\partial\hat{q}_\mu}\mathcal{N}(\hat{q})\vert_{q=0}
-+ \frac1{2!}\hat{q}^\mu\hat{q}^\nu
-  \frac{\partial}{\partial\hat{q}_\mu}
-  \frac{\partial}{\partial\hat{q}_\nu}
-  \mathcal{N}(\hat{q})\vert_{q=0} + \ldots
-\end{equation}
-In this form one can read off a one-to-one correspondence between derivatives at
-$\hat{q}=0$ and the coefficients of the tensor integrals.
-
-%\paragraph{Implementation.}
-At a technical level, 
-the files \texttt{helicity*/d*h*l1d.f90} contain the routines
-\texttt{derivative($\mu^2$, [$i_1$], [$i_2$],\dots)} and\\
-\texttt{reconstruct\_d*(coeffs)}, where the latter is only generated in
-conjunction with the extension \texttt{golem95}, and \texttt{coeffs} is
-a type which comprises all coefficients of a diagram of a certain rank.
-The number of optional indices $i_1$, $i_2$, \dots 
-determine which derivative should be returned. The subroutine
-\texttt{reconstruct\_d*} also takes into account the proper symmetrisation.
-
-\section{Customization}\label{sec:Customization}
-\paragraph{Runtime parameters.}
-Many settings can be changed without recompiling the code, by
-creating and modifying a file \texttt{matrix/param.dat}.
-This file has a very simple format:
-\begin{itemize}
-\item Lines starting with a comment character (`\texttt{!}', `\texttt{\#}', `\texttt{;}')
-      in the first column and blank lines are ignored.
-\item All other lines have the format
-\begin{example}
-name = float\\
-\# or\\
-name = float, float
-\end{example}
-      where the first line defines a real number and the second
-      line defines a complex number, and \texttt{name} is a defined
-      parameter.
-\item Whitespace is ignored but must not appear inside names or
-      literals. Physical lines can not be continued nor can
-      multiple entries appear on one line.
-\end{itemize}
-The list of recognized names can be found in the file
-\texttt{common/model.f90}. 
-With the built-in Standard Model file (\texttt{sm}) one
-can re-set, for example, the value for the Higgs mass by 
-{\tt mH = 125.5}.
-All model constants that have not been specified as zero or one
-can be set in this way. 
-%Please note that upper and lower case letters have to be distinguished
-%and that the names need to be spelled exactly as defined in \texttt{model.py}.
-In addition there are some model independent parameters which can be found in the file 
-\texttt{common/config.f90}.
-%\smallskip
-
-\paragraph{Compile time parameters.}
-Other configuration options can be found in the file \texttt{common/config.f90}.
-\smallskip
-Examples of options contained in \texttt{config.f90} are
-\begin{maxipage}
-\begin{tabular}{lp{0.6\textwidth}}
-\texttt{ki} & the floating point kind used throughout the calculation, the default is double precision.\\
-\texttt{logfile} & an integer specifying the output unit to which all debug output (if activated) is directed. The default is 19. If no file is associated to the unit by means of the \texttt{open} statement in the fortran code calling the process library the output is written to \texttt{fort.<logfile>}. See the file \texttt{test.f90} in the \texttt{matrix} subdirectory for an example how to write the debug output into a file of your choice.\\
-\texttt{debug\_lo\_diagrams} & controls if information about the
-    tree level diagrams is written to the debug logfile (see \texttt{logfile} above).\\
-\texttt{debug\_nlo\_diagrams} & controls if information about the
-    loop-diagrams is written to the debug logfile (see \texttt{logfile} above).\\
-\texttt{include\_eps\_terms} & controls if
-    terms of order $\varepsilon$ multiplying
-    poles are taken into account. (only relevant when \texttt{r2=implicit}, see appendix~\ref{app:r2})\\
-\texttt{include\_eps2\_terms} & controls if
-    terms of order $\varepsilon^2$ multiplying
-    double poles are taken into account. (only relevant when \texttt{r2=implicit}, see appendix~\ref{app:r2})\\
-\texttt{include\_color\_avg\_factor} & controls if the color averaging
-    factor for inital state partons is multiplied to the final result.\\
-\texttt{include\_helicity\_avg\_factor} & controls if the helicity averaging
-    factor for inital state particles is multiplied to the final result.\\
-\texttt{include\_symmetry\_factor} & controls if the symmetry
-    factor for identical final state particles
-    is multiplied to the final result. \\
-\texttt{tens\_rec\_by\_derivatives} & controls whether the tensorial reconstruction method is used. (only relevant when using \golemVC{})
-\end{tabular}
-\end{maxipage}
-
-\section{Drawing the Feynman diagrams}
-In order to print out the diagrams the makefile contains the target
-\texttt{doc} which produces the file \texttt{process.pdf}.
-We use \LaTeX{} plus the package \textsf{axodraw}~\cite{Vermaseren:1994je}
-to create the graphical representation.
-
-The layout of the diagrams is determined by the algorithm used in
-\textsf{feynMF}~\cite{Ohl:1995kr}, modelling the propagators by springs.
-The implemented algorithm works in two steps: first, the topology is
-constructed by ordering the external legs such that the diagram can
-be drawn as a planar graph. The coordinates $e_k$
-of the external legs are
-fixed along a contour around the drawing area.
-%\footnote{Currently,
-%this contour is chosen as an ellipse but in principle any convex shape could be used.}
-In a second step the remaining degrees of freedom, the coordinates
-of the vertices $v_i=(x_i, y_i)$, are fixed by minimizing the Lagrangian
-\begin{multline}
-L(v_1, \ldots, v_n; e_1, \ldots, e_N) =\\
- \frac14\sum_{i,j=1}^n t_{ij}\left(v_i-v_j\right)^2
-+\frac12\sum_{i=1}^n\sum_{k=1}^N\lambda_{ik}\left(v_i-e_k\right)^2
-\end{multline}
-Here, $n$ is the number of vertices and $N$ is the number of external
-legs.
-Minimization of the Lagrangian leads to a system of linear equations, which
-can easily be solved.
-\begin{align*}
-&\frac{\partial L}{\partial v_r}=0\\
-\Leftrightarrow&
- \frac12\sum_{i,j=1}^n t_{ij}\left(v_i-v_j\right)
-     \cdot\left(\delta_{ir}-\delta_{jr}\right)
-+\sum_{i=1}^n\sum_{k=1}^N\lambda_{ik}\left(v_i-e_k\right)
-     \cdot\delta_{ir}=0\\
-\Leftrightarrow&
-M_{rj}v_j\equiv
- \sum_{j=1}^n t_{rj}\left(v_r-v_j\right)
-+\left(\sum_{k=1}^N\lambda_{rk}\right)v_r
-=\sum_{k=1}^N\lambda_{rk}e_k
-\end{align*}
-In the last step we used the symmetry of $t_{ij}$.
-The matrix $M$ can be written as
-\begin{equation}
-M_{rc}=\left\{\begin{array}{ll}
-\left(\sum_{i\neq r}t_{ri}\right)+
-\left(\sum_{k=1}^N\lambda_{rk}\right),&
-r=c\\
--t_{rc},&\text{otherwise}
-\end{array}\right.
-\end{equation}
-
-The symbol $t_{ij}$ is the sum of the spring constants of all
-propagators connecting vertices $i$ and $j$; similarly, $\lambda_{ik}$
-is the spring constant of the leg $k$ if it is connected to vertex $i$
-and zero otherwise.
-
-\section{Import of model files}
-\label{sec:model}
-
-The \gosam{}-\gosamversion{} package comes with the built-in model files 
-{\tt sm}, {\tt smdiag}, {\tt smdiag\_mad}, {\tt smehc}, {\tt smdiagehc},
-{\tt sm\_complex}, {\tt smdiag\_complex}, 
-where the latter two are needed in the case of complex masses and couplings, 
-see Section \ref{sec:complexmasses}. 
-The model files {\tt smdiag\_mad} contain some {\tt MadGraph5} specific settings, while
-the model files {\tt smehc} and {\tt smdiagehc} contain the effective Higgs-gluon couplings.
-
-Other models can be imported most easily in the UFO (Universal Feynman Output)~\cite{Degrande:2011ua,Darme:2023jdn} format.
-The model import in the UFO format can be used in the standalone as well as the OLP 
-mode of \gosam, where both the BLHA1 and BLHA2 standards are supported for the syntax of the model import.
-
-In order to perform calculations in an EFT like SMEFT or HEFT the user is required to provide the EFT model in the UFO format. See Section~\ref{sec:EFT} for more details.
-
-Examples about how to import model files can be found in the subdirectory 
- \texttt{examples}.
-
-\subsection{Import of a UFO model}\label{sec:UFO}
-A model description in the UFO~\cite{Degrande:2011ua,Darme:2023jdn} format consists of a Python package
-stored in a directory. In order to import the model into \gosam{} one needs
-to set the \texttt{model} variable specifying the keyword \texttt{FeynRules}
-in front of the directory name.
-For example, if the Python model files for the MSSM are in 
- the directory \\
- \texttt{\$HOME/models/MSSM\_UFO}, the process card must contain the line
-\begin{example}
-model= FeynRules,\$HOME/models/MSSM\_UFO
-\end{example}
-All parameters of type ``external'' defined in the UFO model's \texttt{parameter.py} file will become available as runtime parameters (see Section~\ref{sec:Customization}). To distinguish them from parameters defined within \gosam directly they are prepended with the prefix \texttt{mdl}. \gosam will try to figure out the correct naming of the strong (electroweak/QED) coupling by checking if the model contains any parameter, external or internal, denoted \texttt{G}, \texttt{GG} or \texttt{GS} (\texttt{E}, \texttt{EE}, \texttt{ee}).
-
-In a UFO model each coupling is assigned a specific order, that is its power wrt. the QCD and/or QED coupling. In general more ``orders'' can be defined in the model, a feature which is useful to distinguish certain sets or classes of couplings. An example for an often used order is \texttt{NP}, which can be used to flag couplings of BSM or EFT origin. \gosam enables the user to make use of this UFO feature by means of the \python filter (see section~\ref{sec:filter}) \texttt{d.order('order')}, where \texttt{'order'} is a string denoting the name of the order parameter as defined in the UFO, e.g. \texttt{'NP'}. If the user wants to apply a filter based on a specific order, the property \texttt{order\_names} has to be declared in the process configuration file, e.g. \texttt{order\_names=NP}.
-
-\attention{\gosam is not able to handle arbitrarily large UFO models because of the limited buffer available in \qgraf. If the model is too large the user will be prompted a \qgraf error. In that case it might help to comment out vertices not contributing to the process from the UFO model files before starting \gosam.}
-
-\attention{Care has to be taken regarding the sign conventions adopted in the model. In most cases this concerns the convention chosen for the gauge field part of the covariant derivative and the overall sign of the ghost term in the Lagrangian. In both there is a certain freedom and no general consensus exists in the literature. See e.g.~\cite{Romao:2012pq} for a review. The sign chosen for the covariant derivative only manifests itself in the Feynman rules for the vertices and as long as the model files are consistent the matrix elements should be independent of the convention.\footnote{One can convince oneself that the sign will always appear squared. However, there is an exception when considering EFTs. Depending on the definition of the EFT operators it can happen that a sign dependence remains. This dependence can be absorbed into a redefinition of the Wilson coefficients of the concerned operators.} The sign chosen for the ghost terms will in addition appear in the ghost propagator. Since  \gosam relies on an internal implementation of the propagators and does not take them from the UFO model, it is important that the model matches the sign convention of the ghosts considered in \gosam:}
-\begin{align}
-   i\Pi_\mathrm{gh}^{ab}(k) &= \frac{i\delta^{ab}}{k^2+i\epsilon}\,,
-\end{align}
-which corresponds to $\eta_G=+1$ in the nomenclature of~\cite{Romao:2012pq}. As the chosen sign conventions cannot easily be extracted from the UFO model it is the responsibility of the user to provide a consistent setup.
-
-\subsection{Import from LanHEP}
-\attention{Since by now LanHEP also provides output in the UFO format we recommend using this format over the older LanHEP format.}
-
-In order to use model files generated by LanHEP the following steps
-have to be taken:
-\begin{enumerate}
-\item When generating the tables using LanHEP, one should include the
-   following option to ensure that the generated tables have the correct
-   headings\footnote{\gosamv{} relies on the column names rather than
-   some specific order.}. The number of spaces in the column headers are
-   irrelevant as long as the columns are wide enough to contain the
-   respective values.
-\begin{example}
-   prtcformat\\
-      fullname: '  fullname  ',\\
-      name:     '  name   ',\\
-      aname:    '  aname  ',\\
-      spin2:    '  spin2  ',\\
-      mass:     '  mass  ',\\
-      width:    '  width  ',\\
-      color:    '  color  ',\\
-      aux:      '  aux  ',\\
-      texname:  '      texname      ',\\
-      atexname: '     atexname      ',\\
-      pdg:      '  pdg   '.
-\end{example}
-\item If the model file is not already equipped with pdg codes
-   the user might want to use the \verb!prtcprop! command in
-   LanHEP to add the relevant codes.
-\item In the setup file, one needs to specify the model as a pair
-   of path and integer number. If the table files are under the directory
-   \texttt{lanhep/ued/} in the tables \texttt{func7.mdl}, \texttt{lgrng7.mdl},
-   \texttt{prtcls7.mdl} and \texttt{vars7.mdl}, the correct statement in
-   the setup file would be
-\begin{example}
-   model=lanhep/ued, 7
-\end{example}
-\end{enumerate}
-
-\attention{Note that the use of user defined functions (\texttt{external\_func} in LanHEP) is not supported any longer.}
-
-
-\subsection{Propagators for spin-2 particles}
-\label{sec:spin2}
-
-The propagator for massive spin-2 particles can be split into two parts
-\begin{align}
-	i \Delta_{\mu\nu,\rho\sigma}(k,m_{\vec n}) =  \underbrace{\frac{i}{k^2-m_{\vec n}^2 + i\epsilon}}_{D(k^2,m_{\vec n})} B_{\mu\nu,\rho\sigma}(k,m_{\vec n})\;,
-\end{align}
-where $B_{\mu\nu,\rho\sigma}$ carries the Lorentz structure
-\begin{align}
-	B_{\mu\nu,\rho\sigma}(k,m) =&
-	             \left(\eta_{\mu \rho} - \frac{k_\mu k_\rho}{m^2}\right) 
-		     \left(\eta_{\nu \sigma} - \frac{k_\nu k_\sigma}{m^2}\right)\notag \\
-         &  + \left(\eta_{\mu \sigma} - \frac{k_\mu k_\sigma}{m^2} \right)
-		     \left(\eta_{\nu \rho} - \frac{k_\nu k_\rho}{m^2}\right) \notag \\
-         &  - \frac23  
-	   \left(\eta_{\mu \nu} - \frac{k_\mu k_\nu}{m^2}\right)
-	   \left(\eta_{\rho \sigma} - \frac{k_\rho k_\sigma}{m^2}\right)\;.
-\end{align}
-%and 
-%\be
-%D(s,m_{\vec n}) =  \frac{i}{s-m_{\vec n}^2 + i \epsilon}\;.
-%\ee
-If all particles attached to the propagator are on-shell, 
-the mass dependent terms in $B_{\mu\nu,\rho\sigma}(k,m)$ drop out.
-Further, if the on-shell condition is not always fulfilled, 
-it turned out in phenomenological applications that the impact of the mass dependent terms is numerically 
-negligible\,\cite{Gleisberg:2003ue,Greiner:2013gca}
-and therefore we did not include them in our implementation
-in order to avoid an enormous proliferation of terms.
-In this case the summation over the graviton states  in $D(s,m_{\vec n})$, leading to
-\be
-D(s) = \sum_{\vec n} \frac{i}{s-m_{\vec n}^2 + i \epsilon}\;,
-\ee
-can be performed independently from the  $B_{\mu\nu,\rho\sigma}$ part carrying the Lorentz structure.
-Further, in  models with large extra dimensions (LED),
- we can use the assumption that the widths of the KK modes are negligible, 
-as the dominant effects come from the almost on-shell production of KK modes, 
-and that the discrete spectrum of the KK  modes can be approximated by an
-integral over a mass density, as the  KK modes are very contiguous.
-%\,\cite{Han:1998sg,Giudice:1998ck}. 
-The density as a function of the mass $m_{\vec n}$ is given by
-\be
-\rho(m_{\vec n})=\frac{R^{\delta}m_{\vec n}^{\delta - 2}}{(4\pi)^{\delta/2}\Gamma(\delta/2)}\;,
-\ee
-where $\delta$ is the number of extra dimensions, leading to \,\cite{Han:1998sg}
-\begin{align}
-	D(s) \to  \int_0^{M_S} d\,m_{\vec n}^2\,
-	\frac{i\,\rho(m_{\vec n})}{s-m_{\vec n}^2+ i \epsilon}
-	= \begin{cases} \frac{ s^{\delta/2-1}}{2M_{s}^{\delta + 2} G_N } \left( \pi + 2 i \, I(\frac{M_S}{\sqrt{s}}) \right) & \text{for\ } s>0 \\
-		\frac{ (-s)^{\delta/2-1}}{2M_{s}^{\delta + 2} G_N} (-2i)\, I_E(\frac{M_S}{\sqrt{-s}}) & \text{for\ } s<0 
-	\end{cases}
-	\label{eq:propagator}
-\end{align}
-with 
-\begin{align}
-	I(x) = \begin{cases} - \sum_{k=1}^{\delta/2-1} \frac1{2k} x^{2k} - \frac12 \log(x^2-1)& \text{if\ } \delta \text{ even} \\
-		- \sum_{k=1}^{(\delta-1)/2 } \frac{1}{2k-1} x^{2k-1} + \frac12 \log\left( \frac{x+1}{x-1} \right) & \text{if\ } \delta \text{ odd}
-	\end{cases}
-\end{align}
-and
-\begin{align}
-	I_E(x) = \begin{cases} (-1)^{\delta/2 + 1} \left( \sum_{k=1}^{\delta/2-1} \frac{(-1)^k}{2k} x^{2k} + \frac12 \log(x^2+1)  \right) 
-		& \text{if } \delta \text{ even} \\
-		(-1)^{(\delta-1)/2} \left(   \sum_{k=1}^{(\delta-1)/2 } \frac{(-1)^k}{2k-1} x^{2k-1} + \frac12 \tan^{-1}(x) \right)   & \text{if } \delta \text{ odd} \,.
-	\end{cases}
-\end{align}
-The UV cutoff $M_S$ is introduced as the effective theory approach loses its validity beyond the scale $M_S$.
-
-
-\gosam{} supports spin-2 propagators with the \texttt{customspin2propagator} extension which
-needs to be enabled in the process card by \\
-{\tt extensions=customspin2propagator}.
-
-The extension works only if the model is imported from an UFO file. 
-The latter can  be adjusted to the needs of the particular model the 
-user would like to consider by editing the file {\tt custompropagator.f90}
-in the subdirectory {\tt common}. 
-In order to generate the latter file,
-the spin-2 particle which should get a customized propagator needs to have a
-separate attribute 'CustomSpin2Prop' in the UFO file with a non-vanishing
-value:\\
-Excerpt of {\tt LED\_UFO/particle.py} with a customized propagator:
-\begin{lstlisting}[style=py]
-    Gr = Particle(pdg_code = 9000006,
-                  name = 'Gr',
-                  # ...
-                  CustomSpin2Prop = 1
-                 )
-\end{lstlisting}
-Then \gosam{} generates a the file {\tt common/custompropagator.f90} where the user needs
-to adapt the {\tt customSpin2Prop} subroutine.
-Beside the squared momentum, the {\tt customSpin2Prop} subroutine also receives the
-mass of the corresponding spin-2 particle as an argument, which
-can be used to distinguish between multiple spin-2 particles if necessary.
-The tensorial part of the spin-2 propagator, $B_{\mu\nu,\rho\sigma}(k,m_{\vec n})$, is treated separately 
-and should not be modified.  If the user would like to modify it, we refer to the  documentation in 
-section 6.3 of {\tt src/form/lorentz.pdf} in the \gosam{} tarball.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Stability tests and rescue system}
 \label{sec:rescue}
+\input{refman_sections/rescue.tex}
 
-\gosam{} contains various options to assess in real time, for each phase space point, 
-the level of precision of the corresponding one-loop matrix element. 
-Whenever a phase space point is found in which the quality of the result falls below a
-certain threshold, either the point is discarded or the evaluation of the amplitude is
-repeated by means of a safer, albeit less efficient procedure. This procedure is
-traditionally called ``rescue system''.
-
-The rescue system of \gosam-3.0 has been extended to (optionally) utilise quadruple precision to re-evaluate unstable points. The stability of a point is assessed using two tests, known as the \textit{pole test} and the \textit{rotation test}, respectively.
-
-The pole test compares the general IR prediction for the single pole of a NLO QCD amplitude, $\mathcal{S}_\mathrm{IR}$, with the singularity computed directly by \gosam, $\mathcal{S}$,
-\begin{align}
-\delta_\mathrm{pole} = \left| \frac{\mathcal{S}_\mathrm{IR} - \mathcal{S}}{{\mathcal{S}_\mathrm{IR}}} \right|.
-\end{align}
-The estimate of the number of correct digits in the result is given by $P_\mathrm{pole} = - \log_{10} ( \delta_\mathrm{pole})$.
-This stability check requires very little additional computational time as the matrix element does not need to be recomputed.
-A similar check can be used for the Born result of loop-induced processes, where the single pole is expected to vanish.
-In the loop-induced case, we define
-\begin{align}
-\delta_\mathrm{pole} = \left| \frac{\mathcal{S}}{\mathcal{A}} \right|.
-\end{align}
-where $\mathcal{A}$ is the finite part of the amplitude.
-
-The rotation test~\cite{vanDeurzen:2013saa} exploits the invariance of scattering amplitudes under an azimuthal rotation about the beam axis.
-The finite part of the amplitude, $\mathcal{A}$, is compared to the value of the amplitude obtained after rotating the input kinematics in the azimuthal plane, $\mathcal{A}_\mathrm{rot}$,
-\begin{align}
-\delta_\mathrm{rot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}} \right|.
-\end{align}
-The estimate of the number of correct digits in the result is given by $P_\mathrm{rot} = - \log_{10} ( \delta_\mathrm{rot})$.
-
-The default procedure to assess the stability of a point uses a pole check followed by a rotation check.
-Firstly, $P_\mathrm{pole}$ is computed,
-\begin{enumerate}
-\item \texttt{PSP\_chk\_th1} $< P_\mathrm{pole}$ $\rightarrow$ accept point,
-\item \texttt{PSP\_chk\_th2} $< P_\mathrm{pole} < $ \texttt{PSP\_chk\_th1} $\rightarrow$ rotation test,
-\item $P_\mathrm{pole} <$ \texttt{PSP\_chk\_th2} $\rightarrow$ rescue point.
-\end{enumerate}
-If a rotation test is required, $P_\mathrm{rot}$ is computed,
-\begin{enumerate}
-\item \texttt{PSP\_chk\_th3} $< P_\mathrm{rot}$ $\rightarrow$ accept point,
-\item  $P_\mathrm{rot} <$ \texttt{PSP\_chk\_th3} $\rightarrow$ rescue point.
-\end{enumerate}
-
-By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
-If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
-
-If \texttt{extensions=quadruple} is set during the \gosam generation phase, then the rescue system will instead recompute the amplitude in quadruple precision and calculate
-\begin{align}
-&\delta_\mathrm{qd} = 2 \left| \frac{\mathcal{A}-\mathcal{A}_\mathrm{q}}{\mathcal{A}+\mathcal{A}_\mathrm{q}} \right|,&
-&\delta_\mathrm{qdrot} = 2 \left| \frac{\mathcal{A}_\mathrm{rot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{rot}+\mathcal{A}_\mathrm{q}} \right|, & \\
-&P_\mathrm{qd} = -\log_\mathrm{10}(\delta_\mathrm{q}),&
-&P_\mathrm{qdrot} = -\log_\mathrm{10}(\delta_\mathrm{qdrot}),&
-\end{align}
-where $\mathcal{A}_q$ is the finite part of the amplitude computed in quadruple precision.
-If both \texttt{PSP\_chk\_th4} $< P_\mathrm{qd}$ and \texttt{PSP\_chk\_th4} $< P_\mathrm{qdrot}$ the point is accepted.
-If this precision threshold is not met, then the input kinematics are rotated in the azimuthal plane and the amplitude is recomputed in quadruple precision, $\mathcal{A}_\mathrm{qrot}$.
-The quantities
-\begin{align}
-&\delta_\mathrm{qqrot} = 2 \left| \frac{\mathcal{A}_\mathrm{qrot}-\mathcal{A}_\mathrm{q}}{\mathcal{A}_\mathrm{qrot}+\mathcal{A}_\mathrm{q}} \right|,&
-&P_\mathrm{qqrot} = -\log_\mathrm{10}(\delta_\mathrm{qqrot}),&
-\end{align}
-are evaluated.
-If \texttt{PSP\_chk\_th5} $< P_\mathrm{qqrot}$ the point is accepted. 
-All remaining points are discarded and a precision of $-10$ is returned.
-
-For loop-induced processes, the stability and rescue procedure are applied to the Born result, the thresholds \texttt{PSP\_chk\_th*} are replaced by \texttt{PSP\_chk\_li*}.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Electroweak corrections}
+\input{refman_sections/electroweak.tex}
 
-
-\section{Electroweak scheme choice}
-\label{sec:ewchoose}
-When computing amplitudes within the Standard Model, there are different
-possibilities how to choose which electroweak parameters are
-considered as input parameters, and which are instead derived
-ones. Within \gosam{} different schemes can be chosen in several
-different ways, depending on whether the scheme might be changed after
-the generation of the code or not, by setting appropriately the flag
-{\tt model.options}.
-
-By default, when the flag is not set in the input card, \gosam{}
-generates a code which uses $\mrm{m_W}$, $\mrm{m_Z}$ and
-$\mrm{\alpha}$ as input parameters, allowing however to change this in
-the generated code, by setting the variable {\tt ewchoice} in the
-configuration file {\tt config.f90} to the desired value. The user can
-choose among 8 different possibilities, which are listed in
-Table~\ref{tab:ewchoose}.  When the electric charge $\mrm{e}$ is set
-algebraically to one, the schemes $6-8$ cannot be used.
-
-\begin{table*}
-\begin{center}
-\small
-\begin{tabular}{|c|l|l|}
-\hline
-ewchoice & input parameters                        & derived parameters                  \\
-\hline
-1        & $\mrm{G_F}$, $\mrm{m_W}$, $\mrm{m_Z}$    & $\mrm{e}$, $\mrm{sw}$              \\
-2        & $\mrm{\alpha}$, $\mrm{m_W}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{sw}$              \\
-3        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{m_Z}$  & $\mrm{e}$, $\mrm{m_W}$             \\
-4        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{G_F}$  & $\mrm{e}$, $\mrm{m_W}$             \\
-5        & $\mrm{\alpha}$, $\mrm{G_F}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{m_W}$, $\mrm{sw}$ \\
-6        & $\mrm{e}$, $\mrm{m_W}$, $\mrm{m_Z}$      & $\mrm{sw}$                         \\
-7        & $\mrm{e}$, $\mrm{sw}$, $\mrm{m_Z}$       & $\mrm{m_W}$                        \\
-8        & $\mrm{e}$, $\mrm{sw}$, $\mrm{G_F}$       & $\mrm{m_W}$, $\mrm{m_Z}$           \\
-\hline
-\end{tabular}
-\end{center}
-\caption{Possible choices to select the electroweak scheme.
-To simplify the notation we write the sine of the Weinberg angle as
-$\mrm{sw}$. The lists of derived parameters contain only the
-parameters which are computed and used in the expressions for the
-amplitudes.}\label{tab:ewchoose}
-\end{table*}
-
-
-The flag {\tt model.options} in the input card allows also to directly
-set the values of the different parameters appearing in the model. If
-the values of exactly three electroweak parameters are
-specified, \gosam{} automatically takes them as input parameters. In
-that case, in order to be able to switch among different schemes after
-code generation, the variable {\tt ewchoose} also must be added to the
-{\tt model.options} flag.
-
-
-
-\section{Support of complex masses}
-\label{sec:complexmasses}
-The integral libraries contained in the \gosam{} package as well as the \gosam{} 
-code itself fully support complex masses. This refers to the introduction of 
-finite widths for fermions as well as
-for $W$- and $Z$-bosons. A fully consistent treatment of complex
-$W$- and $Z$-boson masses requires the use of the complex mass scheme~\cite{Denner:2005fg}.
-The boson masses are promoted to complex masses by
-\begin{equation}
- m_{V}^2 \to \mu_{V}^2 = m_{V}^2 -i m_{V} \Gamma_{V},\quad V=W,Z\;.
-\end{equation}
-In order to maintain gauge invariance this affects the definition of the Weinberg angle:
-\begin{equation}
- \cos^2\theta_w = \frac{\mu_W^2}{\mu_Z^2}\;.
-\end{equation}
- To make use of the complex mass scheme, we introduce two new model files, \texttt{sm\_complex}
- and \texttt{smdiag\_complex}, which contain the Standard Model with complex mass scheme, the first
- with a full CKM matrix, the latter with a diagonal  CKM matrix.
- An example dealing with a complex top quark mass is given in 
- the {\tt examples/singletop} subdirectory of the \gosam{} distribution.
-
-%\subsection{Splitting the Process}
-%If a process becomes too big in order to be linked\footnote{
-%Currently, most systems support programs to a size up to 4\,GB.
-%Although 64\,bit systems can handle a much bigger address space,
-%the current limitation comes from some legacy code in the GNU linker.}
-%there are some possibilities to split the process into independent
-%programs:
-%\begin{itemize}
-%\item the generation of a subset of the helicity configurations, 
-%e.g. one helicity configuration      per process directory.
-%\item the generation of a subset of diagrams. If the diagrams are not
-%      split according to gauge invariant subsets the user should ensure
-%      that all subsets are called with the same set of phase space points.
-%      An easy way of splitting the diagrams into subsets is by using
-%      the option \texttt{select.nlo=\textit{$\langle$first$\rangle$}:\textit{%
-%       $\langle$last$\rangle$}}, where \texttt{first} and \texttt{last} refer to the 
-%       diagram numbers in {\em process.ps}.
-%\end{itemize}
-
-%\section{Advanced Usage}
-%The call to the executable \texttt{gosam.py} can be simulated
-%inside more complex \python programs.
-%It is an easy exercise to
-%run the file generation in user defined \python scripts as long as
-%one includes the module files in the environment variable
-%\texttt{PYTHON\_PATH}. The following script emulates the
-%program \texttt{gosam.py}:
-%\begin{lstlisting}[language=python]
-%>>> from golem.util.config import Properties
-%>>> from golem.util.main_misc import *
-%>>> props = Properties()
-%>>> props.setProperty("in", ["e+", "e-"])
-%>>> props.setProperty("out", ["t", "t~"])
-%>>> # ... populate props with further values ...
-%>>> workflow(props)
-%>>> generate_process_files(props)
-%\end{lstlisting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Advanced diagram selection}
-\gosam generates all diagrams consistent with the coupling orders and external states by default. If only a subset of these diagrams are to be considered, several ways of restricting the diagrams are provided:
-\begin{itemize}
-   \item Selecting specific diagrams by their IDs
-   \item Restricting diagrams with the \texttt{filter.particles} flags
-   \item Filtering the diagrams using \qgraf's built-in options
-   \item Filtering the diagrams using custom \python functions
-\end{itemize}
-The four options are listed in increasing flexibility, but also increasing complexity. All mentioned process card options are described in more detail in appendix \ref{chp:process_card_options}.
-
-\section{Selecting diagrams by their number}
-The easiest way to remove some diagrams from a process is with the \texttt{select[.lo|.nlo|.ct]} options. These options take a set of diagram IDs to determine which diagrams are kept in the respective component. A convenient way to inspect the diagram IDs is \texttt{doc/process.pdf}, which contains all diagrams with their respective identifiers. After modifying the \texttt{select} options and rerunning \texttt{gosam.py}, only the specified diagrams are kept. 
-
-\section{Filtering diagrams with the \texttt{filter.particles} options}
-To discard multiple diagrams based on the internal propagators, the \texttt{filter[|.lo|.nlo|.ct].particles} options can be used. These options discard diagrams which do not have the specified number of internal propagators of the given field. These options are applied at the diagram generation level and are therefore more efficient compared to an equivalent \python filter.
-
-\section{Restricting the generation with \qgraf}
-\qgraf itself also allows filtering the diagrams it generates. These options are described in the \qgraf manual and can be applied with the \texttt{qgraf.verbatim[.lo|.nlo|.ct]} options. The content of these options is written verbatim to \qgraf's input file for the respective component. 
-
-Since these filters are applied already in the first of the diagram generation, they are more efficient compared to an equivalent \python filter. Since this difference is largely insignificant on modern CPUs, it is nevertheless recommended using the \python filters.
-
-\section{Filtering diagrams in \python{}}
-\label{sec:filter}
-The final implemented diagram selection option are the \python filters. They allow arbitrary diagram selection criteria by using user-supplied custom \python functions. They are supplied with the \texttt{filer[.lo|.nlo|.ct]} options, which expects a \python function
-\begin{lstlisting}[style=py]
-   filter(d: golem.topolopy.objects.Diagram) -> bool: ...
-\end{lstlisting}
-Diagrams for which this function returns \texttt{True} are kept, diagrams for which \texttt{False} is returned are discarded.
-
-If the filter function is sufficiently simple, it can directly be supplied to the \texttt{filter} option via a \python lambda-function. If the filter function becomes too complicated, it can be moved to an external file. The name of this file can then be supplied with the \texttt{filter.module} option, after which the functions defined in this external file can be used in the \texttt{filter} options.
-
-\subsection{Methods for diagram filtering}
-The custom filter functions receive a single \texttt{Diagram} object as input. Many convenience methods are implemented on this object to simplify the construction of filters. In the following, a field can be specified as 
-\begin{lstlisting}[style=py]
-   Field = str | Sequence[str]
-\end{lstlisting}
-where each string is the name of the respective field. If multiple field names are supplied, any field from the sequence will be tested for a match.
-
-\emph{Note that Python will not necessarily return an exception if this format is not respected, but the filters might not work as expected.} 
-
-\subsubsection{\texttt{golem.topolopy.objects.Diagram}}
-\begin{adjustwidth}{-100pt}{0pt}
-\input{diagram_methods.tex}
-\end{adjustwidth}
+\input{refman_sections/filtering.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% BLHA.tex is a separate file, was used for the version 1.0 manual
-\input{blha-guide}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{The Binoth Les Houches Accord Interface}
+\label{sec:blha}
+\input{refman_sections/blha-guide.tex}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{SMEFT and HEFT calculations with \gosam}
 \label{sec:EFT}
-
-\section{UFO models for EFT calculations}
-\gosam does not ship with any builtin EFT models. For a calculation based on an EFT the user has to provide the model through the generic UFO interface, see section~\ref{sec:UFO}. \gosam is able to handle $n$-point vertices, with $n>4$, and 4-fermion interactions. Note that when no additional order besides the usual QCD and QED orders is specified for the vertex couplings, \gosam will treat all interactions equally, considering only their assigned power wrt. the perturbative expansion in the strong and electroweak/QED coupling. In most cases one will want to make a distinction between SM and non-SM interactions, which in UFO syntax is conventionally handled trough additional coupling orders. \gosam reserves two special order names, \texttt{NP} and \texttt{QL}. The former is used to assign an order to a coupling wrt. to the power counting of the EFT, for example factors of $1/\Lambda$ in SMEFT. The latter can be used to assign a loop-order to the coupling in cases one wants to take into account a potential loop-suppression of EFT operators, as explained in more detail in the next section.
-
-A special remark has to be made about double, or in general multiple, insertions of EFT operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies when at the same time operators of even higher dimension are missing in the model. For example, a double insertion of dimension 6 operators is at the same order as a single insertion of a dimension 8 operator. To be fully consistent both cases have to be included. The user can avoid such problems by using the \python diagram filters to single out diagrams with at most one SMEFT vertex:
-\begin{lstlisting}[gobble=3,style=py]
-1  filter.lo=lambda d: d.order('NP')<=1
-2  filter.nlo=lambda d: d.order('NP')<=1
-3  filter.ct=lambda d: d.order('NP')<=1
-\end{lstlisting}
-In this example we assume that the leading EFT operators are flagged by \texttt{NP=1} in the UFO model.
-
-\section{Truncation orders in SMEFT}\label{sec:SMEFTtruncations}
-SMEFT is an expansion in inverse powers of the scale of new physics $\Lambda$,
-\begin{align}
-   \mathcal{L} &= \mathcal{L}_\mathrm{SM} + \sum_{d>4}\sum_{i_d}\frac{C^d_{i_d}}{\Lambda^d}O^d_{i_d}\,,\label{eq:SMEFTLag}
-\end{align}
-where $d$ denotes the canonical dimension of the operators $O^d_{i_d}$, with corresponding Wilson coefficients $C^d_{i_d}$. In order to calculate physical quantities one has to truncate the SMEFT expansion at a specific order. Presicely how this truncation is defined is not free of ambiguities, since it can be implemented on the level of the amplitudes or at the level of squared matrix elements. For this reason \gosam supports different truncation options for SMEFT calculations by setting \texttt{enable\_truncation\_orders=true} in the process card, provided the process setup and model used meet some requirements:
-\begin{itemize}
-   \item The model is provided in the UFO format.
-   \item All of the model's SMEFT operators are of the same dimension, with corresponding coupling order set to \texttt{NP=1}. Some SMEFT models might assign \texttt{NP=2} to the dimension 6 terms accommodating for the fact that technically also two dimension 5 terms exists in the SMEFT, which are often dropped\footnote{There are only two lepton-number-violating operators. Experimental findings suggest them to be extremely suppressed.}. In this case the user should adjust the model accordingly.
-   \item The \gosam process file has to specify the property \texttt{order\_names=NP}. Additional order names, like e.g. \texttt{QCD} or \texttt{QED} are optional.
-\end{itemize}
-
-In some cases the user might want to take into account an intrinsic loop suppression of certain operators. Couplings arising from those should be flagged by the additional order \texttt{QL=1} in the UFO model. We can now decompose any amplitude in the following way:
-\begin{align}\label{eq:amp_truncation}
-   \M^\ell &= \underbrace{\M^\ell_\mathrm{SM}}_{\displaystyle\texttt{NP=0}} + \underbrace{\overbrace{\frac{\M^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=0}}  + \overbrace{\frac{\bar{\M}^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=1}}}_{\displaystyle\texttt{NP=1}}\,,
-\end{align}
-where $\ell=0,1$ denotes the type of diagram topology, tree or 1-loop. $\M^\ell_6$ is the contribution of diagrams with a single insertion of a dim-6 operator which is not loop-suppressed and $\bar{\M}^\ell_6$ contains those which are loop-suppressed\footnote{\gosam does not make any assumptions about implicit factors (e.g. couplings and/or factors of $\pi$) contained in the Wilson coefficient of loop-suppressed operators. The Wilson coefficients are taken exactly as they are defined in the UFO model and no additional loop-suppression factor is added the resulting amplitudes by \gosam.}. Starting from here there are different ways how to extend the truncation of the amplitude to physical quantities based on squared matrix elements. Currently nine different truncation options are implemented in GoSam, which will be explained in detail below. They can be chosen at runtime by means of the variable \texttt{EFTcount}. Possible values are shown in table~\ref{tab:EFTcount}
-
-\begin{table}
-\renewcommand{\arraystretch}{1.5}
-\begin{tabular}{c|c|l|l}
-   \texttt{EFTcount} & loop-suppression & truncation & \\
-\hline
-   0 & --- & $\text{SM}^2$ & pure SM\\
-\hline
-   1 & no & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
-   2 & no & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
-   3 & no & $\text{SM}\otimes\text{dim-6}$ & linear coefficient\\
-   4 & no & $\text{dim-6}^2$ & quadratic coefficient\\
-\hline
-   11 & yes & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
-   12 & yes & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
-   13 & yes & $\text{SM}\otimes\text{dim-6}$ & linear coefficient\\
-   14 & yes & $\text{dim-6}^2$ & quadratic coefficient
-\end{tabular}
-\caption{Possible choices for the variable \texttt{EFTcount} and corresponding truncation. $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$.}
-\label{tab:EFTcount}
-\renewcommand{\arraystretch}{1.0}
-\end{table}
-
-In the following we will show the structure of the results returned by \gosam for the Born matrix element and the virtual corrections. We use the notation $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$ and drop the $\Lambda^{-2}$ for reasons of legibility. Since loop-induced processes require a slightly different treatment they are discussed in section~\ref{sec:loop-induced} below.
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
-This option discards any higher dimensional operator and returns just the SM result.
-\begin{flalign}
-    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1\,.&
-\end{flalign}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=1}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, ignoring loop-suppression}
-All SMEFT operators are treated equally and no kind of loop-supression is assumed for any of them. $\M_6$ and $\bar{\M}_6$ thus enter the expressions for the squared matrix elements in exactly the same way. We have
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2 + \M_\mathrm{SM}^0\otimes\qty(\M_6^0+\bar{\M}_6^0)\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1 + \M_\mathrm{SM}^0\otimes\qty(\M_6^1+\bar{\M}_6^1)\notag\\&\hspace{87.5pt} + \qty(\M_6^0+\bar{\M}_6^0)\otimes\M_\mathrm{SM}^1\,.&
-\end{align}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=2}: $(\text{SM}+\text{dim-6})^2$, ignoring loop-suppression}
-This option essentially is ``no truncation'' in the sense that the full available amplitude is simply squared.
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0+\M_6^0+\bar{\M}_6^0}^2\,,&\\[5pt]
-    \text{Virtual }: &\qquad \qty(\M_\mathrm{SM}^0+\M_6^0+\bar{\M}_6^0)\otimes\qty(\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^1)\,.&
-\end{align}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=3}: $\text{SM}\times\text{dim-6}$, ignoring loop-suppression}
-This is the linear dim-6 contribution, i.e. the part of the squared matrix element which is $\order{\Lambda^{-2}}$.
-\begin{align}
-    \text{Born }: &\qquad \M_\mathrm{SM}^0\otimes\qty(\M_6^0+\bar{\M}_6^0)\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\qty(\M_6^1+\bar{\M}_6^1) + \qty(\M_6^0+\bar{\M}_6^0)\otimes\M_\mathrm{SM}^1\,.&
-\end{align}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=4}: $(\text{dim-6})^2$, ignoring loop-suppression}
-The dim-6 part of the amplitude squared:
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_6^0+\bar{\M}_6^0}^2\,,&\\[5pt]
-    \text{Virtual }: &\qquad \qty(\M_6^0+\bar{\M}_6^0)\otimes\qty(\M_6^1+\bar{\M}_6^1)\,.&
-\end{align}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=11}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, with loop-suppression}
-``With loop-suppression'' means that the loop-suppressed operators are treated as introducing a loop-order to the diagrams they are contributing to. Effectively this results in $\bar{\M}_6^0$ being considered a 1-loop contribution at the same (loop and \texttt{NP}) order as $\M_6^1$. $\bar{\M}_6^1$ then corresponds to 2-loops and is consequently dropped.
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2 + \M_\mathrm{SM}^0\otimes\M_6^0\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1 + \M_\mathrm{SM}^0\otimes\M_6^1\notag\\&\hspace{65pt} + \M_6^0\otimes\M_\mathrm{SM}^1 + \qty[\M_\mathrm{SM}^0\otimes\bar{\M}_6^0]\,.&
-\end{align}
-The term in square brackets is then a tree-structure (0-loop topologies) contributing to the 1-loop order.
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=12}: $(\text{SM}+\text{dim-6})^2$, with loop-suppression}
-Due to consideration of the loop-suppression this option is not a simple square anymore.
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0+\M_6^0}^2\,,&\\[5pt]
-    \text{Virtual }: &\qquad \qty(\M_\mathrm{SM}^0+\M_6^0)\otimes\qty(\M_\mathrm{SM}^1+\M_6^1)\notag\\&\hspace{65pt} + \qty[\qty(\M_\mathrm{SM}^0+\M_6^0)\otimes\bar{\M}_6^0]\,.&
-\end{align}
-There is no term $\abs{\bar{\M}_6^0}^2$ in the virtual part, as this would be a 2-loop structure, despite being constructed solely from diagrams with tree topology.
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=13}: $\text{SM}\times\text{dim-6}$, with loop-suppression}
-The linear dim-6 contribution, but treating $\bar{\M}_6^0$ as a 1-loop order object.
-\begin{align}
-    \text{Born }: &\qquad \M_\mathrm{SM}^0\otimes\M_6^0\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_6^1 + \M_6^0\otimes\M_\mathrm{SM}^1 + \qty[\M_\mathrm{SM}^0\otimes\bar{\M}_6^0]\,.&
-\end{align}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=14}: $(\text{dim-6})^2$, with loop-suppression}
-The squared dim-6 part of the amplitude, considering the extra loop order of $\bar{\M}_6^0$ and $\bar{\M}_6^1$:
-\begin{align}
-    \text{Born }: &\qquad \abs{\M_6^0}^2\,,&\\[5pt]
-    \text{Virtual }: &\qquad \M_6^0\otimes\M_6^1+\qty[\M_6^0\otimes\bar{\M}_6^0]\,.&
-\end{align}
-
-Note that when the model does not contain any loop-suppressed operators we have $\bar{\M}_6^\ell\equiv0$ and the truncation options 11, 12, 13, 14 return the same results as options 1, 2, 3, 4, respectively.
-
-\subsection{Loop-induced processes}\label{sec:loop-induced}
-Processes which are loop induced in the SM require a special treatment. In some cases the inclusion of EFT operators generates tree-level contributions to such processes. A famous example is the decay of the Higgs into two gluons, which in the SM is mediated via a top-quark loop. When adding the Higgs-gluon operator $\mathcal{O}_{\phi G} = \phi^\dagger\phi\,G^a_{\mu\nu}G^{a,\mu\nu}$ to the theory the decay can be generated at tree-level.
-
-In order to consistently define the process one has to distinguish two scenarios:
-\begin{enumerate}
-   \item Tree-level contributions are generated by tree-level EFT operators, that is operators which are not considered loop-suppressed.
-   \item Tree-level contributions are generated by loop-suppressed EFT operators only.
-\end{enumerate}
-In the first scenario the process is not actually loop-induced, and the process can be set up in the usual way with a tree-level Born. A requirement is that the QCD and/or QED orders of the EFT operators are consistent with the \texttt{order} statement in the process configuration file. In this case all truncation orders can be defined as above, with $\M_\mathrm{SM}^0\equiv0$. Note, however, that this means that the leading contributions to the process are tree times 1-loop interferences at dim-6 and squared tree-level contributions at dim-6$^2$. The actual SM part is then only subleading in perturbation theory at 1-loop squared and will not even be calculated by \gosam. Most of the time the second scenario will be what one wants to consider. In this case the process is treated as loop-induced and the loop-suppressed EFT diagrams with tree-level topology are considered as of the same level as the 1-loop (SM-)contributions. Since \gosam cannot know a priori if such EFT diagrams exist the user has to explicitly set the flag
-\begin{lstlisting}[gobble=3,style=py]
-1  loop_suppressed_Born=true
-\end{lstlisting}
-in the process card. As a consequence only the \texttt{EFTcount} options 0 and 11 to 14, that is the ones considering loop-suppression, are defined for loop-induced processes. The tree and 1-loop contributions to the process can then be written as (dropping the $\Lambda^{-2}$ as above)
-\begin{align}
-   \M^0 &= \bar{\M}_6^0\,, & \M^1 &= \M_\mathrm{SM}^1 + \M_6^1\,,
-\end{align}
-respectively. The tree-level contains diagrams with loop-suppressed operators, only, while the 1-loop level comprises SM loop diagrams and loop diagrams with single insertions of tree-type EFT operators. There are no loop-diagrams with loop-suppressed operators, as they are discarded as subleading. The structure of the results for the loop-induced Born returned by \gosam are summarized in the following. In all cases the loop-suppressed $\bar{\M}_6^0$ is being considered a 1-loop contribution at the same loop order as $\M_\mathrm{SM}^1$ and $\M_6^1$.
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
-This option discards any higher dimensional operator and returns just the SM result.
-\begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2\,.&
-\end{flalign}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=11}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, with loop-suppression}
-Truncation at linear order in $\Lambda^{-2}$.
-\begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2 + \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
-\end{flalign}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=12}: $(\text{SM}+\text{dim-6})^2$, with loop-suppression}
-The truncation option including dim-6$^2$ terms.
-\begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^0}^2\,.&
-\end{flalign}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=13}: $\text{SM}\times\text{dim-6}$, with loop-suppression}
-The linear dim-6 contribution.
-\begin{flalign}
-    \text{loop-ind. Born }: &\qquad \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
-\end{flalign}
-
-\subsubsection*{\bf\boldmath\texttt{EFTcount=14}: $(\text{dim-6})^2$, with loop-suppression}
-The squared dim-6 contribution:
-\begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_6^1+\bar{\M}_6^0}^2\,.&
-\end{flalign}
-
-Note that above options are still well defined when the model does not contain any loop-suppressed operators. We then have $\bar{\M}_6^0\equiv0$ and only genuine 1-loop squared topologies appear.
-
-\section{Renormalisation}
-Renormalisation in an EFT context is a non-trivial task and not fully automatized in \gosam. In general \gosam therefore provides unrenormalised amplitudes when considering an EFT. However, under certain circumstances \gosam is able to calculate the required counterterms for the 1-loop QCD renormalisation, just as in the pure SM. The necessary condition for this to work is that there are no contributions of the EFT operators to the renormalisation of SM parameters and fields. In other words, all additional UV divergences at $\mathcal{O}\left(\Lambda^{-2}\right)$ can be absorbed by renormalising the Wilson coefficients of the EFT operators alone, without the need to change the counterterms of SM objects. Internally GoSam uses its infrastructure for the generation of the Born amplitude, by replacing occurrences of Wilson coefficients within each diagram by their corresponding counterterm, $C_i\to \delta C_i$. The result is expanded in a way that ensures that each contribution to the counterterm amplitude only has a single insertion of a counterterm.
-
-The counterterms related to the Wilson coefficients have to be provided by the user. This can be done in a convenient way by means of the UFO interface, as explained in section~5.4 of the UFO2.0 manual~\cite{Darme:2023jdn}. Analogously to an ordinary \texttt{Vertex} objects a counterterm vertex \texttt{CTVertex} can be defined, which exactly originates from the replacement $C_i\to \delta C_i$ mentioned above. As an example consider a simplified version of SMEFT with just the two operators $O_{\phi G}$ and $O_{t\phi}$. The latter generates (among others) an anomalous $t\bar{t}H$ vertex, which in the UFO can be defined as
-\begin{lstlisting}[gobble=3,style=py]
-   V_1 = Vertex(
-      name = 'V_1',
-      particles = [ P.t__tilde__, P.t, P.H ],
-      color = [ 'Identity(1,2)' ],
-      lorentz = [ L.FFS1, L.FFS2 ],
-      couplings = {(0,0):C.GC_1, (0,1):C.GC_2})
-\end{lstlisting}
-The vertex has a single colour structure, the identity, and two separate Lorentz structures and couplings, defined in the UFO's \texttt{lorentz.py} and \texttt{couplings.py}, respectively\footnote{See the UFO2.0 manual~\cite{Darme:2023jdn} for a detailed explanation of the syntax.}. The $\overline{\text{MS}}$ counterterm for the Wilson coefficient $C_{t\phi}$ is given by
-\begin{multline}\label{eq:Ctphi_CT}
-   \delta C_{t\phi} = \frac{\alpha_s}{2\pi}\frac{(4\pi)^\epsilon}{\Gamma(1-\epsilon)}\left(\frac{\mu_R^2}{\mu_\mathrm{EFT}^2}\right)^\epsilon\\\left(\frac{1}{\epsilon}\left(-2C_{t\phi}+8y_tC_{\phi G}\right)\right. \\+ \left.1_\mathrm{DRED}\left(-\frac{2}{3}C_{t\phi}+\frac{8}{3}y_tC_{\phi G}\right)\right) + \mathcal{O}(\epsilon)\,,
-\end{multline}
-where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's default) and $1_\mathrm{DRED}=0$ in the t'Hooft-Veltman scheme. $\mu_\mathrm{EFT}$ is the scale at which the Wilson coefficients are renormalised, which can in general be different from the renormalisation scale $\mu_R$ of the strong coupling. The corresponding counterterm vertex is defined in \texttt{CT\_vertices.py}:
-\begin{lstlisting}[gobble=3,style=py]
-   CTV_1 = CTVertex(
-      name = 'CTV_1',
-      type = 'UV',
-      particles = [ P.t__tilde__, P.t, P.H ],
-      color = [ 'Identity(1,2)' ],
-      lorentz = [ L.FFS3, L.FFS4 ],
-      loop_particles = [ [ [ P.g ], [P.t] ] ],
-      couplings = {(0,0,0):C.UVGC_1, (0,1,0):C.UVGC_2})
-\end{lstlisting}
-\gosam only makes use of counterterms of the type \texttt{'UV'}, while the UFO model in general can also provide $R2$ counterterms. However, those are not needed by \gosam. The counterterm vertex has the same colour and Lorentz structure as the ordinary vertex. The additional list \texttt{loop\_particles} contains information about the type of particles appearing in the loops related to the derivation of the counterterm, with the intend to give the user an extra way to filter counterterm vertices. Currently \gosam does not make use of this feature, so this list can be ignored an treated as a dummy object.
-
-The two couplings are given by
-\begin{lstlisting}[gobble=3,style=py]
-   UVGC_1 = Coupling(
-      name = 'UVGC_672',
-      value = '(complex(0,1)*Lam*(Ctphi_CT))/(2.*Gf)',
-      order = {'NP':1, 'QED':1, 'QCD':2})
-\end{lstlisting}
-and
-\begin{lstlisting}[gobble=3,style=py]
-   UVGC_2 = Coupling(
-      name = 'UVGC_177',
-      value = '(Ctphi_CT*complex(0,1)*Lam)/(2.*Gf)',
-      order = {'NP':1, 'QED':1, 'QCD':2})
-\end{lstlisting}
-defined in \texttt{CT\_couplings.py}. They refer to the special \texttt{CTParameter} object \texttt{Ctphi\_CT}, defined in \texttt{CT\_parameters.py}:
-\begin{lstlisting}[gobble=3,style=py]
-   Ctphi_CT = CTParameter(
-      name = 'Ctphi_CT',
-      type = 'real',
-      value = {
-         -1:'aS/2/cmath.pi*(-2*Ctphi+8*yt*CphiG)',
-         0:'dred*aS/2/cmath.pi*(-2/3*Ctphi+8/3*yt*CphiG)'
-      })
-\end{lstlisting}
-which reflects the structure of $\delta C_{t\phi}$ given in~(\ref{eq:Ctphi_CT}). Note that the UFO format permits to omit the definition of a \texttt{CTParameter} object by directly defining the \texttt{value} of the coupling as a \python dict instead.
-Two comments are in order: First, \gosam assumes the strong coupling factor $\alpha_s/2\pi$ to be explicitly contained in the definition of the counterterm. Secondly, \gosam assumes the counterterms of the Wilson coefficients to be in the $\overline{\text{MS}}$ scheme, with the scale factor $\left(\mu_R^2/\mu_\mathrm{EFT}^2\right)^\epsilon$. \gosam automatically expands this factor to obtain the appropriate $\log$ terms, which therefore do not have to be defined explicitly. The only thing required is the presence of a parameter \texttt{mueft} (corresponding to $\mu_\mathrm{EFT}$) given in the UFO's \texttt{parameters.py} file.
-
+\input{refman_sections/eft.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX APPENDIX %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
+\input{refman_sections/appendix.tex}
 
-\chapter{Conventions}
-\label{sec:conventions}
-
-\section{Conventions of \golemVC}
-The integral library \golemVC{} computes integrals of the form
-\begin{eqnarray}
-&&\mu^{2\varepsilon}\int\frac{\mathrm{d^D k}}{i\pi^{D/2}}\frac{k^{\mu_1}\cdots k^{\mu_r}}{%
-((k+r_1)^2-m_1^2)\cdots(k+r_N)^2-m_N^2)}\nn\\
-&=&r_\Gamma\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right]
-\end{eqnarray}
-where $D=(4-2\varepsilon)$ and
-\begin{equation}
-r_\Gamma=\frac{\Gamma(1+\varepsilon)\Gamma^2(1-\varepsilon)}{%
-   \Gamma(1-2\varepsilon)}.
-\end{equation}
-The commonly used integration measure for the internal momentum $k$ is
-\begin{equation}
-\frac{\mu^{2\varepsilon}\diff[D]k}{(2\pi)^D}
-=\mu^{2\varepsilon}\frac{i}{2^D\pi^{D/2}}\cdot\frac{{\mathrm d}^Dk}{i\pi^{D/2}}
-=\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}\cdot%
- \frac{\mu^{2\varepsilon}{\mathrm d}^Dk}{i\pi^{D/2}}.
-\end{equation}
-
-\section{Conventions of \gosamv}
-The factor from above which does not go into the integral definition of
-\golemVC{} can be written as
-\begin{equation}
-\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}=
-\frac{(4\pi)^\varepsilon}{(2\pi)(4\pi)}\frac{i}{2}
-\end{equation}
-The factor of $i/2$ is included in the amplitude definition of \gosamv{}.
-The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
-$\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
-
-In the following we assume that the coupling constants\footnote{
-$e$ and $g_s$ in the Standard Model} have been set to one in the
-setup of \gosamv{}. This ensures that the one-loop matrix
-element, interfered with the Born amplitude, for QCD corrections is calculated in the $\overline{\mathrm{MS}}$ scheme as
-\begin{align}
-&2{\mathrm{Re}}({\cal M}_{\mathrm{loop}}{\cal
-                M}_{\mathrm{Born}}^\dagger)=:\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}\nonumber\\
-  &=
-\frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
-\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}) \label{eq:Conventions:nlo_matrix_element}
-\end{align}
-The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
-to the powers as they appear in the squared tree-level matrix element. \gosamv{} will
-return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
-
-The conversion between different conventions for the $\Gamma$-functions
-is straightforward:
-\begin{equation}
-\frac{1}{\Gamma(1-\varepsilon)}=r_\Gamma+{\mathcal O}(\varepsilon^3)=
-\left(1-\frac{\pi^2}{6}\varepsilon^2\right)\Gamma(1+\varepsilon)
-   +{\mathcal O}(\varepsilon^3)
-\end{equation}
-
-The relevant terms in the expansion of $r_\Gamma$ are
-\begin{equation}
-r_\Gamma=e^{-\gamma_E\varepsilon}
-\left(1-\frac{\pi^2}{12}\varepsilon^2\right)+\mathcal{O}(\varepsilon^3)
-\end{equation}
-
-If one prefers to pull out a factor of
-$e^{-\gamma_E\varepsilon}(4\pi)^{\varepsilon}$ the appropriate
-definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
-\begin{equation}
-\frac{\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}}%
-{e^{-\gamma_E\varepsilon}(4\pi)^\epsilon}=
-\frac{\alpha_s}{2\pi}
-\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}
-+\left(c_0-\frac{\pi^2}{12}\,c_{-2}\right)
-\right](g_1^{n_1}\cdots g_q^{n_q})
-%+{\mathcal{O}}(\varepsilon)
-\end{equation}
-
-\section{The \texttt{nlo\_prefactor} option}
-\label{sec:nlo_prefactors}
-In the one-loop amplitude defined in equation \eqref{eq:Conventions:nlo_matrix_element}, a factor of $\alpha_x/2\pi$ is \emph{not} included in the coefficients $c_{-2}$, $c_{-1}$ and $c_0$. The choice of what prefactor is pulled out of the one-loop amplitude is controlled by the \texttt{nlo\_prefactor} option, which has the three choices
-\begin{eqnarray}
-   A_0 = \frac{\alpha_x}{2\pi}, \qquad A_1 = \frac{1}{8 \pi^2} \quad \text{and} \quad A_2 = 1.
-\end{eqnarray}
-For \texttt{nlo\_prefactor = i}, the squared amplitude at one-loop level is then defined as
-\begin{equation}
-   \left|\mathcal{M}\right|^2_{\text{1-loop}}=
-A_i\ \frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
-\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}).
-\end{equation}
-The default choice of this option depends on the mode \gosam is running in:
-\begin{itemize}
-   \item In standalone mode, the default choice is \texttt{nlo\_prefactor = 0}
-   \item In OLP mode, the default choice is \texttt{nlo\_prefactor = 2}
-\end{itemize}
-In the case of OLP mode, the default choice of the prefactor is mandated by the BLHA convention. The prefactor can still be changed by explicitly setting the \texttt{nlo\_prefactor} option, but please keep in mind that doing this \emph{violates the BLHA standard}.
-
-In the case of a loop-induced process, the prefactor is pulled out of each appearing one-loop amplitude piece, resulting in an overall prefactor of $A_i^2$.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Explicit reduction of the $R_2$ terms}\label{app:r2}
-The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
-containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
-algebra in $D=4-2\varepsilon$ dimensions. 
-For an explicit reduction of these terms, we give a list of all relevant integrals of the form
-\begin{align}
-\int\frac{\diff[D] k}{i\pi^{n/2}}
-\frac{N(\hat{k})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
-\end{align}
-where either $\alpha$ or $\beta$ is a positive integer number, 
-$\hat{k}$ denotes 4-dimensional loop momenta, $k^2=\hat{k}^2-\mu^2$, 
-and the denominators are $D_i=(k+r_i)^2-m_i^2+i\delta$.
-Note that integrals where both $\alpha$ and $\beta$ are
-non-zero will not contribute to the final result, as they will be of order $\varepsilon$.
-An integral of rank $r$ 
-can be written as~\cite{Binoth:2005ff,Reiter:2009kb}:
-\begin{multline}
-I_N^{D,\alpha,\beta;\mu_1\ldots\mu_r}=
-(-1)^{r}\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}
-\varepsilon^\beta
-\sum_{l=0}^{\lfloor r/2\rfloor}\left(-\frac12\right)^l
-\sum_{j_1,\ldots,j_{r-2l}=1}^N
-\times\\
-\left[\hat{g}^{\bullet\bullet}\ldots
-\hat{g}^{\bullet\bullet}r_{j_1}^\bullet
-\cdots r_{j_{r-2l}}^\bullet\right]^{\mu_1\ldots\mu_r}
-I_N^{D+2\alpha+2l}(j_1,\ldots,j_{r-2l}).
-\end{multline}
-Here, the integral $I_N^d(j_1,j_2,\ldots)$ denotes a Feynman parameter
-integral with the parameters $z_{j_1}, z_{j_2}, \ldots$ in the numerator,
-\begin{multline}
-I_N^d(j_1,\ldots, j_p)=\\
-(-1)^N\Gamma\left(N-\frac{d}2\right)%
-\int\!\!\diff[D]_\Box\!z\,\delta_z
-\frac{\prod_{\nu=1}^p z_{j_\nu}}{%
-\left[-\frac12 z^{\mathsf{T}}Sz-i\delta\right]^{N-d/2}},
-\end{multline}
-where $\diff[D]_\Box\!z=
-\prod_{j=1}^N\mathrm{d}z_j\Theta(z_j)\Theta(1-z_j)$
-and $\delta_z=\delta(1-\sum_i z_i)$.
-The square brackets $[\ldots]^{\mu_1\ldots\mu_p}$ expand to the sum of
-all possible assignments of indices to the $\hat{g}^{\bullet\bullet}$-tensors
-and momenta $r_j^\bullet$. 
-The kinematic matrix $S$ is given by $S_{ij}=(r_i-r_j)^2-m_i^2-m_j^2$.
-
-We only need to consider integrals containing an UV pole, because only the latter lead to
-a rational term when multiplied with $\varepsilon$ stemming either from
-$\varepsilon^\beta$ or from the integral prefactor
-\begin{equation}
-\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}=
-(\alpha-1)!\left[-\varepsilon +{\mathcal O}(\varepsilon^2)\right],
-\quad\text{for}\,\alpha>0.
-\end{equation}
-The UV divergence comes from the Gamma function
-\begin{equation}
-\Gamma\left(N-\frac{D+2\alpha+2l}2\right)=
-\Gamma(\varepsilon-(2+\alpha+l-N))\equiv\Gamma(\varepsilon-\eta)
-\end{equation}
-in the Feynman parameter integral~$I_N^{D+2\alpha+2l}$.
-Hence, we examine further the expression
-\begin{multline}
-\varepsilon\cdot I_N^{D+2l+2\alpha}(l_1,\ldots, l_{r-2l})=\\
-\left\{\begin{array}{lr}
-{\mathcal O}(\varepsilon),&\eta<0\\
-(-1)^N\frac1{2^\eta\eta!}\int\diff[D]_\Box\!z\delta_z
-\left[z^{\mathsf{T}}Sz\right]^\eta
-\prod_{i=1}^{r-2l}z_{l_i},&\eta\geq0
-\end{array}\right.
-\end{multline}
-
-The remaining integration can be understood as a special case of the
-Feynman parameter identity
-\begin{equation}
-\frac{1}{\prod_{j=1}^N A_j^{\nu_j}}=\frac{\Gamma(\nu)}{
-\prod_{j=1}^N \Gamma(\nu_j)}\int\!\diff[D]_\Box\!z\,\delta_z
-\frac{\prod_{j=1}^N z_j^{\nu_j-1}}{\left(
-\sum_{j=1}^N z_j A_j\right)^\nu}\; , \; \nu=\sum_j \nu_j
-\end{equation}
-for $A_j=1$, in which case one finds
-\begin{equation}
-\int\!\diff[D]_\Box\!z\,\delta_z
-\prod_{j=1}^N z_j^{\nu_j-1}=\frac{\prod_{j=1}^N \Gamma(\nu_j)}%
-{\Gamma(\alpha)}
-\end{equation}
-
-In the \gosam{} process card, the default is {\tt r2=explicit}, which means that
-the rational part $R_2$ is calculated algebraically using the formulae below,
-while the integrand reduction can be done in 4 dimensions.
-Choosing {\tt r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional
-part during the reduction.
-
-\section*{Integrals with \boldmath$r\leq D$}
-All non-zero cases (in the limit $\epsilon\to0$) for
-integrals where the rank does not exceed the number of propagators are listed
- below~\cite{Binoth:2006hk,Reiter:2009kb}. We encounter box integrals at most; pentagons and above are all zero.
-
-\subsection*{Tadpoles}
-\begin{subequations}
-\begin{align}
-  I_1^{D,0,1} &= -\frac{1}{2}S_{11}\,,\\[10pt]
-%
-  I_1^{D,0,1;\mu_1} &= \frac{1}{2}S_{11}r_1^{\mu_1}\,.
-\end{align}
-\end{subequations}
-Note: $S_{11}=-2m_1^2$
-
-\subsection*{Bubbles}
-\begin{subequations}
-\begin{align}
-    I_2^{D,0,1} =& 1\,,\\[10pt]
-%
-    I_2^{D,0,1;\mu_1} =& -\frac{1}{2}\qty(r_1^{\mu_1}+r_2^{\mu_1})\,,\\[10pt]
-%
-    I_2^{D,0,1;\mu_1\mu_2} =& \frac{1}{6}\qty(2r_1^{\mu_1}r_1^{\mu_2}+r_1^{\mu_1}r_2^{\mu_2}+r_2^{\mu_1}r_1^{\mu_2}+2r_2^{\mu_1}r_2^{\mu_2})\notag\\
-      &-\frac{1}{12}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{12}+S_{22})\,,\\[10pt]
-%
-    I_2^{D,1,0} =& -\frac{1}{6}\qty(S_{11}+S_{12}+S_{22})\,.
-\end{align}
-\end{subequations}
-
-\subsection*{Triangles}
-\begin{subequations}
-\begin{align}
-  I_3^{D,0,1;\mu_1\mu_2} =& \frac{1}{4}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
-%
-  I_3^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
-%
-  I_3^{D,1,0} =& \frac{1}{2}\,,\\[10pt]
-%
-  I_3^{D,1,0;\mu_1} =& -\frac{1}{6}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1})\,.
-\end{align}
-\end{subequations}
-
-\subsection*{Boxes}
-\begin{subequations}
-\begin{align}
-  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{24}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
-%
-  I_4^{D,1,0;\mu_1\mu_2} =& \frac{1}{12}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
-%
-  I_4^{D,2,0} =& -\frac{1}{6}\,.
-\end{align}
-\end{subequations}
-
-\section*{Integrals with \boldmath$r>D$}
-In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of
-propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving
-gravitons.
-More details about higher rank integrals can be found in
-Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}. All non-zero integrals (in the limit $\epsilon\to0$) with $r=D+1$ are implemented in \gosam and shown below. Integrals with $r>D+1$ are currently not available. We encounter pentagon integrals at most; hexagons and above are all zero.
-% \bea
-% &&I_5^{D,3}(S)=
-% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3
-% }{%nl
-% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{12}\;,\\
-% %
-% &&I_5^{D,2;\mu_1 \mu_2}(a_1,a_2; S)=
-% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^2\;
-% \hat{q}_{a_1}^{\mu_1}  \hat{q}_{a_2}^{\mu_2}}{%nl
-% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{48}\,\hat{g}^{\mu_1\mu_2}\;,\\
-% %
-% &&I_5^{D,1;\mu_1\cdots \mu_4}(a_1,\ldots,a_4; S)=
-% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\tilde{k}^2\;
-% \hat{q}_{a_1}^{\mu_1} \ldots \hat{q}_{a_4}^{\mu_4}}{%nl
-% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}\nn\\
-% &&\qquad =-\frac{1}{96}\,
-% \left[\hat{g}^{\mu_1\mu_2}\hat{g}^{\mu_3\mu_4}+ \hat{g}^{\mu_1\mu_3}\hat{g}^{\mu_2\mu_4}
-% +\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
-% \eea
-% \be
-% \eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 ((r_i-r_j)^2-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
-% %+{\cal O}(\eps)\;.
-% \ee
-
-\subsection*{Tadpoles}
-\begin{subequations}
-\begin{align}
-  I_1^{D,0,1;\mu_1\mu_2} &= -\frac{1}{2}S_{11}r_1^{\mu_1}r_1^{\mu_2}+\frac{1}{16}\hat{g}^{\mu_1\mu_2}\qty(S_{11})^2\,,\\[10pt]
-%
-  I_1^{D,1,0} &= \frac{1}{8}\qty(S_{11})^2\,.
-\end{align}
-\end{subequations}
-Note: $S_{11}=-2m_1^2$
-
-\subsection*{Bubbles}
-\begin{subequations}
-\begin{align}
-    I_2^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1,j_2,j_3=1}^2\qty[r_{j_1}^\bullet r_{j_2}^\bullet r_{j_3}^\bullet]^{\mu_1\mu_2\mu_3} -\frac{1}{6}\sum_{j=1}^2\qty[r_j^\bullet r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3}\notag\\
-      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
-      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
-      =& -\frac{1}{12}(3r_1^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}+3r_2^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}\notag\\
-      &\qquad+r_1^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_1^{\mu_1}r_2^{\mu_2}r_1^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}\notag\\
-      &\qquad+r_1^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_2^{\mu_2}r_1^{\mu_3})\notag\\
-      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
-      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,,\\[10pt]
-%
-    I_2^{D,1,0;\mu_1} =& \frac{1}{4}r_1^{\mu_1}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
-      &+\frac{1}{4}r_2^{\mu_1}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
-      =& \frac{1}{12}r_1^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
-      &+\frac{1}{12}r_2^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,.%\,,\\[10pt]
-%
-% not currently implemented:
-%    I_2^{D,2,0} =& -\frac{1}{120}\qty(3S_{11}^2+2S_{12}^2+3S_{22}^2+S_{11}S_{22}+3S_{11}S_{12}+3S_{12}S_{22})\,.
-\end{align}
-\end{subequations}
-
-\subsection*{Triangles}
-\begin{subequations}
-\begin{align}
-  I_3^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{48}\sum_{j_1,j_2=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2\mu_3\mu_4} + \frac{1}{48}\sum_{j=1}^3\qty[\hat{g}^{\bullet\bullet}r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3\mu_4}\notag\\
-    &-\frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
-%
-  I_3^{D,1,0;\mu_1\mu_2} =& \frac{1}{24}\sum_{j_1,j_2=1}^3\qty[r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2} + \frac{1}{24}\sum_{j=1}^3\qty[r_j^\bullet r_j^\bullet]^{\mu_1\mu_2}\notag\\
-    &-\frac{1}{48}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
-%
-  I_3^{D,2,0} =& \frac{1}{24}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,.
-\end{align}
-\end{subequations}
-We have
-\begin{multline}
-  S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23} \\= 2\qty(r_1^2+r_2^2+r_3^2-r_1\cdot r_2-r_1\cdot r_3-r_2\cdot r_3)-4\qty(m_1^2-m_2^2-m_3^2)
-\end{multline}
-
-\subsection*{Boxes}
-\begin{subequations}
-\begin{align}
-  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5} =& -\frac{1}{96}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3\mu_4\mu_5}\,,\\[10pt]
-%
-  I_4^{D,1,0;\mu_1\mu_2\mu_3} =& -\frac{1}{48}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
-%
-  I_4^{D,2,0;\mu_1} =& \frac{1}{24}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}+r_4^{\mu_1})\,.
-\end{align}
-\end{subequations}
-
-\subsection*{Pentagons}
-\begin{subequations}
-\begin{align}
-  I_5^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6} &= \frac{1}{192}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6}\,,\\[10pt]
-%
-  I_5^{D,1,0;\mu_1\mu_2\mu_3\mu_4} &= \frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
-%
-  I_5^{D,2,0;\mu_1\mu_2} &= -\frac{1}{48}\qty[\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2}\,,\\[10pt]
-%
-  I_5^{D,3,0} &= \frac{1}{12}\,.
-\end{align}
-\end{subequations}
-
-\chapter{The included model files}
-\label{chp:model-files}
-
-\section{Format of the model files}\label{sec:modelfiles}
-\gosamv{} expects three files for a proper model definition:
-\begin{description}
-\item[$\langle model\rangle$\texttt{.hh}] \form{} file containing the Feynman rules
-\item[$\langle model\rangle$\texttt{.py}] \python{} file
-\item[$\langle model\rangle$] (no extension) \qgraf{} model file
-\end{description}
-
-\subsection{The \python{} file}
-Thy \python{} file contains the following definitions
-\begin{description}
-\item[\texttt{model\_name}] a variable of string type containing a human-readable
-     name for this model, such as ``Standard Model (Feyn. Gauge) w/o Higgs'' etc.
-\item[\texttt{particles}] a \python{} \texttt{dict} that contains all particles
-     \emph{and} anti-particles of the model. The keys are the \qgraf{} names of the
-     fields; the values are objects of the class \texttt{Particle}.
-     The constructor has the arguments
-     \begin{verbatim}
-Particle(name,two_spin,mass,color_rep,partner,width='0',charge)
-     \end{verbatim}
-\item[\texttt{mnemonics}] a \python{} \texttt{dict} of
-     human-readable particle names. The values are objects of the class
-     \texttt{Particle}. It is save to refer to the dictionary \texttt{particles}.
-\item[\texttt{parameters}] a \python{} \texttt{dict} of
-     model parameters with their default values. Both key and value are strings.
-\item[\texttt{functions}] a \python{} \texttt{dict} of
-     variable names and initialization expressions. Both key and value are strings.
-\item[\texttt{types}] the types of all parameters and functions indicated by
-     \texttt{'R'} for real numbers and \texttt{'C'} for complex numbers.
-\item[\texttt{latex\_names}] a \python{} \texttt{dict} assigning \LaTeX{}
-     code to the field names. Math mode is assumed.
-\item[\texttt{line\_styles}] a \python{} \texttt{dict} assigning line styles
-     to field names. The line style used when drawing Feynman diagrams.
-     Allowed values are \texttt{photon}, \texttt{ghost}, \texttt{scalar},
-     \texttt{gluon}, \texttt{fermion}.
-\end{description}
-
-\subsection{The \qgraf{} file}
-The propagators in the \qgraf{} file must contain the following functions:
-\begin{description}
-\item[\texttt{TWOSPIN}] twice the spin of the particle.
-\item[\texttt{COLOR}]   the color representation of the particle $\in\{1,3,8\}$.
-\item[\texttt{MASS}]    the mass of the particle.
-\item[\texttt{WIDTH}]   the width of the particle (currently not used).
-\item[\texttt{AUX}]     must be zero for most fields. Tensor Ghosts, as introduced
-                        by CalcHep have the value $1$ here.
-\item[\texttt{CONJ}]    for self-conjugate particles the value is \texttt{('+')},
-                        otherwise it is \texttt{('+','-')}.
-\end{description}
-
-The vertices must provide all fields that should be accessible in \texttt{VSUM} statements
-and therefore also the ones that \gosamv{} uses in the \texttt{order} option.
-
-\subsection{The \form{} file}
-There are two possible ways of specifying the Feynman rules in the \form{} file.
-If a model contains only Standard Model like interactions one can make use of
-the file \texttt{src/form/vertices.hh} in the \gosamv{} directory and just define
-the coefficients \texttt{CL} and \texttt{CR} in front of the vertices. This
-strategy is implemented by the modelfiles \texttt{models/sm}. The file
-\form{} contains a procedure \texttt{VertexConstants} which
-replaces the the vertex constants by their symbols. A QED example would be
-\begin{lstlisting}[style=form]
-#Procedure VertexConstants
-   Id CL([field.em], [field.ep], [field.ph]) = e;
-   Id CR([field.em], [field.ep], [field.ph]) = e;
-#EndProcedure
-\end{lstlisting}
-In the header of the \form{} file all model specific
-symbols and functions need to be defined. For this simple
-model we have the fields and the coupling constant as only
-new symbols.
-\begin{lstlisting}[style=form]
-Symbols [field.em], [field.ep], [field.ph], e;
-\end{lstlisting}
-
-Instead of using the file \texttt{vertices.hh} one can also use
-his own vertex definitions. In this case the \form{} file must contain
-the definition
-\begin{lstlisting}[style=form]
-#Define USEVERTEXPROC "1"
-\end{lstlisting}
-and it must define the procedure \texttt{ReplaceVertices}. An example
-for QED is given below.
-\begin{maxipage}
-\begin{lstlisting}[style=form]
-#Procedure ReplaceVertices
-Identify Once vertex(iv?,
-      [field.ep], idx1?, -1, k1?, idx1L1?, -1, idx1C1?,
-      [field.em], idx2?,  1, k2?, idx2L1?,  1, idx2C1?,
-      [field.ph], idx3?,  2, k3?, idx3L2?,  1, idx3C1?) =
-   PREFACTOR(i_ * e) *
-   NCContainer(Sm(idx3L2), idx1L1, idx2L1) *
-   node(idx1, idx2, idx3);
-#EndProcedure
-\end{lstlisting}
-\end{maxipage}
-It should be noted that \gosamv{} expects the procedure \texttt{VertexConstants}
-to exist in both cases. If all the constants are already substituted inside
-\texttt{ReplaceVertices} the file must still provide a possibly empty empty
-implementation of \texttt{VertexConstants}. \gosamv{} ensures that
-\texttt{VertexConstants} is always called after \texttt{ReplaceVertices}.
-
-It is recommended to wrap any factors that are global prefactors to the diagram
-into the argument of the function \texttt{PREFACTOR} as \gosamv{} scans for these
-functions and brackets them out. Each vertex definition must contain a factor
-\texttt{node} which contains the indices\footnote{In \qgraf's terminology
-these indices are a combination of vertex and ray index of the field.}
-of the fields at this vertex.
-
-The \qgraf{} style file generates vertex functions as follows:
-\begin{multline*}
-\mathtt{vertex}(\mathrm{vertex\,index},\\
-   \mathrm{field}_1, \mathrm{index}_1, \pm2\mathrm{spin}_1, \mathrm{momentum}_1, \mu_1, \pm\mathrm{color\,rep}_1, %
-   \mathrm{color\,index}_1,\\
-   \mathrm{field}_2, \mathrm{index}_2, \pm2\mathrm{spin}_2, \mathrm{momentum}_2, \mu_2, \pm\mathrm{color\,rep}_2, %
-   \mathrm{color\,index}_2,\\
-   \vdots\\
-   \mathrm{field}_n, \mathrm{index}_n, \pm2\mathrm{spin}_n, \mathrm{momentum}_n, \mu_n, \pm\mathrm{color\,rep}_n, %
-   \mathrm{color\,index}_n)
-\end{multline*}
-
-The entries are:
-\begin{description}
-\item[vertex index] The unique index of this vertex. (\texttt{iv1}, \texttt{iv2}, \dots)
-\item[$\mathrm{field}_i$] The field name of the $i$-th particle. These names are constructed
-from the \qgraf{} field name as \texttt{[field.$\langle name\rangle$]}.
-\item[$\mathrm{index}_i$] A unique name for this ``ray'' (at index $1$ they are \texttt{idx1r1},
-   \texttt{idx1r2}, \ldots)
-\item[$\pm2\mathrm{spin}_i$] twice the spin of the $i$-th particle.
-   The sign distinguishes particles~($+$) from antiparticles~($-$).
-\item[$\mathrm{momentum}_i$] the incoming momentum of the $i$-th particle.
-\item[$\mu_i$] the Lorentz index of the $i$-th particle. Depending on the spin of the particle
-   this is a spinor index (spin $1/2$), a Lorentz index (spin $1$) or a dummy index (spin $0$).
-   For higher spins this index must be split into its components using the function
-   \texttt{SplitLorentzIndex}. For its proper definition the reader is referred to
-   the document \texttt{src/form/lorentz.pdf}.
-\item[$\pm\mathrm{color\,rep}_i$] the color representation of the $i$-th particle. Allowed
-   values currently are $\pm1,\pm3,\pm8$, although the sign only really makes sense for the
-   fundamental representation $3$ and its conjugate $\bar{3}\equiv-3$.
-\item[$\mathrm{color\,index}_i$] The color index of the $i$-th particle. Depending on the color
-   representation this is an index in the fundamental, the adjoint or the trivial representation.
-\end{description}
-
-All symbols defined in \texttt{src/form/symbols.hh} are also accessible in this \form{} file.
-\attention Note: until recently the definitions of \texttt{Sqrt2} and \texttt{sqrt2} were part
-of the model file. Now these symbols are part of \texttt{src/form/symbols.hh} and must not be
-redefined.
-
-\attention All Dirac matrices and metric tensors must use the notation introduced by \texttt{spinney}.
-The metric tensor is $g^{\mu\nu}=\mathtt{d}(\mu, \nu)$ and $\gamma^\mu=\mathtt{Sm}(\mu)$,
-$\gamma_5=\mathtt{Gamma5}$, $\Pi_+=\mathtt{ProjPlus}$, $\Pi_-=\mathtt{ProjMinus}$. All non-commuting
-objects must reside inside the function \texttt{NCContainter} (see~example).
-
-The color structure must use the objects $t_{ij}^A=\mathtt{T}(A, i, j)$ (where the color flow is such
-that$j$ is the index of an anti-quark), $f^{ABC}=\mathtt{f}(A, B, C)$ and
-$f^{ABE}f^{CDE}=\mathtt{f4}(A,B,C,D)$. At vertices coupling colored with colorless particles
-it might be necessary to use the \texttt{d\_} tensor to file the color flow through the vertex.
-
-\attention Note that all propagators and wave functions are defined in a model independent
-way in the files \texttt{src/form/propagators.hh} and \texttt{src/form/legs.hh}. Please,
-refrain from modifying these files directly but make all changes to \texttt{src/form/lorentz.nw}.
-
-In theories with Majorana fermions the model file should include the following
-line:
-\begin{lstlisting}[style=form]
-#Define DISPOSEQGRAFSIGN "1"
-\end{lstlisting}
-
-\section{Standard Model (\texttt{sm})}
-\label{sec:model-files:sm}
-\subsection{Synopsis}
-The model `\texttt{sm}' contains the Feynman rules for the
-Standard Model in Feynman gauge as described
-in~\cite[Appendix~A]{Boehm:2001}.
-
-\subsection{Particle content}
-\marginlabel{Leptons}
-\begin{tabular}{|l|l|l|p{2cm}|}
-\hline
-Name&Alternative Names&Mass&Comment\\
-\hline
-\tt ep & \tt positron e+ & \tt me& $e^+$\\
-\tt em & \tt electron e- & \tt me& $e^-$\\
-\tt ne & & $0$ & $\nu_e$\\
-\tt nebar & \tt ne\~& $0$ & $\bar{\nu}_e$\\
-\hline
-\tt mup & \tt mu+ & \tt mmu& $\mu^+$\\
-\tt mum & \tt mu- & \tt mmu& $\mu^-$\\
-\tt nmu & & $0$ & $\nu_\mu$\\
-\tt nmubar & \tt nmu\~ & $0$ & $\bar{\nu}_\mu$\\
-\hline
-\tt taup & \tt tau+ & \tt mtau& $e^+$\\
-\tt taum & \tt tau- & \tt mtau& $e^-$\\
-\tt ntau & & $0$ & $\nu_\tau$\\
-\tt ntaubar & \tt ntau\~ & $0$ & $\bar{\nu}_\tau$\\
-\hline
-\end{tabular}
-
-\marginlabel{Quarks}
-\begin{tabular}{|l|l|l|p{2cm}|}
-\hline
-Name&Alternative Names&Mass&Comment\\
-\hline
-\tt U & \tt u & \tt mU& $u$\\
-\tt Ubar & \tt u\~ & \tt mU& $\bar{u}$\\
-\tt D & d & \tt mD & $d$\\
-\tt Dbar & \tt d\~& mD & $\bar{d}$\\
-\hline
-\tt S & \tt s & \tt mS& $u$\\
-\tt Sbar & \tt s\~ & \tt mS& $\bar{u}$\\
-\tt C & c & \tt mC & $d$\\
-\tt Cbar & \tt c\~& mC & $\bar{d}$\\
-\hline
-\tt T & \tt t & \tt mT& $t$\\
-\tt Tbar & \tt t\~ & \tt mT& $\bar{t}$\\
-\tt B & b & \tt mB & $b$\\
-\tt Bbar & \tt b\~& mB & $\bar{b}$\\
-\hline
-\end{tabular}
-
-\marginlabel{Gauge Bosons}
-\begin{tabular}{|l|l|l|p{2cm}|}
-\hline
-Name&Alternative Names&Mass&Comment\\
-\hline
-\tt g & \tt gluon & $0$ & $g$ \\
-\tt A & \tt photon gamma & $0$ & $\gamma$ \\
-\tt Z & & \tt mZ & $Z$ \\
-\tt Wp & \tt W+& \tt mW & $W^+$ \\
-\tt Wm & \tt W-& \tt mW & $W^-$ \\
-\hline
-\end{tabular}
-
-\marginlabel{Scalar Bosons}
-\begin{tabular}{|l|l|l|p{2cm}|}
-\hline
-Name&Alternative Names&Mass&Comment\\
-\hline
-\tt H & \tt h higgs & \tt mH & $H$ \\
-\tt phim & \tt phi- & \tt mW & $\phi^-$ \\
-\tt phip & \tt phi+ & \tt mW & $\phi^+$ \\
-\tt chi &  & \tt mZ & $\chi$ \\
-\hline
-\end{tabular}
-
-\marginlabel{Ghost Fields}
-\begin{tabular}{|l|l|l|p{2cm}|}
-\hline
-Name&Alternative Names&Mass&Comment\\
-\hline
-\tt gh &  & $0$ & $u^g$\\
-\tt ghbar &  & $0$ & $\bar{u}^g$ \\
-\tt ghA &  & $0$ & $u^A$ \\
-\tt ghAbar &  & $0$ & $\bar{u}^A$ \\
-\tt ghZ &  & \tt mZ & $u^Z$ \\
-\tt ghZbar &  & \tt mZ & $\bar{u}^Z$ \\
-\tt ghWp &  & \tt mW & $u^+$ \\
-\tt ghWpbar &  & \tt mW & $\bar{u}^+$ \\
-\tt ghWm &  & \tt mW & $u^-$ \\
-\tt ghWmbar &  & \tt mW & $\bar{u}^-$ \\
-\hline
-\end{tabular}
-
-\subsection{Parameters}
-This section lists all model parameters which are not already
-listed as particle masses.
-
-\medskip
-\begin{tabular}{|l|l|l|}
-\hline
-Name & Symbol & Description\\
-\hline
-\tt NC & $N_C$ & Number of colors in QCD\\
-\tt e & $e$ & electro-weak coupling constant: $\alpha=e^2/(4\pi)$\\
-\tt gs & $g_s$ & strong coupling constant: $\alpha_s=g_s^2/(4\pi)$\\
-\tt sw & $s_w=\sin\theta_w$ & sine of weak mixing angle\\
-\tt cw & $c_w=\cos\theta_w$ & cosine of weak mixing angle\\
-\tt VUD & $V_{ud}$ & CKM mixing matrix element\\
-\tt CVDU & $V_{du}^{\dagger}$ & --- '' ---\\
-\tt VUS & $V_{us}$ & --- '' ---\\
-\tt CVSU & $V_{su}^{\dagger}$ & --- '' ---\\
-\tt VUB & $V_{ub}$ & --- '' ---\\
-\tt CVBU & $V_{bu}^{\dagger}$ & --- '' ---\\
-\tt VCD & $V_{cd}$ & --- '' ---\\
-\tt CVDC & $V_{dc}^{\dagger}$ & --- '' ---\\
-\tt VCS & $V_{cs}$ & --- '' ---\\
-\tt CVSC & $V_{sc}^{\dagger}$ & --- '' ---\\
-\tt VCB & $V_{cb}$ & --- '' ---\\
-\tt CVBC & $V_{bc}^{\dagger}$ & --- '' ---\\
-\tt VTD & $V_{td}$ & --- '' ---\\
-\tt CVTD & $V_{dt}^{\dagger}$ & --- '' ---\\
-\tt VTS & $V_{ts}$ & --- '' ---\\
-\tt CVST & $V_{st}^{\dagger}$ & --- '' ---\\
-\tt VTB & $V_{tb}$ & --- '' ---\\
-\tt CVTB & $V_{bt}^{\dagger}$ & --- '' ---\\
-\hline
-\end{tabular}
-
-\section{\gosam{} directory structure}
-The \gosamv{} source directory has the structure as described below:
-
-\marginlabel{\texttt{doc/}} This directory contains the documentation
-and example setup files. You can run \texttt{make} in this directory
-to generate the document \texttt{refman.pdf}; this is the document you
-are currently reading.
-
-\marginlabel{\texttt{models/}} For each implemented model this directory
-contains the \qgraf model file (no extension), a \form interface
-(\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
-the Standard Model (\texttt{sm}) is distributed with \gosamv, 
-where several variants are available:\\
-\texttt{smdiag} implements
-diagonal flavour structure ($V_{\text{CKM}}=\mathsf{diag}\{1,1,1\}$),\\
-{\tt smehc} contains effective gluon-Higgs couplings),\\
-\texttt{sm\_complex} and \texttt{smdiag\_complex} support the complex mass scheme. 
-The structure of the model files is discussed in more detail in
-Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
-FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
-can be found in the directory 
-\texttt{examples/model/}, as well as UFO files for ADD~\cite{ArkaniHamed:1998rs}
-models with large extra dimensions (LED).
-
-\marginlabel{\texttt{templates/}} Contains templates for the creation
-of the files in the process directory. The contents are transformed
-by the class\\
-\texttt{golem.util.parser.Template} and its subclasses
-in \texttt{golem.templates.*}. The translation of the templates is
-controled by the file \texttt{templates.xml} of the same directory.
-
-\marginlabel{\texttt{src/python/}} All model independent \python modules
-can be found in this directory tree.
-
-\marginlabel{\texttt{src/form/}} Here one finds all \form files
-which are not part of the template.
-
-\marginlabel{\texttt{build}} This directory is created during
-building and installation of this package by running \texttt{meson setup build}.
-The files in this directory are of temporary nature and can be safely
-removed.
-
-\marginlabel{\texttt{examples}} This directory contains some simple examples
-of validated processes.
-
-\marginlabel{\texttt{olp}} Files in this directory are used by
-\texttt{gosam.py --olp}, which is \gosamv's implementation of the
-Binoth Les Houches interface for one-loop programs (BLHA).
-Both the original standards ~\cite{Binoth:2010xt} and the new standards 
-(BLHA2)~\cite{Alioli:2013nda} are supported by \gosam-\gosamversion.
-
-\chapter{Available process card options} \label{chp:process_card_options}
-\begin{adjustwidth}{-100pt}{0pt}
-\include{template.tex}
-\end{adjustwidth}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter*{Conditions of use}
+    GoSam-1.0 -- An automated One-Loop matrix element generator.\\
+    Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
+    Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].\\
     
-    {\bf GoSam-3.0}  \\
+    \textbf{GoSam-3.0}  \\
     Copyright (C) 2011--2025  The \gosam Collaboration
    \begin{itemize}         
       \setlength\itemsep{-0.5em}
@@ -2109,14 +291,13 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
       \item Francesco Tramontano
     \end{itemize}
    
-%\bf{The program is distributed under the 
+%{The program is distributed under the 
 % terms and conditions of the GNU General Public License Version 3}
-    We are indebted to {\bf Thomas Reiter} for his invaluable contributions 
+    We are indebted to \textbf{Thomas Reiter} for his invaluable contributions 
     to the development of GoSam-1.0.\\
         GoSam-1.0 -- An automated One-Loop matrix element generator.\\
     Copyright (C) 2011, 2012, 2013  The GoSam Collaboration\\
     Eur.Phys.J. C72 (2012) 1889, arXiv:1111.2034 [hep-ph].
-
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2135,16 +316,11 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
     \gosam or parts of it should make a clear reference to the publications:
 
     \begin{itemize}
- %       G. Cullen, N. Greiner, G. Heinrich, G. Luisoni, 
-%              P. Mastrolia, G. Ossola, T. Reiter,  F. Tramontano,\\
-%        ``Automated One-Loop Calculations with GoSam,''\\
-%        arXiv:1111.2034 [hep-ph]\\
-%	and \\
        \item  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
               P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk, 
 	      J.F.von Soden-Fraunhofen, F. Tramontano, \\
 	``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond'',\\
-	Eur.\ Phys.\ J.\ C {\bf 74} (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
+	Eur.\ Phys.\ J.\ C \textbf{74} (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
       \item   J.~Braun, B.~Campillo Aveleira, G.~Heinrich, M.~H\"ofer, S.P. Jones, M.~Kerner, J.~Lang, V.~Magerya, \\
         ``One-loop calculations in Effective Field Theories with GoSam-3.0'',\\
         arXiv:2507.xxxx.
@@ -2154,11 +330,6 @@ Both the original standards ~\cite{Binoth:2010xt} and the new standards
 
 
 \bibliographystyle{JHEP}
-\begin{fullpage}
 \bibliography{refman}
-\end{fullpage}
-
-\clearpage
-\remarks
 
 \end{document}

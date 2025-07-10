@@ -1,0 +1,138 @@
+\section{Prerequisites}
+
+The distribution of \gosam-\gosamversion{} provides all external and auxiliary programs which are necessary 
+to successfully run \gosam. 
+Therefore, the user does not have to install any external programs manually.
+
+The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
+Using \gosam requires a Python installation, a Fortran compiler, a C++ compiler, \textsc{Make} and the \textsc{Meson} build system. It is tested with \texttt{Python} $\geq 3.9$ and \textsc{GNU~Fortran}.
+To use a different Fortran compiler and linker, the \texttt{FC} and \texttt{FC\_LD} environment variables can
+be set during the installation.
+
+
+\section{Download}
+
+The \gosam-\gosamversion{} package can either be cloned 
+via \texttt{git}
+or downloaded as a release tar-ball from the GitHub webpage.
+
+\subsection*{HTTP Download}
+At the URL \url{https://github.com/gudrunhe/gosam/releases} the package
+\gosam-\gosamversion{} is available as a tar-ball. 
+It can be unpacked using the command
+\begin{lstlisting}[style=sh]
+tar -xzvf GoSam-3.0-<hash>.tar.gz
+\end{lstlisting}
+
+\subsection*{Git}
+A working copy of the repository can be cloned with the command
+\begin{lstlisting}[style=sh]
+git clone https://github.com/gudrunhe/gosam
+\end{lstlisting}
+This will create a folder \texttt{gosam} in your current directory.
+
+\section{Installation}
+
+The installation of \gosam and its dependencies is very simple and fully automated by means of the \texttt{meson}
+build system. In the \gosam source directory, running
+\begin{lstlisting}[style=sh]
+meson setup build --prefix <prefix> [-Doption=value] \\
+meson install -C build
+\end{lstlisting}
+will download and install \gosam as well as all its dependencies. The options \texttt{-Doption=value} can
+be used to set the build option \texttt{option} to \texttt{value}. A complete list of build options is available by
+running \texttt{meson configure} in the build directory after
+setup. Notably, \golemVC is not installed by default, it can be
+enabled via \texttt{-Dgolem95=true}. The command \texttt{meson configure -Doption=value} can also
+be used to set a build option in an already configured build directory. To avoid collisions with existing
+installations of the dependencies, everything will be installed to the subfolder \texttt{GoSam},
+e.g. \texttt{<prefix>/lib/GoSam}.
+
+To run \gosam after the installation, the file \texttt{gosam.py}, located at \texttt{<prefix>/bin}, has to be found by the shell, e.g. by appending it to \texttt{\$PATH}.
+
+For the default installation, internet access is required to download the dependencies during the build process.
+
+\subsection{Updating an existing installation}
+
+If \gosam was cloned from git, it can be updated by running
+\begin{lstlisting}[style=sh]
+git pull
+\end{lstlisting}
+If a previous \texttt{build} directory exists, 
+\begin{lstlisting}[style=sh]
+meson setup --reconfigure
+\end{lstlisting}
+must be executed in the build directory in order to regenerate the build files. The new version can then be installed by running
+\begin{lstlisting}[style=sh]
+meson install
+\end{lstlisting}
+in the build directory.
+
+\section{Description of the components}
+
+
+The generation of matrix element code using \gosamv can be understood
+as a three-step process. 
+\begin{enumerate}
+\item  \textbf{diagram generation}: \python
+and \qgraf are used. This phase is initiated by
+running \texttt{gosam.py process.in}, where \texttt{process.in} contains the 
+user input for the process to be calculated.
+\item \textbf{code generation}: only \form is run.
+This phase is automatically initiated when the process is being built.
+\item \textbf{compilation and running}: 
+a Fortran compiler and the chosen reduction libraries are used.
+The compilation is initiated by
+\begin{lstlisting}[style=sh]
+meson install
+\end{lstlisting}
+\end{enumerate}
+The the individual steps are explained in more detail in section~\ref{sec:usage}.
+
+If you use the \gosamv package, you should be aware that
+the following programs are used.
+(The numbers indicate during which phase of the code generation
+the tools will be required).
+
+\begin{longtable}{r p{0.7\textwidth}}
+\qgraf (1) & \qgraf~\cite{Nogueira:1991ex}  is required in version 3{.}1 or higher.
+\qgraf-3.4.2 will automatically be downloaded and installed during the installation of \gosam.
+It can be also downloaded manually from
+\url{http://cefema-gt.tecnico.ulisboa.pt/~paulo/d.html}. \\
+
+\python (1) & \gosam requires \texttt{Python} version 3{.}9 or newer. \\
+
+\form (2) & \form~\cite{Vermaseren:2000nd,Kuipers:2012rf}
+version 4{.}0 or higher is required to profit from all optimisation features.
+\form-4.2.1 will automatically be downloaded and installed during the installation of \gosam.
+For manual download, \form is available from
+\url{http://www.nikhef.nl/~form/}. \\
+
+\ninja/\golemVC (3) &
+For one-loop calculations, at least one of these two libraries is
+required.
+The libraries are downloaded and installed during the installation of \gosam.
+Alternatively, \golemVC is available from \url{https://github.com/gudrunhe/golem95} and \ninja is available from \url{https://github.com/peraro/ninja}. \\
+
+\texttt{refrep.cls} (3) & The generation of documentation (optional)
+is based on the \LaTeX-class \texttt{refrep}, which may not be
+present in all \LaTeX{}
+distributions. It can be downloaded from \url{http://www.ctan.org/}
+as part of the \texttt{refman} package.
+This file is only needed if one intends to run \texttt{make doc},
+which generates some documentation like drawing the diagrams, 
+listing the colour structures, etc.
+\end{longtable}
+
+
+\attention{
+Please note that some of these programs may have
+license policies which are different from the license
+applying to \gosamv. The authors of \gosamv do \emph{not}
+take any responsibility for any problems related to the
+above-mentioned software packages.
+}
+
+\section{Running \gosam}
+
+An example of how to use \gosam to set up a process and generate the corresponding libraries is given in the next chapter in Section~\ref{sec:usage}.

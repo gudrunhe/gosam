@@ -1,0 +1,41 @@
+\gosam generates all diagrams consistent with the coupling orders and external states by default. If only a subset of these diagrams are to be considered, several ways of restricting the diagrams are provided:
+\begin{itemize}
+   \item Selecting specific diagrams by their IDs
+   \item Restricting diagrams with the \texttt{filter.particles} flags
+   \item Filtering the diagrams using \qgraf's built-in options
+   \item Filtering the diagrams using custom \python functions
+\end{itemize}
+The four options are listed in increasing flexibility, but also increasing complexity. All mentioned process card options are described in more detail in appendix \ref{chp:process_card_options}.
+
+\section{Selecting diagrams by their number}
+The easiest way to remove some diagrams from a process is with the \texttt{select[.lo|.nlo|.ct]} options. These options take a set of diagram IDs to determine which diagrams are kept in the respective component. A convenient way to inspect the diagram IDs is \texttt{doc/process.pdf}, which contains all diagrams with their respective identifiers. After modifying the \texttt{select} options and rerunning \texttt{gosam.py}, only the specified diagrams are kept. 
+
+\section{Filtering diagrams with the \texttt{filter.particles} options}
+To discard multiple diagrams based on the internal propagators, the one or more of the options \texttt{filter[|.lo|.nlo|.ct].particles} can be used. These options discard diagrams which do not have the specified number of internal propagators of the given field. These options are applied at the diagram generation level and are therefore more efficient compared to an equivalent \python filter.
+
+\section{Restricting the generation with \qgraf}
+\qgraf itself also allows filtering the diagrams it generates. These options are described in the \qgraf manual and can be applied with the \texttt{qgraf.verbatim[.lo|.nlo|.ct]} options. The content of these options is written verbatim to \qgraf's input file for the respective component. 
+
+Since these filters are applied already in the first of the diagram generation, they are more efficient compared to an equivalent \python filter. Since this difference is largely insignificant on modern CPUs, it is nevertheless recommended using the \python filters.
+
+\section{Filtering diagrams in \python{}}
+\label{sec:filter}
+The final implemented diagram selection option are the \python filters. They allow arbitrary diagram selection criteria by using user-supplied custom \python functions. They are supplied with the \texttt{filer[.lo|.nlo|.ct]} options, which expects a \python function 
+\begin{lstlisting}[style=py]
+   filter(d: golem.topolopy.objects.Diagram) -> bool: ...
+\end{lstlisting}
+Diagrams for which this function returns \texttt{True} are kept, diagrams for which \texttt{False} is returned are discarded.
+
+If the filter function is sufficiently simple, it can directly be supplied to the \texttt{filter} option via a \python lambda-function. If the filter function becomes too complicated, it can be moved to an external file. The name of this file can then be supplied with the \texttt{filter.module} option, after which the functions defined in this external file can be used in the \texttt{filter} options.
+
+\subsection{Methods for diagram filtering}
+The custom filter functions receive a single \texttt{Diagram} object as input. Many convenience methods are implemented on this object to simplify the construction of filters. In the following, a field can be specified as 
+\begin{lstlisting}[style=py]
+   Field = str | Sequence[str]
+\end{lstlisting}
+where each string is the name of the respective field. If multiple field names are supplied, any field from the sequence will be tested for a match. The name \texttt{"\_"} acts as a wildcard and matches every field.
+
+\emph{Note that Python will not necessarily return an exception if this format is not respected, but the filters might not work as expected.} 
+
+\subsubsection{\texttt{golem.topolopy.objects.Diagram}}
+\input{refman_sections/diagram_methods.tex}

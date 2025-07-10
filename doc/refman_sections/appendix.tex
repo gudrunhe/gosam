@@ -1,0 +1,713 @@
+\chapter{Conventions}
+\label{sec:conventions}
+
+\section{Conventions of \golemVC}
+The integral library \golemVC{} computes integrals of the form
+\begin{equation}
+\mu^{2\varepsilon}\int\frac{\mathrm{d^D k}}{i\pi^{D/2}}\frac{k^{\mu_1}\cdots k^{\mu_r}}{((k+r_1)^2-m_1^2)\cdots(k+r_N)^2-m_N^2)}
+=r_\Gamma\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right]
+\end{equation}
+where $D=(4-2\varepsilon)$ and
+\begin{equation}
+r_\Gamma=\frac{\Gamma(1+\varepsilon)\Gamma^2(1-\varepsilon)}{%
+   \Gamma(1-2\varepsilon)}.
+\end{equation}
+The commonly used integration measure for the internal momentum $k$ is
+\begin{equation}
+\frac{\mu^{2\varepsilon}\diff[D]k}{(2\pi)^D}
+=\mu^{2\varepsilon}\frac{i}{2^D\pi^{D/2}}\cdot\frac{{\mathrm d}^Dk}{i\pi^{D/2}}
+=\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}\cdot%
+ \frac{\mu^{2\varepsilon}{\mathrm d}^Dk}{i\pi^{D/2}}.
+\end{equation}
+
+\section{Conventions of \gosamv}
+The factor from above which does not go into the integral definition of
+\golemVC{} can be written as
+\begin{equation}
+\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}=
+\frac{(4\pi)^\varepsilon}{(2\pi)(4\pi)}\frac{i}{2}
+\end{equation}
+The factor of $i/2$ is included in the amplitude definition of \gosamv{}.
+The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
+$\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
+
+In the following we assume that the coupling constants\footnote{
+$e$ and $g_s$ in the Standard Model} have been set to one in the
+setup of \gosamv{}. This ensures that the one-loop matrix
+element, interfered with the Born amplitude, for QCD corrections is calculated in the $\overline{\mathrm{MS}}$ scheme as
+\begin{align}
+&2{\mathrm{Re}}({\cal M}_{\mathrm{loop}}{\cal
+                M}_{\mathrm{Born}}^\dagger)=:\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}\nonumber\\
+  &=
+\frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}) \label{eq:Conventions:nlo_matrix_element}
+\end{align}
+The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
+to the powers as they appear in the squared tree-level matrix element. \gosamv{} will
+return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
+
+The conversion between different conventions for the $\Gamma$-functions
+is straightforward:
+\begin{equation}
+\frac{1}{\Gamma(1-\varepsilon)}=r_\Gamma+{\mathcal O}(\varepsilon^3)=
+\left(1-\frac{\pi^2}{6}\varepsilon^2\right)\Gamma(1+\varepsilon)
+   +{\mathcal O}(\varepsilon^3)
+\end{equation}
+
+The relevant terms in the expansion of $r_\Gamma$ are
+\begin{equation}
+r_\Gamma=e^{-\gamma_E\varepsilon}
+\left(1-\frac{\pi^2}{12}\varepsilon^2\right)+\mathcal{O}(\varepsilon^3)
+\end{equation}
+
+If one prefers to pull out a factor of
+$e^{-\gamma_E\varepsilon}(4\pi)^{\varepsilon}$ the appropriate
+definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
+\begin{equation}
+\frac{\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}}%
+{e^{-\gamma_E\varepsilon}(4\pi)^\epsilon}=
+\frac{\alpha_s}{2\pi}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}
++\left(c_0-\frac{\pi^2}{12}\,c_{-2}\right)
+\right](g_1^{n_1}\cdots g_q^{n_q})
+%+{\mathcal{O}}(\varepsilon)
+\end{equation}
+
+\section{The \texttt{nlo\_prefactor} option}
+\label{sec:nlo_prefactors}
+In the one-loop amplitude defined in equation \eqref{eq:Conventions:nlo_matrix_element}, a factor of $\alpha_x/2\pi$ is \emph{not} included in the coefficients $c_{-2}$, $c_{-1}$ and $c_0$. The choice of what prefactor is pulled out of the one-loop amplitude is controlled by the \texttt{nlo\_prefactor} option, which has the three choices
+\begin{eqnarray}
+   A_0 = \frac{\alpha_x}{2\pi}, \qquad A_1 = \frac{1}{8 \pi^2} \quad \text{and} \quad A_2 = 1.
+\end{eqnarray}
+For \texttt{nlo\_prefactor = i}, the squared amplitude at one-loop level is then defined as
+\begin{equation}
+   \left|\mathcal{M}\right|^2_{\text{1-loop}}=
+A_i\ \frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
+\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
++{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}).
+\end{equation}
+The default choice of this option depends on the mode \gosam is running in:
+\begin{itemize}
+   \item In standalone mode, the default choice is \texttt{nlo\_prefactor = 0}
+   \item In OLP mode, the default choice is \texttt{nlo\_prefactor = 2}
+\end{itemize}
+In the case of OLP mode, the default choice of the prefactor is mandated by the BLHA convention. The prefactor can still be changed by explicitly setting the \texttt{nlo\_prefactor} option, but please keep in mind that doing this \emph{violates the BLHA standard}.
+
+In the case of a loop-induced process, the prefactor is pulled out of each appearing one-loop amplitude piece, resulting in an overall prefactor of $A_i^2$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Explicit reduction of the $R_2$ terms}
+\label{app:r2}
+The $R_2$ term \cite{Ossola:2008xq} consists of all terms of the numerator
+containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
+algebra in $D=4-2\varepsilon$ dimensions. 
+For an explicit reduction of these terms, we give a list of all relevant integrals of the form
+\begin{align}
+\int\frac{\diff[D] k}{i\pi^{n/2}}
+\frac{N(\hat{k})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
+\end{align}
+where either $\alpha$ or $\beta$ is a positive integer number, 
+$\hat{k}$ denotes 4-dimensional loop momenta, $k^2=\hat{k}^2-\mu^2$, 
+and the denominators are $D_i=(k+r_i)^2-m_i^2+i\delta$.
+Note that integrals where both $\alpha$ and $\beta$ are
+non-zero will not contribute to the final result, as they will be of order $\varepsilon$.
+An integral of rank $r$ 
+can be written as~\cite{Binoth:2005ff,Reiter:2009kb}:
+\begin{multline}
+I_N^{D,\alpha,\beta;\mu_1\ldots\mu_r}=
+(-1)^{r}\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}
+\varepsilon^\beta
+\sum_{l=0}^{\lfloor r/2\rfloor}\left(-\frac12\right)^l
+\sum_{j_1,\ldots,j_{r-2l}=1}^N
+\times\\
+\left[\hat{g}^{\bullet\bullet}\ldots
+\hat{g}^{\bullet\bullet}r_{j_1}^\bullet
+\cdots r_{j_{r-2l}}^\bullet\right]^{\mu_1\ldots\mu_r}
+I_N^{D+2\alpha+2l}(j_1,\ldots,j_{r-2l}).
+\end{multline}
+Here, the integral $I_N^d(j_1,j_2,\ldots)$ denotes a Feynman parameter
+integral with the parameters $z_{j_1}, z_{j_2}, \ldots$ in the numerator,
+\begin{equation}
+I_N^d(j_1,\ldots, j_p)=
+(-1)^N\Gamma\left(N-\frac{d}2\right)%
+\int\!\!\diff[D]_\Box\!z\,\delta_z
+\frac{\prod_{\nu=1}^p z_{j_\nu}}{%
+\left[-\frac12 z^{\mathsf{T}}Sz-i\delta\right]^{N-d/2}},
+\end{equation}
+where $\diff[D]_\Box\!z=
+\prod_{j=1}^N\mathrm{d}z_j\Theta(z_j)\Theta(1-z_j)$
+and $\delta_z=\delta(1-\sum_i z_i)$.
+The square brackets $[\ldots]^{\mu_1\ldots\mu_p}$ expand to the sum of
+all possible assignments of indices to the $\hat{g}^{\bullet\bullet}$-tensors
+and momenta $r_j^\bullet$. 
+The kinematic matrix $S$ is given by $S_{ij}=(r_i-r_j)^2-m_i^2-m_j^2$.
+
+We only need to consider integrals containing an UV pole, because only the latter lead to
+a rational term when multiplied with $\varepsilon$ stemming either from
+$\varepsilon^\beta$ or from the integral prefactor
+\begin{equation}
+\frac{\Gamma(\alpha-\varepsilon)}{\Gamma(-\varepsilon)}=
+(\alpha-1)!\left[-\varepsilon +{\mathcal O}(\varepsilon^2)\right],
+\quad\text{for}\,\alpha>0.
+\end{equation}
+The UV divergence comes from the Gamma function
+\begin{equation}
+\Gamma\left(N-\frac{D+2\alpha+2l}2\right)=
+\Gamma(\varepsilon-(2+\alpha+l-N))\equiv\Gamma(\varepsilon-\eta)
+\end{equation}
+in the Feynman parameter integral~$I_N^{D+2\alpha+2l}$.
+Hence, we examine further the expression
+\begin{equation}
+\varepsilon\cdot I_N^{D+2l+2\alpha}(l_1,\ldots, l_{r-2l})=
+\left\{\begin{array}{lr}
+{\mathcal O}(\varepsilon),&\eta<0\\
+(-1)^N\frac1{2^\eta\eta!}\int\diff[D]_\Box\!z\delta_z
+\left[z^{\mathsf{T}}Sz\right]^\eta
+\prod_{i=1}^{r-2l}z_{l_i},&\eta\geq0
+\end{array}\right.
+\end{equation}
+
+The remaining integration can be understood as a special case of the
+Feynman parameter identity
+\begin{equation}
+\frac{1}{\prod_{j=1}^N A_j^{\nu_j}}=\frac{\Gamma(\nu)}{
+\prod_{j=1}^N \Gamma(\nu_j)}\int\!\diff[D]_\Box\!z\,\delta_z
+\frac{\prod_{j=1}^N z_j^{\nu_j-1}}{\left(
+\sum_{j=1}^N z_j A_j\right)^\nu}\; , \; \nu=\sum_j \nu_j
+\end{equation}
+for $A_j=1$, in which case one finds
+\begin{equation}
+\int\!\diff[D]_\Box\!z\,\delta_z
+\prod_{j=1}^N z_j^{\nu_j-1}=\frac{\prod_{j=1}^N \Gamma(\nu_j)}%
+{\Gamma(\alpha)}
+\end{equation}
+
+In the \gosam{} process card, the default is \texttt{r2=explicit}, which means that
+the rational part $R_2$ is calculated algebraically using the formulae below,
+while the integrand reduction can be done in 4 dimensions.
+Choosing \texttt{r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional
+part during the reduction.
+
+\section*{Integrals with \boldmath$r\leq D$}
+All non-zero cases (in the limit $\epsilon\to0$) for
+integrals where the rank does not exceed the number of propagators are listed
+ below~\cite{Binoth:2006hk,Reiter:2009kb}. We encounter box integrals at most; pentagons and above are all zero.
+
+\subsection*{Tadpoles}
+\begin{subequations}
+\begin{align}
+  I_1^{D,0,1} &= -\frac{1}{2}S_{11}\,,\\[10pt]
+%
+  I_1^{D,0,1;\mu_1} &= \frac{1}{2}S_{11}r_1^{\mu_1}\,.
+\end{align}
+\end{subequations}
+Note: $S_{11}=-2m_1^2$
+
+\subsection*{Bubbles}
+\begin{subequations}
+\begin{align}
+    I_2^{D,0,1} =& 1\,,\\[10pt]
+%
+    I_2^{D,0,1;\mu_1} =& -\frac{1}{2}\qty(r_1^{\mu_1}+r_2^{\mu_1})\,,\\[10pt]
+%
+    I_2^{D,0,1;\mu_1\mu_2} =& \frac{1}{6}\qty(2r_1^{\mu_1}r_1^{\mu_2}+r_1^{\mu_1}r_2^{\mu_2}+r_2^{\mu_1}r_1^{\mu_2}+2r_2^{\mu_1}r_2^{\mu_2})\notag\\
+      &-\frac{1}{12}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{12}+S_{22})\,,\\[10pt]
+%
+    I_2^{D,1,0} =& -\frac{1}{6}\qty(S_{11}+S_{12}+S_{22})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Triangles}
+\begin{subequations}
+\begin{align}
+  I_3^{D,0,1;\mu_1\mu_2} =& \frac{1}{4}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_3^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
+%
+  I_3^{D,1,0} =& \frac{1}{2}\,,\\[10pt]
+%
+  I_3^{D,1,0;\mu_1} =& -\frac{1}{6}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Boxes}
+\begin{subequations}
+\begin{align}
+  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{24}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
+%
+  I_4^{D,1,0;\mu_1\mu_2} =& \frac{1}{12}\hat{g}^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_4^{D,2,0} =& -\frac{1}{6}\,.
+\end{align}
+\end{subequations}
+
+\section*{Integrals with \boldmath$r>D$}
+In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of
+propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving
+gravitons.
+More details about higher rank integrals can be found in
+Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}. All non-zero integrals (in the limit $\epsilon\to0$) with $r=D+1$ are implemented in \gosam and shown below. Integrals with $r>D+1$ are currently not available. We encounter pentagon integrals at most; hexagons and above are all zero.
+% \bea
+% &&I_5^{D,3}(S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3
+% }{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{12}\;,\\
+% %
+% &&I_5^{D,2;\mu_1 \mu_2}(a_1,a_2; S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^2\;
+% \hat{q}_{a_1}^{\mu_1}  \hat{q}_{a_2}^{\mu_2}}{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}=-\frac{1}{48}\,\hat{g}^{\mu_1\mu_2}\;,\\
+% %
+% &&I_5^{D,1;\mu_1\cdots \mu_4}(a_1,\ldots,a_4; S)=
+% \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\tilde{k}^2\;
+% \hat{q}_{a_1}^{\mu_1} \ldots \hat{q}_{a_4}^{\mu_4}}{%nl
+% \prod_{j=1}^5(q_j^2-m_j^2+i\delta)}\nn\\
+% &&\qquad =-\frac{1}{96}\,
+% \left[\hat{g}^{\mu_1\mu_2}\hat{g}^{\mu_3\mu_4}+ \hat{g}^{\mu_1\mu_3}\hat{g}^{\mu_2\mu_4}
+% +\hat{g}^{\mu_1\mu_4}\hat{g}^{\mu_2\mu_3}\right]\;,
+% \eea
+% \be
+% \eps I_4^{D+6}(S)=\frac{1}{240}\left(\sum_{i,j=1}^4 ((r_i-r_j)^2-m_i^2-m_j^2)-2\sum_{i=1}^4 m_i^2\right)\;.
+% %+{\cal O}(\eps)\;.
+% \ee
+
+\subsection*{Tadpoles}
+\begin{subequations}
+\begin{align}
+  I_1^{D,0,1;\mu_1\mu_2} &= -\frac{1}{2}S_{11}r_1^{\mu_1}r_1^{\mu_2}+\frac{1}{16}\hat{g}^{\mu_1\mu_2}\qty(S_{11})^2\,,\\[10pt]
+%
+  I_1^{D,1,0} &= \frac{1}{8}\qty(S_{11})^2\,.
+\end{align}
+\end{subequations}
+Note: $S_{11}=-2m_1^2$
+
+\subsection*{Bubbles}
+\begin{subequations}
+\begin{align}
+    I_2^{D,0,1;\mu_1\mu_2\mu_3} =& -\frac{1}{12}\sum_{j_1,j_2,j_3=1}^2\qty[r_{j_1}^\bullet r_{j_2}^\bullet r_{j_3}^\bullet]^{\mu_1\mu_2\mu_3} -\frac{1}{6}\sum_{j=1}^2\qty[r_j^\bullet r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3}\notag\\
+      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
+      &+\frac{1}{8}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
+      =& -\frac{1}{12}(3r_1^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}+3r_2^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}\notag\\
+      &\qquad+r_1^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_1^{\mu_1}r_2^{\mu_2}r_1^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_1^{\mu_3}\notag\\
+      &\qquad+r_1^{\mu_1}r_2^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_1^{\mu_2}r_2^{\mu_3}+r_2^{\mu_1}r_2^{\mu_2}r_1^{\mu_3})\notag\\
+      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_1^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
+      &+\frac{1}{24}\qty[\hat{g}^{\bullet\bullet}r_2^\bullet]^{\mu_1\mu_2\mu_3}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,,\\[10pt]
+%
+    I_2^{D,1,0;\mu_1} =& \frac{1}{4}r_1^{\mu_1}\qty(\frac{1}{2}S_{11}+\frac{1}{3}S_{12}+\frac{1}{6}S_{22})\notag\\
+      &+\frac{1}{4}r_2^{\mu_1}\qty(\frac{1}{6}S_{11}+\frac{1}{3}S_{12}+\frac{1}{2}S_{22})\notag\\
+      =& \frac{1}{12}r_1^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-4m_1^2-2m_2^2)\notag\\
+      &+\frac{1}{12}r_2^{\mu_1}\qty(r_1^2+r_2^2-2r_1\cdot r_2-2m_1^2-4m_2^2)\,.%\,,\\[10pt]
+%
+% not currently implemented:
+%    I_2^{D,2,0} =& -\frac{1}{120}\qty(3S_{11}^2+2S_{12}^2+3S_{22}^2+S_{11}S_{22}+3S_{11}S_{12}+3S_{12}S_{22})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Triangles}
+\begin{subequations}
+\begin{align}
+  I_3^{D,0,1;\mu_1\mu_2\mu_3\mu_4} =& \frac{1}{48}\sum_{j_1,j_2=1}^3\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2\mu_3\mu_4} + \frac{1}{48}\sum_{j=1}^3\qty[\hat{g}^{\bullet\bullet}r_j^\bullet r_j^\bullet]^{\mu_1\mu_2\mu_3\mu_4}\notag\\
+    &-\frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
+%
+  I_3^{D,1,0;\mu_1\mu_2} =& \frac{1}{24}\sum_{j_1,j_2=1}^3\qty[r_{j_1}^\bullet r_{j_2}^\bullet]^{\mu_1\mu_2} + \frac{1}{24}\sum_{j=1}^3\qty[r_j^\bullet r_j^\bullet]^{\mu_1\mu_2}\notag\\
+    &-\frac{1}{48}\hat{g}^{\mu_1\mu_2}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,,\\[10pt]
+%
+  I_3^{D,2,0} =& \frac{1}{24}\qty(S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23})\,.
+\end{align}
+\end{subequations}
+We have
+\begin{multline}
+  S_{11}+S_{22}+S_{33}+S_{12}+S_{13}+S_{23} \\= 2\qty(r_1^2+r_2^2+r_3^2-r_1\cdot r_2-r_1\cdot r_3-r_2\cdot r_3)-4\qty(m_1^2-m_2^2-m_3^2)
+\end{multline}
+
+\subsection*{Boxes}
+\begin{subequations}
+\begin{align}
+  I_4^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5} =& -\frac{1}{96}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3\mu_4\mu_5}\,,\\[10pt]
+%
+  I_4^{D,1,0;\mu_1\mu_2\mu_3} =& -\frac{1}{48}\sum_{j_1=1}^4\qty[\hat{g}^{\bullet\bullet}r_{j_1}^\bullet]^{\mu_1\mu_2\mu_3}\,,\\[10pt]
+%
+  I_4^{D,2,0;\mu_1} =& \frac{1}{24}\qty(r_1^{\mu_1}+r_2^{\mu_1}+r_3^{\mu_1}+r_4^{\mu_1})\,.
+\end{align}
+\end{subequations}
+
+\subsection*{Pentagons}
+\begin{subequations}
+\begin{align}
+  I_5^{D,0,1;\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6} &= \frac{1}{192}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4\mu_5\mu_6}\,,\\[10pt]
+%
+  I_5^{D,1,0;\mu_1\mu_2\mu_3\mu_4} &= \frac{1}{96}\qty[\hat{g}^{\bullet\bullet}\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2\mu_3\mu_4}\,,\\[10pt]
+%
+  I_5^{D,2,0;\mu_1\mu_2} &= -\frac{1}{48}\qty[\hat{g}^{\bullet\bullet}]^{\mu_1\mu_2}\,,\\[10pt]
+%
+  I_5^{D,3,0} &= \frac{1}{12}\,.
+\end{align}
+\end{subequations}
+
+\chapter{The included model files}
+\label{chp:model-files}
+
+\section{Format of the model files}\label{sec:modelfiles}
+\gosamv{} expects three files for a proper model definition:
+
+\begin{tabular}{r l}
+\texttt{<model>.hh} & \form{} file containing the Feynman rules \\
+\texttt{<model>.py} & \python{} file \\
+\texttt{<model>} (no extension) & \qgraf{} model file \\
+\end{tabular}
+
+\subsection{The \python{} file}
+Thy \python{} file contains the following definitions
+
+\begin{tabular}{r p{0.7\textwidth}}
+\texttt{model\_name} & a variable of string type containing a human-readable
+     name for this model, such as ``Standard Model (Feyn. Gauge) w/o Higgs'' etc. \\
+\texttt{particles} & a \python{} \texttt{dict} that contains all particles
+     \emph{and} anti-particles of the model. The keys are the \qgraf{} names of the
+     fields; the values are objects of the class \texttt{Particle}.
+     The constructor has the arguments
+     \begin{lstlisting}[style=py]
+Particle(name,two_spin,mass,color_rep,partner,width='0',charge)
+     \end{lstlisting} \\
+\texttt{mnemonics} & a \python{} \texttt{dict} of
+     human-readable particle names. The values are objects of the class
+     \texttt{Particle}. It is save to refer to the dictionary \texttt{particles}. \\
+\texttt{parameters} & a \python{} \texttt{dict} of
+     model parameters with their default values. Both key and value are strings. \\
+\texttt{functions} & a \python{} \texttt{dict} of
+     variable names and initialization expressions. Both key and value are strings. \\
+\texttt{types} & the types of all parameters and functions indicated by
+     \texttt{'R'} for real numbers and \texttt{'C'} for complex numbers. \\
+\texttt{latex\_names} & a \python{} \texttt{dict} assigning \LaTeX{}
+     code to the field names. Math mode is assumed. \\
+\texttt{line\_styles} & a \python{} \texttt{dict} assigning line styles
+     to field names. The line style used when drawing Feynman diagrams.
+     Allowed values are \texttt{photon}, \texttt{ghost}, \texttt{scalar},
+     \texttt{gluon}, \texttt{fermion}.
+\end{tabular}
+
+\subsection{The \qgraf{} file}
+The propagators in the \qgraf{} file must contain the following functions:
+
+\begin{longtable}{r p{0.7\textwidth}}
+\texttt{TWOSPIN} & twice the spin of the particle. \\
+\texttt{COLOR} &   the color representation of the particle $\in\{1,3,8\}$. \\
+\texttt{MASS} &    the mass of the particle. \\
+\texttt{WIDTH} &   the width of the particle (currently not used). \\
+\texttt{AUX} &     must be zero for most fields. Tensor Ghosts, as introduced
+                        by CalcHep have the value $1$ here. \\
+\texttt{CONJ} &    for self-conjugate particles the value is \texttt{('+')},
+                        otherwise it is \texttt{('+','-')}. \\
+\end{longtable}
+
+The vertices must provide all fields that should be accessible in \texttt{VSUM} statements
+and therefore also the ones that \gosamv{} uses in the \texttt{order} option.
+
+\subsection{The \form{} file}
+There are two possible ways of specifying the Feynman rules in the \form{} file.
+If a model contains only Standard Model like interactions one can make use of
+the file \texttt{src/form/vertices.hh} in the \gosamv{} directory and just define
+the coefficients \texttt{CL} and \texttt{CR} in front of the vertices. This
+strategy is implemented by the modelfiles \texttt{models/sm}. The file
+\form{} contains a procedure \texttt{VertexConstants} which
+replaces the the vertex constants by their symbols. A QED example would be
+\begin{lstlisting}[style=form]
+#Procedure VertexConstants
+   Id CL([field.em], [field.ep], [field.ph]) = e;
+   Id CR([field.em], [field.ep], [field.ph]) = e;
+#EndProcedure
+\end{lstlisting}
+In the header of the \form{} file all model specific
+symbols and functions need to be defined. For this simple
+model we have the fields and the coupling constant as only
+new symbols.
+\begin{lstlisting}[style=form]
+Symbols [field.em], [field.ep], [field.ph], e;
+\end{lstlisting}
+
+Instead of using the file \texttt{vertices.hh} one can also use
+his own vertex definitions. In this case the \form{} file must contain
+the definition
+\begin{lstlisting}[style=form]
+#Define USEVERTEXPROC "1"
+\end{lstlisting}
+and it must define the procedure \texttt{ReplaceVertices}. An example
+for QED is given below.
+\begin{lstlisting}[style=form]
+#Procedure ReplaceVertices
+Identify Once vertex(iv?,
+      [field.ep], idx1?, -1, k1?, idx1L1?, -1, idx1C1?,
+      [field.em], idx2?,  1, k2?, idx2L1?,  1, idx2C1?,
+      [field.ph], idx3?,  2, k3?, idx3L2?,  1, idx3C1?) =
+   PREFACTOR(i_ * e) *
+   NCContainer(Sm(idx3L2), idx1L1, idx2L1) *
+   node(idx1, idx2, idx3);
+#EndProcedure
+\end{lstlisting}
+It should be noted that \gosamv{} expects the procedure \texttt{VertexConstants}
+to exist in both cases. If all the constants are already substituted inside
+\texttt{ReplaceVertices} the file must still provide a possibly empty empty
+implementation of \texttt{VertexConstants}. \gosamv{} ensures that
+\texttt{VertexConstants} is always called after \texttt{ReplaceVertices}.
+
+It is recommended to wrap any factors that are global prefactors to the diagram
+into the argument of the function \texttt{PREFACTOR} as \gosamv{} scans for these
+functions and brackets them out. Each vertex definition must contain a factor
+\texttt{node} which contains the indices\footnote{In \qgraf's terminology
+these indices are a combination of vertex and ray index of the field.}
+of the fields at this vertex. \newpage
+
+The \qgraf{} style file generates vertex functions as follows:
+
+\begin{lstlisting}[style=form, mathescape]
+vertex(vertex index,
+    field$_1$, index$_1$, $\pm$$2$spin$_1$, momentum$_1$, $\mu_1$, $\pm$color rep$_1$, color index$_1$,
+    field$_2$, index$_2$, $\pm$$2$spin$_2$, momentum$_2$, $\mu_2$, $\pm$color rep$_2$, color index$_2$,
+    $\vdots$
+    field$_n$, index$_n$, $\pm$$2$spin$_n$, momentum$_n$, $\mu_n$, $\pm$color rep$_n$, color index$_n$
+  )
+\end{lstlisting}
+
+The entries are:
+\begin{longtable}{r p{0.75\textwidth}}
+\texttt{vertex index} & The unique index of this vertex. (\texttt{iv1}, \texttt{iv2}, \dots) \\
+\texttt{field}$_i$ & The field name of the $i$-th particle. These names are constructed from the \qgraf{} field name as \texttt{[field.$\langle name\rangle$]}. \\
+\texttt{index}$_i$ & A unique name for this ``ray'' (at index $1$ they are \texttt{idx1r1}, \texttt{idx1r2}, \ldots) \\
+$\pm2$\texttt{spin}$_i$ & twice the spin of the $i$-th particle.
+   The sign distinguishes particles~($+$) from antiparticles~($-$). \\
+\texttt{momentum}$_i$ & the incoming momentum of the $i$-th particle. \\
+$\mu_i$ & the Lorentz index of the $i$-th particle. Depending on the spin of the particle
+   this is a spinor index (spin $1/2$), a Lorentz index (spin $1$) or a dummy index (spin $0$).
+   For higher spins this index must be split into its components using the function
+   \texttt{SplitLorentzIndex}. For its proper definition the reader is referred to
+   the document \texttt{src/form/lorentz.pdf}. \\
+$\pm$\texttt{color rep}$_i$ & the color representation of the $i$-th particle. Allowed
+   values currently are $\pm1,\pm3,\pm8$, although the sign only really makes sense for the
+   fundamental representation $3$ and its conjugate $\bar{3}\equiv-3$. \\
+\texttt{color index}$_i$ & The color index of the $i$-th particle. Depending on the color
+   representation this is an index in the fundamental, the adjoint or the trivial representation.
+\end{longtable}
+
+All symbols defined in \texttt{src/form/symbols.hh} are also accessible in this \form{} file.
+
+\attention{
+Note: until recently the definitions of \texttt{Sqrt2} and \texttt{sqrt2} were part
+of the model file. Now these symbols are part of \texttt{src/form/symbols.hh} and must not be
+redefined.
+}
+
+\attention{
+   All Dirac matrices and metric tensors must use the notation introduced by \texttt{spinney}.
+The metric tensor is $g^{\mu\nu}=\mathtt{d}(\mu, \nu)$ and $\gamma^\mu=\mathtt{Sm}(\mu)$,
+$\gamma_5=\mathtt{Gamma5}$, $\Pi_+=\mathtt{ProjPlus}$, $\Pi_-=\mathtt{ProjMinus}$. All non-commuting
+objects must reside inside the function \texttt{NCContainter} (see~example).
+}
+
+The color structure must use the objects $t_{ij}^A=\mathtt{T}(A, i, j)$ (where the color flow is such
+that$j$ is the index of an anti-quark), $f^{ABC}=\mathtt{f}(A, B, C)$ and
+$f^{ABE}f^{CDE}=\mathtt{f4}(A,B,C,D)$. At vertices coupling colored with colorless particles
+it might be necessary to use the \texttt{d\_} tensor to file the color flow through the vertex.
+
+\attention{
+   Note that all propagators and wave functions are defined in a model independent
+way in the files \texttt{src/form/propagators.hh} and \texttt{src/form/legs.hh}. Please,
+refrain from modifying these files directly but make all changes to \texttt{src/form/lorentz.nw}.
+}
+
+In theories with Majorana fermions the model file should include the following
+line:
+\begin{lstlisting}[style=form]
+#Define DISPOSEQGRAFSIGN "1"
+\end{lstlisting}
+
+\section{Standard Model (\texttt{sm})}
+\label{sec:model-files:sm}
+\subsection{Synopsis}
+The model `\texttt{sm}' contains the Feynman rules for the
+Standard Model in Feynman gauge as described
+in~\cite[Appendix~A]{Boehm:2001}.
+\renewcommand{\arraystretch}{1.1}
+\subsection{Particle content}
+\subsubsection{Leptons}
+\begin{longtable}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\texttt{ep }& \texttt{positron e+ }& \texttt{me}& $e^+$\\
+\texttt{em }& \texttt{electron e- }& \texttt{me}& $e^-$\\
+\texttt{ne }& & $0$ & $\nu_e$\\
+\texttt{nebar }& \texttt{ne\~}& $0$ & $\bar{\nu}_e$\\
+\hline
+\texttt{mup }& \texttt{mu+ }& \texttt{mmu}& $\mu^+$\\
+\texttt{mum }& \texttt{mu- }& \texttt{mmu}& $\mu^-$\\
+\texttt{nmu }& & $0$ & $\nu_\mu$\\
+\texttt{nmubar }& \texttt{nmu\~ }& $0$ & $\bar{\nu}_\mu$\\
+\hline
+\texttt{taup }& \texttt{tau+ }& \texttt{mtau}& $e^+$\\
+\texttt{taum }& \texttt{tau- }& \texttt{mtau}& $e^-$\\
+\texttt{ntau }& & $0$ & $\nu_\tau$\\
+\texttt{ntaubar }& \texttt{ntau\~ }& $0$ & $\bar{\nu}_\tau$\\
+\hline
+\end{longtable}
+
+\subsubsection{Quarks}
+\begin{longtable}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\texttt{U }& \texttt{u }& \texttt{mU}& $u$\\
+\texttt{Ubar }& \texttt{u\~ }& \texttt{mU}& $\bar{u}$\\
+\texttt{D }& d & \texttt{mD }& $d$\\
+\texttt{Dbar }& \texttt{d\~}& mD & $\bar{d}$\\
+\hline
+\texttt{S }& \texttt{s }& \texttt{mS}& $u$\\
+\texttt{Sbar }& \texttt{s\~ }& \texttt{mS}& $\bar{u}$\\
+\texttt{C }& c & \texttt{mC }& $d$\\
+\texttt{Cbar }& \texttt{c\~}& mC & $\bar{d}$\\
+\hline
+\texttt{T }& \texttt{t }& \texttt{mT}& $t$\\
+\texttt{Tbar }& \texttt{t\~ }& \texttt{mT}& $\bar{t}$\\
+\texttt{B }& b & \texttt{mB }& $b$\\
+\texttt{Bbar }& \texttt{b\~}& mB & $\bar{b}$\\
+\hline
+\end{longtable}
+
+\subsubsection{Gauge Bosons}
+\begin{longtable}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\texttt{g }& \texttt{gluon }& $0$ & $g$ \\
+\texttt{A }& \texttt{photon gamma }& $0$ & $\gamma$ \\
+\texttt{Z }& & \texttt{mZ }& $Z$ \\
+\texttt{Wp }& \texttt{W+}& \texttt{mW }& $W^+$ \\
+\texttt{Wm }& \texttt{W-}& \texttt{mW }& $W^-$ \\
+\hline
+\end{longtable}
+
+\subsubsection{Scalar Bosons}
+\begin{longtable}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\texttt{H }& \texttt{h higgs }& \texttt{mH }& $H$ \\
+\texttt{phim }& \texttt{phi- }& \texttt{mW }& $\phi^-$ \\
+\texttt{phip }& \texttt{phi+ }& \texttt{mW }& $\phi^+$ \\
+\texttt{chi }&  & \texttt{mZ }& $\chi$ \\
+\hline
+\end{longtable}
+
+\subsubsection{Ghost Fields}
+\begin{longtable}{|l|l|l|p{2cm}|}
+\hline
+Name&Alternative Names&Mass&Comment\\
+\hline
+\texttt{gh }&  & $0$ & $u^g$\\
+\texttt{ghbar }&  & $0$ & $\bar{u}^g$ \\
+\texttt{ghA }&  & $0$ & $u^A$ \\
+\texttt{ghAbar }&  & $0$ & $\bar{u}^A$ \\
+\texttt{ghZ }&  & \texttt{mZ }& $u^Z$ \\
+\texttt{ghZbar }&  & \texttt{mZ }& $\bar{u}^Z$ \\
+\texttt{ghWp }&  & \texttt{mW }& $u^+$ \\
+\texttt{ghWpbar }&  & \texttt{mW }& $\bar{u}^+$ \\
+\texttt{ghWm }&  & \texttt{mW }& $u^-$ \\
+\texttt{ghWmbar }&  & \texttt{mW }& $\bar{u}^-$ \\
+\hline
+\end{longtable}
+
+\subsection{Parameters}
+This section lists all model parameters which are not already
+listed as particle masses.
+
+\medskip
+\begin{longtable}{|l|l|l|}
+\hline
+Name & Symbol & Description\\
+\hline
+\texttt{NC }& $N_C$ & Number of colors in QCD\\
+\texttt{e }& $e$ & electro-weak coupling constant: $\alpha=e^2/(4\pi)$\\
+\texttt{gs }& $g_s$ & strong coupling constant: $\alpha_s=g_s^2/(4\pi)$\\
+\texttt{sw }& $s_w=\sin\theta_w$ & sine of weak mixing angle\\
+\texttt{cw }& $c_w=\cos\theta_w$ & cosine of weak mixing angle\\
+\texttt{VUD }& $V_{ud}$ & CKM mixing matrix element\\
+\texttt{CVDU }& $V_{du}^{\dagger}$ & --- '' ---\\
+\texttt{VUS }& $V_{us}$ & --- '' ---\\
+\texttt{CVSU }& $V_{su}^{\dagger}$ & --- '' ---\\
+\texttt{VUB }& $V_{ub}$ & --- '' ---\\
+\texttt{CVBU }& $V_{bu}^{\dagger}$ & --- '' ---\\
+\texttt{VCD }& $V_{cd}$ & --- '' ---\\
+\texttt{CVDC }& $V_{dc}^{\dagger}$ & --- '' ---\\
+\texttt{VCS }& $V_{cs}$ & --- '' ---\\
+\texttt{CVSC }& $V_{sc}^{\dagger}$ & --- '' ---\\
+\texttt{VCB }& $V_{cb}$ & --- '' ---\\
+\texttt{CVBC }& $V_{bc}^{\dagger}$ & --- '' ---\\
+\texttt{VTD }& $V_{td}$ & --- '' ---\\
+\texttt{CVTD }& $V_{dt}^{\dagger}$ & --- '' ---\\
+\texttt{VTS }& $V_{ts}$ & --- '' ---\\
+\texttt{CVST }& $V_{st}^{\dagger}$ & --- '' ---\\
+\texttt{VTB }& $V_{tb}$ & --- '' ---\\
+\texttt{CVTB }& $V_{bt}^{\dagger}$ & --- '' ---\\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.25}
+\section{\gosam directory structure}
+The \gosamv source directory has the structure as described below:
+
+\begin{longtable}{r p{0.7\textwidth}}
+
+\texttt{doc/} & This directory contains the documentation
+and example setup files. You can run \texttt{make} in this directory
+to generate the document \texttt{refman.pdf}; this is the document you
+are currently reading. \\
+
+\texttt{models/} & For each implemented model this directory
+contains the \qgraf model file (no extension), a \form interface
+(\texttt{*.hh}) and a \python module (\texttt{*.py}). Currently,
+the Standard Model (\texttt{sm}) is distributed with \gosamv, 
+where several variants are available:
+\begin{itemize}
+  \item \texttt{smdiag} implements a diagonal flavour structure ($V_{\text{CKM}}=\mathrm{diag}\{1,1,1\}$),
+  \item \texttt{smehc} contains effective gluon-Higgs couplings,
+  \item \texttt{sm\_complex} and \texttt{smdiag\_complex} support the complex mass scheme. 
+\end{itemize}
+The structure of the model files is discussed in more detail in
+Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on 
+FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
+can be found in the directory 
+\texttt{examples/model/}, as well as \texttt{UFO}  files for ADD~\cite{ArkaniHamed:1998rs}
+models with large extra dimensions (LED). \\
+
+\texttt{templates/} & Contains templates for the creation
+of the files in the process directory. The contents are transformed
+by the class
+\texttt{golem.util.parser.Template} and its subclasses
+in \texttt{golem.templates.*}. The translation of the templates is
+controled by the file \texttt{templates.xml} of the same directory. \\
+
+\texttt{src/python/} & All model independent \python modules
+can be found in this directory tree. \\
+
+\texttt{src/form/} & Here one finds all \form files
+which are not part of the template. \\
+
+\texttt{build} & This directory is created during
+building and installation of this package by running \texttt{meson setup build}.
+The files in this directory are of temporary nature and can be safely
+removed. \\
+
+\texttt{examples} & This directory contains some simple examples
+of validated processes. \\
+
+\texttt{olp} & Files in this directory are used by
+\texttt{gosam.py --olp}, which is \gosamv's implementation of the
+Binoth Les Houches interface for one-loop programs (BLHA).
+Both the original standards ~\cite{Binoth:2010xt} and the new standards 
+(BLHA2)~\cite{Alioli:2013nda} are supported by \gosam-\gosamversion. \\
+
+
+\end{longtable}
+
+\chapter{Available process card options} \label{chp:process_card_options}
+\input{refman_sections/template.tex}
