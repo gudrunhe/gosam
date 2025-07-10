@@ -27,6 +27,8 @@ process_path = Property(
    Example:
    process_path=/scratch/golem_processes/process1
    """,
+    str,
+    "gosam_process"
 )
 
 qgraf_in = Property(
