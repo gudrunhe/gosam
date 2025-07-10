@@ -43,9 +43,6 @@ If a rotation test is required, $P_\mathrm{rot}$ is computed,
 By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
 If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
 
-By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
-If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
-
 If \texttt{extensions=quadruple} is set during the \gosam generation phase, then the rescue system will instead recompute the amplitude in quadruple precision and calculate
 \begin{align}
 &\delta_\mathrm{qd} = 2 \left| \frac{\mathcal{A}-\mathcal{A}_\mathrm{q}}{\mathcal{A}+\mathcal{A}_\mathrm{q}} \right|,&

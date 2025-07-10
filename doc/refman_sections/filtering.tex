@@ -11,7 +11,7 @@ The four options are listed in increasing flexibility, but also increasing compl
 The easiest way to remove some diagrams from a process is with the \texttt{select[.lo|.nlo|.ct]} options. These options take a set of diagram IDs to determine which diagrams are kept in the respective component. A convenient way to inspect the diagram IDs is \texttt{doc/process.pdf}, which contains all diagrams with their respective identifiers. After modifying the \texttt{select} options and rerunning \texttt{gosam.py}, only the specified diagrams are kept. 
 
 \section{Filtering diagrams with the \texttt{filter.particles} options}
-To discard multiple diagrams based on the internal propagators, the one or more of the options \texttt{filter[|.lo|.nlo|.ct].particles} can be used. These options discard diagrams which do not have the specified number of internal propagators of the given field. These options are applied at the diagram generation level and are therefore more efficient compared to an equivalent \python filter.
+To discard multiple diagrams based on the internal propagators, one or more of the options \texttt{filter[|.lo|.nlo|.ct].particles} can be used. These options discard diagrams which do not have the specified number of internal propagators of the given field. These options are applied at the diagram generation level and are therefore more efficient compared to an equivalent \python filter.
 
 \section{Restricting the generation with \qgraf}
 \qgraf itself also allows filtering the diagrams it generates. These options are described in the \qgraf manual and can be applied with the \texttt{qgraf.verbatim[.lo|.nlo|.ct]} options. The content of these options is written verbatim to \qgraf's input file for the respective component. 

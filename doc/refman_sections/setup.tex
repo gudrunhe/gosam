@@ -212,7 +212,7 @@ amplitudes was written using \haggies~\cite{Reiter:2009ts}, since version~2 we
 use the features provided by \form{} version
 4.x~\cite{Kuipers:2012rf} to produce optimized code. This leads to more compact code and a speed-up in amplitude evaluation.
 
-\subsection{Grouping/summing of diagrams which share common subdiagrams}
+\section{Grouping/summing of diagrams which share common subdiagrams}
 \label{sec:grouping_summing}
 Already in the first release of \gosam{}, the diagrams were analyzed
 according to their kinematic matrix $S_{ij}$ and grouped together
@@ -258,13 +258,13 @@ loop, as shown in Figure~\ref{fig:diagsum_particle}, are also summed
 into one ``meta-diagram''. The default setting for this option is \texttt{diagsum=true}.
 
 
-\paragraph{Grouping of Tree-level Diagrams}
+\subsection*{Grouping of Tree-level Diagrams}
 
 By default the expressions of all tree-level diagrams are grouped into one
 file. This has the advantage that subexpressions which appear in several
 tree-level diagrams can be reused across the amplitude. The option to turn of this feature is not available anymore as of version 3.0.
 
-\subsection{Numerical polarisation vectors}
+\section{Numerical polarisation vectors}
 \label{sec:numpolvec}
 The use of numerical polarisation vectors for massless gauge bosons
 (gluons, photons) is activated by default.  This means that the
@@ -281,7 +281,7 @@ If the user wants to specify his/her preferred reference vectors,
 this can be done using the option \texttt{reference-vectors=\ldots}
 in the process card.
 
-\subsection{The extension \texttt{derive} ... is not an extension anymore}
+\section{The extension \texttt{derive} ... is not an extension anymore}
 \label{sec:derive}
 
 The \texttt{derive} feature generates code to access the tensor coefficients
@@ -312,7 +312,7 @@ The number of optional indices $i_1$, $i_2$, \dots
 determine which derivative should be returned. The subroutine
 \texttt{reconstruct\_d*} also takes into account the proper symmetrisation.
 
-\subsection{Customization}\label{sec:Customization}
+\section{Customization}\label{sec:Customization}
 \paragraph{Runtime parameters.}
 Many settings can be changed without recompiling the code, by
 creating and modifying a file \texttt{matrix/param.dat}.
@@ -360,7 +360,7 @@ Examples of options contained in \texttt{config.f90} are
     poles are taken into account. (only relevant when \texttt{r2=implicit}, see Appendix~\ref{app:r2})\\
 \texttt{include\_eps2\_terms} & controls if
     terms of order $\varepsilon^2$ multiplying
-    double poles are taken into account.\\
+    double poles are taken into account. (only relevant when \texttt{r2=implicit}, see Appendix~\ref{app:r2})\\
 \texttt{include\_color\_avg\_factor} & controls if the color averaging
     factor for inital state partons is multiplied to the final result.\\
 \texttt{include\_helicity\_avg\_factor} & controls if the helicity averaging
@@ -368,9 +368,6 @@ Examples of options contained in \texttt{config.f90} are
 \texttt{include\_symmetry\_factor} & controls if the symmetry
     factor for identical final state particles
     is multiplied to the final result. \\
-\texttt{use\_sorted\_sum} & controls if the diagrams are summed using
-    the algorithm Malcolm~\cite{Malcolm:1970}, which reduces the error
-    accumulated in presence of large cancellations.\\
 \texttt{tens\_rec\_by\_derivatives} & controls whether the tensorial reconstruction method is used. (only relevant when using \golemVC{})
 \end{longtable}
 
@@ -510,7 +507,9 @@ have to be taken:
    model=lanhep/ued, 7
 \end{lstlisting}
 \end{enumerate}
-\attention{Note that the use of user defined functions (\texttt{external\_func} in LanHEP) is not supported anymore.}
+
+\attention{Note that the use of user defined functions (\texttt{external\_func} in LanHEP) is not supported any longer.}
+
 
 \subsection{Propagators for spin-2 particles}
 \label{sec:spin2}
