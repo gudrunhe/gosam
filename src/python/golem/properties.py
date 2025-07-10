@@ -20,7 +20,7 @@ process_name = Property(
 process_path = Property(
     "process_path",
     """\
-   The path to which all Form output is written.
+   The path to which the process skeleton is written.
    If no absolute path is given, the path is interpreted relative
    to the working directory from which gosam.py is run.
 
