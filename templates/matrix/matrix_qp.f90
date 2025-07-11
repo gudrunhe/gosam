@@ -161,7 +161,7 @@ contains
 @if generate_loop_diagrams %][%
 @if generate_counterterms %]
       if (renormalisation.eq.4) then
-         ! massive quark counterterms only, OLD IMPLEMENTATION
+         ! quark mass counterterms only, OLD IMPLEMENTATION
          deltaOS = 1.0_ki_qp[%
 @if use_MQSE %][% @else %]
          print *, "ERROR: Code generated with use_MQSE=false."
@@ -199,7 +199,7 @@ contains
       case (0)
          ! no renormalisation
       case (1,2,3)
-         ! fully renormalised (1), finite gamma5 renormalisation only (2) or massive quark counterterms only (2): 
+         ! fully renormalised (1), finite gamma5 renormalisation only (2) or quark mass counterterms only (2): 
          ! separation handled in ct_amplitude.f90 and function amplitude_Dym
          if (present(h)) then
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_h_qp(vecs, renorm_logs, scale2, h)
@@ -207,7 +207,7 @@ contains
             amp((/3,2/)) = amp((/3,2/)) + samplitudect_qp(vecs, renorm_logs, scale2)
          end if
       case (4)
-         ! massive quark counterterms only, OLD IMPLEMENTATION
+         ! quark mass counterterms only, OLD IMPLEMENTATION
       case default
          ! not implemented
          print*, "In [% process_name asprefix=\_ %]matrix:"

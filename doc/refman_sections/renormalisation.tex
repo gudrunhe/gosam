@@ -1,0 +1,33 @@
+For calculations in the SM \gosam is capable of performing the one-loop QCD renormalisation in an automated way. For the precise form of the counterterms we refer to the original \gosam publication~\cite{Cullen:2011ac}. The quark and gluon wave functions are renormalised on-shell, as are the quark masses. For the the strong coupling we choose the decoupling scheme~\cite{Bernreuther:1981sg}. Yukawa couplings are by default renormalised in the on-shell scheme, but the user can choose to use the \MSb scheme instead by setting the \texttt{MSbar\_yukawa} option in the process card. This feature is particularly useful when considering processes for which certain quarks are considered massless but their coupling to the Higgs should be retained. See the process \texttt{bghb} in the \texttt{examples} directory as an example.
+
+There are several ways to switch off certain contributions or the whole of the one-loop QCD counterterms. When setting \texttt{renorm=false} in the process card no counterterms will be generated at all. If the counterterms have been generated they can also bee switched off at compile time by means of the \texttt{common/config.f90} parameter \texttt{renormalisation}:\\
+
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{lp{0.6\textwidth}}
+    \texttt{renormalisation=0} & all counterterms switched off\\
+    \texttt{renormalisation=1} & all counterterms switched on\\
+    \texttt{renormalisation=2} & only counterterm for finite $\gamma_5$ renormalisation in the 't Hooft-Veltmann scheme\\
+    \texttt{renormalisation=3} & only quark mass counterterms\\
+    \texttt{renormalisation=4} & only quark mass counterterms (alternative implementation)
+\end{tabular}
+\renewcommand{\arraystretch}{1.0}\\[10pt]
+
+The latter option only is available if \texttt{use\_MQSE=true} has been set in the process card. It enables the quark mass renormalisation as implemented in \gosam versions 1 and 2, which is based on scanning the one-loop diagrams for quark self-energy subgraphs (see~\cite{Cullen:2011ac} for details), and is available mainly for debugging purposes. As of \gosam-3.0 mass counterterms are instead directly inserted into massive quark propagators of the Born diagrams.
+
+Certain compile time parameters exist in \texttt{common/config.f90} which allow for a more fine-grained adjustment of the counterterms:
+
+{\ttfamily
+    \noindent renorm\_alphas\\
+    renorm\_gluonwf\\
+    renorm\_mqwf\\
+    renorm\_qmass\\
+    renorm\_yukawa\\
+    renorm\_logs\\
+    renorm\_gamma5\\
+    renorm\_eftwilson\\
+    renorm\_ehc
+}
+
+They are explained in detail in Appendix~\ref{chp:process_card_options}. All of these keywords are also available as process card options. The automatic generation of QCD counterterms has been extended to certain classes of EFT models, see Section~\ref{sec:EFTrenorm}
+
+\attention{Renormalisation in the electroweak theory is not yet available.}
