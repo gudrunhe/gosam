@@ -1,4 +1,4 @@
-\gosam generates all diagrams consistent with the coupling orders and external states by default. If only a subset of these diagrams are to be considered, several ways of restricting the diagrams are provided:
+By default \gosam generates all diagrams consistent with the coupling orders and external states. If only a subset of these diagrams are to be considered, several ways of restricting the diagrams are provided:
 \begin{itemize}
    \item Selecting specific diagrams by their IDs
    \item Restricting diagrams with the \texttt{filter.particles} flags
@@ -16,7 +16,7 @@ To discard multiple diagrams based on the internal propagators, one or more of t
 \section{Restricting the generation with \qgraf}
 \qgraf itself also allows filtering the diagrams it generates. These options are described in the \qgraf manual and can be applied with the \texttt{qgraf.verbatim[.lo|.nlo|.ct]} options. The content of these options is written verbatim to \qgraf's input file for the respective component. 
 
-Since these filters are applied already in the first of the diagram generation, they are more efficient compared to an equivalent \python filter. Since this difference is largely insignificant on modern CPUs, it is nevertheless recommended using the \python filters.
+Since these filters are applied already in the first step of the diagram generation, they are more efficient compared to an equivalent \python filter. Since this difference is largely insignificant on modern CPUs, it is nevertheless recommended using the \python filters.
 
 \section{Filtering diagrams in \python{}}
 \label{sec:filter}
@@ -26,7 +26,7 @@ The final implemented diagram selection option are the \python filters. They all
 \end{lstlisting}
 Diagrams for which this function returns \texttt{True} are kept, diagrams for which \texttt{False} is returned are discarded.
 
-If the filter function is sufficiently simple, it can directly be supplied to the \texttt{filter} option via a \python lambda-function. If the filter function becomes too complicated, it can be moved to an external file. The name of this file can then be supplied with the \texttt{filter.module} option, after which the functions defined in this external file can be used in the \texttt{filter} options.
+If the filter function is sufficiently simple, it can directly be supplied to the \texttt{filter} option via a \python lambda-function. If the filter function becomes too complicated, it can be moved to an external file. The name of this file can then be supplied with the \texttt{filter.module} option, after which the functions defined in this external file can be used in the \texttt{filter} options. The \texttt{filter.module} feature is used by the process \texttt{ddeeg} in the \texttt{examples} directory.
 
 \subsection{Methods for diagram filtering}
 The custom filter functions receive a single \texttt{Diagram} object as input. Many convenience methods are implemented on this object to simplify the construction of filters. In the following, a field can be specified as 

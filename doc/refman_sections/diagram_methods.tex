@@ -38,10 +38,10 @@
    \vspace{0.2cm} \\
    Example:
    \begin{lstlisting}[style=pykw]
-    # Remove all diagrams first generation propagators with momentum "k1+k2"
+    # Remove all diagrams with first generation propagators with momentum "k1+k2"
     lambda d: d.iprop(["U", "Ubar", "D", "Dbar"], momentum = "k1+k2") == 0
    \end{lstlisting}
-   \attention{\gosam relates some subprocesses to their crossing by default. Using the \texttt{momentum} keyword can break the crossing symmetry and therefore falsify the result. In this case, either run \gosam with the \texttt{no-crossings} option or use the \lstinline[style=pykw]|iprop_momentum| function.}
+   \attention{By default \gosam uses crossing symmetries between different subprocesses to reduce code redundancies and duplications. Using the \texttt{momentum} keyword can break the crossing symmetry and therefore falsify the result \emph{without a warning}. In this case, either run \gosam with the \texttt{no-crossings} option or use the \lstinline[style=pykw]|iprop_momentum| function.}
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|iprop_momentum(f: Field, momentum: str) -> bool|} \vspace{0.1cm}\\
    Returns \texttt{True} if the diagram contains a propagator of the given field with the given momentum. When \texttt{True} is returned, the diagram is flagged as potentially crossing symmetry violating and all subprocesses related to the one containing the current diagram are tested for crossing symmetry explicitly.
@@ -59,9 +59,11 @@
    Returns a list of the propagator masses in a quark loop of size two. If the diagram does not contain such a loop, an empty list is returned.  
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{ext_legs_from_vertex(f: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
+   \textcolor{red}{MH: a bit unclear, maybe an example might help}
    Returns \texttt{True} if more than \texttt{max\_legs} legs matching \texttt{f} are attached to the same vertex. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{vertex_with_external_legs(*fields: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
+   \textcolor{red}{MH: what is the difference compared to \lstinline{vertex_with_external_legs}?}
    Returns \texttt{True} if more than \texttt{max\_legs} legs are attached to a vertex matching \texttt{*fields}. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|loopsize() -> int|} \vspace{0.1cm}\\
