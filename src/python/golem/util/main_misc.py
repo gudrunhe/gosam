@@ -534,10 +534,10 @@ def fill_config(conf):
     no_renorm = generate_loop_diagrams and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""
-    for p in ["renorm_beta",
+    for p in ["renorm_alphas",
               "renorm_mqwf",
-              "renorm_decoupling",
-              "renorm_mqse",
+              "renorm_gluonwf",
+              "renorm_qmass",
               "renorm_logs",
               "renorm_gamma5",
               "renorm_yukawa",
@@ -694,7 +694,7 @@ def fill_config(conf):
     conf["generate_counterterms"] = generate_counterterms
     conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_loop_diagrams
     conf["generate_ym_counterterms"] = (conf.getBooleanProperty("renorm_yukawa") \
-                                        or conf.getBooleanProperty("renorm_mqse") \
+                                        or conf.getBooleanProperty("renorm_qmass") \
                                         or conf.getBooleanProperty("renorm_gamma5")) \
         and generate_counterterms and generate_loop_diagrams
     conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_loop_diagrams

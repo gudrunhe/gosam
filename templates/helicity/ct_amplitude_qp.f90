@@ -14,8 +14,8 @@ contains[%
       use [% process_name asprefix=\_ %]color_qp, only: numcs
       use [% process_name asprefix=\_ %]kinematics, only: corrections_are_qcd
       use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
-         & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, renorm_yukawa, renorm_eftwilson, &
+         & renormalisation, renorm_alphas, renorm_mqwf, renorm_gluonwf, &
+         & renorm_logs, renorm_qmass, renorm_yukawa, renorm_eftwilson, &
          & renorm_ehc, renorm_gamma5, nlo_prefactors
       use [% process_name asprefix=\_ %]dipoles_qp, only: pi
       use [% process_name asprefix=\_ %]counterterms_qp, only: counterterm_alphas, counterterm_gluonwf, counterterm_mqwf[%
@@ -119,12 +119,12 @@ contains[%
          if (corrections_are_qcd) then
       
             ! alpha_s renormalisation:      
-            if (renorm_beta) then
+            if (renorm_alphas) then
                Deltagwf_0 = Deltagwf_0 + counterterm_alphas(scale2)
             end if
 
             ! gluon wave function renormalisation:
-            if (renorm_decoupling) then
+            if (renorm_gluonwf) then
                Deltagwf_0 = Deltagwf_0 + counterterm_gluonwf(scale2)
             end if  
 
@@ -139,7 +139,7 @@ contains[%
      
             ! Yukawa coupling and quark mass renormalisation
             ! Finite renormalisation for gamma5 in tHV
-            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
+            if (renorm_yukawa.or.renorm_qmass.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_0(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_0(scale2,  0)
             end if[% 
@@ -179,14 +179,14 @@ contains[%
          if (corrections_are_qcd) then
       
             ! alpha_s renormalisation:      
-            if (renorm_beta) then
+            if (renorm_alphas) then
                Deltagwf_0 = Deltagwf_0 + counterterm_alphas(scale2)
                ! SMEFT contribution to QCD beta function (currently placeholder):
                Deltagwf_1 = Deltagwf_1 + 0._ki
             end if
 
             ! gluon wave function renormalisation:
-            if (renorm_decoupling) then
+            if (renorm_gluonwf) then
                Deltagwf_0 = Deltagwf_0 + counterterm_gluonwf(scale2)
                ! SMEFT contribution to gluon WF renormalisation (currently placeholder):
                Deltagwf_1 = Deltagwf_1 + 0._ki
@@ -205,7 +205,7 @@ contains[%
      
             ! Yukawa coupling and quark mass renormalisation
             ! Finite renormalisation for gamma5 in tHV
-            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
+            if (renorm_yukawa.or.renorm_qmass.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_1(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_1(scale2,  0)
             end if[% 
@@ -245,14 +245,14 @@ contains[%
          if (corrections_are_qcd) then
       
             ! alpha_s renormalisation:      
-            if (renorm_beta) then
+            if (renorm_alphas) then
                Deltagwf_0 = Deltagwf_0 + counterterm_alphas(scale2)
                ! SMEFT contribution to QCD beta function (currently placeholder):
                Deltagwf_2 = Deltagwf_2 + 0._ki
             end if
 
             ! gluon wave function renormalisation:
-            if (renorm_decoupling) then
+            if (renorm_gluonwf) then
                Deltagwf_0 = Deltagwf_0 + counterterm_gluonwf(scale2)
                ! SMEFT contribution to gluon WF renormalisation (currently placeholder):
                Deltagwf_2 = Deltagwf_2 + 0._ki
@@ -271,7 +271,7 @@ contains[%
      
             ! Yukawa coupling and quark mass renormalisation
             ! Finite renormalisation for gamma5 in tHV
-            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
+            if (renorm_yukawa.or.renorm_qmass.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct_2(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct_2(scale2,  0)
             end if[% 
@@ -314,12 +314,12 @@ contains[%
          if (corrections_are_qcd) then
       
             ! alpha_s renormalisation:      
-            if (renorm_beta) then
+            if (renorm_alphas) then
                Deltagwf = Deltagwf + counterterm_alphas(scale2)
             end if
 
             ! gluon wave function renormalisation:
-            if (renorm_decoupling) then
+            if (renorm_gluonwf) then
                Deltagwf = Deltagwf + counterterm_gluonwf(scale2)
             end if  
 
@@ -349,7 +349,7 @@ contains[%
       
             ! Yukawa coupling and quark mass renormalisation
             ! Finite renormalisation for gamma5 in tHV
-            if (renorm_yukawa.or.renorm_mqse.or.renorm_gamma5) then
+            if (renorm_yukawa.or.renorm_qmass.or.renorm_gamma5) then
                amp(-1,:) = amp(-1,:) + ampdymct(scale2, -1)
                amp( 0,:) = amp( 0,:) + ampdymct(scale2,  0)
             end if[% 

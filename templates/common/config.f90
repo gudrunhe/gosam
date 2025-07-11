@@ -117,7 +117,7 @@
    @end @select %]
 
    ! if renormalisation.eq.1, include alpha_s renormalisation:
-   logical :: renorm_beta = [% renorm_beta
+   logical :: renorm_alphas = [% renorm_alphas
              convert=bool
              true=.true.
              false=.false. %]
@@ -128,13 +128,13 @@
              false=.false. %]
    ! include massive quark contribution for wave function renormalisation
    ! of the gluon
-   logical :: renorm_decoupling = [% renorm_decoupling
+   logical :: renorm_gluonwf = [% renorm_gluonwf
              convert=bool
              true=.true.
              false=.false. %]
 
    ! include mass counter terms for internal quark lines
-   logical :: renorm_mqse = [% renorm_mqse
+   logical :: renorm_qmass = [% renorm_qmass
              convert=bool
              true=.true.
              false=.false. %]

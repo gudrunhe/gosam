@@ -954,12 +954,13 @@ pyxodraw = Property(
     hidden=True,
 )
 
-config_renorm_beta = Property(
-    "renorm_beta",
+config_renorm_alphas = Property(
+    "renorm_alphas",
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables beta function renormalisation
+   Activates or disables the one-loop QCD renormalisation 
+   of the strong coupling.
 
    QCD only
    """,
@@ -973,7 +974,7 @@ config_renorm_logs = Property(
    Sets the name of the same variable in config.f90
 
    Activates or disables the logarithmic finite terms
-   of all UV counterterms
+   of all one-loop QCD renormalisation counterterms.
 
    QCD only
    """,
@@ -981,27 +982,29 @@ config_renorm_logs = Property(
     True,
 )
 
-config_renorm_mqse = Property(
-    "renorm_mqse",
+config_renorm_qmass = Property(
+    "renorm_qmass",
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the UV counterterm coming from the
-   massive quark propagators
+   Activates or disables the one-loop QCD renormalisation
+   of quark masses.
 
    QCD only
+
+    See also: use_MQSE
    """,
     bool,
     True,
 )
 
-config_renorm_decoupling = Property(
-    "renorm_decoupling",
+config_renorm_gluonwf = Property(
+    "renorm_gluonwf",
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables UV counterterms coming from
-   massive quark loops
+   Activates or disables one-loop QCD renormalisation
+   of the gluon wave function.
 
    QCD only
    """,
@@ -1014,8 +1017,8 @@ config_renorm_mqwf = Property(
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables UV countertems coming from
-   external massive quarks
+   Activates or disables one-loop QCD renormalisation
+   of massive quark wave functions.
 
    QCD only
    """,
@@ -1028,8 +1031,8 @@ config_renorm_gamma5 = Property(
     """\
    Sets the same variable in config.f90
 
-   Activates finite renormalisation for axial couplings in the
-   't Hooft-Veltman scheme
+   Activates or disables finite one-loop QCD renormalisation 
+   for axial couplings in the 't Hooft-Veltman scheme.
 
    QCD only, works only with built-in model files.
    """,
@@ -1042,10 +1045,11 @@ config_renorm_yukawa = Property(
     """\
    Sets the same variable in config.f90
 
-   Enables renormalization of Yukawa coupling. Two schemes are
-   possible: On-Shell and MSbar.
+   Activates or disables one-loop QCD renormalisation
+   of Yukawa couplings. Two schemes are available:
+   On-Shell and MSbar. (see 'MSbar_yukawa')
 
-   QCD only.
+   QCD only
 
    See also: MSbar_yukawa
    """,
@@ -1058,10 +1062,13 @@ config_renorm_eftwilson = Property(
     """\
    Sets the same variable in config.f90
 
-   Enables renormalization of EFT Wilson coefficients.
-   Works only with special New Physics UFO models, con-
-   taining 'NP' as additional coupling order. 'order_names'
-   must be specified and explicitly contain 'NP'.
+   Activates or disables one-loop QCD renormalisation
+   of EFT Wilson coefficients. Works only with special 
+   New Physics UFO models, containing 'NP' as additional
+   coupling order. 'order_names' must be specified and 
+   explicitly contain 'NP'.
+
+   QCD only
    """,
     bool,
     False,
@@ -1072,14 +1079,17 @@ config_renorm_ehc = Property(
     """\
    Sets the same variable in config.f90
 
-   Turns on the finite renormalisation of effective Higgs-gluon
-   vertices. Implemented for models in the heavy-top limit like
-   smehc. Should not be used when counterterms for Wilson coeffi-
-   cients are supplyed by means of a UFO model (see 'renorm_eft_wilson').
+   Activates or disables one-loop QCD renormalisation of effective 
+   Higgs-gluon vertices. Implemented for models in the heavy-top 
+   limit like smehc. Should not be used when counterterms for Wilson
+   coefficients are supplyed by means of a UFO model 
+   (see 'renorm_eft_wilson').
    CAUTION:
    This will only work if the Higgs-gluon vertices factorize from the
    amplitude, i.e. the number of Higgs-gluon couplings is the same for
    all Born diagrams!
+
+   QCD only
    """,
     bool,
     False,
@@ -1561,6 +1571,7 @@ use_MQSE = Property(
     energies and insert the appropriate mass counterterm during the
     form step. Used mainly for debugging purposes.
 
+    See also: renorm_qmass
     """,
     bool,
     False,
@@ -1645,13 +1656,15 @@ properties = [
     filter_nlo_diagrams,
     filter_ct_diagrams,
     filter_module,
-    config_renorm_beta,
+    config_renorm_alphas,
+    config_renorm_gluonwf,
     config_renorm_mqwf,
-    config_renorm_decoupling,
-    config_renorm_mqse,
+    config_renorm_qmass,
+    use_MQSE,
+    config_renorm_yukawa,
+    MSbar_yukawa,    
     config_renorm_logs,
     config_renorm_gamma5,
-    config_renorm_yukawa,
     config_renorm_eftwilson,
     config_renorm_ehc,
     config_reduction_interoperation,
@@ -1694,8 +1707,6 @@ properties = [
     all_mandelstam,
     flavour_groups,
     respect_generations,
-    MSbar_yukawa,
-    use_MQSE,
     meson_buildtype,
     meson_arch,
     unitary_gauge

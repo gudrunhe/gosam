@@ -110,7 +110,7 @@ contains
    subroutine samplitudel01(vecs, scale2, amp, rat2, ok, h)
       use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
-         & renormalisation, renorm_logs, renorm_mqse, nlo_prefactors
+         & renormalisation, renorm_logs, renorm_qmass, nlo_prefactors
       use [% process_name asprefix=\_ %]kinematics, only: &
          & inspect_kinematics, init_event
       use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model

@@ -120,8 +120,8 @@ subroutine     setup_parameters()
    mT = 171.2_ki
 
    renormalisation = 1
-   renorm_beta = .true.
-   renorm_mqse = .true.
+   renorm_alphas = .true.
+   renorm_qmass = .true.
    renorm_logs = .true.
 
    ! reduction_interoperation=0

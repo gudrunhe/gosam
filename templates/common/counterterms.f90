@@ -167,7 +167,7 @@ contains
    function counterterm_mass_OS(renorm,eps,scale2,m) result(ct)
       use [% process_name asprefix=\_ %]color, only: CF
       use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
-         & renorm_logs, renorm_mqse
+         & renorm_logs, renorm_qmass
       implicit none
       real(ki) :: ct, scale2, m
       integer :: eps
@@ -175,7 +175,7 @@ contains
 
       ct = 0.0_ki
 
-      if (.not.(renorm.and.renorm_mqse)) then
+      if (.not.(renorm.and.renorm_qmass)) then
          return
       end if
 
