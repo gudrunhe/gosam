@@ -1,13 +1,13 @@
     ################################################################################
-    #   __   __   ___   __   __  __                      GoSam                               #
-    #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop             #
-    # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator             #
-    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                       #
+    #   __   __   ___   __   __  __                      GoSam                        #
+    #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop           #
+    # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator          #
+    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                    #
     #                                                                                                      #
     #                                    (c) The GoSam Collaboration 2011-2025     #
     #                                                                                                        #
     #        AUTHORS:                                                                               #
-    #        * Jens Braun                       <j.braun@kit.edu>                       #
+    #        * Jens Braun                       <j.braun@kit.edu>                  #
     #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
     #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          # 
     #        * Marius Hoefer                    <marius.hoefer@kit.edu>            #
@@ -131,17 +131,18 @@ OLP-mode, additionally a script `build_olp_library.sh` is generated to run all b
 # References
 Scientific publications using GoSam or any modified version of it or any code linking to GoSam or parts of it should make a clear reference to the publications:
 
- * G.~Cullen, N. Greiner, G. Heinrich, G. Luisoni, 
+ * G. Cullen, N. Greiner, G. Heinrich, G. Luisoni, 
               P. Mastrolia, G. Ossola, T. Reiter, F. Tramontano,
           ``Automated One-Loop Calculations with GoSam'',
-       Eur. Phys. J. C \textbf{72} (2012), 1889 [arXiv:1111.2034 [hep-ph]].
-       \item  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
+		  Eur. Phys. J. C 72 (2012), 1889 [arXiv:1111.2034 [hep-ph]].
+		  
+*  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
               P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk, 
 	      J.F.von Soden-Fraunhofen, F. Tramontano, 
 		  ``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond",
-		  Eur.\ Phys.\ J.\ C \textbf{74} (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
+		  Eur. Phys. J. C 74 (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
 		  
- * J.~Braun, B.~Campillo Aveleira, G.~Heinrich, M.~H\"ofer, S.P. Jones, M.~Kerner, J.~Lang, V.~Magerya, 
+ * J. Braun, B. Campillo Aveleira, G. Heinrich, M. Hoefer, S.P. Jones, M. Kerner, J. Lang, V. Magerya, 
         ``One-loop calculations in Effective Field Theories with GoSam-3.0",
         arXiv:2507.xxxx.
 
