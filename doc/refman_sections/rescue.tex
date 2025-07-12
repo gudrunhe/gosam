@@ -40,7 +40,12 @@ If a rotation test is required, $P_\mathrm{rot}$ is computed,
 \item  $P_\mathrm{rot} <$ \texttt{PSP\_chk\_th3} $\rightarrow$ rescue point.
 \end{enumerate}
 
-By default, if the above checks trigger the rescue system then the point will be recomputed with \texttt{reduction\_interoperation\_rescue} \textcolor{red}{MH: does this mean we call golem95 instead of ninja or vice-versa?} and a pole check followed by a rotation check will be performed.
+By default, if the above checks trigger the rescue system then the
+point will be recomputed with the reduction library specified in
+\texttt{reduction\_interoperation\_rescue} if this
+library is available (i.e. typically with {\sc Golem95}  if \gosam was compiled with the \golem
+option enabled and if \ninja is the default reduction library).
+A pole check followed by a rotation check will be performed.
 If these checks fail or the rescue system is disabled, the point is discarded and a precision of $-10$ is returned.
 
 If \texttt{extensions=quadruple} is set during the \gosam generation phase, then the rescue system will instead recompute the amplitude in quadruple precision and calculate
@@ -62,4 +67,16 @@ are evaluated.
 If \texttt{PSP\_chk\_th5} $< P_\mathrm{qqrot}$ the point is accepted. 
 All remaining points are discarded and a precision of $-10$ is returned.
 
-For loop-induced processes, the stability and rescue procedure are applied to the Born result, the thresholds \texttt{PSP\_chk\_th*} are replaced by \texttt{PSP\_chk\_li*}.
+For loop-induced processes, the stability and rescue procedure are
+applied to the Born result, the thresholds \texttt{PSP\_chk\_th*} are
+replaced by \texttt{PSP\_chk\_li*}.
+
+\vspace*{3mm}
+
+Typically, the fraction of unstable points does not exceed the percent range and
+therefore using \texttt{extensions}\texttt{=quadruple} with \ninja as
+the only reduction library is the recommended setup for a calculation
+where the virtual amplitude is called at a large number of phase space
+points, as it represents a good balance between rescue success and speed.
+If \texttt{PSP\_verbosity} is set to \texttt{True} the points that
+could not be rescued are written to the file \texttt{gs\_badpts.log}.
