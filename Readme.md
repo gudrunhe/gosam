@@ -1,15 +1,15 @@
     ################################################################################
-    #   __   __   ___   __   __  __                      GoSam                        #
-    #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop           #
-    # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator          #
-    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                    #
-    #                                                                                                      #
+    #   __   __   ___   __   __  __                      GoSam                     #
+    #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop             #
+    # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
+    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                     #
+    #                                                                              #
     #                                    (c) The GoSam Collaboration 2011-2025     #
-    #                                                                                                        #
-    #        AUTHORS:                                                                               #
+    #                                                                              #
+    #       AUTHORS:                                                               #
     #        * Jens Braun                       <j.braun@kit.edu>                  #
     #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
-    #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          # 
+    #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          #
     #        * Marius Hoefer                    <marius.hoefer@kit.edu>            #
     #        * Stephen Jones                    <stephen.jones@durham.ac.uk>       #
     #        * Matthias Kerner                  <matthias.kerner@kit.edu>          #
@@ -27,7 +27,6 @@
     #  it under the terms of the GNU General Public License either                 #
     #  version 3, or (at your option) any later version.                           #
     #                                                                              #
-    # 
     ################################################################################
 
 
@@ -40,18 +39,18 @@ the associated one-loop diagrams into code suitable for the
 evaluation with Ninja and/or Golem95.
 
 # Prerequisites
-* Installing GoSam and it's dependencies as well as building the generated Fortran code requires the 
+* Installing GoSam and it's dependencies as well as building the generated Fortran code requires the
   [Meson](https://mesonbuild.com/Getting-meson.html) build system.
-* Running GoSam requires at least Python version 3.9 (older versions of Python may work but are unsupported), to run 
+* Running GoSam requires at least Python version 3.9 (older versions of Python may work but are unsupported), to run
 the Python code in parallel additionally the `multiprocess` package is required (available from [PyPI](https://pypi.org/project/multiprocess/)).
 * To compile the dependencies and the generated code, a sufficiently modern Fortran compiler is required.
 * Building GoSam with support for quadruple precision requires QuadNinja, which in turn requires `libquadmath`.
 
 # Installation
 
-GoSam is available from the public [GitHub repository](https://github.com/gudrunhe/gosam) or as a release tarball. 
+GoSam is available from the public [GitHub repository](https://github.com/gudrunhe/gosam) or as a release tarball.
 
-The git repository can be downloaded by running 
+The git repository can be downloaded by running
 ```console
 git clone
 ```
@@ -63,17 +62,17 @@ git clone
 > in the `build` directory. Otherwise, the revision tag of the installation is not updated after pulling changes.
 
 The tarball is available [here](https://github.com/gudrunhe/gosam/releases).
-Then, in the cloned repository or the unpacked tarball, running 
+Then, in the cloned repository or the unpacked tarball, running
 ```console
 meson setup build --prefix <prefix> [-Doption=value]
 meson install -C build
 ```
-will download, build and install 
-[QGRAF](http://cfif.tecnico.ulisboa.pt/~paulo/qgraf.html), 
-[Form](https://www.nikhef.nl/~form/), 
+will download, build and install
+[QGRAF](http://cfif.tecnico.ulisboa.pt/~paulo/qgraf.html),
+[Form](https://www.nikhef.nl/~form/),
 [Golem95](https://github.com/gudrunhe/golem95) (optional),
 [Ninja](https://github.com/peraro/ninja)
-and GoSam. By default, only `Ninja` is installed. By optionally setting `-Doption=value`, the default build options can be altered. 
+and GoSam. By default, only `Ninja` is installed. By optionally setting `-Doption=value`, the default build options can be altered.
 The full list of build options is available by running `meson configure` in the `build` directory after running `meson setup`.
 To avoid collisions with possible other installations of some of said programs, everything is installed into
 a subfolder, e.g. `<prefix>/lib/GoSam/`. Only the main script, `gosam.py`, is directly installed to `<prefix>/bin`.
@@ -81,8 +80,8 @@ As of version 3, GoSam no longer requires an environment setup (formerly `gosam_
 be found by the shell, e.g. by adding `<prefix>/bin` to `$PATH`.
 
 > [!NOTE]
-> Running `meson install -C build` will by default use all available processor cores. If this is undesired, the number 
-> of jobs can be chosen by running 
+> Running `meson install -C build` will by default use all available processor cores. If this is undesired, the number
+> of jobs can be chosen by running
 > ```console
 > meson compile -C build -j <jobs>
 > meson install -C build
@@ -90,7 +89,7 @@ be found by the shell, e.g. by adding `<prefix>/bin` to `$PATH`.
 > instead.
 
 > [!NOTE]
-> By default, QuadNinja is built alongside Ninja. If this is undesired, QuadNinja can be disabled by setting 
+> By default, QuadNinja is built alongside Ninja. If this is undesired, QuadNinja can be disabled by setting
 > `-Dquadninja=false` during setup.
 
 > [!NOTE]
@@ -101,7 +100,7 @@ A GoSam-3 installation can be removed by running
 ```console
 ninja gs-uninstall
 ```
-in the `build` directory. 
+in the `build` directory.
 
 > [!CAUTION]
 > This will remove the GoSam installation at `<prefix>` currently specified in the `build` folder. This procedure will
@@ -111,16 +110,16 @@ in the `build` directory.
 # Running GoSam
 Running GoSam generally consists of two steps, the first one being the preparation of the process directory.
 This is done by the Python program `gosam.py`. It supports two run modes, standalone mode and OLP
-mode. In standalone mode, the process directory is generated by running 
+mode. In standalone mode, the process directory is generated by running
 ```console
 gosam.py <process_card>.in
 ```
 with an appropriate process card. This will generate a folder `<process_dir>` containing all files required for
-generating the source code. For details on the process card and running GoSam in OLP mode, please consult the full 
+generating the source code. For details on the process card and running GoSam in OLP mode, please consult the full
 manual.
 
 As a second step, the remaining source is generated and everything is compiled to a library. For this purpose, the
-process directory contains a Meson build definition. In the process directory, running 
+process directory contains a Meson build definition. In the process directory, running
 ```console
 meson setup build --prefix <prefix>
 meson install -C build
@@ -131,18 +130,17 @@ OLP-mode, additionally a script `build_olp_library.sh` is generated to run all b
 # References
 Scientific publications using GoSam or any modified version of it or any code linking to GoSam or parts of it should make a clear reference to the publications:
 
- * G. Cullen, N. Greiner, G. Heinrich, G. Luisoni, 
-              P. Mastrolia, G. Ossola, T. Reiter, F. Tramontano,
-          ``Automated One-Loop Calculations with GoSam'',
-		  Eur. Phys. J. C 72 (2012), 1889 [arXiv:1111.2034 [hep-ph]].
-		  
-*  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni, 
-              P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk, 
-	      J.F.von Soden-Fraunhofen, F. Tramontano, 
-		  ``GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond",
-		  Eur. Phys. J. C 74 (2014) 8,  3001 [arXiv:1404.7096 [hep-ph]].
-		  
- * J. Braun, B. Campillo Aveleira, G. Heinrich, M. Hoefer, S.P. Jones, M. Kerner, J. Lang, V. Magerya, 
-        ``One-loop calculations in Effective Field Theories with GoSam-3.0",
-        arXiv:2507.xxxx.
+ * G. Cullen, N. Greiner, G. Heinrich, G. Luisoni,
+              P. Mastrolia, G. Ossola, T. Reiter, F. Tramontano,\
+          _Automated One-Loop Calculations with GoSam_,\
+		  Eur. Phys. J. C __72__ (2012), 1889 [[arXiv:1111.2034 [hep-ph]](https://arxiv.org/abs/1111.2034)].
 
+*  G. Cullen,  H. van Deurzen, N. Greiner, G. Heinrich, G. Luisoni,
+              P. Mastrolia, E. Mirabella, G. Ossola, T. Peraro, J. Schlenk,
+	      J.F.von Soden-Fraunhofen, F. Tramontano,\
+		  _GoSam-2.0: a tool for automated one-loop calculations within the Standard Model and Beyond_,\
+		  Eur. Phys. J. C __74__ (2014) 8,  3001 [[arXiv:1404.7096 [hep-ph]](https://arxiv.org/abs/1404.7096)].
+
+ * J. Braun, B. Campillo Aveleira, G. Heinrich, M. Hoefer, S.P. Jones, M. Kerner, J. Lang, V. Magerya,\
+        _One-loop calculations in Effective Field Theories with GoSam-3.0_,\
+        arXiv:2507.xxxx.

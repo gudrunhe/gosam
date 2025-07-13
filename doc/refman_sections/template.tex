@@ -14,7 +14,7 @@ Default: \verb|gosam_process|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{process\_path}}] (\textit{text})
 \begin{verbatim}
-The path to which the process skeleton is written.
+The path to which all Form output is written.
 If no absolute path is given, the path is interpreted relative
 to the working directory from which gosam.py is run.
 
@@ -612,24 +612,11 @@ See filter.lo, filter.nlo
 Default: \verb|""|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{renorm\_alphas}}] (\textit{true/false})
+\\\item[\colorbox{gray!30}{\texttt{renorm\_beta}}] (\textit{true/false})
 \begin{verbatim}
 Sets the name of the same variable in config.f90
 
-Activates or disables the one-loop QCD renormalisation
-of the strong coupling.
-
-QCD only
-\end{verbatim}
-Default: \verb|True|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{renorm\_gluonwf}}] (\textit{true/false})
-\begin{verbatim}
-Sets the name of the same variable in config.f90
-
-Activates or disables one-loop QCD renormalisation
-of the gluon wave function.
+Activates or disables beta function renormalisation
 
 QCD only
 \end{verbatim}
@@ -640,69 +627,36 @@ Default: \verb|True|
 \begin{verbatim}
 Sets the name of the same variable in config.f90
 
-Activates or disables one-loop QCD renormalisation
-of massive quark wave functions.
+Activates or disables UV countertems coming from
+external massive quarks
 
 QCD only
 \end{verbatim}
 Default: \verb|True|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{renorm\_qmass}}] (\textit{true/false})
+\\\item[\colorbox{gray!30}{\texttt{renorm\_decoupling}}] (\textit{true/false})
 \begin{verbatim}
 Sets the name of the same variable in config.f90
 
-Activates or disables the one-loop QCD renormalisation
-of quark masses.
+Activates or disables UV counterterms coming from
+massive quark loops
 
 QCD only
-
- See also: use_MQSE
 \end{verbatim}
 Default: \verb|True|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{use\_MQSE}}] (\textit{true/false})
+\\\item[\colorbox{gray!30}{\texttt{renorm\_mqse}}] (\textit{true/false})
 \begin{verbatim}
-Whether or not to scan 1-loop amplitudes for massive quark self
-energies and insert the appropriate mass counterterm during the
-form step. Used mainly for debugging purposes.
+Sets the name of the same variable in config.f90
 
-See also: renorm_qmass
-\end{verbatim}
-Default: \verb|False|
-\\Hidden: \verb|False|
-\\Experimental: \verb|True|
-\\\item[\colorbox{gray!30}{\texttt{renorm\_yukawa}}] (\textit{true/false})
-\begin{verbatim}
-Sets the same variable in config.f90
-
-Activates or disables one-loop QCD renormalisation
-of Yukawa couplings. Two schemes are available:
-On-Shell and MSbar. (see 'MSbar_yukawa')
+Activates or disables the UV counterterm coming from the
+massive quark propagators
 
 QCD only
-
-See also: MSbar_yukawa
 \end{verbatim}
 Default: \verb|True|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{MSbar\_yukawa}}] (\textit{comma separated list})
-\begin{verbatim}
-List of quarks with Yukawa couplings which shall be renormalised in
-the MSbar scheme instead of the default OS scheme. Can also be used
-to renormalise Yukawa couplings of particles with mass set to zero
-while still keeping their coupling to the Higgs.
-
-Examples:
-MSbar_yukawa=B
--> Yukawa coupling of bottom to Higgs will be renormalised in the
-   MSbar scheme, even if mB=0 (as long as Hbb coupling still exist)
-
-See also: renorm_yukawa
-\end{verbatim}
-Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{renorm\_logs}}] (\textit{true/false})
@@ -710,7 +664,7 @@ Default: \verb|None|
 Sets the name of the same variable in config.f90
 
 Activates or disables the logarithmic finite terms
-of all one-loop QCD renormalisation counterterms.
+of all UV counterterms
 
 QCD only
 \end{verbatim}
@@ -721,10 +675,24 @@ Default: \verb|True|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Activates or disables finite one-loop QCD renormalisation
-for axial couplings in the 't Hooft-Veltman scheme.
+Activates finite renormalisation for axial couplings in the
+'t Hooft-Veltman scheme
 
 QCD only, works only with built-in model files.
+\end{verbatim}
+Default: \verb|True|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{renorm\_yukawa}}] (\textit{true/false})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Enables renormalization of Yukawa coupling. Two schemes are
+possible: On-Shell and MSbar.
+
+QCD only.
+
+See also: MSbar_yukawa
 \end{verbatim}
 Default: \verb|True|
 \\Hidden: \verb|False|
@@ -733,13 +701,10 @@ Default: \verb|True|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Activates or disables one-loop QCD renormalisation
-of EFT Wilson coefficients. Works only with special
-New Physics UFO models, containing 'NP' as additional
-coupling order. 'order_names' must be specified and
-explicitly contain 'NP'.
-
-QCD only
+Enables renormalization of EFT Wilson coefficients.
+Works only with special New Physics UFO models, con-
+taining 'NP' as additional coupling order. 'order_names'
+must be specified and explicitly contain 'NP'.
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
@@ -748,17 +713,14 @@ Default: \verb|False|
 \begin{verbatim}
 Sets the same variable in config.f90
 
-Activates or disables one-loop QCD renormalisation of effective
-Higgs-gluon vertices. Implemented for models in the heavy-top
-limit like smehc. Should not be used when counterterms for Wilson
-coefficients are supplyed by means of a UFO model
-(see 'renorm_eft_wilson').
+Turns on the finite renormalisation of effective Higgs-gluon
+vertices. Implemented for models in the heavy-top limit like
+smehc. Should not be used when counterterms for Wilson coeffi-
+cients are supplyed by means of a UFO model (see 'renorm_eft_wilson').
 CAUTION:
 This will only work if the Higgs-gluon vertices factorize from the
 amplitude, i.e. the number of Higgs-gluon couplings is the same for
 all Born diagrams!
-
-QCD only
 \end{verbatim}
 Default: \verb|False|
 \\Hidden: \verb|False|
@@ -1125,7 +1087,7 @@ Points to the QGraf executable.
 Example:
 qgraf.bin=/home/my_user_name/bin/qgraf
 \end{verbatim}
-Default: \verb|<gosam-prefix>/bin/GoSam/qgraf|
+Default: \verb|/home/jens/.local/bin/GoSam/qgraf|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.bin}}] (\textit{text})
@@ -1138,7 +1100,7 @@ Examples:
 2) # Use non-standard location:
    form.bin=/home/my_user_name/bin/form
 \end{verbatim}
-Default: \verb|<gosam-prefix>/bin/GoSam/tform|
+Default: \verb|/home/jens/.local/bin/GoSam/tform|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.threads}}] (\textit{integer number})
@@ -1364,6 +1326,32 @@ Default is respect_generations=False.
 Default: \verb|False|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{MSbar\_yukawa}}] (\textit{comma separated list})
+\begin{verbatim}
+List of quarks with Yukawa couplings which shall be renormalised in
+the MSbar scheme instead of the default OS scheme. Can also be used
+to renormalise Yukawa couplings of particles with mass set to zero
+while still keeping their coupling to the Higgs.
+
+Examples:
+MSbar_yukawa=B
+-> Yukawa coupling of bottom to Higgs will be renormalised in the
+   MSbar scheme, even if mB=0 (as long as Hbb coupling still exist)
+
+See also: renorm_yukawa
+\end{verbatim}
+Default: \verb|None|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{use\_MQSE}}] (\textit{true/false})
+\begin{verbatim}
+Whether or not to scan 1-loop amplitudes for massive quark self
+energies and insert the appropriate mass counterterm during the
+form step. Used mainly for debugging purposes.
+\end{verbatim}
+Default: \verb|False|
+\\Hidden: \verb|False|
+\\Experimental: \verb|True|
 \\\item[\colorbox{gray!30}{\texttt{meson.buildtype}}] (\textit{text})
 \begin{verbatim}
 Build-type passed to meson as the '-Dbuildtype=<buildtype>' option.

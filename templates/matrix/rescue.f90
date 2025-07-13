@@ -278,7 +278,7 @@ contains
       ! if(icheck.eq.1) write(*,*) 'passed rescue', amp(2), amprot(2), ampres(2), ampresrot(2), prec 
       ! if(icheck.eq.2) write(*,*) 'failed rescue rotation_check', amp(2), amprot(2), ampres(2), ampresrot(2), prec 
       ! if(icheck.eq.3) write(*,*) 'failed rescue pole_check', amp(2), amprot(2), ampres(2), ampresrot(2), prec 
-      reduction_interoperation = reduction_interoperation_rescue
+      reduction_interoperation = tmp_red_int
    end subroutine rescue
    !---#] subroutine rescue[%
    @end @if extension quadruple %]

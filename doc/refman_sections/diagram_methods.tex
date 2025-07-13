@@ -59,12 +59,21 @@
    Returns a list of the propagator masses in a quark loop of size two. If the diagram does not contain such a loop, an empty list is returned.  
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{ext_legs_from_vertex(f: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
-   \textcolor{red}{MH: a bit unclear, maybe an example might help}
    Returns \texttt{True} if more than \texttt{max\_legs} legs matching \texttt{f} are attached to the same vertex. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
+   Example:
+   \begin{lstlisting}[style=pykw]
+      # Remove all diagrams with two tops from the same vertex in the final 
+      # state, e.g. the s-channel contribution in gg-> ttbar
+      lambda d: not d.ext_legs_from_vertex(["T", "Tbar"], is_ingoing=False)
+   \end{lstlisting}
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]{vertex_with_external_legs(*fields: Field, max_legs=1, is_ingoing=None) -> bool}} \vspace{0.1cm}\\
-   \textcolor{red}{MH: what is the difference compared to \lstinline{vertex_with_external_legs}?}
-   Returns \texttt{True} if more than \texttt{max\_legs} legs are attached to a vertex matching \texttt{*fields}. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
+   Returns \texttt{True} if more than \texttt{max\_legs} legs are attached to a vertex matching \texttt{*fields}. In contrast to \texttt{ext\_legs\_from\_vertex}, the field matching here is done on the vertex instead of the legs. For \lstinline[style=pykw]| is_ingoing == True| only incoming legs are counted, for \lstinline[style=pykw]| is_ingoing == False| only outgoing legs are counted. All legs are counted when \texttt{is\_ingoing} is \texttt{None}. The diagram is automatically flagged for potential crossing symmetry violation if \texttt{True} is returned and \texttt{is\_ingoing} is not \texttt{None}.
+   Example:
+   \begin{lstlisting}[style=pykw]
+      # Remove Yukawa vertices of the incoming particles in e.g. Drell-Yan
+      lambda d: not d.vertex_with_external_legs("_", "_", "H", is_ingoing=True)
+   \end{lstlisting}
 
    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=pykw]|loopsize() -> int|} \vspace{0.1cm}\\
    Returns the size of the loop.
