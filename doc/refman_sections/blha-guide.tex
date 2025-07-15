@@ -1,172 +1,152 @@
-The interface of \gosam with a Monte Carlo event generator program 
-is based on the Binoth-Les Houches Accord (BLHA)
-standard interface.
-\gosamv supports both BLHA1~\cite{Binoth:2010xt}
-and BLHA2~\cite{Alioli:2013nda}.
-Certainly, a dedicated interface without using the BLHA is also possible.
-
+The interface of \gosam with a Monte Carlo event generator program is based on the Binoth-Les Houches Accord (BLHA) standard interface. \gosamv  supports both BLHA1~\cite{Binoth:2010xt} and BLHA2~\cite{Alioli:2013nda}. Certainly, a dedicated interface without using the BLHA is also possible.
 
 \section{Preparation of the order file}
-This step should be done by the Monte Carlo (MC) program. 
-We give a generic example of an order file for the process \\
-$pp\to (Z\to e^+e^-)+$\,jet in both BLHA1 and BLHA2 standards 
-in Figs.~\ref{fig:BLHA1} and \ref{fig:BLHA2}.
-\begin{figure}[htb!]
+This step should be done by the Monte Carlo (MC) program. The order file can have any name and any extension. We use  the extension \texttt{.lh} or \texttt{.olp} for order files and \texttt{.olc} for contract files. An order file consits of a set of keywords specifying the process setup and a list of subprocesses, representing individual partonic channels contributing to the calculation. Generic examples for the process $pp\to (Z\to e^+e^-)+$\,jet in both BLHA1 and BLHA2 standards, are given in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2}.
+
+\begin{figure}
+\centering
 \begin{subfigure}[]{0.49\textwidth}
 \centering
-\fbox{
-    \parbox[t][][c]{145\unitlength}{\ttfamily\scriptsize
-\# OLP\_order.lh   \\
-\# created by MC Sherpowig-1.0\\
-\# Process: p p $->$ e+ e- jet\\
-Model                    SMdiag\\
-CorrectionType           QCD\\
-IRregularisation         DRED\\
-AlphasPower              2\\
-AlphaPower               1\\
-MatrixElementSquareType  CHsummed\\
-OperationMode            CouplingsStrippedOff\\
-SubdivideSubprocess      no\\
-\# Subprocesses \\
-1 -1 $->$ 11 -11 21\\ 
-1 21 $->$ 11 -11 1\\
-2 -2 $->$ 11 -11 21\\
-...\\
-21 -2 $->$ 11 -11 -2\\
-\\
-\# Process specific GoSam settings\\
-\#@ symmetries family,generation}
-}
+\begin{lstlisting}[title={BLHA1 order file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# OLP_order.lh
+# created by Your_favourite_MC
+# Process: p p -> e+ e- jet
+CorrectionType           QCD
+IRregularisation         DRED
+AlphasPower              1
+AlphaPower               2
+MatrixElementSquareType  CHsummed
+# Subprocesses
+1 -1 -> 11 -11 21
+1 21 -> 11 -11 1
+2 -2 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+# Process specific GoSam settings
+#@ symmetries family,generation
+#@ filter.particles A:0,H:0,chi:0
+\end{lstlisting}
 \end{subfigure}
-\begin{subfigure}[]{0.49\textwidth}
+\hspace*{5pt}
+\begin{subfigure}[]{0.46\textwidth}
 \centering
-\fbox{
-    \parbox[t]{165\unitlength}{\ttfamily\scriptsize
-\# vim: syntax=olp\\
-\#@OLP GOSAM 2.0\\
-\#@IgnoreUnknown False\\
-\#@IgnoreCase False\\
-\#@SyntaxExtensions \\
-CorrectionType QCD $|$ OK\\
-IRregularisation DRED $|$ OK\\
-AlphasPower 2 $|$ OK\\
-AlphaPower  1   $|$ OK\\           1\\
-MatrixElementSquareType CHsummed $|$ OK\\
-OperationMode CouplingsStrippedOff $|$ OK\\
-SubdivideSubprocess  no $|$ OK\\
-1 -1 $->$ 11 -11 21 $|$ 1 1\\
-1 21 $->$ 11 -11 1  $|$ 1 2\\
-2 -2 $->$ 11 -11 21 $|$ 1 3\\
-...\\
-21 -2 $->$ 11 -11 -2 $|$ 1 13\\}
-}
+\begin{lstlisting}[title={BLHA1 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# vim: syntax=olp
+#@OLP GoSam 3.0.0
+#@IgnoreUnknown False
+#@IgnoreCase False
+#@SyntaxExtensions
+CorrectionType QCD | OK
+IRregularisation DRED | OK
+AlphasPower 1 | OK
+AlphaPower 2 | OK
+MatrixElementSquareType CHsummed | OK
+1 -1 -> 11 -11 21 | 1 0
+1 21 -> 11 -11 1 | 1 1
+2 -2 -> 11 -11 21 | 1 2
+...
+21 -2 -> 11 -11 -2 | 1 13
+\end{lstlisting}
 \end{subfigure}
-\caption{Examples of order and contract files for Z+jet, with BLHA1 standards.}
+\caption{Examples of order and contract files for Z+jet, with BLHA1 standards. BLHA1 only supports one-loop amplitudes, no tree-level amplitudes, which have to be provided by the MC instead.}
 \label{fig:BLHA1}
 \end{figure}  
 
-
-
-\begin{figure}[h]
+\begin{figure}
+\centering
 \begin{subfigure}[]{0.49\textwidth}
 \centering
-\fbox{
-    \parbox[t][][b]{148\unitlength}{\ttfamily\scriptsize
-\#  OLP\_order.lh \\
-\# created by MC Sherpowig-2.0\\
-InterfaceVersion         BLHA2\\
-CorrectionType           QCD\\
-IRregularisation         DRED\\
-WidthScheme              ComplexMass\\
-EWScheme                 alphaGF\\
-AccuracyTarget           0.0001\\
-DebugUnstable            True\\
+\begin{lstlisting}[title={BLHA2 order file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# OLP_order.lh
+# created by An_even_better_MC
+InterfaceVersion         BLHA2
+Model                    SMdiag
+CorrectionType           QCD
+IRregularisation         DRED
+EWScheme                 alphaGF
+AccuracyTarget           0.0001
+DebugUnstable            True
 
-AlphasPower              1\\
-AmplitudeType ccTree\\
-1 -1 $->$ 11 -11 21 \\
-...\\
-21 -2 $->$ 11 -11 -2 \\
-AmplitudeType scTree\\
-1 -1 $->$ 11 -11 21 \\
-...\\
-21 -2 $->$ 11 -11 -2 \\
-AmplitudeType Loop\\
-1 -1 $->$ 11 -11 21 \\
-...\\
-21 -2 $->$ 11 -11 -2 \\
-\\
-AlphasPower              2\\
-AmplitudeType Tree\\
-1 1 $->$ 11 -11 1 1 \\ 
-...\\
-21 21 $->$ 11 -11 2 -2\\}}
+AlphasPower              1
+AmplitudeType ccTree
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AmplitudeType scTree
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AmplitudeType Loop
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AlphasPower              2
+AmplitudeType Tree
+1 1 -> 11 -11 1 1
+...
+21 21 -> 11 -11 2 -2
+
+# Process specific GoSam settings
+#@ symmetries family,generation
+#@ filter.particles A:0,H:0,chi:0
+\end{lstlisting}
 \end{subfigure}
-\begin{subfigure}[]{0.49\textwidth}
+\hspace*{5pt}
+\begin{subfigure}[]{0.46\textwidth}
 \centering
-\fbox{
-    \parbox[t][][b]{160\unitlength}{\ttfamily\scriptsize
-\# vim: syntax=olp\\
-\#@OLP GOSAM 2.0\\
-\#@IgnoreUnknown False\\
-\#@IgnoreCase False\\
-\#@SyntaxExtensions \\
-InterfaceVersion BLHA2 $|$ OK\\
-CorrectionType QCD $|$ OK\\
-IRregularisation DRED $|$ OK\\
-WidthScheme              ComplexMass $|$ OK\\
-EWScheme                 alphaGF $|$ OK\\
-AccuracyTarget           0.0001 $|$ OK\\
-DebugUnstable            True $|$ OK\\
-
-AlphasPower 1 $|$ OK\\
-AmplitudeType ccTree $|$ OK\\
-1 -1 $->$ 11 -11 21 $|$ 1 131\\
-...\\
-21 2 $->$ 11 -11 2 $|$ 1 70\\
-AmplitudeType scTree | OK\\
-1 -1 $->$ 11 -11 21 $|$ 1 145\\
-...\\
-21 2 $->$ 11 -11 2 $|$ 1 71\\
-AmplitudeType Loop $|$ OK\\
-1 -1 $->$ 11 -11 21 $|$ 1 137\\
-...\\
-21 2 $->$ 11 -11 2 $|$ 1 63\\
-\\
-AlphasPower 2 $|$ OK\\
-AmplitudeType Tree $|$ OK\\
-1 1 $->$ 11 -11 1 1 $|$ 1 42\\
-...\\
-21 21 $->$ 11 -11 -2 2 $|$ 1 106\\}
-}
+\begin{lstlisting}[title={BLHA2 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# vim: syntax=olp
+#@OLP GoSam 3.0.0
+#@IgnoreUnknown False
+#@IgnoreCase False
+#@SyntaxExtensions
+InterfaceVersion BLHA2 | OK
+Model SMdiag | OK
+CorrectionType QCD | OK
+IRregularisation DRED | OK
+EWScheme alphaGF | OK
+AccuracyTarget 0.0001 | OK
+DebugUnstable True | OK
+AlphasPower 1 | OK
+AmplitudeType ccTree | OK
+1 -1 -> 11 -11 21 | 1 131
+...
+21 -2 -> 11 -11 -2 | 1 70
+AmplitudeType scTree | OK
+1 -1 -> 11 -11 21 | 1 145
+...
+21 -2 -> 11 -11 -2 | 1 71
+AmplitudeType Loop | OK
+1 -1 -> 11 -11 21 | 1 137
+...
+21 -2 -> 11 -11 -2 | 1 63
+AlphasPower 2 | OK
+AmplitudeType Tree | OK
+1 1 -> 11 -11 1 1 | 1 42
+...
+21 21 -> 11 -11 2 -2 | 1 106
+\end{lstlisting}
 \end{subfigure}
-\caption{Order and contract files for Z+jet with BLHA2 standards.}
+\caption{Order and contract files for Z+jet with BLHA2 standards. In contrast to the BLHA1 example this oder file also generates tree-level and spin and colour correlated amplitudes.}
 \label{fig:BLHA2}
 \end{figure}  
 
-\paragraph{Remarks}
-\begin{itemize}
-\item The order file can have any name and any extension.
-      We use  the extension \texttt{.lh}
-      for order files (\texttt{.olp} is also common) and \texttt{.olc} for contract files.
-\item The options \texttt{WidthScheme, EWScheme} in the BLHA2  example are optional.
-\item The option \texttt{SubdivdeSubprocess}  has the following effect
-      on the code generation with \gosam{}: if set to 
-      \texttt{no}, \gosam{} generates one label per subprocess, if set to
-      \texttt{yes} it generates one label per helicity subamplitude
-      and therefore \emph{many} labels per subprocess.
-      
-\item \gosam{} specific settings can be put into commentary lines starting
-      with the letter combination `\texttt{\#@}'. This is not part of the
-      BLHA standard. The line `\texttt{\#@ symmetries} \dots' restricts the
-      helicity subamplitudes being generated to the ones relevant for this
-      particular process, using the information that flavour changings only occur within 
-      the same quark families resp. lepton generations.
+For the precise definition of the standard we refer to the respective publications~\cite{Binoth:2010xt,Alioli:2013nda}. In the following we list the set of BLHA keywords implemented in \gosam, seperating them in three classes: required keywords, which have to appear in every BLHA order file, optional keywords, and some keywords the user might look for but which are not implemented in \gosam or not fully supported. Keywords which are not listed here are not implemented.
 
-      Additionally, the \texttt{Extra} keyword of BLHA2 for OLP-specific settings is also supported.
-\end{itemize}
+\input{refman_sections/olp_options.tex}
 
-\section{Running GoSam}
+\subsection{\gosam specifc instructions}\label{sec:hashat_instructions}
+\gosam specific settings can be put into commentary lines starting with the letter combination `\texttt{\#@}'. This is not part of the BLHA standard. Any option available in the ordinary \gosam process card can be passed in this way, with the exception of settings related to the IR regularisation scheme. For those the user has to use the \texttt{IRregularisation} keyword. The syntax is slightly different compared to the process card, in the sense that the \texttt{=} sign has to be replaced with a space. In the examples in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2} the specifc instructions correspond to a process card containg the lines
+\begin{lstlisting}[gobble=0,style=in]
+symmetries=family,generation
+filter.particles=A:0,H:0,chi:0
+\end{lstlisting}
+
+\section{Running GoSam}\label{sec:BLHA_running}
 To run \gosam{} within the MC/OLP setup one can use the following command:\\
 \begin{lstlisting}[style=sh]
 gosam.py --olp -M <MCName> -c <your-path-to>/gosam.conf order.lh

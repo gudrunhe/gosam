@@ -1,0 +1,94 @@
+\lstset{
+  breaklines = true,
+  breakatwhitespace = true
+}
+
+\subsection{Required Keywords}
+Only two BLHA keywords have to present in the order file so that \gosam can process it, otherwise an error will be returned immediately. Those are:
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|CorrectionType|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["QCD", "EW", "QED"]|
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|IRregularisation|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = "tHV", "DRED", "CDR"|
+\end{basedescript}
+Of course, those two keywords are not enough to fully specify a process. Only in conjunction with additional optional keywords (see Section~\ref{sec:optional_BLHA_keywords} below) a process can be defined. If the MC program fails to provide a consistent setup, \gosam will return an error. There is one additional keyword which is required, but for convenience a default value is defined so that it can be omitted:
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|InterfaceVersion|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["BLHA1", "BLHA2"]|\\
+        This is a required keyword introduced with the BLHA2 standard. To be able to use BLHA1 compliant order files the default \texttt{"BLHA1"} is set, when the keyword is absent from the order file.
+\end{basedescript}
+Note that the BLHA2 standard defines tow additional mandatory keywords, \texttt{Model} and \texttt{CouplingPower}. Those were introduced with BLHA2 and were not present in BLHA1, where alternative keywords could be used. In \gosam one can use those alternative keywords instead, independent of the version standard. Therefore they are treated as optional. Note, however, that the corresponding information has to be provided in one or the other way otherwise the setup of the process will be incomplete and \gosam will exit with an error.
+
+\subsection{Optional Keywords}\label{sec:optional_BLHA_keywords}
+There are several ways how to choose a model. If non of the following keywords is present \gosam will assume the built-in Standard Model with diagonal CKM-Matrix (\texttt{smdiag}) as the default.
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Model|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["SMdiag", "SMnondiag", "ufo:/<path/to/ufo-model>"]|\\
+        The BLHA2 keys will be converted internally: \texttt{SMdiag} $\to$ \texttt{smdiag} and \texttt{SMnondiag} $\to$ \texttt{sm}.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|ModelFile|} --- Standard: BLHA1\vspace{0.1cm}\\
+        This keyword expects a model in the SLHA format~\cite{Skands:2003cj,Allanach:2008qq}. Note: \gosam does not check if the model is valid.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|UFOModel|} --- Standard: Not part of the standard\vspace{0.1cm}\\
+        \lstinline[style=in]|UFOModel <path/to/ufo-model>| is an alternative for \lstinline[style=in]|Model ufo:/<path/to/ufo-model>|
+\end{basedescript}
+Built-in models different from \texttt{sm} and \texttt{smdiag} can be selected by supplying an additional config file (see Section~\ref{sec:BLHA_running}) or through the special \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions} below).
+
+Another key ingredient to the process definition is the power in the QCD and/or EW coupling. The corresponding keywords in both the BLHA1 and the BLHA2 standard are supported, irrespective of the actual \texttt{InterfaceVersion}.
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|CouplingPower|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["qcd" <int>, "qed" <int>]|
+     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AlphasPower|} --- Standard: BLHA1\vspace{0.1cm}\\
+        Takes exactly one argument of type \texttt{<int>}.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AlphaPower|} --- Standard: BLHA1\vspace{0.1cm}\\
+        Takes exactly one argument of type \texttt{<int>}.
+\end{basedescript}
+
+The BLHA1 standard was focused on one-loop amplitudes only. The keyword \texttt{MatrixElementSquareType} could be used to select different settings with respect to spin and colour averaging. With the BLHA2 standard this feature has been dismissed. At the same time the keyword \texttt{AmplitudeType} has been introduced, which now also allows to call tree-level and spin and colour correlated amplitudes (see Section...). In the BLHA2 standard the behaviour wrt. spin and colour is that of \texttt{CHsummed}. \gosam still supports the \texttt{MatrixElementSquareType} keyword, even in a BLHA2 setting.
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|MatrixElementSquareType|} --- Standard: BLHA1\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = "CHsummed", "CHaveraged", "Csummed", "Caveraged", "Hsummed", "Haveraged", "CHaveragedSymm", "CHsummedSymm", "NoTreeLevel"|
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AmplitudeType|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["Loop", "Tree", "ccTree", "scTree", "scTree2", "LoopInduced", "ccLoop", "scLoop"]|\\
+\end{basedescript}
+If neither \texttt{MatrixElementSquareType} nor \texttt{AmplitudeType} is provided, the behaviour is that of \lstinline[style=in]|AmplitudeType Loop|, based on the provided coupling powers and the correction type.
+
+Further optional keywords available with \gosam are:
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AccuracyTarget|} --- Standard: BLHA2\vspace{0.1cm}\\
+        Takes exactly one value of type \texttt{<float>}, must be positive.\\
+        Sets the properties \lstinline[style=in]|PSP_chk_th1 = -math.log10(<float>)| and  \lstinline[style=in]|PSP_check = True|.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|DebugUnstable|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["yes", "no", "true", "false"]|\\
+        Sets the property \texttt{PSP\_verbosity}.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|EWScheme|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["alphaGF", "alpha0", "alphaMZ", "OLPDefined"]|\\
+        The options \texttt{"alphaRUN"} and \texttt{"alphaMSbar"} are not supported.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|ExcludedParticles|} --- Standard: BLHA2\vspace{0.1cm}\\
+        Input must be PDG numbers.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Extra|} --- Standard: BLHA2\vspace{0.1cm}\\
+        Currently the \texttt{Extra} keyword is not used to its full potential. Only settings can be passed which have their own BLHA specific keyword anyway.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|OperationMode|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = "CouplingsStrippedOff"|
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Precision|} --- Standard: Not part of the standard\vspace{0.1cm}\\
+        Takes exactly one value of type \texttt{<float>}, must be positive. Is and alias for \texttt{AccuracyTarget}.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|PrecisionCheck|} --- Standard: Not part of the standard\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["disabled", "off"]|\\
+        For both possible values sets the properties \lstinline[style=in]|PSP_chk_method = Automatic| and  \lstinline[style=in]|PSP_check = False|.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|SubdivideSubprocess|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["yes", "no", "true", "false"]|\\
+        For \texttt{true}/\texttt{yes} \gosam will generate labels for every helicity configuration contributing to a subprocess. For \texttt{false}/\texttt{no} \gosam will generate only one label per subprocess.
+\end{basedescript}
+
+\subsection{Common Keywords which are not supported}
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|IRsubtractionMethod|} --- Standard: BLHA1\vspace{0.1cm}\\
+        \lstinline[style=in]|suppored_values = "None"|\\
+        \gosam does not provide IR-subtracted results, yet.
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|LightMassiveParticles|} --- Standard: BLHA2\vspace{0.1cm}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|MassiveParticleScheme|} --- Standard: BLHA1, BLHA2 \vspace{0.1cm}\\
+        This keyword will be ignored as \gosam does not perform EW renormalisation, for which the mass scheme becomes relevant. See also Section~\ref{sec:complexmasses}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|MassiveParticles|} --- Standard: BLHA2\vspace{0.1cm}\\
+        This keyword will be ignored as it can interfere in an unexpected way with the settings provided by the model file. See also \textcolor{red}{MH: put a comment about the treatment of particle masses somewhere and refernece it here}
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|WidthScheme|} --- Standard: BLHA2\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = ["ComplexMass", "FixedWidth"]|\\
+        Replaces the BLHA1 keyword \texttt{ResonanceTreatment}. This keyword is implemented in \gosam, but currently has no effect, as \gosam does not perform EW renormalisation. See also Section~\ref{sec:complexmasses}
+\end{basedescript}
