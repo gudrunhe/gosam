@@ -707,7 +707,10 @@ def process_order_file(
                 "Please check that this is really what you want to do! " 
                 % (order_file_name,pi_key,conf["extra_setup_file"],conf[pi_key],conf["mc_specials."+pi_key]))
         key = pi_key.removeprefix("mc_specials")
-        conf[key] = conf["mc_specials."+pi_key]
+        if key == "extensions":
+            conf["extensions"] = conf["mc_specials.extensions"] if conf["extensions"] == "" else conf[extensions]+","+conf["mc_specials.extensions"]
+        else:
+            conf[key] = conf["mc_specials."+pi_key]
         conf._del("mc_specials."+pi_key)
 
     contract_file = golem.util.olp_objects.OLPContractFile(order_file)
@@ -719,8 +722,6 @@ def process_order_file(
     orig_conf = conf.copy()
 
     file_ok = golem.util.olp_options.process_olp_options(contract_file, conf, ignore_case, ignore_unknown)
-    if not file_ok:
-        logger.warning("Please, check configuration and contract files for errors!")
 
     for subprocess_number, (lineo, _, _, _) in enumerate(order_file.processes_ordered()):
         subconf = orig_conf.copy()
@@ -1070,6 +1071,13 @@ def process_order_file(
     except IOError as err:
         raise golem.util.olp_objects.OLPError("while writing contract file: %s" % err)
     # ---#] Write output file:
+
+    # Contract file is written, no we can stop if there were any errors 
+    if not file_ok:
+        logger.critical("Your BLHA order file could not be processed properly.\n"
+                        "Please, check configuration and contract files for errors!")
+        sys.exit("GoSam terminated due to an error")   
+
     # ---#[ Process global templates:
 
     if templates is None:

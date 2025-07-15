@@ -1,11 +1,4 @@
 # vim: ts=3:sw=3
-
-# NOTE:
-# In order to distinguish standardized options from Golem extensions
-# we prefix everything that has not been agreed on by "GX_".
-# Users should be aware that those options might disappear or be renamed
-# in the future.
-
 import os.path
 import golem.properties
 from golem.util.olp_objects import OLPError
@@ -55,7 +48,6 @@ def required_olp_option_default(default):
 @optional_olp_option
 def MatrixElementSquareType(values, conf, ignore_case):
     err_flag = False
-    NoTreeLevel = "GX_NoTreeLevel"
 
     supported_values = [
         "CHsummed",
@@ -66,7 +58,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
         "Haveraged",
         "CHaveragedSymm",
         "CHsummedSymm",
-        NoTreeLevel,
+        "NoTreeLevel",
     ]
 
     lower_case_values = {}
@@ -91,9 +83,9 @@ def MatrixElementSquareType(values, conf, ignore_case):
     sym_fac = False
     no_tree = False
 
-    if NoTreeLevel in checked_values:
+    if "NoTreeLevel" in checked_values:
         no_tree = True
-        checked_values = [x for x in checked_values if x != NoTreeLevel]
+        checked_values = [x for x in checked_values if x != "NoTreeLevel"]
 
     if "CHsummed" in checked_values:
         if len(checked_values) > 1:
@@ -145,7 +137,7 @@ def MatrixElementSquareType(values, conf, ignore_case):
             + "#    Csummed Haveraged\n"
             + "#    Hsummed Caveraged\n"
             + "#    CHsummedSymm\n"
-            + "#    GX_NoTreeLevel\n"
+            + "#    NoTreeLevel\n"
         )
     else:
         conf["olp.include_color_average"] = col_avg
@@ -236,7 +228,7 @@ def Model(values, conf, ignore_case):
             conf[golem.properties.model] = ["FeynRules", file_name]
             return __value_OK__
         else:
-            logger.warning("UFOModel which expands to '%s' does not exist." % file_name)
+            logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
             return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
     supported_values = ["SMdiag", "SMnondiag"]
@@ -506,7 +498,7 @@ def UFOModel(values, conf, ignore_case):
         conf[golem.properties.model] = ["FeynRules", file_name]
         return __value_OK__
     else:
-        logger.warning("UFOModel which expands to '%s' does not exist." % file_name)
+        logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
         return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
 
@@ -621,7 +613,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
         else:
             contract_file.setPropertyResponseOrdered(name, "Error: Unknown by OLP", lineno)
             if not quiet:
-                logger.warning("Line %s: Keyword '%s' unknown." % (name, lineno))
+                logger.critical("Line %s: Keyword '%s' unknown." % (name, lineno))
             error_count += 1
             continue
 
@@ -635,7 +627,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
         contract_file.setPropertyResponseOrdered(name, response, lineno)
         if not contract_file.isPropertyOk(name):
             if not quiet:
-                logger.warning("Line %s: Option '%s' failed. %s" % (lineno, name, response))
+                logger.critical("Line %s: Option '%s' failed. %s" % (lineno, name, response))
             error_count += 1
     for key in __required_olp_options_default__:
         handler = __required_olp_options_default__[key]
@@ -644,7 +636,7 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
     if len(missing) > 0:
         error_count += 1
         if not quiet:
-            logger.warning("Missing required options: %s" % ", ".join(missing))
+            logger.critical("Missing required options: %s" % ", ".join(missing))
         raise OLPError("Missing required options: %s" % ", ".join(missing))
 
     (__all_olp_options__, __olp_lower_case__, __required_olp_options__, __required_olp_options_default__) = backup
