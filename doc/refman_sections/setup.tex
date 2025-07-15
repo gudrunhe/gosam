@@ -166,7 +166,7 @@ When performing a calculation in SMEFT and setting
 \begin{lstlisting}[style=in]
     enable_truncation_orders=true
 \end{lstlisting}
-in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See Section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j} when then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}. \\
+in the process card the amount of files is tripled, as each diagram is split according to the decomposition of the amplitude in eq.~(\ref{eq:amp_truncation}). See Section~\ref{sec:SMEFTtruncations} for a detailed explanation. Instead of a single file \texttt{d[j]h*.*} for diagram number \texttt{j}, we then have \texttt{d[j]\_0h*.*}, \texttt{d[j]\_1h*.*} and \texttt{d[j]\_2h*.*}. \\
    
 \texttt{matrix} & This folder contains the code to combine
 the helicity amplitudes into a matrix element. Here one also finds
@@ -175,7 +175,7 @@ the test program \texttt{test.f90}. This folder is always compiled last. \\
 \texttt{model.hh} &
 Contains model specific definitions needed by the \form code
 which is generating the symbolic expressions for the amplitude.
-The original files from the \texttt{model/} directory of \gosamv. 
+The original files from the \texttt{model/} directory of \gosamv
 are renamed, e.g.
 \texttt{sm} $\to$ \texttt{model}, \texttt{sm.hh} $\to$ \texttt{model.hh}. \\
 
@@ -190,7 +190,7 @@ like e.g. the paths to the reduction libraries, compiler options, etc. \\
 
 \texttt{meson.build} & This file contains the main \texttt{meson} project and library definitions. \\
 
-\texttt{meson\_options.txt} & This file contains the build options for the \texttt{meson} project. The currently defined build options are 
+\texttt{meson\_options.txt} & This file contains the build options for the \texttt{meson} project. The currently defined build options are \newline
 \begin{tabular}{l p{0.65\linewidth}}
    \texttt{doc} & Build and install \texttt{doc/process.pdf}. The default is \texttt{False}. \\
    \texttt{test\_executables} & Build and install \texttt{matrix/test.f90}. The default is \texttt{False}.
@@ -216,7 +216,7 @@ use the features provided by \form{} version
 \label{sec:grouping_summing}
 Already in the first release of \gosam{}, the diagrams were analyzed
 according to their kinematic matrix $S_{ij}$ and grouped together
-before reduction. Thes leads to an important gain in efficiency, both
+before reduction. This leads to an important gain in efficiency, both
 when using integrand reduction methods, as well as 
 classical tensor reduction techniques. Details about the way diagrams
 are grouped can be found in~\cite{Cullen:2011ac}.
@@ -304,7 +304,7 @@ $\hat{q}=0$ and the coefficients of the tensor integrals.
 %\paragraph{Implementation.}
 At a technical level, 
 the files \texttt{helicity*/d*h*l1d.f90} contain the routines
-\texttt{derivative($\mu^2$, [$i_1$], [$i_2$],\dots)} and\\
+\texttt{derivative($\mu^2$, [$i_1$], [$i_2$],\dots)} and
 \texttt{reconstruct\_d*(coeffs)}, where the latter is only generated in
 conjunction with the extension \texttt{golem95}, and \texttt{coeffs} is
 a type which comprises all coefficients of a diagram of a certain rank.
