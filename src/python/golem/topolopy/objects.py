@@ -868,8 +868,6 @@ class Propagator(DiagramComponent):
             flist = None
         elif isinstance(field, str):
             flist = [field]
-        elif hasattr(field,"__str__"):
-            flist = [str(field)]
         elif "__iter__" in field.__class__.__dict__:
             if len(field) == 0:
                 flist = None

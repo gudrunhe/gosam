@@ -15,4 +15,4 @@ reduction_programs=ninja
 
 unitary_gauge=true
 
-filter.nlo= lambda d: d.chord(part21) > 0
+filter.nlo= lambda d: d.chord("part21") > 0
