@@ -697,6 +697,19 @@ def process_order_file(
 
     mc_specials(conf, order_file)
 
+    for pi_key in conf.getListProperty("mc_specials.keys"):
+        if pi_key == "":
+            continue
+        if pi_key in default_conf:
+            if conf["mc_specials."+pi_key] != conf[pi_key] and conf[pi_key] is not None and conf[pi_key] != "":
+                logger.warning("Your BLHA order file '%s' specifies the property '%s' in a special '#@' instruction.\n" \
+                "It will overwrite the default and/or the value given in the config file\n'%s':\n%s -> %s\n" \
+                "Please check that this is really what you want to do! " 
+                % (order_file_name,pi_key,conf["extra_setup_file"],conf[pi_key],conf["mc_specials."+pi_key]))
+        key = pi_key.removeprefix("mc_specials")
+        conf[key] = conf["mc_specials."+pi_key]
+        conf._del("mc_specials."+pi_key)
+
     contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
     tmp_contract_file = golem.util.olp_objects.OLPContractFile(order_file)
@@ -1118,12 +1131,24 @@ def process_order_file(
 
 
 def mc_specials(conf, order_file):
+    pi_keys = []
     for pi in order_file.processing_instructions():
         pi_parts = pi.strip().split(" ", 1)
+        if pi_parts[0] == "regularisation_scheme":
+            logger.critical("Property 'regularisation_scheme' cannot be set as a '#@' instruction in the BLHA order file!\n" \
+            "Please only use BLHA's 'IRregularisation' keyword.")
+            sys.exit("GoSam terminated due to an error")
+        if pi_parts[0] == "extensions":
+            if any(irs in [ext.lower() for ext in pi_parts[1].split(",")] for irs in ["dred","thv"]):
+                logger.critical("IR regularisation scheme ('dred' or 'thv') cannot be added to 'extensions'\n"
+                                "in a '#@' instruction in the BLHA order file! Please only use BLHA's 'IRregularisation' keyword.")
+                sys.exit("GoSam terminated due to an error")   
+        pi_keys.append(pi_parts[0])
         if len(pi_parts) == 2:
-            conf.setProperty(pi_parts[0], pi_parts[1])
+            conf.setProperty("mc_specials."+pi_parts[0], pi_parts[1])
         else:
-            conf.setProperty(pi_parts[0], True)
+            conf.setProperty("mc_specials."+pi_parts[0], True)
+    conf.setProperty("mc_specials.keys",pi_keys)
 
     mc_name = conf.getProperty("olp.mc.name").lower().strip()
     mc_version = []

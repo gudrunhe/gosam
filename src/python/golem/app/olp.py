@@ -137,6 +137,9 @@ def main(argv=sys.argv):
                 cf.load(f)
             defaults.append(cf)
             default_files.append(os.path.abspath(fname))
+        except IOError:
+            logger.critical("Configuration file %r could not be found." % (fname))
+            sys.exit("GoSam terminated due to an error")
         except golem.util.config.GolemConfigError as ex:
             logger.critical("Configuration file %r could not be read: %s" % (fname, str(ex)))
             sys.exit("GoSam terminated due to an error")
