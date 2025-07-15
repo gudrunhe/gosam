@@ -198,15 +198,15 @@ def ModelFile(values, conf, ignore_case):
     else:
         return __value_ERR__ + "model file does not exist."
 
-
-@optional_olp_option
-def ParameterCard(values, conf, ignore_case):
-    file_name = " ".join(values)
-    conf["olp.modelfile"] = file_name
-    if os.path.exists(file_name):
-        return __value_OK__
-    else:
-        return __value_ERR__ + "SLHA file does not exist."
+# Deactivated: Does not seem to do wat it is supposed to due according to the BLHA2 standard
+#@optional_olp_option
+#def ParameterCard(values, conf, ignore_case):
+#    file_name = " ".join(values)
+#    conf["olp.modelfile"] = file_name
+#    if os.path.exists(file_name):
+#        return __value_OK__
+#    else:
+#        return __value_ERR__ + "SLHA file does not exist."
 
 
 @optional_olp_option
@@ -218,7 +218,7 @@ def SubdivideSubprocess(values, conf, ignore_case):
 @optional_olp_option
 def Model(values, conf, ignore_case):
     if len(values) >= 1 and values[0][:5].lower() == "ufo:/":
-        file_name = os.path.abspath(" ".join(values)[5:].strip())
+        file_name = os.path.abspath(" ".join(values)[4:].strip())
         conf["olp.ufomodel"] = file_name
         if (
             os.path.exists(file_name)
@@ -315,7 +315,7 @@ def WidthScheme(values, conf, ignore_case):
 
 @optional_olp_option
 def AmplitudeType(values, conf, ignore_case):
-    # Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2
+    # Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2 -> deactivated. Use GoSam3's EFT features instead
     if len(values) > 1:
         return __value_ERR__ + "too many values."
     supported_values = [
@@ -325,8 +325,8 @@ def AmplitudeType(values, conf, ignore_case):
         "scTree",
         "scTree2",
         "LoopInduced",
-        "LoopInterference",
-        "LIEffInterference",
+        #"LoopInterference",
+        #"LIEffInterference",
         "ccLoop",
         "scLoop",
     ]
@@ -344,15 +344,15 @@ def AmplitudeType(values, conf, ignore_case):
     ):
         conf["olp.no_tree_level"] = True
         conf["olp.no_loop_level"] = False
-    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
-        "loopinterference",
-        "lieffinterference",
-    ]:
-        conf["olp.no_tree_level"] = False
-        conf["olp.no_loop_level"] = False
-        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
-            conf.psp_chk_method_last = conf["PSP_chk_method"]
-            conf["PSP_chk_method"] = "LoopInduced"
+#    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
+#        "loopinterference",
+#        "lieffinterference",
+#    ]:
+#        conf["olp.no_tree_level"] = False
+#        conf["olp.no_loop_level"] = False
+#        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
+#            conf.psp_chk_method_last = conf["PSP_chk_method"]
+#            conf["PSP_chk_method"] = "LoopInduced"
     elif ret.startswith(__value_OK__) and (
         "loop" in conf["olp.amplitudetype"].lower()
         and not "ccloop" in conf["olp.amplitudetype"].lower()
@@ -501,25 +501,25 @@ def UFOModel(values, conf, ignore_case):
         logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
         return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
-
-@optional_olp_option
-def Parameters(values, conf, ignore_case):
-    """
-    NOT YET PART OF THE STANDARD
-    """
-    # conf["olp.parameters"] = values
-    parameters = list(values)
-    if len(values) > 0:
-        if parameters[0] == "alpha_s":
-            # parameters.remove("alpha_s")
-            conf["olp.alphas"] = 1
-            conf["olp.parameters"] = parameters
-    else:
-        conf["olp.alphas"] = 0
-        conf["olp.parameters"] = parameters
-        logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
-        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
-    return __value_OK__
+# Deactivated: Has no effect, function unclear
+#@optional_olp_option
+#def Parameters(values, conf, ignore_case):
+#    """
+#    NOT YET PART OF THE STANDARD
+#    """
+#    # conf["olp.parameters"] = values
+#    parameters = list(values)
+#    if len(values) > 0:
+#        if parameters[0] == "alpha_s":
+#            # parameters.remove("alpha_s")
+#            conf["olp.alphas"] = 1
+#            conf["olp.parameters"] = parameters
+#    else:
+#        conf["olp.alphas"] = 0
+#        conf["olp.parameters"] = parameters
+#        logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+#        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
+#    return __value_OK__
 
 
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):

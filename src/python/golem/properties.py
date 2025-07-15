@@ -75,7 +75,8 @@ model = Property(
 
    Format 1) searches for the model files <name>, <name>.hh
    and <name>.py in the models/ directory under the installation
-   path of Golem.
+   path of Golem. The following models are shipped with GoSam:
+   sm, smdiag, sm_complex, smdiag_complex, smehc, smdiagehc, smdiag_mad 
 
    Format 2) is similar to format 1) but <path> is used instead
    of the models/ directory of the Golem installation

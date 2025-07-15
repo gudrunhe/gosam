@@ -214,6 +214,9 @@ def main(argv=sys.argv):
                 use_crossings=cmd_args.use_crossings,
                 mc_name=cmd_args.mc,
             )
+        except golem.util.config.GolemConfigError as ex:
+            logger.warning("Order file %r has been skipped because of errors: %s" % (arg, str(ex)))
+            skipped += 1
         except golem.util.olp_objects.OLPError as ex:
             logger.warning("Order file %r has been skipped because of errors: %s" % (arg, str(ex)))
             skipped += 1
