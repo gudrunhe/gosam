@@ -1158,10 +1158,14 @@ def mc_specials(conf, order_file):
             conf.setProperty("mc_specials."+pi_parts[0], True)
     conf.setProperty("mc_specials.keys",pi_keys)
 
-    mc_name = conf.getProperty("olp.mc.name").lower().strip()
+    if conf.getProperty("mc_specials.olp.mc.name") is not None:
+        mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
+    else:
+        mc_name = "any"
+    
     mc_version = []
     try:
-        s = conf.getProperty("olp.mc.version", default="").strip()
+        s = conf.getProperty("mc_specials.olp.mc.version", default="").strip()
         if len(s) > 0:
             mc_version = list(map(int, s.split(".")))
     except ValueError as ex:
@@ -1169,11 +1173,15 @@ def mc_specials(conf, order_file):
 
     required_extensions = []
 
-    if mc_name.startswith("powheg"):
+    if mc_name == "any":
+        pass
+    elif mc_name.startswith("powheg"):
         required_extensions.extend(["f77"])
         required_extensions.extend(["olp_badpts"])
     elif mc_name.startswith("amcatnlo"):
         required_extensions.extend(["f77"])
+    else:
+        logger.warning("Unknown Monte Carlo program passed via the --mc argument: %s. This statement will be IGNORED!" % (mc_name))
 
     extensions = golem.properties.getExtensions(conf)
     add_extensions = []
@@ -1182,7 +1190,6 @@ def mc_specials(conf, order_file):
             add_extensions.append(ext)
     if len(add_extensions) > 0:
         conf.setProperty("%s-auto.extensions" % mc_name, ",".join(add_extensions))
-
 
 def merge_extensions(conf_a, conf_b):
     """merge extensions from conf_a into conf_b"""

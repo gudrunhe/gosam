@@ -30,7 +30,7 @@ There are several ways how to choose a model. If non of the following keywords i
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|UFOModel|} --- Standard: Not part of the standard\vspace{0.1cm}\\
         \lstinline[style=in]|UFOModel <path/to/ufo-model>| is an alternative for \lstinline[style=in]|Model ufo:/<path/to/ufo-model>|
 \end{basedescript}
-Built-in models different from \texttt{sm} and \texttt{smdiag} can be selected by supplying an additional config file (see Section~\ref{sec:BLHA_running}) or through the special \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions} below).
+Built-in models different from \texttt{sm} and \texttt{smdiag} can be selected by supplying an additional config file (see Section~\ref{sec:BLHA_running}) or through the special \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions} below).\\
 
 Another key ingredient to the process definition is the power in the QCD and/or EW coupling. The corresponding keywords in both the BLHA1 and the BLHA2 standard are supported, irrespective of the actual \texttt{InterfaceVersion}.
 \begin{basedescript}{\desclabelstyle{\pushlabel}}
@@ -47,15 +47,15 @@ The BLHA1 standard was focused on one-loop amplitudes only. The keyword \texttt{
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|MatrixElementSquareType|} --- Standard: BLHA1\vspace{0.1cm}\\
         \lstinline[style=in]|supported_values = "CHsummed", "CHaveraged", "Csummed", "Caveraged", "Hsummed", "Haveraged", "CHaveragedSymm", "CHsummedSymm", "NoTreeLevel"|
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AmplitudeType|} --- Standard: BLHA2\vspace{0.1cm}\\
-        \lstinline[style=in]|supported_values = ["Loop", "Tree", "ccTree", "scTree", "scTree2", "LoopInduced", "ccLoop", "scLoop"]|\\
+        \lstinline[style=in]|supported_values = ["Loop", "Tree", "ccTree", "scTree", "scTree2", "LoopInduced", "ccLoop", "scLoop"]|
 \end{basedescript}
-If neither \texttt{MatrixElementSquareType} nor \texttt{AmplitudeType} is provided, the behaviour is that of \lstinline[style=in]|AmplitudeType Loop|, based on the provided coupling powers and the correction type.
+If neither \texttt{MatrixElementSquareType} nor \texttt{AmplitudeType} is provided, the behaviour is that of \lstinline[style=in]|AmplitudeType Loop|, based on the provided coupling powers and the correction type.\\
 
 Further optional keywords available with \gosam are:
 \begin{basedescript}{\desclabelstyle{\pushlabel}}
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|AccuracyTarget|} --- Standard: BLHA2\vspace{0.1cm}\\
         Takes exactly one value of type \texttt{<float>}, must be positive.\\
-        Sets the properties \lstinline[style=in]|PSP_chk_th1 = -math.log10(<float>)| and  \lstinline[style=in]|PSP_check = True|.
+        Sets the properties \lstinline[style=in]|PSP_chk_th1 = int(-math.log10(<float>))| and  \lstinline[style=in]|PSP_check = True|.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|DebugUnstable|} --- Standard: BLHA2\vspace{0.1cm}\\
         \lstinline[style=in]|supported_values = ["yes", "no", "true", "false"]|\\
         Sets the property \texttt{PSP\_verbosity}.

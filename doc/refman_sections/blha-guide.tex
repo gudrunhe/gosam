@@ -140,122 +140,82 @@ For the precise definition of the standard we refer to the respective publicatio
 \input{refman_sections/olp_options.tex}
 
 \subsection{\gosam specifc instructions}\label{sec:hashat_instructions}
-\gosam specific settings can be put into commentary lines starting with the letter combination `\texttt{\#@}'. This is not part of the BLHA standard. Any option available in the ordinary \gosam process card can be passed in this way, with the exception of settings related to the IR regularisation scheme. For those the user has to use the \texttt{IRregularisation} keyword. The syntax is slightly different compared to the process card, in the sense that the \texttt{=} sign has to be replaced with a space. In the examples in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2} the specifc instructions correspond to a process card containg the lines
+\gosam specific settings can be put into commentary lines starting with the letter combination `\texttt{\#@}'. This is not part of the BLHA standard. Any option available in the ordinary \gosam process card can be passed in this way, with the exception of settings related to the IR regularisation scheme. For those the user has to use the \texttt{IRregularisation} keyword. The syntax is slightly different compared to the process card, in the sense that the \texttt{=} sign has to be replaced with a space. In the examples in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2} the specific instructions correspond to a process card counting the lines
 \begin{lstlisting}[gobble=0,style=in]
 symmetries=family,generation
 filter.particles=A:0,H:0,chi:0
 \end{lstlisting}
 
 \section{Running GoSam}\label{sec:BLHA_running}
-To run \gosam{} within the MC/OLP setup one can use the following command:\\
+To switch to \gosam's OLP mode the argument \lstinline[style=sh]|--olp| has to be provided upon execution of the \lstinline[style=sh]|gosam.py| command:
 \begin{lstlisting}[style=sh]
-gosam.py --olp -M <MCName> -c <your-path-to>/gosam.conf order.lh
+gosam.py --olp <order-file>
 \end{lstlisting}
-
-\paragraph{Remarks}
-\begin{itemize}
-\item The extension \lstinline[style=sh]|--olp| is mandatory whenever 
-   a BLHA order file is processed.
-\item The extension \lstinline[style=sh]|-M <MCName>| is optional. By specifying the
-   name of the Monte Carlo which is the intended partner program,
-   \gosam{} can choose some settings simplifying the communication and linking.
-   One can either specify \lstinline[style=sh]|-M MCname| or \lstinline[style=sh]|-M name/version|.
-   Alternatively (and also optional),
-   one can put this information into the order file:\\
-\begin{lstlisting}[style=in]
-@olp.mc.name mypreferredmc
-@olp.mc.version 1.0.0
-\end{lstlisting}
-\item The extension \lstinline[style=sh]|-C| is optional and points to a \gosam{} configuration file.
-   The latter can be used to define \gosam{} specific settings, such as  
-   diagram filters, treatment of the rational parts, etc.
-   
-   If  this option is left out \gosam{} searches for a configuration in the current working directory. In previous versions of \gosam also the user's home directory and the \gosam installation directory would be searched. Since this can and will lead to unexpected behaviour (when settings are overwritten without the user realizing it), this is not done anymore.
-   Possible names for default configuration files are \texttt{gosam.in},
-   \texttt{gosam.conf}, \texttt{.gosam}, \texttt{golem.in},
-   \texttt{golem.conf}, \texttt{.golem}.
-   If such a file is not found, \gosam{} takes the default values for 
-   all unspecified settings.
-\item  The option \lstinline[style=sh]|--destination=<dir>| allows 
-   to place the generated files into the directory \texttt{<dir>}.
-   The short form is \texttt{-D <dir>}.
-\item One can specify the name of the contract file which should be written
-   using the option \lstinline[style=sh]|--output-file=<contractfile>| or simply
-   \lstinline[style=sh]|-o <contractfile>|.
-\item The option \lstinline[style=sh]|--force| will overwrite an already existing
-   contract file without any warning. 
-\item A full list of available command line options is available by running 
+If the order file is not in the current working directory \lstinline[style=sh]|<order-file>| must be given as a relative or absolute path. Additional optional arguments can be passed, a full list of which is available by running
 \begin{lstlisting}[style=sh]
 gosam.py --olp --help
 \end{lstlisting}
-\end{itemize}
+In the follwoing we will comment on the most frequently used ones.
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-c, --config|} Often settings and options which are not considered by the BLHA standard have to be passed. One can then either use the \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions}) or if that is not feasible use the \lstinline[style=sh]|--config <config>| argument to load additional configuration files. Multiple files can be processed, \lstinline[style=sh]|--config <config1> <config2> ... <configN>|. Those files use the same syntax and format as the ordinary process cards (see Section~\ref{sec:usage}). Note that the configuration files do not have to be valid process cards on their own, as otherwise required fields like the \texttt{in} and \texttt{out} particles and the perturbative \texttt{order} are set in the BLHA order file already. In fact, to avoid inconsistencies no setting present in the BLHA order file should be included in the additional configuration files. \gosam does perform consistency checks, but it is not guaranteed that all cases of conflicting setups will be caught.
 
-\paragraph{The contract file}
-From the contract file one can see whether the order file has been processed successfully.
-If everything went smoothly it should look like the one in Fig.~\ref{fig:BLHA1}
-resp. Fig.~\ref{fig:BLHA2}.
-All settings are either acknowledged by the word \texttt{OK} or, in case
-of a failure, by the word \texttt{error} followed by an error message.
+      If no specific configuration files are given, i.e. \lstinline[style=sh]|--config| omitted entirely, \gosam will still search the working directory for files called \texttt{gosam.in}, \texttt{gosam.conf}, \texttt{.gosam}, \texttt{golem.in}, \texttt{golem.conf}, \texttt{.golem}. This can be prevented by setting the argument \colorbox{gray!30}{\lstinline[style=sh]|-C, --no-defaults|}.
 
+      \attention{In previous versions of \gosam also the user's home directory and the \gosam installation directory would be searched. Since this can and will lead to unexpected behaviour (when settings are overwritten without the user realizing it), this is no longer done in \gosamv.}
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-D, --destination|} By default all source code will be generated in the current working directory. An alternative directory can be chosen by passing it via the \lstinline[style=sh]|--destination <dir>| argument.
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-I, --ignore-empty-subprocess|} Depending on the MC it can happen that the order file contains channels which turn out to be zero because they do not contain any diagrams after applying selections and filters. Per default \gosam will return an error signaling to the user that the subprocess is ``empty''. If the MC does not have a means to catch this error, the calculation will fail. Therefore as an alternative \gosam offers the option to return numerical zeros for such subprocesses, which is activated by the \lstinline[style=sh]|--ignore-empty-subprocess| argument.
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-M, --mc|} By specifying the name of the Monte Carlo which is the intended partner program, \gosam can choose some settings simplifying the communication and linking. One can either specify \lstinline[style=sh]|--mc <mc-program>| or \lstinline[style=sh]|--mc <mc-program>/<version>|. Currently special settings for the following MC programs are implemented:
+            \begin{itemize}
+                  \item[\hspace{-1em}]\lstinline[style=sh]|--mc powheg| --- This sets the extensions \texttt{f77} and \texttt{olp\_badpts}.
+                  \item[\hspace{-1em}]\lstinline[style=sh]|--mc amcatnlo| --- This sets the extension \texttt{f77}.
+            \end{itemize}
+      The \lstinline[style=sh]|<version>| information is currently not used. Note that it is also possible to specify the MC program using \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions}):
+      \begin{lstlisting}[style=in]
+            #@ olp.mc.name mypreferredmc
+            #@ olp.mc.version 1.0.0
+      \end{lstlisting}
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-o, --output-file|} Per default the contract file written by \gosam is named like the order file, with the file extension (e.g. \texttt{.lh} or \texttt{.olp}) replaced by by \texttt{.olc}. One can instead specify the name of the contract file using the \lstinline[style=sh]|--output-file <contract-file>| argument.
+\end{basedescript}
 
-The subprocesses receive an assignment to one or more
-labels per subprocess. In the line
+\subsection{The contract file}
+From the contract file one can see whether the order file has been processed successfully. If everything went smoothly it should look like the one in Fig.~\ref{fig:BLHA1} resp. Fig.~\ref{fig:BLHA2}. All settings are either acknowledged by the word \texttt{OK} or, in case of a failure, by the word \texttt{error} followed by an error message.
+
+The subprocesses receive an assignment to one or more labels per subprocess. In the line
 \begin{lstlisting}[style=in]
-2 -2 -> 11 -11 21 | 1 3
+2 -2 -> 11 -11 21 | 1 2
 \end{lstlisting}
-the suffix \texttt{| 1 3}
-states that this subprocess has been assigned to \texttt{1}
-single label which has the value \texttt{3}. 
-Had we set \texttt{SubdivideSubprocess} (keyword in BLHA1)
-to \texttt{yes} this line might have looked like
+the suffix \texttt{| 1 3} states that this subprocess has been assigned to \texttt{1} single label which has the value \texttt{2}. Had we set \texttt{SubdivideSubprocess} (see Section~\ref{sec:optional_BLHA_keywords}) to \texttt{yes} in the order file this line might have looked like
 \begin{lstlisting}[style=in]
 2 -2 -> 11 11 21 | 4 0 1 2 3
 \end{lstlisting}
-meaning that the subamplitudes
-have been assigned to
-\texttt{4} labels (which is the first number after the bar) with
-the values \texttt{0} to \texttt{3}, each denoting 
-an individual helicity subamplitude. These labels will enter the
-first argument of the routine \texttt{OLP\_EvalSubProcess}.
-In order to retrieve the full amplitude the calling (MC) program should sum
-over the contributions from all labels. Alternatively, it is possible to
-sample the different channels by Monte Carlo techniques.
+meaning that the subamplitudes have been assigned to \texttt{4} labels (which is the first number after the bar) with the values \texttt{0} to \texttt{3}, each denoting an individual helicity subamplitude. These labels will enter the first argument of the interface routines \texttt{OLP\_EvalSubProcess} (BLHA1) and \texttt{OLP\_EvalSubProcess2} (BLHA2) (see Section~\ref{sec:BLHA_calling}). In order to retrieve the full amplitude the calling (MC) program should sum over the contributions from all labels. Alternatively, it is possible to sample the different channels by Monte Carlo techniques.
 
-\section{Producing the libraries containing the virtual amplitudes}
-
+\section{Producing the amplitude libraries}
 Building the library is done with the same sequence of commands as in standalone mode,
-
 \begin{lstlisting}[style=sh]
 meson setup build --prefix <prefix> 
 meson install -C build
 \end{lstlisting}
-
-Now one should find the following files%
-\footnote{Due to backwards compatibility, they are still named \texttt{libgolem\_olp} instead of \texttt{libgosam\_olp}.}
-in a subdirectory \texttt{lib/} or \texttt{lib64/}:
+Now one should find the following files\footnote{Due to backwards compatibility, they are still named \texttt{libgolem\_olp} instead of \texttt{libgosam\_olp}.} in a subdirectory \texttt{lib/} or \texttt{lib64/}:
 \begin{itemize}
 \item \texttt{libgolem\_olp.a} for static linking,
 \item \texttt{libgolem\_olp.so} for dynamic linking.
 \end{itemize}
-
-The Monte-Carlo program can now be linked to these files or can
-use the dynamical library at runtime using the \texttt{dlopen()} and \texttt{dlsym()} system calls%
-\footnote{For more details we refer to the corresponding man pages.}.
-
-The required compiler and linking flags can be generated by calling the \texttt{config.sh} script:\\
+Note that Debian-based systems supporting multiarch will put the libraries in \texttt{lib/<multiarch-name>/} or \texttt{lib64/<multiarch-name>/} instead. The Monte-Carlo program can now be linked to these files or use the dynamical library at runtime by means of the \texttt{dlopen()} and \texttt{dlsym()} system calls\footnote{For more details we refer to the corresponding man pages.}. The required compiler and linking flags can be generated by calling the \texttt{config.sh} script:
 \begin{lstlisting}[style=sh]
 sh ./config.sh -cflags # prints compiler flags 
 sh ./config.sh -libs   # prints linking flags
 \end{lstlisting}
-
-Inside a makefile, one can use the following lines to extend existing build flags:\\
+Inside a makefile, one can use the following lines to extend existing build flags:\\[5pt]
 \texttt{ FCFLAGS+=\$(shell ./config.sh -cflags)} \\
-\texttt{ LDFLAGS+=\$(shell ./config.sh -libs)}
+\texttt{ LDFLAGS+=\$(shell ./config.sh -libs)}\\[5pt]
+\noindent The path to \texttt{config.sh} needs of course to be adapted if the makefile is not in the same directory.
 
-The path to \texttt{config.sh} needs of course to be adapted if the makefile is not in the
-same directory.
-
-\section{Calling the interface routines}
+\section{Calling the interface routines}\label{sec:BLHA_calling}
 
 For the default settings the call of the interface routines 
 will be automatic, so the user does not have to care about the details described below.
