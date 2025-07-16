@@ -1158,27 +1158,46 @@ def mc_specials(conf, order_file):
             conf.setProperty("mc_specials."+pi_parts[0], True)
     conf.setProperty("mc_specials.keys",pi_keys)
 
-    if conf.getProperty("mc_specials.olp.mc.name") is not None:
+    overwrite_warn = False
+
+    mc_name = conf.getProperty("olp.mc.name").lower().strip()
+
+    if mc_name != "any":        
+        if conf.getProperty("mc_specials.olp.mc.name") is not None:
+            mc_special_mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
+            if mc_name != mc_special_mc_name:
+                overwrite_warn = True
+    elif conf.getProperty("mc_specials.olp.mc.name") is not None:
         mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
-    else:
-        mc_name = "any"
     
     mc_version = []
-    try:
+    s = ""
+    mc_special_s = ""
+    if conf.getProperty("olp.mc.version") is not None:
+        s = conf.getProperty("olp.mc.version", default="").strip()
+        if conf.getProperty("mc_specials.olp.mc.version") is not None:
+            mc_special_s = conf.getProperty("mc_specials.olp.mc.version", default="").strip()
+            if s != mc_special_s:
+                overwrite_warn = True
+    elif conf.getProperty("mc_specials.olp.mc.version") is not None:
         s = conf.getProperty("mc_specials.olp.mc.version", default="").strip()
-        if len(s) > 0:
-            mc_version = list(map(int, s.split(".")))
-    except ValueError as ex:
-        pass
+    if len(s) > 0:
+        mc_version = list(map(int, s.split(".")))
+
+    if overwrite_warn:
+        old_mc = mc_special_mc_name if mc_special_s == "" else mc_special_mc_name+"/"+mc_special_s
+        new_mc = mc_name if s == "" else mc_name+"/"+s
+        logger.warning("Command line argument --mc %s overwrites #@ instruction in BLHA order file: %s -> %s " 
+                        % (new_mc,old_mc,new_mc))
 
     required_extensions = []
 
     if mc_name == "any":
         pass
-    elif mc_name.startswith("powheg"):
+    elif mc_name == "powheg" or mc_name == "powhegbox":
         required_extensions.extend(["f77"])
         required_extensions.extend(["olp_badpts"])
-    elif mc_name.startswith("amcatnlo"):
+    elif mc_name == "amcatnlo":
         required_extensions.extend(["f77"])
     else:
         logger.warning("Unknown Monte Carlo program passed via the --mc argument: %s. This statement will be IGNORED!" % (mc_name))
