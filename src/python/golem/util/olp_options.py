@@ -198,15 +198,14 @@ def ModelFile(values, conf, ignore_case):
     else:
         return __value_ERR__ + "model file does not exist."
 
-# Deactivated: Does not seem to do wat it is supposed to due according to the BLHA2 standard
-#@optional_olp_option
-#def ParameterCard(values, conf, ignore_case):
-#    file_name = " ".join(values)
-#    conf["olp.modelfile"] = file_name
-#    if os.path.exists(file_name):
-#        return __value_OK__
-#    else:
-#        return __value_ERR__ + "SLHA file does not exist."
+@optional_olp_option
+def ParameterCard(values, conf, ignore_case):
+    file_name = " ".join(values)
+    conf["olp.modelfile"] = file_name
+    if os.path.exists(file_name):
+        return __value_OK__
+    else:
+        return __value_ERR__ + "SLHA file does not exist."
 
 
 @optional_olp_option
@@ -501,25 +500,24 @@ def UFOModel(values, conf, ignore_case):
         logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
         return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
-# Deactivated: Has no effect, function unclear
-#@optional_olp_option
-#def Parameters(values, conf, ignore_case):
-#    """
-#    NOT YET PART OF THE STANDARD
-#    """
-#    # conf["olp.parameters"] = values
-#    parameters = list(values)
-#    if len(values) > 0:
-#        if parameters[0] == "alpha_s":
-#            # parameters.remove("alpha_s")
-#            conf["olp.alphas"] = 1
-#            conf["olp.parameters"] = parameters
-#    else:
-#        conf["olp.alphas"] = 0
-#        conf["olp.parameters"] = parameters
-#        logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
-#        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
-#    return __value_OK__
+@optional_olp_option
+def Parameters(values, conf, ignore_case):
+    """
+    NOT YET PART OF THE STANDARD
+    """
+    # conf["olp.parameters"] = values
+    parameters = list(values)
+    if len(values) > 0:
+        if parameters[0] == "alpha_s":
+            # parameters.remove("alpha_s")
+            conf["olp.alphas"] = 1
+            conf["olp.parameters"] = parameters
+    else:
+        conf["olp.alphas"] = 0
+        conf["olp.parameters"] = parameters
+        logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
+        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
+    return __value_OK__
 
 
 def expect_one_keyword(values, conf, ignore_case, key, supported_values):
