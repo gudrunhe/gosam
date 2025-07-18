@@ -1,13 +1,17 @@
 \section{UFO models for EFT calculations}
-\gosam does not ship with any builtin EFT models. For a calculation based on an EFT the user has to provide the model through the generic UFO interface, see section~\ref{sec:UFO}. \gosam is able to handle $n$-point vertices, with $n>4$, and 4-fermion interactions. Note that when no additional order besides the usual QCD and QED orders is specified for the vertex couplings, \gosam will treat all interactions equally, considering only their assigned power wrt. the perturbative expansion in the strong and electroweak/QED coupling. In most cases one will want to make a distinction between SM and non-SM interactions, which in UFO syntax is conventionally handled trough additional coupling orders. \gosam reserves two special order names, \texttt{NP} and \texttt{QL}. The former is used to assign an order to a coupling wrt. to the power counting of the EFT, for example factors of $1/\Lambda$ in SMEFT. The latter can be used to assign a loop-order to the coupling in cases one wants to take into account a potential loop-suppression of EFT operators, as explained in more detail in the next section.
+\gosam does not come with any built-in EFT models. For a calculation based on an EFT the user has to provide the model through the generic UFO interface, see section~\ref{sec:UFO}. \gosam is able to handle $n$-point vertices, with $n>4$, and 4-fermion interactions. Note that, when no additional order besides the usual QCD and QED orders is specified for the vertex couplings, \gosam will treat all interactions equally, considering only their assigned power wrt. the perturbative expansion in the strong and electroweak/QED coupling. In most cases one will want to make a distinction between SM and non-SM interactions, which in UFO syntax is conventionally handled trough additional coupling orders. \gosam reserves two special order names, \texttt{NP} and \texttt{QL}. The former is used to assign an order to a coupling wrt. to the power counting of the EFT, for example factors of $1/\Lambda$ in SMEFT. The latter can be used to assign a loop-order to the coupling in cases one wants to take into account a potential loop-suppression of EFT operators, as explained in more detail in section~\ref{sec:SMEFTtruncations} below.
 
-A special remark has to be made about double, or in general multiple, insertions of EFT operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies when at the same time operators of even higher dimension are missing in the model. For example, a double insertion of dimension 6 operators is at the same order as a single insertion of a dimension 8 operator. To be fully consistent both cases have to be included. The user can avoid such problems by using the \python diagram filters to single out diagrams with at most one SMEFT vertex:
+A special remark has to be made about double, or in general multiple, insertions of EFT operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies when at the same time operators of even higher dimension are missing in the model. For example, a double insertion of dimension 6 operators is at the same order as a single insertion of a dimension 8 operator. To be fully consistent, both cases would have to be included. The user can avoid such problems by using the \python diagram filters to single out diagrams with at most one SMEFT vertex:
 \begin{lstlisting}[gobble=3,style=py]
 1  filter.lo=lambda d: d.order('NP')<=1
 2  filter.nlo=lambda d: d.order('NP')<=1
 3  filter.ct=lambda d: d.order('NP')<=1
 \end{lstlisting}
 In this example we assume that the leading EFT operators are flagged by \texttt{NP=1} in the UFO model.
+
+\section{Multi-fermion operators} \label{sec:four-fermion}
+The treatment of diagram signs has been extended to handle vertices containing more than two fermions. The determination of the diagram sign is based on the algorithm of Ref.~\cite{Denner:1992me}, which requires tracing the fermion lines of a diagram. This tracing is unambiguous for vertices containing only two fermions, but requires additional information on how the legs of a vertex are connected when more than two fermions are involved. \gosam reads this information from the analytical vertex structure supplied by the UFO model. If the leg connections of a vertex are ambiguous, i.e.\ the analytical expression is a sum of two or more Lorentz structures connecting the legs differently, it is split into multiple vertices such that the leg connections are unambiguous for every vertex. After this procedure, \gosam's reduction machinery is able to handle the resulting diagrams normally.
+
 
 \section{Truncation orders in SMEFT}
 \label{sec:SMEFTtruncations}
@@ -143,34 +147,41 @@ respectively. The tree-level contains diagrams with loop-suppressed operators, o
 \subsubsection*{\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
 This option discards any higher dimensional operator and returns just the SM result.
 \begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2\,.&
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2\,.&
 \end{flalign}
 
 \subsubsection*{\boldmath\texttt{EFTcount=11}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, with loop-suppression}
 Truncation at linear order in $\Lambda^{-2}$.
 \begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2 + \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2 + \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
 \end{flalign}
 
 \subsubsection*{\boldmath\texttt{EFTcount=12}: $(\text{SM}+\text{dim-6})^2$, with loop-suppression}
 The truncation option including dim-6$^2$ terms.
 \begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^0}^2\,.&
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^0}^2\,.&
 \end{flalign}
 
 \subsubsection*{\boldmath\texttt{EFTcount=13}: $\text{SM}\times\text{dim-6}$, with loop-suppression}
 The linear dim-6 contribution.
 \begin{flalign}
-    \text{loop-ind. Born }: &\qquad \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
+    \text{Loop-ind. Born }: &\qquad \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
 \end{flalign}
 
 \subsubsection*{\boldmath\texttt{EFTcount=14}: $(\text{dim-6})^2$, with loop-suppression}
 The squared dim-6 contribution:
 \begin{flalign}
-    \text{loop-ind. Born }: &\qquad \abs{\M_6^1+\bar{\M}_6^0}^2\,.&
+    \text{Loop-ind. Born }: &\qquad \abs{\M_6^1+\bar{\M}_6^0}^2\,.&
 \end{flalign}
 
 Note that above options are still well defined when the model does not contain any loop-suppressed operators. We then have $\bar{\M}_6^0\equiv0$ and only genuine 1-loop squared topologies appear.
+
+\section{Calculations in HEFT}
+Higgs Effective Field Theory (HEFT)~\cite{Feruglio:1992wf,Bagger:1993zf,Koulovassilopoulos:1993pw,Burgess:1999ha,Wang:2006im,Grinstein:2007iv,Alonso:2012px,Buchalla:2012qq,Buchalla:2013rka} organises the power counting in terms of the chiral dimension instead of the canonical dimension of operators, as SMEFT does. As the chiral dimension is directly related to the loop order of an operator, the loop-suppression mentioned above is an integral feature of HEFT. Operators from the leading HEFT Lagrangian $\mathcal{L}_2$ are considered "tree-level operators", those from the next-to-leading (in the power counting) Lagrangian $\mathcal{L}_4$ "one-loop operators" and so on.\footnote{The subscript indicates the chiral dimension. It is always an even number. For the technical details of HEFT we refer to the given references.} The full SM is a subset of $\mathcal{L}_2$.
+
+Each insertion of a vertex coming from $\mathcal{L}_{2n}$ raises the loop order of a given diagram by $n-1$. For example, a single $\mathcal{L}_4$ vertex in a diagram with tree topology will make it a one-loop order diagram, contributing at the same level as a genuine one-loop diagram with only vertices from $\mathcal{L}_2$.
+
+\gosam is able to perform calculations to NLO in HEFT, when in the corresponding UFO model all vertices from $\mathcal{L}_2$ are tagged with (\texttt{NP=0, QL=0}), vertices from $\mathcal{L}_4$ with (\texttt{NP=1, QL=1}). Vertices from $\mathcal{L}_6$ are not considered, as they are of two-loop order. The amplitude is then assembled correctly when setting \texttt{EFTcount=12}. In the notation from above $\M_\mathrm{SM}^\ell$ then corresponds to \emph{all} contributions from $\mathcal{L}_2$, including anomalous ones, and $\bar{\M}_6^0$ to contributions with tree topology and a single insertion of a $\mathcal{L}_4$ vertex. $\M_6^\ell$ is not present in the HEFT setup.
 
 \section{Renormalisation of Wilson Coefficients}\label{sec:EFTrenorm}
 \gosam is able to provide renormalised amplitudes at NLO QCD in the SM. See~\cite{Cullen:2011ac} for details about the construction of the corresponding counterterms. Renormalisation in an EFT context is a non-trivial task and not fully automatized in \gosam. In general \gosam therefore provides unrenormalised amplitudes when considering an EFT. However, under certain circumstances \gosam is able to calculate the required counterterms for the 1-loop QCD renormalisation, just as in the pure SM. The necessary condition for this to work is that there are no contributions of the EFT operators to the renormalisation of SM parameters and fields. In other words, all additional UV divergences at $\mathcal{O}\left(\Lambda^{-2}\right)$ can be absorbed by renormalising the Wilson coefficients of the EFT operators alone, without the need to change the counterterms of SM objects. Internally \gosam uses its infrastructure for the generation of the Born amplitude, by replacing occurrences of Wilson coefficients within each diagram by their corresponding counterterm, $C_i\to \delta C_i$. The result is expanded in a way that ensures that each contribution to the counterterm amplitude only has a single insertion of a counterterm.
@@ -184,11 +195,11 @@ The counterterms related to the Wilson coefficients have to be provided by the u
       lorentz = [ L.FFS1, L.FFS2 ],
       couplings = {(0,0):C.GC_1, (0,1):C.GC_2})
 \end{lstlisting}
-The vertex has a single colour structure, the identity, and two separate Lorentz structures and couplings, defined in the UFO's \texttt{lorentz.py} and \texttt{couplings.py}, respectively\footnote{See the UFO2.0 manual~\cite{Darme:2023jdn} for a detailed explanation of the syntax.}. The $\overline{\text{MS}}$ counterterm for the Wilson coefficient $C_{t\phi}$ is given by
+The vertex has a single colour structure, the identity, and two separate Lorentz structures and couplings, defined in the UFO's \texttt{lorentz.py} and \texttt{couplings.py}, respectively.\footnote{See the UFO2.0 manual~\cite{Darme:2023jdn} for a detailed explanation of the syntax.} The $\overline{\text{MS}}$ counterterm for the Wilson coefficient $C_{t\phi}$ is given by
 \begin{multline}\label{eq:Ctphi_CT}
-   \delta C_{t\phi} = \frac{\alpha_s}{2\pi}\frac{(4\pi)^\epsilon}{\Gamma(1-\epsilon)}\left(\frac{\mu_R^2}{\mu_\mathrm{EFT}^2}\right)^\epsilon\\\left(\frac{1}{\epsilon}\left(-2C_{t\phi}+8y_tC_{\phi G}\right)\right. + \left.1_\mathrm{DRED}\left(-\frac{2}{3}C_{t\phi}+\frac{8}{3}y_tC_{\phi G}\right)\right) + \mathcal{O}(\epsilon)\,,
+   \delta C_{t\phi} = \frac{\alpha_s}{2\pi}\frac{(4\pi)^\epsilon}{\Gamma(1-\epsilon)}\left(\frac{\mu_R^2}{\mu_\mathrm{EFT}^2}\right)^\epsilon\,\left(\frac{1}{\epsilon}\left(-2C_{t\phi}+8y_tC_{\phi G}\right)\right. \\+ \left.1_\mathrm{DRED}\left(-\frac{2}{3}C_{t\phi}+\frac{8}{3}y_tC_{\phi G}\right)\right) + \mathcal{O}(\epsilon)\,,
 \end{multline}
-where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's default) and $1_\mathrm{DRED}=0$ in the t'Hooft-Veltman scheme. $\mu_\mathrm{EFT}$ is the scale at which the Wilson coefficients are renormalised, which can in general be different from the renormalisation scale $\mu_R$ of the strong coupling. The corresponding counterterm vertex is defined in \texttt{CT\_vertices.py}:
+where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's default) and $1_\mathrm{DRED}=0$ in the 't Hooft--Veltman scheme. $\mu_\mathrm{EFT}$ is the scale at which the Wilson coefficients are renormalised, which can in general be different from the renormalisation scale $\mu_R$ of the strong coupling. The corresponding counterterm vertex is defined in \texttt{CT\_vertices.py}:
 \begin{lstlisting}[gobble=3, style=py]
    CTV_1 = CTVertex(
       name = 'CTV_1',
