@@ -14,7 +14,7 @@ r_\Gamma=\frac{\Gamma(1+\varepsilon)\Gamma^2(1-\varepsilon)}{%
    \Gamma(1-2\varepsilon)}.
 \end{equation}
 The commonly used integration measure for the internal momentum $k$ is
-\begin{equation}
+\begin{equation}\label{eq:conventions:integration_meas}
 \frac{\mu^{2\varepsilon}\diff[D]k}{(2\pi)^D}
 =\mu^{2\varepsilon}\frac{i}{2^D\pi^{D/2}}\cdot\frac{{\mathrm d}^Dk}{i\pi^{D/2}}
 =\frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}\cdot%
@@ -22,49 +22,33 @@ The commonly used integration measure for the internal momentum $k$ is
 \end{equation}
 
 \section{Conventions of \gosamv}
-The factor from above which does not go into the integral definition of
-\golemVC{} can be written as
+The factor in eq.~(\ref{eq:conventions:integration_meas}) which is not part of the integral definition of \golemVC{} can be written as
 \begin{equation}
 \frac{(4\pi)^\varepsilon \cdot i}{(4\pi)^2}=
 \frac{(4\pi)^\varepsilon}{(2\pi)(4\pi)}\frac{i}{2}
 \end{equation}
-The factor of $i/2$ is included in the amplitude definition of \gosamv{}.
-The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of
-$\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.
+The factor of $i/2$ is included in the amplitude definition of \gosamv{}. The factors $(2\pi)$ and $(4\pi)$ are later used to build up a factor of $\alpha_x/2\pi$, where $\alpha_x$ is either $\alpha$ or $\alpha_s$.\\
 
-In the following we assume that the coupling constants\footnote{
-$e$ and $g_s$ in the Standard Model} have been set to one in the
-setup of \gosamv{}. This ensures that the one-loop matrix
-element, interfered with the Born amplitude, for QCD corrections is calculated in the $\overline{\mathrm{MS}}$ scheme as
-\begin{align}
-&2{\mathrm{Re}}({\cal M}_{\mathrm{loop}}{\cal
-                M}_{\mathrm{Born}}^\dagger)=:\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}\nonumber\\
-  &=
-\frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
-\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}) \label{eq:Conventions:nlo_matrix_element}
+The one-loop matrix element, interfered with the Born amplitude, for QCD corrections is calculated in the $\overline{\mathrm{MS}}$ scheme as
+\begin{align}\label{eq:Conventions:nlo_matrix_element}
+2{\mathrm{Re}}({\M}_{\mathrm{loop}}{\M}_{\mathrm{Born}}^\dagger)=:\left\vert\M\right\vert^2_{\text{1-loop}}
+    &= \frac{\alpha_s}{2\pi}\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}\cdot\left[
+      \frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0+{\mathcal{O}}(\varepsilon)\right]
 \end{align}
-The factor $(g_1^{n_1}\cdots g_q^{n_q})$ are the coupling constants
-to the powers as they appear in the squared tree-level matrix element. \gosamv{} will
-return the coefficients $c_{-2}$, $c_{-1}$ and $c_0$.
+The LO coupling constants are contained in the coefficients $c_i$, which are the values \gosamv{} returns.\\
 
-The conversion between different conventions for the $\Gamma$-functions
-is straightforward:
+The conversion between different common choices for the $\Gamma$-function prefator is straightforward:
 \begin{equation}
 \frac{1}{\Gamma(1-\varepsilon)}=r_\Gamma+{\mathcal O}(\varepsilon^3)=
 \left(1-\frac{\pi^2}{6}\varepsilon^2\right)\Gamma(1+\varepsilon)
    +{\mathcal O}(\varepsilon^3)
 \end{equation}
-
 The relevant terms in the expansion of $r_\Gamma$ are
 \begin{equation}
 r_\Gamma=e^{-\gamma_E\varepsilon}
 \left(1-\frac{\pi^2}{12}\varepsilon^2\right)+\mathcal{O}(\varepsilon^3)
 \end{equation}
-
-If one prefers to pull out a factor of
-$e^{-\gamma_E\varepsilon}(4\pi)^{\varepsilon}$ the appropriate
-definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
+If one prefers to pull out a factor of $e^{-\gamma_E\varepsilon}(4\pi)^{\varepsilon}$ the appropriate definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
 \begin{equation}
 \frac{\left\vert\mathcal{M}\right\vert^2_{\text{1-loop}}}%
 {e^{-\gamma_E\varepsilon}(4\pi)^\epsilon}=
@@ -75,25 +59,25 @@ definition of the matrix element up to terms of $\mathcal{O}(\epsilon)$ is
 %+{\mathcal{O}}(\varepsilon)
 \end{equation}
 
-\section{The \texttt{nlo\_prefactor} option}
+
+\section{The \texttt{nlo\_prefactors} option}
 \label{sec:nlo_prefactors}
-In the one-loop amplitude defined in equation \eqref{eq:Conventions:nlo_matrix_element}, a factor of $\alpha_x/2\pi$ is \emph{not} included in the coefficients $c_{-2}$, $c_{-1}$ and $c_0$. The choice of what prefactor is pulled out of the one-loop amplitude is controlled by the \texttt{nlo\_prefactor} option, which has the three choices
+In the one-loop amplitude defined in equation \eqref{eq:Conventions:nlo_matrix_element}, a factor of $\alpha_x/2\pi$ is \emph{not} included in the coefficients $c_{-2}$, $c_{-1}$ and $c_0$. The choice of what prefactor is pulled out of the one-loop amplitude is controlled by the \texttt{nlo\_prefactors} keyword, which has the three options
 \begin{eqnarray}
    A_0 = \frac{\alpha_x}{2\pi}, \qquad A_1 = \frac{1}{8 \pi^2} \quad \text{and} \quad A_2 = 1.
 \end{eqnarray}
-For \texttt{nlo\_prefactor = i}, the squared amplitude at one-loop level is then defined as
-\begin{equation}
-   \left|\mathcal{M}\right|^2_{\text{1-loop}}=
-A_i\ \frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}
-\cdot\left[\frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0
-+{\mathcal{O}}(\varepsilon)\right](g_1^{n_1}\cdots g_q^{n_q}).
-\end{equation}
+For \texttt{nlo\_prefactors = i}, the squared amplitude at one-loop level is then defined as
+\begin{align}
+  \left\vert\M\right\vert^2_{\text{1-loop}}
+    &= A_i\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}\cdot\left[
+      \frac{c_{-2}}{\varepsilon^2}+\frac{c_{-1}}{\varepsilon}+c_0+{\mathcal{O}}(\varepsilon)\right]
+\end{align}
 The default choice of this option depends on the mode \gosam is running in:
 \begin{itemize}
-   \item In standalone mode, the default choice is \texttt{nlo\_prefactor = 0}
-   \item In OLP mode, the default choice is \texttt{nlo\_prefactor = 2}
+   \item In standalone mode, the default choice is \texttt{nlo\_prefactors = 0}
+   \item In OLP mode, the default choice is \texttt{nlo\_prefactors = 2}
 \end{itemize}
-In the case of OLP mode, the default choice of the prefactor is mandated by the BLHA convention. The prefactor can still be changed by explicitly setting the \texttt{nlo\_prefactor} option, but please keep in mind that doing this \emph{violates the BLHA standard}.
+In the case of OLP mode, the default choice of the prefactor is mandated by the BLHA convention. When using BLHA2 interface routines (see Section~\ref{sec:BLHA2_calling}) the prefactor can still be changed by explicitly setting the \texttt{nlo\_prefactors} option, but please keep in mind that doing this \emph{violates the BLHA standard}.
 
 In the case of a loop-induced process, the prefactor is pulled out of each appearing one-loop amplitude piece, resulting in an overall prefactor of $A_i^2$.
 
@@ -348,6 +332,7 @@ We have
 
 \chapter{The included model files}
 \label{chp:model-files}
+This section is describes the structure of the built-in model files shipped with \gosam.
 
 \section{Format of the model files}\label{sec:modelfiles}
 \gosamv{} expects three files for a proper model definition:
@@ -652,15 +637,27 @@ Name & Symbol & Description\\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.25}
-\section{\gosam directory structure}
+
+
+
+
+\chapter{\gosam directory structure}
 The \gosamv source directory has the structure as described below:
 
 \begin{longtable}{r p{0.7\textwidth}}
+
+\texttt{build/} & This directory is created during
+building and installation of this package by running \texttt{meson setup build}.
+The files in this directory are of temporary nature and can be safely
+removed. \\
 
 \texttt{doc/} & This directory contains the documentation
 and example setup files. You can run \texttt{make} in this directory
 to generate the document \texttt{refman.pdf}; this is the document you
 are currently reading. \\
+
+\texttt{examples/} & This directory contains some simple examples
+of validated processes. \\
 
 \texttt{models/} & For each implemented model this directory
 contains the \qgraf model file (no extension), a \form interface
@@ -677,7 +674,21 @@ Chapter~\ref{sec:modelfiles}. Model files for the MSSM based on
 FeynRules/UFO~\cite{Degrande:2011ua}  and LanHEP~\cite{Semenov:2010qt}
 can be found in the directory 
 \texttt{examples/model/}, as well as \texttt{UFO}  files for ADD~\cite{ArkaniHamed:1998rs}
-models with large extra dimensions (LED). \\
+models with large extra dimensions (LED). Also some SMEFT UFO models with different subsets of dimension-6 operators can be found there. \\
+
+\texttt{olp/} & Files in this directory are used by
+\lstinline[style=sh]|gosam.py --olp|, which is \gosamv's implementation of the
+Binoth Les Houches interface for one-loop programs (BLHA).
+Both the original standards ~\cite{Binoth:2010xt} and the new standards
+(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv. See Section~\ref{sec:blha}.\\
+
+\texttt{src/python/} & All model independent \python modules
+can be found in this directory tree. \\
+
+\texttt{src/form/} & Here one finds all \form files
+which are not part of the template. \\
+
+\texttt{subprojects/} & Contains the installations of \gosam's dependencies (\form~\cite{Vermaseren:2000nd,Kuipers:2012rf,Ueda:2020wqk}, \golemVC~\cite{Binoth:2008uq, Cullen:2011kv, Guillet:2013msa},  \ninja~\cite{Mastrolia:2012bu,vanDeurzen:2013saa,Peraro:2014cba}, \oneloop~\cite{vanHameren:2010cp}, \qgraf~\cite{Nogueira:1991ex}).\\
 
 \texttt{templates/} & Contains templates for the creation
 of the files in the process directory. The contents are transformed
@@ -686,28 +697,11 @@ by the class
 in \texttt{golem.templates.*}. The translation of the templates is
 controled by the file \texttt{templates.xml} of the same directory. \\
 
-\texttt{src/python/} & All model independent \python modules
-can be found in this directory tree. \\
-
-\texttt{src/form/} & Here one finds all \form files
-which are not part of the template. \\
-
-\texttt{build} & This directory is created during
-building and installation of this package by running \texttt{meson setup build}.
-The files in this directory are of temporary nature and can be safely
-removed. \\
-
-\texttt{examples} & This directory contains some simple examples
-of validated processes. \\
-
-\texttt{olp} & Files in this directory are used by
-\texttt{gosam.py --olp}, which is \gosamv's implementation of the
-Binoth Les Houches interface for one-loop programs (BLHA).
-Both the original standards ~\cite{Binoth:2010xt} and the new standards 
-(BLHA2)~\cite{Alioli:2013nda} are supported by \gosamv. \\
-
-
 \end{longtable}
+
+
+
+
 
 \chapter{Available process card options} \label{chp:process_card_options}
 \input{refman_sections/template.tex}

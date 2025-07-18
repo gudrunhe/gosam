@@ -307,7 +307,7 @@ Note that the initialization of derived parameters only works correctly if the c
       call OLP_Start("path/to/contract.olc",ierr)
 !  now sin(theta_w) is set consistently
 \end{lstlisting}
-Some options can be changed at any time; it is instructive to look at the file \texttt{common/model.f90} generated in the process library during the compilation step (see Section~\ref{sec:BLHA_compiling}). It contains  the available parameter names and their settings.
+Some options can be changed at any time; it is instructive to look at the file \texttt{common/model.f90} generated in the process library during the compilation step (see Section~\ref{sec:BLHA_compiling}). It contains  the available parameter names and their settings. See also Appendix~\ref{chp:model-files} about the built-in models shipped with \gosam.
 
 \attention{
       Parameters which are set to either one or zero using the \texttt{one} or \texttt{zero} parameter card options, respectively, are fixed and cannot be changed at runtime.
@@ -346,7 +346,7 @@ The momenta are expected to be given in physical (in-out) kinematics: $p_1+p_2=p
 +\mathtt{res(3)}
 \right)
 \end{align}
-This means that the coefficients \texttt{res(1:3)} contain an explicit factor of $\alpha_s(\mu)/(4\pi)$. See also Appendix~\ref{sec:nlo_prefactors} for more details about the prefactors.
+Note that the coefficients \texttt{res(1:3)} contain an explicit factor of $\alpha_s(\mu)/(2\pi)$. In BLHA1 this convention is fixed an cannot be changed with the \texttt{nlo\_prefactors} process card option (see Appendix~\ref{sec:nlo_prefactors}).
 
 
 \subsubsection{Finalize (optional)}
@@ -422,7 +422,7 @@ The arguments are:
 \item \texttt{acc}: pointer to a one element array with the outcome of the 
 OLP internal accuracy check 
 \end{itemize}
-The \texttt{rval} argument is an array of length four which is filled by the subroutine, containing the result of the evaluation, as specified in eq.~(\ref{eq:res}). The default settings for the prefactor can be changed using the option \texttt{ nlo\_prefactor} (default: \texttt{2}), see section \ref{sec:nlo_prefactors}. For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
+The \texttt{rval} argument is an array of length four which is filled by the subroutine, containing the result of the evaluation, as specified in eq.~(\ref{eq:res}). In BLHA2 one can use the process card keyword \texttt{ nlo\_prefactors} to control which coupling prefactor is included in the result. The default in OLP mode is \texttt{nlo\_prefactors = 2}, which (for QCD corrections) corresponds to eq.~(\ref{eq:res}), i.e. $\alpha_s/(2\pi)$ included in the loop components of $\texttt{rval}$. See also Appendix~\ref{sec:nlo_prefactors}. For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
 
 
 \subsubsection{Loop-induced processes}
