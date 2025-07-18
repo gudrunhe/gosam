@@ -73,7 +73,7 @@ Further optional keywords available with \gosam are:
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|ExcludedParticles|} --- Standard: BLHA2\vspace{0.1cm}\\
         Input must be PDG numbers.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Extra|} --- Standard: BLHA2\vspace{0.1cm}\\
-        Currently the \texttt{Extra} keyword is not used to its full potential. Only settings can be passed which have their own BLHA specific keyword anyway.
+        Currently the \texttt{Extra} keyword is not used to its full potential. Only settings can be passed which have their own BLHA specific keyword anyway. See Section~\ref{sec:BLHA_precisionchecks} for a usage example.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|OperationMode|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
         \lstinline[style=in]|supported_values = "CouplingsStrippedOff"|
      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|ParameterCard|} --- Standard: Not part of the standard\vspace{0.1cm}\\
@@ -83,8 +83,8 @@ Further optional keywords available with \gosam are:
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Precision|} --- Standard: Not part of the standard\vspace{0.1cm}\\
         Takes exactly one value of type \texttt{<float>}, must be positive. Is and alias for \texttt{AccuracyTarget}.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|PrecisionCheck|} --- Standard: Not part of the standard\vspace{0.1cm}\\
-        \lstinline[style=in]|supported_values = ["disabled", "off"]|\\
-        For both possible values sets the properties \lstinline[style=in]|PSP_chk_method = Automatic| and  \lstinline[style=in]|PSP_check = False|.
+        \lstinline[style=in]|supported_values = ["disabled", "off", "automatic", "polerotation", "rotation", "loopinduced"]|\\
+        \lstinline[style=in]|"disabled", "off"| sets the properties \lstinline[style=in]|PSP_chk_method = Automatic| and  \lstinline[style=in]|PSP_check = False|. See also Section~\ref{sec:BLHA_precisionchecks}.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|SubdivideSubprocess|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
         \lstinline[style=in]|supported_values = ["yes", "no", "true", "false"]|\\
         For \texttt{true}/\texttt{yes} \gosam will generate labels for every helicity configuration contributing to a subprocess. For \texttt{false}/\texttt{no} \gosam will generate only one label per subprocess.
