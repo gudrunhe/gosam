@@ -503,7 +503,8 @@ def fill_config(conf):
 
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:
-        if conf.getProperty(p):
+        if conf.getProperty(p) or conf.getProperty(p) == False or conf.getProperty(p) == 0:
+            # Note that 'False'and '0' are actually valid values. We want to skip falsy values like [], " ", None, etc.
             conf.setProperty(str(p), conf.getProperty(p))
 
     # Check for required properties in standalone mode:

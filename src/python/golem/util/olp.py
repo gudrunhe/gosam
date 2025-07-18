@@ -765,7 +765,8 @@ def process_order_file(
         model_conf = conf.copy()
         # This fills in the defaults where no option is given:
         for p in golem.properties.properties:
-            if model_conf.getProperty(p):
+            if model_conf.getProperty(p) or model_conf.getProperty(p) == False or model_conf.getProperty(p) == 0:
+                # Note that 'False'and '0' are actually valid values. We want to skip falsy values like [], " ", None, etc.
                 model_conf.setProperty(str(p), model_conf.getProperty(p))
 
         model = golem.util.tools.getModel(model_conf, imodel_path)
@@ -1090,10 +1091,32 @@ def process_order_file(
 
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:
-        if conf.getProperty(p):
+        if conf.getProperty(p) or conf.getProperty(p) == False or conf.getProperty(p) == 0:
+            # Note that 'False'and '0' are actually valid values a property can be set to. 
             conf.setProperty(str(p), conf.getProperty(p))
         else:
+            # this catches all falsy values like [], None, " ", etc., which mean
+            # the property is not set yet. But not '0' and the acual bool 'False', 
+            # which we checked for above, since those ARE possible values for a property.
             conf.setProperty(str(p), p.getDefault())
+
+##################################################################################
+#   ATTENTION!!! 
+#   
+#   The following original implementation looks fine but is broken, as properties
+#   evaluating to 'False' or '0' will be counted as not initialized/given. But
+#   this is not correct. A property can be set to either of these values and we
+#   DO NOT want to overwrite it with its default. Code kept here as a warning.    
+#
+##################################################################################
+#    for p in golem.properties.properties:
+#        if conf.getProperty(p):
+#            conf.setProperty(str(p), conf.getProperty(p))
+#        else:
+#            conf.setProperty(str(p), p.getDefault())
+
+
+
 
     golem.properties.setInternals(conf)
 
