@@ -579,7 +579,9 @@ extensions = Property(
     "extensions",
     """\
    A list of extension names which should be activated for the
-   code generation.
+   code generation. Note that for some of those extensions 
+   dedicated keywords exist: reduction_programs, 
+   regularisation_scheme, polvec
 
    ninja        --- Use the ninja reduction library (default).
    golem95      --- Use the golem95 reduction library (only when
@@ -587,8 +589,8 @@ extensions = Property(
    dred         --- Use DRED as IR regularisation scheme (default).
    thv          --- Use tHV as IR regularisation scheme.
    numpolvec    --- Evaluate polarisation vectors numerically (default).
-   quadruple    --- Make a quadruple precision copy of the code (this
-                    works only with ninja).
+   quadruple    --- Activate the use of quadruple precision in the 
+                    rescue system (this works only with ninja).
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
    gaugecheck   --- modify gauge boson wave functions to allow for
@@ -1468,12 +1470,12 @@ order_names = Property(
 enable_truncation_orders = Property(
     "enable_truncation_orders",
     """\
-   Whether or not to generate extra code to assess different
-   truncation orders in EFT calculations. Only works with a
-   New Physics UFO model containing 'NP' as additional coupling
-   order. 'order_names' must be specified and explicitly contain
-   'NP'. When set to False (default) no truncation is performed,
-   i.e. the amplitude is squared in the naive way.
+   Whether or not to generate extra code for different truncation 
+   options in EFT calculations. Only works with a New Physics UFO
+   model containing 'NP' as additional coupling order. 
+   'order_names' must be specified and explicitly contain 'NP'. 
+   When set to False (default) no truncation is performed, i.e. 
+   the amplitude is squared in the naive way.
    """,
     bool,
     False,
@@ -1622,6 +1624,7 @@ unitary_gauge = Property(
 
 # Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
+#   main process definition
     process_name,
     process_path,
     qgraf_in,
@@ -1632,24 +1635,20 @@ properties = [
     loop_suppressed_Born,
     zero,
     one,
-    renorm,
-    sum_helicities,
-    regularisation_scheme,
-    config_convert_to_thv,
+    config_nlo_prefactors,
+    form_factor_lo,
+    form_factor_nlo,
+    crossings,
+#   filters and selectors
     helicities,
-    qgraf_options,
     filter_particles,
     filter_lo_particles,
     filter_nlo_particles,
     filter_ct_particles,
+    qgraf_options,
     qgraf_verbatim,
     qgraf_verbatim_lo,
     qgraf_verbatim_nlo,
-    sum_diagrams,
-    reduction_programs,
-    polvec_method,
-    extensions,
-    debug_flags,
     select_lo_diagrams,
     select_nlo_diagrams,
     select_ct_diagrams,
@@ -1657,6 +1656,23 @@ properties = [
     filter_nlo_diagrams,
     filter_ct_diagrams,
     filter_module,
+#   schemes and program settings 
+    regularisation_scheme,
+    config_convert_to_thv,
+    sum_diagrams,
+    sum_helicities,
+    all_mandelstam,
+    polvec_method,
+    reference_vectors,
+    symmetries,
+    flavour_groups,
+    respect_generations,
+    r2,
+    unitary_gauge,
+    order_names,
+    enable_truncation_orders,
+#   renormalisation
+    renorm,
     config_renorm_alphas,
     config_renorm_gluonwf,
     config_renorm_mqwf,
@@ -1668,10 +1684,12 @@ properties = [
     config_renorm_gamma5,
     config_renorm_eftwilson,
     config_renorm_ehc,
+#   reduction and rescue
+    reduction_programs,
     config_reduction_interoperation,
     config_reduction_interoperation_rescue,
-    config_nlo_prefactors,
     config_PSP_check,
+    config_PSP_chk_method,
     config_PSP_rescue,
     config_PSP_verbosity,
     config_PSP_chk_th1,
@@ -1685,8 +1703,13 @@ properties = [
     config_PSP_chk_li3,
     config_PSP_chk_li4,
     config_PSP_chk_li5,
-    config_PSP_chk_method,
-    reference_vectors,
+#   misc
+    extensions,
+#   diagram drawing
+    pyxodraw,
+    use_vertex_labels,
+#   technical settings
+    debug_flags,
     abbrev_color,
     abbrev_limit,
     template_path,
@@ -1695,22 +1718,9 @@ properties = [
     form_threads,
     form_tmp,
     form_workspace,
-    r2,
-    symmetries,
-    crossings,
     formopt_level,
-    pyxodraw,
-    form_factor_lo,
-    form_factor_nlo,
-    order_names,
-    enable_truncation_orders,
-    use_vertex_labels,
-    all_mandelstam,
-    flavour_groups,
-    respect_generations,
     meson_buildtype,
-    meson_arch,
-    unitary_gauge
+    meson_arch
 ]
 
 REDUCTION_EXTENSIONS = ["golem95", "ninja"]
