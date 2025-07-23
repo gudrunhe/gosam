@@ -881,16 +881,43 @@ def workflow(conf):
             searchm = "mass("+str(abs(p.getPDGCode()))+")"
             if searchm in list(map(str.lower,new_zero)):
                 new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
-                m = p.getMass()
-                if m != "0":
-                    new_zero.append(m)
+                if p.isMassive():
+                    new_zero.append(p.getMass())
             searchw = "width("+str(abs(p.getPDGCode()))+")"
             if searchw in list(map(str.lower,new_zero)):
                 new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
-                w = p.getWidth()
-                if w != "0":
-                    new_zero.append(w)
+                if p.hasWidth():
+                    new_zero.append(p.getWidth())
         conf.setProperty("zero",",".join(list(set(new_zero))))
+
+
+    # It can happen that a model defines names for a particle's mass and width but 
+    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the 
+    # built-in models). We have to take care of that and add those names to the zero 
+    # property to avoid erroneous code generation. Otherwise the user has to remember
+    # to add these cases to 'zero' manually.
+    # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
+    if not conf["__OLP_MODE__"]:
+        zeros = conf.getListProperty("zero")
+        for p in model.particles.values():
+            if p.isMassive(zeros):
+                m = p.getMass(zeros)
+                try:
+                    if float(model.parameters[m]) == 0.:
+                        zeros.append(m)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+            if p.hasWidth(zeros):
+                w = p.getWidth(zeros)
+                try:
+                    if float(model.parameters[w]) == 0.:
+                        zeros.append(w)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+        conf.setProperty("zero",",".join(list(set(zeros))))
+
 
     for prop in [golem.properties.zero, golem.properties.one]:
         golem.util.tools.expand_parameter_list(prop, conf)
