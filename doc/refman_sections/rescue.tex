@@ -80,3 +80,15 @@ where the virtual amplitude is called at a large number of phase space
 points, as it represents a good balance between rescue success and speed.
 If \texttt{PSP\_verbosity} is set to \texttt{True} the points that
 could not be rescued are written to the file \texttt{gs\_badpts.log}.
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/PSP_Check.pdf}
+    \caption{Flowchart of the precision check system described in the text. The variables \texttt{PSP\_chk\_<index>} stand for \texttt{PSP\_chk\_th<index>} or \texttt{PSP\_chk\_li<index>} depending on the amplitude type.}
+    \label{fig:rescue-check}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/PSP_Rescue.pdf}
+    \caption{Flowchart of the point rescue system described in the text. The variables \texttt{PSP\_chk\_<index>} stand for \texttt{PSP\_chk\_th<index>} or \texttt{PSP\_chk\_li<index>} depending on the amplitude type. The pole and rotation check are the ones described in Figure \ref{fig:rescue-check}.}
+    \label{fig:rescue-rescue}
+\end{figure}
