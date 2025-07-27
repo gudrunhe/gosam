@@ -13,3 +13,14 @@ helicities=[dD=+-]D[+-][+-]
 
 one=gs,e
 zero=mU,mD,mS,mC,mB,wT
+
+# Tune rescue system to request very stable results > 14 digits
+#PSP_rescue=true
+#PSP_chk_kfactor=10
+#PSP_chk_th1=14
+#PSP_chk_th2=14
+#PSP_chk_th3=14
+#PSP_chk_th4=14
+#PSP_chk_th5=14
+
+extensions=quadruple

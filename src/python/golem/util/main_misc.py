@@ -475,6 +475,9 @@ def fill_config(conf):
     is_loopinduced
     """
 
+    # save the settings given in the process config file
+    rc_conf = conf.copy()
+
     ini = conf.getProperty(golem.properties.qgraf_in)
     fin = conf.getProperty(golem.properties.qgraf_out)
 
@@ -645,10 +648,6 @@ def fill_config(conf):
             + "This will probably cause some serious errors in your result,\n"
             + "so I will not let you do that, sorry.")
 
-    if not golem.installation.WITH_GOLEM:
-        if 'golem95' in conf["reduction_programs"].split(","):
-            raise GolemConfigError("The configuration requests 'golem95' as reduction library," +
-                                   "but GoSam was build without Golem. Please reinstall GoSam with support for Golem.")
         # END: Check for incompatible configuration
 
 
@@ -688,7 +687,26 @@ def fill_config(conf):
 
     tmp_ext = golem.properties.getExtensions(conf)
 
-    for p in conf["reduction_programs"].split(","):
+    # add appropriate reduction programs to extensions
+    if rc_conf["reduction_programs"] is None:
+        # no input provided by the user -> defaults (ninja+golem95)
+        reduction_programs = conf.getListProperty("reduction_programs")
+    else:
+        # use reduction programs specified by the user
+        reduction_programs = rc_conf.getListProperty("reduction_programs")
+
+    if not golem.installation.WITH_GOLEM:
+        if reduction_programs == ["golem95"]:
+            raise GolemConfigError("The configuration requests only 'golem95' as reduction library,"+
+                                    "but GoSam was built without Golem.\n"+
+                                    "Please reinstall GoSam with support for Golem or select a diferent reduction library.")
+        elif "golem95" in reduction_programs:
+            logger.warning("The configuration requests 'golem95' as a reduction library, but GoSam was build without Golem.\n"+
+                            "Removing 'golem95' from 'reduction_programs'.")
+            reduction_programs.remove("golem95")
+            conf.setProperty("reduction_programs",",".join(reduction_programs))
+
+    for p in reduction_programs:
         if not p in tmp_ext:
             if conf["gosam-auto-reduction.extensions"]:
                 conf["gosam-auto-reduction.extensions"] = p + "," + conf["gosam-auto-reduction.extensions"]
@@ -722,14 +740,12 @@ def fill_config(conf):
                 red_flag = True
                 break
         if not red_flag:
-            logger.warning(
-                "Generating code for the virtual part without specifying\n"
-                + "a reduction library is useless.\n"
-                + "Please, make sure that at least one of the following\n"
-                + "is added to 'extensions':\n"
+            raise GolemConfigError(
+                "Generating code for\n"
+                + "the virtual part without specifying a reduction library is useless. Please,\n"
+                + "make sure that at least one of the following is added to 'extensions':\n"
                 + ", ".join(golem.properties.REDUCTION_EXTENSIONS)
             )
-            conf["gosam-auto-reduction.extensions"] = "ninja,golem95"
     if not generate_loop_diagrams and conf["gosam-auto-reduction.extensions"]:
         conf["gosam-auto-reduction.extensions"] = ""
 
@@ -797,11 +813,10 @@ def fill_config(conf):
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
-        if ("ninja" not in conf["reduction_programs"]) or ("golem95" in conf["reduction_programs"]):
+        if ("ninja" not in conf["reduction_programs"]):
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
-                + "in association with ninja. Please select only ninja as reduction program by setting:\n"
-                + "'reduction_programs=ninja' in the input card.\n"
+                + "in association with ninja. Please add ninja as reduction program to 'reduction_programs' in the input card.\n"
             )
 
     conf["reduction_interoperation"] = conf["reduction_interoperation"].upper()

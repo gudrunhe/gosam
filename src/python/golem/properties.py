@@ -553,12 +553,12 @@ reduction_programs = Property(
 
         Possible values: ninja, golem95
 
-        Default: ninja
+        Default: ninja,golem95
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
     list,
-    "ninja",
+    "ninja,golem95",
     options=["ninja", "golem95"],
 )
 
@@ -583,9 +583,6 @@ extensions = Property(
    dedicated keywords exist: reduction_programs, 
    regularisation_scheme, polvec
 
-   ninja        --- Use the ninja reduction library (default).
-   golem95      --- Use the golem95 reduction library (only when
-                    enabled during setup step of GoSam installation).
    dred         --- Use DRED as IR regularisation scheme (default).
    thv          --- Use tHV as IR regularisation scheme.
    numpolvec    --- Evaluate polarisation vectors numerically (default).
@@ -612,8 +609,6 @@ extensions = Property(
     list,
     ",".join(DEFAULT_EXTENSIONS),
     options=[
-        "ninja",
-        "golem95",
         "dred",
         "thv",
         "numpolvec",
@@ -1112,12 +1107,15 @@ config_reduction_interoperation = Property(
    """,
     str,
     -1,
+    options=["-1","ninja","golem95"],
 )
 
 config_reduction_interoperation_rescue = Property(
     "reduction_interoperation_rescue",
     """
    Rescue reduction program.
+
+   Possible values are: ninja, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam
    decide.
@@ -1126,6 +1124,7 @@ config_reduction_interoperation_rescue = Property(
    """,
     str,
     -1,
+    options=["-1","ninja","golem95","quadruple"],
 )
 
 config_nlo_prefactors = Property(
@@ -1288,6 +1287,31 @@ config_PSP_chk_th5 = Property(
     7,
 )
 
+config_PSP_chk_kfactor = Property(
+    "PSP_chk_kfactor",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on the k-factor to perform a rotation check on the PSP.
+   """,
+    str,
+    1000,
+)
+
+config_PSP_chk_rotdiff = Property(
+    "PSP_chk_rotdiff",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on size of difference between rotated
+   dimensionless amplitudes
+     |diff * maxscale2**(nlegs-4)|
+   beyond the PSP is rescued.
+   """,
+    str,
+    1000000,
+)
+
 config_PSP_chk_li1 = Property(
     "PSP_chk_li1",
     """\
@@ -1393,15 +1417,31 @@ config_PSP_chk_li5 = Property(
     7,
 )
 
-config_PSP_chk_kfactor = Property(
-    "PSP_chk_kfactor",
+config_PSP_chk_kfactor_li = Property(
+    "PSP_chk_kfactor_li",
     """\
    Sets the same variable in config.f90
 
-   Threshold on the k-factor to perform a rotation check on the PSP.
+   Threshold on size of dimensionless amplitude:
+     |amp2 * maxscale2**(nlegs-4)|
+   beyond which a rotation check on the PSP is performed.
    """,
     str,
-    1000,
+    1000000,
+)
+
+config_PSP_chk_rotdiff_li = Property(
+    "PSP_chk_rotdiff_li",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on size of difference between rotated
+   dimensionless amplitudes
+     |diff * maxscale2**(nlegs-4)|
+   beyond the PSP is rescued.
+   """,
+    str,
+    1000000,
 )
 
 config_PSP_chk_method = Property(
@@ -1720,11 +1760,14 @@ properties = [
     config_PSP_chk_th4,
     config_PSP_chk_th5,
     config_PSP_chk_kfactor,
+    config_PSP_chk_rotdiff,
     config_PSP_chk_li1,
     config_PSP_chk_li2,
     config_PSP_chk_li3,
     config_PSP_chk_li4,
     config_PSP_chk_li5,
+    config_PSP_chk_kfactor_li,
+    config_PSP_chk_rotdiff_li,
 #   misc
     extensions,
 #   diagram drawing
@@ -1773,7 +1816,6 @@ def getExtensions(conf):
         for ext in lst:
             if ext not in ext_set:
                 ext_set.append(ext)
-
     return list(ext_set)
 
 

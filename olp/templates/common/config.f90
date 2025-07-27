@@ -36,21 +36,26 @@
    integer :: reduction_interoperation_rescue = [%
    @select reduction_interoperation_rescue default="-1"
    @case -1 %][%
-      @if extension golem95 %]GOLEM95[%
+      @if extension quadruple %]QUADNINJA[%
       @else %][%
-           @if extension quadruple %]QUADNINJA[%
+         @select reduction_interoperation default="-1"
+         @case -1 %][%
+           @if extension golem95 %]GOLEM95[%
            @else %][%
-           @select reduction_interoperation default="-1"
-           @case -1 %][%
-              @if extension ninja %]NINJA[%
-              @else %][%
-                    @if extension golem95 %]GOLEM95[%
-                     @else%]-1[%
-                    @end @if %][%
-              @end @if %][%
-           @else %]-1[%
-           @end @select %][%
+                @if extension ninja %]NINJA[%
+                @else%]-1[%
+                @end @if %][%
            @end @if %][%
+         @case GOLEM95 %][%
+                @if extension ninja %]NINJA[%
+                @else%]-1[%
+                @end @if %][%
+         @case NINJA %][%
+                @if extension golem95 %]GOLEM95[%
+                @else%]-1[%
+                @end @if %][%
+         @else%]-1[%
+         @end @select %][%
       @end @if %][%
    @else %][% reduction_interoperation_rescue %][%
    @end @select %]
@@ -229,8 +234,8 @@
    integer :: PSP_chk_th3 = [% PSP_chk_th3 %] ! double/double rotation (th3 < r => accept, r < th3 => rescue)
    integer :: PSP_chk_th4 = [% PSP_chk_th4 %] ! double/quad rotation (th4 < r => accept, r < th4 => discard) 
    integer :: PSP_chk_th5 = [% PSP_chk_th5 %] ! quad/quad_rot rotation (th5 < r => accept, r < th5 => discard)
-
    real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
+   real(ki) :: PSP_chk_rotdiff = [% PSP_chk_rotdiff convert=real %].0_ki
    [% @if generate_tree_diagrams %]
    ! not used in this process (process is not loop-induced):[%
    @else %]
@@ -241,7 +246,8 @@
    integer :: PSP_chk_li3 = [% PSP_chk_li3 %] ! double/double rotation (li3 < r => accept, r < li3 => rescue)
    integer :: PSP_chk_li4 = [% PSP_chk_li4 %] ! double/quad rotation (li4 < r => accept, r < li4 => discard)
    integer :: PSP_chk_li5 = [% PSP_chk_li5 %] ! quad/quad_rot rotation (li5 < r => accept, r < li5 => discard)
-
+   real(ki) :: PSP_chk_kfactor_li = [% PSP_chk_kfactor_li convert=real %].0_ki
+   real(ki) :: PSP_chk_rotdiff_li = [% PSP_chk_rotdiff_li convert=real %].0_ki
 [%
 @if ewchoose %]
    !

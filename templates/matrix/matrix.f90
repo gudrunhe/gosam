@@ -3,9 +3,9 @@
    use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki, &
      & PSP_check, PSP_verbosity, PSP_rescue, PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_th4, PSP_chk_th5, &
-     & PSP_chk_kfactor, reduction_interoperation, &
+     & PSP_chk_kfactor, PSP_chk_rotdiff, reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
-     & PSP_chk_li5, &
+     & PSP_chk_li5, PSP_chk_kfactor_li, PSP_chk_rotdiff_li, &
      & reduction_interoperation_rescue
    use [% process_name asprefix=\_ %]kinematics, only: &
        num_legs, corrections_are_qcd
@@ -267,20 +267,25 @@ contains
                  &                "' th2='", PSP_chk_th2, &
                  &                "' th3='", PSP_chk_th3, &
                  &                "' th4='", PSP_chk_th4, &
-                 &                "' th5='", PSP_chk_th5,"'/>"[%
-           @else %]
+                 &                "' th5='", PSP_chk_th5,"'/>"
+            write(42,'(4x,A16,D23.16,A3)') &
+                 &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
+            write(42,'(4x,A16,D23.16,A3)') &
+                 &  "<PSP_rotdiff d='", PSP_chk_rotdiff,"'/>"[%
+            @else %]
             write(42,'(4x,A21,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A7,I2.1,A3)') &
                  &  "<PSP_thresholds li1='", PSP_chk_li1, &
                  &                "' li2='", PSP_chk_li2, &
                  &                "' li3='", PSP_chk_li3, &
                  &                "' li4='", PSP_chk_li4, &
-                 &                "' li5='", PSP_chk_li5,"'/>"[%
+                 &                "' li5='", PSP_chk_li5,"'/>"
+            write(42,'(4x,A19,D23.16,A3)') &
+                 &  "<PSP_kfaktor_li k='", PSP_chk_kfactor_li,"'/>"
+            write(42,'(4x,A19,D23.16,A3)') &
+                 &  "<PSP_rotdiff_li d='", PSP_chk_rotdiff_li,"'/>"[%
             @end @if %]
-            write(42,'(4x,A16,D23.16,A3)') &
-                 &  "<PSP_kfaktor k='", PSP_chk_kfactor,"'/>"
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec1 sp='", spprec1, "' fp='", fpprec1, "'/>"
-
             write(42,'(4x,A15,I3.1,A6,I3.1,A3)') &
                  &  "<PSP_prec2 sp='", spprec2, "' fp='", fpprec2, "'/>"
             write(42,'(4x,A10,D23.16,A3)') &

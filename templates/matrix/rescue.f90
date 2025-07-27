@@ -3,10 +3,22 @@
    use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki,[% @if extension quadruple %] ki_qp,[% @end @if extension quadruple %] &
      & PSP_chk_th1, &
      & PSP_chk_th2, PSP_chk_th3, PSP_chk_th4, PSP_chk_th5, &
-     & PSP_chk_kfactor, reduction_interoperation, &
+     & PSP_chk_kfactor, PSP_chk_kfactor_li, &
+     & PSP_chk_rotdiff, PSP_chk_rotdiff_li, &
+     & reduction_interoperation, &
      & PSP_chk_li1, PSP_chk_li2, PSP_chk_li3, PSP_chk_li4, &
      & PSP_chk_li5, &
      & reduction_interoperation_rescue
+   use [% process_name asprefix=\_ %]kinematics, only:[%
+      @for repeat num_legs shift=1 %][%
+         @if is_first %] [% @else %], [%
+         @end @if %]k[% $_ %][%
+      @end @for %][%
+      @for mandelstam non-zero sym_prefix=es %], [%
+         @if eval index % 8 .eq. 0 %]&
+     & [%
+         @end @if%][%symbol%][%
+      @end @for mandelstam %]
    use [% process_name asprefix=\_ %]matrix_dp, only: samplitudel01, ir_subtraction[%
 @if extension quadruple %]
    use [% process_name asprefix=\_ %]matrix_qp, only: samplitudel01_qp[%
@@ -28,6 +40,7 @@ contains
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(in) :: amp
       real(ki) :: kfac
+      real(ki) :: maxscale2
       real(ki), dimension(2:3), intent(out) :: irp
       integer, intent(inout) :: prec
       integer, intent(inout) :: icheck
@@ -40,15 +53,29 @@ contains
       fpprec1 = 18[%
 @if anymember LoopInduced PSP_chk_method ignore_case=true %]
       ! poles should be zero for loop-induced processes
-      ! write(*,*) '--performing pole_check (loop-induced)--' 
+      ! write(*,*) '--performing pole_check (loop-induced)--'
+      maxscale2=max([%
+        @for mandelstam non-zero sym_prefix=es %][%
+        @if is_first %] abs([%symbol%]), [% @else %], [%
+        @end @if %][%
+          @if eval index % 8 .eq. 0 %]&
+     & [% @end @if%]abs([%symbol%])[%
+        @end @for mandelstam %])
       if(amp(2) .ne. 0.0_ki .and. amp(3) .ne. 0.0_ki) then
         spprec1 = -int(log10(abs((amp(3)/amp(2)))))
       endif
+      kfac = abs(amp(2)*maxscale2**([%num_legs%]-4)) ! dimensionless finite part
       icheck=1                                                              ! ACCEPT
       if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
+         ! write(*,*) 'failed pole_check: spprec1.lt.PSP_chk_li1', spprec1, PSP_chk_li1
+         icheck=2                                                           ! ROTATION
+      endif
+      if (kfac.gt.PSP_chk_kfactor_li.and.PSP_chk_kfactor.gt.0) then
+         ! write(*,*) 'failed pole_check: kfac.gt.PSP_chk_kfactor_li', kfac, PSP_chk_kfactor_li
          icheck=2                                                           ! ROTATION
       endif
       if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
+         ! write(*,*) 'failed pole_check: spprec1.lt.PSP_chk_li2', spprec1, PSP_chk_li2
          icheck=3
          fpprec1=-10        ! Set -10 as finite part precision
       endif[%
@@ -65,11 +92,16 @@ contains
          kfac = 0.0_ki
       endif
       icheck=1                                                              ! ACCEPT
-      if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2 &
-           .or.(kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0)) then
+      if(spprec1.lt.PSP_chk_th1.and.spprec1.ge.PSP_chk_th2) then
+         ! write(*,*) 'failed pole_check: spprec1.lt.PSP_chk_th1', spprec1, PSP_chk_th1
+         icheck=2                                                           ! ROTATION
+      endif
+      if (kfac.gt.PSP_chk_kfactor.and.PSP_chk_kfactor.gt.0) then
+         ! write(*,*) 'failed pole_check: kfac.gt.PSP_chk_kfactor', kfac, PSP_chk_kfactor
          icheck=2                                                           ! ROTATION
       endif
       if(spprec1.lt.PSP_chk_th2) then                                       ! RESCUE
+         ! write(*,*) 'failed pole_check: spprec1.lt.PSP_chk_th2', spprec1, PSP_chk_th2
          icheck=3
          fpprec1=-10        ! Set -10 as finite part precision
       endif[%
@@ -89,6 +121,7 @@ contains
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(in) :: amp
       real(ki), dimension(1:4), intent(out) :: amprot
+      real(ki) :: diff, maxscale2
       real(ki) :: rat2, angle
       integer, intent(inout) :: prec
       integer, intent(inout) :: icheck
@@ -107,17 +140,38 @@ contains
          vecsrot(irot,4) = vecs(irot,4)
       enddo
       call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
-      if((amprot(2)-amp(2)) .ne. 0.0_ki) then
+      diff = (amprot(2)-amp(2))
+      maxscale2=max([%
+        @for mandelstam non-zero sym_prefix=es %][%
+        @if is_first %] abs([%symbol%]), [% @else %], [%
+        @end @if %][%
+          @if eval index % 8 .eq. 0 %]&
+     & [% @end @if%]abs([%symbol%])[%
+        @end @for mandelstam %])
+      diff = abs((amprot(2)-amp(2)) * maxscale2**([%num_legs%]-4))
+      icheck=1                                                       ! ACCEPTED
+      if(diff .ne. 0.0_ki) then
          fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
       else
          fpprec1 = 16
       endif[%
       @if anymember PoleRotation PSP_chk_method ignore_case=true %]
-      icheck=1                                                       ! ACCEPTED
-      if(fpprec1.lt.PSP_chk_th3) icheck=2                            ! RESCUE[%
+      if(fpprec1.lt.PSP_chk_th3) then
+         ! write(*,*) 'failed rotation_check: fpprec1.lt.PSP_chk_th3', fpprec1, PSP_chk_th3
+         icheck=2                            ! RESCUE
+      endif
+      if(diff.gt.PSP_chk_rotdiff) then
+         ! write(*,*) 'failed rotation_check: diff.gt.PSP_chk_rotdiff', diff, PSP_chk_rotdiff
+         icheck=2                                                    ! RESCUE
+         fpprec1=-10        ! Set -10 as finite part precision
+      endif[%
       @else %]
-      icheck=1                                                       ! ACCEPTED
-      if(fpprec1.lt.PSP_chk_li3) icheck=2                            ! RESCUE[%
+      if(fpprec1.lt.PSP_chk_li3) icheck=2                            ! RESCUE
+      if(diff.gt.PSP_chk_rotdiff_li) then
+         ! write(*,*) 'failed rotation_check: diff.gt.PSP_chk_rotdiff_li', diff, PSP_chk_rotdiff_li
+         icheck=2                                                    ! RESCUE
+         fpprec1=-10        ! Set -10 as finite part precision
+      endif[%
       @end @if %]
       prec = fpprec1
       ! if(icheck.eq.1) write(*,*) 'passed double vs double_rot', amp(2), amprot(2), fpprec1, prec 

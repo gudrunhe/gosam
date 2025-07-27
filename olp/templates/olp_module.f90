@@ -31,14 +31,16 @@ contains
            & PSP_chk_th3 => PSP_chk_th3, &
            & PSP_chk_th4 => PSP_chk_th4, &
            & PSP_chk_th5 => PSP_chk_th5, &
-           & PSP_chk_kfactor => PSP_chk_kfactor[%
+           & PSP_chk_kfactor => PSP_chk_kfactor, &
+           & PSP_chk_rotdiff => PSP_chk_rotdiff[%
       @else %]
            & PSP_chk_li1 => PSP_chk_li1, &
            & PSP_chk_li2 => PSP_chk_li2, &
            & PSP_chk_li3 => PSP_chk_li3, &
            & PSP_chk_li4 => PSP_chk_li4, &
            & PSP_chk_li5 => PSP_chk_li5, &
-           & PSP_chk_kfactor => PSP_chk_kfactor[%
+           & PSP_chk_kfactor_li => PSP_chk_kfactor_li, &
+           & PSP_chk_rotdiff_li => PSP_chk_rotdiff_li[%
       @end @if %]
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name

@@ -949,11 +949,11 @@ GoSam has to be compiled with support for golem95.
 
 Possible values: ninja, golem95
 
-Default: ninja
+Default: ninja,golem95
 
 See also reduction_interoperation, reduction_interoperation_rescue.
 \end{verbatim}
-Default: \verb|ninja|
+Default: \verb|ninja,golem95|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{reduction\_interoperation}}] (\textit{text})
@@ -975,6 +975,8 @@ Default: \verb|-1|
 \begin{verbatim}
 
    Rescue reduction program.
+
+   Possible values are: ninja, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam
    decide.
@@ -1133,6 +1135,18 @@ Threshold on the k-factor to perform a rotation check on the PSP.
 Default: \verb|1000|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_rotdiff}}] (\textit{text})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold on size of difference between rotated
+dimensionless amplitudes
+  |diff * maxscale2**(nlegs-4)|
+beyond the PSP is rescued.
+\end{verbatim}
+Default: \verb|1000000|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_li1}}] (\textit{integer number})
 \begin{verbatim}
 Sets the same variable in config.f90. For loop-induced
@@ -1228,6 +1242,29 @@ The number has to be an integer.
 Default: \verb|7|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_kfactor\_li}}] (\textit{text})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold on size of dimensionless amplitude:
+  |amp2 * maxscale2**(nlegs-4)|
+beyond which a rotation check on the PSP is performed.
+\end{verbatim}
+Default: \verb|1000000|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{PSP\_chk\_rotdiff\_li}}] (\textit{text})
+\begin{verbatim}
+Sets the same variable in config.f90
+
+Threshold on size of difference between rotated
+dimensionless amplitudes
+  |diff * maxscale2**(nlegs-4)|
+beyond the PSP is rescued.
+\end{verbatim}
+Default: \verb|1000000|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{extensions}}] (\textit{comma separated list})
 \begin{verbatim}
 A list of extension names which should be activated for the
@@ -1235,9 +1272,6 @@ code generation. Note that for some of those extensions
 dedicated keywords exist: reduction_programs,
 regularisation_scheme, polvec
 
-ninja        --- Use the ninja reduction library (default).
-golem95      --- Use the golem95 reduction library (only when
-                 enabled during setup step of GoSam installation).
 dred         --- Use DRED as IR regularisation scheme (default).
 thv          --- Use tHV as IR regularisation scheme.
 numpolvec    --- Evaluate polarisation vectors numerically (default).
