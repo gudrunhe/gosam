@@ -1622,6 +1622,27 @@ unitary_gauge = Property(
     default=False,
 )
 
+massive_light_fermions = Property(
+    "massive_light_fermions",
+    """\
+    Some models define mass parameters for light fermions, but initialise 
+    them to zero. This is for example the case for the up- and down-quark,
+    and the leptons in the built-in model files. Per default GoSam will 
+    treat those fermions as masseless during the code generation. The 
+    corresponding mass parameter in config.f90 is then fixed to zero and 
+    connot be changed. Setting 
+
+    massive_light_fermions=true
+
+    deactivates this behaviour. Note that in this case the user can still
+    add fermion mass parameters to the 'zero' property manually. For all
+    other fermions a non-zero mass MUST be set when calling the process 
+    libraries.
+    """,
+    bool,
+    default=False,
+)
+
 # Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
 #   main process definition
@@ -1635,6 +1656,7 @@ properties = [
     loop_suppressed_Born,
     zero,
     one,
+    massive_light_fermions,
     config_nlo_prefactors,
     form_factor_lo,
     form_factor_nlo,

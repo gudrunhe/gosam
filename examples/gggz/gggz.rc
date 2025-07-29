@@ -16,6 +16,8 @@ filter.nlo=lambda d: d.chord(["U", "D"]) > 2
 
 one=gs,e
 zero=w*, mD
+# example uses non-zero up-quark mass
+massive_light_fermions=true
 
 helicities=+-++,+-+-,+-+0
 

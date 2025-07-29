@@ -906,7 +906,7 @@ def workflow(conf):
     # property to avoid erroneous code generation. Otherwise the user has to remember
     # to add these cases to 'zero' manually.
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-    if not conf["__OLP_MODE__"]:
+    if not conf["__OLP_MODE__"] and not conf.getBooleanProperty("massive_light_fermions"):
         zeros = conf.getListProperty("zero")
         for p in model.particles.values():
             if p.isMassive(zeros):

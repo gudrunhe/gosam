@@ -807,24 +807,25 @@ def process_order_file(
         # built-in models). We have to take care of that and add those names to the zero 
         # property to avoid erroneous code generation. Otherwise the user has to remember
         # to add these cases to 'zero' manually.
-        zeros = conf.getListProperty("zero")
-        for p in model.particles.values():
-            if p.isMassive(zeros):
-                m = p.getMass(zeros)
-                try:
-                    if float(model.parameters[m]) == 0.:
-                        zeros.append(m)
-                except KeyError:
-                    # dependent parameters are not part of parameters dict
-                    pass
-            if p.hasWidth(zeros):
-                w = p.getWidth(zeros)
-                try:
-                    if float(model.parameters[w]) == 0.:
-                        zeros.append(w)
-                except KeyError:
-                    # dependent parameters are not part of parameters dict
-                    pass
+        if not conf.getBooleanProperty("massive_light_fermions"):
+            zeros = conf.getListProperty("zero")
+            for p in model.particles.values():
+                if p.isMassive(zeros):
+                    m = p.getMass(zeros)
+                    try:
+                        if float(model.parameters[m]) == 0.:
+                            zeros.append(m)
+                    except KeyError:
+                        # dependent parameters are not part of parameters dict
+                        pass
+                if p.hasWidth(zeros):
+                    w = p.getWidth(zeros)
+                    try:
+                        if float(model.parameters[w]) == 0.:
+                            zeros.append(w)
+                    except KeyError:
+                        # dependent parameters are not part of parameters dict
+                        pass
         conf.setProperty("zero",",".join(list(set(zeros))))
         for subconf in subprocesses_conf:
             subconf.setProperty("zero",",".join(list(set(zeros))))

@@ -180,6 +180,25 @@ See also: model, zero
 Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{massive\_light\_fermions}}] (\textit{true/false})
+\begin{verbatim}
+Some models define mass parameters for light fermions, but initialise
+them to zero. This is for example the case for the up- and down-quark,
+and the leptons in the built-in model files. Per default GoSam will
+treat those fermions as masseless during the code generation. The
+corresponding mass parameter in config.f90 is then fixed to zero and
+connot be changed. Setting
+
+massive_light_fermions=true
+
+deactivates this behaviour. Note that in this case the user can still
+add fermion mass parameters to the 'zero' property manually. For all
+other fermions a non-zero mass MUST be set when calling the process
+libraries.
+\end{verbatim}
+Default: \verb|False|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{nlo\_prefactors}}] (\textit{integer number})
 \begin{verbatim}
 
