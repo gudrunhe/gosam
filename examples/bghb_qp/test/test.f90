@@ -87,7 +87,7 @@ call exitgolem()
 
 contains
 
-!pure 
+!pure
 subroutine load_reference_kinematics(vecs, scale2)
    use bghb_kinematics, only: adjust_kinematics, dotproduct
    implicit none
@@ -110,23 +110,21 @@ end  subroutine load_reference_kinematics
 subroutine     setup_parameters()
    use bghb_config, only: renormalisation !, &
      !        & reduction_interoperation
-   use bghb_model, only: mBMS, mH, sw, cw, alpha, mW, mZ
+   use bghb_model, only: set_parameter
    implicit none
-
+   integer :: ierr = 0
    real(ki), parameter :: vev = 246.2185_ki
-   real(ki), parameter :: my_sw = 0.47229_ki
+   real(ki), parameter :: sw = 0.47229_ki
    real(ki), parameter :: pi =  3.14159265358979323846264338327948_ki
-
+   real(ki), parameter :: mW = vev / sw * 0.5_ki
    renormalisation = 1
 
    !reduction_interoperation = 0
-
-
-   alpha = 1.0_ki/(4.0_ki*pi)
-   mBMS = 2.937956_ki
-   mH = 120.0_ki
-   mW = vev / my_sw * 0.5_ki
-   mZ = mW / sqrt(1.0_ki - my_sw*my_sw)
+   call set_parameter("alpha", 1.0_ki/(4.0_ki*pi), 0.0_ki, ierr)
+   call set_parameter("mBMS", 2.937956_ki, 0.0_ki, ierr)
+   call set_parameter("mH", 120.0_ki, 0.0_ki, ierr)
+   call set_parameter("mW", mW, 0.0_ki, ierr)
+   call set_parameter("mZ", mW / sqrt(1.0_ki - sw*sw), 0.0_ki, ierr)
 
 end subroutine setup_parameters
 
@@ -147,7 +145,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    ! Campbell, Ellis, Maltoni, Willenbrock; hep-ph/0204093
    ! amp(2) = amp(2) - 4.0_ki * amp(0)
    ! amp(1) = amp(1) - 4.0_ki/3.0_ki * amp(0)
-   ! NOTE: Not required anymore in GoSam3. Is now handled 
+   ! NOTE: Not required anymore in GoSam3. Is now handled
    ! automatically by setting MSbar_yukawa=B in input file.
 
    do ic = 1, 2

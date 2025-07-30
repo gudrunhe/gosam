@@ -36,7 +36,7 @@ outdict=translatefile(options.input,config)
 # Write model.f90 file
 modelfile.write('module     [$ process_name asprefix=\_ $]model\n')
 modelfile.write('   ! Model parameters for the model: [$ model $]\n')
-modelfile.write('   use [$ @if internal OLP_MODE $][$ @else $][$ process_name asprefix=\_ $][$ @end @if $]config, only: ki')
+modelfile.write('   use [$ @if internal OLP_MODE $][$ @else $][$ process_name asprefix=\_ $][$ @end @if $]config, only: ki[$ @if extension quadruple $], ki_qp[$ @end @if $]')
 modelfile.write(', &\n')
 modelfile.write('   & renormalisation, EFTcount, reduction_interoperation, &\n')
 modelfile.write('   & reduction_interoperation_rescue, deltaOS, &\n')
@@ -45,8 +45,9 @@ modelfile.write('   & nlo_prefactors, convert_to_thv')[$
 @if ewchoose $]
 modelfile.write(', ewchoice')[$
 @end @if$][$
-@end @select$]
-modelfile.write('\n   implicit none\n')
+@end @select$][$ @if extension quadruple $]
+modelfile.write('\n   use [$ @if internal OLP_MODE $][$ @else $][$ process_name asprefix=\_ $][$ @end @if $]model_qp, only: set_parameter_qp => set_parameter\n')[$ @end @if $]
+modelfile.write('   implicit none\n')
 modelfile.write('\n')
 modelfile.write('   private :: ki\n')
 modelfile.write('   private :: renormalisation, EFTcount, reduction_interoperation\n')
@@ -1146,7 +1147,9 @@ modelfile.write("     end if\n")
 modelfile.write("\n")
 modelfile.write("\n")
 modelfile.write("     call init_functions()\n")
-modelfile.write("      ! TODO init_color\n")
+modelfile.write("      ! TODO init_color\n")[$ @if extension quadruple $]
+modelfile.write("     call set_parameter_qp(name, real(re, kind=ki_qp), real(im, kind=ki_qp), ierr)\n")
+[$ @end @if $]
 modelfile.write("   end subroutine\n")
 modelfile.write("!---#] subroutine set_parameter\n")
 
