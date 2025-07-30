@@ -18,7 +18,7 @@
    ! Reduction libraries:
    integer, parameter :: GOLEM95   = 1
    integer, parameter :: NINJA     = 2
-   integer, parameter :: QUADNINJA = 4 ! experimental
+   integer, parameter :: QUADNINJA = 4
    ! Reduction methods
    integer :: reduction_interoperation = [%
    @select reduction_interoperation default="-1"
@@ -96,10 +96,6 @@
    integer :: ninja_istop = 0[%
       @end @if extension ninja %]
 
-   ! Parameter: Use stable accumulation of diagrams or builtin sum
-   !            Stable accumulation is implemented in accu.f90
-   logical :: use_sorted_sum = .false.
-
    ! Flag to decide if results should be converted to tHV
    ! if they are not already in that scheme
    logical :: convert_to_thv = [% convert_to_thv
@@ -110,7 +106,7 @@
    integer :: logfile = 19
 
    ! Parameter determining the SMEFT counting
-   integer :: EFTcount = 1
+   integer :: EFTcount = 0
 
    !---#[ Renormalisation:
    ! Parameter to switch UV-Counterterms on or off

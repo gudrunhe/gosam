@@ -38,7 +38,7 @@ where $\ell=0,1$ denotes the type of diagram topology, tree or 1-loop. $\M^\ell_
 \begin{tabular}{c|c|l|l}
    \texttt{EFTcount} & loop-suppression & truncation & \\
 \hline
-   0 & --- & $\text{SM}^2$ & pure SM\\
+   0 & --- & $\text{SM}^2$ & pure SM (default setting)\\
 \hline
    1 & no & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
    2 & no & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
@@ -58,7 +58,7 @@ where $\ell=0,1$ denotes the type of diagram topology, tree or 1-loop. $\M^\ell_
 In the following we will show the structure of the results returned by \gosam for the Born matrix element and the virtual corrections. We use the notation $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$ and drop the $\Lambda^{-2}$ for reasons of legibility. Since loop-induced processes require a slightly different treatment they are discussed in section~\ref{sec:loop-induced} below.
 
 \subsubsection*{\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
-This option discards any higher dimensional operators and returns just the SM result.
+This option discards any higher dimensional operators and returns just the SM result. This is the default.
 \begin{flalign}
     \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2\,,&\\[5pt]
     \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1\,.&
@@ -145,7 +145,7 @@ in the process card. As a consequence only the \texttt{EFTcount} options 0 and 1
 respectively. The tree-level contains diagrams with loop-suppressed operators, only, while the 1-loop level comprises SM loop diagrams and loop diagrams with single insertions of tree-type EFT operators. There are no loop-diagrams with loop-suppressed operators, as they are discarded as subleading. The structure of the results for the loop-induced Born returned by \gosam are summarized in the following. In all cases the loop-suppressed $\bar{\M}_6^0$ is being considered a 1-loop contribution at the same loop order as $\M_\mathrm{SM}^1$ and $\M_6^1$.
 
 \subsubsection*{\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
-This option discards any higher dimensional operator and returns just the SM result.
+This option discards any higher dimensional operator and returns just the SM result. This is the default.
 \begin{flalign}
     \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2\,.&
 \end{flalign}
