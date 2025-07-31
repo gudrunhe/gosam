@@ -45,8 +45,10 @@ modelfile.write('   & nlo_prefactors, convert_to_thv')[$
 @if ewchoose $]
 modelfile.write(', ewchoice')[$
 @end @if$][$
-@end @select$][$ @if extension quadruple $]
-modelfile.write('\n   use [$ @if internal OLP_MODE $][$ @else $][$ process_name asprefix=\_ $][$ @end @if $]model_qp, only: set_parameter_qp => set_parameter\n')[$ @end @if $]
+@end @select$]
+modelfile.write('\n')
+[$ @if extension quadruple $]
+modelfile.write('   use [$ @if internal OLP_MODE $][$ @else $][$ process_name asprefix=\_ $][$ @end @if $]model_qp, only: set_parameter_qp => set_parameter\n')[$ @end @if $]
 modelfile.write('   implicit none\n')
 modelfile.write('\n')
 modelfile.write('   private :: ki\n')
