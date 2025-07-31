@@ -136,8 +136,8 @@ subroutine     setup_parameters()
 
 
    ! make sure the defaults for Nf have not changed
-   call set_paramter("Nf", 5.0_ki, 0.0_ki, ierr)
-   call set_paramter("Nfgen", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .false.
 end subroutine setup_parameters
