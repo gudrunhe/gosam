@@ -1151,7 +1151,6 @@ modelfile.write("      ! TODO init_color\n")[$ @if extension quadruple $]
 modelfile.write("     call set_parameter_qp(name, real(re, kind=ki_qp), real(im, kind=ki_qp), ierr)\n")
 [$ @end @if $]
 modelfile.write("   end subroutine\n")
-modelfile.write("   end subroutine\n")
 modelfile.write("!---#] subroutine set_parameter\n")
 
 
