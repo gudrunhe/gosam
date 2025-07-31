@@ -127,6 +127,9 @@ meson install -C build
 will generate the remaining source, build the process libraries and install them to `<prefix>`. If GoSam is run in
 OLP-mode, additionally a script `build_olp_library.sh` is generated to run all build commands.
 
+> [!CAUTION]
+> GoSam communicates the location of the dependencies to the generated code via `meson`'s `pkg_config_path` option. This overrides the _default_ search location of `pkg-conf`, and is therefore overriden again by the environment variable `PKG_CONFIG_PATH` if it is set. This results in a compilation error for the process library. To circumvent this, the `PKG_CONFIG_PATH` variable can be removed by using the `unset` command, or the generated `<prefix>/gosam_setup_env.sh` can be loaded with the `source` command to add the required paths to `PKG_CONFIG_PATH`.
+
 # References
 Scientific publications using GoSam or any modified version of it or any code linking to GoSam or parts of it should make a clear reference to the publications:
 

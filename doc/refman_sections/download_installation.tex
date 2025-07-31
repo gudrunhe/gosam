@@ -1,7 +1,7 @@
 \section{Prerequisites}
 
-The distribution of \gosamv provides all external and auxiliary programs which are necessary 
-to successfully run \gosam. 
+The distribution of \gosamv provides all external and auxiliary programs which are necessary
+to successfully run \gosam.
 Therefore, the user does not have to install any external programs manually.
 
 The program \gosam is designed to run in any modern Unix-like environment (Linux, Mac).\\
@@ -12,13 +12,13 @@ be set during the installation.
 
 \section{Download}
 
-The \gosamv package can either be cloned 
+The \gosamv package can either be cloned
 via \texttt{git}
 or downloaded as a release tar-ball from the GitHub webpage.
 
 \subsection*{HTTP Download}
 At the URL \url{https://github.com/gudrunhe/gosam/releases} the package
-\gosamv is available as a tar-ball. 
+\gosamv is available as a tar-ball.
 It can be unpacked using the command
 \begin{lstlisting}[style=sh]
 tar -xzvf GoSam-3.0-<hash>.tar.gz
@@ -52,13 +52,17 @@ To run \gosam after the installation, the file \texttt{gosam.py}, located at \te
 
 For the default installation, internet access is required to download the dependencies during the build process.
 
+\attention{
+\gosam communicates the location of the dependencies to the generated code via \texttt{meson}'s \texttt{pkg\_config\_path} option. This overrides the \emph{default} search location of \texttt{pkgconf}, and is therefore overriden again by the environment variable \texttt{PKG\_CONFIG\_PATH} if it is set. This results in a compilation error for the process library. To circumvent this, the \texttt{PKG\_CONFIG\_PATH} variable can be removed by using the \texttt{unset} command, or the generated \texttt{<prefix>/gosam\_setup\_env.sh} can be loaded with the \texttt{source} command to add the required paths to \texttt{PKG\_CONFIG\_PATH}.
+}
+
 \subsection{Updating an existing installation}
 
 If \gosam was cloned from git, it can be updated by running
 \begin{lstlisting}[style=sh]
 git pull
 \end{lstlisting}
-If a previous \texttt{build} directory exists, 
+If a previous \texttt{build} directory exists,
 \begin{lstlisting}[style=sh]
 meson setup --reconfigure
 \end{lstlisting}
@@ -72,15 +76,15 @@ in the build directory.
 
 
 The generation of matrix element code using \gosamv can be understood
-as a three-step process. 
+as a three-step process.
 \begin{enumerate}
 \item  \textbf{diagram generation}: \python
 and \qgraf are used. This phase is initiated by
-running \texttt{gosam.py process.in}, where \texttt{process.in} contains the 
+running \texttt{gosam.py process.in}, where \texttt{process.in} contains the
 user input for the process to be calculated.
 \item \textbf{code generation}: only \form is run.
 This phase is automatically initiated when the process is being built.
-\item \textbf{compilation and running}: 
+\item \textbf{compilation and running}:
 a Fortran compiler and the chosen reduction libraries are used.
 The compilation is initiated by
 \begin{lstlisting}[style=sh]
@@ -120,7 +124,7 @@ present in all \LaTeX{}
 distributions. It can be downloaded from \url{http://www.ctan.org/}
 as part of the \texttt{refman} package.
 This file is only needed if one intends to run \texttt{make doc},
-which generates some documentation like drawing the diagrams, 
+which generates some documentation like drawing the diagrams,
 listing the colour structures, etc.
 \end{longtable}
 
