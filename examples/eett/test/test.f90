@@ -96,7 +96,6 @@ contains
 
 pure subroutine load_reference_kinematics(vecs, scale2)
    use eett_kinematics, only: adjust_kinematics
-   use eett_model, only: mT
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
@@ -117,30 +116,29 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_thv !, &
-       !      & reduction_interoperation
-   use eett_model, only: Nf, Nfgen, mT, mZ, wZ, mW
+   use eett_config, only: renormalisation, convert_to_thv 
+   use eett_model, only: set_parameter
    use analytic, only: include_Z
    implicit none
+   integer :: ierr = 0
 
-   real(ki) :: my_sw, my_cw
+   real(ki) :: sw, cw, mZ
 
    renormalisation = 0
 
-   ! reduction_interoperation = 1
-
-   my_sw = 0.47303762_ki
-   my_cw = sqrt(1.0_ki - my_sw**2)
-
-   mT = 172.5_ki
-
+   sw = 0.47303762_ki
+   cw = sqrt(1.0_ki - sw**2)
    mZ = 91.1876_ki
-   wZ = 2.4952_ki
 
-   mW = my_cw * mZ
+   call set_parameter("mT", 172.5_ki, 0.0_ki, ierr)
 
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("mZ", mZ, 0.0_ki, ierr)
+   call set_parameter("wZ", 2.4952_ki, 0.0_ki, ierr)
+
+   call set_parameter("mW", cw * mZ, 0.0_ki, ierr)
+
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    include_Z = .true.
 

@@ -157,31 +157,33 @@ subroutine     setup_parameters()
        & convert_to_thv_dred => convert_to_thv
   use udeneg_thv_config, only: renormalisation_thv => renormalisation, &
        & convert_to_thv_thv => convert_to_thv
-  use udeneg_dred_model, only: mW_dred => mW, wW_dred => wW, mZ_dred => mZ, &
-       & Nf_dred => Nf, Nfgen_dred => Nfgen, VUD_dred => VUD, CVDU_dred => CVDU
-  use udeneg_thv_model, only: mW_thv => mW, wW_thv => wW, mZ_thv => mZ, &
-       & Nf_thv => Nf, Nfgen_thv => Nfgen, VUD_thv => VUD, CVDU_thv => CVDU   
+  use udeneg_dred_model, only: set_parameter_dred => set_parameter
+  use udeneg_thv_model, only: set_parameter_thv => set_parameter
   implicit none
+  integer :: ierr = 0
   
   renormalisation_dred = 1
   renormalisation_thv = 1
 
-  mW_dred = 80.398_ki
-  mW_thv = mW_dred
-  wW_dred = 2.1054_ki
-  wW_thv = wW_dred
-  mZ_dred = mW_dred / sqrt(1.0_ki - 0.4808222_ki**2)
-  mZ_thv = mZ_dred
+  call set_parameter_dred("mW", 80.398_ki, 0.0_ki, ierr)
+  call set_parameter_dred("wW", 2.1054_ki, 0.0_ki, ierr)
+  call set_parameter_dred("mZ", 80.398_ki / sqrt(1.0_ki - 0.4808222_ki**2), 0.0_ki, ierr)
 
-  VUD_dred  = (0.97419_ki, 0.0_ki)
-  VUD_thv = VUD_dred
-  CVDU_dred = (0.97419_ki, 0.0_ki)
-  CVDU_thv = CVDU_dred
-  
-  Nf_dred = 5
-  Nf_thv = Nf_dred
-  Nfgen_dred = 5
-  Nfgen_thv = Nfgen_dred
+  call set_parameter_dred("VUD", 0.97419_ki, 0.0_ki, ierr)
+  call set_parameter_dred("CVDU", 0.97419_ki, 0.0_ki, ierr)
+
+  call set_parameter_dred("Nf", 5.0_ki, 0.0_ki, ierr)
+  call set_parameter_dred("Nfgen", 5.0_ki, 0.0_ki, ierr)
+
+  call set_parameter_thv("mW", 80.398_ki, 0.0_ki, ierr)
+  call set_parameter_thv("wW", 2.1054_ki, 0.0_ki, ierr)
+  call set_parameter_thv("mZ", 80.398_ki / sqrt(1.0_ki - 0.4808222_ki**2), 0.0_ki, ierr)
+
+  call set_parameter_thv("VUD", 0.97419_ki, 0.0_ki, ierr)
+  call set_parameter_thv("CVDU", 0.97419_ki, 0.0_ki, ierr)
+
+  call set_parameter_thv("Nf", 5.0_ki, 0.0_ki, ierr)
+  call set_parameter_thv("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
   convert_to_thv_dred = .false.
   convert_to_thv_thv = .false.
@@ -311,14 +313,15 @@ pure elemental function rel_diff(a, b)
 end  function rel_diff
 
 subroutine     shake_gauge_parameters(delta)
-  use udeneg_dred_model, only: gauge5z_dred => gauge5z
-  use udeneg_thv_model, only: gauge5z_thv => gauge5z
+  use udeneg_dred_model, only: set_parameter_dred => set_parameter
+  use udeneg_thv_model, only: set_parameter_thv => set_parameter
   implicit none
+  integer :: ierr = 0
   real(ki), intent(in) :: delta
   real(ki), dimension(4) :: harvest
   call random_number(harvest)
 
-  gauge5z_dred = delta * (harvest(1) - 0.5_ki)
-  gauge5z_thv = gauge5z_dred
+  call set_parameter_dred("gauge5z", delta * (harvest(1) - 0.5_ki), 0.0_ki, ierr)
+  call set_parameter_thv("gauge5z", delta * (harvest(1) - 0.5_ki), 0.0_ki, ierr)
 end subroutine shake_gauge_parameters
 end program test

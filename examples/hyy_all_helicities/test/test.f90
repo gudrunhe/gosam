@@ -89,17 +89,18 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters(flags)
    use hyy_config
-   use hyy_model, only: mH, mT, mW, mZ, alpha
+   use hyy_model, only: set_parameter
    use hyy_groups, only: virt_flags, update_flags
    implicit none
+   integer :: ierr = 0
    type(virt_flags), intent(out) :: flags
 
-   mH    = 124.5_ki
+   call set_parameter("mH", 124.5_ki, 0.0_ki, ierr)
 
-   mT    =  172.5_ki
-   mW    =  80.398_ki
-   mZ    =  91.1876_ki
-   alpha =  0.00729735299_ki
+   call set_parameter("mT", 172.5_ki, 0.0_ki, ierr)
+   call set_parameter("mW", 80.398_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("alpha", 0.00729735299_ki, 0.0_ki, ierr)
 
    renormalisation = 0
 

@@ -111,20 +111,19 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggtt_config
-   use ggtt_model, only: Nf, Nfgen, mT => mdlMT, mdlaS
+   use ggtt_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
    renorm_logs = .true.
    convert_to_thv = .false.
 
-   ! reduction_interoperation = 0
-
-   mT    = 171.2_ki
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("mdlMT", 171.2_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
    ! set g_s to one
-   mdlaS = 1.0_ki / (16.0_ki * atan(1.0_ki))
+   call set_parameter("mdlaS", 1.0_ki / (16.0_ki * atan(1.0_ki)), 0.0_ki, ierr)
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
@@ -180,7 +179,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    amp(1) = -26.235240991775640 * amp(0)
    amp(2:3) = amp(2:3)
 
-    do ic = 1, 2
+   do ic = 1, 2
       ch = channels(ic)
       write(ch,*) "REFERENCE AMP(0):       ", amp(0)
       write(ch,*) "REFERENCE AMP(1)/AMP(0):", amp(1)/amp(0)

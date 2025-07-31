@@ -120,22 +120,21 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ggHg_config, only: renormalisation, convert_to_thv !, &
-   use ggHg_model, only: GF, mH, mW, mZ, alpha, Nf, Nfgen, sqrt2, gH
+   use ggHg_config, only: renormalisation, convert_to_thv
+   use ggHg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
    real(ki), parameter :: pi = 3.14159265358979323846264&
         &3383279502884197169399375105820974944592307816406286209_ki
    renormalisation = 1
 
-   mH = 125.0_ki
-   mW = 80.419_ki
-   mZ = 91.1876_ki
-   GF = 1.16639E-05_ki
+   call set_parameter("mH", 125.0_ki, 0.0_ki, ierr)
+   call set_parameter("mW", 80.419_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("GF", 1.16639E-05_ki, 0.0_ki, ierr)
 
-   !alpha = mW**2*(1.0_ki-mW*mW/mZ/mZ)*8.0_ki*GF/sqrt2/4.0_ki/pi
-
-   Nf    = 5
-   Nfgen = 1
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .true.
 end subroutine setup_parameters

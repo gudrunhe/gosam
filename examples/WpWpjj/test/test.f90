@@ -127,16 +127,17 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use wpwpjj_config, only: renormalisation, convert_to_thv !, &
-   use wpwpjj_model, only: Nf, Nfgen, mW, wW
+   use wpwpjj_model, only: set_parameter
    implicit none
-
+   integer :: ierr = 0
+   
    ! we compare unrenormalized results:
    renormalisation = 0
 
 
    ! make sure the defaults for Nf have not changed
-   Nf    = 5.0_ki
-   Nfgen = 5.0_ki
+   call set_paramter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_paramter("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .false.
 end subroutine setup_parameters

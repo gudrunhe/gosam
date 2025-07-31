@@ -113,20 +113,20 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eeuu_config, only: renormalisation, convert_to_thv !, &
-       !      & reduction_interoperation
-   use eeuu_model, only: Nf, Nfgen, mZ, wZ, mW
+   use eeuu_config, only: renormalisation, convert_to_thv
+   use eeuu_model, only: set_parameter
    implicit none
-
+   integer :: ierr = 0
+   
    renormalisation = 0
 
 
-   mZ = 91.1876_ki
-   wZ = 2.4952_ki
-   mW = mZ * sqrt(1.0_ki - 0.47303762_ki**2)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("wZ", 2.4952_ki, 0.0_ki, ierr)
+   call set_parameter("mW", 91.1876_ki * sqrt(1.0_ki - 0.47303762_ki**2), 0.0_ki, ierr)
 
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .true.
 end subroutine setup_parameters

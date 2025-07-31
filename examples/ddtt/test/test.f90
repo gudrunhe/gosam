@@ -111,22 +111,16 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ddtt_config, only: renormalisation, convert_to_thv !, &
-   use ddtt_model, only: Nf, Nfgen, mT
-   use ddtt_model_qp, only: Nf_qp => Nf, Nfgen_qp => Nfgen, mT_qp => mT
+   use ddtt_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
    convert_to_thv = .false.
 
-   ! set double precision parameters
-   mT = 172.5_ki
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
-
-   ! set quadruple precision parameters
-   mT_qp = 172.5_ki
-   Nf_qp    = 5.0_ki
-   Nfgen_qp = 1.0_ki
+   call set_parameter("mT", 172.5_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
 end subroutine setup_parameters
 
@@ -153,6 +147,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    integer :: prec
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: it's not safe to use 'set_parameter' for this, because then
+   !       also all dependent parameters are recalculated
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mT = mT / Q

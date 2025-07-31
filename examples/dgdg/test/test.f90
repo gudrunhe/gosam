@@ -114,14 +114,14 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use dgdg_config, only: renormalisation, convert_to_thv !, &
-   use dgdg_model, only: Nf, Nfgen
+   use dgdg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
-
-   Nf    = 2.0_ki
-   Nfgen = 2.0_ki
+   call set_parameter("Nf", 2.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 2.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .true.
 end subroutine setup_parameters

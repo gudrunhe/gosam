@@ -89,17 +89,18 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use tttt_config, only: renormalisation, convert_to_thv !, &
-   use tttt_model, only: Nf, Nfgen, mT
+   use tttt_config, only: renormalisation, convert_to_thv
+   use tttt_model, only: set_parameter
    implicit none
-
+   integer :: ierr = 0
+   
    renormalisation = 1
 
 
-   mT = 171.2_ki
+   call set_parameter("mT", 171.2_ki, 0.0_ki, ierr)
 
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .false.
 end subroutine setup_parameters
@@ -126,6 +127,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    integer :: prec
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: it's not safe to use 'set_parameter' for this, because then
+   !       also all dependent parameters are recalculated
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mT = mT / Q

@@ -40,7 +40,6 @@ call inspect_kinematics(logf)
 call compute_gosam_result(vecs, scale2, gosam_amp)
 call compute_reference_result(vecs, scale2, ref_amp)
 
-
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
 if (diff(0) .gt. eps) then
@@ -112,16 +111,17 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggtt_config
-   use ggtt_model, only: Nf, Nfgen, mT, gauge1z
+   use ggtt_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
    renorm_logs = .true.
    convert_to_thv = .false.
 
-   mT    = 171.2_ki
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("mT", 171.2_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

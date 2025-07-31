@@ -114,15 +114,16 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use gggg_config, only: renormalisation !, &
-   use gggg_model, only: Nf, Nfgen
+   use gggg_config, only: renormalisation
+   use gggg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
 
    ! We generated the process with no fermion loops 
-   Nf    = 0.0_ki
+   call set_parameter("Nf", 0.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .true.
 end subroutine setup_parameters

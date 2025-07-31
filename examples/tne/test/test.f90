@@ -111,11 +111,12 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use tne_config
-   use tne_model
+   use tne_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
-   wW = 2.0476_ki
-   mT = 171.2_ki
+   call set_parameter("wW", 2.0476_ki, 0.0_ki, ierr)
+   call set_parameter("mT", 171.2_ki, 0.0_ki, ierr)
 
    renormalisation = 1
    renorm_alphas = .true.

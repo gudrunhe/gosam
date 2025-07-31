@@ -113,13 +113,14 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use uudd_config, only: renormalisation
-   use uudd_model, only: Nf, Nfgen
+   use uudd_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
-   Nf    = 2.0_ki
-   Nfgen = 2.0_ki
+   call set_parameter("Nf", 2.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 2.0_ki, 0.0_ki, ierr)
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
