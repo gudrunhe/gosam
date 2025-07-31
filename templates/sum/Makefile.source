@@ -25,21 +25,17 @@ FORM_OPT=-D PROCESSPATH=.. \
 	 -p ..:../codegen \
 	 -M -q
 
-[% @if generate_nlo_virt %]
+[% @if generate_loop_diagrams %]
 DIAGRAMS_VIRT=[%
-@select r2
-@case implicit explicit off %][%
    @for elements topolopy.keep.virt %] \
 	d[%$_%]l1.f90[%
 	   @if extension quadruple %] \
 	d[%$_%]l1_qp.f90[%
-	   @end @if %][%
-	   @if internal GENERATE_DERIVATIVES %] \
+	   @end @if %] \
 	d[%$_%]l1d.f90[%
 	   @if extension quadruple %] \
 	d[%$_%]l1d_qp.f90[%
 	   @end @if %][%
-      @end @if %][%
    @if extension ninja %] \
     d[%$_%]l131.f90 \
     d[%$_%]l132.f90 \
@@ -50,54 +46,32 @@ DIAGRAMS_VIRT=[%
         d[%$_%]l121_qp.f90[%
       @end @if %][%
       @end @if %][%
-   @end @for %][%
-@end @select %]
+   @end @for %]
 
-TXT_VIRT=[%
-@select r2
-@case implicit explicit off %]$(subst .f90,.txt,$(DIAGRAMS_VIRT))[%
-@case only %][%
-   @for elements topolopy.keep.virt %] \
-	d[%$_%]l1.abb[%
-   @end @for %][%
-@end @select %]
+TXT_VIRT=$(subst .f90,.txt,$(DIAGRAMS_VIRT))
 
 ABB_VIRT=[%
-   @select abbrev.level
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%].f90[%
       @end @for %][%
-   @end @select %][%
   @if extension quadruple %][%
-   @select abbrev.level
-   @case diagram %][%
       @for elements topolopy.keep.virt %] \
 	abbrevd[%$_%]_qp.f90[%
       @end @for %][%
-   @end @select %][%
 @end @if extension quadruple %]
 SOURCE_VIRT=$(ABB_VIRT) $(DIAGRAMS_VIRT)
 [% @else %]
 DIAGRAMS_VIRT=
 TXT_VIRT=
 SOURCE_VIRT=
-[% @end @if generate_nlo_virt %]
-[% @if generate_uv_counterterms %]
-DIAGRAMS_CT=[%
-   @for elements topolopy.keep.ct %] \
-	d[%$_%]l1c.f90[%
-   @end @for %]
-TXT_CT=$(subst .f90,.txt,$(DIAGRAMS_CT))
-SOURCE_CT=$(ABB_CT) $(DIAGRAMS_CT)[%
-@end @if %]
+[% @end @if generate_loop_diagrams %]
 
 .PHONY: source
 .SUFFIXES:
 all_source: $(SOURCE_VIRT)
 
 [% 
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 d[%$_%]l1.prc:
@@ -105,13 +79,9 @@ d[%$_%]l1.prc:
 	@$(FORM) $(FORM_OPT) \
 		-D DIAG=[%$_%] \
 		-D LOOPS=1 \
-                -D OUTFILE=d[%$_%]l1 \[%
-@if internal GENERATE_DERIVATIVES %]
-      -D RANK=[% rank %] \[%
-         @if internal DERIVATIVES_AT_ZERO %]
+                -D OUTFILE=d[%$_%]l1 \
+      -D RANK=[% rank %] \
       -D DERIVATIVESATZERO=1 \[%
-         @end @if %][%
-@end @if%][%
 @if internal GENERATE_NINJA_TRIPLE %]
       -D RANK=[% rank %] \
       -D LOOPSIZE=[% loopsize diagram=$_ %] \[%
@@ -122,10 +92,7 @@ d[%$_%]l1.prc:
 @end @if%]
 
 [% 
-@if extension formopt %]
-
-[% 
-@if generate_nlo_virt %][%
+@if generate_loop_diagrams %][%
    @for groups var=grp rank=grank %][%
 	   @for diagrams group=grp %]
 
@@ -134,23 +101,17 @@ d[%$_%]l1.txt: d[%$_%]l1.prc
 	@$(FORM) $(FORM_OPT) \
 		-D OUTFILE=d[%$_%]l1 \
 		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
-		../codegen/finaloptimization.frm[%
-	   @select abbrev.level @case diagram %]
-[% @if internal GENERATE_DERIVATIVES %]
+		-D RANK=[% rank %] \
+		-D DERIVATIVESATZERO=1 \
+		../codegen/finaloptimization.frm
 d[%$_%]l1d.txt : d[%$_%]l1.txt
 	@echo Form is generating loop diagram derivatives [%$_%] @ Helicity sum
 	@$(FORM) $(FORM_OPT) \
 		-w$(FORM_THREADS) \
 		-D OUTFILE=d[%$_%]l1 \
 		-D DIAG=[%$_%] \
-		-D RANK=[% rank %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %] \
+		-D RANK=[% rank %] \
+		-D DERIVATIVESATZERO=1 \
                 -D OUTSUFFIX=hh \
 		../codegen/derive.frm[%
    @for repeat rank inclusive=true var=rk %]
@@ -182,8 +143,7 @@ d[%$_%]l1d.f90 : d[%$_%]l1d.txt
 		--QSIGN=[%sign%] \
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%
-		@end @if %]
+		--LOOPSIZE=[% loopsize diagram=$_ %]
 [% @if extension ninja %] 
 d[%$_%]l14.txt : d[%$_%]l1.txt
 	@echo Form is optimizing loop diagram [%$_%] for ninja @ Helicity sum
@@ -291,115 +251,8 @@ d[%$_%]l121.f90[% @if extension quadruple %] d[%$_%]l121_qp.f90[% @end @if %]: d
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if %][%
-		@end @select %][%
 	@end @for diagrams %][%
 @end @for groups %][%
-@end @if generate_nlo_virt %]
-
-[% @else %][%
-@if generate_nlo_virt %][%
-   @for groups var=grp rank=grank %][%
-	   @for diagrams group=grp %]
-d[%$_%]l1.txt [% @if internal GENERATE_DERIVATIVES %] d[%$_%]l1d.txt [% @end @if %]d[%$_%]l1.abb: ../diagrams-1.hh
-	@echo Form is processing loop diagram [%$_%] @ Helicity sum
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)[%
-	      @if is_mqse %] \
-		-D MQSE=1[%
-			@end @if %] \
-		-D LOOPS=1 \
-		-D GROUP=0 \
-		-D DIAG=[%$_%] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-D RANK=[% rank %] \
-		-D GLOOPSIZE=[% loopsize group=grp %] \
-		-D GRANK=[% grank %] \
-		-D OUTFILE=d[%$_%]l1[%
-			@if internal GENERATE_DERIVATIVES %] \
-		-D GENERATEDERIVATIVES=1[%
-			@end @if %][%
-			@if internal DERIVATIVES_AT_ZERO %] \
-		-D DERIVATIVESATZERO=1[%
-			@end @if %][%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %] \
-		../codegen/golem.frm
-d[%$_%]l1.f90: d[%$_%]l1.txt
-	@echo Haggies is processing loop diagram [%$_%] @ Helicity sum
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D -1 [% ' all helicities' %] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ $<[%
-		@if internal GENERATE_DERIVATIVES %]
-d[%$_%]l1d.f90: d[%$_%]l1d.txt
-	@echo Haggies is processing derivatives [%$_%] @ Helicity sum
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D -1 [% ' all helicities' %] \
-		-D QSIGN=[% sign %] -D "QSHIFT=[%shift%]" \
-		-D RANK=[%rank%] -D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1.in \
-		-t ../codegen/haggies-l1d.out \
-		$(addprefix -p,$(shell grep extrasymbols \
-			d[%$_%]l1.dat \
-			| sed 's/extrasymbols=//')) \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-		@end @if %][%
-	   @select abbrev.level @case diagram %]
-abbrevd[%$_%].f90: d[%$_%]l1.abb
-	@echo Haggies is processing abbreviations for loop diagram [%$_
-	%] @ Helicity [% helicity %]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-t ../codegen/abbrevloc.out \
-		-c ../codegen/abbrev.in \
-		-D GROUP=[%grp%] -D DIAGRAM=[%$_%] -D -1 [% ' all helicities' %] \
-		-D RANK=[%rank%] \
-		-o $@ $<[%
-	   @end @select %][%
-	@end @for diagrams %][%
-        @select abbrev.level @case group %]
-abbrevg[%grp%].f90:[%
-	   @for diagrams group=grp %] \
-		   d[%$_%]l1.abb[%
-	   @end @for %]
-	@echo Haggies is processing abbreviations for group [%grp%]
-	@$(HAGGIES) $(HAGGIES_OPT) -F \
-		-t ../codegen/abbrevloc.out \
-		-c ../codegen/abbrev.in \
-		-D -1 [% ' all helicities' %] \
-		-o $@ $+[%
-	@end @select %][%
-@end @for groups %][%
-@end @if generate_nlo_virt %][%
-@if generate_uv_counterterms %][%
-	@for elements topolopy.keep.ct %]
-d[%$_%]l1c.txt: ../diagrams-ct.hh
-	@echo Form is processing counter term diagram [%$_%] @ Helicity sum
-	@$(FORM) $(FORM_OPT) \
-		-w$(FORM_THREADS)
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D LOOPS=ct	\
-		-D LOOPSIZE=1 \
-		-D CT=1 \
-		-D DIAG=[%$_%] \
-		-D OUTFILE=d[%$_%]l1c \
-		../codegen/golem.frm
-d[%$_%]l1c.f90: d[%$_%]l1c.txt
-	@echo Haggies is processing counter term for diagram [%$_%] @ Helicity sum
-	@$(HAGGIES) $(HAGGIES_OPT) \
-		-D GROUP=[% group convert=bool true=1 false=0 %] \
-		-D DIAGRAM=[%$_%] -D -1 [% ' all helicities' %] \
-		-D LOOPSIZE=[% loopsize diagram=$_ %] \
-		-c ../codegen/haggies-l1c.in \
-		-t ../codegen/haggies-l1c.out \
-		-o $@ -F $(shell $(FIND) $(FIND_OPT) . -name '$<')[%
-	@end @for %][%
-@end @if %][%
-@end @if %]
+@end @if generate_loop_diagrams %]
 
 

@@ -1,0 +1,14 @@
+process_name=Hbb_4F
+process_path=virtual
+
+in=H
+out=b,b~
+
+model=FeynRules, ../model/SMEFT_4F
+
+order_names=QCD,NP
+
+order=NP, 0, 1
+
+renorm=false
+nlo_prefactors=2

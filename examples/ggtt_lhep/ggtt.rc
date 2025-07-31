@@ -7,7 +7,8 @@ out=6,-6
 
 order=QCD, 2, 4
 
-qgraf.verbatim=true=chord[part2,part3,part4,part5,0,0];
+filter.particles=part2:0,part3:0,part4:0,part5:0
+
 model.options=Nfgen:1, Nf:5, mdlMtop:172.5
 model=../model/Standard_Model_LanHep, 4
 

@@ -1,5 +1,6 @@
 program test
 use olp_module
+use config, only: debug_lo_diagrams, debug_nlo_diagrams
 use, intrinsic :: iso_c_binding
 implicit none
 
@@ -28,6 +29,10 @@ channels(2) = 6
 
 open(file="test.log", unit=logf)
 success = .true.
+
+! if (debug_lo_diagrams .or. debug_nlo_diagrams) then
+!    open(file="gosam.log", unit=gosamlogf)
+! end if
 
 call OLP_Start(contract_file_name,ierr,stage,rndseed)
 
@@ -82,12 +87,14 @@ end if
 
 call OLP_Finalize()
 close(unit=logf)
+! if (debug_lo_diagrams .or. debug_nlo_diagrams) then
+!    close(unit=gosamlogf)
+! end if
 
 contains
 
 subroutine load_reference_kinematics(subprocess, blha_kinematics, renorm_scale)
-   use p0_gg_hddbar_model, only: p0_mD => mD, p0_mH => mH
-   use p1_ddbar_huubar_model, only: p1_mD => mD, p1_mU => mU, p1_mH => mH
+   use model, only: p0_mD => mD, p0_mH => mH, p1_mD => mD, p1_mU => mU, p1_mH => mH
    implicit none
    integer, intent(in) :: subprocess
    real(ki), dimension(60), intent(out) :: blha_kinematics
@@ -131,11 +138,19 @@ subroutine     compute_gosam_result(subprocess, blha_kinematics, renorm_scale, g
 
    real(ki), dimension(60) :: blha_amp
 
+   integer :: success
+
    ! parameters(1) is interpreted as alpha_s
    real(ki), dimension(10) :: parameters = 1.0
    real(ki), parameter :: two_pi = &
             &6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359&
             &64296173026564613294187689219101164463450718816256962234900568205403877042211119289_ki
+
+   if (subprocess .eq. 0) then
+      call OLP_SetParameter(c_char_"Nfgen"//c_null_char, 1.0_ki, 0.0_ki, success)
+   else if (subprocess .eq. 1) then
+      call OLP_SetParameter(c_char_"Nfgen"//c_null_char, 2.0_ki, 0.0_ki, success)
+   end if
 
    call OLP_EvalSubProcess(subprocess, blha_kinematics, renorm_scale,  parameters, blha_amp)
 
@@ -162,13 +177,13 @@ subroutine     compute_reference_result(subprocess, amp)
    integer, intent(in) :: subprocess
    real(ki), dimension(0:3), intent(out) :: amp
 
-   if (subprocess .eq. 1) then
+   if (subprocess .eq. 0) then
       ! process g g -> h d d~
       amp(0) =   0.5677813961826772E-06_ki
       amp(1) =  66.66351423714880_ki
       amp(2) = -16.58166333155296_ki
       amp(3) =  -8.666666666666572_ki
-   else if (subprocess .eq. 0) then
+   else if (subprocess .eq. 1) then
       ! process d d~ -> h u u~
       amp(0) =   0.1011096724203530E-06_ki
       amp(1) =  33.95216267342636_ki

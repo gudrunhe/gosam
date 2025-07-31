@@ -2,7 +2,6 @@ program test
 use eett_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
 use eett_matrix, only: initgolem, exitgolem
 use eett_kinematics, only: inspect_kinematics, init_event
-use eett_groups, only: tear_down_golem95
 implicit none
 
 ! Note: I also did a cross-check with CalcHEP for the leading order.
@@ -97,11 +96,10 @@ contains
 
 pure subroutine load_reference_kinematics(vecs, scale2)
    use eett_kinematics, only: adjust_kinematics
-   use eett_model, only: mT
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
- 
+
    vecs(1,:) = (/ 74.7646520969852_ki, 0.0_ki, 0.0_ki, 74.7646520969852_ki /)
    vecs(2,:) = (/ 6067.88254935176_ki, 0.0_ki, 0.0_ki, -6067.88254935176_ki /)
    vecs(3,:) = (/ 5867.13826404309_ki,  16.7946967430656_ki, &
@@ -112,48 +110,39 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    ! constraints (on-shell conditions and momentum conservation)
    ! we call the following routine.
    !call adjust_kinematics(vecs)
-  
+
    scale2 = 29756.25_ki
 
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_cdr !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar, &
-       !      & reduction_interoperation
-   use eett_model, only: Nf, Nfgen, mT, mZ, wZ, mW
+   use eett_config, only: renormalisation, convert_to_thv 
+   use eett_model, only: set_parameter
    use analytic, only: include_Z
    implicit none
+   integer :: ierr = 0
 
-   real(ki) :: my_sw, my_cw
+   real(ki) :: sw, cw, mZ
 
    renormalisation = 0
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 1
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
-   ! reduction_interoperation = 1
-
-   my_sw = 0.47303762_ki
-   my_cw = sqrt(1.0_ki - my_sw**2)
-
-   mT = 172.5_ki
-
+   sw = 0.47303762_ki
+   cw = sqrt(1.0_ki - sw**2)
    mZ = 91.1876_ki
-   wZ = 2.4952_ki
 
-   mW = my_cw * mZ
+   call set_parameter("mT", 172.5_ki, 0.0_ki, ierr)
 
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("mZ", mZ, 0.0_ki, ierr)
+   call set_parameter("wZ", 2.4952_ki, 0.0_ki, ierr)
+
+   call set_parameter("mW", cw * mZ, 0.0_ki, ierr)
+
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    include_Z = .true.
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

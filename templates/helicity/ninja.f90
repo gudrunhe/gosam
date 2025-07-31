@@ -1,9 +1,9 @@
 ![% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]
-module     [% process_name asprefix=\_ %]ninjah[% helicity %]
+module     [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]
    ! This file has been generated for ninja 
    use ninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]config
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config
    implicit none
    private[%
 
@@ -18,16 +18,16 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use iso_c_binding, only: c_ptr, c_loc, c_int
    use ninjago_module
    use [% process_name asprefix=\_ %]kinematics
-   use [% process_name asprefix=\_ %]model[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
-   use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l1, only: numerator_diagram[% DIAG %] => numerator_ninja
-   use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l121, only: numerator_tmu_diagram[% DIAG %] => numerator_tmu
-   use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l131, only: numerator_t3_diagram[% DIAG %] => numerator_t3
-   use [% process_name asprefix=\_ %]d[% DIAG %]h[% helicity 
+   use [% process_name asprefix=\_ %]d[% DIAG %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity 
      %]l132, only: numerator_t2_diagram[% DIAG %] => numerator_t2[%
          @end @for %]
    use [% process_name asprefix=\_ %]globalsl1, only: epspow[%
@@ -187,4 +187,4 @@ end subroutine ninja_reduce_group[% grp %]
 !-----#] subroutine ninja_reduce_group[% grp %]:[%
    @end @for %]
 !---#] reduce groups with ninja:
-end module [% process_name asprefix=\_ %]ninjah[% helicity %]
+end module [% process_name asprefix=\_ %]ninja[% @if enable_truncation_orders %]_[% trnco %][% @end @if %]h[% helicity %]

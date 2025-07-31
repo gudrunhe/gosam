@@ -7,11 +7,9 @@ out=2,-2,1,-1
 zero=mU,mD,mC,mS,mB,mT
 
 model=smdiag
-reduction_programs=ninja,golem95,samurai
 
 order=QCD,4
 
 qgraf.options=onshell,notadpole,nosnail
 symmetries=family,generation
-extensions=better_num
 

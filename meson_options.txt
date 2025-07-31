@@ -1,0 +1,20 @@
+option(
+    'golem95',
+    type: 'boolean',
+    value: false,
+    description: 'Build `Golem95` as additional integral reduction library'
+    )
+
+option(
+    'quadninja',
+    type: 'boolean',
+    value: true,
+    description: 'Build QuadNinja, a copy of Ninja in quadruple precision'
+    )
+
+option(
+    'native',
+    type: 'boolean',
+    value: false,
+    description: 'Build GoSam and it`s dependencies for the host CPU architecture. This can lead to a improved runtime performance, the generated libraries will not work on other CPU architectures though.'
+    )

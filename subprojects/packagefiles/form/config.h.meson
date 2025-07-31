@@ -1,0 +1,170 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define to 1 if you have the <boost/unordered_map.hpp> header file. */
+#mesondefine HAVE_BOOST_UNORDERED_MAP_HPP
+
+/* Define to 1 if you have the <boost/unordered_set.hpp> header file. */
+#mesondefine HAVE_BOOST_UNORDERED_SET_HPP
+
+/* Define to 1 if you have __builtin_popcount function. */
+#mesondefine HAVE_BUILTIN_POPCOUNT
+
+/* Define to 1 if you have clock_gettime. */
+#mesondefine HAVE_CLOCK_GETTIME
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#mesondefine HAVE_FCNTL_H
+
+/* Define to 1 if you have ftime. */
+#mesondefine HAVE_FTIME
+
+/* Define to 1 if you have gettimeofday. */
+#mesondefine HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#mesondefine HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <limits.h> header file. */
+#mesondefine HAVE_LIMITS_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#mesondefine HAVE_MEMORY_H
+
+/* Define to 1 if you have __popcnt function. */
+#mesondefine HAVE_POPCNT
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#mesondefine HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#mesondefine HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#mesondefine HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#mesondefine HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/file.h> header file. */
+#mesondefine HAVE_SYS_FILE_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#mesondefine HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#mesondefine HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <tr1/unordered_map> header file. */
+#mesondefine HAVE_TR1_UNORDERED_MAP
+
+/* Define to 1 if you have the <tr1/unordered_set> header file. */
+#mesondefine HAVE_TR1_UNORDERED_SET
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#mesondefine HAVE_UNISTD_H
+
+/* Define to 1 if you have the <unordered_map> header file. */
+#mesondefine HAVE_UNORDERED_MAP
+
+/* Define to 1 if you have the <unordered_set> header file. */
+#mesondefine HAVE_UNORDERED_SET
+
+/* Define to 1 if you have the <windows.h> header file. */
+#mesondefine HAVE_WINDOWS_H
+
+/* Compiling for ILP32 data model */
+#mesondefine ILP32
+
+/* Compiling for a Linux system. */
+#mesondefine LINUX
+
+/* Compiling for LLP64 data model */
+#mesondefine LLP64
+
+/* Compiling for LP64 data model */
+#mesondefine LP64
+
+/* Name of package */
+#mesondefine PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#mesondefine PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#mesondefine PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#mesondefine PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#mesondefine PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#mesondefine PACKAGE_URL
+
+/* Define to the version of this package. */
+#mesondefine PACKAGE_VERSION
+
+/* The size of `char', as computed by sizeof. */
+#mesondefine SIZEOF_CHAR
+
+/* The size of `int', as computed by sizeof. */
+#mesondefine SIZEOF_INT
+
+/* The size of `long', as computed by sizeof. */
+#mesondefine SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#mesondefine SIZEOF_LONG_LONG
+
+/* The size of `off_t', as computed by sizeof. */
+#mesondefine SIZEOF_OFF_T
+
+/* The size of `short', as computed by sizeof. */
+#mesondefine SIZEOF_SHORT
+
+/* The size of `void *', as computed by sizeof. */
+#mesondefine SIZEOF_VOID_P
+
+/* Define to 1 if you have the ANSI C header files. */
+#mesondefine STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#mesondefine TIME_WITH_SYS_TIME
+
+/* Compiling for UNIX system */
+#mesondefine UNIX
+
+/* Version number of package */
+#mesondefine VERSION
+
+/* Compiling for WINDOWS system */
+#mesondefine WINDOWS
+
+/* Define to use GMP for long integer arithmetic. */
+#mesondefine WITHGMP
+
+/* Define to use POSIX thread clock. */
+#ifdef WITHPTHREADS
+#mesondefine WITHPOSIXCLOCK
+#endif
+
+/* Define to use zlib for compression. */
+#mesondefine WITHZLIB
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#mesondefine _FILE_OFFSET_BITS
+
+/* Define for large files, on AIX-style hosts. */
+#mesondefine _LARGE_FILES
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#mesondefine inline
+#endif

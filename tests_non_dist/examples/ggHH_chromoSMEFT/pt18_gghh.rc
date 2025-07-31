@@ -1,0 +1,33 @@
+process_name=pt18_gghh
+process_path=pt18_gghh
+
+
+in=g,g
+out=h,h
+order=QCD, 2, 2
+
+# one quark flavour [t] running in the loops:
+qgraf.verbatim=true=chord[part22,part23,part24,part5000000,0,0];
+qgraf.options=onshell,notadpole,nosnail
+
+one=mdlaS
+zero=mdlMU,mdlMD,mdlMS,mdlMC,mdlMB,mdlWT,mdlWh,mdlWW,mdlWZ
+
+reduction_programs=golem95
+#extensions=quadruple
+
+model=FeynRules, ../model/UFO_testSMEFTGoSam
+
+use_order_names=True
+
+r2=explicit
+
+PSP_chk_method=LoopInduced
+
+order_names=NP,QL,QCD
+
+filter.lo= lambda d: d.order('NP')<2
+
+filter.nlo= lambda d: d.vertices(part5,anti5,part5000000) == 0 and  d.vertices(part15,anti15,part5000000) == 0 \
+    and d.vertices(part21,part21,part5000000) == 0 and d.vertices(part21,part21,part5000000,part5000000) == 0 \
+    and d.order('NP')<2

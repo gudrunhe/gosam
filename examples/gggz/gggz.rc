@@ -11,13 +11,15 @@ order=QCD, NONE, 3
 # doublet in the loop.
 # The second filter ensures that all bubbles
 # (which are zero by color) are removed.
-qgraf.verbatim=\
-   true=iprop[S,C,B,T,0,0];\\n\\\n\
-   true=chord[U,D,3,4];
+filter.particles=S:0,C:0,B:0,T:0
+filter.nlo=lambda d: d.chord(["U", "D"]) > 2
 
 one=gs,e
 zero=w*, mD
+# example uses non-zero up-quark mass
+massive_light_fermions=true
 
 helicities=+-++,+-+-,+-+0
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true

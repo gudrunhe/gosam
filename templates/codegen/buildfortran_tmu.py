@@ -112,7 +112,7 @@ for lidx in range(0,n_t_terms):
 f90file.write('module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21\n')
 f90file.write('   ! file: '+str(os.getcwd())+diag_name[:-1]+'21.f90 \n')
 f90file.write('   ! generator: buildfortran_n3.py \n')
-f90file.write('   use [% process_name asprefix=\_ %]config, only: ki \n')
+f90file.write('   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki \n')
 f90file.write('   use [% process_name asprefix=\_ %]util, only: cond_t, d => metric_tensor \n')
 f90file.write('\n')
 f90file.write('   implicit none\n')
@@ -134,12 +134,12 @@ if (int(rank)>=int(loopsize)+1):
 
 for lidx in range(0,n_t_terms):
     f90file.write('!---#[ subroutine brack_%s: \n' % lidx)
-    f90file.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+    f90file.write('   subroutine brack_{0}(ninjaA0,'.format(lidx)
                   + extra_arg + ' brack)\n')
-    f90file.write('      use [% process_name asprefix=\_ %]model \n')
+    f90file.write('      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model \n')
     f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
     f90file.write('      use [% process_name asprefix=\_ %]color \n')
-    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+    f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
     f90file.write('      implicit none \n')
     f90file.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
     if (int(rank)>=int(loopsize)+1):
@@ -157,15 +157,15 @@ if (extra_arg):
 f90file.write('!---#[ subroutine numerator_tmu:\n')
 f90file.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )[%
 @if helsum %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_tmu")\n'.format(diag) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_ninja_tmu")\n'.format(diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %]) )[%
 @else %]
-f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_tmu")\n'.format(diag,heli) )[%
+f90file.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_ninja_tmu")\n'.format(diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %],heli) )[%
 @end @if %]
 f90file.write('      use iso_c_binding, only: c_int\n')
 f90file.write('      use ninjago_module, only: ki => ki_nin\n')
 f90file.write('      use [% process_name asprefix=\_ %]globalsl1, only: epspow \n')
 f90file.write('      use [% process_name asprefix=\_ %]kinematics \n')
-f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
+f90file.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'\n')
 f90file.write('      implicit none \n')
 f90file.write('      integer(c_int), intent(in) :: ncut\n')
 f90file.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')
@@ -211,7 +211,7 @@ f90file.close()
 f90file_qp.write('module     [% process_name asprefix=\_%]'+diag_name[:-1]+'21_qp\n')
 f90file_qp.write('   ! file: '+str(os.getcwd())+diag_name[:-1]+'21_qp.f90 \n')
 f90file_qp.write('   ! generator: buildfortran_n3.py \n')
-f90file_qp.write('   use [% process_name asprefix=\_ %]config, only: ki => ki_qp \n')
+f90file_qp.write('   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp \n')
 f90file_qp.write('   use [% process_name asprefix=\_ %]util_qp, only: cond_t, d => metric_tensor \n')
 f90file_qp.write('\n')
 f90file_qp.write('   implicit none\n')
@@ -233,12 +233,12 @@ if (int(rank)>=int(loopsize)+1):
 
 for lidx in range(0,n_t_terms):
     f90file_qp.write('!---#[ subroutine brack_%s: \n' % lidx)
-    f90file_qp.write('   pure subroutine brack_{0}(ninjaA0,'.format(lidx)
+    f90file_qp.write('   subroutine brack_{0}(ninjaA0,'.format(lidx)
                   + extra_arg + ' brack)\n')
-    f90file_qp.write('      use [% process_name asprefix=\_ %]model_qp \n')
+    f90file_qp.write('      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
     f90file_qp.write('      use [% process_name asprefix=\_ %]color_qp \n')
-    f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+    f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
     f90file_qp.write('      implicit none \n')
     f90file_qp.write('      complex(ki), dimension(4), intent(in) :: ninjaA0\n')
     if (int(rank)>=int(loopsize)+1):
@@ -256,15 +256,15 @@ if (extra_arg):
 f90file_qp.write('!---#[ subroutine numerator_tmu:\n')
 f90file_qp.write('   subroutine numerator_tmu(ncut, a, coeffs) &\n' )[%
 @if helsum %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_tmu")\n'.format(diag) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}_qp_ninja_tmu")\n'.format(diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %]) )[%
 @else %]
-f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_tmu")\n'.format(diag,heli) )[%
+f90file_qp.write('   & bind(c, name="[% process_name asprefix=\_ %]d{0}h{1}_qp_ninja_tmu")\n'.format(diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %],heli) )[%
 @end @if %]
 f90file_qp.write('      use iso_c_binding, only: c_int\n')
 f90file_qp.write('      use quadninjago_module, only: ki => ki_nin\n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]globalsl1_qp, only: epspow \n')
 f90file_qp.write('      use [% process_name asprefix=\_ %]kinematics_qp \n')
-f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
+f90file_qp.write('      use [% process_name asprefix=\_ %]abbrevd'+diag[% @if enable_truncation_orders %]+'_[% trnco %]'[% @end @if %][% @if helsum %][% @else %]+'h'+heli[% @end @if %]+'_qp\n')
 f90file_qp.write('      implicit none \n')
 f90file_qp.write('      integer(c_int), intent(in) :: ncut\n')
 f90file_qp.write('      complex(ki), dimension(0:3,0:*), intent(in) :: a\n')

@@ -5,6 +5,9 @@ from golem.model import MODEL_OPTIONS
 import golem.util.tools
 from math import sqrt
 
+import logging
+logger = logging.getLogger(__name__)
+
 model_name = "Standard Model in Feynman Gauge (Diagonal CKM)"
 #---#[ particles:
 particles = {
@@ -229,15 +232,15 @@ latex_parameters = {
    'gXe': 'g_{e\\chi}',
    'gXmu': 'g_{\\mu\\chi}',
    'gXtau': 'g_{\\tau\\chi}',
-   'gPU': 'g_{U\\phi}^\pm',
-   'gPD': 'g_{D\phi^pm}',
-   'gPC': 'g_{C\phi^pm}',
-   'gPS': 'g_{S\phi^pm}',
-   'gPB': 'g_{B\phi^pm}',
-   'gPT': 'g_{T\phi^pm}',
-   'gPe': 'g_{e\phi^pm}',
-   'gPmu': 'g_{\\mu\\phi^pm}',
-   'gPtau': 'g_{\\tau\\phi^pm}',
+   'gPU': 'g_{U\\phi}^\\pm',
+   'gPD': 'g_{D\\phi^\\pm}',
+   'gPC': 'g_{C\\phi^\\pm}',
+   'gPS': 'g_{S\\phi^\\pm}',
+   'gPB': 'g_{B\\phi^\\pm}',
+   'gPT': 'g_{T\\phi^\\pm}',
+   'gPe': 'g_{e\\phi^\\pm}',
+   'gPmu': 'g_{\\mu\\phi^\\pm}',
+   'gPtau': 'g_{\\tau\\phi^\\pm}',
    'gGWX': 'g_{\\chi u_{W^+}}',
    'gGWH': 'g_{H u_{W^+}}',
    'gGZH': 'g_{Hu_{Z}}',
@@ -484,8 +487,8 @@ latex_names = {
    'ntaubar': '\\bar{\\nu}_\\tau',
 
    'H':       'H',
-   'phim':    '\phi^-',
-   'phip':    '\phi^+',
+   'phim':    '\\phi^-',
+   'phip':    '\\phi^+',
    'chi':     '\\chi',
 
    'ghA':     'u_\\gamma',
@@ -770,9 +773,9 @@ def init():
    ewchoose = keys["ewchoose"]
    param=""
 
-   golem.util.tools.debug("GS: %r" % gosam_choice)
-   golem.util.tools.debug("user: %r" % user_choice)
-   golem.util.tools.debug("ewchoose: %r" % ewchoose)
+   logger.debug("GS: %r" % gosam_choice)
+   logger.debug("user: %r" % user_choice)
+   logger.debug("ewchoose: %r" % ewchoose)
 
    for item in list(DEFAULT.keys()):
       if item in ones:
@@ -796,7 +799,7 @@ def init():
             param = "None!\n"
          warn+= param
          warn+= "We trust you know what you are doing ;-).\n"
-         golem.util.tools.warning(warn)
+         logger.warning(warn)
    else:
       if gosam_choice == 0:
          for key in ["mZ","mW","alpha"]:
@@ -818,7 +821,7 @@ def init():
          warn+= "EW parameters are computed from:\n"
          warn+= "mW, mZ, alpha.\n"
          warn+= "This can be changed editing ewchoice in common/config.f90.\n"
-         golem.util.tools.warning(warn)
+         logger.warning(warn)
       elif gosam_choice == -2:
          # Substitute parameters from user and fill gaps with defaults once
          for key in ["mZ", "mW", "alpha", "GF", "e", "sw"]:
@@ -836,7 +839,7 @@ def init():
          warn+= "EW parameters are computed from:\n"
          warn+= "mW, mZ, alpha.\n"
          warn+= "This can be changed editing ewchoice in common/config.f90.\n"
-         golem.util.tools.warning(warn)
+         logger.warning(warn)
 
    for key, value in list(MODEL_OPTIONS.items()):
       if key in parameters:
@@ -845,8 +848,8 @@ def init():
             fval = float(sval)
             parameters[key] = sval
          except ValueError:
-            golem.util.tools.warning(
-            "Model option %s=%r not in allowed range." % (key, value),
+            logger.warning(
+            "Model option %s=%r not in allowed range.\n" % (key, value) +
             "Option ignored")
 
       elif key.lower() == "masses":

@@ -1,0 +1,242 @@
+\section{UFO models for EFT calculations}
+\gosam does not come with any built-in EFT models. For a calculation based on an EFT the user has to provide the model through the generic UFO interface, see section~\ref{sec:UFO}. \gosam is able to handle $n$-point vertices, with $n>4$, and 4-fermion interactions. Note that, when no additional order besides the usual QCD and QED orders is specified for the vertices, \gosam will treat all interactions equally, considering only their assigned power with respect to the perturbative expansion in the strong and electroweak/QED coupling. In most cases a distinction between SM and non-SM interactions is desirable, which in UFO syntax is conventionally handled through additional coupling orders. \gosam reserves two special order names, \texttt{NP} and \texttt{QL}. The former is used to assign an order to a coupling with respect to the power counting of the EFT, for example factors of $1/\Lambda$ in SMEFT. The latter can be used to assign a loop-order to the coupling, taking into account a potential loop-suppression of EFT operators, as explained in more detail in section~\ref{sec:SMEFTtruncations} below.
+
+A special remark has to be made about double, or in general multiple, insertions of EFT operators. Per default \gosam will generate diagrams with multiple insertions of non-SM vertices, if they are present in the model. However, in a SMEFT context this leads to inconsistencies when at the same time operators of even higher dimension are missing in the model. For example, a double insertion of dimension 6 operators is at the same order as a single insertion of a dimension 8 operator. To be fully consistent, both cases would have to be included. The user can avoid such problems by using the \python diagram filters to single out diagrams with at most one SMEFT vertex:
+\begin{lstlisting}[gobble=3,style=py]
+1  filter.lo=lambda d: d.order('NP')<=1
+2  filter.nlo=lambda d: d.order('NP')<=1
+3  filter.ct=lambda d: d.order('NP')<=1
+\end{lstlisting}
+In this example we assume that the leading EFT operators are flagged by \texttt{NP=1} in the UFO model.
+
+\section{Multi-fermion operators} \label{sec:four-fermion}
+The treatment of diagram signs has been extended to handle vertices containing more than two fermions. The determination of the diagram sign is based on the algorithm of Ref.~\cite{Denner:1992me}, which requires tracing the fermion lines of a diagram. This tracing is unambiguous for vertices containing only two fermions, but requires additional information on how the legs of a vertex are connected when more than two fermions are involved. \gosam reads this information from the analytical vertex structure supplied by the UFO model. If the leg connections of a vertex are ambiguous, i.e.\ the analytical expression is a sum of two or more Lorentz structures connecting the legs differently, it is split into multiple vertices such that the leg connections are unambiguous for every vertex. After this procedure, \gosam's reduction machinery is able to handle the resulting diagrams normally.
+
+
+\section{Truncation orders in SMEFT}
+\label{sec:SMEFTtruncations}
+SMEFT is an expansion in inverse powers of the scale of new physics $\Lambda$,
+\begin{align}
+   \mathcal{L} &= \mathcal{L}_\mathrm{SM} + \sum_{d>4}\sum_{i_d}\frac{C^d_{i_d}}{\Lambda^d}O^d_{i_d}\,,\label{eq:SMEFTLag}
+\end{align}
+where $d$ denotes the canonical dimension of the operators $O^d_{i_d}$, with corresponding Wilson coefficients $C^d_{i_d}$. In order to calculate physical quantities one has to truncate the SMEFT expansion at a specific order. Precisely how this truncation is defined is not free of ambiguities, since it can be implemented on the level of the amplitudes or at the level of squared matrix elements. For this reason \gosam supports different truncation options for SMEFT calculations by setting \texttt{enable\_truncation\_orders=true} in the process card, provided the process setup and model used meet some requirements:
+\begin{itemize}
+   \item The model is provided in the UFO format.
+   \item All of the model's SMEFT operators are of the same dimension, with corresponding coupling order set to \texttt{NP=1}. Some SMEFT models might assign \texttt{NP=2} to the dimension 6 terms, accounting for the fact that technically also two dimension 5 terms exist in the SMEFT, which are often dropped.\footnote{There are only two lepton-number-violating operators. Experimental findings suggest them to be extremely suppressed.} In this case the user should adjust the model accordingly.
+   \item The \gosam process card has to specify the property \texttt{order\_names=NP}. Additional order names, like e.g.\ \texttt{QCD} or \texttt{QED} are optional.
+\end{itemize}
+%
+In some cases the user might want to take into account an intrinsic loop suppression of certain operators. Couplings arising from those should be flagged by the additional order \texttt{QL=1} in the UFO model. We can now decompose any amplitude in the following way:
+\begin{align}\label{eq:amp_truncation}
+   \M^\ell &= \underbrace{\M^\ell_\mathrm{SM}}_{\displaystyle\texttt{NP=0}} + \underbrace{\overbrace{\frac{\M^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=0}}  + \overbrace{\frac{\bar{\M}^\ell_6}{\Lambda^2}}^{\displaystyle\texttt{QL=1}}}_{\displaystyle\texttt{NP=1}}\,,
+\end{align}
+where $\ell=0,1$ denotes the type of diagram topology, tree or 1-loop. $\M^\ell_6$ is the contribution of diagrams with a single insertion of a dim-6 operator which is not loop-suppressed and $\bar{\M}^\ell_6$ contains those which are loop-suppressed.\footnote{\gosam does not make any assumptions about implicit factors (e.g.\ couplings and/or factors of $\pi$) contained in the Wilson coefficient of loop-suppressed operators. The Wilson coefficients are taken exactly as they are defined in the UFO model and no additional loop-suppression factor is added to the resulting amplitudes by \gosam.} Subsequently, there are different ways of treating the truncation of the amplitude to calculate physical quantities based on squared matrix elements. Currently nine different truncation options are implemented in \gosam, which will be explained in detail below. They can be chosen at runtime by means of the variable \texttt{EFTcount}. Possible values are shown in Table~\ref{tab:EFTcount}.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\centering
+\begin{tabular}{c|c|l|l}
+   \texttt{EFTcount} & loop-suppression & truncation & \\
+\hline
+   0 & --- & $\text{SM}^2$ & pure SM (default setting)\\
+\hline
+   1 & no & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
+   2 & no & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
+   3 & no & $\text{SM}\otimes\text{dim-6}$ & linear coefficient\\
+   4 & no & $\text{dim-6}^2$ & quadratic coefficient\\
+\hline
+   11 & yes & $\text{SM}^2 + \text{SM}\otimes\text{dim-6}$ & linear truncation\\
+   12 & yes & $\left(\text{SM}+\text{dim-6}\right)^2$ & quadratic truncation\\
+   13 & yes & $\text{SM}\otimes\text{dim-6}$ & linear coefficient\\
+   14 & yes & $\text{dim-6}^2$ & quadratic coefficient
+\end{tabular}
+\caption{Possible choices for the variable \texttt{EFTcount} and corresponding truncation. $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$.}
+\label{tab:EFTcount}
+\renewcommand{\arraystretch}{1.25}
+\end{table}
+
+In the following we will show the structure of the results returned by \gosam for the Born matrix element and the virtual corrections. We use the notation $A\otimes B\equiv2\,\mathrm{Re}\left\{A^\dagger B\right\}$ and drop the $\Lambda^{-2}$ for reasons of legibility. Since loop-induced processes require a slightly different treatment they are discussed in section~\ref{sec:loop-induced} below.
+
+\subsubsection*{\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
+This option discards any higher dimensional operators and returns just the SM result. This is the default.
+\begin{flalign}
+    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1\,.&
+\end{flalign}
+
+\subsubsection*{\boldmath\texttt{EFTcount=1}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, ignoring loop-suppression}
+All SMEFT operators are treated equally and no kind of loop-suppression is assumed for any of them. $\M_6$ and $\bar{\M}_6$ thus enter the expressions for the squared matrix elements in exactly the same way. We have
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2 + \M_\mathrm{SM}^0\otimes\qty(\M_6^0+\bar{\M}_6^0)\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1 + \M_\mathrm{SM}^0\otimes\qty(\M_6^1+\bar{\M}_6^1) + \qty(\M_6^0+\bar{\M}_6^0)\otimes\M_\mathrm{SM}^1\,.&
+\end{align}
+
+\subsubsection*{\boldmath\texttt{EFTcount=2}: $(\text{SM}+\text{dim-6})^2$, ignoring loop-suppression}
+This option essentially is ``no truncation'' in the sense that the full available amplitude is simply squared.
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0+\M_6^0+\bar{\M}_6^0}^2\,,&\\[5pt]
+    \text{Virtual }: &\qquad \qty(\M_\mathrm{SM}^0+\M_6^0+\bar{\M}_6^0)\otimes\qty(\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^1)\,.&
+\end{align}
+
+\subsubsection*{\boldmath\texttt{EFTcount=3}: $\text{SM}\times\text{dim-6}$, ignoring loop-suppression}
+This is the linear dim-6 contribution, i.e.\ the part of the squared matrix element which is $\order{\Lambda^{-2}}$.
+\begin{align}
+    \text{Born }: &\qquad \M_\mathrm{SM}^0\otimes\qty(\M_6^0+\bar{\M}_6^0)\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\qty(\M_6^1+\bar{\M}_6^1) + \qty(\M_6^0+\bar{\M}_6^0)\otimes\M_\mathrm{SM}^1\,.&
+\end{align}
+
+\subsubsection*{\boldmath\texttt{EFTcount=4}: $(\text{dim-6})^2$, ignoring loop-suppression}
+The dim-6 part of the amplitude squared:
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_6^0+\bar{\M}_6^0}^2\,,&\\[5pt]
+    \text{Virtual }: &\qquad \qty(\M_6^0+\bar{\M}_6^0)\otimes\qty(\M_6^1+\bar{\M}_6^1)\,.&
+\end{align}
+
+\subsubsection*{\boldmath\texttt{EFTcount=11}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, with loop-suppression}
+``With loop-suppression'' means that the operators which are assumed to be loop-generated in a UV-complete model are treated as introducing an additional loop order to the diagrams they are contributing to. Effectively, this results in $\bar{\M}_6^0$ being considered a 1-loop contribution at the same (loop and \texttt{NP}) order as $\M_6^1$. $\bar{\M}_6^1$ then corresponds to 2-loops and is consequently dropped.
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0}^2 + \M_\mathrm{SM}^0\otimes\M_6^0\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_\mathrm{SM}^1 + \M_\mathrm{SM}^0\otimes\M_6^1 + \M_6^0\otimes\M_\mathrm{SM}^1 + \qty[\M_\mathrm{SM}^0\otimes\bar{\M}_6^0]\,.&
+\end{align}
+The term in square brackets is then a tree-structure (0-loop topologies) contributing to the 1-loop order.
+
+\subsubsection*{\boldmath\texttt{EFTcount=12}: $(\text{SM}+\text{dim-6})^2$, with loop-suppression}
+Due to consideration of the loop-suppression this option is not a simple square anymore.
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_\mathrm{SM}^0+\M_6^0}^2\,,&\\[5pt]
+    \text{Virtual }: &\qquad \qty(\M_\mathrm{SM}^0+\M_6^0)\otimes\qty(\M_\mathrm{SM}^1+\M_6^1) + \qty[\qty(\M_\mathrm{SM}^0+\M_6^0)\otimes\bar{\M}_6^0]\,.&
+\end{align}
+There is no term $\abs{\bar{\M}_6^0}^2$ in the virtual part, as this would be a 2-loop structure, despite being constructed solely from diagrams with tree topology.
+
+\subsubsection*{\boldmath\texttt{EFTcount=13}: $\text{SM}\times\text{dim-6}$, with loop-suppression}
+The linear dim-6 contribution, but treating $\bar{\M}_6^0$ as a 1-loop order object.
+\begin{align}
+    \text{Born }: &\qquad \M_\mathrm{SM}^0\otimes\M_6^0\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_\mathrm{SM}^0\otimes\M_6^1 + \M_6^0\otimes\M_\mathrm{SM}^1 + \qty[\M_\mathrm{SM}^0\otimes\bar{\M}_6^0]\,.&
+\end{align}
+
+\subsubsection*{\boldmath\texttt{EFTcount=14}: $(\text{dim-6})^2$, with loop-suppression}
+The squared dim-6 part of the amplitude, considering the extra loop order of $\bar{\M}_6^0$ and $\bar{\M}_6^1$:
+\begin{align}
+    \text{Born }: &\qquad \abs{\M_6^0}^2\,,&\\[5pt]
+    \text{Virtual }: &\qquad \M_6^0\otimes\M_6^1+\qty[\M_6^0\otimes\bar{\M}_6^0]\,.&
+\end{align}
+
+Note that, when the model does not contain any loop-suppressed operators, we have $\bar{\M}_6^\ell\equiv0$ and the truncation options 11, 12, 13, 14 return the same results as options 1, 2, 3, 4, respectively.
+
+\subsection{Loop-induced processes}\label{sec:loop-induced}
+Processes which are loop induced in the SM require a special treatment. In some cases the inclusion of EFT operators generates tree-level contributions to such processes. A famous example is the decay of the Higgs boson into two gluons, which in the SM is mediated via a top-quark loop. When adding the Higgs-gluon operator $\mathcal{O}_{\phi G} = \phi^\dagger\phi\,G^a_{\mu\nu}G^{a,\mu\nu}$ to the theory the decay can be generated at tree-level.
+
+In order to consistently define the process one has to distinguish two scenarios:
+\begin{enumerate}
+   \item Tree-level contributions are generated by tree-level EFT operators, that is operators which are not considered loop-suppressed.
+   \item Tree-level contributions are generated by loop-suppressed EFT operators only.
+\end{enumerate}
+In the first scenario the process is not actually loop-induced, and the process can be set up in the usual way with a tree-level Born. A requirement is that the QCD and/or QED orders of the EFT operators are consistent with the \texttt{order} statement in the process configuration file. In this case all truncation orders can be defined as above, with $\M_\mathrm{SM}^0\equiv0$. Note, however, that this means that the leading contributions to the process are tree times 1-loop interferences at dim-6 and squared tree-level contributions at dim-6$^2$. The actual SM part is then only subleading in perturbation theory at 1-loop squared and will not even be calculated by \gosam. 
+
+In that sense the second scenario is more interesting. In this case the process is treated as loop-induced and the loop-suppressed EFT diagrams with tree-level topology are considered as of the same level as the 1-loop (SM-)contributions. Since \gosam cannot know a priori if such EFT diagrams exist the user has to explicitly set the flag
+\begin{lstlisting}[gobble=3, style=py]
+1  loop_suppressed_Born=true
+\end{lstlisting}
+in the process card. As a consequence only the \texttt{EFTcount} options 0 and 11 to 14, that is the ones considering loop-suppression, are defined for loop-induced processes. The tree and 1-loop contributions to the process can then be written as (dropping the $\Lambda^{-2}$ as above)
+\begin{align}
+   \M^0 &= \bar{\M}_6^0\,, & \M^1 &= \M_\mathrm{SM}^1 + \M_6^1\,,
+\end{align}
+respectively. The tree-level contains diagrams with loop-suppressed operators, only, while the 1-loop level comprises SM loop diagrams and loop diagrams with single insertions of tree-type EFT operators. There are no loop-diagrams with loop-suppressed operators, as they are discarded as subleading. The structure of the results for the loop-induced Born returned by \gosam is summarized in the following. In all cases the loop-suppressed $\bar{\M}_6^0$ is being considered a 1-loop contribution at the same loop order as $\M_\mathrm{SM}^1$ and $\M_6^1$.
+
+\subsubsection*{\boldmath\texttt{EFTcount=0}: $\text{SM}^2$}
+This option discards any higher dimensional operator and returns just the SM result. This is the default.
+\begin{flalign}
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2\,.&
+\end{flalign}
+
+\subsubsection*{\boldmath\texttt{EFTcount=11}: $\text{SM}^2+\text{SM}\times\text{dim-6}$, with loop-suppression}
+Truncation at linear order in $\Lambda^{-2}$.
+\begin{flalign}
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1}^2 + \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
+\end{flalign}
+
+\subsubsection*{\boldmath\texttt{EFTcount=12}: $(\text{SM}+\text{dim-6})^2$, with loop-suppression}
+The truncation option including dim-6$^2$ terms.
+\begin{flalign}
+    \text{Loop-ind. Born }: &\qquad \abs{\M_\mathrm{SM}^1+\M_6^1+\bar{\M}_6^0}^2\,.&
+\end{flalign}
+
+\subsubsection*{\boldmath\texttt{EFTcount=13}: $\text{SM}\times\text{dim-6}$, with loop-suppression}
+The linear dim-6 contribution.
+\begin{flalign}
+    \text{Loop-ind. Born }: &\qquad \M_\mathrm{SM}^1\otimes\qty(\M_6^1 + \bar{\M}_6^0)\,.&
+\end{flalign}
+
+\subsubsection*{\boldmath\texttt{EFTcount=14}: $(\text{dim-6})^2$, with loop-suppression}
+The squared dim-6 contribution:
+\begin{flalign}
+    \text{Loop-ind. Born }: &\qquad \abs{\M_6^1+\bar{\M}_6^0}^2\,.&
+\end{flalign}
+
+Note that above options are still well defined when the model does not contain any loop-suppressed operators. We then have $\bar{\M}_6^0\equiv0$ and only genuine 1-loop squared topologies appear.
+
+\section{Calculations in HEFT}
+Higgs Effective Field Theory (HEFT)~\cite{Feruglio:1992wf,Bagger:1993zf,Koulovassilopoulos:1993pw,Burgess:1999ha,Wang:2006im,Grinstein:2007iv,Alonso:2012px,Buchalla:2012qq,Buchalla:2013rka} organises the power counting in terms of the chiral dimension instead of the canonical dimension of operators, as SMEFT does. As the chiral dimension is directly related to the loop order of an operator, the loop-suppression mentioned above is an integral feature of HEFT. Operators from the leading HEFT Lagrangian $\mathcal{L}_2$ are considered "tree-level operators", those from the next-to-leading (in the power counting) Lagrangian $\mathcal{L}_4$ "one-loop operators" and so on.\footnote{The subscript indicates the chiral dimension. It is always an even number. For the technical details of HEFT we refer to the given references.} The full SM is a subset of $\mathcal{L}_2$.
+
+Each insertion of a vertex coming from $\mathcal{L}_{2n}$ raises the loop order of a given diagram by $n-1$. For example, a single $\mathcal{L}_4$ vertex in a diagram with tree topology will make it a one-loop order diagram, contributing at the same level as a genuine one-loop diagram with only vertices from $\mathcal{L}_2$.
+
+\gosam is able to perform calculations to NLO in HEFT, when in the corresponding UFO model all vertices from $\mathcal{L}_2$ are tagged with (\texttt{NP=0, QL=0}), vertices from $\mathcal{L}_4$ with (\texttt{NP=1, QL=1}). Vertices from $\mathcal{L}_6$ are not considered, as they are of two-loop order. The amplitude is then assembled consistently when setting \texttt{EFTcount=12}. In the above notation, $\M_\mathrm{SM}^\ell$ then corresponds to \emph{all} contributions from $\mathcal{L}_2$, including anomalous ones, and $\bar{\M}_6^0$ to contributions with tree topology and a single insertion of a $\mathcal{L}_4$ vertex. $\M_6^\ell$ is not present in the HEFT setup.
+
+\section{Renormalisation of Wilson coefficients}\label{sec:EFTrenorm}
+\gosam is able to provide renormalised amplitudes at NLO QCD in the SM. See~\cite{Cullen:2011ac} for details about the construction of the corresponding counterterms. Renormalisation in an EFT context is a non-trivial task and not fully automatized in \gosam. In general \gosam therefore provides unrenormalised amplitudes when considering an EFT. However, under certain circumstances \gosam is able to calculate the required counterterms for the 1-loop QCD renormalisation, just as in the pure SM. The necessary condition for this to work is that there are no contributions of the EFT operators to the renormalisation of SM parameters and fields. In other words, all additional UV divergences at $\mathcal{O}\left(\Lambda^{-2}\right)$ can be absorbed by renormalising the Wilson coefficients of the EFT operators alone, without the need to change the counterterms of SM objects. Internally \gosam uses its infrastructure for the generation of the Born amplitude, by replacing occurrences of Wilson coefficients within each diagram by their corresponding counterterm, $C_i\to \delta C_i$. The result is expanded in a way that ensures that each contribution to the counterterm amplitude only has a single insertion of a counterterm.
+
+The counterterms related to the Wilson coefficients have to be provided by the user. This can be done in a convenient way by means of the UFO interface, as explained in section~5.4 of the UFO2.0 manual~\cite{Darme:2023jdn}. Analogously to an ordinary \texttt{Vertex} object a counterterm vertex \texttt{CTVertex} can be defined, which exactly originates from the replacement $C_i\to \delta C_i$ mentioned above. As an example consider a simplified version of SMEFT with just the two operators 
+\begin{align}
+    O_{\phi G} &= \left(\phi^\dagger\phi\right)G_{\mu\nu}^aG^{a,\mu\nu}\,, & O_{t\phi} &= \left(\phi^\dagger\phi\right)\bar{Q}_Lt_R\tilde{\phi}\,.
+\end{align}    
+The latter generates (among others) an anomalous $t\bar{t}H$ vertex, which in the UFO can be defined as
+\begin{lstlisting}[gobble=3, style=py]
+   V_1 = Vertex(
+      name = 'V_1',
+      particles = [ P.t__tilde__, P.t, P.H ],
+      color = [ 'Identity(1,2)' ],
+      lorentz = [ L.FFS1, L.FFS2 ],
+      couplings = {(0,0):C.GC_1, (0,1):C.GC_2})
+\end{lstlisting}
+The vertex has a single colour structure, the identity, and two separate Lorentz structures and couplings, defined in the UFO's \texttt{lorentz.py} and \texttt{couplings.py}, respectively.\footnote{See the UFO2.0 manual~\cite{Darme:2023jdn} for a detailed explanation of the syntax.} The $\overline{\text{MS}}$ counterterm for the Wilson coefficient $C_{t\phi}$ is given by
+\begin{multline}\label{eq:Ctphi_CT}
+   \delta C_{t\phi} = \frac{\alpha_s}{2\pi}\frac{(4\pi)^\epsilon}{\Gamma(1-\epsilon)}\left(\frac{\mu_R^2}{\mu_\mathrm{EFT}^2}\right)^\epsilon\,\left(\frac{1}{\epsilon}\left(-2C_{t\phi}+8y_tC_{\phi G}\right)\right. \\+ \left.1_\mathrm{DRED}\left(-\frac{2}{3}C_{t\phi}+\frac{8}{3}y_tC_{\phi G}\right)\right) + \mathcal{O}(\epsilon)\,,
+\end{multline}
+where $1_\mathrm{DRED}=1$, if the calculation is performed in DRED (\gosam's default) and $1_\mathrm{DRED}=0$ in the 't Hooft--Veltman scheme. $\mu_\mathrm{EFT}$ is the scale at which the Wilson coefficients are renormalised, which can in general be different from the renormalisation scale $\mu_R$ of the strong coupling. The corresponding counterterm vertex is defined in \texttt{CT\_vertices.py}:
+\begin{lstlisting}[gobble=3, style=py]
+   CTV_1 = CTVertex(
+      name = 'CTV_1',
+      type = 'UV',
+      particles = [ P.t__tilde__, P.t, P.H ],
+      color = [ 'Identity(1,2)' ],
+      lorentz = [ L.FFS3, L.FFS4 ],
+      loop_particles = [ [ [ P.g ], [P.t] ] ],
+      couplings = {(0,0,0):C.UVGC_1, (0,1,0):C.UVGC_2})
+\end{lstlisting}
+\gosam only makes use of counterterms of the type \lstinline{'UV'}, while the UFO model in general can also provide $R2$ counterterms. However, those are not needed by \gosam. The counterterm vertex has the same colour and Lorentz structure as the ordinary vertex. The additional list \texttt{loop\_particles} contains information about the type of particles appearing in the loops related to the derivation of the counterterm, with the intention to give the user an extra way to filter counterterm vertices. Currently \gosam does not make use of this feature, so this list can be ignored and treated as a dummy object. The two couplings are given by
+\begin{lstlisting}[gobble=3,style=py]
+   UVGC_1 = Coupling(
+      name = 'UVGC_1',
+      value = '(complex(0,1)*Lam*(Ctphi_CT))/(2.*Gf)',
+      order = {'NP':1, 'QED':1, 'QCD':2})
+\end{lstlisting}
+and
+\begin{lstlisting}[gobble=3,style=py]
+   UVGC_2 = Coupling(
+      name = 'UVGC_2',
+      value = '(Ctphi_CT*complex(0,1)*Lam)/(2.*Gf)',
+      order = {'NP':1, 'QED':1, 'QCD':2})
+\end{lstlisting}
+defined in \texttt{CT\_couplings.py}. Here $\texttt{Lam}=\Lambda^{-2}$ is the SMEFT NP scale, and $G_F^{-1}\propto v^2$, with $v$ the Higgs vacuum expectation value, comes from the operator definition. The special \texttt{CTParameter} object \texttt{Ctphi\_CT} is defined in \texttt{CT\_parameters.py}:
+\begin{lstlisting}[gobble=3,style=py]
+   Ctphi_CT = CTParameter(
+      name = 'Ctphi_CT',
+      type = 'real',
+      value = {
+         -1:'aS/2/cmath.pi*(-2*Ctphi+8*yt*CphiG)',
+         0:'dred*aS/2/cmath.pi*(-2/3*Ctphi+8/3*yt*CphiG)'
+      })
+\end{lstlisting}
+It reflects the structure of $\delta C_{t\phi}$ given in~(\ref{eq:Ctphi_CT}). Note that the UFO format permits to omit the definition of a \texttt{CTParameter} object by directly defining the \texttt{value} of the coupling as a \python dict instead.
+Two comments are in order: First, \gosam assumes the strong coupling factor $\alpha_s/2\pi$ to be explicitly contained in the definition of the counterterm. Secondly, \gosam assumes the counterterms of the Wilson coefficients to be in the $\overline{\text{MS}}$ scheme, with the scale factor $\left(\mu_R^2/\mu_\mathrm{EFT}^2\right)^\epsilon$. \gosam automatically expands this factor to obtain the appropriate logarithmic terms, which therefore do not have to be defined explicitly. The only requirement is the presence of a parameter \texttt{mueft} (corresponding to $\mu_\mathrm{EFT}$) in the UFO's \texttt{parameters.py} file.

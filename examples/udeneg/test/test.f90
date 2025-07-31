@@ -114,32 +114,25 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use udeneg_config, only: renormalisation, convert_to_cdr !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar
-   use udeneg_model, only: mW, wW, mZ, Nf, Nfgen, VUD, CVDU
+   use udeneg_config, only: renormalisation, convert_to_thv
+   use udeneg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 1
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 
-   mW = 80.398_ki
-   wW = 2.1054_ki
-   mZ = mW / sqrt(1.0_ki - 0.4808222_ki**2)
+   call set_parameter("mW", 80.398_ki, 0.0_ki, ierr)
+   call set_parameter("wW", 2.1054_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 80.398_ki / sqrt(1.0_ki - 0.4808222_ki**2), 0.0_ki, ierr)
 
-   VUD  = (0.97419_ki, 0.0_ki)
-   CVDU = (0.97419_ki, 0.0_ki)
+   call set_parameter("VUD", 0.97419_ki, 0.0_ki, ierr)
+   call set_parameter("CVDU", 0.97419_ki, 0.0_ki, ierr)
 
-   Nf = 5
-   Nfgen = 5
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
-   convert_to_cdr = .true.
+   convert_to_thv = .true.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
@@ -229,12 +222,13 @@ pure elemental function rel_diff(a, b)
 end  function rel_diff
 
 subroutine     shake_gauge_parameters(delta)
-   use udeneg_model, only: gauge5z
+   use udeneg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
    real(ki), intent(in) :: delta
    real(ki), dimension(4) :: harvest
    call random_number(harvest)
 
-   gauge5z = delta * (harvest(1) - 0.5_ki)
+   call set_parameter("gauge5z", delta * (harvest(1) - 0.5_ki), 0.0_ki, ierr)
 end subroutine shake_gauge_parameters
 end program test

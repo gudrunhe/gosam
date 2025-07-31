@@ -1,32 +1,39 @@
 # vim: ts=3:sw=3:expandtab
-
+import os
 from golem.util.config import Property
-from golem.util.path import golem_path
+from golem.installation import BIN_DIR
 
+process_name = Property(
+    "process_name",
+    """\
+   A symbolic name for the process. This name, appended with 
+   an underscore, will be used as a prefix for the Fortran modules.
 
-process_name = Property("process_name",
-   """\
-   A symbolic name for this process. This name will be used
-   as a prefix for the Fortran modules.
-
-   Golem will insert an underscore after this prefix.
-   If the process name is left blank no prefix will be used
-   and no extra underscore will be generated.
+   The deafult name is 'gosam_process', but the user can also 
+   explcitly set 'process_name=', i.e. empty. In this case no prefix 
+   will be used (not recommended).
    """,
-   str, "")
+    str,
+    "gosam_process",
+)
 
-process_path = Property("process_path",
-   """\
-   The path to which all Form output is written.
+process_path = Property(
+    "process_path",
+    """\
+   The path to which the process skeleton is written.
    If no absolute path is given, the path is interpreted relative
    to the working directory from which gosam.py is run.
 
    Example:
    process_path=/scratch/golem_processes/process1
-   """)
+   """,
+    str,
+    "gosam_process"
+)
 
-qgraf_in = Property("in",
-   """\
+qgraf_in = Property(
+    "in",
+    """\
    A comma-separated list of initial state particles.
    Which particle names are valid depends on the
    model file in use.
@@ -36,10 +43,12 @@ qgraf_in = Property("in",
    2) in=e+,e-
    3) in=g,g
    """,
-   list)
+    list,
+)
 
-qgraf_out = Property("out",
-   """\
+qgraf_out = Property(
+    "out",
+    """\
    A comma-separated list of final state particles.
    Which particle names are valid depends on the
    model file in use.
@@ -49,10 +58,12 @@ qgraf_out = Property("out",
    2) out=e+,e-,gamma
    3) out=b,b~,t,t~
    """,
-   list)
+    list,
+)
 
-model = Property("model",
-   """\
+model = Property(
+    "model",
+    """\
    This option allows the selection of a model for the
    Feynman rules. It has to conform with one of four possible
    formats:
@@ -64,7 +75,8 @@ model = Property("model",
 
    Format 1) searches for the model files <name>, <name>.hh
    and <name>.py in the models/ directory under the installation
-   path of Golem.
+   path of Golem. The following models are shipped with GoSam:
+   sm, smdiag, sm_complex, smdiag_complex, smehc, smdiagehc, smdiag_mad 
 
    Format 2) is similar to format 1) but <path> is used instead
    of the models/ directory of the Golem installation
@@ -73,24 +85,28 @@ model = Property("model",
    prtcls<number>.mdl and vars<number>.mdl in the directory <path>.
    These files need to be in CalcHEP/CompHEP format.
 
-   Format 4) expects files according to the new FeynRules Python
-   interface in the directory specified by <path>.
-   (Not fully implemented yet)
+   Format 4) expects a UFO model in the directory specified by <path>.
    """,
-   list,"smdiag")
+    list,
+    "smdiag",
+)
 
-model_options = Property("model.options",
-   """\
+model_options = Property(
+    "model.options",
+    """\
    If the model in use supports options they can be passed via this
    property.
 
    For builtin models, the option "ewchoose"
-   selects automatically the EW scheme based.
+   automatically selects the EW scheme used.
    """,
-   list,"ewchoose")
+    list,
+    "ewchoose",
+)
 
-qgraf_power = Property("order",
-   """\
+qgraf_power = Property(
+    "order",
+    """\
    A 3-tuple <coupling>,<born>,<virt> where <coupling> denotes
    a function of the qgraf style file which can be used as
    an argument in a 'vsum' statement. For the standard model
@@ -119,12 +135,27 @@ qgraf_power = Property("order",
    If the last number is omitted no virtual corrections are
    calculated.
 
+   For loop induced processes, the order of the Born diagrams
+   should be specified as `NONE`.
+
    See also: qgraf.options, qgraf.verbatim
    """,
-   list)
+    list,
+)
 
-helicities = Property("helicities",
-   """\
+loop_suppressed_Born = Property(
+    "loop_suppressed_Born",
+    """\
+   In case of a a loop-induced process generate Born diagrams with tree 
+   topology containing loop-suppressed EFT operators.
+    """,
+    bool,
+    default=False,
+)
+
+helicities = Property(
+    "helicities",
+    """\
    A list of helicities to be calculated. An empty list
    means that all possible helicities should be generated.
 
@@ -178,10 +209,12 @@ helicities = Property("helicities",
             #            -+-++,-+-+-,-+-+0,--+++,--++-,--++0
 
    """,
-   list)
+    list,
+)
 
-qgraf_options = Property("qgraf.options",
-   """\
+qgraf_options = Property(
+    "qgraf.options",
+    """\
    A list of options which is passed to qgraf via the 'options' line.
    Possible values (as of qgraf.3.1.1) are zero, one or more of:
       onepi, onshell, nosigma, nosnail, notadpole, floop
@@ -189,12 +222,68 @@ qgraf_options = Property("qgraf.options",
 
    Please, refer to the QGraf documentation for details.
    """,
-   list,"onshell,notadpole,nosnail",
-   options=["onepi", "onshell", "nosigma", "nosnail", "notadpole",
-      "floop", "topol"])
+    list,
+    "onshell,notadpole,nosnail",
+    options=[
+        "onepi",
+        "onshell",
+        "nosigma",
+        "nosnail",
+        "notadpole",
+        "floop",
+        "topol",
+    ],
+)
 
-qgraf_verbatim = Property("qgraf.verbatim",
-   """\
+filter_particles = Property(
+    "filter.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in every diagram. Multiple fields may be specified.
+
+    Example:
+
+    filter.particles=u:0,d:0 # No internal u or d quarks
+    """,
+    str,
+)
+
+filter_lo_particles = Property(
+    "filter.lo.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the LO diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+)
+
+filter_nlo_particles = Property(
+    "filter.nlo.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the NLO diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+)
+
+filter_ct_particles = Property(
+    "filter.ct.particles",
+    """\
+    Restrict the number of internal propagators with the given field
+    in the counter term diagrams. Multiple fields may be specified.
+
+    See also filter.particles.
+    """,
+    str,
+)
+
+qgraf_verbatim = Property(
+    "qgraf.verbatim",
+    """\
    This option allows to send verbatim lines to
    the file qgraf.dat. This can be useful if the user
    wishes to put additional restricitons to the selected diagrams.
@@ -215,130 +304,61 @@ qgraf_verbatim = Property("qgraf.verbatim",
 
    See also: qgraf.options, order
    """,
-   str, "")
+    str,
+    "",
+)
 
-qgraf_verbatim_lo = Property("qgraf.verbatim.lo",
-   """\
+qgraf_verbatim_lo = Property(
+    "qgraf.verbatim.lo",
+    """\
    Same as qgraf.verbatim but only applied to LO diagrams.
 
    See also: qgraf.verbatim, qgraf.verbatim.nlo
    """,
-   str, "")
+    str,
+    "",
+)
 
-qgraf_verbatim_nlo = Property("qgraf.verbatim.nlo",
-   """\
+qgraf_verbatim_nlo = Property(
+    "qgraf.verbatim.nlo",
+    """\
    Same as qgraf.verbatim but only applied to NLO diagrams.
 
    See also: qgraf.verbatim, qgraf.verbatim.nlo
    """,
-   str, "")
+    str,
+    "",
+)
 
-ldflags_golem95 = Property("golem95.ldflags",
-   """\
-   LDFLAGS required to link golem95.
+qgraf_verbatim_ct = Property(
+    "qgraf.verbatim.ct",
+    """\
+   Same as qgraf.verbatim but only applied to CT diagrams.
 
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   golem95.ldflags=-L/usr/local/lib/ -lgolem-gfortran-double
-
+   See also: qgraf.verbatim, qgraf.verbatim.nlo
    """,
-   str,
-   "")
+    str,
+    "",
+)
 
-fcflags_golem95 = Property("golem95.fcflags",
-   """\
-   FCFLAGS required to compile with golem95.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   golem95.fcflags=-I/usr/local/include/golem95
-
-   """,
-   str,
-   "")
-
-ldflags_samurai = Property("samurai.ldflags",
-   """\
-   LDFLAGS required to link samurai.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   samurai.ldflags=-L/usr/local/lib/ -lsamurai-gfortran-double
-
-   """,
-   str,
-   "")
-
-fcflags_samurai = Property("samurai.fcflags",
-   """\
-   FCFLAGS required to compile with samurai.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   samurai.fcflags=-I/usr/local/include/samurai
-
-   """,
-   str,
-   "")
-
-version_samurai = Property("samurai.version",
-   """\
-   The version of the samurai library in use.
-
-   Example:
-   samurai.version=2.1.1
-
-   """,
-   str,
-   "2.1.1", hidden=True)
-
-ldflags_ninja = Property("ninja.ldflags",
-   """\
-   LDFLAGS required to link ninja.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   ninja.ldflags=-L/usr/local/lib/ -lninja
-
-   """,
-   str,
-   "")
-
-fcflags_ninja = Property("ninja.fcflags",
-   """\
-   FCFLAGS required to compile with ninja.
-
-   GoSam will try to determine the required
-   flags automatically if not provided.
-
-   Example:
-   ninja.fcflags=-I/usr/local/include/ninja
-
-   """,
-   str,
-   "")
-
-zero = Property("zero",
-   """\
+zero = Property(
+    "zero",
+    """\
    A list of symbols that should be treated as identically
    zero throughout the whole calculation. All of these
-   symbols must be defined by the model file.
-   If you do not use built-in models, you probably
-   need to overwrite the default value.
+   symbols must be defined by the model file. For convenience
+   masses and widths can be set by means of PDG codes, e.g.
+   mass(1),width(1) for the down-quark mass and width, res-
+   pectively. Lists of PDG codes separated by ';' can be used 
+   in the arguments of 'mass' and 'width'.
 
    Examples:
    1) # Light masses are set to zero here:
-      zero=me,mU,mD,mS
+      zero=me,mD,mU,mS
+      OR:
+      zero=mass(11),mass(1),mass(2),mass(3)
+      OR:
+      zero=mass(11;1;2;3)
    2) # Diagonal CKM matrix:
       zero=VUS, VUB, CVDC, CVDT, \\
            VCD, VCB, CVSU, CVST, \\
@@ -348,11 +368,12 @@ zero = Property("zero",
 
    See also: model, one
    """,
-   list,
-   "mU,mD,mS,mC,mB,me,mmu")
+    list,
+)
 
-one = Property("one",
-   """\
+one = Property(
+    "one",
+    """\
    A list of symbols that should be treated as identically
    one throughout the whole calculation. All of these
    symbols must be defined by the model file.
@@ -362,20 +383,24 @@ one = Property("one",
 
    See also: model, zero
    """,
-   list)
+    list,
+)
 
-qgraf_bin = Property("qgraf.bin",
-   """\
+qgraf_bin = Property(
+    "qgraf.bin",
+    """\
    Points to the QGraf executable.
 
    Example:
    qgraf.bin=/home/my_user_name/bin/qgraf
    """,
-   str,
-   "qgraf")
+    str,
+    os.path.join(BIN_DIR, "qgraf"),
+)
 
-form_bin = Property("form.bin",
-   """\
+form_bin = Property(
+    "form.bin",
+    """\
    Points to the Form executable.
 
    Examples:
@@ -384,48 +409,40 @@ form_bin = Property("form.bin",
    2) # Use non-standard location:
       form.bin=/home/my_user_name/bin/form
    """,
-   str,
-   "tform")
+    str,
+    os.path.join(BIN_DIR, "tform"),
+)
 
-form_threads = Property("form.threads",
-   """\
+form_threads = Property(
+    "form.threads",
+    """\
    Number of Form threads.
 
    Example:
    form.threads=4
    runs tform, the parallel version of FORM, on 4 cores.
    """,
-   int,2)
+    int,
+    2,
+)
 
-form_workspace = Property("form.workspace",
-   """\
+form_workspace = Property(
+    "form.workspace",
+    """\
    Size of the heap (in megabytes) used by FORM.
 
    Example (for machines with <= 2GB RAM):
    form.workspace=100
    set WorkSpace to 100M in FORM via form.set file.
    """,
-   int,
-   1000)
+    int,
+    1000,
+)
 
 
-haggies_bin = Property("haggies.bin",
-   """\
-   Points to the Haggies executable.
-   Haggies is used to transform the expressions of the
-   diagrams into optimized Fortran90 programs if the
-   extension "noformopt" is active. It can also be used
-   to optimize the color expressions.
-
-   Examples:
-      1) haggies.bin=/home/my_user_name/bin/haggies
-      2) haggies.bin=/usr/bin/java -Xmx50m -jar ./haggies.jar
-   """,
-   str,
-   "java -jar %s" % golem_path("haggies", "haggies.jar"))
-
-form_tmp = Property("form.tempdir",
-   """\
+form_tmp = Property(
+    "form.tempdir",
+    """\
    Temporary directory for Form. Should point to a directory
    on a local disk.
 
@@ -433,83 +450,61 @@ form_tmp = Property("form.tempdir",
    form.tempdir=/tmp
    form.tempdir=/scratch
    """,
-   str,
-   "/tmp")
+    str,
+    "/tmp",
+)
 
-template_path = Property("templates",
-   """\
+template_path = Property(
+    "templates",
+    """\
    Path pointing to the directory containing the template
-   files for the process. If not set, golem uses the directory
-   <golem_path>/templates.
+   files for the process. If not set, GoSam uses the directory
+   <gosam_git_path>/templates, where <gosam_git_path> is the
+   path into which the GoSam git has been cloned.
 
    The directory must contain a file called 'template.xml'
    """,
-   str,
-   "")
+    str,
+    "",
+)
 
-group_diagrams = Property("group",
-   """\
-   Flag whether or not the tree-level diagrams should be grouped
-   into a single file.
-   """,
-   bool,
-   True)
-
-sum_diagrams = Property("diagsum",
-   """\
+sum_diagrams = Property(
+    "diagsum",
+    """\
    Flag whether or not 1-loop diagrams with the same propagators
    should be summed before the algebraic reduction.
    """,
-   bool,
-   True)
+    bool,
+    True,
+)
 
-sum_helicities = Property("helsum",
-   """\
+sum_helicities = Property(
+    "helsum",
+    """\
    Flag whether or not 1-loop diagrams should be analytically
    summed over all helicities
    """,
-   bool,
-   False, experimental=True)
+    bool,
+    False,
+    experimental=True,
+)
 
-renorm = Property("renorm",
-   """\
+renorm = Property(
+    "renorm",
+    """\
    Indicates if the UV counterterms should be generated.
 
    Examples:
    renorm=true
    renorm=false
    """,
-   bool,
-   False, experimental=True)
+    bool,
+    True,
+)
 
-genUV = Property("genUV",
-   """\
-   Indicates if the UV counterterms should be generated
-   using Qgraf.
-
-   Examples:
-   genUV=true
-   genUV=false
-   """,
-   bool,
-   False, experimental=True)
-
-fc_bin = Property("fc.bin",
-   """\
-   Denotes the executable file of the Fortran90 compiler.
-   """,
-   str,
-   "gfortran")
-
-python_bin = Property("python.bin",
-   """\
-   Denotes the executable file of Python
-   """,
-   str,
-   "python3")
-
-formopt_level = Property("formopt.level",
-   """\
+formopt_level = Property(
+    "formopt.level",
+    """\
    There are three levels of Horner Scheme
    offered and the number here will specify
    which one we use. It can only be 1,2 or 3.
@@ -518,101 +513,119 @@ formopt_level = Property("formopt.level",
    formopt.level=3
 
    """,
-   str,
-   "2")
+    str,
+    "2",
+)
 
-regularisation_scheme = Property("regularisation_scheme",
-      """\
-         Sets the used regularisation scheme.
-         Possible values: dred (recommended), cdr
+regularisation_scheme = Property(
+    "regularisation_scheme",
+    """\
+         Sets the used regularisation scheme, dimensional reduction (DRED) 
+         or 't Hooft-Veltman (tHV).
+         Possible values: dred (recommended), thv
       """,
-      str,
-      "dred"
-   )
+    str,
+    "dred",
+    options=["dred", "thv"],
+)
 
-reduction_programs = Property("reduction_programs",
-      """\
-        Specifies the reduction libraries which should be supported.
+config_convert_to_thv = Property(
+    "convert_to_thv",
+    """\
+   Sets the name of the same variable in config.f90
 
-        Possible values: ninja, samurai, golem95, pjfry (experimental)
+   Activates or disables the conversion of the result into the 't Hooft-Veltman 
+   (tHV) regularisation scheme, when the calculation has been performed in DRED.
+
+   Does not have an effect when tHV is picked as regularisation scheme in
+   extensions or via property 'regularisation_scheme'.
+
+   """,
+    bool,
+    False,
+)
+
+reduction_programs = Property(
+    "reduction_programs",
+    """\
+        Specifies the reduction libraries which should be supported. To use golem95,
+        GoSam has to be compiled with support for golem95.
+
+        Possible values: ninja, golem95
+
+        Default: ninja,golem95
 
         See also reduction_interoperation, reduction_interoperation_rescue.
       """,
-      list,
-      "ninja,golem95",
-      options=["ninja","samurai","golem95","pjfry"]
-   )
+    list,
+    "ninja,golem95",
+    options=["ninja", "golem95"],
+)
 
-polvec_method = Property("polvec",
-      """\
+polvec_method = Property(
+    "polvec",
+    """\
           Evaluate the polarisation vector
           'numerical' or 'explicit'.
      """,
-     str,
-     "numerical",
-     options=["numerical","explicit"]
+    str,
+    "numerical",
+    options=["numerical", "explicit"],
 )
 
-DEFAULT_EXTENSIONS="".split(",")
+DEFAULT_EXTENSIONS = "".split(",")
 
-extensions = Property("extensions",
-   """\
+extensions = Property(
+    "extensions",
+    """\
    A list of extension names which should be activated for the
-   code generation.
+   code generation. Note that for some of those extensions 
+   dedicated keywords exist: reduction_programs, 
+   regularisation_scheme, polvec
 
-   Build system related extensions:
-
-   autotools    --- use autotools to generate Makefiles
-   shared       --- create shared libraries (=dynamically linkable code),
-                    enabled by default with autotools extension
-   f77          --- in combination with the BLHA interface it generates
-                    an olp_module.f90 linkable with Fortran77
-
-   Other extensions:
-   noformopt    --- disable diagram optimization using FORM
-   gaugecheck   --- modify gauge boson wave functions to allow for
-                    a limited gauge check (introduces gauge*z variables)
+   dred         --- Use DRED as IR regularisation scheme (default).
+   thv          --- Use tHV as IR regularisation scheme.
+   numpolvec    --- Evaluate polarisation vectors numerically (default).
+   quadruple    --- Activate the use of quadruple precision in the 
+                    rescue system (this works only with ninja).
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
-   quadruple    --- make a quadruple precision copy of the code (this
-                    works only with ninja).
+   gaugecheck   --- modify gauge boson wave functions to allow for
+                    a limited gauge check (introduces gauge*z variables)
+   generate-all-helicities --- Do not use symmetries to relate helicity
+                               configurations and produce separate code
+                               for each configuration instead.
 
-   """
-#   olp_badpts   --- (OLP interface only): allows to stear the numbering
-#                    of the files containing bad points from the MC
-#
-#   olp_daemon   --- (OLP interface only): generates a C-program providing
-#   samurai      --- enable Samurai for the reduction
-#   ninja        --- enable Ninja for the reduction
-#   golem95      --- enable Golem95 for the reduction
-#   pjfry        --- enable PJFry for the reduction (experimental)
-#   topolynomial --- (with FORM >= 4.0) use the ToPolynomial command,
-#                    not compatible with the formopt option.
-#   qshift       --- apply the shift of Q already at the FORM level
-#   numpolvec    --- evaluate polarisation vectors numerically
-#   One option which is affected by this is LDFLAGS. In the following
-#   example only ldflags.looptools is added to the LDFLAGS variable
-#   in the makefiles whereas the variable ldflags.qcdloop is ignored.
-#
-#   extensions=golem95,samurai
-#
-#   ldflags.qcdloops=-L/usr/local/lib -lqcdloop
-#   formopt      --- diagram optimization using FORM (works only with
-#                    abbrev.level=diagram and r2=implicit/explicit).
-#   tracify      --- transform loop momenta into traces before running
-#                    the numerics
+   OLP interface only:
 
-   ,
-   list,",".join(DEFAULT_EXTENSIONS),
-   options=["samurai", "golem95", "pjfry", "dred",
-      "autotools", "qshift", "topolynomial",
-      "qcdloop", "avh_olo", "looptools", "gaugecheck", "derive",
-      "generate-all-helicities", "olp_daemon","olp_badpts", "olp_blha1", "numpolvec",
-      "f77", "no-fr5","ninja","formopt","customspin2prop","shared","cdr","noderive",
-      "noformopt","tracify","better_num","quadruple"])
+   olp_daemon   --- Generates a C-program providing network access to
+                    the amplitude.
+   olp_badpts   --- Allows to stear the numbering of the files containing
+                    bad points from the MC.
+   olp_blha1    --- Use BLHA version 1 instead of version 2.
+   f77          --- In combination with the BLHA interface it generates
+                    an olp_module.f90 linkable with Fortran77
+   """,
+    list,
+    ",".join(DEFAULT_EXTENSIONS),
+    options=[
+        "dred",
+        "thv",
+        "numpolvec",
+        "quadruple",
+        "customspin2prop",
+        "gaugecheck",
+        "generate-all-helicities",
+        "olp_daemon",
+        "olp_badpts",
+        "olp_blha1",
+        "f77",
+    ],
+)
 
-select_lo_diagrams = Property("select.lo",
-   """\
+select_lo_diagrams = Property(
+    "select.lo",
+    """\
    A list of integer numbers, indicating leading order diagrams to be
    selected. If no list is given, all diagrams are selected.
    Otherwise, all diagrams not in the list are discarded.
@@ -627,10 +640,13 @@ select_lo_diagrams = Property("select.lo",
 
    See also: select.nlo, filter.lo, filter.nlo
    """,
-   list,sep=",")
+    list,
+    sep=",",
+)
 
-select_nlo_diagrams = Property("select.nlo",
-   """\
+select_nlo_diagrams = Property(
+    "select.nlo",
+    """\
    A list of integer numbers, indicating one-loop diagrams to be selected.
    If no list is given, all diagrams are selected.
    Otherwise, all diagrams   not in the list are discarded.
@@ -645,10 +661,34 @@ select_nlo_diagrams = Property("select.nlo",
 
    See also: select.lo, filter.lo, filter.nlo
    """,
-   list,sep=",")
+    list,
+    sep=",",
+)
 
-filter_lo_diagrams = Property("filter.lo",
-   """\
+select_ct_diagrams = Property(
+    "select.ct",
+    """\
+   A list of integer numbers, indicating EFT counterterm diagrams to be
+   selected. If no list is given, all diagrams are selected.
+   Otherwise, all diagrams not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.ct=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.ct=1,2,5,8,50,51,52,53
+
+   See also: select.nlo, filter.lo, filter.nlo
+   """,
+    list,
+    sep=",",
+)
+
+filter_lo_diagrams = Property(
+    "filter.lo",
+    """\
    A python function which provides a filter for tree diagrams.
 
    filter.lo=lambda d: d.iprop(Z) == 1 \\
@@ -673,25 +713,55 @@ filter_lo_diagrams = Property("filter.lo",
         - massive: select only propagators with/without a non-zero mass
         - color: one of the numbers 1, 3, -3 or 8, or a list of
                  these numbers
+   * d.legs(...) = number of legs
+      same as iprop, but for external legs
+   * d.iprop_momentum(field, momentum="...") = True when the diagram contains
+      a propagator of field with the specified momentum, False otherwise
    * d.chord(...) = number of loop propagators with the given properties;
        the arguments are the same as in iprop
    * d.bridge(...) = number of non-loop propagators with the given
        properties; the arguments are the same as in iprop
+   * d.order(order) = total power of diagrams with respect to specified
+      coupling order. Only works whit UFO models. The order must be defined
+      in the UFO model's coupling_orders.py and listed in the 'order_names'
+      property of the GoSam config/runcard.
+
+   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to
+         inconsistencies in the automatically generated crossings. This
+         can be circumvented by running GoSam with the option --no-crossings
+         or using the iprop_momentum function, which tracks invalid crossings.
 
    See also: filter.nlo, select.lo, select.nlo
    """,
-   str,"")
+    str,
+    "",
+)
 
-filter_nlo_diagrams = Property("filter.nlo",
-   """\
+filter_nlo_diagrams = Property(
+    "filter.nlo",
+    """\
    A python function which provides a filter for loop diagrams.
 
    See filter.lo for more explanation.
    """,
-   str,"")
+    str,
+    "",
+)
 
-filter_module = Property("filter.module",
-   """\
+filter_ct_diagrams = Property(
+    "filter.ct",
+    """\
+   A python function which provides a filter for eft counterterm diagrams.
+
+   See filter.lo for more explanation.
+   """,
+    str,
+    "",
+)
+
+filter_module = Property(
+    "filter.module",
+    """\
    A python file of predefined functions which should be available
    in filters.
 
@@ -722,18 +792,32 @@ filter_module = Property("filter.module",
 
    See filter.lo, filter.nlo
    """,
-   str,"")
+    str,
+    "",
+)
 
-debug_flags = Property("debug",
-   """\
-   A list of debug flags.
-   Currently, the words 'lo', 'nlo' and 'all' are supported.
+debug_flags = Property(
+    "debug",
+    """\
+   A list of debug flags. Currently, the words 'lo', 'nlo' and 'all' are 
+   supported. All debug output will be directed towards the unit specified 
+   by the compile time parameter 'logfile' defined in common/config.f90. 
+   The default is logfile=19. If no file is associated to the unit by means 
+   of the 'open' statement in the fortran code calling the process library 
+   the output is written to 'fort.<logfile>'. See the file 'test.f90' in 
+   the 'matrix' subdirectory for an example how to write the debug output 
+   into a file of your choice:
+
+   open(unit=logfile,status='unknown',action='write',file='debug.xml')
+   
    """,
-   list,
-   options=["nlo", "lo", "numpolvec", "all"])
+    list,
+    options=["nlo", "lo", "numpolvec", "all"],
+)
 
-reference_vectors = Property("reference-vectors",
-   """\
+reference_vectors = Property(
+    "reference-vectors",
+    """\
    A list of reference vectors for massive and higher spin particles.
    For vectors which are not assigned here, the program picks a
    reference vector automatically.
@@ -762,51 +846,51 @@ reference_vectors = Property("reference-vectors",
    out=g,g
    reference-vectors=1:2,2:3,3:4,4:1
    """,
-   list)
+    list,
+)
 
-abbrev_color = Property("abbrev.color",
-   """\
+abbrev_color = Property(
+    "abbrev.color",
+    """\
    The program in use for the generation of color related abbreviations.
    The value should be one of:
-      haggies        color algebra in form, optimization with haggies
       form           color algebra and optimization in form
       none           color algebra in form, no optimization
    """,
-   str, "form",
-   options=["haggies","form","none"], hidden=True)
+    str,
+    "form",
+    options=["form", "none"],
+    hidden=True,
+)
 
-abbrev_limit = Property("abbrev.limit",
-   """\
+abbrev_limit = Property(
+    "abbrev.limit",
+    """\
    Maximum number of instructions per subroutine when calculating
    abbreviations, if this number is positive.
    """,
-   str, "500")
+    str,
+    "500",
+)
 
-abbrev_level = Property("abbrev.level",
-   """\
-   The level at which abbreviations are generated. The value should be
-   one of (with the default formopt extension, only diagram is supported):
-      helicity       generates files helicity<X>/abbrevh<X>.f90
-      group          generates files helicity<X>/abbrevg<G>h<X>.f90
-      diagram        generates files helicity<X>/abbrevd<D>h<X>.f90
-   """,
-   str, "diagram",
-   options=["helicity", "group", "diagram"], hidden=True)
-
-r2 = Property("r2",
-   """\
+r2 = Property(
+    "r2",
+    """\
    The algorithm how to treat the R2 term:
 
    implicit    -- mu^2 terms are kept in the numerator and reduced
-                  at runtime
+                  at runtime (available only when regularisation
+                  scheme is DRED)
    explicit    -- mu^2 terms are reduced analytically
-   off         -- all mu^2 terms are set to zero
    """,
-   str, "explicit",
-   options=["implicit", "explicit", "off", "only"])
+    str,
+    "explicit",
+    options=["implicit", "explicit"],
+)
 
-crossings = Property("crossings",
-   """\
+crossings = Property(
+    "crossings",
+    """\
    A list of crossed processes derived from this process.
 
    For each process in the list a module similar to matrix.f90 is
@@ -820,10 +904,12 @@ crossings = Property("crossings",
 
    crossings=dxd_uux: -1 1 > 2 -2, ud_ud: 2 1 > 2 1
    """,
-   list)
+    list,
+)
 
-symmetries = Property("symmetries",
-   """\
+symmetries = Property(
+    "symmetries",
+    """\
    Specifies the symmetries of the amplitude.
 
    This information is used when the list of helicities is generated.
@@ -853,124 +939,197 @@ symmetries = Property("symmetries",
             %+<n> refers to +n only
             %-<n> refers to -n only
    """,
-   list)
+    list,
+)
 
-pyxodraw = Property("pyxodraw",
-   """\
+pyxodraw = Property(
+    "pyxodraw",
+    """\
    Specifies whether to draw any diagrams or not.
    """,
-   bool, True, hidden=True)
+    bool,
+    True,
+    hidden=True,
+)
 
-config_renorm_beta = Property("renorm_beta",
-   """\
+config_renorm_alphas = Property(
+    "renorm_alphas",
+    """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables beta function renormalisation
+   Activates or disables the one-loop QCD renormalisation 
+   of the strong coupling.
 
    QCD only
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_renorm_logs = Property("renorm_logs",
-   """\
+config_renorm_logs = Property(
+    "renorm_logs",
+    """\
    Sets the name of the same variable in config.f90
 
    Activates or disables the logarithmic finite terms
-   of all UV counterterms
+   of all one-loop QCD renormalisation counterterms.
 
    QCD only
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_renorm_mqse = Property("renorm_mqse",
-   """\
+config_renorm_qmass = Property(
+    "renorm_qmass",
+    """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the UV counterterm coming from the
-   massive quark propagators
+   Activates or disables the one-loop QCD renormalisation
+   of quark masses.
 
    QCD only
-   """,
-   bool, True)
 
-config_renorm_decoupling = Property("renorm_decoupling",
-   """\
+    See also: use_MQSE
+   """,
+    bool,
+    True,
+)
+
+config_renorm_gluonwf = Property(
+    "renorm_gluonwf",
+    """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables UV counterterms coming from
-   massive quark loops
+   Activates or disables one-loop QCD renormalisation
+   of the gluon wave function.
 
    QCD only
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_renorm_mqwf = Property("renorm_mqwf",
-   """\
+config_renorm_mqwf = Property(
+    "renorm_mqwf",
+    """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables UV countertems coming from
-   external massive quarks
+   Activates or disables one-loop QCD renormalisation
+   of massive quark wave functions.
 
    QCD only
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_renorm_gamma5 = Property("renorm_gamma5",
-   """\
+config_renorm_gamma5 = Property(
+    "renorm_gamma5",
+    """\
    Sets the same variable in config.f90
 
-   Activates finite renormalisation for axial couplings in the
-   't Hooft-Veltman scheme
+   Activates or disables finite one-loop QCD renormalisation 
+   for axial couplings in the 't Hooft-Veltman scheme.
 
    QCD only, works only with built-in model files.
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_renorm_yukawa = Property("renorm_yukawa",
-   """\
+config_renorm_yukawa = Property(
+    "renorm_yukawa",
+    """\
    Sets the same variable in config.f90
 
-   Enables renormalization of Yukawa coupling.
-   NOTE: Works only in case overall renormalization is possible
+   Activates or disables one-loop QCD renormalisation
+   of Yukawa couplings. Two schemes are available:
+   On-Shell and MSbar. (see 'MSbar_yukawa')
 
-   QCD only, works only with built-in model files.
+   QCD only
+
+   See also: MSbar_yukawa
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_reduction_interoperation = Property("reduction_interoperation",
-   """
+config_renorm_eftwilson = Property(
+    "renorm_eftwilson",
+    """\
+   Sets the same variable in config.f90
+
+   Activates or disables one-loop QCD renormalisation
+   of EFT Wilson coefficients. Works only with special 
+   New Physics UFO models, containing 'NP' as additional
+   coupling order. 'order_names' must be specified and 
+   explicitly contain 'NP'.
+
+   QCD only
+   """,
+    bool,
+    False,
+)
+
+config_renorm_ehc = Property(
+    "renorm_ehc",
+    """\
+   Sets the same variable in config.f90
+
+   Activates or disables one-loop QCD renormalisation of effective 
+   Higgs-gluon vertices. Implemented for models in the heavy-top 
+   limit like smehc. Should not be used when counterterms for Wilson
+   coefficients are supplyed by means of a UFO model 
+   (see 'renorm_eft_wilson').
+   CAUTION:
+   This will only work if the Higgs-gluon vertices factorize from the
+   amplitude, i.e. the number of Higgs-gluon couplings is the same for
+   all Born diagrams!
+
+   QCD only
+   """,
+    bool,
+    False,
+)
+
+config_reduction_interoperation = Property(
+    "reduction_interoperation",
+    """
    Default reduction library.
 
-   Possible values are: ninja, samurai, golem95, pjfry (experimental)
+   Possible values are: ninja, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam decide
    depending on reduction_libraries
 
    See common/config.f90 for details.
    """,
-   str, -1)
+    str,
+    -1,
+    options=["-1","ninja","golem95"],
+)
 
-config_reduction_interoperation_rescue = Property("reduction_interoperation_rescue",
-   """
+config_reduction_interoperation_rescue = Property(
+    "reduction_interoperation_rescue",
+    """
    Rescue reduction program.
+
+   Possible values are: ninja, golem95
 
    Sets the same variable in config.f90. A value of '-1' lets GoSam
    decide.
 
    See common/config.f90 for details.
    """,
-   str, -1)
+    str,
+    -1,
+    options=["-1","ninja","golem95","quadruple"],
+)
 
-config_samurai_scalar = Property("samurai_scalar",
-   """
-   Sets the same variable in config.f90.
-
-   See common/config.f90 for details.
-   """,
-   int, 2)
-
-config_nlo_prefactors = Property("nlo_prefactors",
-   """
+config_nlo_prefactors = Property(
+    "nlo_prefactors",
+    """
    Sets the same variable in config.f90. The values have the
    following meaning:
 
@@ -985,20 +1144,25 @@ config_nlo_prefactors = Property("nlo_prefactors",
    for better testing. In OLP interface mode (BLHA/BLHA2), the default is
    nlo_prefactors=2.
    """,
-   int, 0, options=["0","1","2"])
+    int,
+    0,
+    options=["0", "1", "2"],
+)
 
-config_PSP_check = Property("PSP_check",
-   """\
+config_PSP_check = Property(
+    "PSP_check",
+    """\
    Sets the same variable in config.f90
 
    Activates Phase-Space Point test for the full amplitude.
-
-   !!Works only for QCD and with built-in model files!!
    """,
-   bool, True)
+    bool,
+    True,
+)
 
-config_PSP_rescue = Property("PSP_rescue",
-   """\
+config_PSP_rescue = Property(
+    "PSP_rescue",
+    """\
    Sets the same variable in config.f90
 
    Activates Phase-Space Point rescue based on the estimated
@@ -1006,138 +1170,283 @@ config_PSP_rescue = Property("PSP_rescue",
    The accuracy is estimated using information on the single
    pole accuracy and on the stability of the finite part
    under rotation of the phase space point.
-
-   !!Works only for QCD and with built-in model files!!
    """,
-   bool, False)
+    bool,
+    False,
+)
 
-config_PSP_verbosity = Property("PSP_verbosity",
-   """\
+config_PSP_verbosity = Property(
+    "PSP_verbosity",
+    """\
    Sets the same variable in config.f90
 
    Sets the verbosity of the PSP_check.
    verbosity = False: no output
    verbosity = True : bad point are written into gs_badpts.log
-   !!Works only for QCD and with built-in model files!!
    """,
-   bool, False)
+    bool,
+    False,
+)
 
-config_PSP_chk_th1 = Property("PSP_chk_th1",
-   """\
+config_PSP_chk_th1 = Property(
+    "PSP_chk_th1",
+    """\
    Sets the same variable in config.f90
 
-   Threshold to activate accept the point without further
-   treatments. The number has to be an integer indicating the
-   wished minimum number of digits accuracy on the pole. For poles
-   more precise than this threshold the finite part is not checked.
-   !!Works only for QCD and with built-in model files!!
-   """,
-   int, 8)
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the single pole. The number has to be 
+   an integer indicating the desired minimum number of digits 
+   accuracy on the single pole. For poles more precise than this 
+   threshold the finite part is not checked.
 
-config_PSP_chk_th2 = Property("PSP_chk_th2",
-   """\
-   Sets the same variable in config.f90
-
-   Threshold to declare a PSP as bad point, based of the precision
-   of the pole.  Points with precision less than this threshold are
-   directly reprocessed with the rescue system (if available), or
-   declared as unstable. According to the verbosity level set, such
-   points are written to a file and not used when the code is
-   interfaced to an external Monte Carlo using the new BLHA
-   standards.
-   !!Works only for QCD and with built-in model files!!
-   """,
-   int, 3)
-
-config_PSP_chk_th3 = Property("PSP_chk_th3",
-   """\
-   Sets the same variable in config.f90
-
-   Threshold to declare a PSP as bad point, based on the precision
-   of the finite part estimated with a rotation. According to the
-   verbosity level set, such points are written to a file and not
-   used when the code is interfaced to an external Monte Carlo
-   using the new BLHA standards.
-   !!Works only for QCD and with built-in model files!!
-   """,
-   int, 5)
-
-
-config_PSP_chk_li1 = Property("PSP_chk_li1",
-   """\
-   Sets the same variable in config.f90. For loop-induced
-   processes, it is used instead of PSP_chk_th1.
-
-   It is precision of the pole part (which should be zero) in
-   comparison to the finite part. If the pole part is at least
-   PSP_chk_li1 orders smaller than the finite part, the point is
-   accepted without any other check.
-
-   If Samurai is used as default reduction program, this needs to
-   be reduced to 8.
+   !!Works only with models for which ir_subtraction returns
+   the expected single pole!!
 
    The number has to be an integer.
    """,
-   int, 16)
+    int,
+    8,
+)
 
-config_PSP_chk_li2 = Property("PSP_chk_li2",
-   """\
+config_PSP_chk_th2 = Property(
+    "PSP_chk_th2",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a PSP as a bad point, based of the precision
+   of the single pole. Points with precision less than this 
+   threshold are directly reprocessed with the rescue system (if 
+   available), or declared as unstable. According to the verbosity 
+   level set, such points are written to a file and not used when 
+   the code is interfaced to an external Monte Carlo using the new 
+   BLHA standards.
+
+   !!Works only with models for which ir_subtraction returns
+   the expected single pole!!
+
+   The number has to be an integer.
+   """,
+    int,
+    3,
+)
+
+config_PSP_chk_th3 = Property(
+    "PSP_chk_th3",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a PSP as a bad point, based on the precision
+   of the finite part estimated with a rotation. Points with 
+   precision less than this threshold are directly reprocessed 
+   with the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written 
+   to a file and not used when the code is interfaced to an 
+   external Monte Carlo using the new BLHA standards.
+
+   The number has to be an integer.
+   """,
+    int,
+    5,
+)
+
+config_PSP_chk_th4 = Property(
+    "PSP_chk_th4",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the finite part estimated by 
+   comparing the normal and rotated double precision 
+   evaluations against a quadruple precision evaluation.
+
+   !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
+   """,
+    int,
+    10,
+)
+
+config_PSP_chk_th5 = Property(
+    "PSP_chk_th5",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold to declare a quadruple precision PSP as a bad point,
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated quadruple precision 
+   evaluations. According to the verbosity level set, such points
+   are written to a file and not used when the code is interfaced
+   to an external Monte Carlo using the new BLHA standards.
+
+   !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
+   """,
+    int,
+    7,
+)
+
+config_PSP_chk_kfactor = Property(
+    "PSP_chk_kfactor",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on the k-factor to perform a rotation check on the PSP.
+   """,
+    str,
+    1000,
+)
+
+config_PSP_chk_rotdiff = Property(
+    "PSP_chk_rotdiff",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on size of difference between rotated
+   dimensionless amplitudes
+     |diff * maxscale2**(nlegs-4)|
+   beyond the PSP is rescued.
+   """,
+    str,
+    1000000,
+)
+
+config_PSP_chk_li1 = Property(
+    "PSP_chk_li1",
+    """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th1.
+
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the single pole (which should be 
+   zero). The number has to be an integer indicating the desired 
+   minimum number of digits  accuracy on the single pole. For 
+   poles more precise than this  threshold the finite part is 
+   not checked.
+
+   !!Works only with models for which the single pole vanishes
+   at Born level!!
+
+   The number has to be an integer.
+   """,
+    int,
+    8,
+)
+
+config_PSP_chk_li2 = Property(
+    "PSP_chk_li2",
+    """\
    Sets the same variable in config.f90. For loop-induced
    processes, it is used instead of PSP_chk_th2.
 
-   Threshold to declare a PSP as bad point, based of the precision
-   of the pole in comparison to the finite part. Points with
-   precision less than this threshold are directly reprocessed with
-   the rescue system (if available), or declared as unstable.
-   According to the verbosity level set, such points are written to
-   a file and not used when the code is interfaced to an external
-   Monte Carlo using the new BLHA standards.
+   Threshold to declare a PSP as a bad point, based of the precision
+   of the single pole. Points with precision less than this 
+   threshold are directly reprocessed with the rescue system (if 
+   available), or declared as unstable. According to the verbosity 
+   level set, such points are written to a file and not used when 
+   the code is interfaced to an external Monte Carlo using the new 
+   BLHA standards.
 
-   If Samurai is used as default reduction program, this needs to
-   be reduced to 6.
+   !!Works only with models for which the single pole vanishes
+   at Born level!!
+
+   The number has to be an integer.
    """,
-   int, 7)
+    int,
+    3,
+)
 
-config_PSP_chk_li3 = Property("PSP_chk_li3",
-   """\
+config_PSP_chk_li3 = Property(
+    "PSP_chk_li3",
+    """\
    Sets the same variable in config.f90. For loop-induced
    processes, it is used instead of PSP_chk_th3.
 
-   Threshold to declare a PSP as bad point, based on the precision
-   of the finite part estimated with a rotation. Points with
-   precision less than this threshold are reprocessed with the
-   rescue system (if available) or declared as unstable.  According
-   to the verbosity level set, such points are written to a file
-   and not used when the code is interfaced to an external Monte
-   Carlo using the new BLHA standards.
+   Threshold to declare a PSP as a bad point, based on the precision
+   of the finite part estimated with a rotation. Points with 
+   precision less than this threshold are directly reprocessed 
+   with the rescue system (if available), or declared as unstable.
+   According to the verbosity level set, such points are written 
+   to a file and not used when the code is interfaced to an 
+   external Monte Carlo using the new BLHA standards.
+
+   The number has to be an integer.
    """,
-   int, 6)
+    int,
+    5,
+)
 
-config_PSP_chk_li4 = Property("PSP_chk_li4",
-   """\
-   Sets the same variable in config.f90. Similar to PSP_chk_li2,
-   but for the rescue system (by default Golem95).
+config_PSP_chk_li4 = Property(
+    "PSP_chk_li4",
+    """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th4.
 
-   Threshold to declare a PSP as bad point in the rescue system,
-   based on the precision of the pole part in comparison to the
-   finite part. According to the verbosity level set, such points
+   Threshold to accept a PSP point without further treatment,
+   based on the precision of the finite part estimated by 
+   comparing the normal and rotated double precision 
+   evaluations against a quadruple precision evaluation.
+
+   !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
+   """,
+    int,
+    10,
+)
+
+config_PSP_chk_li5 = Property(
+    "PSP_chk_li5",
+    """\
+   Sets the same variable in config.f90. For loop-induced
+   processes, it is used instead of PSP_chk_th5.
+
+   Threshold to declare a quadruple precision PSP as a bad point,
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated quadruple precision 
+   evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
+
+   !!Used only for: extensions=quadruple!!
+
+   The number has to be an integer.
    """,
-   int, 19)
+    int,
+    7,
+)
 
-
-config_PSP_chk_kfactor = Property("PSP_chk_kfactor",
-   """\
+config_PSP_chk_kfactor_li = Property(
+    "PSP_chk_kfactor_li",
+    """\
    Sets the same variable in config.f90
 
-   Threshold on the k-factor to perform a rotation check on the PSP. 
-   !!Works only for QCD and with built-in model files!!
+   Threshold on size of dimensionless amplitude:
+     |amp2 * maxscale2**(nlegs-4)|
+   beyond which a rotation check on the PSP is performed.
    """,
-   str, 1000)
+    str,
+    1000000,
+)
 
-config_PSP_chk_method = Property("PSP_chk_method",
-   """\
+config_PSP_chk_rotdiff_li = Property(
+    "PSP_chk_rotdiff_li",
+    """\
+   Sets the same variable in config.f90
+
+   Threshold on size of difference between rotated
+   dimensionless amplitudes
+     |diff * maxscale2**(nlegs-4)|
+   beyond the PSP is rescued.
+   """,
+    str,
+    1000000,
+)
+
+config_PSP_chk_method = Property(
+    "PSP_chk_method",
+    """\
    This option can be used to overwrite the automatic phase-space point
    test method enabled with PSP_check=True.
    Except in some BSM scenarios, the user does not need to change this.
@@ -1151,196 +1460,406 @@ config_PSP_chk_method = Property("PSP_chk_method",
                   Needed e.g. for interferience between BSM Born and
                   SM loop-induced virtual.
    """,
-   str, "Automatic",options=["automatic","polerotation","rotation","loopinduced"])
+    str,
+    "Automatic",
+    options=["automatic", "polerotation", "rotation", "loopinduced"],
+)
 
 
-form_factor_lo=Property("form_factor_lo",
-   """\
-   This option allows to define a form factor which LO results are multiplied with.
-   Example: form_factor_lo="(1000._ki**2/(1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:))))"
+form_factor_lo = Property(
+    "form_factor_lo",
+    """\
+   This option allows to define a form factor which LO results are
+   multiplied with.
+   Example:
+   form_factor_lo="(1000._ki**2/
+        (1000._ki**2+dotproduct(vecs(2,:)+vecs(3,:),vecs(2,:)+vecs(3,:)))
+   )"
    """,
-   str, "", experimental=True)
+    str,
+    "",
+    experimental=True,
+)
 
-form_factor_nlo=Property("form_factor_nlo",
-   """\
-   This option allows to define a form factor which NLO/loop-induced results are multiplied with.
+form_factor_nlo = Property(
+    "form_factor_nlo",
+    """\
+   This option allows to define a form factor which NLO/loop-induced results
+   are multiplied with.
    """,
-   str, "", experimental=True)
+    str,
+    "",
+    experimental=True,
+)
 
 
+order_names = Property(
+    "order_names",
+    """\
+   Only works in combination with UFO models.
+   A list of additional coupling orders as defined in the model's
+   coupling_orders.py file that should be tracked throughout the 
+   amplitude generation. Relevant for correct EFT treatment.
+
+   Example:
+   order_names=QCD,NP,QL
+   """,
+    list,
+)
+
+enable_truncation_orders = Property(
+    "enable_truncation_orders",
+    """\
+   Whether or not to generate extra code for different truncation 
+   options in EFT calculations. Only works with a New Physics UFO
+   model containing 'NP' as additional coupling order. 
+   'order_names' must be specified and explicitly contain 'NP'. 
+   When set to False (default) no truncation is performed, i.e. 
+   the amplitude is squared in the naive way.
+   """,
+    bool,
+    False,
+)
+
+use_vertex_labels = Property(
+    "use_vertex_labels",
+    """\
+   Whether or not to print the vertex label in the process.pdf. Can only
+   be activated when using a UFO model file.
+   """,
+    bool,
+    False,
+)
+
+all_mandelstam = Property(
+    "all_mandelstam",
+    """\
+   If 'false' momentum conservation is used to reduce the set of independent
+   Mandelstam invariants in the construction of the amplitude. This option
+   can cause problems with numeric stability of the real radiation ampli-
+   tudes when the accuracy of the phase space point is bad, i.e. momentum
+   conservation is fulfilled to significantly less than double precision.
+   In that case it is better to use the full set of Mandelstam invariants,
+   without using momentum conservation relations.
+   """,
+    bool,
+    False,
+)
+
+flavour_groups = Property(
+    "flavour_groups",
+    """\
+   Defines which flavours should be considered equivalent, i.e. grouped
+   together during channel generation in olp mode. Only relevant if crossings
+   are generated. Uses pdg codes.
+
+   Examples:
+
+   flavour_groups=1:2:3:4:5
+   -> completely flavour blind process with five light quark-flavours
+
+   flavour_groups=1:3:5,2:4
+   -> distinguish up- and down-type quark-flavours
+
+   flavour_groups=
+   -> each flavour treated separately (default)
+   """,
+    list,
+)
+
+respect_generations = Property(
+    "respect_generations",
+    """\
+   Boolean determining whether or not the quark generation should be taken
+   into account when the flavour_groups feature is used to find crossing
+   relations among olp channels. Is relevant if flavour changing vertices
+   appear (Assuming diagonal CKM!).
+
+   Examples:
+
+   respect_generations=False and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) and (u ub to s sb) are crossings of (u ub to d db)
+
+   respect_generations=True and flavour_groups=1:3:5,2:4
+   -> (c cb to d db) is a crossing of (u ub to s sb) but not of (u ub to d db)
+
+   Default is respect_generations=False.
+   """,
+    bool,
+    False,
+)
+
+MSbar_yukawa = Property(
+    "MSbar_yukawa",
+    """\
+    List of quarks with Yukawa couplings which shall be renormalised in
+    the MSbar scheme instead of the default OS scheme. Can also be used
+    to renormalise Yukawa couplings of particles with mass set to zero
+    while still keeping their coupling to the Higgs.
+
+    Examples:
+    MSbar_yukawa=B
+    -> Yukawa coupling of bottom to Higgs will be renormalised in the
+       MSbar scheme, even if mB=0 (as long as Hbb coupling still exist)
+
+    See also: renorm_yukawa
+    """,
+    list,
+)
+
+use_MQSE = Property(
+    "use_MQSE",
+    """\
+    Whether or not to scan 1-loop amplitudes for massive quark self
+    energies and insert the appropriate mass counterterm during the
+    form step. Used mainly for debugging purposes.
+
+    See also: renorm_qmass
+    """,
+    bool,
+    False,
+    experimental=True,
+)
+
+meson_buildtype = Property(
+    "meson.buildtype",
+    """\
+   Build-type passed to meson as the '-Dbuildtype=<buildtype>' option.
+   The respective buildtypes represent:
+                           Debug Symbols        Optimization level
+      plain                false                plain
+      debug                true                 0
+      debugoptimized       true                 2
+      release              false                3
+      minsize              true                 s
+   """,
+    str,
+    default="release",
+    options=["plain", "debug", "debugoptimized", "release", "minsize"],
+)
+
+meson_arch = Property(
+    "meson.arch",
+    """\
+   CPU architecture passed to the compiler as the '-march=<arch>' option.
+   By default, GCC generates code for a generic x86-64 CPU. When using the
+   'native' option, GCC uses all possible instructions available on the
+   currenly used CPU. This can result in faster executing code, but may make
+   the libraries / executables unusable on other CPUs. For all possible
+   options, see the GCC documentation.
+   """,
+    str,
+    default="x86-64",
+)
+
+unitary_gauge = Property(
+    "unitary_gauge",
+    """\
+   Use unitary gauge propagators for the massive vector bosons instead of
+   Feynman gauge propagators.
+    """,
+    bool,
+    default=False,
+)
+
+massive_light_fermions = Property(
+    "massive_light_fermions",
+    """\
+    Some models define mass parameters for light fermions, but initialise 
+    them to zero. This is for example the case for the up- and down-quark,
+    and the leptons in the built-in model files. Per default GoSam will 
+    treat those fermions as masseless during the code generation. The 
+    corresponding mass parameter in config.f90 is then fixed to zero and 
+    connot be changed. Setting 
+
+    massive_light_fermions=true
+
+    deactivates this behaviour. Note that in this case the user can still
+    add fermion mass parameters to the 'zero' property manually. For all
+    other fermions a non-zero mass MUST be set when calling the process 
+    libraries.
+    """,
+    bool,
+    default=False,
+)
+
+# Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
-   process_name,
-   process_path,
-   qgraf_in,
-   qgraf_out,
-   model,
-   model_options,
-   qgraf_power,
-   zero,
-   one,
-   renorm,
-   sum_helicities,
-   regularisation_scheme,
-   genUV,
-   helicities,
-   qgraf_options,
-   qgraf_verbatim,
-   qgraf_verbatim_lo,
-   qgraf_verbatim_nlo,
-   group_diagrams,
-   sum_diagrams,
-   reduction_programs,
-   polvec_method,
-   extensions,
-   debug_flags,
-
-   select_lo_diagrams,
-   select_nlo_diagrams,
-   filter_lo_diagrams,
-   filter_nlo_diagrams,
-   filter_module,
-
-   config_renorm_beta,
-   config_renorm_mqwf,
-   config_renorm_decoupling,
-   config_renorm_mqse,
-   config_renorm_logs,
-   config_renorm_gamma5,
-   config_renorm_yukawa,
-   config_reduction_interoperation,
-   config_reduction_interoperation_rescue,
-   config_samurai_scalar,
-   config_nlo_prefactors,
-   config_PSP_check,
-   config_PSP_rescue,
-   config_PSP_verbosity,
-   config_PSP_chk_th1,
-   config_PSP_chk_th2,
-   config_PSP_chk_th3,
-   config_PSP_chk_kfactor,
-   config_PSP_chk_li1,
-   config_PSP_chk_li2,
-   config_PSP_chk_li3,
-   config_PSP_chk_li4,
-   config_PSP_chk_method,
-
-   reference_vectors,
-   abbrev_color,
-   abbrev_limit,
-   abbrev_level,
-
-   template_path,
-
-   qgraf_bin,
-   form_bin,
-   form_threads,
-   form_tmp,
-   form_workspace,
-   haggies_bin,
-   fc_bin,
-   python_bin,
-
-   fcflags_ninja,
-   ldflags_ninja,
-   fcflags_samurai,
-   ldflags_samurai,
-   version_samurai,
-   fcflags_golem95,
-   ldflags_golem95,
-
-   r2,
-   symmetries,
-   crossings,
-   formopt_level,
-   pyxodraw,
-
-   form_factor_lo,
-   form_factor_nlo
+#   main process definition
+    process_name,
+    process_path,
+    qgraf_in,
+    qgraf_out,
+    model,
+    model_options,
+    qgraf_power,
+    loop_suppressed_Born,
+    zero,
+    one,
+    massive_light_fermions,
+    config_nlo_prefactors,
+    form_factor_lo,
+    form_factor_nlo,
+    crossings,
+#   filters and selectors
+    helicities,
+    filter_particles,
+    filter_lo_particles,
+    filter_nlo_particles,
+    filter_ct_particles,
+    qgraf_options,
+    qgraf_verbatim,
+    qgraf_verbatim_lo,
+    qgraf_verbatim_nlo,
+    select_lo_diagrams,
+    select_nlo_diagrams,
+    select_ct_diagrams,
+    filter_lo_diagrams,
+    filter_nlo_diagrams,
+    filter_ct_diagrams,
+    filter_module,
+#   schemes and program settings 
+    regularisation_scheme,
+    config_convert_to_thv,
+    sum_diagrams,
+    sum_helicities,
+    all_mandelstam,
+    polvec_method,
+    reference_vectors,
+    symmetries,
+    flavour_groups,
+    respect_generations,
+    r2,
+    unitary_gauge,
+    order_names,
+    enable_truncation_orders,
+#   renormalisation
+    renorm,
+    config_renorm_alphas,
+    config_renorm_gluonwf,
+    config_renorm_mqwf,
+    config_renorm_qmass,
+    use_MQSE,
+    config_renorm_yukawa,
+    MSbar_yukawa,    
+    config_renorm_logs,
+    config_renorm_gamma5,
+    config_renorm_eftwilson,
+    config_renorm_ehc,
+#   reduction and rescue
+    reduction_programs,
+    config_reduction_interoperation,
+    config_reduction_interoperation_rescue,
+    config_PSP_check,
+    config_PSP_chk_method,
+    config_PSP_rescue,
+    config_PSP_verbosity,
+    config_PSP_chk_th1,
+    config_PSP_chk_th2,
+    config_PSP_chk_th3,
+    config_PSP_chk_th4,
+    config_PSP_chk_th5,
+    config_PSP_chk_kfactor,
+    config_PSP_chk_rotdiff,
+    config_PSP_chk_li1,
+    config_PSP_chk_li2,
+    config_PSP_chk_li3,
+    config_PSP_chk_li4,
+    config_PSP_chk_li5,
+    config_PSP_chk_kfactor_li,
+    config_PSP_chk_rotdiff_li,
+#   misc
+    extensions,
+#   diagram drawing
+    pyxodraw,
+    use_vertex_labels,
+#   technical settings
+    debug_flags,
+    abbrev_color,
+    abbrev_limit,
+    template_path,
+    qgraf_bin,
+    form_bin,
+    form_threads,
+    form_tmp,
+    form_workspace,
+    formopt_level,
+    meson_buildtype,
+    meson_arch
 ]
 
-REDUCTION_EXTENSIONS = ["samurai", "golem95", "ninja", "pjfry"]
+REDUCTION_EXTENSIONS = ["golem95", "ninja"]
+
 
 def getExtensions(conf):
-   ext_name = str(extensions)
-   ext_set = []
+    ext_name = str(extensions)
+    ext_set = []
 
-   ext_sets = {}
+    ext_sets = {}
 
-   for key in conf:
-      parts = key.split(".")
-      if parts[-1].lower().strip() == ext_name:
-         if len(parts)>=2 and "installed" in parts[0].lower():
-            continue
-         prefix = ".".join(parts[:-1])
-         lst = []
-         ext_sets[prefix] = lst
-         for s in conf.getListProperty(key, delimiter=","):
-            lst.append(s.lower())
-         lst.sort()
-   keys = sorted(ext_sets.keys())
-   for key in keys:
-      lst = ext_sets[key]
-      for ext in lst:
-         if ext not in ext_set:
-            ext_set.append(ext)
-
-   return list(ext_set)
+    for key in conf:
+        parts = key.split(".")
+        if parts[-1].lower().strip() == ext_name:
+            if len(parts) >= 2 and "installed" in parts[0].lower():
+                continue
+            if len(parts) >= 2 and "olp" in parts[0].lower():
+                continue
+            prefix = ".".join(parts[:-1])
+            lst = []
+            ext_sets[prefix] = lst
+            for s in conf.getListProperty(key, delimiter=","):
+                lst.append(s.lower())
+            lst.sort()
+    keys = sorted(ext_sets.keys())
+    for key in keys:
+        lst = ext_sets[key]
+        for ext in lst:
+            if ext not in ext_set:
+                ext_set.append(ext)
+    return list(ext_set)
 
 
 def setInternals(conf):
-   extensions = getExtensions(conf)
-   conf["__INTERNALS__"] = [
-         "__GENERATE_DERIVATIVES__",
-         "__DERIVATIVES_AT_ZERO__",
-         "__REGULARIZATION_DRED__",
-         "__REGULARIZATION_HV__",
-         "__REQUIRE_FR5__",
-         "__GAUGE_CHECK__",
-         "__HAGGIES__",
-         "__NUMPOLVEC__",
-         "__REDUCE_HELICITIES__",
-         "__OLP_DAEMON__",
-         "__OLP_TRAILING_UNDERSCORE__",
-         "__OLP_CALL_BY_VALUE__",
-         "__OLP_TO_LOWER__",
-         "__OLP_BADPTSFILE_NUMBERING__",
-         "__OLP_MODE__",
-         "__OLP_BLHA1__",
-         "__OLP_BLHA2__",
-         "__FORMOPT__",
-         "__GENERATE_NINJA_TRIPLE__",
-         "__GENERATE_NINJA_DOUBLE__",
-         "__CUSTOM_SPIN2_PROP__",
-         "__EWCHOOSE__"]
+    extensions = getExtensions(conf)
+    conf["__INTERNALS__"] = [
+        "__REGULARIZATION_DRED__",
+        "__REGULARIZATION_HV__",
+        "__REQUIRE_FR5__",
+        "__GAUGE_CHECK__",
+        "__NUMPOLVEC__",
+        "__REDUCE_HELICITIES__",
+        "__OLP_DAEMON__",
+        "__OLP_TRAILING_UNDERSCORE__",
+        "__OLP_CALL_BY_VALUE__",
+        "__OLP_TO_LOWER__",
+        "__OLP_BADPTSFILE_NUMBERING__",
+        "__OLP_MODE__",
+        "__OLP_BLHA1__",
+        "__OLP_BLHA2__",
+        "__GENERATE_NINJA_TRIPLE__",
+        "__GENERATE_NINJA_DOUBLE__",
+        "__CUSTOM_SPIN2_PROP__",
+        "__EWCHOOSE__",
+    ]
 
-   conf["__GENERATE_DERIVATIVES__"] = "derive" in extensions
-   conf["__DERIVATIVES_AT_ZERO__"] = "derive" in extensions
+    conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
+    conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
 
-   conf["__FORMOPT__"] = "formopt" in extensions
+    conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
 
-   conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
-   conf["__GENERATE_NINJA_DOUBLE__"] = "ninja" in extensions
+    conf["__REGULARIZATION_DRED__"] = "dred" in extensions
+    conf["__REGULARIZATION_HV__"] = "thv" in extensions
 
-   conf["__CUSTOM_SPIN2_PROP__"] = "customspin2prop" in extensions
-
-   conf["__REGULARIZATION_DRED__"] = "dred" in extensions
-   conf["__REGULARIZATION_HV__"] = not "dred" in extensions
-
-   conf["__HAGGIES__"] = "noformopt" in extensions or "haggies" in conf["abbrev.color"].lower()
-
-   conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
-   conf["__NUMPOLVEC__"] = "numpolvec" in extensions
-   conf["__REDUCE_HELICITIES__"] = "generate-all-helicities" not in extensions
-   conf["__OLP_DAEMON__"] = "olp_daemon" in extensions
-   conf["__OLP_TRAILING_UNDERSCORE__"] = "f77" in extensions
-   conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
-   conf["__OLP_TO_LOWER__"] = "f77" in extensions
-   conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
-   conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
-   conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
-   if not "__OLP_MODE__" in conf:
-      conf["__OLP_MODE__"] =  False
-
-   #conf["__REQUIRE_FR5__"] = "dred" not in extensions \
-   #    and "no-fr5" not in extensions
-   conf["__REQUIRE_FR5__"]  = False
+    conf["__GAUGE_CHECK__"] = "gaugecheck" in extensions
+    conf["__NUMPOLVEC__"] = "numpolvec" in extensions
+    conf["__REDUCE_HELICITIES__"] = "generate-all-helicities" not in extensions
+    conf["__OLP_DAEMON__"] = "olp_daemon" in extensions
+    conf["__OLP_TRAILING_UNDERSCORE__"] = "f77" in extensions
+    conf["__OLP_CALL_BY_VALUE__"] = "f77" not in extensions
+    conf["__OLP_TO_LOWER__"] = "f77" in extensions
+    conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
+    conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
+    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
+    if not "__OLP_MODE__" in conf:
+        conf["__OLP_MODE__"] = False
+    conf["__REQUIRE_FR5__"] = "thv" in extensions

@@ -1,0 +1,24 @@
+process_name=dd_ttH
+process_path=virtual
+
+model=FeynRules, ../model/SMEFT_UFO_Otphi_OphiG
+zero=mdlMQB,mdlWQT,mdlGAMH
+
+in=1,-1
+out=6,-6,25
+
+order=QCD, 2, 4
+
+order_names=QCD,NP
+
+all_mandelstam=True
+enable_truncation_orders=True
+renorm_eftwilson=True
+
+filter.lo=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
+filter.nlo=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
+filter.ct=lambda d: d.vertices(part25,part5,anti5)==0 and d.order('NP')<=1
+
+reduction_programs=ninja
+
+symmetries=parity

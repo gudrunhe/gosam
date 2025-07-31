@@ -2,8 +2,7 @@
 %]#procedure spva
 * vim[% ' %]: syntax=form
 
-[% @if extension formopt %][%
-@for pairs distinct %]
+[% @for pairs distinct %]
    Id Spab3([%
             @if is_lightlike1%]k[%index1%][% @else %]l[%index1%][%
             @end @if %], Q, [%
@@ -33,7 +32,6 @@
    Id Spab3(e[%index2%], Q, e[%index1%]) = Qspvae[%index2%]e[%index1%];[%
       @end @if %][%
    @end @for %][%
-@end @if %][%
 @end @if %]
 
 

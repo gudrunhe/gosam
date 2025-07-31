@@ -1,0 +1,26 @@
+
+Process e+(k1) + e-(k2) > t(k3) + t~(k4)
+
+LO: O(alpha^2 * alpha_s^0)
+NLO: O(alpha^2 * alpha_s^2)
+
+Z and photon exchange in the s-channel
+
+The result is compared to an analytic calculation with Form,
+which can be found in the directory form/.
+
+References
+----------
+
+[1] J. Jersak, E. Laermann, P. M. Zerwas,
+    ``Electroweak Production of Heavy Quarks in e+ e- Annihilation,''
+    Phys. Rev. D25 (1982) 1218.
+
+[2] S. Catani, S. Dittmaier, M. H. Seymour, Z. Trocsanyi,
+    ``The Dipole formalism for next-to-leading order QCD calculations
+      with massive partons,''
+    Nucl. Phys. B627 (2002) 189-265.
+    [hep-ph/0201036].
+
+  
+ 

@@ -111,7 +111,6 @@ void [% olp.process_name asprefix=\_ %]OLP_Finalize();
  *  the following would, for example, be valid calls:
  *
  * <pre>
- *  OLP_Option("samurai_scalar=2", &ierr); // use the avh_olo library
  *  OLP_Option("wW=1.2", &ierr); // sets the width of the W-boson
  * </pre>
  */

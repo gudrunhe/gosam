@@ -8,7 +8,6 @@ CFunction vertex;
 CFunction abbr;
 CTensor SplitLorentzIndex;
 CFunction SCREEN;
-Function NCSIGN(antisymmetric);
 CFunction csqrt;
 
 * Used in the output to keep eps and form factors together
@@ -22,11 +21,7 @@ CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
 CFunction customSpin2Prop;
 CFunction QGRAFSIGN;
 CTensor SUBSCRIPT;
-NFunction NCOrder;[%
-@if extension tracify %]
-CFunction antisymm, Qeps;
-AutoDeclare S Qeps;[%
-@end @if %]
+NFunction NCOrder;
 * formfactor(A, B) = A + B/eps
 CFunction formfactor, log;
 
@@ -34,6 +29,9 @@ Symbols field1, ..., field5;
 Symbols m, TR, NC, NA, eps(-2:2), sign1, ..., sign4;
 Symbol sqrt2, Sqrt2, sqrt3, Sqrt3, scale2;
 Symbol deltaaxial, deltaOS, deltaHV;
+
+Symbol XCT, XCT2, CYUKAWA, CMASS, CFR5;
+AutoDeclare Symbol DELTAYUK, DELTAMASS;
 
 Vector ZERO, vDUMMYA;
 
@@ -44,18 +42,7 @@ Vector ZERO, vDUMMYA;
    Vector qshift;
    CFunction fshift;
 #EndIf
-[%
-@if extension formopt %]
 CF dotproduct;
-[% @end @if %]
-[%
-@if genUV %]
-#If `LOOPS' == ct
-   Vector  p1;
-   CFunction deltaM, deltaZ;
-   Symbols epspole1, epsfin;
-#EndIf[%
-@end @if %]
 
 *---#[ Process dependent symbol definitions:
 #Define LEGS "[% num_legs %]"

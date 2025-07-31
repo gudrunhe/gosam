@@ -110,32 +110,24 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use ddtt_config, only: renormalisation, convert_to_cdr !, &
-        !     & samurai_test, samurai_verbosity, samurai_scalar
-   use ddtt_model, only: Nf, Nfgen, mT
+   use ddtt_config, only: renormalisation, convert_to_thv !, &
+   use ddtt_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
+   convert_to_thv = .false.
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
+   call set_parameter("mT", 172.5_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
-   mT = 172.5_ki
-
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
-
-   convert_to_cdr = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
    use ddtt_matrix, only: samplitude
    use ddtt_model, only: mT
+   use ddtt_model_qp, only: mT_qp => mT
    implicit none
    ! The amplitude should be a homogeneous function
    ! in the energy dimension and scale like
@@ -155,13 +147,17 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    integer :: prec
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: it's not safe to use 'set_parameter' for this, because then
+   !       also all dependent parameters are recalculated
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mT = mT / Q
+   mT_qp = mT_qp / Q
 
    call samplitude(xvecs, xscale2, amp, prec)
 
    mT = mT * Q
+   mT_qp = mT_qp * Q
 
    do ic = 1, 2
       ch = channels(ic)

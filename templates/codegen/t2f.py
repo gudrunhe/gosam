@@ -120,7 +120,7 @@ def translate(tokens,inconfig):
         while itoken < len(tokens):
                 token = tokens[itoken]
 # special case for abbreviations
-                abbpre = re.sub("\d+", " ", token).strip()
+                abbpre = re.sub(r"\d+", " ", token).strip()
                 if abbpre in list(parameters.keys()) and  parameters[abbpre] == 'array':
                         newtoken= token + '(%s)' % tokens[itoken+2]
                         newlist.append(newtoken)
@@ -151,8 +151,12 @@ def translate(tokens,inconfig):
                 elif token in list(symbols.keys()):
                         if token == '^':
                                 if tokens[itoken+1] == '-':
-                                        newtoken = symbols[token] + '(-%s)' % tokens[itoken +2]
-                                        itoken=itoken +3
+                                        if tokens[itoken + 2] == '1':
+                                                newtoken = '1.0_ki/' + newlist.pop()
+                                                itoken += 3
+                                        else:
+                                                newtoken = symbols[token] + '(-%s)' % tokens[itoken + 2]
+                                                itoken = itoken + 3
                                 else:
                                         newtoken = symbols[token] + '%s' % tokens[itoken +1]
                                         itoken=itoken +2

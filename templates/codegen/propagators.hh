@@ -25,9 +25,15 @@ Id proplorentz(1, k1?, 0, 0, 1, iv1?, iv2?) =
 Id proplorentz(1, k1?, 0, 0, -1, iv1?, iv2?) =
   PREFACTOR(i_) * NCContainer(Sm(k1)*ProjMinus, iv2, iv1) * inv(k1, 0);
 *---#] Fermions :
-*---#[ Gauge Bosons :
+*---#[ Gauge Bosons :[% @if unitary_gauge %]
+Id proplorentz(2, k1?, 0, sDUMMY1?, 0, iv1?, iv2?) =
+   - PREFACTOR(i_) * inv(k1, 0, sDUMMY1) * (d(iv1, iv2));
+Id proplorentz(2, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
+   - PREFACTOR(i_) * inv(k1, m, sDUMMY1) * (d(iv1, iv2) - k1(iv1)*k1(iv2)*inv(m^2));
+[% @else %]
 Id proplorentz(2, k1?, m?, sDUMMY1?, 0, iv1?, iv2?) =
    - PREFACTOR(i_) * d(iv1, iv2) * inv(k1, m, sDUMMY1);
+[% @end @if %]
 Id proplorentz(2, 0, m?, sDUMMY1?, 0, iv1?, iv2?) =
    - PREFACTOR(i_) * d(iv1, iv2) * inv(ZERO, m, sDUMMY1);
 *---#] Gauge Bosons :

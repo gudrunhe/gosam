@@ -3,7 +3,7 @@
 module     [% process_name asprefix=\_ %]ninja
    ! This file has been generated for ninja 
    use ninjago_module, only: ki_nin
-   use [% process_name asprefix=\_ %]config
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config
    implicit none
    private[%
 
@@ -18,7 +18,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    use iso_c_binding, only: c_ptr, c_loc, c_int
    use ninjago_module
    use [% process_name asprefix=\_ %]kinematics
-   use [% process_name asprefix=\_ %]model[%
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[%
 
          @for diagrams group=grp var=DIAG idxshift=1 %]
    use [% process_name asprefix=\_ %]d[% DIAG %]l1, only: numerator_diagram[% DIAG %] => numerator_ninja

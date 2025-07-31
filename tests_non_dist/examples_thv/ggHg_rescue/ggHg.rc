@@ -1,0 +1,31 @@
+process_name=ggHg
+process_path=virtual
+
+in=21, 21
+out=25, 21
+
+order=QCD, NONE, 3
+model=smdiag_complex
+model.options=ewchoose:1,mBMS:0,mB:0,wZ:0,wH:0,wT:0,wW:0,wB:0
+
+one=gs
+zero=wH,wT
+
+# No other particles than gluons, Higgs and
+# one quark flavour [t] running in the loops:
+filter.particles=A:0,Z:0,U:0,D:0,C:0,S:0,B:0,H:0
+
+nlo_prefactors=0
+
+# Tune rescue system to request very stable results > 10 digits
+PSP_rescue=true
+PSP_chk_method=Rotation
+PSP_chk_li1=10
+PSP_chk_li2=10
+PSP_chk_li3=10
+PSP_chk_li4=10
+PSP_chk_li5=10
+ 
+polvec=explicit
+extensions=quadruple,olp_badpts
+regularisation_scheme=thv

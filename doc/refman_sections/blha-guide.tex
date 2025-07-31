@@ -1,0 +1,471 @@
+The interface of \gosam with a Monte Carlo event generator program is based on the Binoth-Les Houches Accord (BLHA) standard interface. \gosamv  supports both BLHA1~\cite{Binoth:2010xt} and BLHA2~\cite{Alioli:2013nda}. Certainly, a dedicated interface without using the BLHA is also possible.
+
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+
+\section{Preparation of the order file}
+This step should be done by the Monte Carlo (MC) program. The order file can have any name and any extension. We use  the extension \texttt{.lh} or \texttt{.olp} for order files and \texttt{.olc} for contract files. An order file consits of a set of keywords specifying the process setup and a list of subprocesses, representing individual partonic channels contributing to the calculation. Generic examples for the process $pp\to (Z\to e^+e^-)+$\,jet in both BLHA1 and BLHA2 standards, are given in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2}.
+
+\begin{figure}
+\centering
+\begin{subfigure}[]{0.49\textwidth}
+\centering
+\begin{lstlisting}[title={BLHA1 order file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# OLP_order.lh
+# created by Your_favourite_MC
+# Process: p p -> e+ e- jet
+CorrectionType           QCD
+IRregularisation         DRED
+AlphasPower              1
+AlphaPower               2
+MatrixElementSquareType  CHsummed
+# Subprocesses
+1 -1 -> 11 -11 21
+1 21 -> 11 -11 1
+2 -2 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+# Process specific GoSam settings
+#@ symmetries family,generation
+#@ filter.particles A:0,H:0,chi:0
+\end{lstlisting}
+\end{subfigure}
+\hspace*{5pt}
+\begin{subfigure}[]{0.46\textwidth}
+\centering
+\begin{lstlisting}[title={BLHA1 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# vim: syntax=olp
+#@OLP GoSam 3.0.0
+#@IgnoreUnknown False
+#@IgnoreCase False
+#@SyntaxExtensions
+CorrectionType QCD | OK
+IRregularisation DRED | OK
+AlphasPower 1 | OK
+AlphaPower 2 | OK
+MatrixElementSquareType CHsummed | OK
+1 -1 -> 11 -11 21 | 1 0
+1 21 -> 11 -11 1 | 1 1
+2 -2 -> 11 -11 21 | 1 2
+...
+21 -2 -> 11 -11 -2 | 1 13
+\end{lstlisting}
+\end{subfigure}
+\caption{Examples of order and contract files for Z+jet, with BLHA1 standards. BLHA1 only supports one-loop amplitudes, no tree-level amplitudes, which have to be provided by the MC instead.}
+\label{fig:BLHA1}
+\end{figure}  
+
+\begin{figure}
+\centering
+\begin{subfigure}[]{0.49\textwidth}
+\centering
+\begin{lstlisting}[title={BLHA2 order file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# OLP_order.lh
+# created by An_even_better_MC
+InterfaceVersion         BLHA2
+Model                    SMdiag
+CorrectionType           QCD
+IRregularisation         DRED
+EWScheme                 alphaGF
+AccuracyTarget           0.0001
+DebugUnstable            True
+
+AlphasPower              1
+AmplitudeType ccTree
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AmplitudeType scTree
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AmplitudeType Loop
+1 -1 -> 11 -11 21
+...
+21 -2 -> 11 -11 -2
+
+AlphasPower              2
+AmplitudeType Tree
+1 1 -> 11 -11 1 1
+...
+21 21 -> 11 -11 2 -2
+
+# Process specific GoSam settings
+#@ symmetries family,generation
+#@ filter.particles A:0,H:0,chi:0
+\end{lstlisting}
+\end{subfigure}
+\hspace*{5pt}
+\begin{subfigure}[]{0.46\textwidth}
+\centering
+\begin{lstlisting}[title={BLHA2 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
+# vim: syntax=olp
+#@OLP GoSam 3.0.0
+#@IgnoreUnknown False
+#@IgnoreCase False
+#@SyntaxExtensions
+InterfaceVersion BLHA2 | OK
+Model SMdiag | OK
+CorrectionType QCD | OK
+IRregularisation DRED | OK
+EWScheme alphaGF | OK
+AccuracyTarget 0.0001 | OK
+DebugUnstable True | OK
+AlphasPower 1 | OK
+AmplitudeType ccTree | OK
+1 -1 -> 11 -11 21 | 1 131
+...
+21 -2 -> 11 -11 -2 | 1 70
+AmplitudeType scTree | OK
+1 -1 -> 11 -11 21 | 1 145
+...
+21 -2 -> 11 -11 -2 | 1 71
+AmplitudeType Loop | OK
+1 -1 -> 11 -11 21 | 1 137
+...
+21 -2 -> 11 -11 -2 | 1 63
+AlphasPower 2 | OK
+AmplitudeType Tree | OK
+1 1 -> 11 -11 1 1 | 1 42
+...
+21 21 -> 11 -11 2 -2 | 1 106
+\end{lstlisting}
+\end{subfigure}
+\caption{Order and contract files for Z+jet with BLHA2 standards. In contrast to the BLHA1 example this oder file also generates tree-level and spin and colour correlated amplitudes.}
+\label{fig:BLHA2}
+\end{figure}  
+
+For the precise definition of the standard we refer to the respective publications~\cite{Binoth:2010xt,Alioli:2013nda}. In the following we list the set of BLHA keywords implemented in \gosam, seperating them in three classes: required keywords, which have to appear in every BLHA order file, optional keywords, and some keywords the user might look for but which are not implemented in \gosam or not fully supported. Keywords which are not listed here are not implemented.
+
+%
+%
+%
+
+\input{refman_sections/olp_options.tex}
+
+%
+%
+%
+
+\subsection{Precision checks}\label{sec:BLHA_precisionchecks}
+The \gosam{} process card variable \texttt{PSP\_chk\_method}, which controls the behaviour how \gosam{} checks the result for each phase-space point, can also be set by \lstinline[style=sh]|Extra PrecisionCheck|. Possible values are:
+\begin{itemize}
+	\item \texttt{Extra PrecisionCheck Automatic} \textit{(default)} -- chooses automatically between the options \texttt{PoleRotation} and \texttt{LoopInduced}
+	\item \texttt{Extra PrecisionCheck PoleRotation} -- checks the precision of the pole first and rotates if necessary
+	\item \texttt{Extra PrecisionCheck Rotation} -- estimates the precision of each phase space point by rotating and re-evaluating (slow)
+	\item \texttt{Extra PrecisionCheck LoopInduced} -- checks that the poles are zero (i.e. very small compared to the finite part) and rotates if necessary
+	\item \texttt{Extra PrecisionCheck Disabled}  -- this sets \texttt{PSP\_check=False} which switches off all phase space point precision checks.
+\end{itemize}
+
+
+\subsection{\gosam specifc instructions}\label{sec:hashat_instructions}
+\gosam specific settings can be put into commentary lines starting with the letter combination `\texttt{\#@}'. This is not part of the BLHA standard. Any option available in the ordinary \gosam process card can be passed in this way, with the exception of settings related to the IR regularisation scheme. For those the user has to use the \texttt{IRregularisation} keyword. The syntax is slightly different compared to the process card, in the sense that the \texttt{=} sign has to be replaced with a space. In the examples in Figures~\ref{fig:BLHA1} and \ref{fig:BLHA2} the specific instructions correspond to a process card containing the lines
+\begin{lstlisting}[gobble=0,style=in]
+symmetries=family,generation
+filter.particles=A:0,H:0,chi:0
+\end{lstlisting}
+
+
+\subsection{Subprocess-specific settings in the \gosam configuration file}
+Settings can be passed by means of additional configuration files in the format of \gosam process cards, too (see Section~\ref{sec:BLHA_running} below). Those settings can be subprocess-specific. This is helpful if various subprocesses, each having different settings, should be calculated at once. For this purpose, the subprocesses are enumerated as in the BLHA order file, starting at zero (to match to the correspondig \texttt{p*} subdirectories created by \gosam{}).
+
+\attention{
+This counting does not necessarily match  the labels returned in the BLHA contract file.
+}
+
+The syntax is \lstinline[style=sh]|option[list-of-subprocesses] = value|. For example, to disable the precision check for the second and third processes in the order file, one can set \lstinline[style=sh]|PSP_check[1,2] = True| in the input card. Ranges and exclusion of ranges with \texttt{!} (or \texttt{\^}) are supported. Examples for valid lists:
+\begin{align*}
+    \text{\texttt{0-2}         }     &= \{0,1,2\} \\
+    \text{\texttt{-6,!3-4}         }  &   = \{0,1,2,5,6\} \\
+    \text{\texttt{ 1-4,!3,9}       }   &   = \{1,2,4,9\}
+\end{align*}
+Subprocess-specific settings need to be unambiguous, and they overwrite the corresponding globally set values.
+
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+
+\section{Running GoSam}\label{sec:BLHA_running}
+To switch to \gosam's OLP mode the argument \lstinline[style=sh]|--olp| has to be provided upon execution of the \lstinline[style=sh]|gosam.py| command:
+\begin{lstlisting}[style=sh]
+gosam.py --olp <order-file>
+\end{lstlisting}
+If the order file is not in the current working directory \lstinline[style=sh]|<order-file>| must be given as a relative or absolute path. Additional optional arguments can be passed, a full list of which is available by running
+\begin{lstlisting}[style=sh]
+gosam.py --olp --help
+\end{lstlisting}
+In the follwoing we will comment on the most frequently used ones.
+\begin{basedescript}{\desclabelstyle{\pushlabel}}
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-c, --config|} Often settings and options which are not considered by the BLHA standard have to be passed. One can then either use the \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions}) or if that is not feasible use the \lstinline[style=sh]|--config <config>| argument to load additional configuration files. Multiple files can be processed, \lstinline[style=sh]|--config <config1> <config2> ... <configN>|. Those files use the same syntax and format as the ordinary process cards (see Section~\ref{sec:usage}). Note that the configuration files do not have to be valid process cards on their own, as otherwise required fields like the \texttt{in} and \texttt{out} particles and the perturbative \texttt{order} are set in the BLHA order file already. In fact, to avoid inconsistencies no setting present in the BLHA order file should be included in the additional configuration files. \gosam does perform consistency checks, but it is not guaranteed that all cases of conflicting setups will be caught.
+
+      If no specific configuration files are given, i.e. \lstinline[style=sh]|--config| omitted entirely, \gosam will still search the working directory for files called \texttt{gosam.in}, \texttt{gosam.conf}, \texttt{.gosam}, \texttt{golem.in}, \texttt{golem.conf}, \texttt{.golem}. This can be prevented by setting the argument \colorbox{gray!30}{\lstinline[style=sh]|-C, --no-defaults|}.
+
+      \attention{In previous versions of \gosam also the user's home directory and the \gosam installation directory would be searched. Since this can and will lead to unexpected behaviour (when settings are overwritten without the user realizing it), this is no longer done in \gosamv.}
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-D, --destination|} By default all source code will be generated in the current working directory. An alternative directory can be chosen by passing it via the \lstinline[style=sh]|--destination <dir>| argument.
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-I, --ignore-empty-subprocess|} Depending on the MC it can happen that the order file contains channels which turn out to be zero because they do not contain any diagrams after applying selections and filters. Per default \gosam will return an error signaling to the user that the subprocess is ``empty''. If the MC does not have a means to catch this error, the calculation will fail. Therefore as an alternative \gosam offers the option to return numerical zeros for such subprocesses, which is activated by the \lstinline[style=sh]|--ignore-empty-subprocess| argument.
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-M, --mc|} By specifying the name of the Monte Carlo which is the intended partner program, \gosam can choose some settings simplifying the communication and linking. One can either specify \lstinline[style=sh]|--mc <mc-program>| or \lstinline[style=sh]|--mc <mc-program>/<version>|. Currently special settings for the following MC programs are implemented:
+            \begin{itemize}
+                  \item[\hspace{-1em}]\lstinline[style=sh]|--mc powheg| --- This sets the extensions \texttt{f77} and \texttt{olp\_badpts}.
+                  \item[\hspace{-1em}]\lstinline[style=sh]|--mc powhegbox| --- Same as \texttt{powheg}.
+                  \item[\hspace{-1em}]\lstinline[style=sh]|--mc amcatnlo| --- This sets the extension \texttt{f77}.
+            \end{itemize}
+      The \lstinline[style=sh]|<version>| information is currently not used. Note that it is also possible to specify the MC program using \texttt{\#@} instructions (see Section~\ref{sec:hashat_instructions}):
+      \begin{lstlisting}[style=in]
+            #@ olp.mc.name mypreferredmc
+            #@ olp.mc.version 1.0.0
+      \end{lstlisting}
+      This setting is \emph{not} available as a configuration file option.
+%
+      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=sh]|-o, --output-file|} Per default the contract file written by \gosam is named like the order file, with the file extension (e.g. \texttt{.lh} or \texttt{.olp}) replaced by by \texttt{.olc}. One can instead specify the name of the contract file using the \lstinline[style=sh]|--output-file <contract-file>| argument.
+\end{basedescript}
+
+%
+%
+%
+
+\subsection{The contract file}
+From the contract file one can see whether the order file has been processed successfully. If everything went smoothly it should look like the one in Figure~\ref{fig:BLHA1} or Figure~\ref{fig:BLHA2}, respectively. All settings are either acknowledged by the word \texttt{OK} or, in case of a failure, by the word \texttt{error} followed by an error message.
+
+The subprocesses receive an assignment to one or more labels per subprocess. In the line
+\begin{lstlisting}[style=in]
+2 -2 -> 11 -11 21 | 1 2
+\end{lstlisting}
+the suffix \texttt{| 1 2} states that this subprocess has been assigned to \texttt{1} single label which has the value \texttt{2}. Had we set \texttt{SubdivideSubprocess} (see Section~\ref{sec:optional_BLHA_keywords}) to \texttt{yes} in the order file this line might have looked like
+\begin{lstlisting}[style=in]
+2 -2 -> 11 11 21 | 4 0 1 2 3
+\end{lstlisting}
+meaning that the subamplitudes have been assigned to \texttt{4} labels (which is the first number after the bar) with the values \texttt{0} to \texttt{3}, each denoting an individual helicity subamplitude. These labels will enter the first argument of the interface routines \texttt{OLP\_EvalSubProcess} (BLHA1) and \texttt{OLP\_EvalSubProcess2} (BLHA2) (see Section~\ref{sec:BLHA_calling}). In order to retrieve the full amplitude the calling (MC) program should sum over the contributions from all labels. Alternatively, it is possible to sample the different channels by Monte Carlo techniques.
+
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+
+\section{Producing the amplitude libraries}\label{sec:BLHA_compiling}
+Building the library is done with the same sequence of commands as in standalone mode,
+\begin{lstlisting}[style=sh]
+meson setup build --prefix <prefix> 
+meson install -C build
+\end{lstlisting}
+Now one should find the following files\footnote{Due to backwards compatibility, they are still named \texttt{libgolem\_olp} instead of \texttt{libgosam\_olp}.} in a subdirectory \texttt{lib/} or \texttt{lib64/}:
+\begin{itemize}
+\item \texttt{libgolem\_olp.a} for static linking,
+\item \texttt{libgolem\_olp.so} for dynamic linking.
+\end{itemize}
+For static linking to a C/C++ program the file \texttt{olp.h} is available in the process directory. Note that Debian-based systems supporting multiarch will put the libraries in \texttt{lib/<multiarch-name>/} or \texttt{lib64/<multiarch-name>/} instead. The Monte-Carlo program can now be linked to these files or use the dynamical library at runtime by means of the \texttt{dlopen()} and \texttt{dlsym()} system calls\footnote{For more details we refer to the corresponding man pages.}. The required compiler and linking flags can be generated by calling the \texttt{config.sh} script:
+\begin{lstlisting}[style=sh]
+sh ./config.sh -cflags # prints compiler flags 
+sh ./config.sh -libs   # prints linking flags
+\end{lstlisting}
+Inside a makefile, one can use the following lines to extend existing build flags:\\[5pt]
+\texttt{ FCFLAGS+=\$(shell ./config.sh -cflags)} \\
+\texttt{ LDFLAGS+=\$(shell ./config.sh -libs)}\\[5pt]
+\noindent The path to \texttt{config.sh} needs to be adapted, of course, if the makefile is not in the same directory.
+
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+
+\section{Calling the interface routines}\label{sec:BLHA_calling}
+For the default settings (i.e. when a MC handles the communication with \gosam) the call of the interface routines will be automatic, so the user does not have to care about the details described below.
+
+We should note, however, that there are slight differences in naming (underscoring) and calling conventions (call by reference versus call by value) depending on the extensions in use. For any of the specific MC settings passed through the \lstinline[style=sh]|--mc| argument listed in Section~\ref{sec:BLHA_running} the extension \texttt{f77} is automatically included and therefore the underscoring works such that \texttt{gfortran} used as a Fortran\,77 compiler would not complain.
+
+In the following, we will describe BLHA1 and BLHA2 conventions separately, even though large parts are identical for the two BLHA versions.
+
+%
+%
+%
+
+\subsection{BLHA1}
+
+\subsubsection{Initialization}
+The generated \gosam{} library is initialized with the call
+\begin{lstlisting}[style=fortran]
+      call OLP_Start("path/to/contract.olc",ierr)
+\end{lstlisting}
+The variable \texttt{ierr} should be declared as an integer. If the contract file is not found, \texttt{ierr} is set to a negative value. A non-negative value indicates success. Please note that calling \texttt{OLP\_Start} is mandatory even if the contract file is not present or not read.
+
+
+\subsubsection{Setting parameters}
+If not instructed otherwise \gosam will use the default parameter values of the underlying physics model. In order to align parameters between the MC and \gosam the keyword \texttt{ModelFile} can be used in the order file to read in a SLHA~\cite{Skands:2003cj,Allanach:2008qq} parameter card. This will set the affected parameters to the provided values during the process setup. There is also the option to use the process card keywords \texttt{zero} or \texttt{one} either by means of the special \texttt{\#@} instructions in the order file or the \lstinline[style=sh]|--config| argument for passing a configuration file. This will fix the provided parameters to zero or one, respectivley, during process generation.
+
+At runtime parameters can be passed by calling \texttt{OLP\_option}.
+\begin{lstlisting}[style=fortran]
+      call OLP_Option("name=value",ierr)
+\end{lstlisting}
+Note that the initialization of derived parameters only works correctly if the corresponding input parameters are set with \texttt{OLP\_Option}
+\emph{before} \texttt{OLP\_Start} is called. Example:
+\begin{lstlisting}[style=fortran]
+      call OLP_Option("mZ=91.234",ierr)
+      call OLP_Option("mW=80.123",ierr)
+!  at this point sin(theta_w) is not up to date.
+      call OLP_Start("path/to/contract.olc",ierr)
+!  now sin(theta_w) is set consistently
+\end{lstlisting}
+Some options can be changed at any time; it is instructive to look at the file \texttt{common/model.f90} generated in the process library during the compilation step (see Section~\ref{sec:BLHA_compiling}). It contains  the available parameter names and their settings. See also Appendix~\ref{chp:model-files} about the built-in models shipped with \gosam.
+
+\attention{
+      Parameters which are set to either one or zero using the \texttt{one} or \texttt{zero} parameter card options, respectively, are fixed and cannot be changed at runtime.
+}
+
+\attention{
+      \gosam generates counterterms for massive quarks (see Section~\ref{chp:renormalisation}) during the process generation step. For quarks which are initialized with vanishing mass, either because that is the default of the model or their mass has been added to the \texttt{zero} parameter card option, no counterterms are generated. On the other hand, if the mass parameter is non-zero during process generation, the counterterms will always be generated. This means that the mass state of quarks (massless/massive) cannot be changed after the process has been generated. This is one of the reasons why the order file keyword \texttt{MassiveParticles} is ignored by \gosam.
+}
+
+\subsubsection{Computing the matrix element}
+In BLHA1, the routine which returns a value for the matrix element is \texttt{OLP\_EvalSubProcess}:
+\begin{lstlisting}[style=fortran]
+      integer ilabel
+      double precision moms(5*nlegs)
+      double precision mu,params(1)
+      double precision res(4)
+      !...
+      call OLP_EvalSubProcess(ilabel,moms,mu,params,res)
+\end{lstlisting}
+The first argument, \texttt{ilabel} is one of the labels from the contract file. The momenta are passed in the argument \texttt{moms}, which has the format
+\begin{displaymath}
+\mathtt{(/}
+E_1, p^x_1, p^y_1, p^z_1, m_1,
+E_2, p^x_2, p^y_2, p^z_2, m_2, \ldots
+E_N, p^x_N, p^y_N, p^z_N, m_N
+\mathtt{/)}
+\end{displaymath}
+The momenta are expected to be given in physical (in-out) kinematics: $p_1+p_2=p_3+\ldots+p_N$. The components are in units of GeV. The argument \texttt{mu} is the renormalisation scale $\mu$ (not $\mu^2$!) in GeV. The argument \texttt{params} is an array of which the first argument is $\alpha_s(\mu)$. Any further array entries are ignored within BLHA1.\footnote{Passing more than one parameter is implemented by the \texttt{Parameters} option in the order file, which is  not part of the BLHA1 standard.} The last argument is an array of length four which is filled by the subroutine, containing the result of the evaluation. The entries have as a unit some power of GeV ($\mathrm{GeV}^{(4-N)}$, where $N$ is the number of external particles).
+\begin{align}
+\label{eq:res}
+\mathcal{M}_B^\dagger\mathcal{M}_B&=\mathtt{res(4)}\nonumber\\
+2\mathrm{Re}\left(\mathcal{M}_B^\dagger\mathcal{M}_V\right)&=
+\frac{(4\pi)^\varepsilon}{\Gamma(1-\varepsilon)}\left(
+\frac{\mathtt{res(1)}}{\varepsilon^2}
++\frac{\mathtt{res(2)}}{\varepsilon}
++\mathtt{res(3)}
+\right)
+\end{align}
+Note that the coefficients \texttt{res(1:3)} contain an explicit factor of $\alpha_s(\mu)/(2\pi)$. In BLHA1 this convention is fixed an cannot be changed with the \texttt{nlo\_prefactors} process card option (see Appendix~\ref{sec:nlo_prefactors}).
+
+
+\subsubsection{Finalize (optional)}
+There is also a routine \texttt{OLP\_Finalize} which is only needed if the client code needs to call \texttt{OLP\_Start} more than once, e.g.
+\begin{lstlisting}[style=fortran]
+      do i=1,max_i
+         write(line,'(A3,F6.3)') "mZ=", mZ(i)
+         call OLP_Option(line,ierr)
+         ! Need olp_start to update dependent parameters
+         call OLP_Start(name,ierr)
+         ! ...
+         call OLP_Finalize()
+      enddo
+\end{lstlisting}
+
+%
+%
+%
+
+\subsection{BLHA2}\label{sec:BLHA2_calling}
+
+\subsubsection{Initialization}
+Initialization of the the run-time phase is handled by the same function as in BLHA1,
+\begin{lstlisting}[style=C]
+      OLP_Start(char* fname, int* ierr)
+\end{lstlisting}
+A new function
+\begin{lstlisting}[style=C]
+      OLP_Info(char olp_name[15], char olp_version[15], char message[255])
+\end{lstlisting}
+has been introduced, which serves to keep track of the type and version of the OLP which has been used, and to encourage proper citation. The arguments are the name of the OLP, the version, and a string which contains information about the relevant publications, for example the bibtex identifier.
+
+
+\subsubsection{Setting parameters}
+As for BLHA1 \gosam will initialize all parameters according to their defaults specified in the used model, if no additional instructions are given. This is true for both \gosam's built-in models and for UFO models. A SLHA~\cite{Skands:2003cj,Allanach:2008qq} parameter card can be provided to set parameters to different values during process setup using the \texttt{ParameterCard} keyword in the order file. Similarly the process card keywords \texttt{zero} and \texttt{one} are available, to be used either in a \texttt{\#@} instruction in the order file or in a configuration file to be passed via the \lstinline[style=sh]|--config| argument.\\
+
+At runtime parameters can be passed using the subroutine
+\begin{lstlisting}[style=C]
+      OLP_SetParameter(char* para, double* re, double* im, int* ierr)
+\end{lstlisting}
+where the first argument is a (pointer to a) string serving as a keyword for the parameter to be set, followed by two double precision numbers
+so that complex parameters can also be passed (in case of real parameters, the second double is zero). The integer in the fourth argument is set by the OLP to tell the MC whether the setting of the parameter was successful.
+\begin{itemize}
+      \item \texttt{ ierr=1} means the parameter has been set successfully,
+      \item \texttt{ ierr=0} means failure: issue an error message,
+      \item \texttt{ ierr=2} means that the parameter is unknown or the setting is ignored (for example because it is irrelevant for the considered case), but the MC program should proceed.
+\end{itemize}
+The function \texttt{ OLP\_SetParameter} can be called for every phase space point, if used to set a dynamic parameter. Of course, the routine's argument \texttt{para} should match the name of the corresponding parameter in the model. For the built-in models one can check the \texttt{parameters} dictionary in the respective \texttt{<model>.py} file which can be found in the \texttt{models} subdirectory of the \gosam code. Parameter names in a UFO model can be read from the respective UFO model files directly. Note that \gosam prepends the prefix \texttt{mdl} to all parameters taken from the UFO model in order to distinguish them from internal parameters.
+
+For masses and widths one can alternatively use the corresponding PDG codes of the particles. For example, \texttt{mass(6)} and \texttt{width(6)} can be used to set the mass and width, respectively, of the top-quark (and anti-top quark).
+
+\attention{
+      Parameters which are set to either one or zero using the \texttt{one} or \texttt{zero} parameter card options, respectively, are fixed and cannot be changed at runtime.
+}
+
+\attention{
+      \gosam generates counterterms for massive quarks (see Section~\ref{chp:renormalisation}) during the process generation step. For quarks which are initialized with vanishing mass, either because that is the default of the model or their mass has been added to the \texttt{zero} parameter card option, no counterterms are generated. On the other hand, if the mass parameter is non-zero during process generation, the counterterms will always be generated. This means that the mass state of quarks (massless/massive) cannot be changed after the process has been generated. This is one of the reasons why the order file keyword \texttt{MassiveParticles} is ignored by \gosam.
+}
+
+\subsubsection{Computing the matrix element}
+In BLHA2, the routine which returns a value for the matrix element is
+\begin{lstlisting}[style=C]
+      OLP_EvalSubProcess2(
+            int* i, double* pp, double* mu, double* rval, double* acc
+            )
+\end{lstlisting}
+The arguments are:
+\begin{itemize}
+\item \texttt{i}: pointer to a (one element) array with the label of the subprocess as given in the contract file
+\item \texttt{pp}: pointer to an array of momenta, conventions $(E_j,k_j^x,k_j^y,k_j^z,M_j)$
+\item \texttt{mu}: pointer to the renormalisation scale 
+\item \texttt{rval}: pointer to an array of return values
+\item \texttt{acc}: pointer to a one element array with the outcome of the 
+OLP internal accuracy check 
+\end{itemize}
+The \texttt{rval} argument is an array of length four which is filled by the subroutine, containing the result of the evaluation, as specified in eq.~(\ref{eq:res}). In BLHA2 one can use the process card keyword \texttt{ nlo\_prefactors} to control which coupling prefactor is included in the result. The default in OLP mode is \texttt{nlo\_prefactors = 2}, which (for QCD corrections) corresponds to eq.~(\ref{eq:res}), i.e. $\alpha_s/(2\pi)$ included in the loop components of $\texttt{rval}$. See also Appendix~\ref{sec:nlo_prefactors}. For more details concerning the BLHA2 conventions we refer to \cite{Alioli:2013nda}.
+
+
+\subsubsection{Loop-induced processes}
+Loop-induced processes are supported by the setting \lstinline[style=sh]|AmplitudeType LoopInduced|. In \gosam, they are not handled like Born processes, but like virtual corrections to non-existing born processes and therefore returned in the virtual field $A_0$ (\texttt{PoleCoeff0}) of \texttt{rval} when calling \texttt{OLP\_EvalSubprocess} and \texttt{OLP\_EvalSubprocess2}. The returned value corresponds to the  squared amplitude.
+
+\attention{
+Please note that in the order file, \texttt{CouplingPower} or \texttt{AlphasPower} and \texttt{AlphaPower}  usually refer to the coupling powers if the corresponding Born amplitude, and the type of the correction is specified as \texttt{CorrectionType}. As in the case of loop-induced processes the Born amplitude does not exist, the correct counting of the coupling powers needs to be assured by setting \texttt{CouplingPower} (or \texttt{AlphasPower} and \texttt{AlphaPower}) equal to the order of a corresponding fictitious Born process, i.e. reduce the coupling powers of the loop induced process correspondingly.
+}
+
+
+\subsubsection{Production of colour-/spin correlated trees}
+\gosam{} can also generate Born amplitudes in a spin- and colour-correlated form, which can be obtained in the BLHA2 by requesting \texttt{AmplitudeType scTree} and \texttt{AmplitudeType ccTree}, respectively. Colour-correlated matrix elements are defined as
+\begin{equation}
+ C_{ij}=\bra{{\cal M}}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M}}\;,
+\end{equation}
+spin-correlated matrix elements can be defined as
+\begin{equation}
+ S_{ij}=\bra{{\cal M},-}\textbf{T}_{i}\textbf{T}_j \ket{{\cal M},+}\;.
+\end{equation}
+The spin-correlated matrix element above (as well as the colour correlated matrix element) contains implicitly the sum over all other helicities, only the helicities with the indices $i$ and $j$ are fixed, i.e.\footnote{Note that the spin-correlated matrix elements depend on the conventions chosen for the implementation of the polarization vectors, which can be seen by explicitly pulling out the polarization vector from the amplitude, $|{\cal M}_{i,\lambda}\rangle=\epsilon_\lambda^\mu(p_i)|{\cal M}_{i,\mu}\rangle$. Two conventions can differ by a phase and a shift proportional to the boson's momentum, $\hat{\epsilon}_\lambda^{\mu}(p_i)=e^{i\phi_\lambda}\epsilon_\lambda^\mu(p_i)+\alpha_\lambda p_i^\mu$, from which follows $\langle{\cal M}_{i,\lambda}|{\cal M}_{i,\lambda'}\rangle=e^{i(\phi_{\lambda}-\phi_{\lambda'})}\langle\hat{{\cal M}}_{i,\lambda}|\hat{{\cal M}}_{i,\lambda'}\rangle$.}
+ \begin{eqnarray}
+&&\langle {\cal M}_{i,-} |{\mathbf T}_i\cdot {\mathbf T}_j |{\cal M}_{i,+}\rangle =\\
+&&\sum_{\lambda_1,...,\lambda_{i-1},\lambda_{i+1},...,\lambda_n}
+\langle {\cal M}_{\lambda_1,...,\lambda_{i-1},-,\lambda_{i+1},...,\lambda_n} |
+{\mathbf T}_i\cdot {\mathbf T}_j |
+{\cal M}_{\lambda_1,...,\lambda_{i-1},+,\lambda_{i+1},...,\lambda_n}\rangle \;. \nonumber
+\end{eqnarray}
+These matrix elements are particularly useful in combination with Monte Carlo programs which use these trees to build the dipole subtraction terms for the infrared divergent real radiation part. With these modified tree level matrix elements \gosam{} is able to generate
+all necessary building blocks for a complete NLO calculation. Such a setup has been used successfully in combination with the framework of
+\textsc{Herwig}~\cite{LesHouches2013,Bellm:2013lba,Platzer:2011bc} and the Monte Carlo Program Whizard~\cite{Kilian:2007gr,Moretti:2001zz,Stienemeier:2021cse,Braun:2025hvr}.
+
+\textsc{Whizard} requires the spin-correlations to be passed in the form of the (real  part of the) spin-correlation tensor $B_j^{\mu\nu}$ for particle $j$, instead. It is defined by
+\begin{equation}
+   B_j^{\mu\nu} = \sum_{\lambda,\lambda'}\epsilon_h^\mu(p_j)\epsilon_{\lambda'}^{*\nu}(p_j)\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle\,,
+\end{equation}
+where again a sum over the helicities of the other particles is implicitly understood. Invoking the BLHA interface with the non-standard \texttt{AmplitudeType scTree2} newly implemented in \gosam{}-3.0 will return the relevant entries of $B_j^{\mu\nu}$ in a way which can be directly used in \textsc{Whizard}. Additional phase-factors in $\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle$ related to the fact that \textsc{Whizard} expects the polarization vectors to be defined in the conventions of~\cite{Murayama:1992gi} are taken into account automatically. We remark that this convention for the spin-correlated tree matrix elements conincides with the one used by OpenLoops~\cite{Buccioni:2019sur} in its subroutine \texttt{evaluate\_scpowheg}.

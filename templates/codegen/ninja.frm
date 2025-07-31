@@ -20,14 +20,9 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
-S sDUMMY1;[%
-@if extension qshift%][%
-@else %]
+S sDUMMY1;
 CFunction j;
 Vector Q, p1;
-*  Vector qshift;
-*  CFunction fshift;
-[%@end @if %]
 CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%
@@ -115,18 +110,6 @@ Id Qspvae[%index2%]e[%index1%] = Q.spvae[%index2%]e[%index1%];[%
       @end @if %][%
    @end @for %][%
 @end @if %]
-
-[%
-@if extension qshift %][%
-@else %]
-* T.P. : this should be done numerically, e.g. a -> sign * a - qshift
-*Id Q = p1;
-*#Call shiftmomenta(`DIAG',1)
-*Id fshift(0) = 0;
-*Id fshift(?all) = 1;
-*Id p1 = Q;[%
-@end @if %]
-
 
 
 * What follows are contents of the file ninja_laurent.frm which comes

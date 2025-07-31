@@ -1,0 +1,8 @@
+InterfaceVersion         BLHA2
+CorrectionType           QCD
+IRregularisation         tHV
+CouplingPower QCD        1
+CouplingPower QED        1
+
+AmplitudeType            Loop
+  21 25 ->  6  -6

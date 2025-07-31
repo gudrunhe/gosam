@@ -111,28 +111,22 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use tne_config
-   use tne_model
+   use tne_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
-   wW = 2.0476_ki
-   mT = 171.2_ki
+   call set_parameter("wW", 2.0476_ki, 0.0_ki, ierr)
+   call set_parameter("mT", 171.2_ki, 0.0_ki, ierr)
 
    renormalisation = 1
-   renorm_beta = .true.
-   renorm_mqse = .true.
+   renorm_alphas = .true.
+   renorm_qmass = .true.
    renorm_logs = .true.
 
    ! reduction_interoperation=0
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

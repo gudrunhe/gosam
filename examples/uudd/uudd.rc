@@ -7,8 +7,7 @@ out=1,-1
 
 order=QCD, 2, 4
 
-qgraf.verbatim=\
-true=chord[S,C,B,T,0,0];
+filter.particles=S:0,C:0,B:0,T:0
 
 
 one=gs,e
@@ -16,4 +15,5 @@ zero=mU,mD
 
 helicities=[uU=+-]U[dD=+-]D
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true

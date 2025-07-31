@@ -1,0 +1,15 @@
+process_name=uu_uu
+process_path=virtual
+
+model=FeynRules, ../model/QCD_4F_UFO
+
+in=9000001,-9000001
+out=9000001,-9000001
+
+order=QCD, 2
+
+order_names=QCD,NP
+
+reduction_programs=ninja
+
+nlo_prefactors=0

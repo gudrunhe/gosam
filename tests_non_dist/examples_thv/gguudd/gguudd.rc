@@ -1,0 +1,16 @@
+process_name=gguudd
+process_path=virtual
+
+in=21,21
+out=2,-2,1,-1
+
+zero=mU,mD,mC,mS,mB,mT
+
+model=smdiag
+
+order=QCD,4
+
+qgraf.options=onshell,notadpole,nosnail
+symmetries=family,generation
+
+regularisation_scheme=thv

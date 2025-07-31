@@ -5,7 +5,7 @@ process_path=virtual
 in=21,21
 out=21,21
 
-order=gs, 2, 2
+order=gs, 2
 
 one=gs,e
 
@@ -14,5 +14,6 @@ one=gs,e
 # we keep them as a check.
 helicities=++++,+++-,++--
 
-numpolvec=explicit
-regularisation_scheme=cdr
+polvec=explicit
+regularisation_scheme=dred
+convert_to_thv=true

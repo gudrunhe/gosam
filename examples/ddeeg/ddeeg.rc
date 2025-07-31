@@ -17,14 +17,12 @@ model=smdiag
 model.options= masses: mT, widths: wZ, alpha: 0.007536680237014635, \
       mZ: 91.1876, mW: 80.44, wZ: 2.4952, Nf:5, Nfgen:5
 
-qgraf.verbatim=\
-true=bridge[Z,A,1,100];
-
-
 one=gs,e
 
 # There are only two non-zero helicities
 helicities=[dD=+-]D[eE=+-]E[g=+-]
 
+filter.lo= bridge_filter
+filter.ct= bridge_filter
 filter.nlo= madloop_filter
 filter.module=filter.py

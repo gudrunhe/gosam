@@ -1,0 +1,16 @@
+process_name=udhud_feynman
+process_path=udhud_feynman
+
+in=anti1, part2
+out=part25, anti1, part2
+order=QED, 3, 3
+model=FeynRules, ../model/Standard_Model_UFO
+
+one=mdlee,mdlG
+zero=mdlMB
+
+filter.particles=part3:0,part4:0,part5:0,part6:0,part11:0,part13:0,part15:0
+
+reduction_programs=ninja
+
+filter.nlo= lambda d: d.chord("part21") > 0
