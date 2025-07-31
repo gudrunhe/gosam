@@ -160,7 +160,7 @@ use ggHg_kinematics, only: adjust_kinematics, dotproduct
    vecs(4,2) =  0.0_ki
    vecs(4,3) =  2.16504041532715958458907646670_ki
    vecs(4,4) =  234.365000000000000000702564468_ki
- 
+
    ! (* pt4: s12 =250000.00000000000, s13= -0.000000005 - very unstable => fail)
    !vecs(1,1) =  250.0_ki
    !vecs(1,2) =    0.0_ki
@@ -189,24 +189,23 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggHg_config
-   use ggHg_model, only: Nf, Nfgen, mT, mH, mZ, mW, GF, e
+   use ggHg_model, only:  set_parameter
    implicit none
+   integer :: ierr = 0
 
    ! gf == Pi*alp/(Sqrt[2]*mw^2*(1-mw^2/mz^2)
    ! alp = e^2/(4*Pi)
    ! e = 0.3
    ewchoice = 1
-   GF = 0.000011663700000_ki
-   mZ = 90.1861_ki
-   mW = 80.0_ki
-   e = 0.3_ki
-   !mW = mZ * sqrt(1.0_ki - 0.4808222_ki**2)
 
-   Nf    = 1.0_ki
-   Nfgen = 1.0_ki
-
-   mT = 171.2000000000000_ki
-   mH = 125.0000000000000_ki
+   call set_parameter("GF", 0.000011663700000_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 90.1861_ki, 0.0_ki, ierr)
+   call set_parameter("mW", 80.0_ki, 0.0_ki, ierr)
+   call set_parameter("e", 0.3_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 1.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
+   call set_parameter("mT", 171.2000000000000_ki, 0.0_ki, ierr)
+   call set_parameter("mH", 125.0000000000000_ki, 0.0_ki, ierr)
 
 end subroutine setup_parameters
 

@@ -30,8 +30,8 @@ function     reference_amp(vecs, scale2) result(xamp)
    use cache, only: allocate_cache, clear_cache, reset_cache
    use array, only: packb
    implicit none
-   ! This routine implements equations (D.16)-(D.18) in
-   ! Ref. [1] (see README).
+   ! This routine implements equations (D.16)-(D.18) from 
+   ! hep-ph/0201036 (see also README).
    ! A factor of alpha_s/2/pi * (4 pi)^eps / Gamma(1-eps)
    ! has been factored out from the result
 

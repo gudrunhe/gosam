@@ -96,8 +96,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use gguudd_config, only: renormalisation, convert_to_thv !, &
-   use gguudd_model, only: Nf, Nfgen, mT
+   use gguudd_config, only: renormalisation, convert_to_thv
    implicit none
 
    renormalisation = 1

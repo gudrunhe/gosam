@@ -150,19 +150,20 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ddeeg_config
-   use ddeeg_model, only: mW, mZ, wZ, Nf, Nfgen, alpha
+   use ddeeg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
 
-   mW = 80.44_ki
-   mZ = 91.1876_ki
-   wZ = 2.4952_ki
-   alpha = 1.0_ki/132.6844139_ki
+   call set_parameter("mW", 80.44_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("wZ", 2.4952_ki, 0.0_ki, ierr)
+   call set_parameter("alpha", 1.0_ki/132.6844139_ki, 0.0_ki, ierr)
 
-   Nf = 5.0_ki
-   Nfgen = 5.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .false.
 end subroutine setup_parameters
@@ -273,7 +274,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    amp(1) =  1.40892172309674130E-002_ki
    amp(2) = -1.21173922992901528E-002_ki
    amp(3) = -7.19484295416346949E-003_ki
-   
+
    amp(1:3) = amp(1:3) / (0.118_ki/2.0_ki/pi)
 
    ! Reference result in dred -> convert to thv

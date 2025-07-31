@@ -126,18 +126,19 @@ contains
    end  function rel_diff
 
    subroutine     shake_gauge_parameters(delta)
-      use yyyy_model, only: gauge1z, gauge2z, gauge3z, gauge4z
+      use yyyy_model, only: set_parameter
       implicit none
+      integer :: ierr = 0
       real(ki), intent(in) :: delta
 
       real(ki), dimension(4) :: harvest
 
       call random_number(harvest)
 
-      gauge1z = delta * (harvest(1) - 0.5_ki)
-      gauge2z = delta * (harvest(2) - 0.5_ki)
-      gauge3z = delta * (harvest(3) - 0.5_ki)
-      gauge4z = delta * (harvest(4) - 0.5_ki)
+      call set_parameter("gauge1z", delta * (harvest(1) - 0.5_ki), 0.0_ki, ierr)
+      call set_parameter("gauge2z", delta * (harvest(2) - 0.5_ki), 0.0_ki, ierr)
+      call set_parameter("gauge3z", delta * (harvest(3) - 0.5_ki), 0.0_ki, ierr)
+      call set_parameter("gauge4z", delta * (harvest(4) - 0.5_ki), 0.0_ki, ierr)
    end subroutine shake_gauge_parameters
 
    subroutine get_reference_amps(vecs,scale2,mf,amps)

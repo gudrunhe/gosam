@@ -110,18 +110,18 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use udene_config, only: renormalisation !, &
-       !      & reduction_interoperation 
-   use udene_model, only: mdlMW, mdlwW, mdlSW, mdls12, mdls23, mdls13
+   use udene_config, only: renormalisation
+   use udene_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
-   mdlMW = 80.376_ki
-   mdlwW = 2.124_ki
-   mdlSW = 0.4723042_ki
+   call set_parameter("mdlMW", 80.376_ki, 0.0_ki , ierr)
+   call set_parameter("mdlwW", 2.124_ki, 0.0_ki , ierr)
+   call set_parameter("mdlSW", 0.4723042_ki, 0.0_ki , ierr)
 
-   mdls13 = 0.0_ki
-   mdls23 = 0.0_ki
-   mdls12 = sqrt(1.0_ki - 0.9744362988514740_ki**2)
+   call set_parameter("mdls13", 0.0_ki, 0.0_ki , ierr)
+   call set_parameter("mdls23", 0.0_ki, 0.0_ki , ierr)
+   call set_parameter("mdls12", sqrt(1.0_ki - 0.9744362988514740_ki**2), 0.0_ki , ierr)
 
    renormalisation = 1
 
@@ -148,7 +148,9 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    real(ki), dimension(4, 4) :: xvecs
    real(ki) :: xscale2
 
-    ! rescaling of all dimensionful quantities that enter the calculation
+
+   ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: cannot use 'set_parameter' here because this also recalculates sinW 
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mdlMW = mdlMW / Q

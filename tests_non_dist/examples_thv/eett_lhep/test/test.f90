@@ -3,7 +3,6 @@ use eett_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams
 use eett_matrix, only: initgolem, exitgolem
 use eett_kinematics, only: inspect_kinematics, init_event
 use eett_groups, only: tear_down_golem95
-use eett_rambo
 implicit none
 
 ! Note: I also did a cross-check with CalcHEP for the leading order.
@@ -47,8 +46,6 @@ call initgolem()
 
 call load_reference_kinematics(vecs, scale2)
 
-!call ramb(8000._ki**2,vecs)
-
 call init_event(vecs)
 call inspect_kinematics(logf)
 
@@ -56,11 +53,6 @@ call compute_gosam_result(vecs, scale2, gosam_amp)
 call tear_down_golem95()
 
 call compute_reference_result(vecs, scale2, ref_amp)
-
-! print *, ">>> ", gosam_amp(1), ref_amp(1), &
-!      & gosam_amp(1)/ref_amp(1), &
-!      & gosam_amp(1)-ref_amp(1), &
-!      & (gosam_amp(1)-ref_amp(1))/gosam_amp(0)
 
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
@@ -113,7 +105,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
- 
+
    vecs(1,:) = (/ 74.7646520969852_ki, 0.0_ki, 0.0_ki, 74.7646520969852_ki /)
    vecs(2,:) = (/ 6067.88254935176_ki, 0.0_ki, 0.0_ki, -6067.88254935176_ki /)
    vecs(3,:) = (/ 5867.13826404309_ki,  16.7946967430656_ki, &
@@ -130,25 +122,23 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_thv !, &
-       !      & reduction_interoperation
-   use eett_model, only: Nf, Nfgen, mdlMtop, mdlMZ, mdlwZ, mdlSW
+   use eett_config, only: renormalisation, convert_to_thv
+   use eett_model, only: set_parameter
    use analytic, only: include_Z
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 2 ! only finite gamma5 renorm
 
-   ! reduction_interoperation = 0
+   call set_parameter("mdlMtop", 172.5_ki, 0.0_ki, ierr)
 
-   mdlMtop = 172.5_ki
+   call set_parameter("mdlMZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("mdlwZ", 2.4952_ki, 0.0_ki, ierr)
 
-   mdlMZ = 91.1876_ki
-   mdlwZ = 2.4952_ki
+   call set_parameter("mdlSW", 0.47303762_ki, 0.0_ki, ierr)
 
-   mdlSW = 0.47303762_ki
-
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    include_Z = .true.
 
@@ -179,6 +169,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    logical :: ok
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: Cannot use 'set_parameter' for this because then also all dependent 
+   !       parameters are recalculated
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mdlMtop = mdlMtop / Q

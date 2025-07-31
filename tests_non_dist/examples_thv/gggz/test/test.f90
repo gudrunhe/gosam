@@ -122,19 +122,19 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use gggz_config
-   use gggz_model, only: Nf, Nfgen, mZ, mW, mU
+   use gggz_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 0
-   ! reduction_interoperation = 0
 
-   mZ = 91.1876_ki
-   mW = mZ * sqrt(1.0_ki - 0.4808222_ki**2)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("mW", 91.1876_ki * sqrt(1.0_ki - 0.4808222_ki**2), 0.0_ki, ierr)
 
-   Nf    = 2.0_ki
-   Nfgen = 2.0_ki
+   call set_parameter("Nf", 2.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 2.0_ki, 0.0_ki, ierr)
 
-   mU = 2.0_ki
+   call set_parameter("mU", 2.0_ki, 0.0_ki, ierr)
 
    convert_to_thv = .false.
 end subroutine setup_parameters

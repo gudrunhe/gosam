@@ -112,11 +112,12 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use qqtth_model, only: mT, mH
+   use qqtth_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
-   mH    = 125.0_ki
-   mT    = 171.2_ki
+   call set_parameter("mH", 125.0_ki, 0.0_ki, ierr)
+   call set_parameter("mT", 171.2_ki, 0.0_ki, ierr)
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
