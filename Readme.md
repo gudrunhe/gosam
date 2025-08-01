@@ -146,4 +146,4 @@ Scientific publications using GoSam or any modified version of it or any code li
 
  * J. Braun, B. Campillo Aveleira, G. Heinrich, M. Hoefer, S.P. Jones, M. Kerner, J. Lang, V. Magerya,\
         _One-Loop Calculations in Effective Field Theories with GoSam-3.0_,\
-        arXiv:2507.23549.
+        [[arXiv:2507.23549 [hep-ph]](https://arxiv.org/abs/2507.23549)].
