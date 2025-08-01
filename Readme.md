@@ -2,12 +2,12 @@
     #   __   __   ___   __   __  __                      GoSam                     #
     #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop             #
     # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
-    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.x.x                     #
+    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.0.0                     #
     #                                                                              #
     #                                    (c) The GoSam Collaboration 2011-2025     #
     #                                                                              #
     #       AUTHORS:                                                               #
-    #        * Jens Braun                       <j.braun@kit.edu>                  #
+    #        * Jens Braun                       <jens.braun2@kit.edu>              #
     #        * Benjamin Campillo  Aveleira      <benjamin.campillo@kit.edu>        #
     #        * Gudrun Heinrich                  <gudrun.heinrich@kit.edu>          #
     #        * Marius Hoefer                    <marius.hoefer@kit.edu>            #
@@ -145,5 +145,5 @@ Scientific publications using GoSam or any modified version of it or any code li
 		  Eur. Phys. J. C __74__ (2014) 8,  3001 [[arXiv:1404.7096 [hep-ph]](https://arxiv.org/abs/1404.7096)].
 
  * J. Braun, B. Campillo Aveleira, G. Heinrich, M. Hoefer, S.P. Jones, M. Kerner, J. Lang, V. Magerya,\
-        _One-loop calculations in Effective Field Theories with GoSam-3.0_,\
-        arXiv:2507.xxxx.
+        _One-Loop Calculations in Effective Field Theories with GoSam-3.0_,\
+        arXiv:2507.23549.

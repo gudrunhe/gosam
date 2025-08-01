@@ -14,7 +14,7 @@ PATTERN_TOPOLOPY_CT = "topoct"
 PATTERN_TOPOLOPY_VIRT = "topovirt"
 
 AUTHORS = {
-    "Jens Braun": ["jens.braun@student.kit.edu"],
+    "Jens Braun": ["jens.braun2@.kit.edu"],
     "Benjamin Campillo Aveleira": ["benjamin.campillo@kit.edu"],
     "Gudrun Heinrich": ["gudrun.heinrich@kit.edu"],
     "Marius Hoefer": ["marius.hoefer@kit.edu"],
@@ -57,15 +57,25 @@ LICENSE = [
     # "  You should have received a copy of the GNU General Public License",
     # "  along with this program.  If not, see http://www.gnu.org/licenses/.",
     # "",
-    "  Scientific publications prepared using the present version of",
-    "  GoSam or any modified version of it or any code linking to GoSam",
-    "  or parts of it should make a clear reference to the publication:",
+    "  Scientific publications using GoSam or any modified version of",
+    "  it or any code linking to GoSam or parts of it should make a clear",
+    "  reference to the publications:",
+    "",
+    "      G. Cullen et al.,",
+    "      ``Automated One-Loop Calculations with GoSam'',",
+    "      Eur. Phys. J. C 72 (2012), 1889",
+    "      [arXiv:1111.2034 [hep-ph]].",
     "",
     "      G. Cullen et al.,",
     "      ``GoSam-2.0: a tool for automated one-loop calculations",
-    "                        within the Standard Model and Beyond'',",
+    "        within the Standard Model and Beyond'',",
     "      Eur. Phys. J. C 74 (2014) 8,  3001",
     "      [arXiv:1404.7096 [hep-ph]].",
+    "",
+    "      J. Braun et al.,",
+    "      ``One-Loop Calculations in Effective Field Theories",
+    "        with GoSam-3.0'',",
+    "      [arXiv:2507.23549 [hep-ph]].",
 ]
 
 SCATTER_ASCIIART = [
