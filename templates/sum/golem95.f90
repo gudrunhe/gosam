@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]golem95
    use precision_golem, only: ki_gol => ki
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
    private[%
 
@@ -22,16 +22,14 @@ contains[%
 !---#[ subroutine reconstruct_group[% grp %]:
 subroutine     reconstruct_group[% grp %](coeffs)
    use tens_rec
-   use [% process_name asprefix=\_ %]config
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config
    use [% process_name asprefix=\_
        %]groups, only:[%
          @if use_flags_1 %] evaluate_virt_diagram,[%
          @end @if %] tensrec_info_group[% grp %][%
          @for diagrams group=grp var=DIAG idxshift=1 %]
-   use [% process_name asprefix=\_ %]d[% DIAG %]l1, only: numerator_d[% DIAG %] => numerator_golem95[%
-            @if internal GENERATE_DERIVATIVES %]
+   use [% process_name asprefix=\_ %]d[% DIAG %]l1, only: numerator_d[% DIAG %] => numerator_golem95
    use [% process_name asprefix=\_ %]d[% DIAG %]l1d, only: reconstruct_d[% DIAG %][%
-            @end @if %][%
          @end @for %]
    implicit none
    type(tensrec_info_group[% grp %]), intent(out) :: coeffs[%
@@ -39,12 +37,10 @@ subroutine     reconstruct_group[% grp %](coeffs)
    !------#[ Diagram [% DIAG %]:[%
       @if use_flags_1 %]
    if(evaluate_virt_diagram([% DIAG %])) then[%
-      @end @if %][%
-      @if internal GENERATE_DERIVATIVES %]
+      @end @if %]
       if (tens_rec_by_derivatives) then
          call reconstruct_d[% DIAG %](coeffs)
       else[%
-      @end @if %][%
       @if eval rank .eq. 0 %]
          coeffs%coeffs_[% DIAG %] = &
             & numerator_d[% DIAG %]((/0.0_ki_gol, 0.0_ki_gol, 0.0_ki_gol, &
@@ -68,10 +64,8 @@ subroutine     reconstruct_group[% grp %](coeffs)
                @end @if %][%
             @end @with %][%
          @end @select %])[%
-      @end @if %][%
-      @if internal GENERATE_DERIVATIVES %]
+      @end @if %]
       end if[%
-      @end @if %][%
       @if use_flags_1 %]
    end if[%
       @end @if %]

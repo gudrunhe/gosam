@@ -105,7 +105,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
    real(ki), intent(out) :: scale2
- 
+
    vecs(1,:) = (/ 74.7646520969852_ki, 0.0_ki, 0.0_ki, 74.7646520969852_ki /)
    vecs(2,:) = (/ 6067.88254935176_ki, 0.0_ki, 0.0_ki, -6067.88254935176_ki /)
    vecs(3,:) = (/ 5867.13826404309_ki,  16.7946967430656_ki, &
@@ -122,37 +122,27 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use eett_config, only: renormalisation, convert_to_cdr !, &
-       !      & samurai_test, samurai_verbosity, samurai_scalar, &
-       !      & reduction_interoperation
-   use eett_model, only: Nf, Nfgen, mdlMtop, mdlMZ, mdlwZ, mdlSW
+   use eett_config, only: renormalisation, convert_to_thv
+   use eett_model, only: set_parameter
    use analytic, only: include_Z
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 0
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
-   ! reduction_interoperation = 0
+   call set_parameter("mdlMtop", 172.5_ki, 0.0_ki, ierr)
 
-   mdlMtop = 172.5_ki
+   call set_parameter("mdlMZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("mdlwZ", 2.4952_ki, 0.0_ki, ierr)
 
-   mdlMZ = 91.1876_ki
-   mdlwZ = 2.4952_ki
+   call set_parameter("mdlSW", 0.47303762_ki, 0.0_ki, ierr)
 
-   mdlSW = 0.47303762_ki
-
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 
    include_Z = .true.
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
@@ -179,6 +169,8 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    logical :: ok
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: Cannot use 'set_parameter' for this because then also all dependent 
+   !       parameters are recalculated
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mdlMtop = mdlMtop / Q

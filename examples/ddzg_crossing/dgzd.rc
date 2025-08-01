@@ -16,11 +16,12 @@ zero=mU,mD,mS,mC,mB,me,mmu
 qgraf.options=onshell,notadpole,nosnail
 
 # No Higgs propagators
-qgraf.verbatim=true=iprop[H,0,0];
+filter.particles=H:0
 
 symmetries=family
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true
 r2=implicit
 
 extensions=gaugecheck

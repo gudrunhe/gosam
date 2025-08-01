@@ -1,22 +1,23 @@
 module [% name asprefix=\_ %]matrix
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
    private
 
    public :: initgolem, exitgolem, samplitude
    public :: samplitudel0, samplitudel1, ir_subtraction
    public :: OLP_spin_correlated_lo2, OLP_color_correlated
+   public :: spin_correlated_lo2_whizard, spin_correlated_lo2
    ! TODO:
-   ! public :: color_correlated_lo2, spin_correlated_lo2
+   ! public :: color_correlated_lo2
 
 
 contains
 
    pure function prefactor()
-      use [% process_name asprefix=\_ %]config, only: &
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: &
       & include_color_avg_factor, include_helicity_avg_factor, &
       & include_symmetry_factor
-      use [% process_name asprefix=\_ %]model, only: NC
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model, only: NC
       use [% process_name asprefix=\_ %]kinematics, only: &
       & in_helicities, symmetry_factor
       use [% process_name asprefix=\_ %]color, only: incolors
@@ -102,7 +103,7 @@ contains
    end subroutine samplitude
 
    function     samplitudel0(vecs, h) result(amp)
-      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel0
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel0, orig_func_h => samplitudel0_h
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       integer, optional, intent(in) :: h
@@ -112,7 +113,7 @@ contains
       call twist_momenta(vecs, new_vecs)
 
       if (present(h)) then
-         amp = orig_func(new_vecs, h)
+         amp = orig_func_h(new_vecs, h)
       else
          amp = orig_func(new_vecs)
       end if
@@ -120,7 +121,7 @@ contains
    end function samplitudel0
 
    function     samplitudel1(vecs,scale2,ok,rat2,h) result(amp)
-      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel1
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => samplitudel1, orig_func_h => samplitudel1_h
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
       logical, intent(out) :: ok
@@ -137,7 +138,7 @@ contains
          print *, 'ERROR: Cannot select helicity when code was generated'
          print *, 'with "helsum=1".'[%
          @else %]
-         amp = orig_func(new_vecs, scale2, ok, rat2, h)[%
+         amp = orig_func_h(new_vecs, scale2, ok, rat2, h)[%
          @end @if %]
       else
          amp = orig_func(new_vecs, scale2, ok, rat2)
@@ -199,6 +200,44 @@ contains
    end subroutine OLP_spin_correlated_lo2
 
 
+   subroutine spin_correlated_lo2(vecs, bornsc)
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => spin_correlated_lo2
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%num_legs%], 4, 4) :: bornsc
+
+      real(ki), dimension([%num_legs%], 4) :: new_vecs
+
+      call twist_momenta(vecs, new_vecs)
+
+      call orig_func(new_vecs, bornsc)
+
+      call twist_result_spin_correlated_lo2(bornsc)
+
+      bornsc=bornsc*prefactor()
+
+   end subroutine spin_correlated_lo2
+
+
+   subroutine spin_correlated_lo2_whizard(vecs, bornsc)
+      use [% process_name asprefix=\_ %]matrix, only: orig_func => spin_correlated_lo2_whizard
+      implicit none
+      real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
+      real(ki), dimension([%num_legs%], 4, 4) :: bornsc
+      
+      real(ki), dimension([%num_legs%], 4) :: new_vecs
+
+      call twist_momenta(vecs, new_vecs)
+
+      call orig_func(new_vecs, bornsc)
+
+      call twist_result_spin_correlated_lo2_whizard(bornsc)
+
+      bornsc=bornsc*prefactor()
+
+   end subroutine spin_correlated_lo2_whizard
+
+
    pure subroutine twist_momenta(vecs, new_vecs)
       implicit none
       real(ki), dimension([%num_legs%], 4), intent(in) :: vecs
@@ -228,5 +267,24 @@ contains
       @end @for %]
    end subroutine twist_result_OLP_color_correlated
 
+   pure subroutine twist_result_spin_correlated_lo2_whizard(bornsc)
+     implicit none
+     real(ki), dimension([%num_legs%], 4, 4), intent(inout) :: bornsc
+     real(ki), dimension([%num_legs%], 4, 4) :: temp
+     temp = bornsc[%
+     @for crossing %]
+     bornsc([% index %],:,:) = temp([% $_ %],:,:)[% 
+     @end @for %]
+   end subroutine twist_result_spin_correlated_lo2_whizard
+      
+   pure subroutine twist_result_spin_correlated_lo2(bornsc)
+     implicit none
+     real(ki), dimension([%num_legs%], 4, 4), intent(inout) :: bornsc
+     real(ki), dimension([%num_legs%], 4, 4) :: temp
+     temp = bornsc[%
+     @for crossing %]
+     bornsc([% index %],:,:) = temp([% $_ %],:,:)[%
+     @end @for %]
+   end subroutine twist_result_spin_correlated_lo2
 
 end module [% name asprefix=\_ %]matrix

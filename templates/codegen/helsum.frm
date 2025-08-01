@@ -42,7 +42,7 @@ Symbol Qt2,QspQ[%
 AutoDeclare Symbol c;
 AutoDeclare Vector spva;
 S Nfrat;
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -52,8 +52,6 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
-[% 
-@if internal GENERATE_DERIVATIVES %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -63,7 +61,7 @@ Vectors Q[%
    @for particles lightlike vector %],e[%index%][%
    @end @for %][%
 @end @if %];
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -73,8 +71,6 @@ AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
 CF Wrapper;
-
-[%@end @if%]
 
 #define HELS "[% @for helicities generated %][%helicity%],[%
 @end @for%]"

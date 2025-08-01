@@ -16,7 +16,7 @@ double precision, parameter :: eps = 1.0d-4
 logical :: success
 
 real(ki), dimension(4, 4) :: vecs
-double precision :: scale2
+real(ki) :: scale2
 
 double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
@@ -90,7 +90,7 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    use ggtt_kinematics, only: adjust_kinematics
    implicit none
    real(ki), dimension(4, 4), intent(out) :: vecs
-   double precision, intent(out) :: scale2
+   real(ki), intent(out) :: scale2
  
    vecs(1,:)= (/   137.84795086008967_ki,   0.0000000000000000_ki, &
             &      0.0000000000000000_ki,   137.84795086008967_ki/)
@@ -111,19 +111,17 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ggtt_config
-   use ggtt_model, only: Nf, Nfgen, mT => mdlMtop, gauge1z
+   use ggtt_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
    renorm_logs = .true.
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 
-   ! reduction_interoperation = 0
-   !samurai_group_numerators = .false.
-
-   mT    = 171.2_ki
-   Nf    = 5.0_ki
-   Nfgen = 1.0_ki
+   call set_parameter("mdlMtop", 171.2_ki, 0.0_ki, ierr)
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 1.0_ki, 0.0_ki, ierr)
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
@@ -132,7 +130,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
-   double precision, intent(in) :: scale2
+   real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
    integer :: prec
 
@@ -158,7 +156,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    implicit none
 
    real(ki), dimension(4, 4), intent(in) :: vecs
-   double precision, intent(in) :: scale2
+   real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
 
    double precision, parameter :: alphas = 0.13d0

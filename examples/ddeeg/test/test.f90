@@ -150,28 +150,22 @@ end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
    use ddeeg_config
-   use ddeeg_model, only: mW, mZ, wZ, Nf, Nfgen, alpha
+   use ddeeg_model, only: set_parameter
    implicit none
+   integer :: ierr = 0
 
    renormalisation = 1
 
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2 
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
 
-   mW = 80.44_ki
-   mZ = 91.1876_ki
-   wZ = 2.4952_ki
-   alpha = 1.0_ki/132.6844139_ki
+   call set_parameter("mW", 80.44_ki, 0.0_ki, ierr)
+   call set_parameter("mZ", 91.1876_ki, 0.0_ki, ierr)
+   call set_parameter("wZ", 2.4952_ki, 0.0_ki, ierr)
+   call set_parameter("alpha", 1.0_ki/132.6844139_ki, 0.0_ki, ierr)
 
-   Nf = 5.0_ki
-   Nfgen = 5.0_ki
+   call set_parameter("Nf", 5.0_ki, 0.0_ki, ierr)
+   call set_parameter("Nfgen", 5.0_ki, 0.0_ki, ierr)
 
-   convert_to_cdr = .false.
+   convert_to_thv = .false.
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)

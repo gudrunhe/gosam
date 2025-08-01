@@ -9,7 +9,7 @@ in=1, -1
 out=23, 23, 1, -1
 
 model=smdiag
-# We only need one quark flavour 
+# We only need one quark flavour
 # running in the fermionic loops:
 model.options=  GF:0.00001166390,mW:80.419,mZ:91.188,wW:0,wZ:0
 
@@ -20,8 +20,9 @@ zero=mU,mD,mS,mC,mB,me,mmu
 
 qgraf.options=onshell,notadpole,nosnail
 
-# No other particles than gluons, Higgs and 
+# No other particles than gluons, Higgs and
 # one quark flavour [d] running in the loops:
-qgraf.verbatim=true=iprop[H,T,0,0];
+filter.particles=H:0,T:0
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true

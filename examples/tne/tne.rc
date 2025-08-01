@@ -12,9 +12,7 @@ one=gs
 
 helicities=[+-]--+[-+]
 
-qgraf.options=onshell,nosnail,notadpole
-qgraf.verbatim=\\\n\
-     true = iprop[phim,phip,chi,H,0,0];\\n\\\n\
-     true = iprop[Wp,1,1];
+filter.particles=phim:0,phip:0,chi:0,H:0,Wp:1
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true

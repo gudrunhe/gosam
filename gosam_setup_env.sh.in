@@ -1,0 +1,3 @@
+export PATH="@prefix@/@bindir@":"$PATH"
+export PYTHONPATH="@py_install_dir@":"$PYTHONPATH"
+export PKG_CONFIG_PATH="@prefix@/@libdir@/pkgconfig":"$PKG_CONFIG_PATH"

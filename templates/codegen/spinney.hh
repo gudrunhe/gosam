@@ -8,7 +8,7 @@ CFunctions Spaa, Spab, Spba, Spbb;
 CFunctions Spa2(antisymmetric), Spb2(antisymmetric);
 CFunction SpDenominator;
 Vectors vDUMMY1, ..., vDUMMY4;
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Symbols sDUMMY1, ..., sDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 Function nDUMMY1, ..., nDUMMY3;

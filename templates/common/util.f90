@@ -1,7 +1,7 @@
 [%' vim: sw=3:syntax=golem
 '%]module     [% process_name asprefix=\_ %]util
    use [% process_name asprefix=\_ %]color, only: numcs
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
    private
 
@@ -9,6 +9,7 @@
       module procedure square_0l_0l
       module procedure square_0l_1l
       module procedure square_0l_0l_mat
+      module procedure square_0l_0l_mat_interference
    end interface square
 
    interface     cond
@@ -31,9 +32,6 @@
    public :: cond[%
 @if extension ninja %]
    public :: cond_t[%
-@end @if %][%
-@if extension samurai %]
-   public :: cmplx_sam, cmplx_ki[%
 @end @if %]
 contains
    pure function metric_tensor(mu,nu) result(d)
@@ -49,7 +47,7 @@ contains
       end if
    end  function metric_tensor
 
-   pure function cond_q_mu2(cnd, brack, Q, mu2) result(cond)
+   function cond_q_mu2(cnd, brack, Q, mu2) result(cond)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: Q
@@ -58,8 +56,8 @@ contains
       complex(ki) :: cond
 
       interface
-         pure function brack(inner_Q, inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+         function brack(inner_Q, inner_mu2)
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_Q
             complex(ki), intent(in) :: inner_mu2
@@ -74,7 +72,7 @@ contains
       end if
    end  function cond_q_mu2
 
-   pure function cond_mu2(cnd, brack, mu2) result(cond)
+   function cond_mu2(cnd, brack, mu2) result(cond)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), intent(in) :: mu2
@@ -82,8 +80,8 @@ contains
       complex(ki) :: cond
 
       interface
-         pure function brack(inner_mu2)
-            use [% process_name asprefix=\_ %]config, only: ki
+         function brack(inner_mu2)
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), intent(in) :: inner_mu2
             complex(ki) :: brack
@@ -98,15 +96,15 @@ contains
    end  function cond_mu2
 
 [% @if extension ninja %]
-   pure subroutine cond_mu_r1(cnd, brack, a, coeffs)
+   subroutine cond_mu_r1(cnd, brack, a, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_co)
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(0:*), intent(inout) :: inner_co
@@ -118,15 +116,15 @@ contains
       end if
    end  subroutine cond_mu_r1
 
-   pure subroutine cond_mu_r2(cnd, brack, a, b, coeffs)
+   subroutine cond_mu_r2(cnd, brack, a, b, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a, b
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_b, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_b, inner_co)
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -139,7 +137,7 @@ contains
       end if
    end  subroutine cond_mu_r2
 
-   pure subroutine cond_abc_p3(cnd, brack, a, b, c, param, coeffs)
+   subroutine cond_abc_p3(cnd, brack, a, b, c, param, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a, b, c
@@ -147,8 +145,8 @@ contains
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+         subroutine brack(inner_a, inner_b, inner_c, inner_param, inner_co)
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a
             complex(ki), dimension(4), intent(in) :: inner_b
@@ -163,7 +161,7 @@ contains
       end if
    end  subroutine cond_abc_p3
 
-   pure subroutine    cond_abc_p2(cnd, brack, a0, a1, b, c, param, coeffs)
+   subroutine    cond_abc_p2(cnd, brack, a0, a1, b, c, param, coeffs)
       implicit none
       logical, intent(in) :: cnd
       complex(ki), dimension(4), intent(in) :: a0, a1, b, c
@@ -171,9 +169,9 @@ contains
       complex(ki), dimension(0:*), intent(inout) :: coeffs
 
       interface
-         pure subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
+         subroutine brack(inner_a0, inner_a1, inner_b, inner_c, inner_param,&
            & inner_co)
-            use [% process_name asprefix=\_ %]config, only: ki
+            use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
             implicit none
             complex(ki), dimension(4), intent(in) :: inner_a0
             complex(ki), dimension(4), intent(in) :: inner_a1
@@ -215,12 +213,12 @@ contains
    end subroutine inspect_lo_diagram
 
 !   subroutine     inspect_nlo_diagram(values, d, h, [%
-      @if generate_lo_diagrams %][% @else %]c, [% @end @if %]unit)
+      @if generate_tree_diagrams %][% @else %]c, [% @end @if %]unit)
 !      implicit none
 !
 !      complex(ki), dimension(0:2), intent(in) :: values
 !      integer, intent(in) :: d, h[%
-      @if generate_lo_diagrams %][% @else %], c[% @end @if %]
+      @if generate_tree_diagrams %][% @else %], c[% @end @if %]
 !      integer, intent(in), optional :: unit
 !
 !      integer :: ch
@@ -232,50 +230,28 @@ contains
 !      end if
 !
 !      write(ch,'(A12,I6,A1,I3,[%
-      @if generate_lo_diagrams %][% @else %]A1,I3,[% @end @if
+      @if generate_tree_diagrams %][% @else %]A1,I3,[% @end @if
       %]A11,G23.16,A1,G23.16,A2)') &
 !         & "evt.set_nlo(", d, ",", h, [%
-      @if generate_lo_diagrams %][% @else %]",", c, [% @end @if
+      @if generate_tree_diagrams %][% @else %]",", c, [% @end @if
       %]&
 !         & ",2,complex(", real(values(2)), ",", aimag(values(2)), "))"
 !      write(ch,'(A12,I6,A1,I3,[%
-      @if generate_lo_diagrams %][% @else %]A1,I3,[% @end @if
+      @if generate_tree_diagrams %][% @else %]A1,I3,[% @end @if
       %]A11,G23.16,A1,G23.16,A2)') &
 !         & "evt.set_nlo(", d, ",", h, [%
-      @if generate_lo_diagrams %][% @else %]",", c, [% @end @if
+      @if generate_tree_diagrams %][% @else %]",", c, [% @end @if
       %]&
 !         & ",1,complex(", real(values(1)), ",", aimag(values(1)), "))"
 !      write(ch,'(A12,I6,A1,I3,[%
-      @if generate_lo_diagrams %][% @else %]A1,I3,[% @end @if
+      @if generate_tree_diagrams %][% @else %]A1,I3,[% @end @if
       %]A11,G23.16,A1,G23.16,A2)') &
 !         & "evt.set_nlo(", d, ",", h, [%
-      @if generate_lo_diagrams %][% @else %]",", c, [% @end @if
+      @if generate_tree_diagrams %][% @else %]",", c, [% @end @if
       %]&
 !         & ",0,complex(", real(values(0)), ",", aimag(values(0)), "))"
 !   end subroutine inspect_nlo_diagram
-[%
-@if extension samurai %]
-   !---#[ function cmplx_sam:
-   pure elemental function cmplx_sam(z) result(res)
-      use precision, only: ki_sam => ki
-      implicit none
-      complex(ki), intent(in) :: z
-      complex(ki_sam) :: res
 
-      res = cmplx(real(z, ki_sam), aimag(z), ki_sam)
-   end function cmplx_sam
-   !---#] function cmplx_sam:
-   !---#[ function cmplx_ki:
-   pure elemental function cmplx_ki(z) result(res)
-      use precision, only: ki_sam => ki
-      implicit none
-      complex(ki_sam), intent(in) :: z
-      complex(ki) :: res
-
-      res = cmplx(real(z, ki), aimag(z), ki)
-   end function cmplx_ki
-   !---#] function cmplx_ki:[%
-@end @if %]
    !---#[ function square :
    pure function square_0l_0l(color_vector) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
@@ -312,5 +288,20 @@ contains
       v2 = conjg(color_vector)
       amp = real(sum(v1(:) * v2(:)), ki)
    end function  square_0l_0l_mat
+
+   pure function square_0l_0l_mat_interference(color_vector1, cmat, color_vector2) result(amp)
+      implicit none
+      complex(ki), dimension(numcs), intent(in) :: color_vector1, color_vector2
+      complex(ki), dimension(numcs,numcs), intent(in) :: cmat
+      real(ki) :: amp
+      complex(ki), dimension(numcs) :: v1, v2
+
+      v1 = matmul(cmat, color_vector1)
+      v2 = conjg(color_vector2)
+      amp = real(sum(v1(:) * v2(:)), ki)
+      v1 = matmul(cmat, color_vector2)
+      v2 = conjg(color_vector1)
+      amp = amp + real(sum(v1(:) * v2(:)), ki)
+   end function  square_0l_0l_mat_interference
    !---#] function square :
 end module [% process_name asprefix=\_ %]util

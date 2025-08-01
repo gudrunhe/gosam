@@ -12,8 +12,8 @@ out=11, -12
 order=QCD, 0, 2
 
 # Only W+ in s-channel, no Goldstone bosons
-qgraf.verbatim=\
-true=bridge[Wp,Wm,1,100];
+filter.lo=lambda d: d.bridge(["Wp", "Wm"]) > 0
+filter.nlo=lambda d: d.bridge(["Wp", "Wm"]) > 0
 
 
 model=sm
@@ -24,6 +24,7 @@ one=gs,e
 # There's only one non-zero helicity
 helicities=+--+
 
-regularisation_scheme=cdr
+regularisation_scheme=dred
+convert_to_thv=true
 
 polvec=explicit

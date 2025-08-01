@@ -110,36 +110,24 @@ pure subroutine load_reference_kinematics(vecs, scale2)
 end  subroutine load_reference_kinematics
 
 subroutine     setup_parameters()
-   use udene_config, only: renormalisation, convert_to_cdr!, &
-   !    & reduction_interoperation, &
-   !    & samurai_test, samurai_verbosity, samurai_scalar
-   use udene_model, only: mdlWW, mdlGf, mdlaEWM1, mdlMZ, mdlaS
+   use udene_config, only: renormalisation, convert_to_thv
+   use udene_model, only: set_parameter
    implicit none
-
+   integer :: ierr = 0
    real(ki) :: pi
-
-   renormalisation = 0
-
-   ! reduction_interoperation = 1
-
-   ! settings for samurai:
-   ! verbosity: we keep it zero here unless you want some extra files.
-   ! samurai_verbosity = 0
-   ! samurai_scalar: 1=qcdloop, 2=OneLOop
-   ! samurai_scalar = 2
-   ! samurai_test: 1=(N=N test), 2=(local N=N test), 3=(power test)
-   ! samurai_test = 1
-
-   convert_to_cdr = .true.
-
 
    pi = 4.0_ki * atan(1.0_ki)
 
-   mdlMZ = 90.1876_ki
-   mdlWW = 2.085_ki
-   mdlaEWM1 = 127.9_ki
-   mdlGf = 0.0000116637_ki
-   mdlaS = 1.0_ki / (4.0_ki * pi)
+   call set_parameter("mdlMZ", 90.1876_ki, 0.0_ki , ierr)
+   call set_parameter("mdlWW", 2.085_ki, 0.0_ki , ierr)
+   call set_parameter("mdlaEWM1", 127.9_ki, 0.0_ki , ierr)
+   call set_parameter("mdlGf", 0.0000116637_ki, 0.0_ki , ierr)
+   call set_parameter("mdlaS", 1.0_ki / (4.0_ki * pi), 0.0_ki , ierr)
+
+   renormalisation = 0
+
+   convert_to_thv = .true.
+
 end subroutine setup_parameters
 
 subroutine     compute_gosam_result(vecs, scale2, amp)
@@ -166,6 +154,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    logical :: ok
 
    ! rescaling of all dimensionful quantities that enter the calculation
+   ! Note: cannot use 'set_parameter' here because this also recalculates sinW 
    xvecs = vecs / Q
    xscale2 = scale2 / Q ** 2
    mdlMW = mdlMW / Q

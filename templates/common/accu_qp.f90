@@ -1,4 +1,4 @@
-module     [% process_name asprefix=\_ %]accu_qp
+module     accu_qp
    !
    ! Synopsis:    routines for floating-point accumulation
    !              of sums with small relative error
@@ -16,7 +16,7 @@ module     [% process_name asprefix=\_ %]accu_qp
    !              ! output:
    !              !   0.0      1.0
    !
-   use [% process_name asprefix=\_ %]config, only: ki => ki_qp
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki => ki_qp
    implicit none
 
    integer, parameter, private :: min_ex_ki = minexponent(1.0_ki)
@@ -147,4 +147,4 @@ contains
          end do
       end do
    end  function sorted_matmul
-end module [% process_name asprefix=\_ %]accu_qp
+end module accu_qp

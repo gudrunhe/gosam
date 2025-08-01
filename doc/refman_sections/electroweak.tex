@@ -1,0 +1,69 @@
+While \gosam cannot provide the renormalisation in electroweak theory in an automated way, the generation of unrenormalised EW one-loop amplitudes is not a problem. This chapter discusses a few topics peculiar to EW corrections.
+
+\section{Electroweak scheme choice}
+\label{sec:ewchoose}
+When computing amplitudes within the Standard Model, there are different possibilities how to choose which electroweak parameters are considered as input parameters, and which are instead derived ones. When a UFO model is used the input scheme choice is usually fixed by the model itself. Various of the built-in models shipped with \gosam offer the possibility to choose different schemes without changing the model. This can be done in several different ways, depending on whether the scheme might be changed after the generation of the code or not, by setting appropriately the flag \texttt{model.options}.
+
+By default, when the flag is not set in the input card, \gosam{}
+generates a code which uses $\mrm{m_W}$, $\mrm{m_Z}$ and
+$\mrm{\alpha}$ as input parameters, allowing however to change this in
+the generated code, by setting the compile time parameter \texttt{ewchoice} in the
+configuration file \texttt{config.f90} to the desired value. The user can
+choose among 8 different possibilities, which are listed in
+Table~\ref{tab:ewchoose}.  When the electric charge $\mrm{e}$ is set
+algebraically to one, the schemes $6-8$ cannot be used.
+
+\begin{table*}
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|c|l|l|}
+\hline
+ewchoice & input parameters                        & derived parameters                  \\
+\hline
+1        & $\mrm{G_F}$, $\mrm{m_W}$, $\mrm{m_Z}$    & $\mrm{e}$, $\mrm{sw}$              \\
+2        & $\mrm{\alpha}$, $\mrm{m_W}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{sw}$              \\
+3        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{m_Z}$  & $\mrm{e}$, $\mrm{m_W}$             \\
+4        & $\mrm{\alpha}$, $\mrm{sw}$, $\mrm{G_F}$  & $\mrm{e}$, $\mrm{m_W}$             \\
+5        & $\mrm{\alpha}$, $\mrm{G_F}$, $\mrm{m_Z}$ & $\mrm{e}$, $\mrm{m_W}$, $\mrm{sw}$ \\
+6        & $\mrm{e}$, $\mrm{m_W}$, $\mrm{m_Z}$      & $\mrm{sw}$                         \\
+7        & $\mrm{e}$, $\mrm{sw}$, $\mrm{m_Z}$       & $\mrm{m_W}$                        \\
+8        & $\mrm{e}$, $\mrm{sw}$, $\mrm{G_F}$       & $\mrm{m_W}$, $\mrm{m_Z}$           \\
+\hline
+\end{tabular}
+\renewcommand{\arraystretch}{1.25}
+\end{center}
+\caption{Possible choices to select the electroweak scheme.
+To simplify the notation we write the sine of the Weinberg angle as
+$\mrm{sw}$. The lists of derived parameters contain only the
+parameters which are computed and used in the expressions for the
+amplitudes.}\label{tab:ewchoose}
+\end{table*}
+
+
+The flag \texttt{model.options} in the input card allows also to directly
+set the values of the different parameters appearing in the model. If
+the values of exactly three electroweak parameters are
+specified, \gosam{} automatically takes them as input parameters. In
+that case, in order to be able to switch among different schemes after
+code generation, the variable \texttt{ewchoose} also must be added to the
+\texttt{model.options} flag.
+
+
+
+\section{Support of complex masses}
+\label{sec:complexmasses}
+The integral libraries contained in the \gosam{} package as well as the \gosam{} 
+code itself fully support complex masses. This refers to the introduction of 
+finite widths for fermions as well as
+for $W$- and $Z$-bosons. A fully consistent treatment of complex
+$W$- and $Z$-boson masses requires the use of the complex mass scheme~\cite{Denner:2005fg}.
+The boson masses are promoted to complex masses by
+\begin{equation}
+ m_{V}^2 \to \mu_{V}^2 = m_{V}^2 -i m_{V} \Gamma_{V},\quad V=W,Z\;.
+\end{equation}
+In order to maintain gauge invariance this affects the definition of the Weinberg angle:
+\begin{equation}
+ \cos^2\theta_w = \frac{\mu_W^2}{\mu_Z^2}\;.
+\end{equation}
+ To make use of the complex mass scheme the user can select any of the two built-in models \texttt{sm\_complex} and \texttt{smdiag\_complex}, which contain the Standard Model with complex mass scheme, the first with a full CKM matrix, the latter with a diagonal  CKM matrix. An example dealing with a complex top quark mass is given in the \texttt{examples/singletop} subdirectory of the \gosam{} distribution.

@@ -1,0 +1,36 @@
+InterfaceVersion         BLHA2
+CorrectionType           QCD
+IRregularisation         tHV
+CouplingPower QCD        1
+CouplingPower QED        2
+
+
+# channel d d~ -> G G g
+
+AmplitudeType            Tree
+  1  -1 ->  22  22  21
+
+AmplitudeType            ccTree
+  1  -1 ->  22  22  21
+
+AmplitudeType            scTree2
+  1  -1 ->  22  22  21
+
+AmplitudeType            Loop
+  1  -1 ->  22  22  21
+
+
+# channel d g -> G G d
+
+AmplitudeType            Tree
+  1  21 ->  22  22   1
+
+AmplitudeType            ccTree
+  1  21 ->  22  22   1
+
+AmplitudeType            scTree2
+  1  21 ->  22  22   1
+
+AmplitudeType            Loop
+  1  21 ->  22  22   1
+

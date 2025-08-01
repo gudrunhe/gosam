@@ -14,13 +14,12 @@ helicities=0++
 
 r2=explicit
 
-qgraf.options=notadpole,nosnail,onshell
-qgraf.verbatim=true=iprop[U,D,S,C,B,em,mum,taum,0,0];
+filter.particles=U:0,D:0,S:0,C:0,B:0,em:0,mum:0,taum:0
 
 reduction_programs=ninja, golem95
 
 reference-vectors=2:3,3:2
 filter.nlo={ \
-   'fermionic': CHORD([T]) == LOOPSIZE, \
-   'bosonic':   CHORD([T]) != LOOPSIZE \
+   'fermionic': lambda d: d.chord("T") == d.loopsize(), \
+   'bosonic':   lambda d: d.chord("T") != d.loopsize() \
 }

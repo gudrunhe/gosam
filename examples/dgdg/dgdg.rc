@@ -7,12 +7,10 @@ out=1,21
 
 order=QCD, 2, 4
 
-qgraf.verbatim=\
-true=chord[S,C,B,T,0,0];
+filter.paticles=S:0,C:0,B:0,T:0
 
 
 one=gs,e
 zero=mU,mD
 
 helicities=++++, +++-, +-++, +-+-
-

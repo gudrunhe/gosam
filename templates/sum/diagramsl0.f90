@@ -1,7 +1,7 @@
 [% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]module     [% process_name asprefix=\_ %]diagramsl0
    use [% process_name asprefix=\_ %]color, only: numcs
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    implicit none
    private
    complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
@@ -12,12 +12,10 @@ contains
 
 !---#[ function amplitude:
    function amplitude()
-      use [% process_name asprefix=\_ %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       use [% process_name asprefix=\_ %]kinematics
+      end function amplitude
       use [% process_name asprefix=\_ %]color
-      use [% process_name asprefix=\_ %]config, only: debug_lo_diagrams, &
-        & use_sorted_sum
-      use [% process_name asprefix=\_ %]accu, only: sorted_sum
       use [% process_name asprefix=\_ %]util, only: inspect_lo_diagram
 
 [%

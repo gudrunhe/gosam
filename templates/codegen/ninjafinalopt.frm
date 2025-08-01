@@ -1,7 +1,5 @@
 #-
 off statistics;
-[% 
-@if internal GENERATE_DERIVATIVES %]
 Vectors Q[%
 @for particles %],k[% index %][%
    @if is_massive %],l[% index %][%
@@ -11,7 +9,7 @@ Vectors Q[%
    @for particles lightlike vector %],e[%index%][%
    @end @for %][%
 @end @if %];
-Indices iDUMMY1, ..., iDUMMY5;
+Indices iDUMMY1, ..., iDUMMY6;
 Vectors vDUMMY1, ..., vDUMMY4;
 CFunctions fDUMMY1, ..., fDUMMY3;
 CTensors d(symmetric);
@@ -20,32 +18,12 @@ CTensor SUBSCRIPT;
 AutoDeclare Vectors spva;
 AutoDeclare Indices idx, iv;
 CF dotproduct(symmetric);
-CF Wrapper;[%
-@else %][% 
-@if extension ninja %]
-Vectors Q[%
-@for particles %],k[% index %][%
-   @if is_massive %],l[% index %][%
-   @end @if %][%
-@end @for %][%
-@if internal NUMPOLVEC %][%
-   @for particles lightlike vector %],e[%index%][%
-   @end @for %][%
-@end @if %];
-Vectors vDUMMY1, vDUMMY2;
-CTensors d(symmetric);
-AutoDeclare Vectors spva;
-CF dotproduct(symmetric);
-CF Wrapper;[%
-@end @if %][% @end @if %][%
-@if extension qshift%][%
-@else %]
+CF Wrapper;
   CFunction j;                                                                                                                                               
   CTensor ptens;                                                                                                                                             
   Vector Q, p1;                                                                                                                                              
   Vector qshift;                                                                                                                                             
   CFunction fshift;
-[%@end @if %]
 CF abb`DIAG';
 Symbol Qt2,QspQ[%
 @for particles %],Qspk[% index %][%

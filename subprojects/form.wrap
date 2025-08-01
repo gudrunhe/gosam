@@ -1,0 +1,9 @@
+[wrap-file]
+source_url=https://github.com/vermaseren/form/releases/download/v4.2.1/form-4.2.1.tar.gz
+source_filename=form-4.2.1.tar.gz
+source_hash=f2722d6d4ccb034e01cf786d55342e1c21ff55b182a4825adf05d50702ab1a28
+patch_directory=form
+directory=form-4.2.1
+
+[provide]
+program_names = form, tform

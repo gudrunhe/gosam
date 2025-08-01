@@ -1,6 +1,6 @@
 \documentclass[11pt,a4paper]{refrep}
+\usepackage[T1]{fontenc}
 \usepackage{xspace}
-\usepackage[final]{remark}
 \usepackage{listings}
 \usepackage{amsmath,amssymb}
 \usepackage{syntax}
@@ -13,21 +13,21 @@
 \input lstolp
 \input lstgosam
 \newcommand{\golemversion}{{1{.}0}}
-\newcommand{\golem}{{\tt GoSam}\xspace}
-%\newcommand{\golemv}[1][\golemversion]{{{\tt Golem}~\golemversion}\xspace}
-\newcommand{\golemv}[1][\golemversion]{{\tt GoSam}\xspace}
-\newcommand{\golemVC}{{\tt golem95}\xspace}
+\newcommand{\golem}{\textsc{GoSam}\xspace}
+%\newcommand{\golemv}[1][\golemversion]{{\textsc{Golem}~\golemversion}\xspace}
+\newcommand{\golemv}[1][\golemversion]{\textsc{GoSam}\xspace}
+\newcommand{\golemVC}{\textsc{golem95}\xspace}
 \newcommand{\packagename}{{gosam-\golemversion}}
-\newcommand{\hepforge}{{\sc HepForge}\xspace}
+\newcommand{\hepforge}{\textsc{HepForge}\xspace}
 
-\newcommand{\qgraf}{{\tt QGraf}\xspace}
-\newcommand{\form}{{\tt Form}\xspace}
-\newcommand{\python}{{\tt Python}\xspace}
-\newcommand{\fortranXC}{{\tt Fortran\,95}\xspace}
-\newcommand{\fortranMMIII}{{\tt Fortran\,2003}\xspace}
-\newcommand{\pjfry}{{\tt PJFry}\xspace}
-\newcommand{\haggies}{{\tt haggies}\xspace}
-\newcommand{\samurai}{{\sc Samurai}\xspace}
+\newcommand{\qgraf}{\textsc{QGraf}\xspace}
+\newcommand{\form}{\textsc{Form}\xspace}
+\newcommand{\python}{Python\xspace}
+\newcommand{\fortranXC}{{Fortran\,95}\xspace}
+\newcommand{\fortranMMIII}{{Fortran\,2003}\xspace}
+\newcommand{\pjfry}{\textsc{PJFry}\xspace}
+\newcommand{\haggies}{\textsc{Haggies}\xspace}
+\newcommand{\samurai}{\textsc{Samurai}\xspace}
 
 \newcommand{\contl}{{\ensuremath{\hookrightarrow}}}
 \newcommand{\fmslash}[1]{{#1}\!\!\!/}
@@ -38,7 +38,7 @@
 \author{Thomas Reiter}
 \date{Version \today}
 
-\lstset{basicstyle=\tt,keywordstyle=\tt\color{blue}}
+\lstset{basicstyle=\tt,keywordstyle=\tt\color{blue},upquote=true}
 
 \begin{document}
 \hypersetup{%
@@ -714,8 +714,6 @@ drawbacks:
 \item In generated template files there is no section for the
       user-defined variable and therefore it might be difficult
       to find out about its existence.
-\item In the interactive mode this variable would not be visible
-      either.
 \item The variable is not automatically added to the appendix of
       the user manual.
 \end{itemize}
@@ -780,33 +778,6 @@ is declared correctly we can also skip the argument \texttt{convert}:
 \begin{lstlisting}
 integer :: nlo_prefactors = [% nlo_prefactors %]
 \end{lstlisting}
-
-\subsection{Adding a Parameter to the Interactive Interface}
-\label{ssec:nlo-prefactors:04}
-Despite of its shadowy existence, the interactive mode of \golem{}
-can be an interesting playground for trying out new features.
-The more it is important to add some extra level of luxury for our
-new option also there.
-
-After having added the variable to \texttt{properties.py} it is already
-automatically added to the list of tab-completions in \golem{}'s interactive
-mode, which is started by running \texttt{gosam -i}.
-Typing \lit{nlo} at the prompt followed by hitting the \lit{Tab} key is
-enough to trigger the auto-completion, and the input line now reads
-\lit{nlo\_prefactors} followed by a white space. Hitting the \lit{Tab} key
-again, however, does not help us in remembering the set of allowed variables.
-What we would like to have is the auto-completion printing the list of
-valid options to the screen. In order to enable this feature, we simply
-edit the \python{} file
-\texttt{src/\hspace{0pt}python/\hspace{0pt}golem/\hspace{0pt}%
-shell.py}. In the \texttt{\_\_init\_\_} function of the class
-\texttt{GolemShell} we find an assignment to
-\texttt{self.golem\_follow\_set}, where we add the entry:
-\begin{lstlisting}[language=Python]
-str(golem.properties.config_nlo_prefactors):
-   ["0", "1", "2"],
-\end{lstlisting}
-That's all, we are done!
 
 \section{Numerical Polarization Vectors}
 This section describes a \emph{project} rather than an example:

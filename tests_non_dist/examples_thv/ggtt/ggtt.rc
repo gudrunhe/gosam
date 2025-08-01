@@ -1,0 +1,19 @@
+process_name=ggtt
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=21, 21
+out=6,-6
+
+order=QCD, 2, 4
+
+filter.particles=U:0,S:0,C:0,B:0
+
+model=smdiag
+model.options=Nfgen:1, masses: mT, widths: none
+
+one=gs,e
+
+filter.nlo=lambda d: not d.isScaleless()
+reduction_programs=ninja
+regularisation_scheme=thv

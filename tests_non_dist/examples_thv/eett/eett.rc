@@ -1,0 +1,15 @@
+process_name=eett
+process_path=virtual
+
+in=-11,11
+out=6,-6
+
+order=QCD, 0, 2
+
+one=gs,e
+zero=wT,me
+
+filter.particles=H:0,chi:0
+
+reduction_programs=golem95
+regularisation_scheme=thv

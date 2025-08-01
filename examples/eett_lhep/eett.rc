@@ -10,7 +10,7 @@ order=QCD, 0, 2
 model=../model/Standard_Model_LanHep, 4
 model.options=
 
-qgraf.verbatim=true=iprop[part25,0,0];
+filter.particles=part25:0
 
 helicities=[dD=+-]D[+-][+-]
 

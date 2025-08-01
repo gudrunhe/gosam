@@ -1,11 +1,11 @@
 module     [% process_name asprefix=\_ %]globalsl1
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    use [% process_name asprefix=\_ %]color, only: numcs
    implicit none
 
    private
 
-   [% @if generate_lo_diagrams %]
+   [% @if generate_tree_diagrams %]
    ! amp0 is used to store the LO amplitude between the calls
    ! for one kinematics.
    complex(ki), dimension(numcs[%@if helsum%],0:max(0[%@for helicities generated%],&

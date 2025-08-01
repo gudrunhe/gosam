@@ -16,24 +16,18 @@
 
    ! Options to control the interoperation between different
    ! Reduction libraries:
-   integer, parameter :: SAMURAI   = 0
    integer, parameter :: GOLEM95   = 1
    integer, parameter :: NINJA     = 2
-   integer, parameter :: PJFRY     = 3 ! experimental
-   integer, parameter :: QUADNINJA = 4 ! experimental
+   integer, parameter :: QUADNINJA = 4
    ! Reduction methods
    integer :: reduction_interoperation = [%
    @select reduction_interoperation default="-1"
    @case -1 %][%
       @if extension ninja %]NINJA[%
       @else %][%
-         @if extension samurai %]SAMURAI[%
-         @else %][%
             @if extension golem95 %]GOLEM95[%
-             @else%][%@if extension pjfry  %]PJFRY[%
-              @else%]-1[%@end @if%][%
+             @else%]-1[%
             @end @if %][%
-         @end @if %][%
       @end @if %][%
    @else %][% reduction_interoperation %][%
    @end @select %]
@@ -42,25 +36,26 @@
    integer :: reduction_interoperation_rescue = [%
    @select reduction_interoperation_rescue default="-1"
    @case -1 %][%
-      @if extension golem95 %]GOLEM95[%
+      @if extension quadruple %]QUADNINJA[%
       @else %][%
-           @if extension quadruple %]QUADNINJA[%
+         @select reduction_interoperation default="-1"
+         @case -1 %][%
+           @if extension golem95 %]GOLEM95[%
            @else %][%
-           @select reduction_interoperation default="-1"
-           @case -1 %][%
-              @if extension ninja %]NINJA[%
-              @else %][%
-                 @if extension samurai %]SAMURAI[%
-                 @else %][%
-                    @if extension golem95 %]GOLEM95[%
-                     @else%][%@if extension pjfry  %]PJFRY[%
-                         @else %]-1[%@end @if%][%
-                    @end @if %][%
-                 @end @if %][%
-              @end @if %][%
-           @else %]-1[%
-           @end @select %][%
+                @if extension ninja %]NINJA[%
+                @else%]-1[%
+                @end @if %][%
            @end @if %][%
+         @case GOLEM95 %][%
+                @if extension ninja %]NINJA[%
+                @else%]-1[%
+                @end @if %][%
+         @case NINJA %][%
+                @if extension golem95 %]GOLEM95[%
+                @else%]-1[%
+                @end @if %][%
+         @else%]-1[%
+         @end @select %][%
       @end @if %][%
    @else %][% reduction_interoperation_rescue %][%
    @end @select %]
@@ -101,38 +96,22 @@
    logical :: include_symmetry_factor = .[%
         olp.include_symmetry_factor default=true %].
 
-   [% @if extension samurai %]
-   ! Parameters for the initialization of samurai
-   ! they can also be set using the subroutine parse in model.f90
-   integer :: samurai_scalar = [% samurai_scalar %]
-   integer :: samurai_verbosity = 0
-   integer :: samurai_test = 3
-   ! The following parameter sets the 'istop' argument in all samurai
-   ! calls. Unless you really know what you do, you should stick to the
-   ! default value.
-   integer :: samurai_istop = 0
-   logical :: samurai_group_numerators = .true.[%
-      @end @if extension samurai %]
-
    [% @if extension ninja %]
    integer :: ninja_test = 0
    integer :: ninja_istop = 0[%
       @end @if extension ninja %]
 
-   ! Parameter: Use stable accumulation of diagrams or builtin sum
-   !            Stable accumulation is implemented in accu.f90
-   logical :: use_sorted_sum = .false.
-
-   ! Flag to decide if results should be converted to CDR
+   ! Flag to decide if results should be converted to tHV
    ! if they are not already in that scheme
-   logical :: convert_to_cdr = [%
-   @select olp.irregularisation default=DEFAULT
-   @case DEFAULT %].false.[%
-   @case tHV CDR %].true.[%
-   @else %].false.[%
-   @end @select %]
+   logical :: convert_to_thv = [% convert_to_thv
+             convert=bool
+             true=.true.
+             false=.false. %]
 
    integer :: logfile = 19
+
+   ! Parameter determining the SMEFT counting
+   integer :: EFTcount = 0
 
    !---#[ Renormalisation:
    ! Parameter to switch UV-Counterterms on or off
@@ -143,7 +122,7 @@
    @end @select %]
 
    ! if renormalisation.eq.1, include alpha_s renormalisation:
-   logical :: renorm_beta = [% renorm_beta
+   logical :: renorm_alphas = [% renorm_alphas
              convert=bool
              true=.true.
              false=.false. %]
@@ -154,13 +133,13 @@
              false=.false. %]
    ! include massive quark contribution for wave function renormalisation
    ! of the gluon
-   logical :: renorm_decoupling = [% renorm_decoupling
+   logical :: renorm_gluonwf = [% renorm_gluonwf
              convert=bool
              true=.true.
              false=.false. %]
 
    ! include mass counter terms for internal quark lines
-   logical :: renorm_mqse = [% renorm_mqse
+   logical :: renorm_qmass = [% renorm_qmass
              convert=bool
              true=.true.
              false=.false. %]
@@ -183,13 +162,24 @@
               true=.true.
               false=.false. %]
 
-   ! Switch mass counter terms for massive quarks on or off
+   ! if renormalisation.eq.1, include renormalisation of EFT Wilson coefficients (only works with special UFO models):
+   logical :: renorm_eftwilson = [% renorm_eftwilson
+             convert=bool
+             true=.true.
+             false=.false. %]
+
+   ! if renormalisation.eq.1 and heavy-top limit, include finite Higgs-gluon-vertex renormalisation:
+             logical :: renorm_ehc = [% renorm_ehc
+             convert=bool
+             true=.true.
+             false=.false. %]
+
+   ! Switch mass counter terms for massive quarks on or off (old way, only left for debugging)
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off
-   ! Do not modify directly, use renormalisation=0,1,2 instead.
+   ! Do not modify directly, use renormalisation=0,1,2,3,4 instead.
    real(ki) :: deltaOS = 1.0_ki
-   !---#] Renormalisation:[%
-@if internal GENERATE_DERIVATIVES %]
+   !---#] Renormalisation:
 
    ! This generated code provides the derivatives of the numerator.
    ! Therefore we have the choice between using Golem95's tens_rec
@@ -199,8 +189,7 @@
    !
    ! This option affects the calculation only if reduction_interoperation
    ! is chosen such that the tensorial reconstruction method is used.
-   logical :: tens_rec_by_derivatives = .true.[%
-@end @if %]
+   logical :: tens_rec_by_derivatives = .true.
 
    ! Determines the way GoSam treats the overall factor of alpha_(s)/2/pi
    ! in the result of an NLO amplitude.
@@ -238,22 +227,27 @@
              false=.false. %]
 
    ! Number of good digits in virtual amplitude:[%
-   @if generate_lo_diagrams %][% @else %]
+   @if generate_tree_diagrams %][% @else %]
    ! not used (tree-level not available):[% @end @if %]
-   integer :: PSP_chk_th1 = [% PSP_chk_th1 %]
-   integer :: PSP_chk_th2 = [% PSP_chk_th2 %]
-   integer :: PSP_chk_th3 = [% PSP_chk_th3 %]
+   integer :: PSP_chk_th1 = [% PSP_chk_th1 %] ! pole-check (th1 < r => accept)
+   integer :: PSP_chk_th2 = [% PSP_chk_th2 %] ! pole-check (th2 < r < th1 => rotation, r < th2 => rescue)
+   integer :: PSP_chk_th3 = [% PSP_chk_th3 %] ! double/double rotation (th3 < r => accept, r < th3 => rescue)
+   integer :: PSP_chk_th4 = [% PSP_chk_th4 %] ! double/quad rotation (th4 < r => accept, r < th4 => discard) 
+   integer :: PSP_chk_th5 = [% PSP_chk_th5 %] ! quad/quad_rot rotation (th5 < r => accept, r < th5 => discard)
    real(ki) :: PSP_chk_kfactor = [% PSP_chk_kfactor convert=real %].0_ki
-   [% @if generate_lo_diagrams %]
+   real(ki) :: PSP_chk_rotdiff = [% PSP_chk_rotdiff convert=real %].0_ki
+   [% @if generate_tree_diagrams %]
    ! not used in this process (process is not loop-induced):[%
    @else %]
    ! used instead:[%
    @end @if %]
-   integer :: PSP_chk_li1 = [% PSP_chk_li1 %]
-   integer :: PSP_chk_li2 = [% PSP_chk_li2 %]
-   integer :: PSP_chk_li3 = [% PSP_chk_li3 %]
-   integer :: PSP_chk_li4 = [% PSP_chk_li4 %]
-
+   integer :: PSP_chk_li1 = [% PSP_chk_li1 %] ! pole-check (li1 < r => accept)
+   integer :: PSP_chk_li2 = [% PSP_chk_li2 %] ! pole-check (li2 < r < li1 => rotation, r < li2 => rescue)
+   integer :: PSP_chk_li3 = [% PSP_chk_li3 %] ! double/double rotation (li3 < r => accept, r < li3 => rescue)
+   integer :: PSP_chk_li4 = [% PSP_chk_li4 %] ! double/quad rotation (li4 < r => accept, r < li4 => discard)
+   integer :: PSP_chk_li5 = [% PSP_chk_li5 %] ! quad/quad_rot rotation (li5 < r => accept, r < li5 => discard)
+   real(ki) :: PSP_chk_kfactor_li = [% PSP_chk_kfactor_li convert=real %].0_ki
+   real(ki) :: PSP_chk_rotdiff_li = [% PSP_chk_rotdiff_li convert=real %].0_ki
 [%
 @if ewchoose %]
    !

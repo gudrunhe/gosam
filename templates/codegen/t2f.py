@@ -151,8 +151,12 @@ def translate(tokens,inconfig):
                 elif token in list(symbols.keys()):
                         if token == '^':
                                 if tokens[itoken+1] == '-':
-                                        newtoken = symbols[token] + '(-%s)' % tokens[itoken +2]
-                                        itoken=itoken +3
+                                        if tokens[itoken + 2] == '1':
+                                                newtoken = '1.0_ki/' + newlist.pop()
+                                                itoken += 3
+                                        else:
+                                                newtoken = symbols[token] + '(-%s)' % tokens[itoken + 2]
+                                                itoken = itoken + 3
                                 else:
                                         newtoken = symbols[token] + '%s' % tokens[itoken +1]
                                         itoken=itoken +2

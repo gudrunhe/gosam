@@ -1,6 +1,6 @@
 [% ' vim: syntax=golem
 %]module     [% process_name asprefix=\_ %]dipoles
-   use [% process_name asprefix=\_ %]config, only: ki
+   use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: ki
    use [% process_name asprefix=\_ %]color, only: gammaF, gammaA, &
        & CF, CA, numcs, KF, KA[%
        @for pairs distinct ordered colored1 colored2 %], &
@@ -81,7 +81,7 @@ contains
       ! [Catani,Dittmaier,Seymour,Trocsanyi]
       ! The result does not include the factor of
       ! $-\alpha_s/(2\pi)(4\pi)^\epsilon/\Gamma(1-\epsilon)$
-      use [% process_name asprefix=\_ %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), intent(in) :: mu_sq
       real(ki), dimension(num_legs,4), intent(in) :: vec
@@ -170,7 +170,7 @@ contains
       ! Implements equation (6.52) from the above paper for
       ! each initial state particle. Again we omit the prefactor
       ! $-\alpha_s/(2\pi)(4\pi)^\epsilon/\Gamma(1-\epsilon)$
-      use [% process_name asprefix=\_ %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), intent(in) :: mu_sq
       real(ki), dimension(num_legs,4), intent(in) :: vec
@@ -358,7 +358,7 @@ contains
    function I_ff_qed(mu_sq, vec, I, J)
       ! The result does not include the factor of
       ! $-\alpha_s/(2\pi)(4\pi)^\epsilon/\Gamma(1-\epsilon)$
-      use [% process_name asprefix=\_ %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), intent(in) :: mu_sq
       real(ki), dimension(num_legs,4), intent(in) :: vec
@@ -431,7 +431,7 @@ contains
    function I_if_qed(mu_sq, vec, I, J)
       !  Again we omit the prefactor
       ! $-\alpha_s/(2\pi)(4\pi)^\epsilon/\Gamma(1-\epsilon)$
-      use [% process_name asprefix=\_ %]model
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model
       implicit none
       real(ki), intent(in) :: mu_sq
       real(ki), dimension(num_legs,4), intent(in) :: vec

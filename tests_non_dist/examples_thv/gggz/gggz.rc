@@ -1,0 +1,24 @@
+process_name=gggz
+process_path=virtual
+
+# PDG codes # Gluon: 21 # Z-Boson: 23
+in=21,21
+out=21,23
+
+order=QCD, NONE, 3
+
+# The reference calculation has been done for a (u,d)-quark
+# doublet in the loop.
+# The second filter ensures that all bubbles
+# (which are zero by color) are removed.
+filter.particles=S:0,C:0,B:0,T:0
+filter.nlo=lambda d: d.chord(["U", "D"]) > 2
+
+one=gs,e
+zero=w*, mD
+# example uses non-zero up-quark mass
+massive_light_fermions=true
+
+helicities=+-++,+-+-,+-+0
+
+regularisation_scheme=thv
