@@ -826,9 +826,9 @@ def process_order_file(
                     except KeyError:
                         # dependent parameters are not part of parameters dict
                         pass
-        conf.setProperty("zero",",".join(list(set(zeros))))
-        for subconf in subprocesses_conf:
-            subconf.setProperty("zero",",".join(list(set(zeros))))
+            conf.setProperty("zero",",".join(list(set(zeros))))
+            for subconf in subprocesses_conf:
+                subconf.setProperty("zero",",".join(list(set(zeros))))
 
         # ---#[ Setup excluded and massive particles :
         for lconf in [conf] + subprocesses_conf:
