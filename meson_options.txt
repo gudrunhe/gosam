@@ -1,4 +1,18 @@
 option(
+    'qgraf',
+    type: 'boolean',
+    value: true,
+    description: 'Download, build and install `qgraf`'
+    )
+
+option(
+    'form',
+    type: 'boolean',
+    value: true,
+    description: 'Download, build and install`Form`'
+    )
+
+option(
     'golem95',
     type: 'boolean',
     value: false,

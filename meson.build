@@ -32,7 +32,8 @@ endif
 
 add_global_link_arguments('--disable-new-dtags', language: ['fortran', 'c', 'cpp'])
 
-run_command(
+if get_option('qgraf')
+  run_command(
     'wget',
     '--user=anonymous',
     '--password=anonymous',
@@ -40,14 +41,20 @@ run_command(
     'http://qgraf.tecnico.ulisboa.pt/v3.4/qgraf-3.4.2.tgz',
     check: true
     )
+endif
 
 subproject('avh_olo')
 if get_option('golem95')
     subproject('golem95')
 endif
 subproject('ninja')
-subproject('qgraf')
-subproject('form')
+if get_option('qgraf')
+   subproject('qgraf')
+endif
+if get_option('form')
+   subproject('form')
+endif
+
 
 subdir('src/python/golem')
 
