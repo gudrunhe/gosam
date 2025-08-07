@@ -68,7 +68,7 @@ meson setup build --prefix <prefix> [-Doption=value]
 meson install -C build
 ```
 will download, build and install
-[QGRAF](http://cfif.tecnico.ulisboa.pt/~paulo/qgraf.html),
+[QGRAF](http://cefema-gt.tecnico.ulisboa.pt/~paulo/d.html),
 [Form](https://www.nikhef.nl/~form/),
 [Golem95](https://github.com/gudrunhe/golem95) (optional),
 [Ninja](https://github.com/peraro/ninja)
