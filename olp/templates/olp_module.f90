@@ -189,10 +189,7 @@ contains
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
       use, intrinsic :: iso_c_binding
-      use model, only: set_parameter => set_parameter[%
-      @if extension quadruple %]
-      use model_qp, only: set_parameter_qp => set_parameter[%
-      @end @if %]
+      use model, only: set_parameter => set_parameter
       implicit none
       character(kind=c_char,len=1), intent(in) :: variable_name
       real(kind=c_double), intent(in) :: real_part, imag_part
@@ -210,10 +207,7 @@ contains
       integer :: l;
 
       l = strlen(variable_name)
-      call set_parameter(variable_name(1:l),real_part,imag_part,success)[%
-      @if extension quadruple %]
-      call set_parameter_qp(variable_name(1:l),real_part,imag_part,success)[%
-      @end @if %]
+      call set_parameter(variable_name(1:l),real_part,imag_part,success)
       if(success==0) then ! return immediately on error
           return
       end if
