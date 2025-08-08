@@ -194,10 +194,7 @@ contains
    @if internal OLP_TRAILING_UNDERSCORE %]_[%
    @end @if %]")
       use, intrinsic :: iso_c_binding
-      use model, only: set_parameter => set_parameter[%
-      @if extension quadruple %]
-      use model_qp, only: set_parameter_qp => set_parameter[%
-      @end @if %]
+      use model, only: set_parameter => set_parameter
       implicit none
       character(kind=c_char), dimension(*), intent(in) :: variable_name_in
       character(len=:), allocatable :: variable_name
@@ -219,10 +216,7 @@ contains
       if (allocated(variable_name)) deallocate(variable_name)
       allocate(character(len=l) :: variable_name)
       variable_name = transfer(variable_name_in(1:l), variable_name)
-      call set_parameter(variable_name(1:l),real_part,imag_part,success)[%
-      @if extension quadruple %]
-      call set_parameter_qp(variable_name(1:l),real_part,imag_part,success)[%
-      @end @if %]
+      call set_parameter(variable_name(1:l),real_part,imag_part,success)
       if(success==0) then ! return immediately on error
           return
       end if
