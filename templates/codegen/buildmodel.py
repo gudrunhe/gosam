@@ -903,7 +903,7 @@ modelfile.write("         call set_parameter(\"sw\",real(tmp,ki),aimag(tmp),ierr
 modelfile.write("         return\n")
 modelfile.write("     else")[$
 @end @select $]
-modelfile.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>=7) then\n")
+modelfile.write("if (name(1:min(len_trim(name),5)).eq.\"mass(\" .and. len_trim(name)>=7) then\n")
 modelfile.write("         idx = scan(name,\")\",.false.)\n")
 modelfile.write("         if (idx.eq.0) then\n")
 modelfile.write("            idx=len_trim(name)+1\n")
@@ -930,7 +930,7 @@ modelfile.write("               write(*,'(A20,1x,I10)') \"Cannot set mass for PD
 modelfile.write("               ierr = 0\n")
 modelfile.write("               return\n")
 modelfile.write("            end select\n")
-modelfile.write("     elseif (len_trim(name)>=8 .and. name(1:6).eq.\"width(\") then\n")
+modelfile.write("     elseif (len_trim(name)>=8 .and. name(1:min(len_trim(name),6)).eq.\"width(\") then\n")
 modelfile.write("         idx = scan(name,\")\",.false.)\n")
 modelfile.write("         if (idx.eq.0) then\n")
 modelfile.write("            idx=len_trim(name)+1\n")
@@ -2280,7 +2280,7 @@ modelfile_qp.write("         call set_parameter(\"sw\",real(tmp,ki),aimag(tmp),i
 modelfile_qp.write("         return\n")
 modelfile_qp.write("     else")[$
 @end @select $]
-modelfile_qp.write("if (name(1:5).eq.\"mass(\" .and. len_trim(name)>=7) then\n")
+modelfile_qp.write("if (name(1:min(len_trim(name),5)).eq.\"mass(\" .and. len_trim(name)>=7) then\n")
 modelfile_qp.write("         idx = scan(name,\")\",.false.)\n")
 modelfile_qp.write("         if (idx.eq.0) then\n")
 modelfile_qp.write("            idx=len_trim(name)+1\n")
@@ -2307,7 +2307,7 @@ modelfile_qp.write("               write(*,'(A20,1x,I10)') \"Cannot set mass for
 modelfile_qp.write("               ierr = 0\n")
 modelfile_qp.write("               return\n")
 modelfile_qp.write("            end select\n")
-modelfile_qp.write("     elseif (len_trim(name)>=8 .and. name(1:6).eq.\"width(\") then\n")
+modelfile_qp.write("     elseif (len_trim(name)>=8 .and. name(1:min(len_trim(name),6)).eq.\"width(\") then\n")
 modelfile_qp.write("         idx = scan(name,\")\",.false.)\n")
 modelfile_qp.write("         if (idx.eq.0) then\n")
 modelfile_qp.write("            idx=len_trim(name)+1\n")
