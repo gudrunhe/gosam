@@ -479,33 +479,36 @@ def select_olp_EWScheme(conf):
     ewparameters = ["mW", "mZ", "alpha", "GF", "sw", "e", "vev", "ewchoose"]
     ewscheme = conf["olp.ewscheme"]
     raisewarn = False
-    for key, value in list(golem.model.MODEL_OPTIONS.items()):
-        if any(item.startswith(str(key)) for item in ewparameters):
-            raisewarn = True
+    if conf.getBooleanProperty("olp.config_model_options"):
+        # raise warning only when model.options were actually given in the config file, 
+        # not just because model.options was filled with the default
+        for key, value in list(golem.model.MODEL_OPTIONS.items()):
+            if any(item.startswith(str(key)) for item in ewparameters):
+                raisewarn = True
     #  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
     if ewscheme == "alphaGF":
         golem.model.MODEL_OPTIONS["ewchoose"] = "1"
-        print("OLP EWScheme --> alphaGF (Gmu scheme)")
+        logger.info("OLP EWScheme --> alphaGF (Gmu scheme)")
 
     if ewscheme == "alpha0":
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"
         golem.model.MODEL_OPTIONS["alpha"] = "0.007297352536480967"
-        print("OLP EWScheme --> alpha0")
+        logger.info("OLP EWScheme --> alpha0")
 
     if ewscheme == "alphaMZ":
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"
         # Value of alpha(Mz)^-1=128.944 from Nucl.Phys.Proc.Suppl. 225-227 (2012) 282-287
         golem.model.MODEL_OPTIONS["alpha"] = "0.007755305"
-        print("OLP EWScheme --> alphaMZ")
+        logger.info("OLP EWScheme --> alphaMZ")
 
     if ewscheme == "alphaRUN":
-        print("OLP EWScheme --> alphaRUN")
-        print("EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaRUN\n"
+                       + "EW not supported yet!")
     if ewscheme == "alphaMSbar":
-        print("OLP EWScheme --> alphaMSbar")
-        print("EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaMSbar\n"
+                    +"EW not supported yet!")
     if ewscheme == "OLPDefined":
-        print("OLP EWScheme --> OLPDefined: GoSam default taken")
+        logger.warning("OLP EWScheme --> OLPDefined: GoSam default taken")
         golem.model.MODEL_OPTIONS["ewchoose"] = 2
 
     if raisewarn == True:
