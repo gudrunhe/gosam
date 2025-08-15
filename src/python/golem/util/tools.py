@@ -446,13 +446,14 @@ def getModel(conf, extra_path=None):
             # else: pass
 
     # Adapt EW scheme to order file request:
-    if conf["olp.ewscheme"] is not None and ew_supp == True:
-        select_olp_EWScheme(conf)
-    elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
-        golem.model.MODEL_OPTIONS["ewchoose"] = True
-    elif conf["olp.ewscheme"] is not None and ew_supp == False:
-        logger.critical("EWScheme tag in orderfile incompatible with model.")
-        sys.exit("GoSam terminated due to an error")
+    if conf["__OLP_MODE__"]:
+        if conf["olp.ewscheme"] is not None and ew_supp == True:
+            select_olp_EWScheme(conf)
+        elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
+            golem.model.MODEL_OPTIONS["ewchoose"] = True
+        elif conf["olp.ewscheme"] is not None and ew_supp == False:
+            logger.critical("EWScheme tag in orderfile incompatible with model.")
+            sys.exit("GoSam terminated due to an error")
 
     # Modify EW setting for model file:
     if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
@@ -508,8 +509,8 @@ def select_olp_EWScheme(conf):
         logger.warning("OLP EWScheme --> alphaMSbar\n"
                     +"EW not supported yet!")
     if ewscheme == "OLPDefined":
-        logger.warning("OLP EWScheme --> OLPDefined: GoSam default taken")
-        golem.model.MODEL_OPTIONS["ewchoose"] = 2
+        logger.info("OLP EWScheme --> OLPDefined: GoSam default taken")
+        golem.model.MODEL_OPTIONS["ewchoose"] = "2"
 
     if raisewarn == True:
         logger.warning(
