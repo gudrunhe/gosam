@@ -535,6 +535,8 @@ def fill_config(conf):
     else:
         raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
 
+    conf["__LOOPINDUCED__"] = is_loopinduced
+
     no_renorm = generate_loop_diagrams and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""

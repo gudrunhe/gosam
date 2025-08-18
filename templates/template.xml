@@ -329,6 +329,7 @@
 			<file src="ct_amplitude.f90" dest="ct_amplitudeh%d.f90"
 				arguments="helicity" class="Integrals">
 				<only if-option="renorm" value="true" />
+				<except if-internal="LOOPINDUCED" />
 				<except if-option="enable_truncation_orders" value="true" />
 			</file>
 			<foreach name="trnco" list="0,1,2">
@@ -337,6 +338,7 @@
 				  arguments="helicity,trnco"
 				  class="Integrals">
 				  <only if-option="renorm" value="true" />
+				  <except if-internal="LOOPINDUCED" />
 			      <only if-option="enable_truncation_orders" value="true" />
 			  </file>
 			</foreach>
@@ -359,15 +361,17 @@
 				arguments="helicity" class="Integrals">
 				<only if-extension="quadruple" />
 				<only if-option="renorm" value="true" />
+				<except if-internal="LOOPINDUCED" />
 				<except if-option="enable_truncation_orders" value="true" />
 			</file>
 			<foreach name="trnco" list="0,1,2">
-			    <file src="amplitude_qp.f90"
+			    <file src="ct_amplitude_qp.f90"
 				  dest="ct_amplitudeh%d_%s_qp.f90"
 				  arguments="helicity,trnco"
 				  class="Integrals">
 				  <only if-extension="quadruple" />
 				  <only if-option="renorm" value="true" />
+				  <except if-internal="LOOPINDUCED" />
 			      <only if-option="enable_truncation_orders" value="true" />
 			  </file>
 			</foreach>
