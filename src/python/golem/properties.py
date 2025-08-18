@@ -135,7 +135,7 @@ qgraf_power = Property(
    If the last number is omitted no virtual corrections are
    calculated.
 
-   For loop induced processes, the order of the Born diagrams
+   For loop-induced processes, the order of the Born diagrams
    should be specified as `NONE`.
 
    See also: qgraf.options, qgraf.verbatim

@@ -356,7 +356,7 @@ The momenta are expected to be given in physical (in-out) kinematics: $p_1+p_2=p
 +\mathtt{res(3)}
 \right)
 \end{align}
-Note that the coefficients \texttt{res(1:3)} contain an explicit factor of $\alpha_s(\mu)/(2\pi)$. In BLHA1 this convention is fixed an cannot be changed with the \texttt{nlo\_prefactors} process card option (see Appendix~\ref{sec:nlo_prefactors}).
+Note that the coefficients \texttt{res(1:3)} contain an explicit factor of $\alpha_s(\mu)/(2\pi)$. In BLHA1 this convention is fixed and cannot be changed with the \texttt{nlo\_prefactors} process card option (see Appendix~\ref{sec:nlo_prefactors}).
 
 
 \subsubsection{Finalize (optional)}
@@ -437,10 +437,6 @@ The \texttt{rval} argument is an array of length four which is filled by the sub
 
 \subsubsection{Loop-induced processes}
 Loop-induced processes are supported by the setting \lstinline[style=sh]|AmplitudeType LoopInduced|. In \gosam, they are not handled like Born processes, but like virtual corrections to non-existing born processes and therefore returned in the virtual field $A_0$ (\texttt{PoleCoeff0}) of \texttt{rval} when calling \texttt{OLP\_EvalSubprocess} and \texttt{OLP\_EvalSubprocess2}. The returned value corresponds to the  squared amplitude.
-
-\attention{
-Please note that in the order file, \texttt{CouplingPower} or \texttt{AlphasPower} and \texttt{AlphaPower}  usually refer to the coupling powers if the corresponding Born amplitude, and the type of the correction is specified as \texttt{CorrectionType}. As in the case of loop-induced processes the Born amplitude does not exist, the correct counting of the coupling powers needs to be assured by setting \texttt{CouplingPower} (or \texttt{AlphasPower} and \texttt{AlphaPower}) equal to the order of a corresponding fictitious Born process, i.e. reduce the coupling powers of the loop induced process correspondingly.
-}
 
 
 \subsubsection{Production of colour-/spin correlated trees}

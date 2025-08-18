@@ -74,8 +74,9 @@ Further optional keywords available with \gosam are:
         Input must be PDG numbers.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Extra|} --- Standard: BLHA2\vspace{0.1cm}\\
         Currently the \texttt{Extra} keyword is not used to its full potential. Only settings can be passed which have their own BLHA specific keyword anyway. See Section~\ref{sec:BLHA_precisionchecks} for a usage example.
-    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|OperationMode|} --- Standard: BLHA1, BLHA2\vspace{0.1cm}\\
-        \lstinline[style=in]|supported_values = "CouplingsStrippedOff"|
+    \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|OperationMode|} --- Standard: BLHA1\vspace{0.1cm}\\
+        \lstinline[style=in]|supported_values = "CouplingsStrippedOff"|\\
+        Fixes all couplings to one and sets \lstinline[style=in]|nlo_prefactors=0| (see Appendix~\ref{sec:nlo_prefactors}).
      \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|ParameterCard|} --- Standard: Not part of the standard\vspace{0.1cm}\\
         Can be used to pass parameters defined in an SLHA file to \gosam during process generation. See Section~\ref{sec:BLHA_calling}. This keyword is essentially an alias for BLHA1's \lstinline[style=in]|ModelFile|.
     \item[\hspace{-1em}]\colorbox{gray!30}{\lstinline[style=in]|Parameters|} --- Standard: Not part of the standard\vspace{0.1cm}\\
