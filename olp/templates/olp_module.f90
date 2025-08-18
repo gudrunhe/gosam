@@ -8,7 +8,7 @@ module     olp_module
 
 contains
 
-   subroutine     OLP_Start(contract_file_name,ierr[%
+   subroutine     OLP_Start(contract_file_name_in,ierr[%
    @if internal OLP_BADPTSFILE_NUMBERING %],stage,rndseed[%
    @end @if %]) &
    & bind(C,name="[%
@@ -43,7 +43,8 @@ contains
            & PSP_chk_rotdiff_li => PSP_chk_rotdiff_li[%
       @end @if %]
       implicit none
-      character(kind=c_char,len=1), intent(in) :: contract_file_name
+      character(kind=c_char), dimension(*), intent(in) :: contract_file_name_in
+      character(len=:), allocatable :: contract_file_name
       integer(kind=c_int), intent(out) :: ierr[%
       @if internal OLP_BADPTSFILE_NUMBERING %]
       integer(kind=c_int), intent(in) :: stage, rndseed[%
@@ -52,7 +53,7 @@ contains
          function strlen(s) bind(C,name='strlen')
             use, intrinsic :: iso_c_binding
             implicit none
-            character(kind=c_char,len=1), intent(in) :: s
+            character(kind=c_char), dimension(*), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
       end interface
@@ -62,7 +63,11 @@ contains
       character(len=9) :: kw
 
       ierr = 1
-      l = strlen(contract_file_name)
+      l = strlen(contract_file_name_in)
+      if (allocated(contract_file_name)) deallocate(contract_file_name)
+      allocate(character(len=l) :: contract_file_name)
+      contract_file_name = transfer(contract_file_name_in(1:l), contract_file_name)
+
 
       open(unit=21, file=contract_file_name(1:l), &
           & status='old', action='read', iostat=ferr)
@@ -179,7 +184,7 @@ contains
    end subroutine OLP_Info
 
 
-   subroutine OLP_SetParameter(variable_name, real_part, imag_part, success)&
+   subroutine OLP_SetParameter(variable_name_in, real_part, imag_part, success)&
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_setparameter[%
@@ -191,7 +196,8 @@ contains
       use, intrinsic :: iso_c_binding
       use model, only: set_parameter => set_parameter
       implicit none
-      character(kind=c_char,len=1), intent(in) :: variable_name
+      character(kind=c_char), dimension(*), intent(in) :: variable_name_in
+      character(len=:), allocatable :: variable_name
       real(kind=c_double), intent(in) :: real_part, imag_part
       integer(kind=c_int), intent(out) :: success
 
@@ -199,14 +205,17 @@ contains
          function strlen(s) bind(C,name='strlen')
             use, intrinsic :: iso_c_binding
             implicit none
-            character(kind=c_char,len=1), intent(in) :: s
+            character(kind=c_char), dimension(*), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
       end interface
 
       integer :: l;
 
-      l = strlen(variable_name)
+      l = strlen(variable_name_in)
+      if (allocated(variable_name)) deallocate(variable_name)
+      allocate(character(len=l) :: variable_name)
+      variable_name = transfer(variable_name_in(1:l), variable_name)
       call set_parameter(variable_name(1:l),real_part,imag_part,success)
       if(success==0) then ! return immediately on error
           return
@@ -334,7 +343,7 @@ contains
       @end @for %]
    end subroutine OLP_Finalize
 
-   subroutine     OLP_Option(line,stat) &
+   subroutine     OLP_Option(line_in,stat) &
    & bind(C,name="[%
    @if internal OLP_TO_LOWER %][%
       olp.process_name asprefix=\_ convert=lower %]olp_option[%
@@ -349,7 +358,8 @@ contains
       use model_qp, only: parseline_qp => parseline[%
       @end @if %]
       implicit none
-      character(kind=c_char,len=1), intent(in) :: line
+      character(kind=c_char), dimension(*), intent(in) :: line_in
+      character(len=:), allocatable :: line
       integer(kind=c_int), intent(out) :: stat
       integer :: l, ios
 
@@ -357,12 +367,15 @@ contains
          function strlen(s) bind(C,name='strlen')
             use, intrinsic :: iso_c_binding
             implicit none
-            character(kind=c_char,len=1), intent(in) :: s
+            character(kind=c_char), dimension(*), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
       end interface
 
-      l = strlen(line)
+      l = strlen(line_in)
+      if (allocated(line)) deallocate(line)
+      allocate(character(len=l) :: line)
+      line = transfer(line_in(1:l), line)
       call parseline(line(1:l),ios)[%
       @if extension quadruple %]
       call parseline_qp(line(1:l),ios)[%
@@ -628,7 +641,7 @@ contains
    !---#] OLP Polarization vector:
 
    !---#[ OLP_PrintParameter
-   subroutine OLP_PrintParameter(filename) &
+   subroutine OLP_PrintParameter(filename_in) &
        & bind(C,name="[%
        @if internal OLP_TO_LOWER %][%
           olp.process_name asprefix=\_ convert=lower %]olp_printparameter[%
@@ -641,7 +654,8 @@ contains
       use, intrinsic :: iso_c_binding
       use model, only: print_parameter => print_parameter
       implicit none
-      character(kind=c_char,len=1), intent(in) :: filename
+      character(kind=c_char), dimension(*), intent(in) :: filename_in
+      character(len=:), allocatable :: filename
       integer :: ierr, l
       logical :: exists
 
@@ -649,12 +663,15 @@ contains
          function strlen(s) bind(C,name='strlen')
             use, intrinsic :: iso_c_binding
             implicit none
-            character(kind=c_char,len=1), intent(in) :: s
+            character(kind=c_char), dimension(*), intent(in) :: s
             integer(kind=c_int) :: strlen
          end function strlen
       end interface
 
-      l = strlen(filename)
+      l = strlen(filename_in)
+      if (allocated(filename)) deallocate(filename)
+      allocate(character(len=l) :: filename)
+      filename = transfer(filename_in(1:l), filename)
 
       inquire(file=filename(1:l), exist=exists)
       if (exists) then
