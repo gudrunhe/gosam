@@ -647,6 +647,10 @@ def process_order_file(
     conf = golem.util.config.Properties()
     conf += default_conf
 
+    # check if any model.options are set in the config file (before filling in the defaults)
+    config_model_options = conf.getListProperty("model.options") != []
+    conf.setProperty("olp.config_model_options",config_model_options)
+
     try:
         config_ir_scheme = default_conf["regularisation_scheme"].upper()
     except AttributeError:

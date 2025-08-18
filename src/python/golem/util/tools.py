@@ -446,13 +446,14 @@ def getModel(conf, extra_path=None):
             # else: pass
 
     # Adapt EW scheme to order file request:
-    if conf["olp.ewscheme"] is not None and ew_supp == True:
-        select_olp_EWScheme(conf)
-    elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
-        golem.model.MODEL_OPTIONS["ewchoose"] = True
-    elif conf["olp.ewscheme"] is not None and ew_supp == False:
-        logger.critical("EWScheme tag in orderfile incompatible with model.")
-        sys.exit("GoSam terminated due to an error")
+    if conf["__OLP_MODE__"]:
+        if conf["olp.ewscheme"] is not None and ew_supp == True:
+            select_olp_EWScheme(conf)
+        elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
+            golem.model.MODEL_OPTIONS["ewchoose"] = True
+        elif conf["olp.ewscheme"] is not None and ew_supp == False:
+            logger.critical("EWScheme tag in orderfile incompatible with model.")
+            sys.exit("GoSam terminated due to an error")
 
     # Modify EW setting for model file:
     if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
@@ -479,34 +480,37 @@ def select_olp_EWScheme(conf):
     ewparameters = ["mW", "mZ", "alpha", "GF", "sw", "e", "vev", "ewchoose"]
     ewscheme = conf["olp.ewscheme"]
     raisewarn = False
-    for key, value in list(golem.model.MODEL_OPTIONS.items()):
-        if any(item.startswith(str(key)) for item in ewparameters):
-            raisewarn = True
+    if conf.getBooleanProperty("olp.config_model_options"):
+        # raise warning only when model.options were actually given in the config file, 
+        # not just because model.options was filled with the default
+        for key, value in list(golem.model.MODEL_OPTIONS.items()):
+            if any(item.startswith(str(key)) for item in ewparameters):
+                raisewarn = True
     #  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
     if ewscheme == "alphaGF":
         golem.model.MODEL_OPTIONS["ewchoose"] = "1"
-        print("OLP EWScheme --> alphaGF (Gmu scheme)")
+        logger.info("OLP EWScheme --> alphaGF (Gmu scheme)")
 
     if ewscheme == "alpha0":
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"
         golem.model.MODEL_OPTIONS["alpha"] = "0.007297352536480967"
-        print("OLP EWScheme --> alpha0")
+        logger.info("OLP EWScheme --> alpha0")
 
     if ewscheme == "alphaMZ":
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"
         # Value of alpha(Mz)^-1=128.944 from Nucl.Phys.Proc.Suppl. 225-227 (2012) 282-287
         golem.model.MODEL_OPTIONS["alpha"] = "0.007755305"
-        print("OLP EWScheme --> alphaMZ")
+        logger.info("OLP EWScheme --> alphaMZ")
 
     if ewscheme == "alphaRUN":
-        print("OLP EWScheme --> alphaRUN")
-        print("EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaRUN\n"
+                       + "EW not supported yet!")
     if ewscheme == "alphaMSbar":
-        print("OLP EWScheme --> alphaMSbar")
-        print("EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaMSbar\n"
+                    +"EW not supported yet!")
     if ewscheme == "OLPDefined":
-        print("OLP EWScheme --> OLPDefined: GoSam default taken")
-        golem.model.MODEL_OPTIONS["ewchoose"] = 2
+        logger.info("OLP EWScheme --> OLPDefined: GoSam default taken")
+        golem.model.MODEL_OPTIONS["ewchoose"] = "2"
 
     if raisewarn == True:
         logger.warning(

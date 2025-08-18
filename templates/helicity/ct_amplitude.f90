@@ -386,6 +386,15 @@ contains[%
 
    end function amplitude
    !---#] function amplitude:[% 
+@else %]
+   !---#[ function amplitude:
+   function amplitude(scale2) result(amp)
+      implicit none
+      real(ki) :: scale2
+      complex(ki), dimension(-1:0,numcs) :: amp
+      amp = (0._ki, 0._ki)
+   end function amplitude
+   !---#] function amplitude:[% 
 @end @if generate_counterterms %]
 
 end module [% process_name asprefix=\_ %]ct_amplitudeh[% helicity %][% @if enable_truncation_orders %]_[% trnco %][% @end @if %]

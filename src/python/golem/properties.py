@@ -1840,6 +1840,7 @@ def setInternals(conf):
         "__GENERATE_NINJA_DOUBLE__",
         "__CUSTOM_SPIN2_PROP__",
         "__EWCHOOSE__",
+        "__LOOPINDUCED__",
     ]
 
     conf["__GENERATE_NINJA_TRIPLE__"] = "ninja" in extensions
@@ -1863,3 +1864,5 @@ def setInternals(conf):
     if not "__OLP_MODE__" in conf:
         conf["__OLP_MODE__"] = False
     conf["__REQUIRE_FR5__"] = "thv" in extensions
+    if not "__LOOPINDUCED__" in conf:
+        conf["__LOOPINDUCED__"] = False
