@@ -413,6 +413,7 @@ contains
       @else %]h, [%
       @end @select %]momenta, mu, parameters, res, acc, blha1_mode)
       use, intrinsic :: iso_c_binding
+      use, intrinsic :: ieee_arithmetic
       use config, only: ki, [% @if generate_tree_diagrams %]PSP_chk_th3[% @else %]PSP_chk_li3[% @end @if %], nlo_prefactors, PSP_check
       use model, only: parseline[%
             @if eval olp.mc.name ~ "amcatnlo" %], gs [% @end @if %]
@@ -543,7 +544,7 @@ contains
             @if eval ( cr.amplitudetype .eq. "scTree2" )%]
             ! TODO: How to handle this case for scTree2?[%
             @else%]
-            amp(2)= 1.0_ki/zero[%
+            amp(2)= ieee_value(1.0_ki, ieee_quiet_nan)[%
             @if eval olp.mc.name ~ "amcatnlo" %]
             ! aMC@NLO cannot handle Nan's
             amp(2)= 0.0_ki[%
