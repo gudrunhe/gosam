@@ -16,7 +16,9 @@ program test
    real(ki), dimension(5,4) :: vecs
    real(ki), dimension(0:7) :: amp, ref_amp
    real(ki), dimension(0:7,10) :: ampcc, ref_ampcc
+   real(ki), dimension(10) :: tmp_ampcc
    real(ki), dimension(0:7,5,4,4) :: bmunu, ref_bmunu
+   real(ki), dimension(5,4,4) :: tmp_bmunu
    integer, dimension(0:7) :: eftc
 
    open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
@@ -49,8 +51,10 @@ program test
       do ee = 0, 7 
          EFTcount = eftc(ee)
          amp(ee) = samplitudel0(vecs)
-         call OLP_color_correlated(vecs,ampcc(ee,:))
-         call spin_correlated_lo2_whizard(vecs,bmunu(ee,:,:,:))
+         call OLP_color_correlated(vecs,tmp_ampcc)
+         ampcc(ee,:) = tmp_ampcc(:)
+         call spin_correlated_lo2_whizard(vecs,tmp_bmunu)
+         bmunu(ee,:,:,:) = tmp_bmunu(:,:,:)
          do ii = 1, 5
             do jj = 1, 4
                do kk = 1, 4

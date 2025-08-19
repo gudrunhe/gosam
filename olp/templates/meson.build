@@ -29,6 +29,10 @@ endforeach
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
 add_global_arguments('-march=[% meson.arch %]', language: 'fortran')
+if get_option('code_check')
+    add_global_arguments('-fcheck=all', language: 'fortran')
+    add_global_arguments('-fbacktrace', language: 'fortran')
+endif
 add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %]  language: 'fortran')
 
@@ -38,6 +42,7 @@ add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]
 
 OLP_source = files('olp_module.f90')
 common_source = []
+codegen_targets = []
 
 subdir('common')
 [%
@@ -47,6 +52,8 @@ subdir('[% $_ %]')[%
 
 OLP_source += common_source
 
+codegen = alias_target('codegen', codegen_targets)
+
 lib = both_libraries('golem_olp', OLP_source, install: true, dependencies: dependencies)
 
 install_headers('olp.h', subdir: 'GoSam_Process')
@@ -55,8 +62,8 @@ meson.add_install_script(
   get_option('includedir') / meson.project_name(),
 )
 
-configure_file(input: 'config.sh.in', 
-  output: 'config.sh', 
+configure_file(input: 'config.sh.in',
+  output: 'config.sh',
   configuration: {
     'prefix': get_option('prefix'),
     'libdir': get_option('libdir'),

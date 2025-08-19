@@ -3,3 +3,6 @@ option('test_executables', type: 'boolean', value: false,
 
 option('doc', type: 'boolean', value: false,
         description: 'Build the process documentation files for each subprocess and install them to ${SOURCE_DIR}/doc')
+
+option('code_check', type: 'boolean', value: false,
+        description: 'Enable fortran runtime checks and error backtracing with \'-fcheck=all\' and \'-fbacktrace\'')

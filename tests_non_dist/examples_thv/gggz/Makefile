@@ -7,19 +7,27 @@ endif
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
+ifndef ENABLE_CODE_CHECK
+ENABLE_CODE_CHECK=false
+endif
+
 .PHONY: all gosam test comptest clean
 
 all: gosam test
 
 test: comptest
-	@echo Running test programm
-	$(MAKE) -C test test
+	@echo Running test program
+	$(MAKE) ENABLE_CODE_CHECK=$(ENABLE_CODE_CHECK) -C test test
 
 comptest: gosam 
 	$(MAKE) -C test compile
 
 gosam: $(PROCESS).log
+ifeq ($(ENABLE_CODE_CHECK),true)
+	cd virtual; meson setup build --prefix ${CURDIR}/virtual --warnlevel 3 -Dcode_check=True; cd build; meson compile; meson install
+else
 	cd virtual; meson setup build --prefix ${CURDIR}/virtual; cd build; meson compile; meson install
+endif
 
 $(PROCESS).log: $(PROCESS).in
 	@echo setting up virtual ...

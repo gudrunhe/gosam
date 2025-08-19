@@ -4,6 +4,10 @@ CFLAGS=$(shell sh ../virtual/config.sh -cflags)
 LDFLAGS=$(shell sh ../virtual/config.sh -libs)
 DEPS=$(shell sh ../virtual/config.sh -deps)
 
+ifndef ENABLE_CODE_CHECK
+ENABLE_CODE_CHECK=false
+endif
+
 OBJECTS=test.o
 
 .PHONY: compile test clean
@@ -11,7 +15,11 @@ OBJECTS=test.o
 compile: test_program
 
 $(OBJECTS): %.o: %.f90
+ifeq ($(ENABLE_CODE_CHECK),true)
+	$(FC) $(CFLAGS) -fcheck=all -o $@ -c $<
+else
 	$(FC) $(CFLAGS) -o $@ -c $<
+endif
 
 test_program: $(OBJECTS) $(DEPS)
 	$(FC) -o $@ $(OBJECTS) $(LDFLAGS)

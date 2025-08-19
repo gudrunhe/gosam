@@ -66,8 +66,13 @@ contains
 
   function get_mass(p4) result(m)
     implicit none
-    real(ki), dimension(4) :: p4
+    real(ki), dimension(:) :: p4
     real(ki) :: m
+
+    if( size(p4).ne.4 ) then
+       print *, "get_mass: four momentum is not four dimensional! ", size(p4)
+       stop
+    endif
     
     m = sqrt(abs(p4(1)**2-p4(2)**2-p4(3)**2-p4(4)**2))
     
