@@ -166,7 +166,7 @@ contains
       integer, intent(in) :: N
       real(ki), intent(in) :: s
       real(ki), dimension(N), intent(in) :: masses
-      real(ki), dimension(N,4), intent(in) :: vecs
+      real(ki), dimension(:,:), intent(in) :: vecs
 
       real(ki), parameter :: eps = epsilon(s) * 1.0E+03_ki
 
@@ -200,7 +200,7 @@ contains
       implicit none
       real(ki), intent(in) :: s
       real(ki), dimension(2), intent(in) :: masses
-      real(ki), dimension(2,4), intent(out) :: vecs
+      real(ki), dimension(:,:), intent(out) :: vecs
 
       real(ki) :: A, B, m12, m22, sqrts
 
@@ -222,7 +222,7 @@ contains
       integer, intent(in) :: N
       real(ki), dimension(4*N), intent(in) :: u
       real(ki), intent(in) :: s
-      real(ki), dimension(N,4), intent(out) :: vecs
+      real(ki), dimension(:,:), intent(out) :: vecs
 
       real(ki) :: w0
       real(ki), dimension(N,4) :: q

@@ -29,9 +29,6 @@ else
 	cd virtual; meson setup build --prefix ${CURDIR}/virtual; cd build; meson compile; meson install
 endif
 
-fort: $(PROCESS).log
-	$(MAKE) -C nfort
-
 $(PROCESS).log: $(PROCESS).in
 	@echo setting up virtual ...
 	@if [ ! -d virtual ]; then mkdir virtual; fi

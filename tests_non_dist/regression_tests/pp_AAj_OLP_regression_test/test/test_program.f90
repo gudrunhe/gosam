@@ -12,6 +12,7 @@ program main
   real(ki), dimension(50) :: momenta
   real(ki) :: amp, acc, mu
   real(ki), dimension(0:NCHAN-1,60) :: blha_res, ref_res
+  real(ki), dimension(60) :: tmp_blha_res
 
   eval_chans = (/0,6,1,2,3,7,4,5/)
   
@@ -28,7 +29,8 @@ program main
      call get_reference(ievt,vecs,ref_res)
      call vecs_to_blha(vecs,momenta)
      do ichan = 0, NCHAN-1
-        call OLP_EvalSubProcess2(eval_chans(ichan), momenta, mu, blha_res(ichan,:), acc)
+        call OLP_EvalSubProcess2(eval_chans(ichan), momenta, mu, tmp_blha_res, acc)
+        blha_res(ichan,:) = tmp_blha_res(:)
         !call print_blha_result(ichan,blha_res(ichan,:))
      end do
      call check_reference(blha_res,ref_res)
@@ -70,8 +72,13 @@ contains
 
   function get_mass(p4) result(m)
     implicit none
-    real(ki), dimension(4) :: p4
+    real(ki), dimension(:) :: p4
     real(ki) :: m
+
+    if( size(p4).ne.4 ) then
+       print *, "get_mass: four momentum is not four dimensional! ", size(p4)
+       stop
+    endif
     
     m = sqrt(abs(p4(1)**2-p4(2)**2-p4(3)**2-p4(4)**2))
     

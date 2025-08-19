@@ -10,6 +10,7 @@ program test
    integer, parameter, dimension(0:4) :: eftc = (/0,11,12,13,14/)
    real(ki), dimension(4,4) :: vecs
    real(ki), dimension(0:4,0:3) :: gsres, refres, diff
+   real(ki), dimension(0:3) :: tmp_gsres, tmp_refres
    real(ki) :: scale2, sqrts
    real(ki), parameter :: eps = 1.0e-10_ki
    character(len=45), dimension(0:4) :: truncation_order, truncation_order2 
@@ -61,8 +62,10 @@ program test
    
    do ieft = 0, 4
       EFTcount = eftc(ieft)
-      call samplitude(vecs, scale2, gsres(ieft,:), prec)
-      call analytic_amp(vecs,refres(ieft,:))
+      call samplitude(vecs, scale2, tmp_gsres, prec)
+      call analytic_amp(vecs,tmp_refres)
+      gsres(ieft,:) = tmp_gsres(:)
+      refres(ieft,:) = tmp_refres(:)
       write(unit=6,fmt="(A45)") NEW_LINE('a'), truncation_order(ieft)
       write(unit=6,fmt="((3(15x,A11)))") &
            & "finite part", "single pole", "double pole"

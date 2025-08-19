@@ -1021,7 +1021,7 @@ contains
    !----#[ function dotproduct_rr:
    pure function dotproduct_rr(p, q)
       implicit none
-      real(ki), dimension(4), intent(in) :: p, q
+      real(ki), dimension(:), intent(in) :: p, q
       real(ki) :: dotproduct_rr
       dotproduct_rr = p(1)*q(1) - p(2)*q(2) - p(3)*q(3) - p(4)*q(4)
    end  function dotproduct_rr
@@ -1029,7 +1029,7 @@ contains
    !----#[ function dotproduct_cc:
    pure function dotproduct_cc(p, q)
       implicit none
-      complex(ki), dimension(4), intent(in) :: p, q
+      complex(ki), dimension(:), intent(in) :: p, q
       complex(ki) :: dotproduct_cc
       dotproduct_cc = p(1)*q(1) - p(2)*q(2) - p(3)*q(3) - p(4)*q(4)
    end  function dotproduct_cc
@@ -1037,8 +1037,8 @@ contains
    !----#[ function dotproduct_rc:
    pure function dotproduct_rc(p, q)
       implicit none
-      real(ki), dimension(4), intent(in) :: p
-      complex(ki), dimension(4), intent(in) :: q
+      real(ki), dimension(:), intent(in) :: p
+      complex(ki), dimension(:), intent(in) :: q
       complex(ki) :: dotproduct_rc
       dotproduct_rc = p(1)*q(1) - p(2)*q(2) - p(3)*q(3) - p(4)*q(4)
    end  function dotproduct_rc
@@ -1046,8 +1046,8 @@ contains
    !----#[ function dotproduct_cr:
    pure function dotproduct_cr(p, q)
       implicit none
-      complex(ki), dimension(4), intent(in) :: p
-      real(ki), dimension(4), intent(in) :: q
+      complex(ki), dimension(:), intent(in) :: p
+      real(ki), dimension(:), intent(in) :: q
       complex(ki) :: dotproduct_cr
       dotproduct_cr = p(1)*q(1) - p(2)*q(2) - p(3)*q(3) - p(4)*q(4)
    end  function dotproduct_cr

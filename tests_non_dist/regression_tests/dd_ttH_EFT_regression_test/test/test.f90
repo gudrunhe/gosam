@@ -14,7 +14,9 @@ program test
    real(ki) :: scale2, factor, nlo_cpl, rat, factor2, eftfac, vev
    real(ki), dimension(5,4) :: vecs
    real(ki), dimension(0:7,0:3) :: amp, ref_amp
+   real(ki), dimension(0:3) :: tmp_amp
    real(ki), dimension(0:7,2:3) :: irp, ref_irp
+   real(ki), dimension(2:3) :: tmp_irp
    integer, dimension(0:7) :: eftc
 
    open(unit=10,status='old',action='read',file='param.dat',iostat=ierr)
@@ -46,8 +48,10 @@ program test
 
       do ee = 0, 7 
          EFTcount = eftc(ee)
-         call samplitude(vecs, scale2, amp(ee,:), prec)
-         call ir_subtraction(vecs, scale2, irp(ee,:))
+         call samplitude(vecs, scale2, tmp_amp, prec)
+         amp(ee,:) = tmp_amp(:)
+         call ir_subtraction(vecs, scale2, tmp_irp(:))
+         irp(ee,:) = tmp_irp(:)
          !print *, amp(ee,:)
          !print *, ref_amp(ee,:)
          !print *, irp(ee,:)
