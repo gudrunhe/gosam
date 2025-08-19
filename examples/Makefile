@@ -2,6 +2,8 @@
 
 GOSAM_BIN=gosam.py
 
+ENABLE_CODE_CHECK=false
+
 .PHONY : clean
 clean :
 	for f in * ; \
@@ -41,7 +43,7 @@ $(ALL_TESTS) :
 	|| printf "make very-clean failed\n@@@ FAILURE @@@\n" \
 		> "$@/test/test.log" \
 	printf "Running 'make test' in $@...\n"
-	$(MAKE) GOSAM=$(GOSAM_BIN) -C "$@" test \
+	$(MAKE) GOSAM=$(GOSAM_BIN) ENABLE_CODE_CHECK=$(ENABLE_CODE_CHECK) -C "$@" test \
 	|| printf "make test failed\n@@@ FAILURE @@@\n" \
 		> "$@/test/test.log"
 	echo ------------------------------------------------------------
