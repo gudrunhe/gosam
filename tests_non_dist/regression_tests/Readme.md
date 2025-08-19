@@ -16,3 +16,6 @@ This file contains a list of processes are used as additional regression tests f
 
 - ___uu_uu_4F___: $u\bar{u}\to u\bar{u}$
   		   Checks GoSam's functionalities related to four-fermion operators.
+
+Setting the variable `ENABLE_CODE_CHECK=true` will compile the examples with 
+fortran runtime checks enabled and an increased compiler warning level.

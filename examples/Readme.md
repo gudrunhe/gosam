@@ -182,6 +182,9 @@ It defines the following commands:
 - `make <dirname>`:
    Run `make test` in the directory `<dirname>`.
 
+Setting the variable `ENABLE_CODE_CHECK=true` will compile the examples with 
+fortran runtime checks enabled and an increased compiler warning level.
+
 
 # Possible Issues
 

@@ -256,7 +256,7 @@ contains
    pure function square_0l_0l(color_vector) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
       implicit none
-      complex(ki), dimension(numcs), intent(in) :: color_vector
+      complex(ki), dimension(:), intent(in) :: color_vector
       real(ki) :: amp
       complex(ki), dimension(numcs) :: v1, v2
 
@@ -267,8 +267,8 @@ contains
    pure function square_0l_1l(color_vector1, color_vector2) result(amp)
       use [% process_name asprefix=\_ %]color, only: cmat => CC
       implicit none
-      complex(ki), dimension(numcs), intent(in) :: color_vector1
-      complex(ki), dimension(numcs), intent(in) :: color_vector2
+      complex(ki), dimension(:), intent(in) :: color_vector1
+      complex(ki), dimension(:), intent(in) :: color_vector2
       real(ki) :: amp
       complex(ki), dimension(numcs) :: v1, v2
 
@@ -279,7 +279,7 @@ contains
 
    pure function square_0l_0l_mat(color_vector, cmat) result(amp)
       implicit none
-      complex(ki), dimension(numcs), intent(in) :: color_vector
+      complex(ki), dimension(:), intent(in) :: color_vector
       complex(ki), dimension(numcs,numcs), intent(in) :: cmat
       real(ki) :: amp
       complex(ki), dimension(numcs) :: v1, v2
@@ -291,7 +291,7 @@ contains
 
    pure function square_0l_0l_mat_interference(color_vector1, cmat, color_vector2) result(amp)
       implicit none
-      complex(ki), dimension(numcs), intent(in) :: color_vector1, color_vector2
+      complex(ki), dimension(:), intent(in) :: color_vector1, color_vector2
       complex(ki), dimension(numcs,numcs), intent(in) :: cmat
       real(ki) :: amp
       complex(ki), dimension(numcs) :: v1, v2

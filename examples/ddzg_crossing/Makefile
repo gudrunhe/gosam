@@ -8,20 +8,29 @@ endif
 GOSAM_RC1=$(addprefix -m ,$(wildcard ../setup.in)) -m $(PROCESS1).rc
 GOSAM_RC2=$(addprefix -m ,$(wildcard ../setup.in)) -m $(PROCESS2).rc
 
+ifndef ENABLE_CODE_CHECK
+ENABLE_CODE_CHECK=false
+endif
+
 .PHONY: all golem test comptest clean very-clean
 
 all: golem test
 
 test: comptest
 	@echo Running test program
-	$(MAKE) -C test test
+	$(MAKE) ENABLE_CODE_CHECK=$(ENABLE_CODE_CHECK) -C test test
 
 comptest: golem
 	$(MAKE) -C test compile
 
 golem: $(PROCESS1).log $(PROCESS2).log
+ifeq ($(ENABLE_CODE_CHECK),true)
+	cd $(PROCESS1); meson setup build --prefix ${CURDIR}/$(PROCESS1) --warnlevel 3 -Dcode_check=True; cd build; meson compile; meson install
+	cd $(PROCESS2); meson setup build --prefix ${CURDIR}/$(PROCESS2) --warnlevel 3 -Dcode_check=True; cd build; meson compile; meson install
+else
 	cd $(PROCESS1); meson setup build --prefix ${CURDIR}/$(PROCESS1); cd build; meson compile; meson install
 	cd $(PROCESS2); meson setup build --prefix ${CURDIR}/$(PROCESS2); cd build; meson compile; meson install
+endif
 
 $(PROCESS1).log: $(PROCESS1).in
 	@echo setting up $(PROCESS1) ...
