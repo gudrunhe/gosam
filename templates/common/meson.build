@@ -10,6 +10,8 @@ generated_source = ['color.f90', 'kinematics.f90' [% @if internal OLP_MODE %][% 
               depends: hel_gen_targets
                 )
 
+codegen_targets += [% process_name asprefix=\_ %]common_gen
+
 [% process_name asprefix=\_ %]source += files(['rambo.f90', 'globalsl1.f90',
                      'util.f90',
                      'dipoles.f90', 'groups.f90',

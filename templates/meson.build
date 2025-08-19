@@ -38,6 +38,7 @@ add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $
 add_global_link_arguments('-march=[% meson.arch %]', language: 'fortran')
 add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %] language: 'fortran')
+codegen_targets = []
 [% @end @if %]
 
 [% process_name asprefix=\_ %]source = files([])
@@ -45,17 +46,19 @@ hel_gen_targets = []
 
 subdir('doc')
 [%
-@for helicities generated %] 
+@for helicities generated %]
 subdir('helicity[% helicity %]')[%
 @end @for helicities %][%
-@if helsum%] 
+@if helsum%]
 subdir('sum')[%
 @end @if %]
 subdir('common')
 subdir('matrix')
+codegen_targets += hel_gen_targets
 [% @if internal OLP_MODE %]
 OLP_source += [% process_name asprefix=\_ %]source
 [% @else %]
+codegen = alias_target('codegen', codegen_targets)
 lib = both_libraries('golem_process_[% process_name %]',
     [% process_name asprefix=\_ %]source,
     install: true,
@@ -65,8 +68,8 @@ meson.add_install_script(
   find_program(files('install_mod_files.py')),
   get_option('includedir') / meson.project_name(),
 )
-configure_file(input: 'config.sh.in', 
-  output: 'config.sh', 
+configure_file(input: 'config.sh.in',
+  output: 'config.sh',
   configuration: {
     'prefix': get_option('prefix'),
     'libdir': get_option('libdir'),

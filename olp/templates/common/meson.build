@@ -12,3 +12,4 @@ common_source += files(['accu_qp.f90'])[%
 @end @if %]
 
 common_source += common_gen
+codegen_targets += common_gen

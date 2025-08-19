@@ -42,6 +42,7 @@ add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]
 
 OLP_source = files('olp_module.f90')
 common_source = []
+codegen_targets = []
 
 subdir('common')
 [%
@@ -51,6 +52,8 @@ subdir('[% $_ %]')[%
 
 OLP_source += common_source
 
+codegen = alias_target('codegen', codegen_targets)
+
 lib = both_libraries('golem_olp', OLP_source, install: true, dependencies: dependencies)
 
 install_headers('olp.h', subdir: 'GoSam_Process')
@@ -59,8 +62,8 @@ meson.add_install_script(
   get_option('includedir') / meson.project_name(),
 )
 
-configure_file(input: 'config.sh.in', 
-  output: 'config.sh', 
+configure_file(input: 'config.sh.in',
+  output: 'config.sh',
   configuration: {
     'prefix': get_option('prefix'),
     'libdir': get_option('libdir'),
