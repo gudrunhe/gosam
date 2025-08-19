@@ -28,6 +28,10 @@ endforeach
 add_global_arguments('-w', language: 'fortran')
 add_global_arguments('-ffree-line-length-none', language: 'fortran')
 add_global_arguments('-march=[% meson.arch %]', language: 'fortran')
+if get_option('code_check')
+    add_global_arguments('-fcheck=all', language: 'fortran')
+    add_global_arguments('-fbacktrace', language: 'fortran')
+endif
 add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %]  language: 'fortran')
 
