@@ -7,7 +7,7 @@ endif
 GOSAM_RC=$(addprefix -m ,$(wildcard ../setup.in)) \
 	 -m $(PROCESS).rc
 
-fndef ENABLE_CODE_CHECK
+ifndef ENABLE_CODE_CHECK
 ENABLE_CODE_CHECK=false
 endif
 
