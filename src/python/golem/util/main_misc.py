@@ -641,8 +641,10 @@ def fill_config(conf):
     if conf.getBooleanProperty("enable_truncation_orders"):
         for fltr in ["lo","nlo","ct"]:
             if conf["filter."+fltr] is None:
+                logger.info("\'enable_truncation_orders=True\' -> adding filter.%s: d.order('NP')<=1 " % fltr)
                 conf["filter."+fltr] = "lambda d: d.order('NP')<=1"
             elif conf["filter."+fltr].startswith("lambda d:"):
+                logger.info("\'enable_truncation_orders=True\' -> appending filter.%s: d.order('NP')<=1 " % fltr)
                 conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
             else:
                 logger.warning("You seem to be using a filter for the %s component " % (fltr) \
