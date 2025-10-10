@@ -4,7 +4,7 @@ import golem.algorithms.mandelstam
 import golem.algorithms.color
 import golem.util.tools
 
-from golem.util.config import Properties, split_qgrafPower
+from golem.util.config import Properties, split_power
 import golem.util.parser
 from golem.model import MODEL_OPTIONS
 
@@ -29,7 +29,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             self._modeltype = conf.getProperty("model")
 
         props = Properties()
-        props["order"] = conf[golem.properties.qgraf_power]
+        props["order"] = conf[golem.properties.coupling_power]
         props.setProperty("modeltype", self._modeltype)
 
         num_in = len(in_particles)
@@ -642,7 +642,7 @@ class KinematicsTemplate(golem.util.parser.Template):
         else:
             names = ["qcd", "gg", "gs"]
 
-        orders = split_qgrafPower(self._properties.getProperty("order"))
+        orders = split_power(self._properties.getProperty("order"))
         if not orders:
             return False
 

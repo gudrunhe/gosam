@@ -191,7 +191,7 @@ class Diagram:
     def rank(self, MQSE=True):
         rk = 0
         for p in self._loop:
-            twospin = self._propagators[abs(p)].twospin
+            twospin = abs(self._propagators[abs(p)].twospin)
             if twospin != 2 or (self.unitary_gauge and self._propagators[abs(p)].mass != "0"):
                 rk += twospin
 
@@ -607,6 +607,15 @@ class Diagram:
 
     def __str__(self):
         return "D(%s)" % (",".join(map(str, list(self._propagators.values()))))
+
+    def __repr__(self):
+        return "D(\n    %s\n)" % (",\n    ".join(map(str, [
+            *list(l.__repr__() for l in self._in_legs.values()),
+            *list(l.__repr__() for l in self._out_legs.values()),
+            *list(p.__repr__() for p in self._propagators.values()),
+            *list(v.__repr__() for v in self._vertices.values()),
+            f"sign: {self.sign()}"
+        ])))
 
     def isNf(self):
         return self.loopsize() == self.chord(None, massive=False, twospin=[1, -1], color=[3, -3])

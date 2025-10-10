@@ -101,8 +101,8 @@ class OLPSubprocess:
         # subproc_conf.cache["model"] = conf.cache["model"]
         subproc_conf[golem.properties.process_name] = self.process_name
         subproc_conf[golem.properties.process_path] = self.getPath(path)
-        subproc_conf[golem.properties.qgraf_in] = list(map(str, self.p_ini))
-        subproc_conf[golem.properties.qgraf_out] = list(map(str, self.p_fin))
+        subproc_conf[golem.properties.particles_in] = list(map(str, self.p_ini))
+        subproc_conf[golem.properties.particles_out] = list(map(str, self.p_fin))
         if len(self.crossings) > 0:
             subproc_conf[golem.properties.crossings] = [
                 "%s: %s" % (name, process) for name, process in list(self.crossings.items())
@@ -350,7 +350,7 @@ def derive_coupling_names(model_path, conf):
     return qcd_name, qed_name, all_couplings
 
 
-def get_qgraf_power(conf):
+def get_power(conf):
     """
     Returns two lists:
        list of length three: [coupling_name, born_power, virt_power]
@@ -843,12 +843,10 @@ def process_order_file(
                     if particle.getPDGCode() == i:
                         list_exclude.append(str(particle))
             if list_exclude:
-                if not lconf["qgraf.verbatim"]:
-                    lconf["qgraf.verbatim"] = "true=iprop[%s,0,0];" % (",".join(list_exclude))
+                if not lconf["filter.particles"]:
+                    lconf["filter.particles"] = ",".join(f"{p}:0" for p in list_exclude)
                 else:
-                    lconf["qgraf.verbatim"] = lconf["qgraf.verbatim"] + "\ntrue=iprop[%s,0,0];" % (
-                        ",".join(list_exclude)
-                    )
+                    lconf["filter.particles"] += "," + ",".join(f"{p}:0" for p in list_exclude)
 
             lconf["__excludedParticles__"] = None
 
@@ -905,16 +903,16 @@ def process_order_file(
 
         for lconf in [conf] + subprocesses_conf:
             qcd_name, qed_name, all_couplings = derive_coupling_names(imodel_path, lconf)
-            qgraf_power = get_qgraf_power(lconf)
+            coupling_power = get_power(lconf)
 
-            if len(qgraf_power) == 0:
+            if len(coupling_power) == 0:
                 contract_file.setPropertyResponse(
                     "CorrectionType",
                     ["Error:", "Wrong or missing entries in", "CorrectionType, AlphaPower or AlphasPower"],
                 )
                 file_ok = False
             else:
-                lconf[golem.properties.qgraf_power] = ",".join(map(str, qgraf_power))
+                lconf[golem.properties.coupling_power] = ",".join(map(str, coupling_power))
 
             if "olp.operationmode" in lconf:
                 strip_couplings = "CouplingsStrippedOff" in lconf.getListProperty("olp.operationmode")
@@ -1155,7 +1153,7 @@ def process_order_file(
     conf["golem.full-name"] = GOLEM_FULL
     conf["golem.revision"] = golem.installation.GOLEM_REVISION
 
-    orders = golem.util.config.split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
+    orders = golem.util.config.split_power(",".join(map(str, conf.getListProperty(golem.properties.coupling_power))))
     powers = orders[0] if orders else []
 
     if len(powers) == 2:

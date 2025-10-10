@@ -5,7 +5,7 @@ in=5, 21
 out=25, 5
 order=QCD, 1, 3
 
-filter.particles=U:0,D:0,S:0,C:0,T:0
+filter.particles=U:0,D:0,S:0,C:0,T:0,Ubar:0,Dbar:0,Cbar:0,SBar:0,TBar:0
 
 one=gs,e
 

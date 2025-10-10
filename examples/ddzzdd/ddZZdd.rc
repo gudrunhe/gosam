@@ -18,8 +18,6 @@ order=QCD, 2
 one=gs,e
 zero=mU,mD,mS,mC,mB,me,mmu
 
-qgraf.options=onshell,notadpole,nosnail
-
 # No other particles than gluons, Higgs and
 # one quark flavour [d] running in the loops:
 filter.particles=H:0,T:0

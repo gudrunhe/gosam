@@ -190,11 +190,6 @@
 		<file src="counterterms.hh" class="Model"/>
 	</directory>
 
-	<directory src="codegen" dest="." usedby="qgraf">
-		<file src="form.sty" class="Verbatim" usedby="qgraf"/>
-		<file src="topolopy.sty" class="Verbatim" usedby="qgraf"/>
-	</directory>
-
 	<directory src="common">
 		<file src="Makefile.source" class="Kinematics"/>
 		<file src="Makefile.dep" class="Kinematics"/>
@@ -247,12 +242,6 @@
 		<file src="generate_doc.sh" class="Kinematics"/>
 		<file src="process.tex" class="Integrals_doc"/>
 		<file src="redo.log" class="Kinematics"/>
-	</directory>
-
-	<directory src="doc" dest="." usedby="qgraf">
-		<file src="pyxo.sty" class="Verbatim" usedby="qgraf">
-			<except if-option="pyxodraw" value="false" />
-		</file>
 	</directory>
 
 	<directory src="matrix">

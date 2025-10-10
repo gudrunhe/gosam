@@ -4,8 +4,6 @@ import sys
 import os
 import os.path
 
-import golem.util.main_qgraf
-from golem.util.path import golem_path
 from golem.util.tools import getModel, load_source
 
 import logging
@@ -51,14 +49,10 @@ def pyxodraw(*args, **opts):
         logger.debug("Pyxodraw is trying to load module %r\n" % base_name + "from directory: %r" % arg_path)
         mod = load_source(base_name, arg)
 
-        model_name = mod.__model_name__
         diagrams = {}
         mod.get_diagrams(diagrams)
 
-        if conf is None:
-            model_mod = load_source(model_name, os.path.join(arg_path, "%s.py" % golem.util.main_qgraf.MODEL_LOCAL))
-        else:
-            model_mod = getModel(conf, arg_path)
+        model_mod = getModel(conf, arg_path)
 
         latex_names = model_mod.latex_names
 

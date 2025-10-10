@@ -318,8 +318,12 @@ class propagator:
         if self.is_invisible:
             return
 
-        v1 = diag.vertices[self.vertex1]
-        v2 = diag.vertices[self.vertex2]
+        if self.field1.two_spin >= 0:
+            v1 = diag.vertices[self.vertex1]
+            v2 = diag.vertices[self.vertex2]
+        else:
+            v2 = diag.vertices[self.vertex1]
+            v1 = diag.vertices[self.vertex2]
         if "latex" in opts:
             latex_names = opts["latex"]
             name = self.field2.name

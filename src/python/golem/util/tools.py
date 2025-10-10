@@ -337,9 +337,11 @@ def prepare_model_files(conf, output_path=None):
     if len(model_lst) == 0:
         model_lst = ["sm"]
         conf.setProperty("model", "sm")
+        conf.setProperty("model_path", golem_path("models/sm"))
     if len(model_lst) == 1:
         model = model_lst[0]
         src_path = golem_path("models")
+        conf.setProperty("model_path", os.path.join(src_path, model))
         # check for local file
         if os.path.sep in model and all(
             [os.path.exists(os.path.join(rel_path, model + ext)) for ext in ["", ".py", ".hh"]]
@@ -363,6 +365,8 @@ def prepare_model_files(conf, output_path=None):
             if order_names == [""]:
                 order_names = []
             mdl.store(path, MODEL_LOCAL, order_names)
+            # TODO: Use proper UFO model instead of generated QGRAF model
+            conf.setProperty("model_path", os.path.join(path, MODEL_LOCAL))
             logger.info("Done with model import.")
         else:
             model_path = model_lst[0]
@@ -376,9 +380,11 @@ def prepare_model_files(conf, output_path=None):
                 logger.info("Importing CalcHep model files ...")
                 mdl = golem.model.calchep.Model(model_path, int(model_name))
                 mdl.store(path, MODEL_LOCAL)
+                conf.setProperty("model_path", os.path.join(path, MODEL_LOCAL))
                 logger.info("Done with model import.")
             else:
                 model = model_lst[1]
+                conf.setProperty("model_path",  os.path.join(model_path, model))
                 for ext in ["", ".py", ".hh"]:
                     copy_file(os.path.join(model_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
     else:
@@ -481,7 +487,7 @@ def select_olp_EWScheme(conf):
     ewscheme = conf["olp.ewscheme"]
     raisewarn = False
     if conf.getBooleanProperty("olp.config_model_options"):
-        # raise warning only when model.options were actually given in the config file, 
+        # raise warning only when model.options were actually given in the config file,
         # not just because model.options was filled with the default
         for key, value in list(golem.model.MODEL_OPTIONS.items()):
             if any(item.startswith(str(key)) for item in ewparameters):
@@ -586,8 +592,8 @@ def generate_particle_lists(conf):
         inp, outp = conf.cache["particle_lists"]
         return inp[:], outp[:]
 
-    ini = conf.getProperty(golem.properties.qgraf_in)
-    fin = conf.getProperty(golem.properties.qgraf_out)
+    ini = conf.getProperty(golem.properties.particles_in)
+    fin = conf.getProperty(golem.properties.particles_out)
 
     mod = getModel(conf)
 

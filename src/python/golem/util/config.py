@@ -650,21 +650,21 @@ def extractRange(s, minval=0, maxval=999):
     return res
 
 
-def split_qgrafPower(power):
+def split_power(power):
     """
-    >>> split_qgrafPower('QCD,2,0,QED,3,3')
+    >>> split_power('QCD,2,0,QED,3,3')
     [['QCD', 2, 0], ['QED', 3, 3]]
-    >>> split_qgrafPower('QCD,2,QED,3')
+    >>> split_power('QCD,2,QED,3')
     [['QCD', 2], ['QED', 3]]
-    >>> split_qgrafPower('QCD,2,3,QED,3')
+    >>> split_power('QCD,2,3,QED,3')
     [['QCD', 2, 3], ['QED', 3, 3]]
-    >>> split_qgrafPower('QCD,2')
+    >>> split_power('QCD,2')
     [['QCD', 2]]
-    >>> split_qgrafPower('QED,3,4')
+    >>> split_power('QED,3,4')
     [['QED', 3, 4]]
-    >>> split_qgrafPower('QCD,2,3,4,QED,3,NP,1')
+    >>> split_power('QCD,2,3,4,QED,3,NP,1')
     [['QCD', 2, 3, 4], ['QED', 3, 3, 3], ['NP', 1, 1, 1]]
-    >>> split_qgrafPower('QED,3,4,QED,3,4')
+    >>> split_power('QED,3,4,QED,3,4')
     Traceback (most recent call last):
      ...
     ConfigurationException: Coupling 'QED' repeated

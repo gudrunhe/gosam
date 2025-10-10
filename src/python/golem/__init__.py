@@ -1,7 +1,6 @@
 import golem.util
 import golem.util.config
 import golem.util.main_misc
-import golem.util.main_qgraf
 import golem.util.olp
 import golem.util.olp_objects
 import golem.util.olp_options

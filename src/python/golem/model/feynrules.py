@@ -1177,11 +1177,7 @@ class Model:
                 fold_name = "(%s) %s Vertex" % (v.name + "_" + str(ivo), " -- ".join(names))
                 f.write("*---#[ %s:\n" % fold_name)
                 flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                f.write("Identify Once vertex(iv?, isCT0, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
-                for el in order_names:
-                    f.write(", %s%d" % (el, vertorders[ivo][el]))
-                if v.name is not None:
-                    f.write(f", {v.name}_{ivo}")
+                f.write(f"Identify Once vertex(iv?, isNP{flagNP}, {v.name}_{ivo}")
                 colors = []
                 for i in xidx:
                     p = particles[i]
@@ -1189,7 +1185,7 @@ class Model:
                     anti = fields[i]
                     color = abs(p.color)
                     spin = abs(p.spin) - 1
-                    if field.startswith("anti") and not p.pdg_code in [24, -24]:
+                    if field.startswith("anti"):# and not p.pdg_code in [24, -24]: TODO: Why no 24?
                         spin = -spin
                         color = -color
                     colors.append(color)
@@ -1323,11 +1319,7 @@ class Model:
                     fold_name = "(%s) %s CTVertex" % (v.name + "_" + str(ivo), " -- ".join(names))
                     f.write("*---#[ %s:\n" % fold_name)
                     flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                    f.write("Identify Once vertex(iv?, isCT1, isNP%s, RK%d" % (str(flagNP), vertorders[ivo]["RK"]))
-                    for el in order_names:
-                        f.write(", %s%d" % (el, vertorders[ivo][el]))
-                    if v.name is not None:
-                        f.write(f", {v.name}_{ivo}")
+                    f.write(f"Identify Once vertex(iv?, isNP{flagNP}, {v.name}_{ivo}")
                     colors = []
                     for i in xidx:
                         p = particles[i]
@@ -1335,7 +1327,7 @@ class Model:
                         anti = fields[i]
                         color = abs(p.color)
                         spin = abs(p.spin) - 1
-                        if field.startswith("anti") and not p.pdg_code in [24, -24]:
+                        if field.startswith("anti"):# and not p.pdg_code in [24, -24]: TODO: Why no 24?
                             spin = -spin
                             color = -color
                         colors.append(color)

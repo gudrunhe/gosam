@@ -1,0 +1,67 @@
+*--#[diagrams:
+{% for diagram in diagrams %}
+*--#[ diagram{{ loop.index }}:
+Local diagram{{ loop.index }} =
+    QGRAFSIGN({{ diagram.sign() }}) * PREFACTOR(1/{{ diagram.symmetry_factor() }}) *
+    {%- for incoming in diagram.incoming() %}
+        inp([field.{{ incoming.particle().name() }}], {{ incoming.momentum_str() -}}) *
+        inplorentz(
+        {{- twospin[incoming.particle().name()] }},{{ "" -}}
+        iv{{ incoming.vertex(1).id() }}r{{ 1 + incoming.ray_index(1) }}L{{ twospin[incoming.particle().name()] | abs }},
+        {{- incoming.momentum_str() }},
+        {{- mass[incoming.particle().name()] -}}
+        ) *
+        inpcolor({{ loop.index }}, iv{{ incoming.vertex(1).id() }}r{{ 1 + incoming.ray_index(1) }}C{{ color[incoming.particle().name()] | abs }}) *
+    {%- endfor -%}
+    {% for outgoing in diagram.outgoing() %}
+        out([field.{{ outgoing.particle().name() }}], {{ outgoing.momentum_str() }}) *
+        outlorentz(
+        {{- twospin[outgoing.particle().name()] }},{{ "" -}}
+        iv{{ outgoing.vertex(1).id() }}r{{ 1 + outgoing.ray_index(1) }}L{{ twospin[outgoing.particle().name()] | abs }},
+        {{- outgoing.momentum_str() -}},
+        {{- mass[outgoing.particle().name()] -}}
+        ) *
+        outcolor({{ loop.index }}, iv{{ outgoing.vertex(1).id() }}r{{ 1 + outgoing.ray_index(1) }}C{{ color[outgoing.particle().name()] | abs }}) *
+    {%- endfor -%}
+    {%- for vertex in diagram.vertices() %}
+        {%- set vertex_loop = loop %}
+        vertex(iv{{ loop.index0 }}, {% if ufo %}isNP{{ 1 if "NP" in vertex.interaction().coupling_orders() and vertex.interaction().coupling_orders()["NP"] != 0 else 0}}, {{ vertex.interaction().name() }},{% endif %}
+        {%- for prop in vertex.propagators_ordered() %}
+            [field.{{ prop.particle().name() }}],{{ "" -}}
+            idx{{ vertex_loop.index0 }}r{{ 1 + prop.ray_index(1) }},{{ "" -}}
+            {{ twospin[prop.particle().name()] }},{{ "" -}}
+            {{ prop.momentum_str() }}+ZERO,{{ "" -}}
+            iv{{ vertex_loop.index0 }}r{{ 1 + prop.ray_index(1) }}L{{ twospin[prop.particle().name()] | abs }},{{ "" -}}
+            {{ color[prop.particle().name()] }},{{ "" -}}
+            iv{{ vertex_loop.index0 }}r{{ 1 + prop.ray_index(1) }}C{{ color[prop.particle().name()] | abs -}}
+            {% if not loop.last %},{% endif -%}
+        {%- endfor -%}
+        ){% if not loop.last or diagram.propagators() | length > 0 %}*{% endif %}
+    {%- endfor -%}
+    {%- for propagator in diagram.propagators() %}
+        {% set propagator = propagator.normalize() %}
+        propcolor(
+        {{- color[propagator.particle().name()] | abs }},{{ "" -}}
+        iv{{ propagator.vertices()[0].id() }}r{{ 1 + propagator.ray_index(0) }}C{{ color[propagator.particle().name()] | abs }},{{ "" -}}
+        iv{{ propagator.vertices()[1].id() }}r{{ 1 + propagator.ray_index(1) }}C{{ color[propagator.particle().name()] | abs }}{{ "" -}}
+        ) *
+        proplorentz(
+        {{- twospin[propagator.particle().name()] | abs }},
+        {{- propagator.momentum_str() }}+ZERO,
+        {{- mass[propagator.particle().name()] }},
+        {{- width[propagator.particle().name()] }},
+        {{- aux[propagator.particle().name()] }},{{ "" -}}
+        iv{{ propagator.vertices()[0].id() }}r{{ 1 + propagator.ray_index(0) }}L{{ twospin[propagator.particle().name()] | abs }},{{ "" -}}
+        iv{{ propagator.vertices()[1].id() }}r{{ 1 + propagator.ray_index(1) }}L{{ twospin[propagator.particle().name()] | abs -}}
+        ){% if not loop.last %}*{% endif %}
+    {%- endfor %}
+;
+*--#] diagram{{ loop.index }}:
+{% endfor %}
+*--#]diagrams:
+*--#[global:
+#define DIAGRAMCOUNT "{{ diagrams | length }}"
+*--#]global:
+
+
+

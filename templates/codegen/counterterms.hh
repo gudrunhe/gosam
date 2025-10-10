@@ -10,40 +10,40 @@
 * to supply the correct counterterms as part of the UFO model.
 *
 [% @for modelparticles massive quarks OSyukawa %]
-id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %]?, [% @end @for %]VL?,[% @end @if %]
+id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% name %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
 	  [field.[% antiname %]], idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
   	  [field.[% modelhiggs %]], idx3?, sDUMMY3?, vDUMMY3?, iv3L?, sign3?, iv3C?) =
-   vertex(iv,[% @if is_ufo %] isCT, isNP0, RK, [% @for ordernames %][% name %], [% @end @for %]VL,[% @end @if %]
+   vertex(iv,[% @if is_ufo %] isNP0, VL,[% @end @if %]
 	  [field.[% name %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% antiname %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
    (1+XCT*CYUKAWA*DELTAYUKOS[% mass %]);
-id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %]?, [% @end @for %]VL?,[% @end @if %]
+id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% antiname %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
 	  [field.[% name %]], idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
   	  [field.[% modelhiggs %]], idx3?, sDUMMY3?, vDUMMY3?, iv3L?, sign3?, iv3C?) =
-   vertex(iv,[% @if is_ufo %] isCT, isNP0, RK, [% @for ordernames %][% name %], [% @end @for %]VL,[% @end @if %]
+   vertex(iv,[% @if is_ufo %] isNP0, VL,[% @end @if %]
 	  [field.[% antiname %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% name %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
    (1+XCT*CYUKAWA*DELTAYUKOS[% mass %]);[%
 @end @for %][% 
 @for modelparticles quarks MSbaryukawa %]
-id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %]?, [% @end @for %]VL?,[% @end @if %]
+id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% name %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
 	  [field.[% antiname %]], idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
   	  [field.[% modelhiggs %]], idx3?, sDUMMY3?, vDUMMY3?, iv3L?, sign3?, iv3C?) =
-   vertex(iv,[% @if is_ufo %] isCT, isNP0, RK, [% @for ordernames %][% name %], [% @end @for %]VL,[% @end @if %]
+   vertex(iv,[% @if is_ufo %] isNP0, VL,[% @end @if %]
 	  [field.[% name %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% antiname %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
    (1+XCT*CYUKAWA*DELTAYUKMSbar);
-id vertex(iv?,[% @if is_ufo %] isCT?, isNP0, RK?, [% @for ordernames %][% name %]?, [% @end @for %]VL?,[% @end @if %]
+id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% antiname %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
 	  [field.[% name %]], idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
   	  [field.[% modelhiggs %]], idx3?, sDUMMY3?, vDUMMY3?, iv3L?, sign3?, iv3C?) =
-   vertex(iv,[% @if is_ufo %] isCT, isNP0, RK, [% @for ordernames %][% name %], [% @end @for %]VL,[% @end @if %]
+   vertex(iv,[% @if is_ufo %] isNP0, VL,[% @end @if %]
 	  [field.[% antiname %]], idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
 	  [field.[% name %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *

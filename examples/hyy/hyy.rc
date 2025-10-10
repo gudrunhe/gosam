@@ -20,6 +20,6 @@ reduction_programs=ninja, golem95
 
 reference-vectors=2:3,3:2
 filter.nlo={ \
-   'fermionic': lambda d: d.chord("T") == d.loopsize(), \
-   'bosonic':   lambda d: d.chord("T") != d.loopsize() \
+   'fermionic': lambda d: d.chord(["T", "Tbar"]) == d.loopsize(), \
+   'bosonic':   lambda d: d.chord(["T", "Tbar"]) != d.loopsize() \
 }

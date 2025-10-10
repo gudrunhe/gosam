@@ -10,7 +10,7 @@
 *
 * Note that the vertex functions with different particles
 * assume a certain ordering which has to be obeyed in the
-* qgraf model file.
+* model file.
 *
 * The Lorentz structures use the notation as defined in
 * the spinney note:

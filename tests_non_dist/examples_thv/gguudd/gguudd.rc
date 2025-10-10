@@ -10,7 +10,6 @@ model=smdiag
 
 order=QCD,4
 
-qgraf.options=onshell,notadpole,nosnail
 symmetries=family,generation
 
 regularisation_scheme=thv

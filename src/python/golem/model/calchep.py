@@ -961,6 +961,10 @@ mnemonics = {
             f.write("\t\t%r: %r" % (names[row[2]], style))
         f.write("\n}\n\n")
 
+        f.write("aux = {{\n{}\n}}\n\n".format(",\n    ".join([
+            f"'{names[row[1]]}': {1 if row[7].lower() == 't' else 0}" for row in self.expand_field_list(prtcls, prefix)
+        ])))
+
         f.write("slha_locations = {}\n\n")
 
     def write_form_file(self, f):

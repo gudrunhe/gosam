@@ -1,9 +1,0 @@
-[wrap-file]
-source_url=http://qgraf.tecnico.ulisboa.pt/v3.4/qgraf-3.4.2.tgz
-source_filename=qgraf-3.4.2.tgz
-lead_directory_missing=true
-source_hash=cfc029fb871c78943865ef8b51ebcd3cd4428448b8816714b049669dfdeab8aa
-patch_directory=qgraf
-
-[provide]
-program_names = qgraf

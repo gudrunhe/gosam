@@ -16,7 +16,6 @@ import golem.util.parser
 import golem.properties
 import golem.topolopy.functions
 import golem.topolopy.objects
-import golem.util.main_qgraf
 import golem.util.constants as consts
 
 import golem.templates.xmltemplates
@@ -24,11 +23,9 @@ import golem.templates.xmltemplates
 from golem.util.path import golem_path
 from golem.util.tools import copy_file, generate_particle_lists
 
-from golem.util.config import GolemConfigError, split_qgrafPower
+from golem.util.config import GolemConfigError, split_power
 
-# The following files contain routines which originally were
-# part of golem-main itself:
-from golem.util.main_qgraf import *
+from golem.util.main_feyngraph import run_feyngraph
 from golem.installation import GOLEM_VERSION, GOLEM_REVISION, LIB_DIR
 
 import logging
@@ -67,22 +64,11 @@ def generate_process_files(conf, from_scratch=False):
 
     helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
-    # Obtain the files required by QGraf from the template file.
-    golem.templates.xmltemplates.transform_templates(
-        templates,
-        path,
-        props,
-        conf=conf,
-        in_particles=in_particles,
-        out_particles=out_particles,
-        user="qgraf",
-        from_scratch=from_scratch,
-        helicity_map=helicity_map,
-    )
-
-    # First thing to be done because the Makefiles
-    # Need to know the number of diagrams.
-    run_qgraf(conf, in_particles, out_particles)
+    lo_diagrams, nlo_diagrams, ct_diagrams = run_feyngraph(
+            list(map(lambda p: str(p), in_particles)),
+            list(map(lambda p: str(p), out_particles)),
+            conf
+        )
 
     # Run the new analyzer:
     logger.info("Analyzing diagrams")
@@ -100,9 +86,7 @@ def generate_process_files(conf, from_scratch=False):
         treecache,
         ctcache,
         ct_signs,
-    ) = run_analyzer(path, conf, in_particles, out_particles)
-    # keep_tree, keep_virt, keep_ct, loopcache, tree_signs, flags, massive_bubbles = \
-    # run_analyzer(path, conf, in_particles, out_particles)
+    ) = run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles)
 
     props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
     props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
@@ -319,9 +303,7 @@ def write_template_file(fname, defaults, format=None):
                         f.write("%s=%s\n" % (k, defaults.getProperty(k)))
             f.write("\n")
         elif format == "LaTeX":
-            if str(prop) == "qgraf.bin":
-                f.write("Default: \\verb|<gosam-prefix>/bin/GoSam/qgraf|\n\\\\")
-            elif str(prop) == "form.bin":
+            if str(prop) == "form.bin":
                 f.write("Default: \\verb|<gosam-prefix>/bin/GoSam/tform|\n\\\\")
             else:
                 if prop.getDefault() is not None:
@@ -478,8 +460,8 @@ def fill_config(conf):
     # save the settings given in the process config file
     rc_conf = conf.copy()
 
-    ini = conf.getProperty(golem.properties.qgraf_in)
-    fin = conf.getProperty(golem.properties.qgraf_out)
+    ini = conf.getProperty(golem.properties.particles_in)
+    fin = conf.getProperty(golem.properties.particles_out)
 
     # Prepare a copy of the setup file in the property [% user.setup %]
     buf = io.StringIO()
@@ -520,7 +502,7 @@ def fill_config(conf):
             raise GolemConfigError("You have to specify the perturbative order of your process!")
 
     # Check for non-fatal incompatible configurations:
-    orders = split_qgrafPower(",".join(map(str, conf.getListProperty(golem.properties.qgraf_power))))
+    orders = split_power(",".join(map(str, conf.getListProperty(golem.properties.coupling_power))))
     if orders is None:
         orders = []
 
@@ -533,7 +515,7 @@ def fill_config(conf):
         generate_loop_diagrams = True
         is_loopinduced = not generate_tree_diagrams
     else:
-        raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.qgraf_power)
+        raise GolemConfigError("The property %s must have 2 or 3 arguments." % golem.properties.coupling_power)
 
     conf["__LOOPINDUCED__"] = is_loopinduced
 
@@ -949,7 +931,7 @@ def workflow(conf):
         golem.util.tools.expand_parameter_list(prop, conf)
 
 
-def run_analyzer(path, conf, in_particles, out_particles):
+def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
     generate_lo = conf.getBooleanProperty("generate_tree_diagrams")
     generate_virt = conf.getBooleanProperty("generate_loop_diagrams")
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
@@ -962,17 +944,12 @@ def run_analyzer(path, conf, in_particles, out_particles):
     ct_flags = {}
 
     if generate_lo or generate_eftli:
-        modname = consts.PATTERN_TOPOLOPY_LO
-        fname = os.path.join(path, "%s.py" % modname)
-        logger.debug("Loading tree diagram file %r" % fname)
-        mod_diag_lo = golem.util.tools.load_source(modname, fname)
         if conf.getBooleanProperty("unitary_gauge"):
-            for d in mod_diag_lo.diagrams.values():
+            for d in lo_diagrams.values():
                 d.unitary_gauge = True
         conf["ehc"] = False
-        # keep_tree, tree_signs, tree_flows =
         keep_tree, tree_signs, treecache = golem.topolopy.functions.analyze_tree_diagrams(
-            mod_diag_lo.diagrams, model, conf, filter_flags=lo_flags
+            lo_diagrams, model, conf, filter_flags=lo_flags
         )
 
         if len(keep_tree) == 0 and not generate_eftli:
@@ -1006,16 +983,12 @@ def run_analyzer(path, conf, in_particles, out_particles):
             else:
                 onshell[key] = "%s**2" % m
 
-        modname = consts.PATTERN_TOPOLOPY_VIRT
-        fname = os.path.join(path, "%s.py" % modname)
-        logger.debug("Loading one-loop diagram file %r" % fname)
-        mod_diag_virt = golem.util.tools.load_source(modname, fname)
         if conf.getBooleanProperty("unitary_gauge"):
-            for d in mod_diag_virt.diagrams.values():
+            for d in nlo_diagrams.values():
                 d.unitary_gauge = True
 
         keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
-            mod_diag_virt.diagrams,
+            nlo_diagrams,
             model,
             conf,
             onshell,
@@ -1033,16 +1006,12 @@ def run_analyzer(path, conf, in_particles, out_particles):
         loopcache_tot = golem.topolopy.objects.LoopCache()
 
     if generate_ct:
-        modname = consts.PATTERN_TOPOLOPY_CT
-        fname = os.path.join(path, "%s.py" % modname)
-        logger.debug("Loading counterterm diagram file %r" % fname)
-        mod_diag_ct = golem.util.tools.load_source(modname, fname)
         if conf.getBooleanProperty("unitary_gauge"):
-            for d in mod_diag_ct.diagrams.values():
+            for d in ct_diagrams.values():
                 d.unitary_gauge = True
 
         keep_ct, ct_signs, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
-            mod_diag_ct.diagrams, model, conf, filter_flags=ct_flags
+            ct_diagrams, model, conf, filter_flags=ct_flags
         )
     else:
         keep_ct = []

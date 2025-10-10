@@ -31,7 +31,7 @@ process_path = Property(
     "gosam_process"
 )
 
-qgraf_in = Property(
+particles_in = Property(
     "in",
     """\
    A comma-separated list of initial state particles.
@@ -46,7 +46,7 @@ qgraf_in = Property(
     list,
 )
 
-qgraf_out = Property(
+particles_out = Property(
     "out",
     """\
    A comma-separated list of final state particles.
@@ -104,16 +104,18 @@ model_options = Property(
     "ewchoose",
 )
 
-qgraf_power = Property(
+coupling_power = Property(
     "order",
     """\
    A 3-tuple <coupling>,<born>,<virt> where <coupling> denotes
-   a function of the qgraf style file which can be used as
-   an argument in a 'vsum' statement. For the standard model
+   a coupling defined in the model.  For the standard model
    file 'sm' there are two such functions, 'gs' which counts
    powers of the strong coupling and 'gw' which counts powers
    of the weak coupling. <born> is the sum of powers for the
    tree level amplitude and <virt> for the virtual amplitude.
+   For UFO models, all couplings defined as `CouplingOrder`
+   objects are available.
+   
    The line
       order = gs, 4, 6
    would select all diagrams which have (gs)^4 at tree level
@@ -126,8 +128,8 @@ qgraf_power = Property(
    with the same order in gw but higher order in gs.
 
    In other models with more than two different coupling
-   constants additional 'vsum' statements, which can be passed
-   via the qgraph.verbatim option, might be needed
+   constants additional additional filters selecting the
+   appropriate orders in other coupling might be needed
    to select the correct set of diagrams.
 
    The user can also use QCD instead of gs and QED instead of gw.
@@ -137,8 +139,6 @@ qgraf_power = Property(
 
    For loop-induced processes, the order of the Born diagrams
    should be specified as `NONE`.
-
-   See also: qgraf.options, qgraf.verbatim
    """,
     list,
 )
@@ -212,26 +212,25 @@ helicities = Property(
     list,
 )
 
-qgraf_options = Property(
-    "qgraf.options",
+native_filters = Property(
+    "filter.options",
     """\
-   A list of options which is passed to qgraf via the 'options' line.
-   Possible values (as of qgraf.3.1.1) are zero, one or more of:
-      onepi, onshell, nosigma, nosnail, notadpole, floop
-      topol
+   A list of options translated to native FeynGraph filters.
+   The supported options are:
+    - `onepi`: only keep one-particle-irreducible diagrams
+    - `onshell`: only keep diagrams with on-shell external legs
+    - `nosnail`: only keep diagrams without self-loops
+    - `notadpole`: only keep diagrams without tadpoles
 
-   Please, refer to the QGraf documentation for details.
+   Please, refer to the FeynGraph documentation for more details.
    """,
     list,
     "onshell,notadpole,nosnail",
     options=[
         "onepi",
         "onshell",
-        "nosigma",
         "nosnail",
         "notadpole",
-        "floop",
-        "topol",
     ],
 )
 
@@ -281,66 +280,6 @@ filter_ct_particles = Property(
     str,
 )
 
-qgraf_verbatim = Property(
-    "qgraf.verbatim",
-    """\
-   This option allows to send verbatim lines to
-   the file qgraf.dat. This can be useful if the user
-   wishes to put additional restricitons to the selected diagrams.
-   This option is mainly inteded for the use of the operators
-      rprop, iprop, chord, bridge, psum
-   Note, that the use of 'vsum' might interfer with the
-   option qgraf.power.
-
-   Example:
-   qgraf.verbatim=\\
-      # no top quarks: \\n\\
-      true=iprop[T, 0, 0];\\n\\
-      # at least one Higgs:\\n\\
-      false=iprop[H, 0, 0];\\n
-
-
-   Please, refer to the QGraf documentation for details.
-
-   See also: qgraf.options, order
-   """,
-    str,
-    "",
-)
-
-qgraf_verbatim_lo = Property(
-    "qgraf.verbatim.lo",
-    """\
-   Same as qgraf.verbatim but only applied to LO diagrams.
-
-   See also: qgraf.verbatim, qgraf.verbatim.nlo
-   """,
-    str,
-    "",
-)
-
-qgraf_verbatim_nlo = Property(
-    "qgraf.verbatim.nlo",
-    """\
-   Same as qgraf.verbatim but only applied to NLO diagrams.
-
-   See also: qgraf.verbatim, qgraf.verbatim.nlo
-   """,
-    str,
-    "",
-)
-
-qgraf_verbatim_ct = Property(
-    "qgraf.verbatim.ct",
-    """\
-   Same as qgraf.verbatim but only applied to CT diagrams.
-
-   See also: qgraf.verbatim, qgraf.verbatim.nlo
-   """,
-    str,
-    "",
-)
-
 zero = Property(
     "zero",
     """\
@@ -384,18 +323,6 @@ one = Property(
    See also: model, zero
    """,
     list,
-)
-
-qgraf_bin = Property(
-    "qgraf.bin",
-    """\
-   Points to the QGraf executable.
-
-   Example:
-   qgraf.bin=/home/my_user_name/bin/qgraf
-   """,
-    str,
-    os.path.join(BIN_DIR, "qgraf"),
 )
 
 form_bin = Property(
@@ -691,8 +618,8 @@ filter_lo_diagrams = Property(
     """\
    A python function which provides a filter for tree diagrams.
 
-   filter.lo=lambda d: d.iprop(Z) == 1 \\
-      and d.vertices(Z, U, Ubar) == 0
+   filter.lo=lambda d: d.iprop("Z") == 1 \\
+      and d.vertices("Z", "U", "Ubar") == 0
 
    The following methods of the diagram class can be used:
 
@@ -1688,11 +1615,11 @@ properties = [
 #   main process definition
     process_name,
     process_path,
-    qgraf_in,
-    qgraf_out,
+    particles_in,
+    particles_out,
     model,
     model_options,
-    qgraf_power,
+    coupling_power,
     loop_suppressed_Born,
     zero,
     one,
@@ -1703,14 +1630,11 @@ properties = [
     crossings,
 #   filters and selectors
     helicities,
+    native_filters,
     filter_particles,
     filter_lo_particles,
     filter_nlo_particles,
     filter_ct_particles,
-    qgraf_options,
-    qgraf_verbatim,
-    qgraf_verbatim_lo,
-    qgraf_verbatim_nlo,
     select_lo_diagrams,
     select_nlo_diagrams,
     select_ct_diagrams,
@@ -1778,7 +1702,6 @@ properties = [
     abbrev_color,
     abbrev_limit,
     template_path,
-    qgraf_bin,
     form_bin,
     form_threads,
     form_tmp,

@@ -12,7 +12,7 @@ one=gs
 
 helicities=[+-]--+[-+]
 
-filter.particles=phim:0,phip:0,chi:0,H:0,Wp:1
+filter.particles=phim:0,phip:0,chi:0,H:0,Wm:1
 
 regularisation_scheme=dred
 convert_to_thv=true
