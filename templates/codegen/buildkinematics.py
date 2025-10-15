@@ -135,7 +135,7 @@ spvaee_dict = {[%
    @end @for %]}
 
 for file in glob.glob("../helicity*/d*h*l?.txt")\
-            + glob.glob("../helicity*/born.txt")\
+            + glob.glob("../helicity*/born[% @if enable_truncation_orders %]_?[% @end @if %].txt")\
             + glob.glob("../sum/d*h*l?.txt")\
             + glob.glob("../matrix/*.f90"):
     with open(file, "r") as filehandle:
