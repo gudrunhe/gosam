@@ -1,4 +1,4 @@
-project('Ninja', 'cpp', 'fortran', version: '1.1.0', meson_version: '>=1.4')
+project('Ninja', 'cpp', 'fortran', version: '1.2.1', meson_version: '>=1.4')
 
 add_project_arguments('-w', language: 'fortran')
 add_project_arguments('-w', language: 'cpp')
@@ -24,7 +24,7 @@ ninja_src += files(['src/avholo_wrapper.F90'])
 
 ninja_args = [
         '-DNINJA_USE_ONELOOP=1',
-        '-DVERSION="1.1.0"',
+        '-DVERSION="' + meson.project_version() + '"',
         '-DNINJA_MASSLESS=1',
         '-DNINJA_X1RANK=1',
         '-DNINJA_USE_ONELOOP_WITH_CACHE=1'
@@ -39,15 +39,18 @@ subdir('src/ninja')
 ninja_includedirs = [include_directories('src/ninja'), include_directories('src')]
 
 if get_option('quadninja')
+    if not (host_machine.cpu_family() == 'aarch64')
+      quadmath = meson.get_compiler('cpp').find_library('quadmath')
+      ninja_dependencies += quadmath
+    endif
+
     ninja_headers += 'quadruple.hh'
-    quadmath = meson.get_compiler('cpp').find_library('quadmath')
     sed = find_program('sed')
     subdir('src/quadninja')
     subdir('src/quadsources')
     ninja_includedirs += include_directories('src/quadninja')
     ninja_src += quadninja_src
     ninja_src += quadninja_headers
-    ninja_dependencies += quadmath
     ninja_subdirs += 'quadninja'
 endif
 

@@ -1,10 +1,15 @@
-[wrap-file]
-source_url=https://github.com/peraro/ninja/releases/download/v1.2.0/ninja-latest.tar.gz
-source_filename=ninja-latest.tar.gz
-directory=ninja-1.2.0
-source_hash=8907b22454f96fea3ebeeb85f8c17c0d0cc21c281c1b6603f16c7b1583226a62
+#[wrap-file]
+#source_url=https://github.com/peraro/ninja/releases/download/v1.2.0/ninja-latest.tar.gz
+#source_filename=ninja-latest.tar.gz
+#directory=ninja-1.2.0
+#source_hash=8907b22454f96fea3ebeeb85f8c17c0d0cc21c281c1b6603f16c7b1583226a62
+
+[wrap-git]
+url = https://github.com/peraro/ninja/
+revision = HEAD
+depth = 1
 patch_directory=ninja
-diff_files = ninja/types.hh.patch
+#diff_files = ninja/types.hh.patch
 
 [provide]
 dependency_names = ninja
