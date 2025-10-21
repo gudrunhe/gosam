@@ -163,7 +163,7 @@ class Model:
 
             if ambiguous_vertex(vertex):
                 vertices = split_vertex(vertex)
-                logger.warning(
+                logger.info(
                             (
                                 "Vertex %s has ambiguous structure of powers and/or rank. Internally split up into: %s."
                                 % (vertex.name, ', '.join(map(str,vertices)))
@@ -287,7 +287,7 @@ class Model:
             unique_maps = set(tuple(map) for map in maps)
             n_structures = len(unique_maps)
             if n_structures > 1:
-                logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                logger.info(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
                 vertices = []
                 for j, unique_map in enumerate(unique_maps):
                     structures = []
@@ -322,7 +322,7 @@ class Model:
                 unique_maps = set(tuple(map) for map in maps)
                 n_structures = len(unique_maps)
                 if n_structures > 1:
-                    logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                    logger.info(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
                     vertices = []
                     for j, unique_map in enumerate(unique_maps):
                         structures = []
