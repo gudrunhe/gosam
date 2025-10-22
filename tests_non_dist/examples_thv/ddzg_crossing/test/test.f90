@@ -193,6 +193,11 @@ subroutine check_equality(a,b,eps,fac,amplitudes_equal)
 
    amplitudes_equal = .true.
 
+   if (any(isnan(a)).or.any(isnan(b))) then
+      write(unit=logf,fmt="(A10)") "NaN error!"
+      amplitudes_equal = .false.
+   end if
+   
    diff = abs(rel_diff(a*fac, b))
 
    if (diff(0) .gt. eps) then

@@ -62,6 +62,12 @@ program test
       call samplitude(vecs, scale2, tmp_gsres, prec)
       call ir_subtraction(vecs,scale2, tmp_gsirp(2:3))
       call analytic_amp(scale2,tmp_refres)
+
+      if (any(isnan(tmp_gsres))) then
+         write(unit=logf,fmt="(A10)") "NaN error!"
+         success = .false.
+      end if
+      
       gsres(ieft,:) = tmp_gsres(:)
       gsirp(ieft,:) = tmp_gsirp(:) 
       refres(ieft,:) = tmp_refres(:)

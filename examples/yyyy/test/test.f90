@@ -72,6 +72,11 @@ program test
          ok = ok .and. h_ok
       end do
 
+      if (any(isnan(gosam_amps)).or.any(isnan(gauge_amps))) then
+         write(unit=logf,fmt="(A10)") "NaN error!"
+         success = .false.
+      end if
+      
       do ihel = 0, num_helis - 1
 
          do ic = 1, 2
