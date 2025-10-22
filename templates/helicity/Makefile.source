@@ -44,7 +44,7 @@ FORM_OPT=[%
 TXT_TREE[% efto %]=[%
    @for elements topolopy.keep.tree %] \
 		d[%$_%]_[% efto %]h[%helicity%]l0.txt[%
-   @end @for %][% 
+   @end @for %][%
    @end @for %][%
 @else %]TXT_TREE=[%
    @for elements topolopy.keep.tree %] \
@@ -209,7 +209,6 @@ born_[% efto %].txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -228,7 +227,6 @@ born.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -247,7 +245,6 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -265,7 +262,6 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -292,7 +288,6 @@ born_[% efto %].txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -314,7 +309,6 @@ born.txt: ../diagrams-0.hh $(TXT_TREE_STAMP)
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -333,7 +327,6 @@ d[%$_%]_[% efto %]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -351,7 +344,6 @@ d[%$_%]h[%helicity%]l0.txt: ../diagrams-0.hh
 		-w$(FORM_THREADS) \
 		-D GROUP=1 \
 		-D LOOPS=0 \
-		-D SIGN=[% tree_sign $_ %] \
 		-D DIAG=[%$_%] \[%
 @if generate_eft_counterterms %]
 		-D EFTCTFLG=0 \[%
@@ -485,7 +477,7 @@ d[%$_%]_[% efto %]h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]_[% e
 		--QSIGN=[%sign%] \
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%		
+		--LOOPSIZE=[% loopsize diagram=$_ %][%
 @if extension ninja %][%
 @if helsum %][%
 @else %]
@@ -694,7 +686,7 @@ d[%$_%]h[%helicity%]l1d.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1d
 		--QSIGN=[%sign%] \
 		--QSHIFT=[%shift%] \
 		--RANK=[%rank%] \
-		--LOOPSIZE=[% loopsize diagram=$_ %][%		
+		--LOOPSIZE=[% loopsize diagram=$_ %][%
 @if extension ninja %][%
 @if helsum %][%
 @else %]
@@ -804,7 +796,7 @@ d[%$_%]h[%helicity%]l121.f90[% @if extension quadruple %] d[%$_%]h[%helicity%]l1
 		--RANK=[%rank%] \
 		--LOOPSIZE=[% loopsize diagram=$_ %][%
 		@end @if helsum %][%
-        @end @if ninja %][% 
+        @end @if ninja %][%
 	@end @if enable_truncation_orders  %][%
 @end @for diagrams %][%
 @end @for groups %][%
@@ -975,16 +967,15 @@ diagramsct.f90[% @if extension quadruple %] diagramsct_qp.f90[% @end @if %]: eft
 @end @if is_last %][% @end @for elements topolopy.keep.ct %][%
 @end @if generate_eft_counterterms %]
 
-[% @if write_vanishing_amplitude %] 
-born.txt: 
+[% @if write_vanishing_amplitude %]
+born.txt:
 	@printf "#####Abbreviations\n\n\n#####Diagrams\namplitude =  0;" > born.txt
 	@echo "abbrev_terms=0" > born.dat
-	@touch born-stamp 
-born-stamp: born.txt 
-diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp 
-	@echo Python is processing tree diagrams @ Helicity [%helicity%] 
-	@$(PYTHON) ../codegen/buildfortranborn.py \ 
-		-i $< \ 
-		--HELICITY=[%helicity%][% 
+	@touch born-stamp
+born-stamp: born.txt
+diagramsl0.f90[% @if extension quadruple %] diagramsl0_qp.f90[% @end @if %]: born.txt born-stamp
+	@echo Python is processing tree diagrams @ Helicity [%helicity%]
+	@$(PYTHON) ../codegen/buildfortranborn.py \
+		-i $< \
+		--HELICITY=[%helicity%][%
 @end @if %]
-

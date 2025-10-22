@@ -1,7 +1,7 @@
 ![% ' vim: ts=3:sw=3:expandtab:syntax=golem
  %]
 module     [% process_name asprefix=\_ %]ninja_qp
-   ! This file has been generated for ninja 
+   ! This file has been generated for ninja
    use quadninjago_module, only: ki_nin
    use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config
    implicit none
@@ -55,7 +55,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
    real(ki_nin), dimension(4,[% loopsize group=grp %]) :: Vi
 
    ok = .true.
-   
+
    if (ninja_test.eq.1) then
       istopm = 1
       istop0 = 1
@@ -64,7 +64,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
       istop0 = max(2,ninja_istop)
    end if[%
    @for propagators group=grp %]
-   msq([% $_ %]) = [% 
+   msq([% $_ %]) = [%
       @if eval mass .eq. 0 %]0.0_ki_nin[%
       @else %][%
          @if eval width .eq. 0 %]real([% mass %]*[% mass %], ki_nin)[%
@@ -77,7 +77,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
       @for smat upper diagonal
            group=grp powfmt=%s**%d prodfmt=%s*%s prefix=es %]
    s_mat([%rowindex%],[%colindex%]) = real([%
-            @if re.is_zero %]0.0_ki[% 
+            @if re.is_zero %]0.0_ki[%
             @else %][%
                @for elements re delimiter=; var=term first=first_term %][%
                   @for elements term delimiter=: %][%
@@ -88,7 +88,7 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
                            @end @if %][%
                         @else %]-[%
                         @end @if %][%
-   
+
                         @select $_
                         @case 2 -2 %][%
                         @case 4 -4%]2.0_ki*[%
@@ -102,14 +102,14 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
                   @end @for %][%
                @end @for %][%
             @end @if %], ki_nin)[%
-      
+
             @if eval rowindex .ne. colindex %]
    s_mat([% colindex %],[% rowindex %]) = s_mat([% rowindex %],[% colindex %])[%
             @end @if %][%
          @end @for %]
    !-----------#] initialize invariants
 
-   
+
       !------#[ sum over reduction of single diagrams:[%
    @for diagrams group=grp var=DIAG index=DIAGIDX idxshift=1 %][%
       @if use_flags_1 %]
@@ -134,20 +134,16 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
             ok = ok .and. (acc_ok.eq.QUADNINJA_SUCCESS)
          if(debug_nlo_diagrams) then
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-finite' re='", [%
-                  diagram_sign %]real(acc(0), ki), &
+               & "<result kind='nlo-finite' re='", real(acc(0), ki), &
                & "' im='", aimag(acc(0)), "'/>"
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-single' re='", [%
-                  diagram_sign %]real(acc(-1), ki), &
+               & "<result kind='nlo-single' re='", real(acc(-1), ki), &
                & "' im='", aimag(acc(-1)), "'/>"
             write(logfile,'(A30,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-double' re='", [%
-                  diagram_sign %]real(acc(-2), ki), &
+               & "<result kind='nlo-double' re='", real(acc(-2), ki), &
                & "' im='", aimag(acc(-2)), "'/>"
             write(logfile,'(A32,E24.16,A6,E24.16,A3)') &
-               & "<result kind='nlo-rational' re='", [%
-                  diagram_sign %]real(accr, ki), &
+               & "<result kind='nlo-rational' re='", real(accr, ki), &
                & "' im='", aimag(accr), "'/>"
             if(ok) then
                write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
@@ -157,19 +153,15 @@ subroutine     ninja_reduce_group[% grp %](scale2,tot,totr,ok)
             write(logfile,*) "</diagram>"
          end if
          tot = [%
-      @if is_first %][% @if diagsum %] + [%
-      @else %][% diagram_sign %][% @end @if %][%
-      @else %]tot [% @if diagsum %] + [% @else %] [% diagram_sign %] [%
-      @end @if %][%
+      @if is_first %] + [%
+      @else %]tot + [%
       @end @if %][%
       @if is_nf %][% @if diagsum %] [% @else %] Nfrat * [%
       @end @if %][%
       @end @if %]acc
          totr = [%
-      @if is_first %][% @if diagsum %] + [%
-      @else %][% diagram_sign %][% @end @if %][%
-      @else %]totr [% @if diagsum %] + [% @else %] [% diagram_sign %] [%
-      @end @if %][%
+      @if is_first %] + [%
+      @else %]totr + [%
       @end @if %][%
       @if is_nf %][% @if diagsum %] [% @else %] Nfrat * [%
       @end @if %][%

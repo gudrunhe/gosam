@@ -225,9 +225,15 @@ class Diagram:
             if okey is None:
                 return 0
             elif isinstance(okey, str):
-                return tmporders[okey]
+                if okey in tmporders.keys():
+                    return tmporders[okey]
+                else:
+                    return 0
             else:
-                return tmporders[str(okey)]
+                if str(okey) in tmporders.keys():
+                    return tmporders[str(okey)]
+                else:
+                    return 0
         except:
             logger.critical("'{0}' cannot be used as key in order function.".format(okey))
             sys.exit("GoSam terminated due to an error")
@@ -428,117 +434,6 @@ class Diagram:
         for l in list(self._out_legs.values()):
             l.substituteZero(symbols)
 
-    def _trace_fermi_line(self, start, seen_props, seen_legs):
-        to_visit = []
-        if isinstance(start, Leg):
-            initial = self._vertices[start.v]
-            seen_legs[start.index-1 + (len(self._in_legs) if not start.ingoing else 0)] = True
-            incoming_ray = start.r
-        else:
-            initial = self._vertices[start.v2]
-            seen_props[start.index-1] = True
-            incoming_ray = start.r2
-
-        to_visit.append(initial)
-        # Walk the diagram along the fermi line
-        while len(to_visit) > 0:
-            current: Vertex = to_visit.pop()
-            if golem.model.global_model is not None: # Model with connection map
-                outgoing_ray = golem.model.global_model.vertex(current.label).spin_map[incoming_ray-1]
-                for leg in [*self._in_legs.values(), *self._out_legs.values()]:
-                    if (leg.v == current.index and leg.r == outgoing_ray and not
-                        seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)]):
-                        return leg
-                for prop in self._propagators.values():
-                    if seen_props[prop.index-1]:
-                        continue
-                    if prop.v1 == current.index and prop.r1 == outgoing_ray:
-                        to_visit.append(self._vertices[prop.v2])
-                        incoming_ray = prop.r2
-                        seen_props[prop.index-1] = True
-                    elif prop.v2 == current.index and prop.r2 == outgoing_ray:
-                        to_visit.append(self._vertices[prop.v1])
-                        incoming_ray = prop.r1
-                        seen_props[prop.index-1] = True
-            else: # Connection map unknown, walk along first leg/propagator that is found
-                # Next propagator in the line is an external leg, return early
-                legs: list[Leg] = list(
-                    filter(
-                        lambda l: l.v == current.index and not seen_legs[l.index-1 + (len(self._in_legs) if not l.ingoing else 0)],
-                        [*self._in_legs.values(), *self._out_legs.values()]
-                    )
-                )
-                for leg in legs:
-                    if leg.twospin >= 0 and leg.twospin % 2 == 0:
-                        seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)] = True
-                        continue
-                    return leg
-                # No external leg, continue within the diagram
-                props: list[Propagator] = list(
-                    filter(
-                        lambda p: p.v1 == current.index or p.v2 == current.index,
-                        self._propagators.values()
-                    )
-                )
-                for prop in props:
-                    if seen_props[prop.index-1]:
-                        continue
-                    seen_props[prop.index-1] = True
-                    if prop.sign != "-":
-                        continue
-                    connected_vertex = self._vertices[prop.v1] if prop.v2 == current.index else self._vertices[prop.v2]
-                    if connected_vertex.index == initial.index:
-                        return connected_vertex
-                    to_visit.append(connected_vertex)
-        return start
-
-
-
-    def _calculate_fermion_sign(self):
-        seen_propagators = [False]*(max(prop.index for prop in self._propagators.values()) if len(self._propagators) > 0 else 0)
-        seen_legs = [False]*(len(self._in_legs) + len(self._out_legs))
-
-        ext_legs = []
-        for leg in [*self._in_legs.values(), *self._out_legs.values()]:
-            if (seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)]
-                    or (leg.twospin >= 0 and leg.twospin % 2 == 0)):
-                    continue
-            final = self._trace_fermi_line(leg, seen_propagators, seen_legs)
-            if isinstance(final, Vertex):
-                continue
-            seen_legs[final.index-1 + (len(self._in_legs) if not final.ingoing else 0)] = True
-            in_index = leg.index + (len(self._in_legs) if not leg.ingoing else 0)
-            out_index = final.index + (len(self._in_legs) if not final.ingoing else 0)
-            if in_index < out_index:
-                ext_legs.extend([in_index, out_index])
-            else:
-                ext_legs.extend([out_index, in_index])
-
-        n_swap = 0
-        for i in range(len(ext_legs)):
-            for j in range(i + 1, len(ext_legs)):
-                if ext_legs[i] > ext_legs[j]:
-                    n_swap += 1
-
-        n_loops = 0
-        for prop in self._propagators.values():
-            if seen_propagators[prop.index-1] or prop.sign != "-":
-                continue
-            _ = self._trace_fermi_line(prop, seen_propagators, seen_legs)
-            n_loops += 1
-
-        self._sign = 1 if (n_swap + n_loops) % 2 == 0 else -1
-
-    def sign(self):
-        """
-        Compute the relative sign of a Feynman diagram.
-
-        Note: the overall sign is arbitrary.
-        """
-        if self._sign == 0:
-            self._calculate_fermion_sign()
-        return self._sign
-
     def _dfs(self, v, visited, dirty, loop, lvert):
         visited.add(v)
         loop_v = -1
@@ -613,8 +508,7 @@ class Diagram:
             *list(l.__repr__() for l in self._in_legs.values()),
             *list(l.__repr__() for l in self._out_legs.values()),
             *list(p.__repr__() for p in self._propagators.values()),
-            *list(v.__repr__() for v in self._vertices.values()),
-            f"sign: {self.sign()}"
+            *list(v.__repr__() for v in self._vertices.values())
         ])))
 
     def isNf(self):
@@ -1407,6 +1301,12 @@ class TreeCache:
 
     def add(self, diagram, diagram_index):
         self.diagrams[diagram_index] = diagram
+
+    def min(self) -> int:
+        return min(self.diagrams.keys())
+
+    def max(self) -> int:
+        return max(self.diagrams.keys())
 
 
 class LoopCache:

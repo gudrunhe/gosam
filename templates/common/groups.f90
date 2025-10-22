@@ -14,7 +14,7 @@
    save
 
    private[%
-   
+
 @if extension golem95 %]
 !---#[ tensor coefficients for golem95:[%
    @for groups var=grp %]
@@ -68,7 +68,7 @@
       module procedure contract_tensor_coefficients_group_[% grp %][%
       @if is_last %]
    end interface
-   
+
    public :: contract_golem95[%
       @end @if %][%
    @end @for %]
@@ -83,9 +83,9 @@
       logical, public :: eval[% $_ assuffix=\_ %] = .true.[%
    @end @for %]
    end type
-   
+
    public :: lo_flags
-   
+
    logical, public, dimension([%
       min_diagram_0 %]:[% max_diagram_0 %]) :: evaluate_lo_diagram = .true.[%
 @end @if %][%
@@ -99,8 +99,8 @@
    end type
 
    public :: virt_flags
-  
-   logical, public, dimension(0:[% 
+
+   logical, public, dimension(0:[%
          count groups %]-1) :: evaluate_virt_group = .true.
    logical, public, dimension([%
       min_diagram_1%]:[% max_diagram_1 %]) :: evaluate_virt_diagram = .true.[%
@@ -258,7 +258,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
               group=grp powfmt=%s**%d prodfmt=%s*%s prefix=es %]
    s_mat([%rowindex%],[%colindex%])=[%
             @if im.is_zero %]real([% @else %]cmplx([% @end @if %][%
-            @if re.is_zero %]0.0_ki[% 
+            @if re.is_zero %]0.0_ki[%
             @else %][%
                @for elements re delimiter=; var=term first=first_term %][%
                   @for elements term delimiter=: %][%
@@ -269,7 +269,7 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
                            @end @if %][%
                         @else %]-[%
                         @end @if %][%
-   
+
                         @select $_
                         @case 2 -2 %][%
                         @case 4 -4%]2.0_ki*[%
@@ -283,16 +283,16 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
                   @end @for %][%
                @end @for %][%
             @end @if %][%
-      
+
             @if im.is_zero %][% @else %],[% @end @if %][%
-      
+
             @for elements im delimiter=; var=term first=first_term %][%
                @for elements term delimiter=: %][%
                   @if is_first %][%
                      @if eval $_ .ge. 0 %]+[%
                      @else %]-[%
                      @end @if %][%
-      
+
                      @select $_
                      @case 2 -2 %][%
                      @case 4 -4%]2.0_ki*[%
@@ -305,9 +305,9 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
                   @end @if %][%
                @end @for %][%
             @end @for %], ki_gol)[%
-      
+
             @if eval rowindex .ne. colindex %]
-   s_mat([% colindex %],[% rowindex %])=s_mat([% 
+   s_mat([% colindex %],[% rowindex %])=s_mat([%
                                         rowindex %],[% colindex %])[%
             @end @if %][%
 
@@ -339,22 +339,16 @@ function     contract_tensor_coefficients_group_[% grp %](coeffs) result(amp)
             @end @if %]
 
       amp = [%
-            @if is_first %][%
-            @if diagsum %]+ [%
-            @else %][% diagram_sign %][%
+            @if is_first %] + [%
+            @else %]amp + [%
             @end @if %][%
-            @else %]amp [%
-            @if diagsum %]+ [%
-            @else %][% diagram_sign %] [%
-            @end @if %][%
-            @end @if %][%
-            @if is_nf %] [% 
+            @if is_nf %] [%
             @if diagsum %][%
             @else %] real(Nfrat, ki_gol) * [% @end @if %][%
             @end @if %]([%
             @if eval rank .eq. 0 %]coeffs%coeffs_[% DIAG %] * a[%
                 loopsize diagram=DIAG %]0(b_set)[%
-            @else %]contract[% loopsize diagram=DIAG %]_[% rank 
+            @else %]contract[% loopsize diagram=DIAG %]_[% rank
       %](coeffs%coeffs_[% DIAG %], rmomenta, b_set)[%
             @end @if %][%
             @select r2 @case implicit %][%

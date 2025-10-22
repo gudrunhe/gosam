@@ -14,7 +14,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         loopcache,
         in_particles,
         out_particles,
-        tree_signs,
         conf,
         heavy_quarks,
         lo_flags,
@@ -24,10 +23,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         helicity_map,
         treecache,
         ctcache,
-        ct_signs,
         ct_flags,
     ):
-        self.init_kinematics(conf, in_particles, out_particles, tree_signs, heavy_quarks, helicity_map, ct_signs)
+        self.init_kinematics(conf, in_particles, out_particles, heavy_quarks, helicity_map)
         self._loopcache = loopcache
         self._partitions = loopcache.partition()
         self._treecache = treecache
@@ -510,18 +508,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
     def max_diagram_1(self, *args, **opts):
         return str(max(self._loopcache.diagrams.keys()))
 
-    def min_diagram_0(self, *args, **opts):
-        return str(min(self._tree_signs.keys()))
-
-    def max_diagram_0(self, *args, **opts):
-        return str(max(self._tree_signs.keys()))
-
-    def min_diagram_ct(self, *args, **opts):
-        return str(min(self._ct_signs.keys()))
-
-    def max_diagram_ct(self, *args, **opts):
-        return str(max(self._ct_signs.keys()))
-
     def diagrams(self, *args, **opts):
         nopts = opts.copy()
         for kw in [
@@ -593,7 +579,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         rank_name = self._setup_name("rank", "rank", opts)
         nf_name = self._setup_name("nf", "is_nf", opts)
         mqse_name = self._setup_name("mqse", "is_mqse", opts)
-        dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
         globi_name = self._setup_name("global_index", "global_index", opts)
         flags_name = self._setup_name("flags", "flags", opts)
 
@@ -644,10 +629,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
                 qsign = "-"
 
             shift_vec = shift.shift_vector()
-            if diagrams[diagram_index].sign() > 0:
-                ssgn = "+"
-            else:
-                ssgn = "-"
 
             props.setProperty(first_name, is_first)
             props.setProperty(last_name, is_last)
@@ -661,7 +642,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             props.setProperty(globi_name, orig_index[diagram_index])
             props.setProperty(nf_name, diagram_index in nf_lst)
             props.setProperty(mqse_name, diagram_index in top_se)
-            props.setProperty(dsgn_name, ssgn)
             props.setProperty(flags_name, " ".join(diagrams[diagram_index].filter_flags))
             yield props
 

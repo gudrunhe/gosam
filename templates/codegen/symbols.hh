@@ -19,7 +19,6 @@ CFunctions C(symmetric), CL(symmetric), CR(symmetric);
 
 CFunctions inv, PREFACTOR, COLORFACTOR, delta(symmetric);
 CFunction customSpin2Prop;
-CFunction QGRAFSIGN;
 CTensor SUBSCRIPT;
 NFunction NCOrder;
 * formfactor(A, B) = A + B/eps
@@ -134,9 +133,9 @@ Symbol [%
 @end @for mandelstam zero%][%
 @for pairs ordered distinct %]
 Symbols spa[%
-   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][% 
+   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
-      %], spb[% 
+      %], spb[%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %][%
    @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
 @end @for pairs ordered distinct %][%
@@ -203,7 +202,7 @@ Symbols spae[% index1
       @if eval is_lightlike2 .and. ( 2spin2 .eq. 2 ) %]
 Vectors spva[%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1
-            %]e[% index2 %], spvae[% index2 %][% 
+            %]e[% index2 %], spvae[% index2 %][%
                  @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
       @end @if %][%
    @end @for %][%
@@ -239,14 +238,14 @@ AutoDeclare CFunctions Lor;
 #Procedure spsymbols[%
 @for pairs ordered distinct %]
    Id Spa2([%
-   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %], [% 
+   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %], [%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %]) = spa[%
-   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][% 
+   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %][%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2
       %];
-   Id Spb2([% 
+   Id Spb2([%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %], [%
-   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %]) = spb[% 
+   @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %]) = spb[%
    @if is_lightlike2 %]k[% @else %]l[% @end @if %][% index2 %][%
    @if is_lightlike1 %]k[% @else %]l[% @end @if %][% index1 %];[%
 @end @for %][%
@@ -308,10 +307,10 @@ AutoDeclare CFunctions Lor;
    Id [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1?, k[%index%]) = [%
+      @end @if %](k[%index%]) = [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1, k[%index%], `HEL[%
+      @end @if %](k[%index%], `HEL[%
       @if is_initial %]i[%index%][%
       @else %]o[%out_index%][%
       @end @if %]');[%
@@ -319,10 +318,10 @@ AutoDeclare CFunctions Lor;
    Id [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1?, k[%index%]) = [%
+      @end @if %](k[%index%]) = [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1, k[%index%], `HEL[%
+      @end @if %](k[%index%], `HEL[%
       @if is_initial %]i[%index%][%
       @else %]o[%out_index%][%
       @end @if %]'[%
@@ -343,10 +342,10 @@ AutoDeclare CFunctions Lor;
    Id [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1?, k[%index%]) = [%
+      @end @if %](k[%index%]) = [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1, k[%index%], `HEL[%
+      @end @if %](k[%index%], `HEL[%
       @if is_initial %]i[%index%][%
       @else %]o[%out_index%][%
       @end @if %]'[%
@@ -357,10 +356,10 @@ AutoDeclare CFunctions Lor;
    Id [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1?, k[%index%]) = [%
+      @end @if %](k[%index%]) = [%
       @if is_initial %]inp[%
       @else %]out[%
-      @end @if %](field1, k[%index%], `HEL[%
+      @end @if %](k[%index%], `HEL[%
       @if is_initial %]i[%index%][%
       @else %]o[%out_index%][%
       @end @if %]'[%
@@ -410,7 +409,7 @@ AutoDeclare CFunctions Lor;
        @if eval reference > 0 %]k[%reference %]=;[%
        @else %]k[% eval - reference %]=;[%
        @end @if %][%
-     @end @if %][% 
+     @end @if %][%
    @end @for %][%
 @end @if %]
 #EndProcedure
@@ -457,7 +456,7 @@ AutoDeclare CFunctions Lor;
       @if eval index .le. num_in %]
          inpcolor([%index%], idx[%io%][% lindex %]C[% rep %]`suffix', `num')[%
       @else %]
-         outcolor([%eval index - num_in %], idx[%io%][% lindex %]C[% rep 
+         outcolor([%eval index - num_in %], idx[%io%][% lindex %]C[% rep
             %]`suffix', `num')[%
       @end @if %][%
       @if is_last %][%
@@ -487,7 +486,7 @@ AutoDeclare CFunctions Lor;
       @if eval index .le. num_in %]
          inpcolor([%index%], idx[%io%][% lindex %]C[% rep %]`suffix', `num')[%
       @else %]
-         outcolor([%eval index - num_in %], idx[%io%][% lindex %]C[% rep 
+         outcolor([%eval index - num_in %], idx[%io%][% lindex %]C[% rep
             %]`suffix', `num')[%
       @end @if %][%
       @if is_last %][%
@@ -562,7 +561,7 @@ AutoDeclare CFunctions Lor;
    @else %]
       0;[%
    @end @select %]
-   Id 
+   Id
          inpcolor([%index%], idxi[%index%]C[%eval .abs. color%]a?, 1) *
          inpcolor([%index%], idxi[%index%]C[%eval .abs. color%]b?, 2) =[%
    @select color
@@ -624,7 +623,7 @@ AutoDeclare CFunctions Lor;
    @else %]
       0;[%
    @end @select %]
-   Id 
+   Id
          outcolor([%out_index%], idxo[%out_index%]C[%
              eval .abs. color%]a?, 1) *
          outcolor([%out_index%], idxo[%out_index%]C[%

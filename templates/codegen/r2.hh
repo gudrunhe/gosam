@@ -16,7 +16,7 @@
    Argument Spab, Spaa, Spbb, Spba;
       #Call shiftmomenta(`DIAG',0)
    EndArgument;
-   Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
+   Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) =
       fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);
    ToTensor Functions, Q, ptens;
    If(count(ptens,1)==0) Multiply ptens;
@@ -59,17 +59,9 @@
       @end @select %][%
       @if diagsum %][%
       @else %][%
-      @select diagram_sign
-      @case + %][%
          @if is_nf %]
       #redefine R2PREFACTOR "Nfrat"[%
          @end @if %][%
-      @case - %]
-      #redefine R2PREFACTOR "-[%
-         @if is_nf %]Nfrat[%
-         @else %]1[%
-         @end @if %]"[%
-      @end @select %][%
       @end @if %]
       #break
 *------#] Diagram [%diag%]:[%

@@ -109,8 +109,6 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags=None):
     fltr = setup_filter(golem.properties.filter_lo_diagrams, conf, model)
     keep = []
     lose = []
-    signs = {}
-    # flows = {}
 
     treecache = TreeCache()
 
@@ -136,15 +134,12 @@ def analyze_tree_diagrams(diagrams, model, conf, filter_flags=None):
             lose.append(idx)
             conf["veto_crossings"] = diagram.filtered_by_momentum
 
-        signs[idx] = diagram.sign()
-    #   flows[idx] = diagram.fermion_flow()
-
     logger.debug("After analyzing tree diagrams: keeping %d, purging %d" % (len(keep), len(lose)))
 
     for idx in keep:
         treecache.add(diagrams[idx], idx)
 
-    return keep, signs, treecache  # , flows
+    return keep, treecache
 
 
 def analyze_loop_diagrams(
@@ -256,7 +251,6 @@ def analyze_ct_diagrams(diagrams, model, conf, filter_flags=None):
     fltr = setup_filter(golem.properties.filter_ct_diagrams, conf, model)
     keep = []
     lose = []
-    signs = {}
 
     ctcache = CTCache()
 
@@ -279,14 +273,12 @@ def analyze_ct_diagrams(diagrams, model, conf, filter_flags=None):
             lose.append(idx)
             conf["veto_crossings"] = diagram.filtered_by_momentum
 
-        signs[idx] = diagram.sign()
-
     logger.debug("After analyzing CT diagrams: keeping %d, purging %d" % (len(keep), len(lose)))
 
     for idx in keep:
         ctcache.add(diagrams[idx], idx)
 
-    return keep, signs, ctcache
+    return keep, ctcache
 
 
 def analyze_diagram(diagram, zero, fltr):

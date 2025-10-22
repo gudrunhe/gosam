@@ -6,6 +6,7 @@ __pycache__
 *.o
 *.olc
 *.in
+test_program
 !setup.in
 !gosam.in
 !golem.in

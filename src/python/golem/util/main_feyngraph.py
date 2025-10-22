@@ -23,8 +23,14 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
     """
     Generate the diagrams and write the `diagrams-<i>.hh` files.
     """
-    # TODO: Use proper UFO model instead of generated QGRAF model
-    model: fg.Model = fg.Model.from_qgraf(conf["model_path"])
+    if hasattr(golem.model, "feyngraph_model"):
+        model = golem.model.feyngraph_model
+    else:
+        if conf.getBooleanProperty("is_ufo"):
+            model: fg.Model = fg.Model.from_ufo(conf["model_path"])
+            model.merge_vertices()
+        else:
+            model: fg.Model = fg.Model.from_qgraf(conf["model_path"])
 
     powers: list[list[str]] = split_power(",".join(map(str, conf.getListProperty(golem.properties.coupling_power))))
     for power in powers:
@@ -89,7 +95,7 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         } if conf.getProperty("filter.lo.vertices") is not None else {}
         for particle_list, count in vertex_restrictions.items():
             lo_selector.select_vertex_count(particle_list, count)
-        lo_selector.select_coupling_power("isCT", 0)
+        lo_selector.select_coupling_power("CT", 0)
         lo_generator: fg.DiagramGenerator = fg.DiagramGenerator(
             in_particles,
             out_particles,
@@ -112,7 +118,7 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         nlo_selector: fg.DiagramSelector = deepcopy(selector)
         for coupling, _, nlo_power in powers:
             nlo_selector.select_coupling_power(coupling, int(nlo_power))
-        nlo_selector.select_coupling_power("isCT", 0)
+        nlo_selector.select_coupling_power("CT", 0)
         particle_restrictions: dict[str, int] = {
             restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
             for restriction in conf.getProperty("filter.nlo.particles").split(",")
@@ -147,7 +153,7 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         ct_selector: fg.DiagramSelector = deepcopy(selector)
         for coupling, _, nlo_power in powers:
             ct_selector.select_coupling_power(coupling, int(nlo_power))
-        ct_selector.select_coupling_power("isCT", 1)
+        ct_selector.select_coupling_power("CT", 1)
         particle_restrictions: dict[str, int] = {
             restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
             for restriction in conf.getProperty("filter.ct.particles").split(",")

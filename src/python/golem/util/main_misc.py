@@ -80,12 +80,10 @@ def generate_process_files(conf, from_scratch=False):
         keep_ct,
         loopcache,
         loopcache_tot,
-        tree_signs,
         flags,
         massive_bubbles,
         treecache,
         ctcache,
-        ct_signs,
     ) = run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles)
 
     props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
@@ -99,6 +97,9 @@ def generate_process_files(conf, from_scratch=False):
     props.setProperty("templates", templates)
     props.setProperty("process_path", path)
     props.setProperty("max_rank", conf["__max_rank__"])
+    if len(treecache.diagrams) > 0:
+        props.setProperty("tree_min", treecache.min())
+        props.setProperty("tree_max", treecache.max())
 
     if conf.getBooleanProperty("write_vanishing_amplitude"):
         props.setProperty("write_vanishing_amplitude", "true")
@@ -126,7 +127,6 @@ def generate_process_files(conf, from_scratch=False):
         treecache=treecache,
         loopcache=loopcache,
         loopcache_tot=loopcache_tot,
-        tree_signs=tree_signs,
         # tree_flows=tree_flows,
         heavy_quarks=[p for p in conf.getListProperty("__heavy_quarks__") if len(p.strip()) > 0],
         lo_flags=flags[0],
@@ -135,10 +135,9 @@ def generate_process_files(conf, from_scratch=False):
         diagram_sum=eprops,
         helicity_map=helicity_map,
         ctcache=ctcache,
-        ct_signs=ct_signs,
         ct_flags=flags[2],
     )
-    cleanup(path)
+    #cleanup(path)
 
 
 def cleanup(path):
@@ -635,8 +634,8 @@ def fill_config(conf):
         # END: Check for incompatible configuration
 
 
-    # Discard all diagrams with double insertions, when truncation orders 
-    # are used. Is also done later in golem.frm, but doing it here reduces 
+    # Discard all diagrams with double insertions, when truncation orders
+    # are used. Is also done later in golem.frm, but doing it here reduces
     # the number of generated diagrams and speeds up the calculation.
     # Note: cannot be done when a filter module is used -> has to be part of the module
     if conf.getBooleanProperty("enable_truncation_orders"):
@@ -651,13 +650,13 @@ def fill_config(conf):
                 + "Since you are also using the 'enable_truncation_orders' feature please make sure you\n"
                 + "restrict order('NP')<=1 to avoid double insertions of EFT operators (if applicable).")
 
-    # For loop-induced processed any tree diagram must contain a 
+    # For loop-induced processed any tree diagram must contain a
     # loop suppressed operator, while loop diagrams must not. Add appropriate filters here.
     # Note: cannot be done when a filter module is used -> has to be part of the module
     if conf.getBooleanProperty("loop_suppressed_Born"):
         for l, fltr in enumerate(["nlo","lo"]):
             if conf["filter."+fltr] is None:
-                conf["filter."+fltr] = "lambda d: d.order('QL')==" + str(l) 
+                conf["filter."+fltr] = "lambda d: d.order('QL')==" + str(l)
             elif conf["filter."+fltr].startswith("lambda d:"):
                 conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('QL')==" + str(l)
             else:
@@ -751,11 +750,11 @@ def fill_config(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    # check consistency of regularisation schemes in setup file 
+    # check consistency of regularisation schemes in setup file
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf["__OLP_MODE__"]:
         mismatch_schemes = [False, None]
-    
+
         if conf["regularisation_scheme"] == "dred":
             if "thv" in ext:
                 mismatch_schemes = [True, "thv"]
@@ -771,14 +770,14 @@ def fill_config(conf):
                     "Unknown regularisation_scheme in config: %s" % str(conf["regularisation_scheme"])
                 )
             sys.exit("GoSam terminated due to an error")
-    
+
         if mismatch_schemes[0]:
             logger.critical(
                     "Incompatible settings between regularisation_scheme and extensions: "
                     + "%r vs. %r" % (conf["regularisation_scheme"],mismatch_schemes[1])
                 )
             sys.exit("GoSam terminated due to an error")
-    
+
         if "thv" in ext and "dred" in ext:
             logger.critical(
                     "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
@@ -865,7 +864,7 @@ def workflow(conf):
     golem.util.tools.prepare_model_files(conf)
 
 
-    # zero property: convert masses and width defined through PDG code to internal parameter name 
+    # zero property: convert masses and width defined through PDG code to internal parameter name
     # (depends on model, so model.py must have been created already)
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf["__OLP_MODE__"]:
@@ -899,9 +898,9 @@ def workflow(conf):
         conf.setProperty("zero",",".join(list(set(new_zero))))
 
 
-    # It can happen that a model defines names for a particle's mass and width but 
-    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the 
-    # built-in models). We have to take care of that and add those names to the zero 
+    # It can happen that a model defines names for a particle's mass and width but
+    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+    # built-in models). We have to take care of that and add those names to the zero
     # property to avoid erroneous code generation. Otherwise the user has to remember
     # to add these cases to 'zero' manually.
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
@@ -948,7 +947,7 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
             for d in lo_diagrams.values():
                 d.unitary_gauge = True
         conf["ehc"] = False
-        keep_tree, tree_signs, treecache = golem.topolopy.functions.analyze_tree_diagrams(
+        keep_tree, treecache = golem.topolopy.functions.analyze_tree_diagrams(
             lo_diagrams, model, conf, filter_flags=lo_flags
         )
 
@@ -964,7 +963,6 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
                 sys.exit("GoSam terminated due to an error")
     else:
         keep_tree = []
-        tree_signs = {}
         treecache = golem.topolopy.objects.TreeCache()
         # tree_flows = {}
 
@@ -1010,12 +1008,11 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
             for d in ct_diagrams.values():
                 d.unitary_gauge = True
 
-        keep_ct, ct_signs, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
+        keep_ct, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
             ct_diagrams, model, conf, filter_flags=ct_flags
         )
     else:
         keep_ct = []
-        ct_signs = {}
         ctcache = golem.topolopy.objects.CTCache()
 
     conf["__heavy_quarks__"] = quark_masses
@@ -1030,7 +1027,6 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
 
     flags = (lo_flags, virt_flags, ct_flags)
 
-    # return keep_tree, keep_virt, loopcache, tree_signs, tree_flows, flags
     return (
         keep_tree,
         keep_virt,
@@ -1039,10 +1035,8 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
         keep_ct,
         loopcache,
         loopcache_tot,
-        tree_signs,
         flags,
         massive_bubbles,
         treecache,
         ctcache,
-        ct_signs,
     )

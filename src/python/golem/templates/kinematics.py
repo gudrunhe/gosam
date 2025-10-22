@@ -16,7 +16,7 @@ class KinematicsTemplate(golem.util.parser.Template):
     light-like vectors and Mandelstam variables.
     """
 
-    def init_kinematics(self, conf, in_particles, out_particles, tree_signs, heavy_quarks, helicity_map, ct_signs):
+    def init_kinematics(self, conf, in_particles, out_particles, heavy_quarks, helicity_map):
         self._mandel_stack = []
         zeroes = golem.util.tools.getZeroes(conf)
         self._zeroes = zeroes
@@ -69,8 +69,6 @@ class KinematicsTemplate(golem.util.parser.Template):
         self._cs_line_stack = []
         self._cs_trace_stack = []
         self._field_info = []
-        self._tree_signs = tree_signs
-        self._ct_signs = ct_signs
         # self._tree_flows = tree_flows
         self._crossings = []
         self._charge = []
@@ -369,57 +367,6 @@ class KinematicsTemplate(golem.util.parser.Template):
                     props[complex_mass] = False
 
                 yield props
-
-    def tree_sign(self, *args, **opts):
-        if len(args) == 0:
-            raise golem.util.parser.TemplateError("[% tree_sign %] without diagram number.")
-
-        diag = self._eval_int(args[0])
-
-        if diag in self._tree_signs:
-            return str(self._tree_signs[diag])
-        else:
-            raise golem.util.parser.TemplateError("[% tree_sign %] with unknown diagram number.")
-
-    def ct_sign(self, *args, **opts):
-        if len(args) == 0:
-            raise golem.util.parser.TemplateError("[% ct_sign %] without diagram number.")
-
-        diag = self._eval_int(args[0])
-
-        if diag in self._ct_signs:
-            return str(self._ct_signs[diag])
-        else:
-            raise golem.util.parser.TemplateError("[% ct_sign %] with unknown diagram number.")
-
-    def _OBSOLETE_tree_flow(self, *args, **opts):
-        first_name = self._setup_name("first", "is_first", opts)
-        last_name = self._setup_name("last", "is_last", opts)
-        index_name = self._setup_name("index", "index", opts)
-        var_name = self._setup_name("var", "$_", opts)
-        props = Properties()
-
-        if len(args) == 0:
-            raise golem.util.parser.TemplateError("[% tree_flow %] without diagram number.")
-
-        diag = self._eval_int(args[0])
-
-        if diag not in self._tree_flows:
-            raise golem.util.parser.TemplateError("[% tree_sign %] with unknown diagram number.")
-
-        flow = self._tree_flows[diag]
-        N = len(flow)
-
-        for i, l in enumerate(flow.keys()):
-            is_first = i == 0
-            is_last = i == N - 1
-            value = flow[l]
-
-            props.setProperty(first_name, str(is_first))
-            props.setProperty(last_name, str(is_last))
-            props.setProperty(index_name, str(l))
-            props.setProperty(var_name, str(value))
-            yield props
 
     def crossings(self, *args, **opts):
         first_name = self._setup_name("first", "is_first", opts)
@@ -749,7 +696,7 @@ class KinematicsTemplate(golem.util.parser.Template):
         else:
             end_index = self._num_in
 
-        # when using "particles" as iterator, which is the last object 
+        # when using "particles" as iterator, which is the last object
         # depends on applied filters, so we have to run the loop twice
         last_index = start_index
         for index in range(start_index, end_index):
@@ -773,7 +720,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             # continue
 
             last_index = index
-            
+
 
         for index in range(start_index, end_index):
             if self._lightlike[index]:

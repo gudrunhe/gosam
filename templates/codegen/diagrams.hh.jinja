@@ -2,9 +2,9 @@
 {% for diagram in diagrams %}
 *--#[ diagram{{ loop.index }}:
 Local diagram{{ loop.index }} =
-    QGRAFSIGN({{ diagram.sign() }}) * PREFACTOR(1/{{ diagram.symmetry_factor() }}) *
+    {{ diagram.sign() }} * PREFACTOR(1/{{ diagram.symmetry_factor() }}) *
     {%- for incoming in diagram.incoming() %}
-        inp([field.{{ incoming.particle().name() }}], {{ incoming.momentum_str() -}}) *
+        inp({{ incoming.momentum_str() -}}) *
         inplorentz(
         {{- twospin[incoming.particle().name()] }},{{ "" -}}
         iv{{ incoming.vertex(1).id() }}r{{ 1 + incoming.ray_index(1) }}L{{ twospin[incoming.particle().name()] | abs }},
@@ -14,7 +14,7 @@ Local diagram{{ loop.index }} =
         inpcolor({{ loop.index }}, iv{{ incoming.vertex(1).id() }}r{{ 1 + incoming.ray_index(1) }}C{{ color[incoming.particle().name()] | abs }}) *
     {%- endfor -%}
     {% for outgoing in diagram.outgoing() %}
-        out([field.{{ outgoing.particle().name() }}], {{ outgoing.momentum_str() }}) *
+        out({{ outgoing.momentum_str() }}) *
         outlorentz(
         {{- twospin[outgoing.particle().name()] }},{{ "" -}}
         iv{{ outgoing.vertex(1).id() }}r{{ 1 + outgoing.ray_index(1) }}L{{ twospin[outgoing.particle().name()] | abs }},
@@ -25,9 +25,9 @@ Local diagram{{ loop.index }} =
     {%- endfor -%}
     {%- for vertex in diagram.vertices() %}
         {%- set vertex_loop = loop %}
-        vertex(iv{{ loop.index0 }}, {% if ufo %}isNP{{ 1 if "NP" in vertex.interaction().coupling_orders() and vertex.interaction().coupling_orders()["NP"] != 0 else 0}}, {{ vertex.interaction().name() }},{% endif %}
+        vertex(iv{{ loop.index0 }},{% if ufo %} {{ vertex.interaction().name() }},{% endif %}
         {%- for prop in vertex.propagators_ordered() %}
-            [field.{{ prop.particle().name() }}],{{ "" -}}
+            {% if not ufo %}[field.{{ prop.particle().name() }}],{% endif %}{{ "" -}}
             idx{{ vertex_loop.index0 }}r{{ 1 + prop.ray_index(1) }},{{ "" -}}
             {{ twospin[prop.particle().name()] }},{{ "" -}}
             {{ prop.momentum_str() }}+ZERO,{{ "" -}}
@@ -39,7 +39,7 @@ Local diagram{{ loop.index }} =
         ){% if not loop.last or diagram.propagators() | length > 0 %}*{% endif %}
     {%- endfor -%}
     {%- for propagator in diagram.propagators() %}
-        {% set propagator = propagator.normalize() %}
+        {% set propagator = propagator.normalize() -%}
         propcolor(
         {{- color[propagator.particle().name()] | abs }},{{ "" -}}
         iv{{ propagator.vertices()[0].id() }}r{{ 1 + propagator.ray_index(0) }}C{{ color[propagator.particle().name()] | abs }},{{ "" -}}

@@ -15,7 +15,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         loopcache_tot,
         in_particles,
         out_particles,
-        tree_signs,
         conf,
         heavy_quarks,
         lo_flags,
@@ -23,9 +22,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         massive_bubbles,
         eprops,
         helicity_map,
-        ct_signs,
     ):
-        self.init_kinematics(conf, in_particles, out_particles, tree_signs, heavy_quarks, helicity_map, ct_signs)
+        self.init_kinematics(conf, in_particles, out_particles, heavy_quarks, helicity_map)
         self._loopcache = loopcache
         self._loopcache_tot = loopcache_tot
         self._partitions = loopcache.partition()
@@ -37,6 +35,8 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         self._diagram_flags_1 = nlo_flags
         self._massive_bubbles = massive_bubbles
         self._eprops = eprops
+        self._tree_min = conf.getIntegerProperty("tree_min")
+        self._tree_max = conf.getIntegerProperty("tree_max")
 
     def maxloopsize(self, *args, **opts):
         return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -480,19 +480,13 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         if "group" in opts:
             g = self._eval_int(opts["group"], **nopts)
             diagrams_tot = self._loopcache_tot.diagrams
-            dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
             value_name = self._setup_name("var", "$_", opts)
             nf_name = self._setup_name("nf", "is_nf", opts)
             nf_lst = set([])
             props = Properties()
             for idx in self._eprops[g]:
-                if diagrams_tot[idx].sign() > 0:
-                    ssgn = "+"
-                else:
-                    ssgn = "-"
                 if diagrams_tot[idx].isNf():
                     nf_lst.add(idx)
-                props.setProperty(dsgn_name, ssgn)
                 props.setProperty(nf_name, idx in nf_lst)
                 props.setProperty(value_name, str(idx))
                 yield props
@@ -512,10 +506,10 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         return str(max(self._loopcache.diagrams.keys()))
 
     def min_diagram_0(self, *args, **opts):
-        return str(min(self._tree_signs.keys()))
+        return self._tree_min
 
     def max_diagram_0(self, *args, **opts):
-        return str(max(self._tree_signs.keys()))
+        return self._tree_max
 
     @staticmethod
     def ninjaidx_formula(nlegs, rk):
@@ -605,7 +599,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         ninjaidxb_name = self._setup_name("ninjaidxb", "ninjaidxb", opts)
         nf_name = self._setup_name("nf", "is_nf", opts)
         mqse_name = self._setup_name("mqse", "is_mqse", opts)
-        dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
         globi_name = self._setup_name("global_index", "global_index", opts)
         flags_name = self._setup_name("flags", "flags", opts)
 
@@ -656,11 +649,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
                 qsign = "-"
 
             shift_vec = shift.shift_vector()
-            if diagrams[diagram_index].sign() > 0:
-                ssgn = "+"
-            else:
-                ssgn = "-"
-
             props.setProperty(first_name, is_first)
             props.setProperty(last_name, is_last)
             props.setProperty(value_name, diagram_index)
@@ -675,7 +663,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
             props.setProperty(globi_name, orig_index[diagram_index])
             props.setProperty(nf_name, diagram_index in nf_lst)
             props.setProperty(mqse_name, diagram_index in top_se)
-            props.setProperty(dsgn_name, ssgn)
             props.setProperty(flags_name, " ".join(diagrams[diagram_index].filter_flags))
             yield props
 
@@ -758,7 +745,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
         ninjaidxb_name = self._setup_name("ninjaidxb", "ninjaidxb", opts)
         nf_name = self._setup_name("nf", "is_nf", opts)
         mqse_name = self._setup_name("mqse", "is_mqse", opts)
-        dsgn_name = self._setup_name("diagram_sign", "diagram_sign", opts)
         globi_name = self._setup_name("global_index", "global_index", opts)
         flags_name = self._setup_name("flags", "flags", opts)
 
@@ -809,10 +795,6 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
                 qsign = "-"
 
             shift_vec = shift.shift_vector()
-            if diagrams_tot[diagram_index].sign() > 0:
-                ssgn = "+"
-            else:
-                ssgn = "-"
 
             props.setProperty(first_name, is_first)
             props.setProperty(last_name, is_last)
@@ -828,6 +810,5 @@ class IntegralsTemplate(golem.templates.kinematics.KinematicsTemplate):
             props.setProperty(globi_name, orig_index[diagram_index])
             props.setProperty(nf_name, diagram_index in nf_lst)
             props.setProperty(mqse_name, diagram_index in top_se)
-            props.setProperty(dsgn_name, ssgn)
             props.setProperty(flags_name, " ".join(diagrams_tot[diagram_index].filter_flags))
             yield props

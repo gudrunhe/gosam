@@ -32,8 +32,8 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-\noindent [% 
-@if is_loopinduced %] This process is loop-induced and contains [% 
+\noindent [%
+@if is_loopinduced %] This process is loop-induced and contains [%
 @select topolopy.count.docu
  @case 0 %]no one-loop Born diagrams[%
  @case 1 %]one one-loop Born diagram[%
@@ -42,15 +42,15 @@
     @case 0%]no different groups[%
     @case 1%]only one group[%
     @else %][% count groups %] groups [%
- @end @select %] of one-loop Born diagrams by analyzing their one-loop integrals. [% 
- @if generate_eft_loopind %] In addition there [% 
+ @end @select %] of one-loop Born diagrams by analyzing their one-loop integrals. [%
+ @if generate_eft_loopind %] In addition there [%
  @select topolopy.count.tree
  @case 0 %]are no diagrams[%
  @case 1 %]is one diagram[%
  @else %]are [%topolopy.count.tree %] diagrams[%
  @end @select %] with tree topology containing a loop-suppressed EFT operator.[%
- @end @if %][% 
- @else 'not is_loopinduced %] This process consists of [% 
+ @end @if %][%
+ @else 'not is_loopinduced %] This process consists of [%
  @select topolopy.count.tree
  @case 0 %]no LO diagrams[%
  @case 1 %]one LO diagram[%
@@ -95,12 +95,12 @@
 $[%helicity%][%
    @if generated %][%
    @else %]\rightarrow [% map.index %][%
-   @end @if %]$[% 
+   @end @if %]$[%
    @for particles %]& $[%hel%]$[%
    @end @for particles %] & [%
    @if generated %][%
-   @else %]$[% map.permutation %]$[% 
-   @end @if %] & $[% map.gauge_set%]$ \\[% 
+   @else %]$[% map.permutation %]$[%
+   @end @if %] & $[% map.gauge_set%]$ \\[%
 @end @for helicities %]
 \end{longtable}
 \section{Wave Functions}
@@ -117,12 +117,12 @@ For the massive particles we have:
    @case 1 %]
 l_{[% index1 %]} &= k_{[% index1%]} - \frac{[% mass1 %]^2}{%
       2 k_{[%index1%]}\cdot [%
-      @select mass2 
+      @select mass2
       @case 0%]k_{[%index2%]}[%
       @else %]l_{[%index2%]}[%
       @end @select mass2 %]}[%
 
-      @select mass2 
+      @select mass2
       @case 0%]k_{[%index2%]}[%
       @else %]l_{[%index2%]}[%
       @end @select mass2 %][%
@@ -324,9 +324,9 @@ For the definition of tensor states, please refer to the document
 [% @if generate_tree_diagrams %]
 \section{Tree Diagrams}
 
-[% 
+[%
 @if pyxodraw %][%
-   @with modules pyxotree.tex path=process %][% 
+   @with modules pyxotree.tex path=process %][%
       @for elements topolopy.keep.tree var=DIAG index=DIAGINDEX %][%
          @if is_first %]\begin{longtable}{cc}
 \endfirsthead
@@ -337,10 +337,7 @@ For the definition of tensor states, please refer to the document
 \begin{minipage}{0.45\textwidth}
 \begin{center}
 [%diagram suffix=DIAG%]\\
-{\sl [%
-         @select tree_sign DIAG
-         @case -1 %]-[%
-         @end @select %]Diagram~[%DIAG%]}[%
+{\sl Diagram~[%DIAG%]}[%
 @if use_vertex_labels %]\\
 [% getVertexInfo tree DIAG %][%
 @end @if %]
@@ -351,18 +348,18 @@ For the definition of tensor states, please refer to the document
 \end{longtable}
 [%       @else %]
 [%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
-         @end @if %][% 
+         @end @if %][%
       @end @for %][%
-   @end @with%][% 
+   @end @with%][%
 @end @if pyxodraw %][%
 @end @if generate_tree_diagrams %]
 
 [% @if generate_eft_loopind %]
 \section{EFT Diagrams with Tree Topology and Loop-Suppression}
 
-[% 
+[%
 @if pyxodraw %][%
-   @with modules pyxotree.tex path=process %][% 
+   @with modules pyxotree.tex path=process %][%
       @for elements topolopy.keep.tree var=DIAG index=DIAGINDEX %][%
          @if is_first %]\begin{longtable}{cc}
 \endfirsthead
@@ -373,10 +370,7 @@ For the definition of tensor states, please refer to the document
 \begin{minipage}{0.45\textwidth}
 \begin{center}
 [%diagram suffix=DIAG%]\\
-{\sl [%
-         @select tree_sign DIAG
-         @case -1 %]-[%
-         @end @select %]Diagram~[%DIAG%]}[%
+{\sl Diagram~[%DIAG%]}[%
 @if use_vertex_labels %]\\
 [% getVertexInfo tree DIAG %][%
 @end @if %]
@@ -387,9 +381,9 @@ For the definition of tensor states, please refer to the document
 \end{longtable}
 [%       @else %]
 [%       @if eval DIAGINDEX .mod. 2 .eq. 1 %]\\[% @else %]&[%@end @if%][%
-         @end @if %][% 
+         @end @if %][%
       @end @for %][%
-   @end @with%][% 
+   @end @with%][%
 @end @if pyxodraw %][%
 @end @if generate_eft_loopind %]
 
@@ -458,7 +452,7 @@ r_{[% $_ %]} &= [% momentum%][%
 S=[%
 @for smat group=grp %][%
    @if is_first %]\left(\begin{array}{[%
-      @with eval loopsize group=grp result=ls %][% 
+      @with eval loopsize group=grp result=ls %][%
          @for repeat ls %]c[% @end @for %]}[%
       @end @with %][%
    @end @if %][%
@@ -472,7 +466,7 @@ S=[%
    @else %]&[% @end @if %][%
 @end @for %]
 \end{equation}[%
-@for smat group=grp nonzero upper diagonal 
+@for smat group=grp nonzero upper diagonal
 	powfmt=%s^%d
 	prodfmt=%s*%s
 	prefix=s_{
@@ -528,11 +522,11 @@ S=[%
 
 \subsubsection{Diagrams ([% count diagrams group=grp %])}[%
 @if pyxodraw %][%
-@with modules pyxovirt.tex path=process %][% 
+@with modules pyxovirt.tex path=process %][%
    @for diagrams group=grp var=DIAG index=DIAGINDEX %][%
       @if is_first %]\begin{longtable}{cc}
 \endfirsthead
-\endhead[% 
+\endhead[%
       @end @if %]
 %---#[ loop diagram[% DIAG %]:
 \index{Diagram[% DIAG convert=number format=%010d %]=Diagram [% DIAG %] (Group [% grp %])}
@@ -540,9 +534,7 @@ S=[%
 \begin{minipage}{0.45\textwidth}
 \begin{center}
 [% diagram suffix=DIAG %]\\
-{\sl [%
-@select diagram_sign @case - -1 %]-[%
-@end @select %]Diagram~[%DIAG%]}\\
+{\sl Diagram~[%DIAG%]}\\
 $S^\prime=S[%
 @for elements pinches %][%
    @if is_first %]^{\{[%
@@ -563,7 +555,7 @@ $S^\prime=S[%
       @else %]-([%shift%])[%
       @end @select %]}[%
    @end @select %]$, $\mathrm{rk}=[%rank%][%
-   @if is_nf %], N_f[% 
+   @if is_nf %], N_f[%
    @end @if %]$[%
 @if use_vertex_labels %]\\
 [% getVertexInfo loop DIAG %][%
@@ -597,10 +589,7 @@ $S^\prime=S[%
 \begin{minipage}{0.45\textwidth}
 \begin{center}
 [%diagram suffix=DIAG%]\\
-{\sl [%
-         @select ct_sign DIAG
-         @case -1 %]-[%
-         @end @select %]Diagram~[%DIAG%]}[%
+{\sl Diagram~[%DIAG%]}[%
 @if use_vertex_labels %]\\
 [% getVertexInfo ct DIAG %][%
 @end @if %]
@@ -623,7 +612,7 @@ This section shows which diagrams are summed when the \texttt{diagsum} feature i
 
 [%
 @for diagsum_groups var=dsgrp %]
-\noindent Metadiagram~\hyperref[sec:Meta[% dsgrp %]]{[% dsgrp %]}:[% 
+\noindent Metadiagram~\hyperref[sec:Meta[% dsgrp %]]{[% dsgrp %]}:[%
 @for diagsum_diagrams diagsum_group=dsgrp var=DIAG index=DIAGINDEX %][%
 @if is_last %] [% DIAG %]\\[% @else %] [% DIAG %],[% @end @if %][%
 @end @for %][%
@@ -640,11 +629,11 @@ This metadiagram contains [% @select count diagsum_diagrams diagsum_group=dsgrp
 
 [%
 @if pyxodraw %][%
-@with modules pyxovirt.tex path=process %][% 
+@with modules pyxovirt.tex path=process %][%
    @for diagsum_diagrams diagsum_group=dsgrp var=DIAG index=DIAGINDEX %][%
       @if is_first %]\begin{longtable}{cc}
 \endfirsthead
-\endhead[% 
+\endhead[%
       @end @if %]
 %---#[ loop diagram[% DIAG %]:
 \hbox{
@@ -653,11 +642,11 @@ This metadiagram contains [% @select count diagsum_diagrams diagsum_group=dsgrp
 [% diagram suffix=DIAG %]\\
 {\sl Diagram~[%DIAG%]}\\
 $\mathrm{rk}=[%rank%][%
-   @if is_nf %], N_f[% 
-   @end @if %]$[% 
+   @if is_nf %], N_f[%
+   @end @if %]$[%
    @if use_MQSE %][%
-   @if is_mqse %], MQSE[% 
-   @end @if %][% 
+   @if is_mqse %], MQSE[%
+   @end @if %][%
    @end @if %][%
 @if use_vertex_labels %]\\
 [% getVertexInfo loop DIAG %][%
@@ -693,14 +682,14 @@ For graph generation we use QGraf~\cite{Nogueira:1991ex}.
 The Feynman diagrams are further processed with the symbolic manipulation
 program FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd} using the FORM library
 SPINNEY~\cite{Cullen:2010jv}.
-The Fortran~90 code is generated using 
+The Fortran~90 code is generated using
 FORM~\cite{Kuipers:2012rf,Vermaseren:2000nd}.
 [% @if extension ninja %]For the reduction of the tensor integrals
-the code uses an implementation of the Laurent series expansion 
+the code uses an implementation of the Laurent series expansion
 method~\cite{Mastrolia:2012bu}
 from the library Ninja~\cite{Peraro:2014cba}.[% @end @if %]
 [% @if extension golem95 %]For
-the reduction of the tensor integrals, the code uses the 
+the reduction of the tensor integrals, the code uses the
 package GOLEM95~\cite{Guillet:2013msa,Binoth:2008uq,Cullen:2011kv}.
 The tensor coefficients are
 obtained using tensorial reconstruction at the integrand
@@ -757,7 +746,7 @@ the evaluation of the scalar integrals:
   J.~A.~M.~Vermaseren,
   ``New features of FORM,''
   arXiv:math-ph/0010025.
-  %%CITATION = MATH-PH/0010025;%% 
+  %%CITATION = MATH-PH/0010025;%%
 %\cite{Cullen:2010jv}
 \bibitem{Cullen:2010jv}
   G.~Cullen, M.~Koch-Janusz and T.~Reiter,

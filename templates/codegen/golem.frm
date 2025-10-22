@@ -25,7 +25,7 @@ off statistics;
          @else %]l[% eval - reference %][%
          @end @if %]"[%
       @end @select %][%
-   @end @if %][% 
+   @end @if %][%
 @end @for %][%
 @if extension dred %]
 #Define DRED "defined"[%
@@ -109,12 +109,6 @@ F diag1,...,diag`DIAGRAMCOUNT';
    Multiply 0;
 #endif
 
-#ifdef `SIGN'
-Id QGRAFSIGN(sDUMMY1?) = `SIGN';
-#else
-Id QGRAFSIGN(sDUMMY1?) = 1;
-#endif
-
 #call zeroes
 
 [% @if generate_counterterms
@@ -136,10 +130,10 @@ Id QGRAFSIGN(sDUMMY1?) = 1;
    EndRepeat;
 #endif
 
-[% @if is_ufo 
+[% @if is_ufo
 %].sort
 [% @if enable_truncation_orders
-%][% @select trnco 
+%][% @select trnco
 @case 0 %]
 Id XNPorder = 0;
 Id XQLorder = 0;[%
@@ -163,11 +157,11 @@ Id Xkeep = 1;[%
    #message Undefined value for trnco: "[% trnco %]"
    #terminate[%
 @end @select %]
-.sort[% 
+.sort[%
 @else %]
 Id XNPorder = 1;
 Id XQLorder = 1;[%
-@end @if %][% 
+@end @if %][%
 @end @if %]
 
 #call VertexConstants
@@ -185,7 +179,7 @@ Id XQLorder = 1;[%
    #Endif
 #Else
    Id deltaaxial = 0;
-#EndIf[% 
+#EndIf[%
 @else%]Id deltaaxial = 0;[%
 @end @if %]
 
@@ -352,11 +346,11 @@ Id SCREEN(sDUMMY1?) = sDUMMY1;[%
 @if internal NUMPOLVEC %][%
    @for particles lightlike vector initial %]
 Id inplorentz(2, ivL2?, k[% index %], 0) *
-   inp(field1?, k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
+   inp(k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
    @end @for %][%
    @for particles lightlike vector final %]
 Id outlorentz(2, ivL2?, k[% index %], 0) *
-   out(field1?, k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
+   out(k[% index %], sDUMMY1?{-1,1}, vDUMMY1?) = e[%index%](ivL2);[%
    @end @for %][%
 @end @if %]
 #include- legs.hh
@@ -453,13 +447,13 @@ EndArgument;
 #Call tHooftAlgebra
 
 #If `LOOPS' == 1
-   
+
    #IfDef `DRED'
     Id d4(p1,p1) = d4(p1,p1) - Qt2;
     Id Sm4(p1) = Sm4(p1) + SmQt;
     Repeat;
         Repeat Id Sm4(p1)*Sm4(p1) = d4(p1,p1);
-        
+
             Id SmQt * Sm4(iDUMMY1?) = - Sm4(iDUMMY1) * SmQt;
     Endrepeat;
         Id p1.p1 = p1.p1 - Qt2;
@@ -536,7 +530,7 @@ Local d`DIAG'R2 = 0;[%
 * are replaced by explicit expressions.
    Brackets eps, Qt2;
 .sort 5.3;
-   Local d`DIAG'R2 = 
+   Local d`DIAG'R2 =
       + diagram`DIAG'[eps] * fDUMMY1(eps)
       + diagram`DIAG'[Qt2] * fDUMMY1(Qt2)
       + diagram`DIAG'[Qt2^2] * fDUMMY1(Qt2^2)
@@ -559,9 +553,9 @@ Local d`DIAG'R2 = 0;[%
 #if `LOOPS' == 1
    Id p1 = Q;
    Argument Spab, Spaa, Spbb, Spba;
-      Id p1 = Q;   
+      Id p1 = Q;
    EndArgument;
-   Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) = 
+   Id fDUMMY1?{Spaa,Spab,Spbb,Spba}(vDUMMY1?, iDUMMY2?, vDUMMY3?) =
       fDUMMY1(vDUMMY1, iDUMMY2, vDUMMY3);
    #call SpOpen(`LIGHTLIKE')
 #endif
@@ -619,8 +613,8 @@ Id inv(sDUMMY1?) = (1/sDUMMY1);
 .end[%
 @end @select %]
 
-#If `LOOPS' == 1[% 
-@select r2 
+#If `LOOPS' == 1[%
+@select r2
 @case explicit %]
    #Create <`OUTFILE'.txt>
    #Create <`OUTFILE'.dat>[%

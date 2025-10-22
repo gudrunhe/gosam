@@ -58,22 +58,18 @@ class TemplateFactory:
                         or "in_particles" not in opts
                         or "out_particles" not in opts
                         or "conf" not in opts
-                        or "tree_signs" not in opts
                         or "lo_flags" not in opts
                         or "nlo_flags" not in opts
                         or "heavy_quarks" not in opts
                         or "massive_bubbles" not in opts
                         or "diagram_sum" not in opts
                         or "helicity_map" not in opts
-                        or "ct_signs" not in opts
                     ):
                         raise golem.util.parser.TemplateError("Cannot use template 'Integrals' here.")
                     loopcache = opts["loopcache"]
                     loopcache_tot = opts["loopcache_tot"]
                     in_particles = opts["in_particles"]
                     out_particles = opts["out_particles"]
-                    tree_signs = opts["tree_signs"]
-                    # tree_flows = opts["tree_flows"]
                     conf = opts["conf"]
                     heavy_quarks = opts["heavy_quarks"]
                     lo_flags = opts["lo_flags"]
@@ -81,7 +77,6 @@ class TemplateFactory:
                     massive_bubbles = opts["massive_bubbles"]
                     diagram_sum = opts["diagram_sum"]
                     helicity_map = opts["helicity_map"]
-                    ct_signs = opts["ct_signs"]
 
                     template = golem.templates.integrals.IntegralsTemplate(f_template)
                     template.setup(
@@ -89,7 +84,6 @@ class TemplateFactory:
                         loopcache_tot,
                         in_particles,
                         out_particles,
-                        tree_signs,
                         conf,
                         heavy_quarks,
                         lo_flags,
@@ -97,7 +91,6 @@ class TemplateFactory:
                         massive_bubbles,
                         diagram_sum,
                         helicity_map,
-                        ct_signs,
                     )
                 elif class_name == "Integrals_doc":
                     if (
@@ -105,7 +98,6 @@ class TemplateFactory:
                         or "in_particles" not in opts
                         or "out_particles" not in opts
                         or "conf" not in opts
-                        or "tree_signs" not in opts
                         or "lo_flags" not in opts
                         or "nlo_flags" not in opts
                         or "heavy_quarks" not in opts
@@ -114,7 +106,6 @@ class TemplateFactory:
                         or "helicity_map" not in opts
                         or "treecache" not in opts
                         or "ctcache" not in opts
-                        or "ct_signs" not in opts
                         or "ct_flags" not in opts
                     ):
                         raise golem.util.parser.TemplateError("Cannot use template 'Integrals_doc' here.")
@@ -122,8 +113,6 @@ class TemplateFactory:
                     treecache = opts["treecache"]
                     in_particles = opts["in_particles"]
                     out_particles = opts["out_particles"]
-                    tree_signs = opts["tree_signs"]
-                    # tree_flows = opts["tree_flows"]
                     conf = opts["conf"]
                     heavy_quarks = opts["heavy_quarks"]
                     lo_flags = opts["lo_flags"]
@@ -132,7 +121,6 @@ class TemplateFactory:
                     diagram_sum = opts["diagram_sum"]
                     helicity_map = opts["helicity_map"]
                     ctcache = opts["ctcache"]
-                    ct_signs = opts["ct_signs"]
                     ct_flags = opts["ct_flags"]
 
                     template = golem.templates.integrals_doc.IntegralsTemplate_doc(f_template)
@@ -140,7 +128,6 @@ class TemplateFactory:
                         loopcache,
                         in_particles,
                         out_particles,
-                        tree_signs,
                         conf,
                         heavy_quarks,
                         lo_flags,
@@ -150,7 +137,6 @@ class TemplateFactory:
                         helicity_map,
                         treecache,
                         ctcache,
-                        ct_signs,
                         ct_flags,
                     )
                 elif class_name == "Kinematics":
@@ -158,24 +144,20 @@ class TemplateFactory:
                         "in_particles" not in opts
                         or "out_particles" not in opts
                         or "conf" not in opts
-                        or "tree_signs" not in opts
                         or "heavy_quarks" not in opts
                         or "helicity_map" not in opts
-                        or "ct_signs" not in opts
                     ):
                         raise golem.util.parser.TemplateError("Cannot use template 'Kinematics' here.")
                     in_particles = opts["in_particles"]
                     out_particles = opts["out_particles"]
                     conf = opts["conf"]
-                    tree_signs = opts["tree_signs"]
                     # tree_flows = opts["tree_flows"]
                     heavy_quarks = opts["heavy_quarks"]
                     helicity_map = opts["helicity_map"]
-                    ct_signs = opts["ct_signs"]
 
                     template = golem.templates.kinematics.KinematicsTemplate(f_template)
                     template.init_kinematics(
-                        conf, in_particles, out_particles, tree_signs, heavy_quarks, helicity_map, ct_signs
+                        conf, in_particles, out_particles, heavy_quarks, helicity_map
                     )
                 elif class_name == "OLP":
                     if (

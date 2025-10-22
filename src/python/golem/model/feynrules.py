@@ -18,6 +18,8 @@ from golem.util.tools import LimitedWidthOutputStream, load_source
 
 import logging
 
+import feyngraph as fg
+
 logger = logging.getLogger(__name__)
 
 LINE_STYLES = {
@@ -131,7 +133,6 @@ class Model:
         parser = ex.ExpressionParser()
         ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
         for l in self.all_lorentz:
-            name = l.name
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
 
@@ -149,205 +150,192 @@ class Model:
                 logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
                 sys.exit("GoSam terminated due to an error")
             else:
-                pass   
+                pass
 
-        # #########################################################################################
-        # Check if there are any vertices with ambiguous coupling orders and if so split them up.
-        # #########################################################################################
-        checked_vertices = []
-        for vertex in self.all_vertices:
-            
-            vertex.rank = set()
-            for l in vertex.lorentz:
-                vertex.rank.add(l.rank)
+        fg_model = fg.Model.from_ufo(model_path)
 
-            if ambiguous_vertex(vertex):
-                vertices = split_vertex(vertex)
-                logger.warning(
-                            (
-                                "Vertex %s has ambiguous structure of powers and/or rank. Internally split up into: %s."
-                                % (vertex.name, ', '.join(map(str,vertices)))
-                            )
-                        )
-                for key, v in vertices.items():
-                    newv = copy.deepcopy(vertex)
-                    newv.name = v["name"]
-                    newv.particles = v["particles"]
-                    newv.color = v["color"]
-                    newv.lorentz = v["lorentz"]
-                    newv.couplings = v["couplings"]
-                    newv.rank = v["rank"]
-                    checked_vertices.append(newv)
-            else:
-                checked_vertices.append(vertex)
-
-        # #######################################################################################################
-        # Check if there are multiple vertices with the same particels and coupling orders. If so, combine them.
-        # #######################################################################################################     
-        # Step 1: check vertex legs/particles
-        seen_vertices = {}
-        for vertex in checked_vertices:
-            prtcls = str(vertex.particles)
-            if prtcls in list(seen_vertices.keys()):
-                seen_vertices[prtcls].append(vertex)
-            else:
-                seen_vertices[prtcls] = [vertex]
-        check_vertices = [v for v in seen_vertices.values() if len(v) > 1]
-
-        # Step 2: check coupling orders of vertices with same legs/particles and combine
-        for verts in check_vertices:
-            seen_vertices2 = {}
-            for v in verts:
-                # At this stage all couplings of a vertex should come with the same order, 
-                # so we can just take the first coupling. The same is true for the rank of 
-                # its lorentz structures.
-                vord = str(list(v.couplings.values())[0].order)+"_RK"+str(list(v.rank)[0])
-                if vord in list(seen_vertices2):
-                    seen_vertices2[vord].append(v)
-                else:
-                    seen_vertices2[vord] = [v]
-            join_vertices = [v for v in seen_vertices2.values() if len(v) > 1]
-
-            # loop over vertices to be joined
-            for jv in join_vertices:
-                #print("joining vertices: ",jv)
-                combv = {}              
-                combv["name"] = "V_%s_0" % 'a'.join(map(lambda v: v.name.split("_")[1],jv))
-                combv["particles"] = jv[0].particles
-                combv["color"] = []
-                combv["lorentz"] = []
-                combv["couplings"] = {}
-                # figure out the colour-lorentz key for the couplings in the merged vertex
-                # check if there are any couplings to be merged as well (i.e. when they share same colour and lorentz structures)
-                seen_couplings = {}
-                for v in jv:
-                    for coord, cpl in v.couplings.items():
-                        if v.color[coord[0]] in combv["color"]:
-                            ccoord = combv["color"].index(v.color[coord[0]])
-                        else:
-                            combv["color"].append(v.color[coord[0]])
-                            ccoord = len(combv["color"])-1
-                        if v.lorentz[coord[1]] in combv["lorentz"]:
-                            lcoord = combv["lorentz"].index(v.lorentz[coord[1]])
-                        else:
-                            combv["lorentz"].append(v.lorentz[coord[1]])
-                            lcoord = len(combv["lorentz"])-1
-                        if (ccoord,lcoord) in list(seen_couplings.keys()):
-                            seen_couplings[(ccoord,lcoord)].append(cpl)
-                        else:   
-                            seen_couplings[(ccoord,lcoord)] = [cpl]
-
-                # loop over couplings to be merged
-                for coord, jc in seen_couplings.items():
-                    if len(jc) < 2:
-                        combv["couplings"][coord] = jc[0]
-                        continue
-                    #print("joining couplings: ",jc)
-                    combc = {}
-                    combc["name"] = "GC_%s" % 'a'.join(map(lambda c: c.name.split("_")[1],jc))
-                    combc["value"] = "%s" % '+'.join(map(lambda c: "("+c.value+")",jc))
-                    # All couplings to be merged have the same order by construction.
-                    combc["order"] = jc[0].order
-                    newc = copy.deepcopy(jc[0])
-                    newc.name = combc["name"]
-                    newc.value = combc["value"]
-                    newc.order = combc["order"]
-                    self.all_couplings.append(newc)
-                    combv["couplings"][coord] = newc 
-      
-                # create the merged vertex and remove the original ones
-                newv = copy.deepcopy(jv[0])
-                newv.name = combv["name"]
-                newv.particles = combv["particles"]
-                newv.color = combv["color"]
-                newv.lorentz = combv["lorentz"]
-                newv.couplings = combv["couplings"]
-
-                logger.warning(
-                            (
-                                "Vertices %s have same external legs, coupling orders and rank. Merging them internally into: %s."
-                                % (', '.join(map(str,jv)),newv.name)
-                            )
-                        )
-
-                checked_vertices.append(newv)
-                for v in jv:
-                    checked_vertices.remove(v)
-
-        self.all_vertices = checked_vertices
-
-        # #######################################################################################################
-
-        # Trace the spin connection for each vertex containing anti-commuting legs and add a spin-connection map
-        split_vertices = {}
-        for i, vertex in enumerate(self.all_vertices):
-            if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
-                continue
-            maps = [trace_spin(l) for l in vertex.lorentz]
-            unique_maps = set(tuple(map) for map in maps)
-            n_structures = len(unique_maps)
-            if n_structures > 1:
-                logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
-                vertices = []
-                for j, unique_map in enumerate(unique_maps):
-                    structures = []
-                    new_couplings = {}
-                    new_lcoord = 0
-                    for k, m in enumerate(maps):
-                        if tuple(m) == unique_map:
-                            structures.append(vertex.lorentz[k])
-                            for ccoord in range(len(vertex.color)):
-                                if (ccoord,k) in list(vertex.couplings.keys()):
-                                    new_couplings[(ccoord,new_lcoord)] = vertex.couplings[(ccoord,k)]
-                            new_lcoord += 1                                    
-                    v = copy.deepcopy(vertex)
-                    v.name = f"{vertex.name}_{j}"
-                    v.lorentz = structures
-                    v.couplings = new_couplings
-                    v.spin_map = unique_map
-                    vertices.append(v)
-                split_vertices[i] = vertices
-            else:
-                vertex.spin_map = unique_maps.pop()
-        for i, vertices in sorted(split_vertices.items(), reverse=True):
+        # ################################################
+        # Apply the vertex splitting of FeynGraph to self
+        # ################################################
+        new_vertices = []
+        obsolete_vertices = []
+        for i, v in enumerate(self.all_vertices):
+            if (splitting := fg_model.splitting(v.name)) is not None:
+                obsolete_vertices.append(i)
+                for name, couplings in splitting.items():
+                    newv = copy.deepcopy(v)
+                    newv.name = name
+                    newv.color = list(set(v.color[c] for c, _ in couplings))
+                    newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
+                    newv.couplings = {
+                        (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
+                        for c in couplings
+                    }
+                    new_vertices.append(newv)
+        for i in sorted(obsolete_vertices, reverse=True):
             self.all_vertices.pop(i)
-            self.all_vertices.extend(vertices)
+        self.all_vertices.extend(new_vertices)
 
         if self.useCT:
-            split_vertices = {}
-            for i, vertex in enumerate(self.all_CTvertices):
-                if not any(s < 0 or s % 2 == 0 for s in vertex.lorentz[0].spins):
-                    continue
-                maps = [trace_spin(l) for l in vertex.lorentz]
-                unique_maps = set(tuple(map) for map in maps)
-                n_structures = len(unique_maps)
-                if n_structures > 1:
-                    logger.warning(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
-                    vertices = []
-                    for j, unique_map in enumerate(unique_maps):
-                        structures = []
-                        new_couplings = {}
-                        new_lcoord = 0
-                        for k, m in enumerate(maps):
-                            if tuple(m) == unique_map:
-                                structures.append(vertex.lorentz[k])
-                                for ccoord in range(len(vertex.color)):
-                                    for xcoord in range(len(vertex.loop_particles)):
-                                        if (ccoord,k,xcoord) in list(vertex.couplings.keys()):
-                                            new_couplings[(ccoord,new_lcoord,xcoord)] = vertex.couplings[(ccoord,k,xcoord)]
-                                new_lcoord += 1                                    
-                        v = copy.deepcopy(vertex)
-                        v.name = f"{vertex.name}_{j}"
-                        v.lorentz = structures
-                        v.couplings = new_couplings
-                        v.spin_map = unique_map
-                        vertices.append(v)
-                    split_vertices[i] = vertices
-                else:
-                    vertex.spin_map = unique_maps.pop()
-            for i, vertices in sorted(split_vertices.items(), reverse=True):
+            new_vertices = []
+            obsolete_vertices = []
+            for i, v in enumerate(self.all_CTvertices):
+                if (splitting := fg_model.splitting(v.name)) is not None:
+                    obsolete_vertices.append(i)
+                    for name, couplings in splitting.items():
+                        newv = copy.deepcopy(v)
+                        newv.name = name
+                        newv.color = list(set(v.color[c] for c, _ in couplings))
+                        newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
+                        newv.couplings = {
+                            (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
+                            for c in couplings
+                        }
+                        new_vertices.append(newv)
+            for i in sorted(obsolete_vertices, reverse=True):
                 self.all_CTvertices.pop(i)
-                self.all_CTvertices.extend(vertices)
+            self.all_CTvertices.extend(new_vertices)
+
+        # ################################################################################
+        # Add rank as coupling order to FeynGraph vertices and split vertices if necessary
+        # ################################################################################
+        new_vertices = []
+        new_ct_vertices = []
+        obsolete_vertices = []
+        for v_index, ufo_vert in enumerate(self.all_vertices + self.all_CTvertices if self.useCT else self.all_vertices):
+            ranks = set(ufo_vert.lorentz[l].rank for _, l, *_ in ufo_vert.couplings.keys())
+            if len(ranks) > 1:
+                logger.warning(
+                    "Ambiguous rank for vertex {}, splitting into {} vertices '{}_0' .. '{}_{}'".format(
+                    ufo_vert.name,
+                    len(ranks),
+                    ufo_vert.name,
+                    ufo_vert.name,
+                    len(ranks) - 1
+                ))
+                fg_model.split_vertex(ufo_vert.name, [f"{ufo_vert.name}_{i}" for i in range(len(ranks))])
+                for i, unique_rank in enumerate(ranks):
+                    lorentz_indices = [i for i, l in enumerate(ufo_vert.lorentz) if l.rank == unique_rank]
+                    newv = copy.deepcopy(ufo_vert)
+                    newv.name = f"{ufo_vert.name}_{i}"
+                    newv.lorentz = [ufo_vert.lorentz[j] for j in lorentz_indices]
+                    newv.couplings = {
+                        (c, newv.lorentz.index(ufo_vert.lorentz[l])): v
+                        for (c, l), v in ufo_vert.couplings.items() if ufo_vert.lorentz[l].rank == unique_rank
+                    }
+                    newv.rank = {unique_rank}
+                    fg_model.add_coupling(newv.name, "RK", unique_rank)
+                    if hasattr(ufo_vert, "type"):
+                        new_ct_vertices.append(newv)
+                    else:
+                        new_vertices.append(newv)
+                obsolete_vertices.append(v_index)
+            else:
+                rank = ranks.pop()
+                fg_model.add_coupling(ufo_vert.name, "RK", rank)
+                ufo_vert.rank = {rank}
+        for i in sorted(obsolete_vertices, reverse=True):
+            if i <= len(self.all_vertices):
+                self.all_vertices.pop(i)
+            else:
+                self.all_CTvertices.pop(i)
+        self.all_vertices.extend(new_vertices)
+        if self.useCT:
+            self.all_CTvertices.extend(new_ct_vertices)
+
+        # ######################################################################
+        # Let FeynGraph merge the equivalent vertices and apply the same to self
+        # ######################################################################
+        mergings = fg_model.merge_vertices()
+
+        new_vertices = []
+        new_ct_vertices = []
+        obsolete_vertices = []
+        obsolete_ct_vertices = []
+        k = 1
+        for merged, original in mergings.items():
+            logger.warning(
+                (
+                    f"Vertices {original} have same external legs, coupling orders and spin map. Merging them internally into: {merged}."
+                )
+            )
+            indices = [i for i, v in enumerate(self.all_vertices) if v.name in original]
+            if len(indices) != 0:
+                color = list(set([c for i in indices for c in self.all_vertices[i].color]))
+                lorentz = list(set(l for i in indices for l in self.all_vertices[i].lorentz))
+                couplings = {}
+                for i in indices:
+                    current_couplings =  {(
+                             color.index(self.all_vertices[i].color[c]),
+                             lorentz.index(self.all_vertices[i].lorentz[l])
+                        ): value for (c, l), value in self.all_vertices[i].couplings.items()
+                    }
+                    for coord, coupling in current_couplings.items():
+                        if coord in couplings:
+                            couplings[coord].append(coupling)
+                        else:
+                            couplings[coord] = [coupling]
+                # Merge couplings where necessary
+                for coord, coupling_list in couplings.items():
+                    if len(coupling_list) == 1:
+                        couplings[coord] = coupling_list[0]
+                    else:
+                        newcoupling = copy.deepcopy(coupling_list[0])
+                        newcoupling.name = f"GC_M_{k}"
+                        newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                        self.all_couplings.append(newcoupling)
+                        couplings[coord] = newcoupling
+                        k += 1
+                # Create new, merged vertex
+                newv = copy.deepcopy(self.all_vertices[indices[0]])
+                newv.name = merged
+                newv.color = color
+                newv.lorentz = lorentz
+                newv.couplings = couplings
+                obsolete_vertices.extend(indices)
+                new_vertices.append(newv)
+            else:
+                indices = [i for i, v in enumerate(self.all_CTvertices) if v.name in original]
+                color = list(set([c for i in indices for c in self.all_CTvertices[i].color]))
+                lorentz = list(set(l for i in indices for l in self.all_CTvertices[i].lorentz))
+                couplings = {}
+                for i in indices:
+                    current_couplings = {(
+                                             color.index(self.all_CTvertices[i].color[c]),
+                                             lorentz.index(self.all_CTvertices[i].lorentz[l])
+                                         ): value for (c, l), value in self.all_CTvertices[i].couplings.items()
+                                         }
+                    for coord, coupling in current_couplings.items():
+                        if coord in couplings:
+                            couplings[coord].append(coupling)
+                        else:
+                            couplings[coord] = [coupling]
+                # Merge couplings where necessary
+                for coord, coupling_list in couplings.items():
+                    if len(coupling_list) == 1:
+                        couplings[coord] = coupling_list[0]
+                    else:
+                        newcoupling = copy.deepcopy(coupling_list[0])
+                        newcoupling.name = f"CTGC_M_{k}"
+                        newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                        self.all_couplings.append(newcoupling)
+                        couplings[coord] = newcoupling
+                        k += 1
+                newv = copy.deepcopy(self.all_CTvertices[indices[0]])
+                newv.name = merged
+                newv.color = color
+                newv.lorentz = lorentz
+                newv.couplings = couplings
+                obsolete_ct_vertices.extend(indices)
+                new_ct_vertices.append(newv)
+
+        for i in sorted(obsolete_vertices, reverse=True):
+            self.all_vertices.pop(i)
+        self.all_vertices.extend(new_vertices)
+        if self.useCT:
+            for i in sorted(obsolete_ct_vertices, reverse=True):
+                self.all_CTvertices.pop(i)
+            self.all_CTvertices.extend(new_ct_vertices)
 
         if self.useCT:
             self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
@@ -377,7 +365,7 @@ class Model:
                     # => split const from log terms, if present
                     for ctpole in list(c.value.keys()):
                         ctcoeff = c.value[ctpole]
-                        self.ctfunctions[name][ctpole] = ctcoeff                    
+                        self.ctfunctions[name][ctpole] = ctcoeff
                 elif isinstance(c.value, str):
                     # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
                     CTparams = [
@@ -387,7 +375,7 @@ class Model:
 
                     for ctparam in CTparams:
                         CTpoles = CTpoles.union(set(ctparam.value.keys()))
-              
+
                     for ctpole in CTpoles:
                         ctcoeff = c.value
                         for ctparam in CTparams:
@@ -398,6 +386,7 @@ class Model:
                     logger.critical("CT coupling %s is neither a dict nor str!" % c)
                     sys.exit("GoSam terminated due to an error")
 
+        golem.model.feyngraph_model = fg_model
         golem.model.global_model = self
 
     def write_python_file(self, f):
@@ -434,20 +423,19 @@ class Model:
             pwidth = str(p.width)
 
             pdg_code = p.pdg_code
-            canonical_name, canonical_anti = canonical_field_names(p)
 
-            mnemonics[p.name] = canonical_name
-            latex_names[canonical_name] = p.texname
+            mnemonics[p.name] = p.name
+            latex_names[p.name] = p.texname
 
             line_type = p.line.lower()
             # FIX- 15.08.12 GC # until FeynRules can accomodate charged scalars
             if line_type in LINE_STYLES:
                 if (line_type == "dashed") and (abs(p.color) == 3):
-                    line_types[canonical_name] = "chargedscalar"
+                    line_types[p.name] = "chargedscalar"
                 else:
-                    line_types[canonical_name] = LINE_STYLES[line_type]
+                    line_types[p.name] = LINE_STYLES[line_type]
             else:
-                line_types[canonical_name] = "scalar"
+                line_types[p.name] = "scalar"
 
             if pmass == "0" or pmass == "ZERO":
                 mass = 0
@@ -455,7 +443,7 @@ class Model:
                 mass = self.prefix + pmass
 
             spin = abs(p.spin) - 1
-            if canonical_name.startswith("anti"):
+            if p.pdg_code < 0:
                 spin = -spin
 
             if pwidth == "0" or pwidth == "ZERO":
@@ -465,7 +453,7 @@ class Model:
 
             f.write(
                 "\t%r: Particle(%r, %d, %r, %d, %r, %r, %d, %r)"
-                % (canonical_name, canonical_name, spin, mass, p.color, canonical_anti, width, pdg_code, p.charge)
+                % (p.name, p.name, spin, mass, p.color, p.antiname, width, pdg_code, p.charge)
             )
 
         f.write("\n}\n\n")
@@ -705,293 +693,23 @@ class Model:
             f.write("\t%r: %r" % (name, value))
         f.write("\n}\n\n")
 
+        f.write("aux = {\n")
+        for p in self.all_particles:
+            aux = 0 if p.propagating else 1
+            if hasattr(p, "CustomSpin2Prop"):
+                if p.CustomSpin2Prop:
+                    if not p.propagating:
+                        logger.critical(f"Particle {p.name} with CustomSpin2Prop has to propagate.")
+                        sys.exit("GoSam terminated due to an error")
+                    aux = 2
+            f.write(f"    '{p.name}': {aux},\n")
+        f.write("}")
+
         # new for modified UFO files
         for p in particlect:
             print(p.counterterm)
         for p in parameterct:
             print(p.counterterm)
-
-    def write_qgraf_file(self, f, order_names):
-        trunc_model = [self.model_orig]
-        while len(trunc_model[-1]) > 70:
-            s = trunc_model[-1]
-            trunc_model[-1] = s[:69]
-            trunc_model.append(s[69:])
-
-        f.write("% vim: syntax=none\n\n")
-        f.write("% This file has been generated from the FeynRule model files\n")
-        f.write("%% in %s\n" % ("\\\n% ".join(trunc_model)))
-        f.write("[ model = '%s' ]\n\n" % self.model_name)
-        f.write("[ fmrules = '%s' ]\n\n" % self.model_name)
-
-        f.write("%---#[ Propagators:\n")
-        for p in self.all_particles:
-            if p.pdg_code < 0:
-                continue
-
-            f.write("%% %s -- %s Propagator (PDG: %d)\n" % (p.name, p.antiname, p.pdg_code))
-
-            field, afield = canonical_field_names(p)
-
-            pmass = str(p.mass)
-            pwidth = str(p.width)
-
-            if pmass == "0" or pmass == "ZERO":
-                mass = 0
-            else:
-                mass = self.prefix + pmass
-
-            if p.spin % 2 == 1:
-                try:
-                    if p.GhostNumber is not None:
-                        if p.GhostNumber == 1:
-                            sign = "-"
-                        else:
-                            sign = "+"
-                    else:
-                        sign = "+"
-                except AttributeError:
-                    sign = "+"
-
-                if mass == 0:
-                    options = ", notadpole"
-                else:
-                    options = ""
-            else:
-                sign = "-"
-                options = ""
-
-            if pwidth == "0" or pwidth == "ZERO":
-                width = "0"
-            else:
-                width = self.prefix + pwidth
-
-            if not p.propagating:
-                aux = "+1"
-            else:
-                aux = "+0"
-
-            try:
-                if p.CustomSpin2Prop:
-                    if not p.propagating:
-                        logger.critical("Particle %s with CustomSpin2Prop has to propagate." % p.name)
-                        sys.exit("GoSam terminated due to an error")
-                    aux = "+2"
-            except AttributeError:
-                pass
-
-            if p.selfconjugate:
-                conj = "('+')"
-            elif p.pdg_code in [24, -24]:
-                conj = "('+','+')"
-            else:
-                conj = "('+','-')"
-
-            f.write(
-                "[%s,%s,%s%s;TWOSPIN='%d',COLOR='%d',\n" % (field, afield, sign, options, abs(p.spin) - 1, abs(p.color))
-            )
-            f.write("    MASS='%s', WIDTH='%s',\n" % (mass, width))
-            f.write("    AUX='%s', CONJ=%s]\n" % (aux, conj))
-
-        f.write("%---#] Propagators:\n")
-        f.write("%---#[ Vertices:\n")
-
-        lwf = LimitedWidthOutputStream(f, 70)
-
-        for c in self.all_couplings:
-            keys = [key for key in list(c.order.keys()) if key[0:1].isdigit()]
-            for k in keys:
-                c.order["O%s" % k] = c.order[k]
-                del c.order[k]
-        orders = set()
-        for c in self.all_couplings:
-            orders.update(list(c.order.keys()))
-
-        for el in order_names:
-            if not (el in orders):
-                logger.critical(
-                    "logger.warning: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(
-                        el
-                    )
-                )
-                sys.exit("GoSam terminated due to an error")
-        orders.update(order_names)
-
-        for v in self.all_vertices:
-            particles = v.particles
-            names = []
-            fields = []
-            afields = []
-            spins = []
-            for p in particles:
-                names.append(p.name)
-                cn = canonical_field_names(p)
-                fields.append(cn[0])
-                afields.append(cn[1])
-                spins.append(p.spin - 1)
-
-            deg = len(fields)
-            if deg >= 7:
-                logger.warning(
-                    ("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." % (v.name, deg))
-                )
-                continue
-                assert False
-
-            #flip = spins[0] == 1 and spins[2] == 1
-
-            vfunctions = {}
-            vertorders = []
-            for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                for name in orders:
-                    if name in coupling.order:
-                        vfunctions[name] = coupling.order[name]
-                    else:
-                        vfunctions[name] = 0
-
-                ic, il = coord
-                vfunctions["RK"] = v.lorentz[il].rank
-
-                if not vfunctions in vertorders:
-                    if len(vertorders) > 0:
-                        # Note: Since the check for ambiguous vertices is now part of __init__ we should never end up here
-                        logger.warning(
-                            (
-                                "write_qgraf_file: Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
-                                % (v.name, vertorders, vfunctions)
-                            )
-                            + "I will split it up."
-                        )
-                    vfcp = copy.deepcopy(vfunctions)
-                    vertorders.append(vfcp)
-
-            for ivo in range(len(vertorders)):
-                f.write("%% %s: %s Vertex" % (v.name + "_" + str(ivo), " -- ".join(names)))
-                lwf.nl()
-                lwf.write("[")
-                is_first = True
-
-                xfields = afields[:]
-                #if flip:
-                #    xfields[0] = afields[1]
-                #    xfields[1] = afields[0]
-
-                for field in xfields:
-                    if is_first:
-                        is_first = False
-                    else:
-                        lwf.write(",")
-                    lwf.write(field)
-                lwf.write(";")
-                lwf.write("isCT='0',")
-                flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                lwf.write("isNP='%s'," % str(flagNP))
-                is_first = True
-                for name, power in list(vertorders[ivo].items()):
-                    if is_first:
-                        is_first = False
-                    else:
-                        lwf.write(",")
-                    lwf.write("%s='%-d'" % (name, power))
-                lwf.write(",VL='%s'" % (v.name + "_" + str(ivo)))
-                lwf.write("]")
-                lwf.nl()
-
-        f.write("%---#] Vertices:\n\n")
-        if self.useCT:
-            f.write("%---#[ CTVertices:\n")
-
-            lwf = LimitedWidthOutputStream(f, 70)
-
-            for c in self.all_CTcouplings:
-                keys = [key for key in list(c.order.keys()) if key[0:1].isdigit()]
-                for k in keys:
-                    c.order["O%s" % k] = c.order[k]
-                    del c.order[k]
-            orders = set()
-            for c in self.all_CTcouplings:
-                orders.update(list(c.order.keys()))
-
-            for v in self.all_CTvertices:
-                particles = v.particles
-                names = []
-                fields = []
-                afields = []
-                spins = []
-                for p in particles:
-                    names.append(p.name)
-                    cn = canonical_field_names(p)
-                    fields.append(cn[0])
-                    afields.append(cn[1])
-                    spins.append(p.spin - 1)
-
-                deg = len(fields)
-                if deg >= 7:
-                    logger.warning(
-                        ("Vertex %s is %d-point and therefore not supported by qgraf. It is skipped." % (v.name, deg))
-                    )
-                    continue
-                    assert False
-
-                #flip = spins[0] == 1 and spins[2] == 1
-
-                vfunctions = {}
-                vertorders = []
-                for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                    for name in orders:
-                        if name in coupling.order:
-                            vfunctions[name] = coupling.order[name]
-                        else:
-                            vfunctions[name] = 0
-
-                    ic, il, ip = coord
-                    vfunctions["RK"] = v.lorentz[il].rank
-
-                    if not vfunctions in vertorders:
-                        if len(vertorders) > 0:
-                            logger.warning(
-                                (
-                                    "CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
-                                    % (v.name, vertorders, vfunctions)
-                                )
-                                + "I will split it up."
-                            )
-                        vfcp = copy.deepcopy(vfunctions)
-                        vertorders.append(vfcp)
-
-                for ivo in range(len(vertorders)):
-                    f.write("%% %s: %s CTVertex" % (v.name + "_" + str(ivo), " -- ".join(names)))
-                    lwf.nl()
-                    lwf.write("[")
-                    is_first = True
-
-                    xfields = afields[:]
-                    #if flip:
-                    #    xfields[0] = afields[1]
-                    #    xfields[1] = afields[0]
-
-                    for field in xfields:
-                        if is_first:
-                            is_first = False
-                        else:
-                            lwf.write(",")
-                        lwf.write(field)
-                    lwf.write(";")
-                    lwf.write("isCT='1',")
-                    flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                    lwf.write("isNP='%s'," % str(flagNP))
-                    is_first = True
-                    for name, power in list(vertorders[ivo].items()):
-                        if is_first:
-                            is_first = False
-                        else:
-                            lwf.write(",")
-                        lwf.write("%s='%-d'" % (name, power))
-                    lwf.write(",VL='%s'" % (v.name + "_" + str(ivo)))
-                    lwf.write("]")
-                    lwf.nl()
-
-            f.write("%---#] CTVertices:\n\n")
 
     def write_form_file(self, f, order_names):
         parser = ex.ExpressionParser()
@@ -1016,9 +734,6 @@ class Model:
         f.write("*---#[ Symbol Definitions:\n")
         f.write("*---#[ Coupling Orders:\n")
         f.write("AutoDeclare Symbols RK")
-        for el in order_names:
-            f.write(",%s" % el)
-        f.write(",isCT")
         f.write(",isNP")
         f.write(",V")
         f.write(",CTV")
@@ -1026,32 +741,6 @@ class Model:
         f.write("Symbol XNPorder,XQLorder,Xkeep;")
         f.write("\n")
         f.write("*---#] Coupling Orders:\n")
-        f.write("*---#[ Fields:\n")
-
-        fields = []
-        for p in self.all_particles:
-            part, anti = canonical_field_names(p)
-            field = "[field.%s]" % part
-            if field not in fields:
-                fields.append(field)
-            if part != anti:
-                field = "[field.%s]" % anti
-                if field not in fields:
-                    fields.append(field)
-
-        if len(fields) > 0:
-            if len(fields) == 1:
-                f.write("Symbol %s;" % fields[0])
-            else:
-                f.write("Symbols")
-                lwf.nl()
-                lwf.write(fields[0])
-                for p in fields[1:]:
-                    lwf.write(",")
-                    lwf.write(p)
-                lwf.write(";")
-        f.write("\n")
-        f.write("*---#] Fields:\n")
         f.write("*---#[ Parameters:\n")
 
         params = []
@@ -1126,19 +815,13 @@ class Model:
         for v in self.all_vertices:
             particles = v.particles
             names = []
-            fields = []
-            afields = []
             spins = []
             for p in particles:
                 names.append(p.name)
-                cn = canonical_field_names(p)
-                fields.append(cn[0])
-                afields.append(cn[1])
                 spins.append(p.spin - 1)
 
             vorders = {}
-            vertorders = []
-            cplnames = []
+            cplnames = [c.name for c in v.couplings.values()]
             for coord, coupling in list(v.couplings.items()):
                 for name in orders:
                     if name in coupling.order:
@@ -1146,66 +829,158 @@ class Model:
                     else:
                         vorders[name] = 0
 
-                ic, il = coord
+                _, il, *_ = coord
                 vorders["RK"] = v.lorentz[il].rank
 
-                if vorders in vertorders:
-                    cplnames[vertorders.index(vorders)].append(coupling.name)
+            deg = len(particles)
+
+            xidx = list(range(deg))
+
+            fold_name = "(%s) %s Vertex" % (v.name, " -- ".join(names))
+            f.write("*---#[ %s:\n" % fold_name)
+            f.write(f"Identify Once vertex(iv?, {v.name}")
+            colors = []
+            for i in xidx:
+                p = particles[i]
+                color = abs(p.color)
+                spin = abs(p.spin) - 1
+                # N.B.: the particles of the vertex object are defined to be outgoing in the UFO convention, but we use
+                # the convention where all particles are incoming. Therefore all particles must be inverted.
+                if p.name != p.antiname and p.pdg_code > 0:
+                    spin = -spin
+                    color = -color
+                colors.append(color)
+
+                f.write(
+                    ",\n   idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+                    % (i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
+                )
+            f.write(") =")
+
+            # The following is used split the amplitude for the truncation options.
+            # QL>0 always implies NP>0.
+            NPQL_brack_flag = False
+            if "QL" in vorders.keys() and vorders["QL"] > 0:
+                f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
+                NPQL_brack_flag = True
+            elif "NP" in vorders.keys() and vorders["NP"] > 0:
+                f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
+                NPQL_brack_flag = True
+
+            dummies = []
+
+            brack_flag = False
+            for i, s in enumerate(spins):
+                if s == 3 or s == 4:
+                    brack_flag = True
+                    idx = "idx%dL%d" % (i + 1, s)
+                    idxa = "idx%dL%da" % (i + 1, s)
+                    idxb = "idx%dL%db" % (i + 1, s)
+                    f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+                    dummies.append(idxa)
+                    dummies.append(idxb)
+
+            if brack_flag:
+                f.write(" (")
+
+            for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
+                if not coupling.name in cplnames:
+                    continue
+                ic, il = coord
+                lorentz = lorex[v.lorentz[il].name]
+                scolor = v.color[ic]
+                f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "")))
+                if scolor != "1":
+                    color = parser.compile(scolor)
+                    color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
+                    color = color.replaceNegativeIndices(0, "MDLIndex%d", dummy_found)
+                    color = transform_color(color, colors, xidx)
+                    if lorentz == ex.IntegerExpression(1):
+                        expr = color
+                    else:
+                        expr = color * lorentz
                 else:
-                    if len(vertorders) > 0:
-                        # Note: Since the check for ambiguous vertices is now part of __init__ we should never end up here
-                        logger.warning(
-                            (
-                                "write_form_file: Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
-                                % (v.name, vertorders, vorders)
-                            )
-                            + "I will split it up."
-                        )
-                    vocp = copy.deepcopy(vorders)
-                    vertorders.append(vocp)
-                    cplnames.append([coupling.name])
+                    expr = lorentz
+                if not expr == ex.IntegerExpression(1):
+                    f.write(" * (")
+                    lwf.nl()
+                    expr.write(lwf)
+                    f.write("\n   )")
 
-            for ivo in range(len(vertorders)):
-                #flip = spins[0] == 1 and spins[2] == 1
+                for ind in list(lsubs.values()):
+                    s = str(ind)
+                    if expr.dependsOn(s):
+                        if s not in dummies:
+                            dummies.append(s)
+
+            if brack_flag:
+                f.write(")")
+            if NPQL_brack_flag:
+                f.write("\n)")
+            f.write(";\n")
+
+            for idx in list(dummy_found.values()):
+                dummies.append(str(idx))
+
+            if len(dummies) > 0:
+                f.write("Sum %s;\n" % ", ".join(dummies))
+            f.write("*---#] %s:\n" % fold_name)
+
+        if self.useCT:
+            for v in self.all_CTvertices:
+                particles = v.particles
+                names = []
+                spins = []
+                for p in particles:
+                    names.append(p.name)
+                    spins.append(p.spin - 1)
+
+                vorders = {}
+                cplnames = [c.name for c in v.couplings.values()]
+                for coord, coupling in list(v.couplings.items()):
+                    for name in orders:
+                        if name in coupling.order:
+                            vorders[name] = coupling.order[name]
+                        else:
+                            vorders[name] = 0
+
+                    _, il, *_ = coord
+                    vorders["RK"] = v.lorentz[il].rank
+
                 deg = len(particles)
-
                 xidx = list(range(deg))
-                #if flip:
-                #    xidx[0] = 1
-                #    xidx[1] = 0
 
-                fold_name = "(%s) %s Vertex" % (v.name + "_" + str(ivo), " -- ".join(names))
+                fold_name = "(%s) %s CTVertex" % (v.name, " -- ".join(names))
                 f.write("*---#[ %s:\n" % fold_name)
-                flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                f.write(f"Identify Once vertex(iv?, isNP{flagNP}, {v.name}_{ivo}")
+                f.write(f"Identify Once vertex(iv?, {v.name}")
                 colors = []
                 for i in xidx:
                     p = particles[i]
-                    field = afields[i]
-                    anti = fields[i]
                     color = abs(p.color)
                     spin = abs(p.spin) - 1
-                    if field.startswith("anti"):# and not p.pdg_code in [24, -24]: TODO: Why no 24?
+                    # N.B.: the particles of the vertex object are defined to be outgoing in the UFO convention, but we use
+                    # the convention where all particles are incoming. Therefore all particles must be inverted.
+                    if p.name != p.antiname and p.pdg_code > 0:
                         spin = -spin
                         color = -color
                     colors.append(color)
 
                     f.write(
-                        ",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
-                        % (field, i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
+                        ",\n   idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
+                        % (i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
                     )
                 f.write(") =")
 
                 # The following is used split the amplitude for the truncation options.
                 # QL>0 always implies NP>0.
                 NPQL_brack_flag = False
-                if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
-                    f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
+                if "QL" in vorders.keys() and vorders["QL"] > 0:
+                    f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
                     NPQL_brack_flag = True
-                elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
-                    f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
+                elif "NP" in vorders.keys() and vorders["NP"] > 0:
+                    f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
                     NPQL_brack_flag = True
-                    
+
                 dummies = []
 
                 brack_flag = False
@@ -1223,12 +998,12 @@ class Model:
                     f.write(" (")
 
                 for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                    if not coupling.name in cplnames[ivo]:
+                    if not coupling.name in cplnames:
                         continue
-                    ic, il = coord
+                    ic, il, ip = coord
                     lorentz = lorex[v.lorentz[il].name]
                     scolor = v.color[ic]
-                    f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "")))
+                    f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "") + "eftctcpl"))
                     if scolor != "1":
                         color = parser.compile(scolor)
                         color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
@@ -1265,148 +1040,6 @@ class Model:
                     f.write("Sum %s;\n" % ", ".join(dummies))
                 f.write("*---#] %s:\n" % fold_name)
 
-        if self.useCT:
-            for v in self.all_CTvertices:
-                particles = v.particles
-                names = []
-                fields = []
-                afields = []
-                spins = []
-                for p in particles:
-                    names.append(p.name)
-                    cn = canonical_field_names(p)
-                    fields.append(cn[0])
-                    afields.append(cn[1])
-                    spins.append(p.spin - 1)
-
-                vorders = {}
-                vertorders = []
-                cplnames = []
-                for coord, coupling in list(v.couplings.items()):
-                    for name in orders:
-                        if name in coupling.order:
-                            vorders[name] = coupling.order[name]
-                        else:
-                            vorders[name] = 0
-
-                    ic, il, ip = coord
-                    vorders["RK"] = v.lorentz[il].rank
-
-                    if vorders in vertorders:
-                        cplnames[vertorders.index(vorders)].append(coupling.name)
-                    else:
-                        if len(vertorders) > 0:
-                            logger.warning(
-                                (
-                                    "Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
-                                    % (v.name, vertorders, vorders)
-                                )
-                                + "I will split it up."
-                            )
-                        vocp = copy.deepcopy(vorders)
-                        vertorders.append(vocp)
-                        cplnames.append([coupling.name])
-
-                for ivo in range(len(vertorders)):
-                    #flip = spins[0] == 1 and spins[2] == 1
-                    deg = len(particles)
-
-                    xidx = list(range(deg))
-                    #if flip:
-                    #    xidx[0] = 1
-                    #    xidx[1] = 0
-
-                    fold_name = "(%s) %s CTVertex" % (v.name + "_" + str(ivo), " -- ".join(names))
-                    f.write("*---#[ %s:\n" % fold_name)
-                    flagNP = 0 if "NP" not in vertorders[ivo] else (1 if vertorders[ivo]["NP"] != 0 else 0)
-                    f.write(f"Identify Once vertex(iv?, isNP{flagNP}, {v.name}_{ivo}")
-                    colors = []
-                    for i in xidx:
-                        p = particles[i]
-                        field = afields[i]
-                        anti = fields[i]
-                        color = abs(p.color)
-                        spin = abs(p.spin) - 1
-                        if field.startswith("anti"):# and not p.pdg_code in [24, -24]: TODO: Why no 24?
-                            spin = -spin
-                            color = -color
-                        colors.append(color)
-
-                        f.write(
-                            ",\n   [field.%s], idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
-                            % (field, i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
-                        )
-                    f.write(") =")
-
-                    # The following is used split the amplitude for the truncation options.
-                    # QL>0 always implies NP>0.
-                    NPQL_brack_flag = False
-                    if "QL" in vertorders[ivo].keys() and vertorders[ivo]["QL"] > 0:
-                        f.write("\n  XQLorder^%d * (" % (vertorders[ivo]["QL"]))
-                        NPQL_brack_flag = True
-                    elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
-                        f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
-                        NPQL_brack_flag = True
-
-                    dummies = []
-
-                    brack_flag = False
-                    for i, s in enumerate(spins):
-                        if s == 3 or s == 4:
-                            brack_flag = True
-                            idx = "idx%dL%d" % (i + 1, s)
-                            idxa = "idx%dL%da" % (i + 1, s)
-                            idxb = "idx%dL%db" % (i + 1, s)
-                            f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
-                            dummies.append(idxa)
-                            dummies.append(idxb)
-
-                    if brack_flag:
-                        f.write(" (")
-
-                    for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                        if not coupling.name in cplnames[ivo]:
-                            continue
-                        ic, il, ip = coord
-                        lorentz = lorex[v.lorentz[il].name]
-                        scolor = v.color[ic]
-                        f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "") + "eftctcpl"))
-                        if scolor != "1":
-                            color = parser.compile(scolor)
-                            color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
-                            color = color.replaceNegativeIndices(0, "MDLIndex%d", dummy_found)
-                            color = transform_color(color, colors, xidx)
-                            if lorentz == ex.IntegerExpression(1):
-                                expr = color
-                            else:
-                                expr = color * lorentz
-                        else:
-                            expr = lorentz
-                        if not expr == ex.IntegerExpression(1):
-                            f.write(" * (")
-                            lwf.nl()
-                            expr.write(lwf)
-                            f.write("\n   )")
-
-                        for ind in list(lsubs.values()):
-                            s = str(ind)
-                            if expr.dependsOn(s):
-                                if s not in dummies:
-                                    dummies.append(s)
-
-                    if brack_flag:
-                        f.write(")")
-                    if NPQL_brack_flag:
-                        f.write("\n)")
-                    f.write(";\n")
-
-                    for idx in list(dummy_found.values()):
-                        dummies.append(str(idx))
-
-                    if len(dummies) > 0:
-                        f.write("Sum %s;\n" % ", ".join(dummies))
-                    f.write("*---#] %s:\n" % fold_name)
-
         f.write("#EndProcedure\n")
         f.write("*---#] Procedure ReplaceVertices :\n")
 
@@ -1427,99 +1060,33 @@ class Model:
 *---#] Procedure VertexConstants :
 """)
 
-    def write_formct_file(self, f):
-        parser = ex.ExpressionParser()
-        lorex = {}
-        lsubs = {}
-        lcounter = [0]
-        dummy_found = {}
-        for l in self.all_lorentz:
-            name = l.name
-            structure = parser.compile(l.structure)
-            structure = structure.replaceStrings("ModelDummyIndex", lsubs, lcounter)
-            structure = structure.replaceNegativeIndices(0, "MDLIndex%d", dummy_found)
-            for i in range(2, 33):
-                structure = structure.algsubs(ex.FloatExpression("%d." % i), ex.IntegerExpression("%d" % i))
+    def write_yukawa_ct_file(self, f) -> None:
+        for v in self.all_vertices:
+            # Identify Yukawa vertices we want to generate counterterms for:
+            #   - Has two massive quarks (identified by PDG code <= 6)
+            #   - Has one Higgs (identified by PDG code 25)
+            #   - Has no new physics (order zero in coupling `NP`)
+            pdg_codes = [abs(p.pdg_code) for p in v.particles]
+            if len(v.particles) == 3 and any(pdg_codes.count(q) == 2 for q in range(7)) and pdg_codes.count(25) == 1:
+                orders = next((c.order for c in v.couplings.values()), None)
+                if orders is not None and "NP" in orders and orders["NP"] != 0:
+                    continue
+                quark_mass = next(p.mass for p in v.particles if abs(p.pdg_code) <= 6)
+                if quark_mass == "0" or quark_mass == "ZERO":
+                    continue
+                f.write(f"""\
+Id vertex(iv?, {v.name},
+          idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
+          idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
+          idx3?, sDUMMY3?, vDUMMY3?, iv3L?, sign3?, iv3C?) =
+    vertex(iv, {v.name},
+           idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
+           idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
+           idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
+    (1+XCT*CYUKAWA*DELTAYUKOS{self.prefix + str(quark_mass)});
 
-        lwf = LimitedWidthOutputStream(f, 70, 6)
-        f.write("* vim: syntax=form:ts=3:sw=3\n\n")
-        f.write("* This file has been generated from the FeynRule model files\n")
-        f.write("* in %s\n" % self.model_orig)
-        f.write("* for Counter Term Vertices\n\n")
+""")
 
-        f.write("*---#[ Symbol Definitions:\n")
-        f.write("*---#[ Parameters:\n")
-
-        params = []
-        for c in self.all_CTcouplings:
-            params.append(self.prefix + c.name.replace("_", ""))
-
-        if len(params) > 0:
-            if len(params) == 1:
-                f.write("Symbol %s;" % params[0])
-            else:
-                f.write("Symbols")
-                lwf.nl()
-                lwf.write(params[0])
-                for p in params[1:]:
-                    lwf.write(",")
-                    lwf.write(p)
-                lwf.write(";")
-
-        f.write("\n")
-
-        if len(self.floats) == 1:
-            f.write("Symbol %s;\n" % self.floats[0])
-        elif len(self.floats) > 1:
-            f.write("Symbols")
-            lwf.nl()
-            lwf.write(self.floats[0])
-            for p in self.floats[1:]:
-                lwf.write(",")
-                lwf.write(p)
-            lwf.write(";\n")
-
-        f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
-        f.write("*---#] Parameters:\n")
-        f.write("*---#] Symbol Definitions:\n")
-        f.write("*---#[ Procedure ReplaceCT :\n")
-        f.write("#Procedure ReplaceCT\n")
-
-        for v in self.all_CTvertices:
-            particles = v.particles
-            names = []
-            fields = []
-            afields = []
-            for p in particles:
-                names.append(p.name)
-                cn = canonical_field_names(p)
-                fields.append(cn[0])
-                afields.append(cn[1])
-
-            deg = len(particles)
-
-            xidx = list(range(deg))
-
-            fold_name = "(%s) %s CT" % (v.name, " -- ".join(names))
-            f.write("*---#[ %s:\n" % fold_name)
-            f.write("Identify Once delta(mass")
-            for i in xidx:
-                p = particles[i]
-                field = afields[i]
-                f.write(",\n   [field.%s]" % field)
-            f.write(") =")
-
-            for coord, coupling in list(v.couplings.items()):
-                ic, il = coord
-                f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "")))
-                for ind in list(lsubs.values()):
-                    s = str(ind)
-
-            f.write(";\n")
-
-            f.write("*---#] %s:\n" % fold_name)
-        f.write("#EndProcedure\n")
-        f.write("*---#] Procedure ReplaceCT :\n")
 
     def containsMajoranaFermions(self):
         for p in self.all_particles:
@@ -1532,17 +1099,15 @@ class Model:
         with open(os.path.join(path, "%s.py" % local_name), "w") as f:
             self.write_python_file(f)
 
-        logger.info("  Writing QGraf file ...")
-        with open(os.path.join(path, local_name), "w") as f:
-            self.write_qgraf_file(f, order_names)
-
         logger.info("  Writing Form file ...")
         with open(os.path.join(path, "%s.hh" % local_name), "w") as f:
             self.write_form_file(f, order_names)
 
-        # logger.info("  Writing Form CT file ...")
-        # with open(os.path.join(path, "%sct.hh" % local_name), 'w') as f:
-        # self.write_formct_file(f)
+        logger.info("  Writing Form Yukawa counterterm file ...")
+        if not os.path.isdir(os.path.join(path, "codegen")):
+            os.mkdir(os.path.join(path, "codegen"))
+        with open(os.path.join(path, "codegen", "ufo_yukawa_counterterms.hh"), "w") as f:
+            self.write_yukawa_ct_file(f)
 
     def vertex(self, label: str) -> Vertex:
         if label[-1].isdigit() and label[-2] == "_":
@@ -1557,25 +1122,6 @@ class Model:
                 return (self.all_vertices+self.all_CTvertices)[self.labels[label]]
             else:
                 return self.all_vertices[self.labels[label]]
-
-
-def canonical_field_names(p):
-    pdg_code = p.pdg_code
-    if pdg_code < 0:
-        canonical_name = "anti%d" % abs(pdg_code)
-        if p.selfconjugate:
-            canonical_anti = canonical_name
-        else:
-            canonical_anti = "part%d" % abs(pdg_code)
-    else:
-        canonical_name = "part%d" % pdg_code
-        if p.selfconjugate:
-            canonical_anti = canonical_name
-        else:
-            canonical_anti = "anti%d" % pdg_code
-
-    return (canonical_name, canonical_anti)
-
 
 lor_P = ex.SymbolExpression("P")
 lor_Metric = ex.SymbolExpression("Metric")
@@ -1924,95 +1470,6 @@ def transform_color(expr, colors, xidx):
             return expr
     else:
         return expr
-
-def trace_spin(lorentz):
-    matcher = re.compile(
-        r"(?:Identity|Gamma|Gamma5|ProjM|ProjP|Sigma|C)\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)"
-    )
-    connections = set(tuple([int(x) - 1 for x in l]) for l in matcher.findall(lorentz.structure))
-    seen = [False for _ in lorentz.spins]
-    connection_map = [-1 for _ in lorentz.spins]
-
-    # Trace the leg connections by contracting the internal spin indices
-    for i in range(len(lorentz.spins)):
-        if lorentz.spins[i] > 0 and not lorentz.spins[i] % 2 == 0:
-            seen[i] = True
-            continue
-
-        cursor = i
-
-        while True:
-            changed = False
-            for c in connections:
-                if c[0] == cursor:
-                    cursor = c[1]
-                    changed = True
-                    break
-            if not changed:
-                if cursor != i:
-                    seen[cursor] = True
-                    seen[i] = True
-                    connection_map[cursor] = i + 1
-                    connection_map[i] = cursor + 1
-                break
-
-    # If the vertex does not provide explicit matching through the analytic expression and only two legs are unmatched,
-    # connect the two unmatched legs
-    unmatched = [x[0] for x in list(filter(lambda x: not x[1], enumerate(seen)))]
-    if len(unmatched) == 2:
-        seen[unmatched[0]] = True
-        seen[unmatched[1]] = True
-        connection_map[unmatched[0]] = unmatched[1] + 1
-        connection_map[unmatched[1]] = unmatched[0] + 1
-
-    return connection_map
-
-def ambiguous_vertex(vertex):
-    # checks if vertex has ambiguous coupling orders and/or rank  
-    cpl_orders = []
-    for coord, cpl in vertex.couplings.items():
-        #cpl_orders.append(str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank))
-        cpl_orders.append(str(cpl.order))
-    if len(set(cpl_orders)) > 1:
-        return True
-    if len(vertex.rank)>1:
-        return True 
-    return False
-
-def split_vertex(vertex):
-    # splits a vertex with ambiguous coupling orders in multiple unambiguous vertices
-    # returns a dict of the form 'vertex_identifier':'vertex', where 'vertex' is a dict
-    # again, i.e. NOT a UFO Vertex type
-    cpl_orders = {}
-    vertices = {}
-    i = -1
-    for coord, cpl in vertex.couplings.items():
-        i += 1 
-        cplord = str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank)
-        if cplord in cpl_orders.keys():
-            vn = vertex.name+"_"+str(cpl_orders[cplord])
-            if vertex.color[coord[0]] in vertices[vn]["color"]:
-                ccoord = vertices[vn]["color"].index(vertex.color[coord[0]])
-            else:
-                vertices[vn]["color"].append(vertex.color[coord[0]])
-                ccoord = len(vertices[vn]["color"])-1
-            if vertex.lorentz[coord[1]] in vertices[vn]["lorentz"]:
-                lcoord = vertices[vn]["lorentz"].index(vertex.lorentz[coord[1]])
-            else:
-                vertices[vn]["lorentz"].append(vertex.lorentz[coord[1]])
-                lcoord = len(vertices[vn]["lorentz"])-1
-            vertices[vn]["couplings"][(ccoord,lcoord)] = cpl
-        else:
-            cpl_orders[cplord] = i
-            vn = vertex.name+"_"+str(i)
-            vertices[vn] = {}
-            vertices[vn]["name"] = vn
-            vertices[vn]["particles"] = vertex.particles
-            vertices[vn]["color"] = [vertex.color[coord[0]]]
-            vertices[vn]["lorentz"] = [vertex.lorentz[coord[1]]]
-            vertices[vn]["couplings"] = {(0,0):cpl}
-            vertices[vn]["rank"] = {vertex.lorentz[coord[1]].rank}
-    return vertices
 
 def load_ufo_files(mname, mpath):
     mfile = None

@@ -351,8 +351,7 @@ def prepare_model_files(conf, output_path=None):
             copy_file(os.path.join(src_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
     elif len(model_lst) == 2:
         if model_lst[0].lower().strip() == "feynrules":
-            isufo = True
-            conf["is_ufo"] = isufo
+            conf["is_ufo"] = True
             model_path = model_lst[1]
             model_path = os.path.expandvars(model_path)
             model_path = os.path.expanduser(model_path)
@@ -366,7 +365,7 @@ def prepare_model_files(conf, output_path=None):
                 order_names = []
             mdl.store(path, MODEL_LOCAL, order_names)
             # TODO: Use proper UFO model instead of generated QGRAF model
-            conf.setProperty("model_path", os.path.join(path, MODEL_LOCAL))
+            conf.setProperty("model_path", model_path)
             logger.info("Done with model import.")
         else:
             model_path = model_lst[0]

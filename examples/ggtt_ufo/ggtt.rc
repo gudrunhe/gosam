@@ -7,7 +7,7 @@ out=6,-6
 
 order=QCD, 2, 4
 
-filter.particles=part2:0,part3:0,part4:0,part5:0
+filter.particles=d:0,s:0,c:0,b:0
 
 model.options=Nfgen:1
 model=FeynRules, ../model/Standard_Model_UFO

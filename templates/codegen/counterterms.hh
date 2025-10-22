@@ -9,6 +9,9 @@
 * will not be considered as Yukawa vertices. For those the user needs
 * to supply the correct counterterms as part of the UFO model.
 *
+[% @if is_ufo %]
+#include- ufo_yukawa_counterterms.hh
+[% @else %]
 [% @for modelparticles massive quarks OSyukawa %]
 id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% name %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
@@ -28,7 +31,7 @@ id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% name %]], idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
    (1+XCT*CYUKAWA*DELTAYUKOS[% mass %]);[%
-@end @for %][% 
+@end @for %][%
 @for modelparticles quarks MSbaryukawa %]
 id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 	  [field.[% name %]], idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
@@ -49,6 +52,7 @@ id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
   	  [field.[% modelhiggs %]], idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
    (1+XCT*CYUKAWA*DELTAYUKMSbar);[%
 @end @for %]
+[% @end @if %]
 
 *---#] identify Yukawa vertices:
 *---#[ identify massive quark propagators:
@@ -56,25 +60,25 @@ id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]
 @if eval width .eq. 0 %]
 id proplorentz(1, vDUMMY1?, [% mass %], 0, 0, iv1L?, iv2L?) =
    proplorentz(1, vDUMMY1, [% mass %], 0, 0, iv1L, iv2L) -
-       i_*XCT*CMASS*DELTAMASSOS[% mass %] * 
+       i_*XCT*CMASS*DELTAMASSOS[% mass %] *
 	      proplorentz(1, vDUMMY1, [% mass %], 0, 0, iv1L, iDUMMY1) *
 		  proplorentz(1, vDUMMY1, [% mass %], 0, 0, iDUMMY1, iv2L);
 id proplorentz(1, ZERO, [% mass %], 0, 0, iv1L?, iv2L?) =
    proplorentz(1, ZERO, [% mass %], 0, 0, iv1L, iv2L) -
-       i_*XCT*CMASS*DELTAMASSOS[% mass %] * 
+       i_*XCT*CMASS*DELTAMASSOS[% mass %] *
 	      proplorentz(1, ZERO, [% mass %], 0, 0, iv1L, iDUMMY1) *
 		  proplorentz(1, ZERO, [% mass %], 0, 0, iDUMMY1, iv2L);[%
 @else %]
 id proplorentz(1, vDUMMY1?, [% mass %], [% width %], 0, iv1L?, iv2L?) =
    proplorentz(1, vDUMMY1, [% mass %], [% width %], 0, iv1L, iv2L) -
-       i_*XCT*CMASS*DELTAMASSOS[% mass %] * 
+       i_*XCT*CMASS*DELTAMASSOS[% mass %] *
 	      proplorentz(1, vDUMMY1, [% mass %], [% width %], 0, iv1L, iDUMMY1) *
 		  proplorentz(1, vDUMMY1, [% mass %], [% width %], 0, iDUMMY1, iv2L);
 id proplorentz(1, ZERO, [% mass %], [% width %], 0, iv1L?, iv2L?) =
    proplorentz(1, ZERO, [% mass %], [% width %], 0, iv1L, iv2L) -
-       i_*XCT*CMASS*DELTAMASSOS[% mass %] * 
+       i_*XCT*CMASS*DELTAMASSOS[% mass %] *
 	      proplorentz(1, ZERO, [% mass %], [% width %], 0, iv1L, iDUMMY1) *
-		  proplorentz(1, ZERO, [% mass %], [% width %], 0, iDUMMY1, iv2L);[% 
+		  proplorentz(1, ZERO, [% mass %], [% width %], 0, iDUMMY1, iv2L);[%
 @end @if %]
 [% @end @for %]
 *---#] identify massive quark propagators:
