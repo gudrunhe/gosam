@@ -44,6 +44,11 @@ call u_init_event(vecs)
 call compute_feynman_result(vecs, scale2, feynman_amp)
 call compute_unitary_result(vecs, scale2, unitary_amp)
 
+if (any(isnan(feynman_amp)).or.any(isnan(unitary_amp))) then
+   write(unit=logf,fmt="(A10)") "NaN error!"
+   success = .false.
+end if
+
 diff = abs(rel_diff(feynman_amp, unitary_amp))
 
 if (diff(0) .gt. eps) then

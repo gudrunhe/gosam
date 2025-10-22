@@ -130,6 +130,11 @@ program test
      write(6,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
      write(logf,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
 
+      if (any(isnan(amp))) then
+         write(logf,*) "NaN error!"
+         success = .false.
+      end if
+     
      do ii = 1, 2
         select case(ii)
         case(1)
