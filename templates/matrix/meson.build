@@ -12,7 +12,9 @@ if get_option('test_executables')
     [% process_name asprefix=\_ %]test_source += common_source
     [% @end @if %]
     if not (build_machine.system() == 'darwin')
-    largs = '-Wl,--disable-new-dtags'
+      largs = '-Wl,--disable-new-dtags'
+    else
+      largs = ''
     endif
     [% process_name asprefix=\_ %]test = executable('run_[% process_name asprefix=\_ %]test',
                                          [% process_name asprefix=\_ %]test_source,
