@@ -1,0 +1,22 @@
+process_name=bghb
+process_path=virtual
+
+in=5, 21
+out=25, 5
+order=QCD, 1, 3
+
+
+
+filter.particles=u:0,d:0,s:0,c:0,t:0
+
+MSbar_yukawa=b
+
+model=FeynRules, ../model/Standard_Model_UFO
+zero=mass(5),width(6;25)
+
+helicities=[bB=+-][+-]0B
++symmetries=parity
+
+
+regularisation_scheme=dred
+convert_to_thv=true
