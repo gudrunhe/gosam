@@ -112,7 +112,7 @@ runloopinduced : printloopinduced $(LOOPINDUCED_TESTS)
 printloopinduced :
 	@echo "SELECTED LOOP INDUCED TESTS: " $(LOOPINDUCED_TESTS)
 
-UFO_TESTS = eeZH_SMEFT ggHg_SMEFT ggtt_ufo Hbb_4F Hbb_SMEFT udene_ufo udhud_unitary uu_graviton_yy
+UFO_TESTS = bghb_ufo eeZH_SMEFT ggHg_SMEFT ggtt_ufo Hbb_4F Hbb_SMEFT udene_ufo udhud_unitary uu_graviton_yy
 
 .PHONY : runufo
 runufo : printufo $(UFO_TESTS)

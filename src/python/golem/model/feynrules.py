@@ -103,6 +103,11 @@ class Model:
         self.initial_import = initial_import
         self.final_import = final_import
 
+        try:
+            self.MSbaryukawa = self.model_options["MSbaryukawa"]
+        except  KeyError:
+            self.MSbaryukawa = []
+
         # IMPORTANT: When using the optimized_import feature we call feynrules.py twice and rely on 
         #            the fact that the model is cached by adding it to sys.modules in tools.load_source, 
         #            including the modifications made during the first call. If for some reason the model
@@ -1079,6 +1084,8 @@ class Model:
                 quark_mass = next(p.mass for p in v.particles if abs(p.pdg_code) <= 6)
                 if quark_mass == "0" or quark_mass == "ZERO":
                     continue
+                quark_mass, quark_name, anti_name = next((str(p.mass), str(p.name), str(p.antiname)) for p in v.particles if abs(p.pdg_code) <= 6)
+                scheme = "MSbar" if bool(set(self.MSbaryukawa).intersection((quark_name, anti_name))) else "OS" + self.prefix + str(quark_mass)
                 f.write(f"""\
 Id vertex(iv?, {v.name},
           idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
@@ -1088,7 +1095,7 @@ Id vertex(iv?, {v.name},
            idx1, sDUMMY1, vDUMMY1, iv1L, sign1, iv1C,
            idx2, sDUMMY2, vDUMMY2, iv2L, sign2, iv2C,
            idx3, sDUMMY3, vDUMMY3, iv3L, sign3, iv3C) *
-    (1+XCT*CYUKAWA*DELTAYUKOS{self.prefix + str(quark_mass)});
+    (1+XCT*CYUKAWA*DELTAYUK{scheme});
 
 """)
 

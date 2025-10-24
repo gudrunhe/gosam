@@ -363,6 +363,7 @@ def prepare_model_files(conf, output_path=None):
                 model_path = os.path.join(rel_path, model_path)
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
+            golem.model.MODEL_OPTIONS["MSbaryukawa"] = conf.getProperty(golem.properties.MSbar_yukawa)
             if conf.getBooleanProperty("optimized_import"):
                 # initial import of model; do not have any information on relevant vertices, yet
                 mdl = golem.model.feynrules.Model(
@@ -913,6 +914,7 @@ def optimize_model(conf, path, lo_diagrams=None, nlo_diagrams=None, ct_diagrams=
     else:    
         model_path = conf["model_path"]
     golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
+    golem.model.MODEL_OPTIONS["MSbaryukawa"] = conf.getProperty(golem.properties.MSbar_yukawa)
     mdl = golem.model.feynrules.Model(
         model_path, 
         golem.model.MODEL_OPTIONS, 
