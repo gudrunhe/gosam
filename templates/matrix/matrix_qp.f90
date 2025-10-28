@@ -934,7 +934,7 @@ contains
             &            + square_qp(colorvec_0(:, -1)) + square_qp(colorvec_0(:, -1), colorvec_1(:, -1))[% 
 @if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
+            amp0_2 = amplitude[% map.index %]l0_2_qp()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)[% 
@@ -953,7 +953,7 @@ contains
             &            + square_qp(colorvec_0(:,-1) + colorvec_1(:,-1))[% 
 @if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
+            amp0_2 = amplitude[% map.index %]l0_2_qp()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2) + square_qp(colorvec_1(:,-2),amp0_2)  
@@ -965,7 +965,7 @@ contains
                colorvec_0(c,:) = samplitudeh[%map.index%]l1_0_qp(real(scale2,ki_qp),my_ok,rational2,c)
                colorvec_1(c,:) = samplitudeh[%map.index%]l1_1_qp(real(scale2,ki_qp),my_ok,rational2,c)
             end do
-            heli_amp( 0) = square_qp(colorvec_0(:, 0), colorvec_1(:, 0)) & 
+            heli_amp( 0) = square_qp(colorvec_0(:, 0), colorvec_1(:, 0)) 
             heli_amp(-1) = square_qp(colorvec_0(:,-1), colorvec_1(:, 0)) &
             &            + square_qp(colorvec_0(:, 0), colorvec_1(:,-1))
             heli_amp(-2) = square_qp(colorvec_0(:,-2), colorvec_1(:, 0)) &
@@ -973,7 +973,7 @@ contains
             &            + square_qp(colorvec_0(:,-1), colorvec_1(:,-1))[% 
 @if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
+            amp0_2 = amplitude[% map.index %]l0_2_qp()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_0(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_0(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_0(:,-2),amp0_2)[% 
@@ -992,7 +992,7 @@ contains
             &            + square_qp(colorvec_1(:,-1))[% 
 @if generate_eft_loopind %]
             ! contributions of tree diagrams with loop-order vertex
-            amp0_2 = amplitude[% map.index %]l0_2()*8._ki_qp*pi*pi
+            amp0_2 = amplitude[% map.index %]l0_2_qp()*8._ki_qp*pi*pi
             heli_amp( 0) = heli_amp( 0) + square_qp(colorvec_1(:, 0),amp0_2)
             heli_amp(-1) = heli_amp(-1) + square_qp(colorvec_1(:,-1),amp0_2)
             heli_amp(-2) = heli_amp(-2) + square_qp(colorvec_1(:,-2),amp0_2)    
