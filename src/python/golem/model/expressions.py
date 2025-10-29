@@ -1362,7 +1362,7 @@ class UnaryMinusExpression(Expression):
         return r_string
 
     def getPrecedence(self):
-        return 100
+        return 150
 
 
 class SpecialExpression(ConstantExpression):
