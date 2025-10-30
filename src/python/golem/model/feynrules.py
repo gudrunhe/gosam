@@ -9,6 +9,7 @@ import os.path
 import sys
 import copy
 import re
+import itertools
 
 import golem.model
 import golem.model.expressions as ex
@@ -1934,35 +1935,61 @@ def transform_color(expr, colors, xidx):
         return expr
 
 def trace_spin(lorentz):
-    matcher = re.compile(
-        r"(?:Identity|Gamma|Gamma5|ProjM|ProjP|Sigma|C)\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)"
-    )
-    connections = set(tuple([int(x) - 1 for x in l]) for l in matcher.findall(lorentz.structure))
-    seen = [False for _ in lorentz.spins]
-    connection_map = [-1 for _ in lorentz.spins]
+    connections, _ = get_spin_connections(lorentz.structure)
 
     # Trace the leg connections by contracting the internal spin indices
-    for i in range(len(lorentz.spins)):
-        if lorentz.spins[i] > 0 and not lorentz.spins[i] % 2 == 0:
-            seen[i] = True
-            continue
+    if connections == {}:
+        # no spin connections given by Lorentz structure
+        seen = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
+        connection_map = [-1 for _ in lorentz.spins]
+    else:
+        # Found spin connections in Lorentz structure. Loop over the different terms.
+        seen = []
+        connection_map = []
+        for ckey, cval in connections.items():
+            s = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
+            cm = [-1 for _ in lorentz.spins]
 
-        cursor = i
+            for i in range(len(lorentz.spins)):
+                if s[i]:
+                    continue
+                cursor = i
 
-        while True:
-            changed = False
-            for c in connections:
-                if c[0] == cursor:
-                    cursor = c[1]
-                    changed = True
-                    break
-            if not changed:
-                if cursor != i:
-                    seen[cursor] = True
-                    seen[i] = True
-                    connection_map[cursor] = i + 1
-                    connection_map[i] = cursor + 1
-                break
+                kill_counter = 0
+
+                while True:
+                    if kill_counter > len(cval):
+                        logger.critical(f"Invalid spin connection for Lorentz structure {lorentz}.")
+                        sys.exit("GoSam terminated due to an error")
+                    kill_counter += 1
+                    changed = False
+                    for c in cval:
+                        if c[0] == cursor:
+                            cursor = c[1]
+                            changed = True
+                            break
+                    if not changed:
+                        if cursor != i:
+                            s[cursor] = True
+                            s[i] = True
+                            cm[cursor] = i + 1
+                            cm[i] = cursor + 1
+                        break
+            seen.append(s)
+            connection_map.append(cm)  
+        # remove duplicates:
+        seen.sort()
+        seen=list(seen for seen,_ in itertools.groupby(seen))          
+        connection_map.sort()
+        connection_map=list(connection_map for connection_map,_ in itertools.groupby(connection_map))
+
+        if len(seen) > 1 or len(connection_map) > 1:
+            logger.critical(f"Cannot find unambigous spin connection for Lorentz structure {lorentz}.")
+            sys.exit("GoSam terminated due to an error")
+
+        # there's only one element left, and that's our map:
+        connection_map = connection_map[0]
+
 
     # If the vertex does not provide explicit matching through the analytic expression and only two legs are unmatched,
     # connect the two unmatched legs
@@ -1974,6 +2001,85 @@ def trace_spin(lorentz):
         connection_map[unmatched[1]] = unmatched[0] + 1
 
     return connection_map
+
+
+def get_spin_connections(expr,depth=0):
+    # A recursive routine extracting the spin connections from a Lorentz structure string.
+    # Has to be recursive as we have to resolve nested brackets.
+
+    keywords = ['Identity','Gamma5','ProjM','ProjP','C','Gamma','Sigma']
+
+    connections = {}
+
+    curr_word = ''
+    
+    skip = 0
+    term = 0
+    len_bracket = 0
+    idx = 0
+
+    while idx < len(expr):
+        l = expr[idx]
+        idx += 1
+
+        if l == ')' and depth > 0:
+            # reached the end of a bracketed expression
+            break
+
+        if l.isalnum():
+            # accumulate the name of the current function
+            curr_word += l
+        elif l == '(' and expr[idx-2] in ['',' ','+','-','*']:
+            # a bracket which does not belong to the argument of a function -> descent into it
+            brack_connections, skip = get_spin_connections(expr[idx:],depth+1)
+            idx += skip            
+            len_bracket = len(brack_connections.keys())
+            try:
+                # check if we already have connections in the current term (multiplying the bracket we just processed)
+                fconnections = connections[term]
+            except KeyError:
+                fconnections = set()
+            # expand the bracket:
+            term -= 1
+            for bck, bcv in brack_connections.items():
+                term += 1
+                connections[term] = fconnections.union(bcv)
+        elif l == '(' and curr_word in keywords:
+            # a bracket indicating the start of the arguments of one of the key functions
+            # find the closing bracket and extract the spin indices/connection
+            curr_word = ''
+            idx1 = idx
+            idx2 = idx
+            while idx < len(expr):
+                idx += 1
+                if expr[idx] == ")":
+                    idx2 = idx
+                    idx += 1 
+                    break
+            matcher = re.compile(r"\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
+            curr_connection = tuple(int(x)-1 for x in matcher.findall(expr[idx1-1:idx2+1])[0])
+            # check if we had any preceeding bracket in the current term
+            # if so, expand it
+            if len_bracket > 0:
+                for t in range(len_bracket):
+                    connections[term-t].add(curr_connection)
+            else:           
+                try:
+                    connections[term].add(curr_connection)
+                except KeyError:
+                    connections[term] = set([curr_connection])
+            curr_connection = None
+        elif (l == "+" or l == "-"):
+            # a plus or minus indicating we're looking at a new term
+            term += 1
+            len_bracket = 0
+            curr_word = ''           
+        else:
+            # end of the current function/object, but is was not any of the key functions
+            curr_word = ''
+        
+    return connections, idx
+
 
 def ambiguous_vertex(vertex):
     # checks if vertex has ambiguous coupling orders and/or rank  

@@ -32,6 +32,7 @@ class Diagram:
 
         self.filtered_by_momentum = False
         self.unitary_gauge = False
+        self.use_MQSE = False
 
         for c in components:
             c.addToDiagram(self)
@@ -198,8 +199,8 @@ class Diagram:
         for v in self._loop_vertices:
             rk += self._vertices[v].rank
 
-        # ToDo: MH: What exactly does this do? How do effective couplings affect this?
-        if MQSE and self.isMassiveQuarkSE() and rk < 2:
+        # Only relevant for the 'old way' of quark mass renormalisation
+        if self.use_MQSE and MQSE and self.isMassiveQuarkSE() and rk < 2:
             return 2
 
         if rk > self.loopsize() + 1 and checkrank:

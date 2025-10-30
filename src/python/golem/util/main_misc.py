@@ -966,6 +966,9 @@ def run_analyzer(path, conf, in_particles, out_particles):
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
     generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
 
+    _unitary_gauge = conf.getBooleanProperty("unitary_gauge")
+    _use_MQSE = conf.getBooleanProperty("use_MQSE")
+
     model = golem.util.tools.getModel(conf)
 
     lo_flags = {}
@@ -977,9 +980,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
         fname = os.path.join(path, "%s.py" % modname)
         logger.debug("Loading tree diagram file %r" % fname)
         mod_diag_lo = golem.util.tools.load_source(modname, fname)
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in mod_diag_lo.diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
         conf["ehc"] = False
         # keep_tree, tree_signs, tree_flows =
         keep_tree, tree_signs, treecache = golem.topolopy.functions.analyze_tree_diagrams(
@@ -1021,9 +1025,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
         fname = os.path.join(path, "%s.py" % modname)
         logger.debug("Loading one-loop diagram file %r" % fname)
         mod_diag_virt = golem.util.tools.load_source(modname, fname)
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in mod_diag_virt.diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
             mod_diag_virt.diagrams,
@@ -1048,9 +1053,10 @@ def run_analyzer(path, conf, in_particles, out_particles):
         fname = os.path.join(path, "%s.py" % modname)
         logger.debug("Loading counterterm diagram file %r" % fname)
         mod_diag_ct = golem.util.tools.load_source(modname, fname)
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in mod_diag_ct.diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_ct, ct_signs, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
             mod_diag_ct.diagrams, model, conf, filter_flags=ct_flags
