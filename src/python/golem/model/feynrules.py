@@ -1935,15 +1935,6 @@ def transform_color(expr, colors, xidx):
         return expr
 
 def trace_spin(lorentz):
-#    matcher = re.compile(
-#        r"(?:Identity|Gamma|Gamma5|ProjM|ProjP|Sigma|C)\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)"
-#    )
-#    connections_orig = set(tuple([int(x) - 1 for x in l]) for l in matcher.findall(lorentz.structure))
-#
-#    connections = {}
-#    if connections_orig != None:
-#        connections[0] = connections_orig
-
     connections, _ = get_spin_connections(lorentz.structure)
 
     # Trace the leg connections by contracting the internal spin indices
@@ -2018,7 +2009,7 @@ def get_spin_connections(expr,depth=0):
     # A recursive routine extracting the spin connections from a Lorentz structure string.
     # Has to be recursive as we have to resolve nested brackets.
 
-    keywords = {'Identity':2,'Gamma5':2,'ProjM':2,'ProjP':2,'C':2,'Gamma':3,'Sigma':4}
+    keywords = ['Identity','Gamma5','ProjM','ProjP','C','Gamma','Sigma']
 
     connections = {}
 
@@ -2049,13 +2040,13 @@ def get_spin_connections(expr,depth=0):
                 # check if we already have connections in the current term (multiplying the bracket we just processed)
                 fconnections = connections[term]
             except KeyError:
-                fconnections = []
+                fconnections = set()
             # expand the bracket:
             term -= 1
             for bck, bcv in brack_connections.items():
                 term += 1
-                connections[term] = fconnections + bcv    
-        elif l == '(' and curr_word in keywords.keys():
+                connections[term] = fconnections.union(bcv)
+        elif l == '(' and curr_word in keywords:
             # a bracket indicating the start of the arguments of one of the key functions
             # find the closing bracket and extract the spin indices/connection
             curr_word = ''
