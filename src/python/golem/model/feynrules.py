@@ -1937,28 +1937,22 @@ def transform_color(expr, colors, xidx):
 def trace_spin(lorentz):
     connections, _ = get_spin_connections(lorentz.structure)
 
-    seen = [False for _ in lorentz.spins]
-    connection_map = [-1 for _ in lorentz.spins]
-
-    for i in range(len(lorentz.spins)):
-        if lorentz.spins[i] > 0 and not lorentz.spins[i] % 2 == 0:
-            seen[i] = True
-            continue
-
     # Trace the leg connections by contracting the internal spin indices
-    if connections != {}:
+    if connections == {}:
+        # no spin connections given by Lorentz structure
+        seen = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
+        connection_map = [-1 for _ in lorentz.spins]
+    else:
         # Found spin connections in Lorentz structure. Loop over the different terms.
         seen = []
         connection_map = []
         for ckey, cval in connections.items():
-            s = [False for _ in lorentz.spins]
+            s = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
             cm = [-1 for _ in lorentz.spins]
 
             for i in range(len(lorentz.spins)):
-                if lorentz.spins[i] > 0 and not lorentz.spins[i] % 2 == 0:
-                    s[i] = True
+                if s[i]:
                     continue
-
                 cursor = i
 
                 kill_counter = 0
