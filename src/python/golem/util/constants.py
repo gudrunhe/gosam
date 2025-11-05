@@ -1,18 +1,6 @@
 # vim: ts=3:sw=3:expandtab
 import golem.installation
 
-PATTERN_DIAGRAMS_LO = "diagrams-0"
-PATTERN_DIAGRAMS_CT = "diagrams-ct"
-PATTERN_DIAGRAMS_NLO_VIRT = "diagrams-1"
-
-PATTERN_PYXO_LO = "pyxotree"
-PATTERN_PYXO_CT = "pyxoct"
-PATTERN_PYXO_NLO_VIRT = "pyxovirt"
-
-PATTERN_TOPOLOPY_LO = "topotree"
-PATTERN_TOPOLOPY_CT = "topoct"
-PATTERN_TOPOLOPY_VIRT = "topovirt"
-
 AUTHORS = {
     "Jens Braun": ["jens.braun2@.kit.edu"],
     "Benjamin Campillo Aveleira": ["benjamin.campillo@kit.edu"],
