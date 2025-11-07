@@ -936,6 +936,9 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
     generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
 
+    _unitary_gauge = conf.getBooleanProperty("unitary_gauge")
+    _use_MQSE = conf.getBooleanProperty("use_MQSE")
+
     model = golem.util.tools.getModel(conf)
 
     lo_flags = {}
@@ -943,9 +946,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
     ct_flags = {}
 
     if generate_lo or generate_eftli:
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in lo_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
         conf["ehc"] = False
         keep_tree, treecache = golem.topolopy.functions.analyze_tree_diagrams(
             lo_diagrams, model, conf, filter_flags=lo_flags
@@ -981,9 +985,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
             else:
                 onshell[key] = "%s**2" % m
 
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in nlo_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
             nlo_diagrams,
@@ -1004,9 +1009,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
         loopcache_tot = golem.topolopy.objects.LoopCache()
 
     if generate_ct:
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in ct_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_ct, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
             ct_diagrams, model, conf, filter_flags=ct_flags
