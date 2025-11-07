@@ -347,8 +347,11 @@ def prepare_model_files(conf, output_path=None):
             [os.path.exists(os.path.join(rel_path, model + ext)) for ext in ["", ".py", ".hh"]]
         ):
             src_path = rel_path
-        for ext in ["", ".py", ".hh"]:
+        for ext in [".py", ".hh"]:
             copy_file(os.path.join(src_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
+        # when called from olp.py we end up here, but the file `model` only exists when the original model was not an UFO
+        if not isufo:
+            copy_file(os.path.join(src_path, model), os.path.join(path, MODEL_LOCAL))
     elif len(model_lst) == 2:
         if model_lst[0].lower().strip() == "feynrules":
             conf["is_ufo"] = True
