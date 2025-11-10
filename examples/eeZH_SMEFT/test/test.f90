@@ -94,7 +94,11 @@ program test
         & "Analytical:", refres(4), &
         & "Ratio:", gsres(4)/refres(4)
 
-   
+   if (any(isnan(gsres))) then
+      write(unit=logf,fmt="(A10)") "NaN error!"
+      success = .false.
+   end if
+      
    diff = abs(rel_diff(gsres, refres))
    
    if (diff(0) .gt. eps) then

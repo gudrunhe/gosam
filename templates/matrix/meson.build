@@ -11,11 +11,16 @@ if get_option('test_executables')
     [% @if internal OLP_MODE %]
     [% process_name asprefix=\_ %]test_source += common_source
     [% @end @if %]
+    if not (build_machine.system() == 'darwin')
+      largs = '-Wl,--disable-new-dtags'
+    else
+      largs = ''
+    endif
     [% process_name asprefix=\_ %]test = executable('run_[% process_name asprefix=\_ %]test',
                                          [% process_name asprefix=\_ %]test_source,
                                          dependencies: dependencies,
                                          install_rpath: dependencies[0].get_variable('libdir'),
-                                         link_args: '-Wl,--disable-new-dtags',
+                                         link_args: largs,
                                          build_by_default: false,
                                          install: true,
                                          install_dir: meson.project_source_root() / 'test')

@@ -118,8 +118,22 @@ def getSubprocess(olpname, id, inp, out, subprocesses, subprocesses_flav, model,
     p_ini = list(map(getparticle, inp))
     p_fin = list(map(getparticle, out))
 
-    s_ini = list(map(str, p_ini))
-    s_fin = list(map(str, p_fin))
+    # replace special characters by placeholders, so the particle names can be used by other code
+    replace_specials = {"~":"__tilde__", "+":"__plus__", "-":"__minus__"}
+
+    s_ini = []
+    s_fin = []
+
+    for p in p_ini:
+        s = str(p)
+        for k,v in replace_specials.items():
+            s = s.replace(k,v)
+        s_ini.append(s)
+    for p in p_fin:
+        s = str(p)
+        for k,v in replace_specials.items():
+            s = s.replace(k,v)
+        s_fin.append(s)
 
     if len(olpname) > 0:
         process_name = "%s_p%d_%s_%s" % (olpname, id, "".join(s_ini), "".join(s_fin))

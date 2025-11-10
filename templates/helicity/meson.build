@@ -12,7 +12,7 @@ generated_sources = [[%
         @if helsum %][% @else %][%
             @if generate_loop_diagrams %][%
                         @for elements topolopy.keep.virt %]
-                            'abbrevd[%$_%]_[% efto %]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]_[% efto %]h[%helicity%].f90' [% @end @if %],[%
+                            'abbrevd[%$_%]_[% efto %]h[%helicity%].f90'[% @if extension quadruple%], 'abbrevd[%$_%]_[% efto %]h[%helicity%]_qp.f90' [% @end @if %],[%
                         @end @for %][%
                 @for elements topolopy.keep.virt %]
                     'd[%$_%]_[% efto %]h[%helicity%]l1.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1_qp.f90' [% @end @if %], 'd[%$_%]_[% efto %]h[%helicity%]l1d.f90'[% @if extension quadruple%], 'd[%$_%]_[% efto %]h[%helicity%]l1d_qp.f90' [% @end @if %],[%
@@ -26,7 +26,7 @@ generated_sources = [[%
         @if generate_eft_loopind %]
 	            'diagramsl0_2.f90'[% @if extension quadruple%], 'diagramsl0_2_qp.f90' [% @end @if %],[% 
         @end @if generate_eft_loopind %][%
-@else %][%
+@else 'not enable_truncation_orders' %][%
     @if generate_tree_diagrams %]
 	        'diagramsl0.f90'[% @if extension quadruple%], 'diagramsl0_qp.f90' [% @end @if %],[% 
     @end @if generate_tree_diagrams %][%

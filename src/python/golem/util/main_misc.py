@@ -641,8 +641,10 @@ def fill_config(conf):
     if conf.getBooleanProperty("enable_truncation_orders"):
         for fltr in ["lo","nlo","ct"]:
             if conf["filter."+fltr] is None:
+                logger.info("\'enable_truncation_orders=True\' -> adding filter.%s: d.order('NP')<=1 " % fltr)
                 conf["filter."+fltr] = "lambda d: d.order('NP')<=1"
             elif conf["filter."+fltr].startswith("lambda d:"):
+                logger.info("\'enable_truncation_orders=True\' -> appending filter.%s: d.order('NP')<=1 " % fltr)
                 conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
             else:
                 logger.warning("You seem to be using a filter for the %s component " % (fltr) \
@@ -794,6 +796,15 @@ def fill_config(conf):
             )
         sys.exit("GoSam terminated due to an error")
 
+    if "thv" in ext and (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+        logger.warning(
+              "You are using the tHV regularisation scheme and a UFO model. Note that in tHV a finite\n"
+            + "renormalisation of the non-singlet axial-vector current (-> gamma_5) is required. The\n"
+            + "corresponding counterterms are only available for the built-in models.\n"
+            + "=> If your process contains non-singlet axial-vector currents you will get a WRONG RESULT!\n"
+
+        )
+
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
         if ("ninja" not in conf["reduction_programs"]):
@@ -936,6 +947,9 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
     generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
     generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
 
+    _unitary_gauge = conf.getBooleanProperty("unitary_gauge")
+    _use_MQSE = conf.getBooleanProperty("use_MQSE")
+
     model = golem.util.tools.getModel(conf)
 
     lo_flags = {}
@@ -943,9 +957,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
     ct_flags = {}
 
     if generate_lo or generate_eftli:
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in lo_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
         conf["ehc"] = False
         keep_tree, treecache = golem.topolopy.functions.analyze_tree_diagrams(
             lo_diagrams, model, conf, filter_flags=lo_flags
@@ -981,9 +996,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
             else:
                 onshell[key] = "%s**2" % m
 
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in nlo_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_virt, keep_vtot, eprops, loopcache, loopcache_tot = golem.topolopy.functions.analyze_loop_diagrams(
             nlo_diagrams,
@@ -1004,9 +1020,10 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
         loopcache_tot = golem.topolopy.objects.LoopCache()
 
     if generate_ct:
-        if conf.getBooleanProperty("unitary_gauge"):
+        if _unitary_gauge or _use_MQSE:
             for d in ct_diagrams.values():
-                d.unitary_gauge = True
+                d.unitary_gauge = _unitary_gauge
+                d.use_MQSE = _use_MQSE
 
         keep_ct, ctcache = golem.topolopy.functions.analyze_ct_diagrams(
             ct_diagrams, model, conf, filter_flags=ct_flags

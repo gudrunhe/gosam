@@ -259,7 +259,8 @@ def draw_diagrams(diagrams: fg.DiagramContainer, model_data: dict[str, dict[str,
                                 model_data["twospin"][p.particle().name()],
                                 model_data["color"][p.particle().name()],
                             ) for p in v.propagators()
-                        ]
+                        ],
+                        vtype = get_vertex_type(v)
                     ) for i, v in enumerate(diag.vertices())
                 },
                 {
@@ -293,6 +294,17 @@ def draw_diagrams(diagrams: fg.DiagramContainer, model_data: dict[str, dict[str,
             pyxo_diag.draw(file, lookup=model_data["line_styles"], latex=model_data["latex_names"], **opts)
             diag_index += 1
         file.write(f"--{BOUNDARY}--\n")
+
+
+def get_vertex_type(v):
+    cpl = v.interaction().coupling_orders()
+    if "CT" in cpl.keys() and cpl["CT"] > 0:
+        return -1
+    elif "NP" in cpl.keys() and cpl["NP"] > 0:
+        return cpl["NP"]
+    else:
+        return 0
+
 
 def convert_diagrams(diagrams: fg.DiagramContainer, model_data: dict[str, dict[str, str | int]]) \
         -> dict[int, Diagram] | None:

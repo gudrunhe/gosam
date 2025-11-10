@@ -37,12 +37,13 @@ success = .true.
 
 call OLP_Start(contract_file_name,ierr)
 
-call OLP_SetParameter(c_char_"mH"//c_null_char, 124.5_ki, 0.0_ki, ierr)
-call OLP_SetParameter(c_char_"mT"//c_null_char, 172.5_ki, 0.0_ki, ierr)
-call OLP_SetParameter(c_char_"mW"//c_null_char, 80.398_ki, 0.0_ki, ierr)
-call OLP_SetParameter(c_char_"mZ"//c_null_char, 91.1876_ki, 0.0_ki, ierr)
-call OLP_SetParameter(c_char_"wW"//c_null_char, 0.0_ki, 0.0_ki, ierr)
-call OLP_SetParameter(c_char_"wZ"//c_null_char, 0.0_ki, 0.0_ki, ierr)
+! Input chosen to match hyy_olp example.
+! Note: UFO model uses (MZ,alpha,Gf) input scheme
+call OLP_SetParameter(c_char_"MH"//c_null_char, 124.5_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"MT"//c_null_char, 172.5_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"ymt"//c_null_char, 172.5_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"Gf"//c_null_char, 0.0000112640644764_ki, 0.0_ki, ierr)
+call OLP_SetParameter(c_char_"MZ"//c_null_char, 91.1876_ki, 0.0_ki, ierr)
 call OLP_SetParameter(c_char_"alpha"//c_null_char, 0.00729735299_ki, 0.0_ki, ierr)
 
 call load_reference_kinematics(blha_kinematics, renorm_scale)
@@ -80,17 +81,17 @@ close(unit=logf)
 contains
 
 pure subroutine load_reference_kinematics(vecs, scale)
-   use model, only: mH
+   use model, only: mdlMH
    implicit none
    real(ki), dimension(50), intent(out) :: vecs
    real(ki), intent(out) :: scale
 
    vecs(:) = 0.0_ki
-   vecs(1) = mH
-   vecs(5) = mH
-   vecs(6) = 0.5_ki * mH
-   vecs(7) = 0.3_ki * mH
-   vecs(9) = 0.4_ki * mH
+   vecs(1) = mdlmH
+   vecs(5) = mdlmH
+   vecs(6) = 0.5_ki * mdlmH
+   vecs(7) = 0.3_ki * mdlmH
+   vecs(9) = 0.4_ki * mdlmH
    vecs(11)   =   vecs(6)
    vecs(12:15) = - vecs(7:10)
 
@@ -99,7 +100,7 @@ pure subroutine load_reference_kinematics(vecs, scale)
 end  subroutine load_reference_kinematics
 
 subroutine     compute_gosam_result(vecs, scale, amp)
-   use model, only: alpha, mH, e, sw, mW
+   use model, only: mdlaEW, mdlMH, mdlee, mdlGf, mdlMW
    implicit none
 
    real(ki), dimension(50), intent(in) :: vecs
@@ -112,20 +113,19 @@ subroutine     compute_gosam_result(vecs, scale, amp)
    double precision :: pi, prefactor, GF
 
    pi = 4.0d0 * atan(1.0d0)
-   GF =  pi * alpha / sqrt(2.0_ki) / sw**2 / mW**2
+   GF = mdlGf
 
    call OLP_EvalSubProcess2(0, vecs, scale, amp, prec)
 
    ! factor 1/16/pi/mH for converting to width
    ! factor 2 for summing over helicities
-   amp = amp * 2.0_ki / (16.0d0 * pi * mH)
-   ! we have set e=1 in the calculation.
+   amp = amp * 2.0_ki / (16.0d0 * pi * mdlMH)
    ! furthermore we factored out alpha/2/pi in the amplitude
-   amp = amp * alpha ** 3 / pi
-
+   amp = amp * mdlaEW ** 2 / 4 / pi**2
+   
    write(logf,*) "GOSAM AMP(1):", amp(2)
 
-   prefactor = mH**3 * GF * alpha**2 / sqrt(2.0d0) / 128.0d0 / pi**3
+   prefactor = mdlMH**3 * GF * mdlaEW**2 / sqrt(2.0d0) / 128.0d0 / pi**3
 
    do ic = 1, 2
       ch = channels(ic)
@@ -164,7 +164,7 @@ pure elemental function rel_diff(a, b)
 end  function rel_diff
 
 function GammaHyy() result(Gamma)
-   use model, only: mH, mT, mW, alpha, sw, NC
+   use model, only: mdlMH, mdlMT, mdlMW, mdlGf, mdlaEW, NC
    implicit none
 
    double precision :: Gamma
@@ -173,17 +173,17 @@ function GammaHyy() result(Gamma)
    double precision :: tauT, tauW, GF, pi
 
    pi = 4.0d0 * atan(1.0d0)
-   GF =  pi * alpha / sqrt(2.0_ki) / sw**2 / mW**2
+   GF = mdlGf
 
-   tauT = mH**2/4.0d0/mT**2
-   tauW = mH**2/4.0d0/mW**2
+   tauT = mdlMH**2/4.0d0/mdlMT**2
+   tauW = mdlMH**2/4.0d0/mdlMW**2
 
    amps = (0.0d0, 0.0d0)
 
    amps = amps + NC * (2.0d0/3.0d0)**2 * AHq(tauT) + AHW(tauW)
 
-   Gamma = mH**3 * real(amps*conjg(amps), kind(1.d0))
-   Gamma = Gamma * GF * alpha**2 / sqrt(2.0d0) / 128.0d0 / pi**3
+   Gamma = mdlMH**3 * real(amps*conjg(amps), kind(1.d0))
+   Gamma = Gamma * GF * mdlaEW**2 / sqrt(2.0d0) / 128.0d0 / pi**3
    Gamma = Gamma * 2.0d0 ! (two non-zero helicities compared to hyy example)
 end function GammaHyy
 

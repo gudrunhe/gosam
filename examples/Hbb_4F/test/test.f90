@@ -41,6 +41,11 @@ program test
    call compute_gosam_result(vecs, scale2, amp)
    call analytic_result(scale, ref_amp)
 
+   if (any(isnan(amp))) then
+      write(unit=logf,fmt="(A10)") "NaN error!"
+      success = .false.
+   end if
+   
    diff = abs(rel_diff(amp, ref_amp))
 
    if (diff(0) .gt. eps) then

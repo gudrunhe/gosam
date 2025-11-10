@@ -1,0 +1,12 @@
+InterfaceVersion         BLHA2
+CorrectionType           EW
+IRregularisation         DRED
+CouplingPower QCD        0
+CouplingPower QED        3
+
+# Process definitions
+
+DebugUnstable            True
+
+AmplitudeType            LoopInduced
+ 25 ->    22    22

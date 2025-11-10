@@ -1,0 +1,6 @@
+model=FeynRules,../model/Standard_Model_UFO
+zero=mass(1;2;3;4;5),width(6;23;24;25)
+
+filter.particles=d:0,u:0,s:0,c:0,b:0,e-:0,mu-:0,ta-:0
+
+nlo_prefactors=0

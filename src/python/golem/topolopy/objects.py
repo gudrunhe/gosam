@@ -32,6 +32,7 @@ class Diagram:
 
         self.filtered_by_momentum = False
         self.unitary_gauge = False
+        self.use_MQSE = False
 
         for c in components:
             c.addToDiagram(self)
@@ -161,8 +162,8 @@ class Diagram:
             else:
                 self._adjacency_list[nkeep] = lst
 
-    def getLoopIntegral(self, MQSE=True):
-        return LoopIntegral([self._propagators[abs(l)] for l in self._loop], self.rank(MQSE))
+    def getLoopIntegral(self, MQSE=True, checkrank=True):
+        return LoopIntegral([self._propagators[abs(l)] for l in self._loop], self.rank(MQSE,checkrank))
 
     def colorforbidden(self):
         reps = []
@@ -188,7 +189,7 @@ class Diagram:
                     reps.append(c)
         return len(reps) == 1
 
-    def rank(self, MQSE=True):
+    def rank(self, MQSE=True, checkrank=True):
         rk = 0
         for p in self._loop:
             twospin = abs(self._propagators[abs(p)].twospin)
@@ -198,11 +199,11 @@ class Diagram:
         for v in self._loop_vertices:
             rk += self._vertices[v].rank
 
-        # ToDo: MH: What exactly does this do? How do effective couplings affect this?
-        if MQSE and self.isMassiveQuarkSE() and rk < 2:
+        # Only relevant for the 'old way' of quark mass renormalisation
+        if self.use_MQSE and MQSE and self.isMassiveQuarkSE() and rk < 2:
             return 2
 
-        if rk > self.loopsize() + 1:
+        if rk > self.loopsize() + 1 and checkrank:
             logger.debug("{}".format(self))
             logger.critical(
                 "Encountered diagram with rank {}, loopsize {} and rank - loopsize = {} > 1, which GoSam is unable to handle.".format(
@@ -327,7 +328,7 @@ class Diagram:
         powfmt = "%s**%d"
         prefix = "s"
 
-        li = self.getLoopIntegral()
+        li = self.getLoopIntegral(checkrank=False)
         onshell = {}
 
         for l in list(self._in_legs.values()):

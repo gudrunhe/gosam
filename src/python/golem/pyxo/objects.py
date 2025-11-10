@@ -282,14 +282,14 @@ class vertex:
 
         if self.vtype is not None:
             # vertex type identifier:
-            # (0,0) -> normal vertex (dot)
-            # (1,i) with i any integer (NP order) -> EFT CT vertex (cross)
-            # (0,i) with i>0 (NP order) -> NP vertex (box)
-            if self.vtype[0] == 1:
+            # 0 -> normal (non EFT) vertex (dot)
+            # -1 -> CT vertex (cross)
+            # i with i>0 (NP order) -> NP vertex (box)
+            if self.vtype == -1:
                 f.write("   \\Cross(%0.1f,%0.1f){%s}{1.0} " % (x, y, vsize))
-            elif self.vtype[1] == 0:
+            elif self.vtype == 0:
                 f.write("   \\Vertex(%0.1f,%0.1f){%s} " % (x, y, vsize))
-            elif self.vtype[1] >= 1:
+            elif self.vtype >= 1:
                 f.write("   \\GBoxc(%0.1f,%0.1f)(%s,%s)0 " % (x, y, 2 * vsize, 2 * vsize))
             else:
                 logging.critical("I don't know this vertex type identifier: %s" % str(self.vtype))

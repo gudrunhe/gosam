@@ -43,6 +43,11 @@ call compute_reference_result(vecs, scale2, ref_amp)
 
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
+if (any(isnan(gosam_amp))) then
+	write(unit=logf,fmt="(A10)") "NaN error!"
+	success = .false.
+end if
+
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
    & "Comparison of LO failed!"
@@ -172,7 +177,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    u= dotproduct(vecs(1,:)-vecs(4,:), vecs(1,:)-vecs(4,:))
 
    ! The following results are calculated based on the formula (9) and (14)
-   ! in arXiv:0902.4894v2. The conversion from CDR to DRED is included.
+   ! in arXiv:0902.4894v2. The conversion from tHV to DRED is included.
 
    amp(0) = abs(customSpin2Prop(s,0._ki))**2._ki * mdlkappa**4._ki / 16._ki / 3._ki &
                   &  * (u*t**3._ki + t*u**3._ki) / 4._ki

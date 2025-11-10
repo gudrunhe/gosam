@@ -44,6 +44,11 @@ call compute_reference_result(vecs, scale2, ref_amp)
 
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
+if (any(isnan(gosam_amp))) then
+	write(unit=logf,fmt="(A10)") "NaN error!"
+	success = .false.
+end if
+
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
    & "Comparison of LO failed!"

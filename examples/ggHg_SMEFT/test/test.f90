@@ -64,6 +64,12 @@ program test
       EFTcount = eftc(ieft)
       call samplitude(vecs, scale2, tmp_gsres, prec)
       call analytic_amp(vecs,tmp_refres)
+
+      if (any(isnan(tmp_gsres))) then
+         write(unit=logf,fmt="(A10)") "NaN error!"
+         success = .false.
+      end if
+      
       gsres(ieft,:) = tmp_gsres(:)
       refres(ieft,:) = tmp_refres(:)
       write(unit=6,fmt="(A45)") NEW_LINE('a'), truncation_order(ieft)
