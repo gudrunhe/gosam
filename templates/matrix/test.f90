@@ -164,6 +164,10 @@ subroutine  print_parameters(vecs, scale2)
 
 [% @else %]
    call print_parameter()
+   do i=1,[%num_legs%]
+   write(*,'(A1,1x,A2,I1,A5,4(1x, G23.16))') "#", "p(", i, ")   =", vecs(i,:)
+   enddo
+   write(*,'(A1,1x,A26)') "#", "--------------------------"
 [% @end @select %]
 
 end subroutine print_parameters

@@ -46,6 +46,11 @@ call compute_reference_result(vecs, scale2, ref_amp)
 
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
+if (any(isnan(gosam_amp))) then
+	write(unit=logf,fmt="(A10)") "NaN error!"
+	success = .false.
+end if
+
 if (diff(0) .gt. eps) then
    write(unit=logf,fmt="(A3,1x,A40)") "==>", &
    & "Comparison of LO failed!"
@@ -194,7 +199,7 @@ subroutine     compute_reference_result(vecs, scale2, amp)
    amp(2) = -18.72201065555712_ki * amp(0)
    amp(3) = -17.0_ki / 3.0_ki * amp(0)
 
-   ! In order to convert to CDR we need to subtract
+   ! In order to convert to tHV we need to subtract
    ! n_q * C_F/2 + n_g * C_A/6 = 2 C_F/2 + 1 C_A/6 = 11/6
    ! see arXiv:hep-ph/9610553
    amp(1) = amp(1) - 11.0_ki/6.0_ki * amp(0)

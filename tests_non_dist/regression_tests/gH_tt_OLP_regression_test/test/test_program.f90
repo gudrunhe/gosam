@@ -141,6 +141,11 @@ contains
 
     write(6,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev b0db9e47)."
     write(logf,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev b0db9e47)."
+
+    if (any(isnan(blha_res))) then
+       write(logf,*) "NaN error!"
+       success = .false.
+    end if
     
     isuccess = .true.
 

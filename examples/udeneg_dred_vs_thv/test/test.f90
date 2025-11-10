@@ -53,6 +53,11 @@ call inspect_kinematics_dred(logf)
 call compute_gosam_result(vecs, scale2, gosam_amp_dred, gosam_amp_thv)
 call compute_reference_result(vecs, scale2, ref_amp_dred, ref_amp_thv)
 
+if (any(isnan(gosam_amp_dred)).or.any(isnan(gosam_amp_thv))) then
+   write(unit=logf,fmt="(A10)") "NaN error!"
+   success = .false.
+end if
+
 diff_dred = abs(rel_diff(gosam_amp_dred, ref_amp_dred))
 diff_thv = abs(rel_diff(gosam_amp_thv, ref_amp_thv))
 

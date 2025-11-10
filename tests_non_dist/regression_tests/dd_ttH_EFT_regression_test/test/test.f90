@@ -57,7 +57,7 @@ program test
          !print *, irp(ee,:)
          !print *, ref_irp(ee,:)
       end do
-
+      
       call check_reference(amp, irp, ref_amp, ref_irp)
       
       ! call generate_reference_output(ievt, amp, irp)
@@ -122,6 +122,11 @@ program test
      write(6,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
      write(logf,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
 
+      if (any(isnan(amp))) then
+         write(logf,*) "NaN error!"
+         success = .false.
+      end if
+     
      do ii = 1, 2
         select case(ii)
         case(1)
@@ -178,15 +183,15 @@ program test
         end do
      end do
 
-         if (success) then
-       write(logf,'(A15)') "@@@ SUCCESS @@@"
-    else
-       write(logf,'(A15)') "@@@ FAILURE @@@"
-    end if
+     if (success) then
+        write(logf,'(A15)') "@@@ SUCCESS @@@"
+     else
+        write(logf,'(A15)') "@@@ FAILURE @@@"
+     end if
 
-    close(unit=logf)
+     close(unit=logf)
     
-  end subroutine check_reference
+   end subroutine check_reference
    
    
    function rel_diff(a, b)

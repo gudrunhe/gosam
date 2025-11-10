@@ -44,6 +44,11 @@ call inspect_kinematics(logf)
 call compute_gosam_result(vecs, scale2, heli_amps_gosam)
 call compute_reference_result(vecs, scale2, heli_amps_ref)
 
+if (any(isnan(heli_amps_gosam))) then
+   write(unit=logf,fmt="(A10)") "NaN error!"
+   success = .false.
+end if
+
 do h = 0, 2
    if(h .eq. 0) then
       rdiff = abs(rel_diff(heli_amps_gosam(h), heli_amps_ref(h)))

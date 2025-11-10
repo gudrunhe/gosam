@@ -9,6 +9,7 @@ import os.path
 import sys
 import copy
 import re
+import itertools
 
 import golem.model
 import golem.model.expressions as ex
@@ -205,7 +206,7 @@ class Model:
         for v_index, ufo_vert in enumerate(self.all_vertices + self.all_CTvertices if self.useCT else self.all_vertices):
             ranks = set(ufo_vert.lorentz[l].rank for _, l, *_ in ufo_vert.couplings.keys())
             if len(ranks) > 1:
-                logger.warning(
+                logger.info(
                     "Ambiguous rank for vertex {}, splitting into {} vertices '{}_0' .. '{}_{}'".format(
                     ufo_vert.name,
                     len(ranks),
@@ -254,7 +255,7 @@ class Model:
         obsolete_ct_vertices = []
         k = 1
         for merged, original in mergings.items():
-            logger.warning(
+            logger.info(
                 (
                     f"Vertices {original} have same external legs, coupling orders and spin map. Merging them internally into: {merged}."
                 )

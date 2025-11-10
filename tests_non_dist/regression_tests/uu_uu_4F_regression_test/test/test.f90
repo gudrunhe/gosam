@@ -33,6 +33,11 @@ program test
 
     call get_reference(ref_amp)
 
+    if (isnan(amp)) then
+       write(logf,*) "NaN error!"
+       success = .false.
+    end if
+    
     diff = abs(rel_diff(amp, ref_amp))
 
     do ic = 1, 2

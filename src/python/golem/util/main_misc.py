@@ -796,6 +796,15 @@ def fill_config(conf):
             )
         sys.exit("GoSam terminated due to an error")
 
+    if "thv" in ext and (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+        logger.warning(
+              "You are using the tHV regularisation scheme and a UFO model. Note that in tHV a finite\n"
+            + "renormalisation of the non-singlet axial-vector current (-> gamma_5) is required. The\n"
+            + "corresponding counterterms are only available for the built-in models.\n"
+            + "=> If your process contains non-singlet axial-vector currents you will get a WRONG RESULT!\n"
+
+        )
+
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
         if ("ninja" not in conf["reduction_programs"]):

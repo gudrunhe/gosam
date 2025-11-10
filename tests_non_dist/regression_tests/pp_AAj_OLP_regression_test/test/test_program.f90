@@ -134,6 +134,11 @@ contains
 
     success = .true.
 
+    if (any(isnan(blha_res))) then
+       write(logf,*) "NaN error!"
+       success = .false.
+    end if
+    
     write(6,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
     write(logf,*) "Comparing against reference numbers produced with GoSam 3.0.0 (rev 3518ed0)."
     
