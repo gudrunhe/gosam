@@ -55,6 +55,11 @@ do ic = 1, 2
     write(ch,'(A58)') "----------------------------------------------------"
 end do
 
+if (isnan(gosam_amp(2))) then
+   write(unit=logf,fmt="(A10)") "NaN error!"
+   success = .false.
+end if
+
 diff = 2.0d0 * (ref_amp(1)-gosam_amp(2)) / (abs(ref_amp(1))+abs(gosam_amp(2)))
 
 if (diff .gt. eps) then
