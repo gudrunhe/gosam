@@ -468,4 +468,36 @@
 		<file src="meson.build" class="Kinematics"/>
 		<file src="generate_source.sh" class="Kinematics"/>
 	</directory>
+	
+	<directory src="subprojects">
+        <except if-internal="OLP_MODE"/>
+		<file src="avh_olo.wrap" class="Verbatim"/>
+		<file src="golem95.wrap" class="Verbatim"/>
+		<file src="ninja.wrap" class="Verbatim"/>
+		<directory src="packagefiles">
+		    <directory src="avh_olo">
+    		    <file src="create.py.patch" class="Verbatim"/>
+    			<file src="install_mod_files.py" class="Verbatim"/>
+    			<file src="meson.build" class="Verbatim"/>
+			</directory>
+			<directory src="ninja">
+    		    <file src="meson_options.txt" class="Verbatim"/>
+    			<file src="install_mod_files.py" class="Verbatim"/>
+    			<file src="meson.build" class="Verbatim"/>
+                <file src="types.hh.patch" class="Verbatim"/>
+                <directory src="src">
+                    <directory src="ninja">
+                        <file src="meson.build" class="Verbatim"/>
+                        <file src="ninja_config.h" class="Verbatim"/>
+                    </directory>
+                    <directory src="quadninja">
+                        <file src="ninja_config.h" class="Verbatim"/>
+                    </directory>
+                    <directory src="quadsources">
+                        <file src="meson.build" class="Verbatim"/>
+                    </directory>
+                </directory>
+            </directory>    
+		</directory>
+	</directory>
 </template>

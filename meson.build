@@ -30,7 +30,9 @@ if get_option('native')
     add_global_link_arguments('-march=native', language: ['fortran', 'c', 'cpp'])
 endif
 
-add_global_link_arguments('--disable-new-dtags', language: ['fortran', 'c', 'cpp'])
+if not (build_machine.system() == 'darwin')
+	add_global_link_arguments('--disable-new-dtags', language: ['fortran', 'c', 'cpp'])
+endif
 
 run_command(
     'wget',

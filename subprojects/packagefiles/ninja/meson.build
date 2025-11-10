@@ -64,6 +64,8 @@ ninja = both_libraries('ninja',
     )
 
 ninja_dep = declare_dependency(link_with: ninja)
+meson.override_dependency('ninja', ninja_dep)
+
 
 pkg.generate(ninja,
     subdirs: ninja_subdirs,

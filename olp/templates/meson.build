@@ -1,7 +1,7 @@
 project('GoSam_Process[% process_name assuffix=\_%]',
     'fortran',
     version:'1.0',
-    meson_version: '>=0.58.0',
+    meson_version: '>=0.63.0',
     default_options: [
         'buildtype=release',
         'b_asneeded=false',
@@ -12,32 +12,38 @@ project('GoSam_Process[% process_name assuffix=\_%]',
 pkg_env = ['PKG_CONFIG_PATH=[% pkg_config_path %]']
 
 dependencies = []
-dependencies += dependency('avh_olo')
-[% @if extension golem95 %]dependencies += dependency('golem95')[% @end @if %]
-[% @if extension ninja %]dependencies += dependency('ninja')[% @end @if %]
+dependencies += dependency('avh_olo', allow_fallback: true, static: true)
+[% @if extension golem95 %]dependencies += dependency('golem95', allow_fallback: true, static: true)[% @end @if %]
+[% @if extension ninja %]dependencies += dependency('ninja', allow_fallback: true, static: true)[% @end @if %]
 
 dep_ldflags = ''
 dep_cflags = ''
 pkg_config = find_program('pkg-config')
 
-foreach d: dependencies
-    dep_ldflags += ' ' + run_command(pkg_config, '--libs', d.name(), capture: true, check: true, env: pkg_env).stdout()
-    dep_ldflags += ' -Wl,-rpath,' + d.get_variable('libdir')
-    dep_cflags += ' ' + run_command(pkg_config, '--cflags', d.name(), capture: true, check: true, env: pkg_env).stdout()
-endforeach
-
-add_global_arguments('-w', language: 'fortran')
-add_global_arguments('-ffree-line-length-none', language: 'fortran')
-add_global_arguments('-march=[% meson.arch %]', language: 'fortran')
-if get_option('code_check')
-    add_global_arguments('-fcheck=all', language: 'fortran')
-    add_global_arguments('-fbacktrace', language: 'fortran')
+if not (dependencies[0].type_name() == 'internal') # Only if dependencies are not vendored
+  foreach d: dependencies
+      dep_ldflags += ' ' + run_command(pkg_config, '--libs', d.name(), capture: true, check: true, env: pkg_env).stdout()
+      dep_ldflags += ' -Wl,-rpath,' + d.get_variable('libdir')
+      dep_cflags += ' ' + run_command(pkg_config, '--cflags', d.name(), capture: true, check: true, env: pkg_env).stdout()
+  endforeach
+else
+  dep_ldflags += '-L' + get_option('libdir') + ' -lavh_olo'[% @if extension golem95 %] + ' -lgolem95'[%@end @if %][% @if extension ninja %] + ' -lninja'[% @end @if %]
+  dep_ldflags += ' ' + '-Wl,-rpath,' + get_option('libdir')
+  dep_cflags += '-I' + get_option('includedir') + '/avh_olo'[% @if extension golem95 %] + ' -I' + get_option('includedir') + '/golem95'[%@end @if %][% @if extension ninja %] + ' -I' + get_option('includedir') + '/ninja'[% @end @if %]
 endif
-add_global_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
+
+add_project_arguments('-w', language: 'fortran')
+add_project_arguments('-ffree-line-length-none', language: 'fortran')
+add_project_arguments('-march=[% meson.arch %]', language: 'fortran')
+if get_option('code_check')
+    add_project_arguments('-fcheck=all', language: 'fortran')
+    add_project_arguments('-fbacktrace', language: 'fortran')
+endif
+add_project_arguments([% @for options %extension%.fcflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %]  language: 'fortran')
 
-add_global_link_arguments('-march=[% meson.arch %]', language: 'fortran')
-add_global_link_arguments([% @for options %extension%.ldflags ignorecase=true %]'[% $_ %]'.split(' '),
+add_project_link_arguments('-march=[% meson.arch %]', language: 'fortran')
+add_project_link_arguments([% @for options %extension%.ldflags ignorecase=true %]'[% $_ %]'.split(' '),
 [% @end @for %] language: 'fortran')
 
 OLP_source = files('olp_module.f90')
@@ -74,3 +80,8 @@ configure_file(input: 'config.sh.in',
   install: true,
   install_dir: meson.current_source_dir()
   )
+
+gosam_olp_[% process_name asprefix=\_ %]dep = declare_dependency(
+  link_with: lib
+)
+meson.override_dependency('gosam_olp_[% process_name%]', gosam_olp_[% process_name asprefix=\_ %]dep)
