@@ -56,4 +56,34 @@
 		<file src="generate_source.sh" class="OLP" usedby="olp" executable="yes"/>
 		<file src="Makefile.source" class="OLP" usedby="olp"/>
 	</directory>
+	
+	<directory src="subprojects" usedby="olp">
+		<file src="avh_olo.wrap" class="Verbatim" usedby="olp"/>
+		<file src="golem95.wrap" class="Verbatim" usedby="olp"/>
+		<file src="ninja.wrap" class="Verbatim" usedby="olp"/>
+		<directory src="packagefiles" usedby="olp">
+		    <directory src="avh_olo" usedby="olp">
+    		    <file src="create.py.patch" class="Verbatim" usedby="olp"/>
+    			<file src="install_mod_files.py" class="Verbatim" usedby="olp"/>
+    			<file src="meson.build" class="Verbatim" usedby="olp"/>
+			</directory>
+			<directory src="ninja" usedby="olp">
+    		    <file src="meson_options.txt" class="Verbatim" usedby="olp"/>
+    			<file src="install_mod_files.py" class="Verbatim" usedby="olp"/>
+    			<file src="meson.build" class="Verbatim" usedby="olp"/>
+                <directory src="src" usedby="olp">
+                    <directory src="ninja" usedby="olp">
+                        <file src="meson.build" class="Verbatim" usedby="olp"/>
+                        <file src="ninja_config.h" class="Verbatim" usedby="olp"/>
+                    </directory>
+                    <directory src="quadninja" usedby="olp">
+                        <file src="ninja_config.h" class="Verbatim" usedby="olp"/>
+                    </directory>
+                    <directory src="quadsources" usedby="olp">
+                        <file src="meson.build" class="Verbatim" usedby="olp"/>
+                    </directory>
+                </directory>
+            </directory>    
+		</directory>
+	</directory>
 </template>
