@@ -4,7 +4,6 @@ source_filename=ninja-latest.tar.gz
 directory=ninja-1.2.0
 source_hash=8907b22454f96fea3ebeeb85f8c17c0d0cc21c281c1b6603f16c7b1583226a62
 patch_directory=ninja
-diff_files = ninja/types.hh.patch
 
 [provide]
 dependency_names = ninja
