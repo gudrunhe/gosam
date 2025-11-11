@@ -121,6 +121,11 @@ def generate_process_files(conf, from_scratch=False):
     else:
         props.setProperty("write_vanishing_amplitude", "false")
 
+    if conf.getBooleanProperty("generate_eft_loopind"):
+        props.setProperty("generate_eft_loopind","true")
+    else:
+        props.setProperty("generate_eft_loopind","false")
+
     conf["__info.count.tree__"] = len(keep_tree)
     conf["__info.count.virt__"] = len(keep_virt)
     conf["__info.count.docu__"] = len(keep_vtot)
@@ -1000,6 +1005,8 @@ def run_analyzer(path, conf, in_particles, out_particles):
                     )
                 )
                 sys.exit("GoSam terminated due to an error")
+        if len(keep_tree) == 0 and generate_eftli:
+            conf.setProperty("generate_eft_loopind","false")
     else:
         keep_tree = []
         tree_signs = {}

@@ -1,0 +1,9 @@
+[wrap-git]
+url=https://bitbucket.org/hameren/oneloop.git
+revision=v3.7.2
+depth=1
+patch_directory=avh_olo
+diff_files=avh_olo/create.py.patch
+
+[provide]
+dependency_names = avh_olo
