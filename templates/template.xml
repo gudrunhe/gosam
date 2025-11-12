@@ -473,7 +473,6 @@
     		    <file src="meson_options.txt" class="Verbatim"/>
     			<file src="install_mod_files.py" class="Verbatim"/>
     			<file src="meson.build" class="Verbatim"/>
-                <file src="types.hh.patch" class="Verbatim"/>
                 <directory src="src">
                     <directory src="ninja">
                         <file src="meson.build" class="Verbatim"/>

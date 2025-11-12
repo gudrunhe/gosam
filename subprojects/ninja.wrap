@@ -9,7 +9,6 @@ url = https://github.com/peraro/ninja/
 revision = HEAD
 depth = 1
 patch_directory=ninja
-#diff_files = ninja/types.hh.patch
 
 [provide]
 dependency_names = ninja
