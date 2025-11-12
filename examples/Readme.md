@@ -159,7 +159,7 @@ It defines the following commands:
 
 
 - `make runselected`: \
-   This command runs a selection of tests to be specified in th Makefile.
+   This command runs a selection of tests to be specified in the Makefile.
 
 
 - `make check_selection`: \

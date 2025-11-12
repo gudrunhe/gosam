@@ -887,7 +887,7 @@ def workflow(conf):
             rp = os.path.relpath(path)
             if not os.path.sep in rp:
                 os.mkdir(rp)
-                logger.warning("Process path %r created." % path)
+                logger.info("Process path %r created." % path)
         except OSError as err:
             raise GolemConfigError("Could not create process path: %r\r%s" % (path, err))
 
