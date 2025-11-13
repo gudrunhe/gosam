@@ -12,9 +12,9 @@ project('GoSam_Process[% process_name assuffix=\_%]',
 pkg_env = ['PKG_CONFIG_PATH=[% pkg_config_path %]']
 
 dependencies = []
-dependencies += dependency('avh_olo', allow_fallback: true, static: true)
-[% @if extension golem95 %]dependencies += dependency('golem95', allow_fallback: true, static: true)[% @end @if %]
-[% @if extension ninja %]dependencies += dependency('ninja', allow_fallback: true, static: true)[% @end @if %]
+dependencies += dependency('avh_olo', allow_fallback: true)
+[% @if extension golem95 %]dependencies += dependency('golem95', allow_fallback: true)[% @end @if %]
+[% @if extension ninja %]dependencies += dependency('ninja', allow_fallback: true)[% @end @if %]
 
 dep_ldflags = ''
 dep_cflags = ''

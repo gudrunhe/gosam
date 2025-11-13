@@ -264,7 +264,7 @@ class Model:
                 newv.lorentz = combv["lorentz"]
                 newv.couplings = combv["couplings"]
 
-                logger.warning(
+                logger.info(
                             (
                                 "Vertices %s have same external legs, coupling orders and rank. Merging them internally into: %s."
                                 % (', '.join(map(str,jv)),newv.name)
@@ -811,7 +811,7 @@ class Model:
         for el in order_names:
             if not (el in orders):
                 logger.critical(
-                    "logger.warning: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(
+                    "logger.critical: '{0}' specified in 'order_names' is not present in UFO model. This can cause dangerous and hard to spot errors ==> abort.".format(
                         el
                     )
                 )
@@ -950,7 +950,7 @@ class Model:
 
                     if not vfunctions in vertorders:
                         if len(vertorders) > 0:
-                            logger.warning(
+                            logger.info(
                                 (
                                     "CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
                                     % (v.name, vertorders, vfunctions)
@@ -1301,9 +1301,9 @@ class Model:
                         cplnames[vertorders.index(vorders)].append(coupling.name)
                     else:
                         if len(vertorders) > 0:
-                            logger.warning(
+                            logger.info(
                                 (
-                                    "Vertex %s has ambiguous structure of powers:\n %s and %s.\n "
+                                    "CTVertex %s has ambiguous structure of powers:\n %s and %s.\n "
                                     % (v.name, vertorders, vorders)
                                 )
                                 + "I will split it up."
