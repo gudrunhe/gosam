@@ -62,13 +62,49 @@ def generate_process_files(conf, from_scratch=False):
 
     in_particles, out_particles = generate_particle_lists(conf)
 
-    helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
-
+    logger.info("Running FeynGraph")
     lo_diagrams, nlo_diagrams, ct_diagrams = run_feyngraph(
             list(map(lambda p: str(p), in_particles)),
             list(map(lambda p: str(p), out_particles)),
             conf
         )
+    logger.info("FeynGraph finished")
+
+    # ToDo: probably have to extract the diagram vertices BEFORE running the analyzer, 
+    # because we have to update the rank information -> order should be 
+    #   1.) initial loading of model, write model.py only (not model.hh)
+    #   2.) run feyngraph
+    #   3.) analyze vertices
+    #   4.) reload model, reduce vertex and coupling list, rewrite model.py, write model.hh
+    #   5.) analyzer
+    #   6.) templates
+    # note that in this way we still end up with more vertices than we actually need, 
+    # because the filters are applied after extraction of the vertices
+    
+    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
+        keep_vertices = extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
+        if len(keep_vertices) > 0:
+            logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
+        else:
+            logger.warning(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
+        model_path = conf["model_path"]
+        golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
+        mdl = golem.model.feynrules.Model(
+            model_path, 
+            golem.model.MODEL_OPTIONS, 
+            reduce_model=True,
+            final_import=True
+            )
+        order_names = sorted(conf.getProperty(golem.properties.order_names))
+        if order_names == [""]:
+            order_names = []
+        MODEL_LOCAL = golem.util.constants.MODEL_LOCAL
+        mdl.store(path, MODEL_LOCAL, order_names)
+        # Remove model.py from cache so it will be reloaded:
+        if MODEL_LOCAL in conf.cache:
+            del conf.cache[MODEL_LOCAL]
+
+    helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
     # Run the new analyzer:
     logger.info("Analyzing diagrams")
@@ -85,6 +121,8 @@ def generate_process_files(conf, from_scratch=False):
         treecache,
         ctcache,
     ) = run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles)
+
+    logger.info("Analyzer finished")    
 
     props.setProperty("topolopy.keep.tree", ",".join(map(str, keep_tree)))
     props.setProperty("topolopy.keep.virt", ",".join(map(str, keep_virt)))
@@ -883,7 +921,7 @@ def workflow(conf):
     # zero property: convert masses and width defined through PDG code to internal parameter name
     # (depends on model, so model.py must have been created already)
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-    if not conf["__OLP_MODE__"]:
+    if not conf.getBooleanProperty("__OLP_MODE__"):
         model = golem.util.tools.getModel(conf)
         orig_zero = conf.getListProperty("zero")
         new_zero = []
@@ -920,7 +958,7 @@ def workflow(conf):
     # property to avoid erroneous code generation. Otherwise the user has to remember
     # to add these cases to 'zero' manually.
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-    if not conf["__OLP_MODE__"] and not conf.getBooleanProperty("massive_light_fermions"):
+    if not conf.getBooleanProperty("__OLP_MODE__") and not conf.getBooleanProperty("massive_light_fermions"):
         zeros = conf.getListProperty("zero")
         for p in model.particles.values():
             if p.isMassive(zeros):
@@ -1064,3 +1102,47 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
         treecache,
         ctcache,
     )
+
+
+def extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
+    generate_lo = conf.getBooleanProperty("generate_tree_diagrams")
+    generate_virt = conf.getBooleanProperty("generate_loop_diagrams")
+    generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
+    generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
+
+    keep_vertices = set()    
+
+    if generate_lo or generate_eftli:
+        tree_vertices = golem.util.tools.extract_vertices(lo_diagrams)
+        keep_vertices.update(tree_vertices)
+    if generate_virt:
+        loop_vertices = golem.util.tools.extract_vertices(nlo_diagrams)
+        keep_vertices.update(loop_vertices)
+    if generate_ct:
+        ct_vertices = golem.util.tools.extract_vertices(ct_diagrams)
+        keep_vertices.update(ct_vertices)
+
+    addv = set()
+    delv = set()
+    for v in keep_vertices:
+        if v in golem.model.mergings.keys():
+            addv.update(set(golem.model.mergings[v]))
+            delv.add(v)
+    logger.debug(f"Merged vertices: {delv} -> {addv}")
+    #keep_vertices -= delv
+    keep_vertices.update(addv)
+
+    addv = set()
+    delv = set()
+    for v in keep_vertices:
+        # this works because we know split vertices are appended by _<int>
+        # would be nicer to have a feyngraph rountine returning the splitting dict
+        vparent = v[:v.rindex('_')]
+        if golem.model.feyngraph_model.splitting(vparent) is not None:
+            addv.add(vparent)
+            delv.add(v)
+    logger.debug(f"Split vertices: {delv} -> {addv}")
+    #keep_vertices -= delv
+    keep_vertices.update(addv)
+
+    return keep_vertices

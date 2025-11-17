@@ -98,27 +98,51 @@ unprefixed_symbols = [sym_Nf, sym_Nfgen, sym_Nfrat]
 
 
 class Model:
-    def __init__(self, model_path, model_options=None):
+    def __init__(self, model_path, model_options=None, reduce_model=False, final_import=True):
         self.model_options = model_options or dict()
+        self.reduce_model = reduce_model
+        self.final_import = final_import
 
-        sys.path.append(model_path)
-        parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
-        norm_path = os.path.normpath(model_path)
-        if norm_path.startswith(parent_path):
-            mname = norm_path[len(parent_path) :].replace(os.sep, "")
+        mod, mname = load_ufo_files(model_path)
+
+        self.useCT = False
+        if self.reduce_model:
+            keep_couplings = set()
+            self.all_vertices = [v for v in mod.all_vertices if v.name in model_options["keep_vertices"]]
+            for v in self.all_vertices:
+                keep_couplings.update(set(v.couplings.values()))
+            try:
+                self.all_CTvertices = [v for v in mod.all_CTvertices if v.name in model_options["keep_vertices"]]
+                for v in self.all_CTvertices:
+                    keep_couplings.update(set(v.couplings.values()))
+                self.useCT = True
+            except AttributeError:
+                pass
+            self.all_couplings = list(keep_couplings)
+            if len(keep_couplings) > 0:
+                logger.info(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings: {keep_couplings}")
+            else:
+                logger.warning(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings -> Something might have gone wrong")
         else:
-            mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else "")))
-        if os.altsep is not None:
-            mname = mname.replace(os.altsep, "")
-        search_path = [parent_path]
+            self.all_vertices = mod.all_vertices
+            try:
+                self.all_CTvertices = mod.all_CTvertices
+                self.useCT = True
+            except AttributeError:
+                pass
+            self.all_couplings = mod.all_couplings
 
-        logger.info("Trying to import FeynRules model '%s' from %s" % (mname, search_path[0]))
-        mod = load_ufo_files(mname, search_path)
+        self.all_parameters = mod.all_parameters
+        try:
+            self.all_CTparameters = mod.all_CTparameters
+        except AttributeError:
+            if self.useCT:
+                logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
+                sys.exit("GoSam terminated due to an error")
+            else:
+                pass
 
         self.all_particles = mod.all_particles
-        self.all_couplings = mod.all_couplings
-        self.all_parameters = mod.all_parameters
-        self.all_vertices = mod.all_vertices
         self.all_lorentz = mod.all_lorentz
         self.model_orig = model_path
         self.model_name = mname
@@ -137,50 +161,15 @@ class Model:
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
 
-        self.useCT = False
-        try:
-            self.all_CTvertices = mod.all_CTvertices
-            self.useCT = True
-        except AttributeError:
-            pass
+        if not self.reduce_model: #not self.final_import:
+            fg_model = fg.Model.from_ufo(model_path)
 
-        try:
-            self.all_CTparameters = mod.all_CTparameters
-        except AttributeError:
-            if self.useCT:
-                logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
-                sys.exit("GoSam terminated due to an error")
-            else:
-                pass
-
-        fg_model = fg.Model.from_ufo(model_path)
-
-        # ################################################
-        # Apply the vertex splitting of FeynGraph to self
-        # ################################################
-        new_vertices = []
-        obsolete_vertices = []
-        for i, v in enumerate(self.all_vertices):
-            if (splitting := fg_model.splitting(v.name)) is not None:
-                obsolete_vertices.append(i)
-                for name, couplings in splitting.items():
-                    newv = copy.deepcopy(v)
-                    newv.name = name
-                    newv.color = list(set(v.color[c] for c, _ in couplings))
-                    newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
-                    newv.couplings = {
-                        (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
-                        for c in couplings
-                    }
-                    new_vertices.append(newv)
-        for i in sorted(obsolete_vertices, reverse=True):
-            self.all_vertices.pop(i)
-        self.all_vertices.extend(new_vertices)
-
-        if self.useCT:
+            # ################################################
+            # Apply the vertex splitting of FeynGraph to self
+            # ################################################
             new_vertices = []
             obsolete_vertices = []
-            for i, v in enumerate(self.all_CTvertices):
+            for i, v in enumerate(self.all_vertices):
                 if (splitting := fg_model.splitting(v.name)) is not None:
                     obsolete_vertices.append(i)
                     for name, couplings in splitting.items():
@@ -194,200 +183,224 @@ class Model:
                         }
                         new_vertices.append(newv)
             for i in sorted(obsolete_vertices, reverse=True):
-                self.all_CTvertices.pop(i)
-            self.all_CTvertices.extend(new_vertices)
-
-        # ################################################################################
-        # Add rank as coupling order to FeynGraph vertices and split vertices if necessary
-        # ################################################################################
-        new_vertices = []
-        new_ct_vertices = []
-        obsolete_vertices = []
-        for v_index, ufo_vert in enumerate(self.all_vertices + self.all_CTvertices if self.useCT else self.all_vertices):
-            ranks = set(ufo_vert.lorentz[l].rank for _, l, *_ in ufo_vert.couplings.keys())
-            if len(ranks) > 1:
-                logger.info(
-                    "Ambiguous rank for vertex {}, splitting into {} vertices '{}_0' .. '{}_{}'".format(
-                    ufo_vert.name,
-                    len(ranks),
-                    ufo_vert.name,
-                    ufo_vert.name,
-                    len(ranks) - 1
-                ))
-                fg_model.split_vertex(ufo_vert.name, [f"{ufo_vert.name}_{i}" for i in range(len(ranks))])
-                for i, unique_rank in enumerate(ranks):
-                    lorentz_indices = [i for i, l in enumerate(ufo_vert.lorentz) if l.rank == unique_rank]
-                    newv = copy.deepcopy(ufo_vert)
-                    newv.name = f"{ufo_vert.name}_{i}"
-                    newv.lorentz = [ufo_vert.lorentz[j] for j in lorentz_indices]
-                    newv.couplings = {
-                        (c, newv.lorentz.index(ufo_vert.lorentz[l])): v
-                        for (c, l), v in ufo_vert.couplings.items() if ufo_vert.lorentz[l].rank == unique_rank
-                    }
-                    newv.rank = {unique_rank}
-                    fg_model.add_coupling(newv.name, "RK", unique_rank)
-                    if hasattr(ufo_vert, "type"):
-                        new_ct_vertices.append(newv)
-                    else:
-                        new_vertices.append(newv)
-                obsolete_vertices.append(v_index)
-            else:
-                rank = ranks.pop()
-                fg_model.add_coupling(ufo_vert.name, "RK", rank)
-                ufo_vert.rank = {rank}
-        for i in sorted(obsolete_vertices, reverse=True):
-            if i <= len(self.all_vertices):
                 self.all_vertices.pop(i)
-            else:
-                self.all_CTvertices.pop(i)
-        self.all_vertices.extend(new_vertices)
-        if self.useCT:
-            self.all_CTvertices.extend(new_ct_vertices)
+            self.all_vertices.extend(new_vertices)
 
-        # ######################################################################
-        # Let FeynGraph merge the equivalent vertices and apply the same to self
-        # ######################################################################
-        mergings = fg_model.merge_vertices()
+            if self.useCT:
+                new_vertices = []
+                obsolete_vertices = []
+                for i, v in enumerate(self.all_CTvertices):
+                    if (splitting := fg_model.splitting(v.name)) is not None:
+                        obsolete_vertices.append(i)
+                        for name, couplings in splitting.items():
+                            newv = copy.deepcopy(v)
+                            newv.name = name
+                            newv.color = list(set(v.color[c] for c, _ in couplings))
+                            newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
+                            newv.couplings = {
+                                (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
+                                for c in couplings
+                            }
+                            new_vertices.append(newv)
+                for i in sorted(obsolete_vertices, reverse=True):
+                    self.all_CTvertices.pop(i)
+                self.all_CTvertices.extend(new_vertices)
 
-        new_vertices = []
-        new_ct_vertices = []
-        obsolete_vertices = []
-        obsolete_ct_vertices = []
-        k = 1
-        for merged, original in mergings.items():
-            logger.info(
-                (
-                    f"Vertices {original} have same external legs, coupling orders and spin map. Merging them internally into: {merged}."
-                )
-            )
-            indices = [i for i, v in enumerate(self.all_vertices) if v.name in original]
-            if len(indices) != 0:
-                color = list(set([c for i in indices for c in self.all_vertices[i].color]))
-                lorentz = list(set(l for i in indices for l in self.all_vertices[i].lorentz))
-                couplings = {}
-                for i in indices:
-                    current_couplings =  {(
-                             color.index(self.all_vertices[i].color[c]),
-                             lorentz.index(self.all_vertices[i].lorentz[l])
-                        ): value for (c, l), value in self.all_vertices[i].couplings.items()
-                    }
-                    for coord, coupling in current_couplings.items():
-                        if coord in couplings:
-                            couplings[coord].append(coupling)
+            # ################################################################################
+            # Add rank as coupling order to FeynGraph vertices and split vertices if necessary
+            # ################################################################################
+            new_vertices = []
+            new_ct_vertices = []
+            obsolete_vertices = []
+            for v_index, ufo_vert in enumerate(self.all_vertices + self.all_CTvertices if self.useCT else self.all_vertices):
+                ranks = set(ufo_vert.lorentz[l].rank for _, l, *_ in ufo_vert.couplings.keys())
+                if len(ranks) > 1:
+                    logger.info(
+                        "Ambiguous rank for vertex {}, splitting into {} vertices '{}_0' .. '{}_{}'".format(
+                        ufo_vert.name,
+                        len(ranks),
+                        ufo_vert.name,
+                        ufo_vert.name,
+                        len(ranks) - 1
+                    ))
+                    fg_model.split_vertex(ufo_vert.name, [f"{ufo_vert.name}_{i}" for i in range(len(ranks))])
+                    for i, unique_rank in enumerate(ranks):
+                        lorentz_indices = [i for i, l in enumerate(ufo_vert.lorentz) if l.rank == unique_rank]
+                        newv = copy.deepcopy(ufo_vert)
+                        newv.name = f"{ufo_vert.name}_{i}"
+                        newv.lorentz = [ufo_vert.lorentz[j] for j in lorentz_indices]
+                        newv.couplings = {
+                            (c, newv.lorentz.index(ufo_vert.lorentz[l])): v
+                            for (c, l), v in ufo_vert.couplings.items() if ufo_vert.lorentz[l].rank == unique_rank
+                        }
+                        newv.rank = {unique_rank}
+                        fg_model.add_coupling(newv.name, "RK", unique_rank)
+                        if hasattr(ufo_vert, "type"):
+                            new_ct_vertices.append(newv)
                         else:
-                            couplings[coord] = [coupling]
-                # Merge couplings where necessary
-                for coord, coupling_list in couplings.items():
-                    if len(coupling_list) == 1:
-                        couplings[coord] = coupling_list[0]
-                    else:
-                        newcoupling = copy.deepcopy(coupling_list[0])
-                        newcoupling.name = f"GC_M_{k}"
-                        newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
-                        self.all_couplings.append(newcoupling)
-                        couplings[coord] = newcoupling
-                        k += 1
-                # Create new, merged vertex
-                newv = copy.deepcopy(self.all_vertices[indices[0]])
-                newv.name = merged
-                newv.color = color
-                newv.lorentz = lorentz
-                newv.couplings = couplings
-                obsolete_vertices.extend(indices)
-                new_vertices.append(newv)
-            else:
-                indices = [i for i, v in enumerate(self.all_CTvertices) if v.name in original]
-                color = list(set([c for i in indices for c in self.all_CTvertices[i].color]))
-                lorentz = list(set(l for i in indices for l in self.all_CTvertices[i].lorentz))
-                couplings = {}
-                for i in indices:
-                    current_couplings = {(
-                                             color.index(self.all_CTvertices[i].color[c]),
-                                             lorentz.index(self.all_CTvertices[i].lorentz[l])
-                                         ): value for (c, l), value in self.all_CTvertices[i].couplings.items()
-                                         }
-                    for coord, coupling in current_couplings.items():
-                        if coord in couplings:
-                            couplings[coord].append(coupling)
-                        else:
-                            couplings[coord] = [coupling]
-                # Merge couplings where necessary
-                for coord, coupling_list in couplings.items():
-                    if len(coupling_list) == 1:
-                        couplings[coord] = coupling_list[0]
-                    else:
-                        newcoupling = copy.deepcopy(coupling_list[0])
-                        newcoupling.name = f"CTGC_M_{k}"
-                        newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
-                        self.all_couplings.append(newcoupling)
-                        couplings[coord] = newcoupling
-                        k += 1
-                newv = copy.deepcopy(self.all_CTvertices[indices[0]])
-                newv.name = merged
-                newv.color = color
-                newv.lorentz = lorentz
-                newv.couplings = couplings
-                obsolete_ct_vertices.extend(indices)
-                new_ct_vertices.append(newv)
-
-        for i in sorted(obsolete_vertices, reverse=True):
-            self.all_vertices.pop(i)
-        self.all_vertices.extend(new_vertices)
-        if self.useCT:
-            for i in sorted(obsolete_ct_vertices, reverse=True):
-                self.all_CTvertices.pop(i)
-            self.all_CTvertices.extend(new_ct_vertices)
-
-        if self.useCT:
-            self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
-        else:
-            self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
-
-        # the following code block splits all_couplings into
-        # two separate lists of CT and non-CT couplings
-        # also fills self.ctfunctions used write_python_file
-        if self.useCT:
-            self.all_CTcouplings = []
-            self.ctfunctions = {}
-            self.cttypes = {}
-            for a in dir(mod.CT_vertices.C):
-                b = getattr(mod.CT_vertices.C, a)
-                if type(b).__name__ == "Coupling":
-                    self.all_CTcouplings.append(b)
-                    if b in self.all_couplings:
-                        self.all_couplings.remove(b)
-            # construct the CT dictionary representing the Laurent expansion
-            for c in self.all_CTcouplings:
-                name = self.prefix + c.name.replace("_", "")
-                self.ctfunctions[name] = {}
-                self.cttypes[name] = "C"
-                if isinstance(c.value, dict):
-                    # the value of the coupling is a dictionary representing the Laurent expansion
-                    # => split const from log terms, if present
-                    for ctpole in list(c.value.keys()):
-                        ctcoeff = c.value[ctpole]
-                        self.ctfunctions[name][ctpole] = ctcoeff
-                elif isinstance(c.value, str):
-                    # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
-                    CTparams = [
-                        ctp for ctp in self.all_CTparameters if ctp.name in re.split(r"\(|\)|\+|\*|-|/", c.value)
-                    ]
-                    CTpoles = set()
-
-                    for ctparam in CTparams:
-                        CTpoles = CTpoles.union(set(ctparam.value.keys()))
-
-                    for ctpole in CTpoles:
-                        ctcoeff = c.value
-                        for ctparam in CTparams:
-                            if ctpole in ctparam.value:
-                                ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole])
-                        self.ctfunctions[name][ctpole] = ctcoeff
+                            new_vertices.append(newv)
+                    obsolete_vertices.append(v_index)
                 else:
-                    logger.critical("CT coupling %s is neither a dict nor str!" % c)
-                    sys.exit("GoSam terminated due to an error")
+                    rank = ranks.pop()
+                    fg_model.add_coupling(ufo_vert.name, "RK", rank)
+                    ufo_vert.rank = {rank}
+            for i in sorted(obsolete_vertices, reverse=True):
+                if i <= len(self.all_vertices):
+                    self.all_vertices.pop(i)
+                else:
+                    self.all_CTvertices.pop(i)
+            self.all_vertices.extend(new_vertices)
+            if self.useCT:
+                self.all_CTvertices.extend(new_ct_vertices)
 
-        golem.model.feyngraph_model = fg_model
+            # ######################################################################
+            # Let FeynGraph merge the equivalent vertices and apply the same to self
+            # ######################################################################
+            mergings = fg_model.merge_vertices()
+
+            new_vertices = []
+            new_ct_vertices = []
+            obsolete_vertices = []
+            obsolete_ct_vertices = []
+            k = 1
+            for merged, original in mergings.items():
+                logger.info(
+                    (
+                        f"Vertices {original} have same external legs, coupling orders and spin map. Merging them internally into: {merged}."
+                    )
+                )
+                indices = [i for i, v in enumerate(self.all_vertices) if v.name in original]
+                if len(indices) != 0:
+                    color = list(set([c for i in indices for c in self.all_vertices[i].color]))
+                    lorentz = list(set(l for i in indices for l in self.all_vertices[i].lorentz))
+                    couplings = {}
+                    for i in indices:
+                        current_couplings =  {(
+                                 color.index(self.all_vertices[i].color[c]),
+                                 lorentz.index(self.all_vertices[i].lorentz[l])
+                            ): value for (c, l), value in self.all_vertices[i].couplings.items()
+                        }
+                        for coord, coupling in current_couplings.items():
+                            if coord in couplings:
+                                couplings[coord].append(coupling)
+                            else:
+                                couplings[coord] = [coupling]
+                    # Merge couplings where necessary
+                    for coord, coupling_list in couplings.items():
+                        if len(coupling_list) == 1:
+                            couplings[coord] = coupling_list[0]
+                        else:
+                            newcoupling = copy.deepcopy(coupling_list[0])
+                            newcoupling.name = f"GC_M_{k}"
+                            newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                            self.all_couplings.append(newcoupling)
+                            couplings[coord] = newcoupling
+                            k += 1
+                    # Create new, merged vertex
+                    newv = copy.deepcopy(self.all_vertices[indices[0]])
+                    newv.name = merged
+                    newv.color = color
+                    newv.lorentz = lorentz
+                    newv.couplings = couplings
+                    obsolete_vertices.extend(indices)
+                    new_vertices.append(newv)
+                else:
+                    indices = [i for i, v in enumerate(self.all_CTvertices) if v.name in original]
+                    color = list(set([c for i in indices for c in self.all_CTvertices[i].color]))
+                    lorentz = list(set(l for i in indices for l in self.all_CTvertices[i].lorentz))
+                    couplings = {}
+                    for i in indices:
+                        current_couplings = {(
+                                                 color.index(self.all_CTvertices[i].color[c]),
+                                                 lorentz.index(self.all_CTvertices[i].lorentz[l])
+                                             ): value for (c, l), value in self.all_CTvertices[i].couplings.items()
+                                             }
+                        for coord, coupling in current_couplings.items():
+                            if coord in couplings:
+                                couplings[coord].append(coupling)
+                            else:
+                                couplings[coord] = [coupling]
+                    # Merge couplings where necessary
+                    for coord, coupling_list in couplings.items():
+                        if len(coupling_list) == 1:
+                            couplings[coord] = coupling_list[0]
+                        else:
+                            newcoupling = copy.deepcopy(coupling_list[0])
+                            newcoupling.name = f"CTGC_M_{k}"
+                            newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                            self.all_couplings.append(newcoupling)
+                            couplings[coord] = newcoupling
+                            k += 1
+                    newv = copy.deepcopy(self.all_CTvertices[indices[0]])
+                    newv.name = merged
+                    newv.color = color
+                    newv.lorentz = lorentz
+                    newv.couplings = couplings
+                    obsolete_ct_vertices.extend(indices)
+                    new_ct_vertices.append(newv)
+
+            for i in sorted(obsolete_vertices, reverse=True):
+                self.all_vertices.pop(i)
+            self.all_vertices.extend(new_vertices)
+            if self.useCT:
+                for i in sorted(obsolete_ct_vertices, reverse=True):
+                    self.all_CTvertices.pop(i)
+                self.all_CTvertices.extend(new_ct_vertices)
+
+            if self.useCT:
+                self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
+            else:
+                self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
+
+            golem.model.feyngraph_model = fg_model
+            golem.model.mergings = mergings
+
+        if self.final_import:
+            # the following code block splits all_couplings into
+            # two separate lists of CT and non-CT couplings
+            # also fills self.ctfunctions used write_python_file
+            if self.useCT:
+                self.all_CTcouplings = []
+                self.ctfunctions = {}
+                self.cttypes = {}
+                for ctv in self.all_CTvertices:
+                    for ctc in ctv.couplings.values():
+                        if self.reduce_model and ctc not in keep_couplings:
+                            continue
+                        self.all_CTcouplings.append(ctc)
+                        if ctc in self.all_couplings:
+                            self.all_couplings.remove(ctc)
+                # construct the CT dictionary representing the Laurent expansion
+                for c in self.all_CTcouplings:
+                    name = self.prefix + c.name.replace("_", "")
+                    self.ctfunctions[name] = {}
+                    self.cttypes[name] = "C"
+                    if isinstance(c.value, dict):
+                        # the value of the coupling is a dictionary representing the Laurent expansion
+                        # => split const from log terms, if present
+                        for ctpole in list(c.value.keys()):
+                            ctcoeff = c.value[ctpole]
+                            self.ctfunctions[name][ctpole] = ctcoeff
+                    elif isinstance(c.value, str):
+                        # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
+                        CTparams = [
+                            ctp for ctp in self.all_CTparameters if ctp.name in re.split(r"\(|\)|\+|\*|-|/", c.value)
+                        ]
+                        CTpoles = set()
+
+                        for ctparam in CTparams:
+                            CTpoles = CTpoles.union(set(ctparam.value.keys()))
+
+                        for ctpole in CTpoles:
+                            ctcoeff = c.value
+                            for ctparam in CTparams:
+                                if ctpole in ctparam.value:
+                                    ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole])
+                            self.ctfunctions[name][ctpole] = ctcoeff
+                    else:
+                        logger.critical("CT coupling %s is neither a dict nor str!" % c)
+                        sys.exit("GoSam terminated due to an error")
+
         golem.model.global_model = self
 
     def write_python_file(self, f):
@@ -498,15 +511,8 @@ class Model:
         parameters = {}
         functions = {}
         types = {}
-        parameterct = {}
         slha_locations = {}
         for p in self.all_parameters:
-            #  new: collect all the new counterterm pieces (if there are any)
-            try:
-                # use the name (p.name) or the object in the dictionary
-                parameterct[p] = p.counterterm
-            except AttributeError:
-                pass
             name = self.prefix + p.name.replace("_", "undrscr")
             if p.nature == "external":
                 parameters[name] = p.value
@@ -546,98 +552,100 @@ class Model:
                     parameters[real_key] = sval
                 except ValueError:
                     logger.warning("Model option %s=%r not in allowed range.\n" % (key, value) + "Option ignored")
-        specials = {}
-        for expr in shortcut_functions:
-            specials[str(expr)] = expr
-        for expr in unprefixed_symbols:
-            specials[str(expr)] = expr
+        if self.final_import:            
+            specials = {}
+            for expr in shortcut_functions:
+                specials[str(expr)] = expr
+            for expr in unprefixed_symbols:
+                specials[str(expr)] = expr
 
-        parser = ex.ExpressionParser(**specials)
+            parser = ex.ExpressionParser(**specials)
 
-        for c in self.all_couplings:
-            name = self.prefix + c.name.replace("_", "")
-            functions[name] = c.value
-            types[name] = "C"
+            for c in self.all_couplings:
+                name = self.prefix + c.name.replace("_", "")
+                functions[name] = c.value
+                types[name] = "C"
 
-        logger.info("      Generating function list ...")
-        f.write("functions = {")
-        fcounter = [0]
-        fsubs = {}
-        is_first = True
-        for name, value in list(functions.items()):
-            expr = parser.compile(value)
-            for fn in cmath_functions:
-                expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
-            expr = expr.prefixSymbolsWith(self.prefix)
-            expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-            expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
-            expr = expr.algsubs(sym_abs, abs_)
-
-            if is_first:
-                is_first = False
-                f.write("\n")
-            else:
-                f.write(",\n")
-            f.write("\t%r: " % name)
-            f.write("'")
-            expr.write(f)
-            f.write("'")
-        f.write("\n}\n\n")
-
-        if self.useCT:
-            types.update(self.cttypes)
-
-            logger.info("      Generating counter term function list ...")
-            f.write("ctfunctions = {")
+            logger.info("      Generating function list ...")
+            f.write("functions = {")
+            fcounter = [0]
+            fsubs = {}
             is_first = True
-            for name, value in self.ctfunctions.items():
+            for name, value in list(functions.items()):
+                expr = parser.compile(value)
+                for fn in cmath_functions:
+                    expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
+                expr = expr.prefixSymbolsWith(self.prefix)
+                expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+                expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                expr = expr.algsubs(sym_abs, abs_)
+
                 if is_first:
                     is_first = False
                     f.write("\n")
                 else:
                     f.write(",\n")
                 f.write("\t%r: " % name)
-                is_firstcf = True
-                for pl, cf in value.items():
-                    expr = parser.compile(cf)
-                    for fn in cmath_functions:
-                        expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
-                    expr = expr.prefixSymbolsWith(self.prefix)
-                    expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-                    expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
-                    expr = expr.algsubs(sym_abs, abs_)
-
-                    if is_firstcf:
-                        is_firstcf = False
-                        f.write("{\n")
-                    else:
-                        f.write(",\n")
-                    f.write("\t\t%r: " % pl)
-                    f.write("'")
-                    expr.write(f)
-                    f.write("'")
-                f.write("\n\t}")
+                f.write("'")
+                expr.write(f)
+                f.write("'")
             f.write("\n}\n\n")
 
-        # search for additional floats appearing in lorentz structures
-        for l in self.all_lorentz:
-            structure = parser.compile(l.structure)
-            structure = structure.replaceFloats(self.prefix + "float", fsubs, fcounter)
+            if self.useCT:
+                types.update(self.cttypes)
 
-        self.floats = list(fsubs.keys())
-        self.floatsd = fsubs
-        self.floatsc = fcounter
+                logger.info("      Generating counter term function list ...")
+                f.write("ctfunctions = {")
+                is_first = True
+                for name, value in self.ctfunctions.items():
+                    if is_first:
+                        is_first = False
+                        f.write("\n")
+                    else:
+                        f.write(",\n")
+                    f.write("\t%r: " % name)
+                    is_firstcf = True
+                    for pl, cf in value.items():
+                        expr = parser.compile(cf)
+                        for fn in cmath_functions:
+                            expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
+                        expr = expr.prefixSymbolsWith(self.prefix)
+                        expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+                        expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                        expr = expr.algsubs(sym_abs, abs_)
+
+                        if is_firstcf:
+                            is_firstcf = False
+                            f.write("{\n")
+                        else:
+                            f.write(",\n")
+                        f.write("\t\t%r: " % pl)
+                        f.write("'")
+                        expr.write(f)
+                        f.write("'")
+                    f.write("\n\t}")
+                f.write("\n}\n\n")
+
+            # search for additional floats appearing in lorentz structures
+            for l in self.all_lorentz:
+                structure = parser.compile(l.structure)
+                structure = structure.replaceFloats(self.prefix + "float", fsubs, fcounter)
+
+            self.floats = list(fsubs.keys())
+            self.floatsd = fsubs
+            self.floatsc = fcounter
 
         f.write("parameters = {")
         is_first = True
 
-        for name, value in list(fsubs.items()):
-            if is_first:
-                is_first = False
-                f.write("\n")
-            else:
-                f.write(",\n")
-            f.write("\t%r: %r" % (name, str(value)))
+        if self.final_import:
+            for name, value in list(fsubs.items()):
+                if is_first:
+                    is_first = False
+                    f.write("\n")
+                else:
+                    f.write(",\n")
+                f.write("\t%r: %r" % (name, str(value)))
 
         for name, value in list(parameters.items()):
             if is_first:
@@ -651,27 +659,29 @@ class Model:
                 f.write("\t%r: %r" % (name, str(value)))
         f.write("\n}\n\n")
 
-        f.write("latex_parameters = {")
-        is_first = True
-        for p in self.all_parameters:
-            name = self.prefix + p.name.replace("_", "undrscr")
-            if is_first:
-                is_first = False
-            else:
-                f.write(",")
-            f.write("\n\t%r: %r" % (name, p.texname))
-        f.write("\n}\n\n")
+        if self.final_import:
+            f.write("latex_parameters = {")
+            is_first = True
+            for p in self.all_parameters:
+                name = self.prefix + p.name.replace("_", "undrscr")
+                if is_first:
+                    is_first = False
+                else:
+                    f.write(",")
+                f.write("\n\t%r: %r" % (name, p.texname))
+            f.write("\n}\n\n")
 
         f.write("types = {")
         is_first = True
 
-        for name in list(fsubs.keys()):
-            if is_first:
-                is_first = False
-                f.write("\n")
-            else:
-                f.write(",\n")
-            f.write("\t%r: 'RP'" % name)
+        if self.final_import:
+            for name in list(fsubs.keys()):
+                if is_first:
+                    is_first = False
+                    f.write("\n")
+                else:
+                    f.write(",\n")
+                f.write("\t%r: 'RP'" % name)
 
         for name, value in list(types.items()):
             if is_first:
@@ -682,17 +692,18 @@ class Model:
             f.write("\t%r: %r" % (name, value))
         f.write("\n}\n\n")
 
-        f.write("slha_locations = {")
-        is_first = True
+        if self.final_import:
+            f.write("slha_locations = {")
+            is_first = True
 
-        for name, value in list(slha_locations.items()):
-            if is_first:
-                is_first = False
-                f.write("\n")
-            else:
-                f.write(",\n")
-            f.write("\t%r: %r" % (name, value))
-        f.write("\n}\n\n")
+            for name, value in list(slha_locations.items()):
+                if is_first:
+                    is_first = False
+                    f.write("\n")
+                else:
+                    f.write(",\n")
+                f.write("\t%r: %r" % (name, value))
+            f.write("\n}\n\n")
 
         f.write("aux = {\n")
         for p in self.all_particles:
@@ -706,11 +717,6 @@ class Model:
             f.write(f"    '{p.name}': {aux},\n")
         f.write("}")
 
-        # new for modified UFO files
-        for p in particlect:
-            print(p.counterterm)
-        for p in parameterct:
-            print(p.counterterm)
 
     def write_form_file(self, f, order_names):
         parser = ex.ExpressionParser()
@@ -1100,29 +1106,17 @@ Id vertex(iv?, {v.name},
         with open(os.path.join(path, "%s.py" % local_name), "w") as f:
             self.write_python_file(f)
 
-        logger.info("  Writing Form file ...")
-        with open(os.path.join(path, "%s.hh" % local_name), "w") as f:
-            self.write_form_file(f, order_names)
+        if self.final_import:
+            logger.info("  Writing Form file ...")
+            with open(os.path.join(path, "%s.hh" % local_name), "w") as f:
+                self.write_form_file(f, order_names)
 
-        logger.info("  Writing Form Yukawa counterterm file ...")
-        if not os.path.isdir(os.path.join(path, "codegen")):
-            os.mkdir(os.path.join(path, "codegen"))
-        with open(os.path.join(path, "codegen", "ufo_yukawa_counterterms.hh"), "w") as f:
-            self.write_yukawa_ct_file(f)
+            logger.info("  Writing Form Yukawa counterterm file ...")
+            if not os.path.isdir(os.path.join(path, "codegen")):
+                os.mkdir(os.path.join(path, "codegen"))
+            with open(os.path.join(path, "codegen", "ufo_yukawa_counterterms.hh"), "w") as f:
+                self.write_yukawa_ct_file(f)
 
-    def vertex(self, label: str) -> Vertex:
-        if label[-1].isdigit() and label[-2] == "_":
-            # During export into a QGRAF or FORM model file, a '_<digit>' is added. Since this only encodes splitting
-            # into unambiguous coupling power pieces, it can be ignored here
-            if self.useCT:
-                return (self.all_vertices+self.all_CTvertices)[self.labels[label[:-2]]]
-            else:
-                return self.all_vertices[self.labels[label[:-2]]]
-        else:
-            if self.useCT:
-                return (self.all_vertices+self.all_CTvertices)[self.labels[label]]
-            else:
-                return self.all_vertices[self.labels[label]]
 
 lor_P = ex.SymbolExpression("P")
 lor_Metric = ex.SymbolExpression("Metric")
@@ -1472,24 +1466,29 @@ def transform_color(expr, colors, xidx):
     else:
         return expr
 
-def load_ufo_files(mname, mpath):
+def load_ufo_files(model_path):
+    sys.path.append(model_path)
+    parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
+    norm_path = os.path.normpath(model_path)
+    if norm_path.startswith(parent_path):
+        mname = norm_path[len(parent_path) :].replace(os.sep, "")
+    else:
+        mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else "")))
+    if os.altsep is not None:
+        mname = mname.replace(os.altsep, "")
+    search_path = [parent_path]
+
+    logger.info("Trying to import FeynRules model '%s' from %s" % (mname, search_path[0]))
+
     mfile = None
     try:
-        if sys.version_info >= (
-            3,
-            6,
-        ):
-            fpath = mpath[0] + "/" + mname + "/__init__.py"
-            mod = load_source(mname, fpath)
-        else:
-            import imp
-
-            mfile, mpath, mdesc = imp.find_module(mname, mpath)
-            mod = imp.load_module(mname, mfile, mpath, mdesc)
+        fpath = search_path[0] + "/" + mname + "/__init__.py"
+        mod = load_source(mname, fpath)
     except ImportError as exc:
         logger.critical("Problem importing model file: %s" % exc)
         sys.exit("GoSam terminated due to an error")
     finally:
         if mfile is not None:
             mfile.close()
-    return mod
+
+    return mod, mname

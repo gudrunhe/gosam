@@ -323,7 +323,7 @@ def prepare_model_files(conf, output_path=None):
     # Some options only work with ufo models.
     # For OLP mode: check if property is set already.
     if conf["is_ufo"] is not None:
-        isufo = conf["is_ufo"]
+        isufo = conf.getBooleanProperty("is_ufo")
     else:
         isufo = False
         conf["is_ufo"] = isufo
@@ -362,11 +362,16 @@ def prepare_model_files(conf, output_path=None):
                 model_path = os.path.join(rel_path, model_path)
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
-            mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS)
-            order_names = sorted(conf.getProperty(golem.properties.order_names))
-            if order_names == [""]:
-                order_names = []
-            mdl.store(path, MODEL_LOCAL, order_names)
+            if conf.getBooleanProperty("optimized_import"):
+                # initial import of model; do not have any information on relevant vertices, yet
+                mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS, reduce_model=False, final_import=False)
+                mdl.store(path, MODEL_LOCAL, order_names=[])
+            else:
+                mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS)
+                order_names = sorted(conf.getProperty(golem.properties.order_names))
+                if order_names == [""]:
+                    order_names = []
+                mdl.store(path, MODEL_LOCAL, order_names)
             # TODO: Use proper UFO model instead of generated QGRAF model
             conf.setProperty("model_path", model_path)
             logger.info("Done with model import.")
@@ -860,21 +865,22 @@ def derive_coupling_names(conf):
 
 
 def load_source(mname, mpath):
-    if sys.version_info >= (
-        3,
-        6,
-    ):
-        # see https://docs.python.org/dev/whatsnew/3.12.html#imp
-        import importlib.util
-        import importlib.machinery
+    # see https://docs.python.org/dev/whatsnew/3.12.html#imp
+    import importlib.util
+    import importlib.machinery
+    loader = importlib.machinery.SourceFileLoader(mname, mpath)
+    spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[mname] = mod
+    loader.exec_module(mod)
 
-        loader = importlib.machinery.SourceFileLoader(mname, mpath)
-        spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[mname] = mod
-        loader.exec_module(mod)
-    else:
-        import imp
-
-        mod = imp.load_source(mname, mpath)
     return mod
+
+
+def extract_vertices(diagrams):
+    vertices = set()
+    for idx, diagram in list(diagrams.items()):
+        for v in diagram._vertices.values():
+            
+            vertices.add(v.label)
+    return vertices
