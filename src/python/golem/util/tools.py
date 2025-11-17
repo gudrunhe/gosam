@@ -364,10 +364,20 @@ def prepare_model_files(conf, output_path=None):
             extract_model_options(conf)
             if conf.getBooleanProperty("optimized_import"):
                 # initial import of model; do not have any information on relevant vertices, yet
-                mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS, reduce_model=False, final_import=False)
+                mdl = golem.model.feynrules.Model(
+                    model_path, 
+                    golem.model.MODEL_OPTIONS, 
+                    initial_import=True, 
+                    final_import=False
+                    )
                 mdl.store(path, MODEL_LOCAL, order_names=[])
             else:
-                mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS)
+                mdl = golem.model.feynrules.Model(
+                    model_path, 
+                    golem.model.MODEL_OPTIONS, 
+                    initial_import=True, 
+                    final_import=True
+                    )
                 order_names = sorted(conf.getProperty(golem.properties.order_names))
                 if order_names == [""]:
                     order_names = []
@@ -871,6 +881,7 @@ def load_source(mname, mpath):
     loader = importlib.machinery.SourceFileLoader(mname, mpath)
     spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
     mod = importlib.util.module_from_spec(spec)
+    # cache the module (relied on by optimized_import feature in feynrules.py):
     sys.modules[mname] = mod
     loader.exec_module(mod)
 

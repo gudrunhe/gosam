@@ -70,8 +70,8 @@ def generate_process_files(conf, from_scratch=False):
         )
     logger.info("FeynGraph finished")
 
-    # ToDo: probably have to extract the diagram vertices BEFORE running the analyzer, 
-    # because we have to update the rank information -> order should be 
+    # Have to extract the diagram vertices BEFORE running the analyzer, 
+    # because we have to update the rank information -> order should be: 
     #   1.) initial loading of model, write model.py only (not model.hh)
     #   2.) run feyngraph
     #   3.) analyze vertices
@@ -92,7 +92,7 @@ def generate_process_files(conf, from_scratch=False):
         mdl = golem.model.feynrules.Model(
             model_path, 
             golem.model.MODEL_OPTIONS, 
-            reduce_model=True,
+            initial_import=False,
             final_import=True
             )
         order_names = sorted(conf.getProperty(golem.properties.order_names))
@@ -1121,28 +1121,5 @@ def extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
     if generate_ct:
         ct_vertices = golem.util.tools.extract_vertices(ct_diagrams)
         keep_vertices.update(ct_vertices)
-
-    addv = set()
-    delv = set()
-    for v in keep_vertices:
-        if v in golem.model.mergings.keys():
-            addv.update(set(golem.model.mergings[v]))
-            delv.add(v)
-    logger.debug(f"Merged vertices: {delv} -> {addv}")
-    #keep_vertices -= delv
-    keep_vertices.update(addv)
-
-    addv = set()
-    delv = set()
-    for v in keep_vertices:
-        # this works because we know split vertices are appended by _<int>
-        # would be nicer to have a feyngraph rountine returning the splitting dict
-        vparent = v[:v.rindex('_')]
-        if golem.model.feyngraph_model.splitting(vparent) is not None:
-            addv.add(vparent)
-            delv.add(v)
-    logger.debug(f"Split vertices: {delv} -> {addv}")
-    #keep_vertices -= delv
-    keep_vertices.update(addv)
 
     return keep_vertices

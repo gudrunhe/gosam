@@ -98,15 +98,27 @@ unprefixed_symbols = [sym_Nf, sym_Nfgen, sym_Nfrat]
 
 
 class Model:
-    def __init__(self, model_path, model_options=None, reduce_model=False, final_import=True):
+    def __init__(self, model_path, model_options=None, initial_import=True, final_import=True):
         self.model_options = model_options or dict()
-        self.reduce_model = reduce_model
+        self.initial_import = initial_import
         self.final_import = final_import
 
+        # IMPORTANT: When using the optimized_import feature we call feynrules.py twice and rely on 
+        #            the fact that the model is cached by adding it to sys.modules in tools.load_source, 
+        #            including the modifications made during the first call. If for some reason the model
+        #            is not cached, optimized_import will not work.
         mod, mname = load_ufo_files(model_path)
 
         self.useCT = False
-        if self.reduce_model:
+        if self.initial_import:
+            self.all_vertices = mod.all_vertices
+            try:
+                self.all_CTvertices = mod.all_CTvertices
+                self.useCT = True
+            except AttributeError:
+                pass
+            self.all_couplings = mod.all_couplings
+        else:
             keep_couplings = set()
             self.all_vertices = [v for v in mod.all_vertices if v.name in model_options["keep_vertices"]]
             for v in self.all_vertices:
@@ -123,14 +135,6 @@ class Model:
                 logger.info(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings: {keep_couplings}")
             else:
                 logger.warning(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings -> Something might have gone wrong")
-        else:
-            self.all_vertices = mod.all_vertices
-            try:
-                self.all_CTvertices = mod.all_CTvertices
-                self.useCT = True
-            except AttributeError:
-                pass
-            self.all_couplings = mod.all_couplings
 
         self.all_parameters = mod.all_parameters
         try:
@@ -161,7 +165,7 @@ class Model:
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
 
-        if not self.reduce_model: #not self.final_import:
+        if self.initial_import:
             fg_model = fg.Model.from_ufo(model_path)
 
             # ################################################
@@ -353,7 +357,6 @@ class Model:
                 self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
             golem.model.feyngraph_model = fg_model
-            golem.model.mergings = mergings
 
         if self.final_import:
             # the following code block splits all_couplings into
@@ -365,7 +368,7 @@ class Model:
                 self.cttypes = {}
                 for ctv in self.all_CTvertices:
                     for ctc in ctv.couplings.values():
-                        if self.reduce_model and ctc not in keep_couplings:
+                        if not self.initial_import and ctc not in keep_couplings:
                             continue
                         self.all_CTcouplings.append(ctc)
                         if ctc in self.all_couplings:
@@ -400,8 +403,6 @@ class Model:
                     else:
                         logger.critical("CT coupling %s is neither a dict nor str!" % c)
                         sys.exit("GoSam terminated due to an error")
-
-        golem.model.global_model = self
 
     def write_python_file(self, f):
         # Edit : GC- 16.11.12 now have the dictionaries
@@ -1480,15 +1481,11 @@ def load_ufo_files(model_path):
 
     logger.info("Trying to import FeynRules model '%s' from %s" % (mname, search_path[0]))
 
-    mfile = None
     try:
         fpath = search_path[0] + "/" + mname + "/__init__.py"
         mod = load_source(mname, fpath)
     except ImportError as exc:
         logger.critical("Problem importing model file: %s" % exc)
         sys.exit("GoSam terminated due to an error")
-    finally:
-        if mfile is not None:
-            mfile.close()
 
     return mod, mname
