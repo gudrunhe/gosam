@@ -10,7 +10,7 @@
 * to supply the correct counterterms as part of the UFO model.
 *
 [% @if is_ufo %]
-#include- ufo_yukawa_counterterms.hh
+#include- [% @if internal OLP_MODE %]../../model/codegen/[% @end @if %]ufo_yukawa_counterterms.hh
 [% @else %]
 [% @for modelparticles massive quarks OSyukawa %]
 id vertex(iv?,[% @if is_ufo %] isNP0, VL?,[% @end @if %]

@@ -897,10 +897,14 @@ def load_source(mname, mpath):
 
 def optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf):
     keep_vertices = extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
+
     if len(keep_vertices) > 0:
         logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
     else:
         logger.warning(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
+
+    conf["keep_vertices"] = list(keep_vertices)
+
     if conf.getBooleanProperty("__OLP_MODE__"):
         model_path = conf["modeltype"]
     else:    
@@ -920,20 +924,6 @@ def optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf):
     # Remove model.py from cache so it will be reloaded:
     if MODEL_LOCAL in conf.cache:
         del conf.cache[MODEL_LOCAL]
-    # Update model in common process directory:
-    if conf.getBooleanProperty("__OLP_MODE__"):
-    # ToDo: This currently only works for a single olp subprocess!
-    #       Need to combine the files from different subprocesses.
-        src_path = path
-        target_path = os.path.dirname(conf["model_path"])
-        for ext in [".py", ".hh"]:
-            copy_file(os.path.join(src_path, MODEL_LOCAL + ext), os.path.join(target_path, MODEL_LOCAL + ext))
-        if not os.path.isdir(os.path.join(path, "codegen")):
-            os.mkdir(os.path.join(target_path, "codegen"))
-        copy_file(
-            os.path.join(src_path, "codegen/ufo_yukawa_counterterms.hh"), 
-            os.path.join(target_path, "codegen/ufo_yukawa_counterterms.hh")
-            )
 
 
 def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
@@ -956,6 +946,5 @@ def extract_vertices(diagrams):
     vertices = set()
     for idx, diagram in list(diagrams.items()):
         for v in diagram._vertices.values():
-            
             vertices.add(v.label)
     return vertices

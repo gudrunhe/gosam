@@ -1187,12 +1187,34 @@ def process_order_file(
 
     # ---] Fill in information needed by the main config to generate the common source files
 
-    if conf.getBooleanProperty("optimized_import"):
+    # ---[ Optimize common model files (in case of UFO model and optimized_import=True)
+    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
+        keep_vertices = set()
+        for sp_conf in subprocesses_conf_short.values():
+            keep_vertices.update(set(sp_conf.getListProperty("keep_vertices")))
+        if len(keep_vertices) > 0:
+            logger.info(f"optimized_import (ufo): identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
+        else:
+            logger.warning(f"optimized_import (ufo): identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
+        model_path = conf["modeltype"]
+        golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
+        mdl = golem.model.feynrules.Model(
+            model_path, 
+            golem.model.MODEL_OPTIONS, 
+            initial_import=False,
+            final_import=True
+            )
+        order_names = sorted(conf.getProperty(golem.properties.order_names))
+        if order_names == [""]:
+            order_names = []
+        MODEL_LOCAL = golem.util.constants.MODEL_LOCAL
+        mdl.store(os.path.dirname(conf["model"]), MODEL_LOCAL, order_names)
         # Reload model.py:
         MODEL_LOCAL = os.path.basename(conf["model"])
         if MODEL_LOCAL in conf.cache:
             del conf.cache[MODEL_LOCAL]
             _  = golem.util.tools.getModel(conf, imodel_path)
+    # ---] Optimize common model files        
 
     golem.templates.xmltemplates.transform_templates(
         templates,

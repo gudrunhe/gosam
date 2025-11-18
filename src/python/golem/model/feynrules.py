@@ -405,9 +405,6 @@ class Model:
                         sys.exit("GoSam terminated due to an error")
 
     def write_python_file(self, f):
-        # Edit : GC- 16.11.12 now have the dictionaries
-        # particlect and parameterct available
-        # if non-empty the model.py file is modified
         f.write("# vim: ts=3:sw=3\n")
         f.write("# This file has been generated from the FeynRules model files\n")
         f.write("# in %s\n" % self.model_orig)
