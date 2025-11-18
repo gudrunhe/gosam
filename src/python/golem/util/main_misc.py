@@ -81,7 +81,7 @@ def generate_process_files(conf, from_scratch=False):
         #   6.) templates
         # note that in this way we still end up with more vertices than we actually need, 
         # because the filters are applied after extraction of the vertices
-        golem.util.tools.optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf)
+        golem.util.tools.optimize_model(conf, path, lo_diagrams=lo_diagrams, nlo_diagrams=nlo_diagrams, ct_diagrams=ct_diagrams)
 
     helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 

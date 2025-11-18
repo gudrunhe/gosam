@@ -895,8 +895,13 @@ def load_source(mname, mpath):
 
     return mod
 
-def optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf):
-    keep_vertices = extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
+def optimize_model(conf, path, lo_diagrams=None, nlo_diagrams=None, ct_diagrams=None, olp=False, sconf=dict()):    
+    if olp:
+        keep_vertices = set()
+        for sp_conf in sconf.values():
+            keep_vertices.update(set(sp_conf.getListProperty("keep_vertices")))
+    else:
+        keep_vertices = extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
 
     if len(keep_vertices) > 0:
         logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
@@ -944,7 +949,8 @@ def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
 
 def extract_vertices(diagrams):
     vertices = set()
-    for idx, diagram in list(diagrams.items()):
-        for v in diagram._vertices.values():
-            vertices.add(v.label)
+    if diagrams is not None:
+        for idx, diagram in list(diagrams.items()):
+            for v in diagram._vertices.values():
+                vertices.add(v.label)
     return vertices
