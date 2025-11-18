@@ -1187,6 +1187,13 @@ def process_order_file(
 
     # ---] Fill in information needed by the main config to generate the common source files
 
+    if conf.getBooleanProperty("optimized_import"):
+        # Reload model.py:
+        MODEL_LOCAL = os.path.basename(conf["model"])
+        if MODEL_LOCAL in conf.cache:
+            del conf.cache[MODEL_LOCAL]
+            _  = golem.util.tools.getModel(conf, imodel_path)
+
     golem.templates.xmltemplates.transform_templates(
         templates,
         path,

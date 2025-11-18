@@ -80,14 +80,17 @@ def generate_process_files(conf, from_scratch=False):
     #   6.) templates
     # note that in this way we still end up with more vertices than we actually need, 
     # because the filters are applied after extraction of the vertices
-    
+
     if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
         keep_vertices = extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
         if len(keep_vertices) > 0:
             logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
         else:
             logger.warning(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
-        model_path = conf["model_path"]
+        if conf.getBooleanProperty("__OLP_MODE__"):
+            model_path = conf["modeltype"]
+        else:    
+            model_path = conf["model_path"]
         golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
         mdl = golem.model.feynrules.Model(
             model_path, 
@@ -103,6 +106,19 @@ def generate_process_files(conf, from_scratch=False):
         # Remove model.py from cache so it will be reloaded:
         if MODEL_LOCAL in conf.cache:
             del conf.cache[MODEL_LOCAL]
+        # Update model in common process directory:
+        if conf.getBooleanProperty("__OLP_MODE__"):
+        # ToDo: This currently only works for a single olp subprocess!
+        #       Need to combine the files from different subprocesses.
+            src_path = path
+            target_path = os.path.dirname(conf["model_path"])
+            for ext in [".py", ".hh"]:
+                copy_file(os.path.join(src_path, MODEL_LOCAL + ext), os.path.join(target_path, MODEL_LOCAL + ext))
+            os.mkdir(os.path.join(target_path, "codegen"))
+            copy_file(
+                os.path.join(src_path, "codegen/ufo_yukawa_counterterms.hh"), 
+                os.path.join(target_path, "codegen/ufo_yukawa_counterterms.hh")
+                )
 
     helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
@@ -535,7 +551,7 @@ def fill_config(conf):
             conf.setProperty(str(p), conf.getProperty(p))
 
     # Check for required properties in standalone mode:
-    if not conf["__OLP_MODE__"]:
+    if not conf.getBooleanProperty("__OLP_MODE__"):
         if (True if conf.getProperty("in") is None else conf.getProperty("in")==""):
             raise GolemConfigError("You have to specify at least one 'in' particle!")
         if (True if conf.getProperty("out") is None else conf.getProperty("out")==""):
@@ -797,7 +813,7 @@ def fill_config(conf):
 
     # check consistency of regularisation schemes in setup file
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-    if not conf["__OLP_MODE__"]:
+    if not conf.getBooleanProperty("__OLP_MODE__"):
         mismatch_schemes = [False, None]
 
         if conf["regularisation_scheme"] == "dred":

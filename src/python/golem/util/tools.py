@@ -312,6 +312,8 @@ def prepare_model_files(conf, output_path=None):
 
     model_lst = conf.getProperty(golem.properties.model)
 
+    logger.debug(f"Preparing model: {model_lst}")
+
     # For BLHA2 standards: conversion to GoSam internal keywords of SM:
     if len(model_lst) == 1 and str(model_lst[0]).lower() == "smdiag":
         model_lst[0] = "smdiag"
@@ -326,7 +328,7 @@ def prepare_model_files(conf, output_path=None):
         isufo = conf.getBooleanProperty("is_ufo")
     else:
         isufo = False
-        conf["is_ufo"] = isufo
+        conf.setProperty("is_ufo",isufo)
 
     conf["enable_truncation_orders"] = conf.getProperty(golem.properties.enable_truncation_orders)
 
@@ -347,9 +349,10 @@ def prepare_model_files(conf, output_path=None):
             [os.path.exists(os.path.join(rel_path, model + ext)) for ext in ["", ".py", ".hh"]]
         ):
             src_path = rel_path
-        for ext in [".py", ".hh"]:
-            copy_file(os.path.join(src_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
-        # when called from olp.py we end up here, but the file `model` only exists when the original model was not an UFO
+        # In OLP mode we end up here even if the original model was a UFO. We have to take this into account:
+        copy_file(os.path.join(src_path, model + ".py"), os.path.join(path, MODEL_LOCAL + ".py"))
+        if not (isufo and conf.getBooleanProperty("optimized_import")):
+            copy_file(os.path.join(src_path, model + ".hh"), os.path.join(path, MODEL_LOCAL + ".hh"))
         if not isufo:
             copy_file(os.path.join(src_path, model), os.path.join(path, MODEL_LOCAL))
     elif len(model_lst) == 2:
@@ -408,6 +411,10 @@ def prepare_model_files(conf, output_path=None):
         logger.critical("Parameter 'model' cannot have more than two entries.")
         sys.exit("GoSam terminated due to an error")
 
+    if not conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
+        logger.warning("optimized_import is a UFO specific feature, but you are not using a UFO model. => Turning it off.")
+        conf.setProperty("optimized_import",False)
+        
 
 def extract_model_options(conf):
     for opt in conf.getListProperty(golem.properties.model_options):
@@ -882,6 +889,7 @@ def load_source(mname, mpath):
     spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
     mod = importlib.util.module_from_spec(spec)
     # cache the module (relied on by optimized_import feature in feynrules.py):
+    # Note: olp mode does not work without this
     sys.modules[mname] = mod
     loader.exec_module(mod)
 
