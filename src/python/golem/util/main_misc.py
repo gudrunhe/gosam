@@ -70,55 +70,18 @@ def generate_process_files(conf, from_scratch=False):
         )
     logger.info("FeynGraph finished")
 
-    # Have to extract the diagram vertices BEFORE running the analyzer, 
-    # because we have to update the rank information -> order should be: 
-    #   1.) initial loading of model, write model.py only (not model.hh)
-    #   2.) run feyngraph
-    #   3.) analyze vertices
-    #   4.) reload model, reduce vertex and coupling list, rewrite model.py, write model.hh
-    #   5.) analyzer
-    #   6.) templates
-    # note that in this way we still end up with more vertices than we actually need, 
-    # because the filters are applied after extraction of the vertices
-
     if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
-        keep_vertices = extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
-        if len(keep_vertices) > 0:
-            logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
-        else:
-            logger.warning(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
-        if conf.getBooleanProperty("__OLP_MODE__"):
-            model_path = conf["modeltype"]
-        else:    
-            model_path = conf["model_path"]
-        golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
-        mdl = golem.model.feynrules.Model(
-            model_path, 
-            golem.model.MODEL_OPTIONS, 
-            initial_import=False,
-            final_import=True
-            )
-        order_names = sorted(conf.getProperty(golem.properties.order_names))
-        if order_names == [""]:
-            order_names = []
-        MODEL_LOCAL = golem.util.constants.MODEL_LOCAL
-        mdl.store(path, MODEL_LOCAL, order_names)
-        # Remove model.py from cache so it will be reloaded:
-        if MODEL_LOCAL in conf.cache:
-            del conf.cache[MODEL_LOCAL]
-        # Update model in common process directory:
-        if conf.getBooleanProperty("__OLP_MODE__"):
-        # ToDo: This currently only works for a single olp subprocess!
-        #       Need to combine the files from different subprocesses.
-            src_path = path
-            target_path = os.path.dirname(conf["model_path"])
-            for ext in [".py", ".hh"]:
-                copy_file(os.path.join(src_path, MODEL_LOCAL + ext), os.path.join(target_path, MODEL_LOCAL + ext))
-            os.mkdir(os.path.join(target_path, "codegen"))
-            copy_file(
-                os.path.join(src_path, "codegen/ufo_yukawa_counterterms.hh"), 
-                os.path.join(target_path, "codegen/ufo_yukawa_counterterms.hh")
-                )
+        # Have to extract the diagram vertices BEFORE running the analyzer, 
+        # because we have to update the rank information -> order should be: 
+        #   1.) initial loading of model, write model.py only (not model.hh)
+        #   2.) run feyngraph
+        #   3.) analyze vertices
+        #   4.) reload model, reduce vertex and coupling list, rewrite model.py, write model.hh
+        #   5.) analyzer
+        #   6.) templates
+        # note that in this way we still end up with more vertices than we actually need, 
+        # because the filters are applied after extraction of the vertices
+        golem.util.tools.optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf)
 
     helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
@@ -1118,24 +1081,3 @@ def run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles):
         treecache,
         ctcache,
     )
-
-
-def extract_vertices(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
-    generate_lo = conf.getBooleanProperty("generate_tree_diagrams")
-    generate_virt = conf.getBooleanProperty("generate_loop_diagrams")
-    generate_ct = conf.getBooleanProperty("generate_eft_counterterms")
-    generate_eftli = conf.getBooleanProperty("generate_eft_loopind")
-
-    keep_vertices = set()    
-
-    if generate_lo or generate_eftli:
-        tree_vertices = golem.util.tools.extract_vertices(lo_diagrams)
-        keep_vertices.update(tree_vertices)
-    if generate_virt:
-        loop_vertices = golem.util.tools.extract_vertices(nlo_diagrams)
-        keep_vertices.update(loop_vertices)
-    if generate_ct:
-        ct_vertices = golem.util.tools.extract_vertices(ct_diagrams)
-        keep_vertices.update(ct_vertices)
-
-    return keep_vertices

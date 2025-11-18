@@ -895,6 +895,62 @@ def load_source(mname, mpath):
 
     return mod
 
+def optimize_model(lo_diagrams, nlo_diagrams, ct_diagrams, path, conf):
+    keep_vertices = extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf)
+    if len(keep_vertices) > 0:
+        logger.info(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}")
+    else:
+        logger.warning(f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong")
+    if conf.getBooleanProperty("__OLP_MODE__"):
+        model_path = conf["modeltype"]
+    else:    
+        model_path = conf["model_path"]
+    golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
+    mdl = golem.model.feynrules.Model(
+        model_path, 
+        golem.model.MODEL_OPTIONS, 
+        initial_import=False,
+        final_import=True
+        )
+    order_names = sorted(conf.getProperty(golem.properties.order_names))
+    if order_names == [""]:
+        order_names = []
+    MODEL_LOCAL = golem.util.constants.MODEL_LOCAL
+    mdl.store(path, MODEL_LOCAL, order_names)
+    # Remove model.py from cache so it will be reloaded:
+    if MODEL_LOCAL in conf.cache:
+        del conf.cache[MODEL_LOCAL]
+    # Update model in common process directory:
+    if conf.getBooleanProperty("__OLP_MODE__"):
+    # ToDo: This currently only works for a single olp subprocess!
+    #       Need to combine the files from different subprocesses.
+        src_path = path
+        target_path = os.path.dirname(conf["model_path"])
+        for ext in [".py", ".hh"]:
+            copy_file(os.path.join(src_path, MODEL_LOCAL + ext), os.path.join(target_path, MODEL_LOCAL + ext))
+        if not os.path.isdir(os.path.join(path, "codegen")):
+            os.mkdir(os.path.join(target_path, "codegen"))
+        copy_file(
+            os.path.join(src_path, "codegen/ufo_yukawa_counterterms.hh"), 
+            os.path.join(target_path, "codegen/ufo_yukawa_counterterms.hh")
+            )
+
+
+def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
+    keep_vertices = set()    
+
+    if conf.getBooleanProperty("generate_tree_diagrams") or conf.getBooleanProperty("generate_eft_loopind"):
+        tree_vertices = extract_vertices(lo_diagrams)
+        keep_vertices.update(tree_vertices)
+    if conf.getBooleanProperty("generate_loop_diagrams"):
+        loop_vertices = extract_vertices(nlo_diagrams)
+        keep_vertices.update(loop_vertices)
+    if conf.getBooleanProperty("generate_eft_counterterms"):
+        ct_vertices = extract_vertices(ct_diagrams)
+        keep_vertices.update(ct_vertices)
+
+    return keep_vertices
+
 
 def extract_vertices(diagrams):
     vertices = set()
