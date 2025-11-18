@@ -61,6 +61,7 @@ def generate_process_files(conf, from_scratch=False):
         raise GolemConfigError("Process path does not exist: %s" % path)
 
     in_particles, out_particles = generate_particle_lists(conf)
+    helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
 
     logger.info("Running FeynGraph")
     lo_diagrams, nlo_diagrams, ct_diagrams = run_feyngraph(
@@ -68,22 +69,7 @@ def generate_process_files(conf, from_scratch=False):
             list(map(lambda p: str(p), out_particles)),
             conf
         )
-    logger.info("FeynGraph finished")
-
-    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
-        # Have to extract the diagram vertices BEFORE running the analyzer, 
-        # because we have to update the rank information -> order should be: 
-        #   1.) initial loading of model, write model.py only (not model.hh)
-        #   2.) run feyngraph
-        #   3.) analyze vertices
-        #   4.) reload model, reduce vertex and coupling list, rewrite model.py, write model.hh
-        #   5.) analyzer
-        #   6.) templates
-        # note that in this way we still end up with more vertices than we actually need, 
-        # because the filters are applied after extraction of the vertices
-        golem.util.tools.optimize_model(conf, path, lo_diagrams=lo_diagrams, nlo_diagrams=nlo_diagrams, ct_diagrams=ct_diagrams)
-
-    helicity_map = golem.util.tools.enumerate_and_reduce_helicities(conf)
+    logger.info("FeynGraph finished")    
 
     # Run the new analyzer:
     logger.info("Analyzing diagrams")
@@ -100,6 +86,13 @@ def generate_process_files(conf, from_scratch=False):
         treecache,
         ctcache,
     ) = run_analyzer(lo_diagrams, nlo_diagrams, ct_diagrams, conf, in_particles)
+
+    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
+        golem.util.tools.optimize_model(conf, path, 
+                                        lo_diagrams=treecache.diagrams, 
+                                        nlo_diagrams=loopcache_tot.diagrams, 
+                                        ct_diagrams=ctcache.diagrams
+                                        )
 
     logger.info("Analyzer finished")    
 

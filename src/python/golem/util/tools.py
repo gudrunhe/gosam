@@ -932,7 +932,7 @@ def optimize_model(conf, path, lo_diagrams=None, nlo_diagrams=None, ct_diagrams=
 
 
 def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
-    keep_vertices = set()    
+    keep_vertices = set()
 
     if conf.getBooleanProperty("generate_tree_diagrams") or conf.getBooleanProperty("generate_eft_loopind"):
         tree_vertices = extract_vertices(lo_diagrams)
