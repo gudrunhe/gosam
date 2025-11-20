@@ -761,6 +761,8 @@ def process_order_file(
             logger.info("Creating directory %r" % imodel_path)
             os.mkdir(imodel_path)
         for lconf in [conf] + subprocesses_conf:
+            # before preparing the model files we need to initialize 'optimized_import' to its default when not set in config
+            lconf.setProperty("optimized_import", lconf.getProperty(golem.properties.optimized_import))
             golem.util.tools.prepare_model_files(lconf, imodel_path)
 
             lconf["modeltype"] = lconf.getListProperty("model")[-1]

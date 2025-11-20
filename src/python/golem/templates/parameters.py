@@ -311,7 +311,11 @@ class ModelTemplate(Template):
                 i += 1
         else:
             for name, value in list(self._slha_blocks.items()):
-                lst.append((i, name))
+                if value <= 2:
+                    lst.append((i, name))
+                else:
+                    logger.warning(f"SLHA input for entries with more that two dimensions " 
+                                   + f"not supported! Skipping {name} ({value} dimensional)")
                 i += 1
 
         if "reversed" in args:
