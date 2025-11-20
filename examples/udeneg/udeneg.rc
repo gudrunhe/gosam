@@ -14,8 +14,7 @@ model=sm
 order=QCD, 1, 3
 
 # Only W+ in s-channel, no Goldstone bosons
-filter.lo=lambda d: d.bridge(["Wp", "Wm"]) > 0
-filter.nlo=lambda d: d.bridge(["Wp", "Wm"]) > 0
+filter=lambda d: any(p.particle().name() in ["Wp", "Wm"] for p in d.bridges())
 
 
 one=gs,e

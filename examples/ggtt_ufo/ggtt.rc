@@ -13,6 +13,6 @@ model.options=Nfgen:1
 model=FeynRules, ../model/Standard_Model_UFO
 zero=mdlMB,mdlWT
 
-filter.nlo=lambda d: not d.isScaleless()
+filter.nlo=lambda d: not is_scaleless(d)
 r2=explicit
 debug=nlo

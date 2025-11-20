@@ -94,12 +94,14 @@ Default: \verb|ewchoose|
 \\\item[\colorbox{gray!30}{\texttt{order}}] (\textit{comma separated list})
 \begin{verbatim}
 A 3-tuple <coupling>,<born>,<virt> where <coupling> denotes
-a function of the qgraf style file which can be used as
-an argument in a 'vsum' statement. For the standard model
+a coupling defined in the model.  For the standard model
 file 'sm' there are two such functions, 'gs' which counts
 powers of the strong coupling and 'gw' which counts powers
 of the weak coupling. <born> is the sum of powers for the
 tree level amplitude and <virt> for the virtual amplitude.
+For UFO models, all couplings defined as `CouplingOrder`
+objects are available.
+
 The line
    order = gs, 4, 6
 would select all diagrams which have (gs)^4 at tree level
@@ -112,8 +114,8 @@ Instead, for the virtual corrections diagrams are chosen
 with the same order in gw but higher order in gs.
 
 In other models with more than two different coupling
-constants additional 'vsum' statements, which can be passed
-via the qgraph.verbatim option, might be needed
+constants additional additional filters selecting the
+appropriate orders in other coupling might be needed
 to select the correct set of diagrams.
 
 The user can also use QCD instead of gs and QED instead of gw.
@@ -123,8 +125,6 @@ calculated.
 
 For loop-induced processes, the order of the Born diagrams
 should be specified as `NONE`.
-
-See also: qgraf.options, qgraf.verbatim
 \end{verbatim}
 Default: \verb|None|
 \\Hidden: \verb|False|
@@ -314,6 +314,20 @@ forms:
 Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter.options}}] (\textit{comma separated list})
+\begin{verbatim}
+A list of options translated to native FeynGraph filters.
+The supported options are:
+ - `onepi`: only keep one-particle-irreducible diagrams
+ - `onshell`: only keep diagrams with on-shell external legs
+ - `nosnail`: only keep diagrams without self-loops
+ - `notadpole`: only keep diagrams without tadpoles
+
+Please, refer to the FeynGraph documentation for more details.
+\end{verbatim}
+Default: \verb|onshell,notadpole,nosnail|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.particles}}] (\textit{text})
 \begin{verbatim}
 Restrict the number of internal propagators with the given field
@@ -356,58 +370,37 @@ See also filter.particles.
 Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{qgraf.options}}] (\textit{comma separated list})
+\\\item[\colorbox{gray!30}{\texttt{diagram\_selector}}] (\textit{text})
 \begin{verbatim}
-A list of options which is passed to qgraf via the 'options' line.
-Possible values (as of qgraf.3.1.1) are zero, one or more of:
-   onepi, onshell, nosigma, nosnail, notadpole, floop
-   topol
-
-Please, refer to the QGraf documentation for details.
+A FeynGraph `DiagramSelector` object used as a basis for diagram filtering.
+Additional filters, e.g. `native_filters` and `filter_<...>_diagrams` will
+be applied on top of this selector.
 \end{verbatim}
-Default: \verb|onshell,notadpole,nosnail|
+Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim}}] (\textit{text})
+\\\item[\colorbox{gray!30}{\texttt{diagram\_selector.lo}}] (\textit{text})
 \begin{verbatim}
-This option allows to send verbatim lines to
-the file qgraf.dat. This can be useful if the user
-wishes to put additional restricitons to the selected diagrams.
-This option is mainly inteded for the use of the operators
-   rprop, iprop, chord, bridge, psum
-Note, that the use of 'vsum' might interfer with the
-option qgraf.power.
-
-Example:
-qgraf.verbatim=\
-   # no top quarks: \n\
-   true=iprop[T, 0, 0];\n\
-   # at least one Higgs:\n\
-   false=iprop[H, 0, 0];\n
-
-Please, refer to the QGraf documentation for details.
-
-See also: qgraf.options, order
+Same as `diagram_selector`, but only applied to the leading order diagrams.
+Overwrites `diagram_selector` if both are specified.
 \end{verbatim}
-Default: \verb|""|
+Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim.lo}}] (\textit{text})
+\\\item[\colorbox{gray!30}{\texttt{diagram\_selector.nlo}}] (\textit{text})
 \begin{verbatim}
-Same as qgraf.verbatim but only applied to LO diagrams.
-
-See also: qgraf.verbatim, qgraf.verbatim.nlo
+Same as `diagram_selector`, but only applied to the next-to-leading order diagrams.
+Overwrites `diagram_selector` if both are specified.
 \end{verbatim}
-Default: \verb|""|
+Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{qgraf.verbatim.nlo}}] (\textit{text})
+\\\item[\colorbox{gray!30}{\texttt{diagram\_selector.ct}}] (\textit{text})
 \begin{verbatim}
-Same as qgraf.verbatim but only applied to NLO diagrams.
-
-See also: qgraf.verbatim, qgraf.verbatim.nlo
+Same as `diagram_selector`, but only applied to the counter-term diagrams.
+Overwrites `diagram_selector` if both are specified.
 \end{verbatim}
-Default: \verb|""|
+Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{select.lo}}] (\textit{comma separated list})
@@ -467,51 +460,26 @@ See also: select.nlo, filter.lo, filter.nlo
 Default: \verb|None|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
+\\\item[\colorbox{gray!30}{\texttt{filter}}] (\textit{text})
+\begin{verbatim}
+A python function which provides a filter for diagrams. This function
+is used as a custom function in the FeynGraph `DiagramSelector`
+and is expected to be of the form `f(d: fg.Diagram) -> bool`. See the
+FeynGraph documentation for details.
+
+Example
+-------
+
+filter=lambda d: sum(p.name() == "Z" for p in d.propagators()) == 1       and not any(v.match_particles(["Z", "U", "Ubar"]) for v in d.vertices())
+\end{verbatim}
+Default: \verb|""|
+\\Hidden: \verb|False|
+\\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{filter.lo}}] (\textit{text})
 \begin{verbatim}
-A python function which provides a filter for tree diagrams.
+A python function which provides a filter for tree-level diagrams.
 
-filter.lo=lambda d: d.iprop(Z) == 1 \
-   and d.vertices(Z, U, Ubar) == 0
-
-The following methods of the diagram class can be used:
-
-* d.rank() = the maximum rank in Q possible for this diagram
-* d.loopsize() = the number of propagators in the loop
-* d.vertices(field1, field2, ...) = number of vertices
-    with the given fields
-* d.loopvertices(field1, field2, ...) = number of vertices
-    with the given fields; only those vertices which have
-    at least one loop propagator attached to them
-* d.iprop(field, momentum="...", twospin=..., massive=True/False,
-                                                         color=...) =
-    the number of propagators with the given properties:
-     - field: a field or list of fields
-     - momentum: a string denoting the momentum through this propagator,
-            such as "k1+k2"
-     - twospin: two times the spin (integer number)
-     - massive: select only propagators with/without a non-zero mass
-     - color: one of the numbers 1, 3, -3 or 8, or a list of
-              these numbers
-* d.legs(...) = number of legs
-   same as iprop, but for external legs
-* d.iprop_momentum(field, momentum="...") = True when the diagram contains
-   a propagator of field with the specified momentum, False otherwise
-* d.chord(...) = number of loop propagators with the given properties;
-    the arguments are the same as in iprop
-* d.bridge(...) = number of non-loop propagators with the given
-    properties; the arguments are the same as in iprop
-* d.order(order) = total power of diagrams with respect to specified
-   coupling order. Only works whit UFO models. The order must be defined
-   in the UFO model's coupling_orders.py and listed in the 'order_names'
-   property of the GoSam config/runcard.
-
-Note: Using d.iprop(field, momentum="...") in olp-mode can lead to
-      inconsistencies in the automatically generated crossings. This
-      can be circumvented by running GoSam with the option --no-crossings
-      or using the iprop_momentum function, which tracks invalid crossings.
-
-See also: filter.nlo, select.lo, select.nlo
+See filter.lo for more explanation.
 \end{verbatim}
 Default: \verb|""|
 \\Hidden: \verb|False|
@@ -542,25 +510,20 @@ in filters.
 Example:
 
 filter.module=filter.py
-filter.nlo=my_nlo_filter("vertices.txt")
-filter.lo=my_nlo_filter("vertices.txt")
+filter.lo=lo_selector
+filter.lo=nlo_selector
 
 ------ filter.py -----
 
-class my_nlo_filter_class:
-   def __init__(self, fname):
-      self.fields = []
-      with open(fname, 'r') as f:
-         for line in f.readlines():
-            fields = map(lambda s: s.strip(),
-                  line.split(","))
-            self.fields.append(fields)
+ import feyngraph as fg
 
-   def __call__(self, diag):
-      for lst in self.fields:
-         if diag.vertices(*lst) > 0:
-            return False
-      return True
+ lo_selector = fg.DiagramSelector()
+ lo_selector.select_coupling_power("NP", 1)
+ lo_selector.select_vertex_count(["Z", "u", "u~"], 1)
+
+ nlo_selector = fg.DiagramSelector()
+ nlo_selector.select_coupling_power("NP", 1)
+ nlo_selector.select_vertex_count(["Z", "u", "u~"], 2)
 
 ----------------------
 
@@ -1357,16 +1320,6 @@ path into which the GoSam git has been cloned.
 The directory must contain a file called 'template.xml'
 \end{verbatim}
 Default: \verb|""|
-\\Hidden: \verb|False|
-\\Experimental: \verb|False|
-\\\item[\colorbox{gray!30}{\texttt{qgraf.bin}}] (\textit{text})
-\begin{verbatim}
-Points to the QGraf executable.
-
-Example:
-qgraf.bin=/home/my_user_name/bin/qgraf
-\end{verbatim}
-Default: \verb|<gosam-prefix>/bin/GoSam/qgraf|
 \\Hidden: \verb|False|
 \\Experimental: \verb|False|
 \\\item[\colorbox{gray!30}{\texttt{form.bin}}] (\textit{text})

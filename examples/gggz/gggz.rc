@@ -12,7 +12,7 @@ order=QCD, NONE, 3
 # The second filter ensures that all bubbles
 # (which are zero by color) are removed.
 filter.particles=S:0,C:0,B:0,T:0
-filter.nlo=lambda d: d.chord(["U", "D"]) > 2
+filter.nlo=lambda d: sum(p.particle().name() in ["U", "Ubar", "D", "Dbar"] for p in d.chord(0)) > 2
 
 one=gs,e
 zero=w*, mD

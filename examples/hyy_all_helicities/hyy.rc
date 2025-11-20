@@ -17,7 +17,4 @@ filter.particles=U:0,D:0,S:0,C:0,B:0,em:0,mum:0,taum:0
 reduction_programs=ninja, golem95
 
 extensions=generate-all-helicities
-filter.nlo={ \
-   'fermionic': lambda d: d.chord("T") == d.loopsize(), \
-   'bosonic':   lambda d: d.chord("T") != d.loopsize() \
-}
+filter.nlo=lambda d: sum(p.particle().name() in ["T", "Tbar"] for p in d.chord(0)) == d.loopsize(0)

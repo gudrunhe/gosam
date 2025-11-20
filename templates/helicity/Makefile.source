@@ -403,9 +403,6 @@ d[%$_%]_[% efto %]h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D OUTFILE=d[%$_%]_[% efto %]h[%helicity%]l1 \
 		-D GENERATEDERIVATIVES=1 \
 		-D DERIVATIVESATZERO=1[%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %][%
                 @if helsum %] \
 		../codegen/golem_[% efto %].frm[%
                 @else %][%
@@ -612,9 +609,6 @@ d[%$_%]h[%helicity%]l1.txt: ../diagrams-1.hh
 		-D OUTFILE=d[%$_%]h[%helicity%]l1 \
 		-D GENERATEDERIVATIVES=1 \
 		-D DERIVATIVESATZERO=1[%
-			@if is_massive_bubble diagram=$_ %] \
-		-D "MASSIVEBUBBLE=[% massive_bubble_args diagram=$_ %]"[%
-			@end @if %][%
                 @if helsum %] \
 		../codegen/golem.frm[%
                 @else %][%

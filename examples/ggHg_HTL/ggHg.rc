@@ -29,7 +29,7 @@ symmetries=family
 filter.particles=A:0,Z:0,U:0,C:0,S:0,B:0,H:0
 
 # Remove scaleless diagrams:
-filter.nlo= lambda d: not d.isScaleless()
+#filter.nlo= lambda d: not is_scaleless(d)
 
 regularisation_scheme=dred
 convert_to_thv=true

@@ -1,11 +1,14 @@
 # vim: ts=3:sw=3
 
+import feyngraph as fg
+
+import golem.templates.kinematics
+import golem.util.config
+import golem.util.path
+import golem.util.tools
+from golem.diagrams.methods import is_nf, loopsize, massive_quark_self_energy, rank
 from golem.util.config import Properties
 from golem.util.parser import Template, TemplateError
-import golem.templates.kinematics
-import golem.util.path
-import golem.util.config
-import golem.util.tools
 
 
 class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
@@ -18,23 +21,23 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         heavy_quarks,
         lo_flags,
         nlo_flags,
-        massive_bubbles,
         eprops,
         helicity_map,
-        treecache,
-        ctcache,
+        tree_diagrams,
+        ct_diagrams,
         ct_flags,
     ):
-        self.init_kinematics(conf, in_particles, out_particles, heavy_quarks, helicity_map)
+        self.init_kinematics(
+            conf, in_particles, out_particles, heavy_quarks, helicity_map
+        )
         self._loopcache = loopcache
         self._partitions = loopcache.partition()
-        self._treecache = treecache
+        self._tree_diagrams = tree_diagrams
         self._roots = sorted(self._partitions.keys())
         self._latex_names = golem.util.tools.getModel(conf).latex_parameters
         self._diagram_flags_0 = lo_flags
         self._diagram_flags_1 = nlo_flags
-        self._massive_bubbles = massive_bubbles
-        self._ctcache = ctcache
+        self._ct_diagrams = ct_diagrams
         self._diagram_flags_ct = ct_flags
         self._eprops = eprops
 
@@ -42,26 +45,34 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         level = self._eval_string(args[0])
         idx = self._eval_int(args[1])
         if level == "tree":
-            VI = self._treecache.diagrams[idx].VertexInfo()
+            d: fg.Diagram = self._tree_diagrams[idx - 1]
         elif level == "loop":
-            VI = self._loopcache.diagrams[idx].VertexInfo()
+            d: fg.Diagram = self._loopcache.diagrams[idx]
         elif level == "ct":
-            VI = self._ctcache.diagrams[idx].VertexInfo()
+            d: fg.Diagram = self._ct_diagrams[idx - 1]
         else:
             raise TemplateError("Unknown level in [% getVertexInfo %]")
-        VIstr = ""
-        for vidx, v in VI.items():
-            if VIstr != "":
-                VIstr = VIstr + ",\\\\"
-            VIstr = VIstr + str(v["multiplicity"]) + " of " + str(vidx).replace("_", "\\_") + " ("
-            ostr = ""
-            for oidx, o in v.items():
-                if ostr != "":
-                    ostr = ostr + ", "
-                if oidx != "multiplicity":
-                    ostr = ostr + str(oidx) + "$=$" + str(o)
-            VIstr = VIstr + ostr + ")"
-        return VIstr
+
+        vertices = {}
+        for v in d.vertices():
+            if v.interaction().name() in vertices.keys():
+                vertices[v.interaction().name()][1] += 1
+            else:
+                vertices[v.interaction().name()] = [
+                    v.interaction().coupling_orders(),
+                    1,
+                ]
+
+        return r",\\".join(
+            "{} of {}({})".format(
+                n,
+                name,
+                ", ".join(
+                    f"{coupling} $=$ {order}" for coupling, order in orders.items()
+                ),
+            )
+            for name, (orders, n) in vertices.items()
+        )
 
     def maxloopsize(self, *args, **opts):
         return self._format_value(self._loopcache.maxloopsize, **opts)
@@ -81,7 +92,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             del nopts["diagram"]
             d = self._eval_int(opts["diagram"], **nopts)
             if d in list(self._loopcache.diagrams.keys()):
-                ls = self._loopcache.diagrams[d].loopsize()
+                ls = loopsize(self._loopcache.diagrams[d])
                 return self._format_value(ls, **nopts)
             else:
                 raise TemplateError("Unknown diagram in [% loopsize %]")
@@ -309,7 +320,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
                     else:
                         onshell[si] = powfmt % (mi, 2)
 
-                smatrix = root.getSMatrix(onshell, powfmt, prodfmt, s_prefix, s_suffix, s_infix)
+                smatrix = root.getSMatrix(
+                    onshell, powfmt, prodfmt, s_prefix, s_suffix, s_infix
+                )
                 size = root.size()
             else:
                 raise TemplateError("Unknown group in [% smat %]")
@@ -384,8 +397,12 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         for i, j in entries:
             reSij, imSij = smatrix[(i, j)]
 
-            sre = ";".join(["%s:%s" % (coeff, sym) for sym, coeff in list(reSij.items())])
-            sim = ";".join(["%s:%s" % (coeff, sym) for sym, coeff in list(imSij.items())])
+            sre = ";".join(
+                ["%s:%s" % (coeff, sym) for sym, coeff in list(reSij.items())]
+            )
+            sim = ";".join(
+                ["%s:%s" % (coeff, sym) for sym, coeff in list(imSij.items())]
+            )
 
             props.setProperty(row_name, i + shift)
             props.setProperty(col_name, j + shift)
@@ -402,63 +419,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             yield props
 
             count += 1
-
-    def loop_flow(self, *args, **opts):
-        diagrams = self._loopcache.diagrams
-
-        if len(args) == 0:
-            raise TemplateError("[% loop_flow ??? %] missing diagram index.")
-
-        didx = self._eval_int(args[0])
-
-        if didx not in diagrams:
-            raise TemplateError("[% loop_flow %d %] non-existing diagram" % didx)
-
-        diag = diagrams[didx]
-
-        flow = diag.fermion_flow()
-
-        first_name = self._setup_name("first", "is_first", opts)
-        last_name = self._setup_name("last", "is_last", opts)
-        index_name = self._setup_name("index", "index", opts)
-        var_name = self._setup_name("var", "$_", opts)
-        props = Properties()
-
-        N = len(flow)
-
-        for i, l in enumerate(flow.keys()):
-            is_first = i == 0
-            is_last = i == N - 1
-            value = flow[l]
-
-            props.setProperty(first_name, str(is_first))
-            props.setProperty(last_name, str(is_last))
-            props.setProperty(index_name, str(l))
-            props.setProperty(var_name, str(value))
-            yield props
-
-    def is_massive_bubble(self, *args, **opts):
-        if "diagram" not in opts:
-            raise TemplateError("Option 'diagram' required in " + "[% is_massive_bubble %]")
-
-        nopts = opts.copy()
-        del nopts["diagram"]
-        d = self._eval_int(opts["diagram"], **nopts)
-
-        return d in self._massive_bubbles
-
-    def massive_bubble_args(self, *args, **opts):
-        if "diagram" not in opts:
-            raise TemplateError("Option 'diagram' required in " + "[% massive_bubble_args %]")
-
-        nopts = opts.copy()
-        del nopts["diagram"]
-        d = self._eval_int(opts["diagram"], **nopts)
-
-        if d in self._massive_bubbles:
-            return ",".join(map(str, self._massive_bubbles[d]))
-        else:
-            return ""
 
     def lo_flags(self, *args, **opts):
         if "diagram" in opts:
@@ -481,7 +441,9 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             if g >= 0 and g < len(self._roots):
                 fltr = []
                 root = self._roots[g]
-                diagrams = set([idx for idx, keep, pinch, shift in self._partitions[root]])
+                diagrams = set(
+                    [idx for idx, keep, pinch, shift in self._partitions[root]]
+                )
                 result = []
 
                 for key, lst in list(self._diagram_flags_1.items()):
@@ -553,10 +515,10 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
                     # else:
                     #   shift_lst[idx] = shift
                     shift_lst[idx] = shift
-                    rank_lst[idx] = diagrams[idx].rank()
-                    if diagrams[idx].isNf():
+                    rank_lst[idx] = rank(diagrams[idx])
+                    if is_nf(diagrams[idx]):
                         nf_lst.add(idx)
-                    if diagrams[idx].isMassiveQuarkSE():
+                    if massive_quark_self_energy(diagrams[idx]):
                         top_se.add(idx)
             else:
                 raise TemplateError("Unknown group in [% diagrams %]")
@@ -565,7 +527,7 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
 
         if "loopsize" in opts:
             ls = self._eval_int(opts["loopsize"], **nopts)
-            fltr = list([d for d in fltr if diagrams[d].size() == ls])
+            fltr = list([d for d in fltr if loopsize(diagrams[d]) == ls])
 
         first_name = self._setup_name("first", "is_first", opts)
         last_name = self._setup_name("last", "is_last", opts)
@@ -580,7 +542,6 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
         nf_name = self._setup_name("nf", "is_nf", opts)
         mqse_name = self._setup_name("mqse", "is_mqse", opts)
         globi_name = self._setup_name("global_index", "global_index", opts)
-        flags_name = self._setup_name("flags", "flags", opts)
 
         if "idxshift" in opts:
             idxshift = int(opts["idxshift"])
@@ -634,15 +595,20 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             props.setProperty(last_name, is_last)
             props.setProperty(value_name, diagram_index)
             props.setProperty(idx_name, idx)
-            props.setProperty(keep_name, ",".join(map(str, [x + idxshift for x in keep_lst[diagram_index]])))
-            props.setProperty(pinch_name, ",".join(map(str, [x + idxshift for x in pinch_lst[diagram_index]])))
+            props.setProperty(
+                keep_name,
+                ",".join(map(str, [x + idxshift for x in keep_lst[diagram_index]])),
+            )
+            props.setProperty(
+                pinch_name,
+                ",".join(map(str, [x + idxshift for x in pinch_lst[diagram_index]])),
+            )
             props.setProperty(shift_name, shift_vec)
             props.setProperty(sign_name, qsign)
             props.setProperty(rank_name, rank_lst[diagram_index])
             props.setProperty(globi_name, orig_index[diagram_index])
             props.setProperty(nf_name, diagram_index in nf_lst)
             props.setProperty(mqse_name, diagram_index in top_se)
-            props.setProperty(flags_name, " ".join(diagrams[diagram_index].filter_flags))
             yield props
 
     def diagsum_groups(self, *args, **opts):
@@ -683,13 +649,15 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
             fltr = []
             for idx in self._eprops[ds]:
                 fltr.append(idx)
-                rank_lst[idx] = diagrams[idx].rank()
-                if diagrams[idx].isNf():
+                rank_lst[idx] = rank(diagrams[idx])
+                if is_nf(diagrams[idx]):
                     nf_lst.add(idx)
-                if diagrams[idx].isMassiveQuarkSE():
+                if massive_quark_self_energy(diagrams[idx]):
                     top_se.add(idx)
         else:
-            raise TemplateError("[% diagsum_diagrams %] must be called per diagsum_group")
+            raise TemplateError(
+                "[% diagsum_diagrams %] must be called per diagsum_group"
+            )
 
         first_name = self._setup_name("first", "is_first", opts)
         last_name = self._setup_name("last", "is_last", opts)

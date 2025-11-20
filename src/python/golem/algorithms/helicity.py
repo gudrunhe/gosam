@@ -1,11 +1,19 @@
 # vim: ts=3:sw=3:expandtab
-import golem.properties
-import golem.algorithms.color
-import itertools
-import sys
-from copy import deepcopy
+from __future__ import annotations
 
+import itertools
 import logging
+import sys
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from copy import deepcopy
+from typing import Any, Callable, cast, final, override
+
+import golem.algorithms.color
+import golem.properties
+import golem.util.tools
+from golem.model.particle import Particle
+from golem.util.config import Properties
+from golem.util.parser import TemplateError
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +37,12 @@ massive_states = [
 ]
 
 
-def reference_vectors(conf, in_particles, out_particles, return_particle_ids=False):
+def reference_vectors(
+    conf: Properties,
+    in_particles: list[Particle],
+    out_particles: list[Particle],
+    return_particle_ids: bool = False,
+) -> dict[int, int | str]:
     """
     For a given process and a given helicity choose, heuristicly,
     a good set of reference momenta.
@@ -53,24 +66,23 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
 
     """
     zeroes = golem.util.tools.getZeroes(conf)
-    suggstr = conf.getProperty(golem.properties.reference_vectors)
+    suggstr = cast(list[str], conf.getProperty(golem.properties.reference_vectors))
     if suggstr == [""]:
         suggstr = []
-    suggestions = dict([list(map(int, s.split(":"))) for s in suggstr])
+    suggestions = {int(s.split(":")[0]): int(s.split(":")[1]) for s in suggstr}
     num_legs = len(in_particles) + len(out_particles)
     assert num_legs > 1, "Seriously, you need at least two particles!"
 
-    external_massless = []
-    reference_required = []
-    gauge_vector_required = []
-    references = {}
-    not_favourable = set()
-    ini_indices = set()
+    external_massless: list[int | str] = []
+    reference_required: list[int] = []
+    gauge_vector_required: list[int] = []
+    references: dict[int, int | str] = {}
+    not_favourable: set[int] = set()
+    ini_indices: set[int] = set()
 
-    by_index = {}
+    by_index: dict[int, int | str] = {}
 
-    def classify(particle, index, is_ini):
-        mass = particle.getMass(zeroes)
+    def classify(particle: Particle, index: int):
         twospin = particle.getSpin()
         is_massive = particle.isMassive(zeroes)
 
@@ -102,12 +114,12 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
 
     i = 0
     for ini in in_particles:
-        classify(ini, i, True)
+        classify(ini, i)
         ini_indices.update([i])
         i += 1
 
     for fin in out_particles:
-        classify(fin, i, False)
+        classify(fin, i)
         i += 1
     assert i == num_legs
 
@@ -141,7 +153,7 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
             if len(preferred - ini_indices) >= 2:
                 preferred.difference_update(ini_indices)
             elif len(preferred) < 2:
-                raise golem.util.parser.TemplateError(
+                raise TemplateError(
                     """Cannot produce correct code for your problem.\n\
             Please, see lorentz.pdf for more details."""
                 )
@@ -244,7 +256,9 @@ def reference_vectors(conf, in_particles, out_particles, return_particle_ids=Fal
     return references
 
 
-def parse_helicity(string, symbols=symbol_to_heli):
+def parse_helicity(
+    string: str, symbols: dict[str, int] = symbol_to_heli
+) -> dict[int, int]:
     """
     Parse a string representation of a helicity combination
     into a dictionary of helicities.
@@ -258,32 +272,37 @@ def parse_helicity(string, symbols=symbol_to_heli):
        >>> print(parse_helicity("+-0k"))
        {0: 1, 1: -1, 2: 0, 3: 2}
     """
-    result = {}
+    result: dict[int, int] = {}
     i = 0
     for c in string:
         if c in symbols:
             result[i] = symbols[c]
             i += 1
         else:
-            raise golem.util.parser.TemplateError("Illegal helicity: %r" % string)
+            raise TemplateError("Illegal helicity: %r" % string)
     return result
 
 
-def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
-    symmetries = conf.getProperty(golem.properties.symmetries)
+def generate_symmetry_filter(
+    conf: Properties,
+    zeroes: list[str],
+    in_particles: list[Particle],
+    out_particles: list[Particle],
+) -> Callable[[Mapping[int, int]], bool]:
+    symmetries = cast(list[str], conf.getProperty(golem.properties.symmetries))
     lsymmetries = [s.lower().strip() for s in symmetries]
     family = "family" in lsymmetries
     flavour = "flavour" in lsymmetries
     lepton = "lepton" in lsymmetries
     generation = "generation" in lsymmetries
 
-    quarks = {}
-    anti_quarks = {}
-    leptons = {}
-    anti_leptons = {}
+    quarks: dict[int, tuple[int, bool, int]] = {}
+    anti_quarks: dict[int, tuple[int, bool, int]] = {}
+    leptons: dict[int, tuple[int, bool, int]] = {}
+    anti_leptons: dict[int, tuple[int, bool, int]] = {}
 
-    fixed = {}
-    pdg_fixed = {}
+    fixed: dict[int, set[int]] = {}
+    pdg_fixed: dict[int, set[int]] = {}
     for s in symmetries:
         if "=" in s:
             idx, hel = s.split("=", 1)
@@ -303,21 +322,31 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
                 try:
                     pdg = int(pidx)
                     for sign in signs:
-                        pdg_fixed[sign * pdg] = set(golem.algorithms.helicity.parse_helicity(hel.strip()).values())
+                        pdg_fixed[sign * pdg] = set(
+                            parse_helicity(hel.strip()).values()
+                        )
                 except ValueError:
-                    logging.critical("In symmetries=%s ... : '%s' is not a PDG code." % (s, pidx))
+                    logging.critical(
+                        "In symmetries=%s ... : '%s' is not a PDG code." % (s, pidx)
+                    )
                     sys.exit("GoSam terminated due to an error")
             else:
                 try:
                     idx = int(idx) - 1
                 except ValueError:
-                    logging.critical("In symmetries=%s ... : '%s' is not a particle number." % (s, idx))
+                    logging.critical(
+                        "In symmetries=%s ... : '%s' is not a particle number."
+                        % (s, idx)
+                    )
                     sys.exit("GoSam terminated due to an error")
                 if idx < 0 or idx >= len(in_particles) + len(out_particles):
-                    logging.critical("In symmetries=%s ... : '%d' is not in a good range." % (s, idx + 1))
+                    logging.critical(
+                        "In symmetries=%s ... : '%d' is not in a good range."
+                        % (s, idx + 1)
+                    )
                     sys.exit("GoSam terminated due to an error")
 
-                fixed[idx] = set(golem.algorithms.helicity.parse_helicity(hel.strip()).values())
+                fixed[idx] = set(parse_helicity(hel.strip()).values())
 
     for idx, p in enumerate(in_particles):
         sp = p.getSpin()
@@ -356,15 +385,18 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
         elif -pdg in range(11, 19):
             anti_leptons[li + idx] = (apdg, m, ((apdg - 11) // 2) + 1)
 
-    quark_filters = []
-    lepton_filters = []
+    quark_filters: list[list[tuple[int, ...]]] = []
+    lepton_filters: list[list[tuple[int, ...]]] = []
 
     quark_assignments = 0
     lepton_assignments = 0
 
     if flavour or family:
         if len(quarks) != len(anti_quarks):
-            logging.critical("Cannot apply 'flavour' or 'family' " + "symmetry to this external state.")
+            logging.critical(
+                "Cannot apply 'flavour' or 'family' "
+                + "symmetry to this external state."
+            )
             sys.exit("GoSam terminated due to an error")
 
         qi = list(quarks.keys())
@@ -372,7 +404,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
         for p in itertools.permutations(ai):
             quark_assignments += 1
             valid = True
-            lines = []
+            lines: list[tuple[int, ...]] = []
             for q, a in zip(qi, p):
                 qpdg, qm, qg = quarks[q]
                 apdg, am, ag = anti_quarks[a]
@@ -386,7 +418,10 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
 
     if lepton or generation:
         if len(leptons) != len(anti_leptons):
-            logging.critical("Cannot apply 'lepton' or 'generation' " + "symmetry to this external state.")
+            logging.critical(
+                "Cannot apply 'lepton' or 'generation' "
+                + "symmetry to this external state."
+            )
             sys.exit("GoSam terminated due to an error")
 
         qi = list(leptons.keys())
@@ -406,7 +441,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
             if valid:
                 lepton_filters.append(lines)
 
-    fermion_filters = []
+    fermion_filters: list[list[list[tuple[int, ...]]]] = []
     if lepton_assignments > 0:
         fermion_filters.append(lepton_filters)
 
@@ -417,7 +452,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
     outp = out_particles[:]
     linp = len(inp)
 
-    def filter_function(heli):
+    def filter_function(heli: Mapping[int, int]) -> bool:
         for i, p in enumerate(inp):
             pdg = p.getPDGCode()
             if pdg in pdg_fixed:
@@ -428,7 +463,7 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
             if pdg in pdg_fixed:
                 if heli[linp + i] not in pdg_fixed[pdg]:
                     return False
-        for k, h_set in list(fixed.items()):
+        for k, h_set in fixed.items():
             if heli[k] not in h_set:
                 return False
 
@@ -440,7 +475,9 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
                     hf = heli[fermion]
                     ha = heli[anti_fermion]
 
-                    if (float(linp - anti_fermion) - 0.5) * (float(linp - fermion) - 0.5) > 0:
+                    if (float(linp - anti_fermion) - 0.5) * (
+                        float(linp - fermion) - 0.5
+                    ) > 0:
                         fulfilled = hf == -ha
                     else:
                         fulfilled = hf == ha
@@ -458,9 +495,9 @@ def generate_symmetry_filter(conf, zeroes, in_particles, out_particles):
     return filter_function
 
 
-def parse_cycles(s):
-    cycles = []
-    current_cycle = None
+def parse_cycles(s: str) -> list[list[int]]:
+    cycles: list[list[int]] = []
+    current_cycle: list[int] = []
     level = 0
     tokens = s.replace("(", " ( ").replace(")", " ) ").split()
     for token in tokens:
@@ -485,7 +522,9 @@ def parse_cycles(s):
                     idx = int(token) - 1
                     current_cycle.append(idx)
                 except ValueError:
-                    logger.critical("Unrecognized token %r in permutation %r." % (token, s))
+                    logger.critical(
+                        "Unrecognized token %r in permutation %r." % (token, s)
+                    )
                     sys.exit("GoSam terminated due to an error")
             else:
                 logger.critical("Bad place for %r in permutation %r" % (token, s))
@@ -494,22 +533,25 @@ def parse_cycles(s):
     return cycles
 
 
+@final
 class Permutation:
-    def __init__(self, a_map={}):
-        self._map = {}
+    def __init__(self, a_map: Mapping[int, int] = {}):
+        self._map: dict[int, int] = {}
         for k, v in list(a_map.items()):
             if k == v:
                 continue
             else:
                 self._map[k] = v
 
-    def __call__(self, arg):
+    def __call__(
+        self, arg: int | Permutation | list[int]
+    ) -> int | Permutation | list[int]:
         if isinstance(arg, Permutation):
-            result = {}
+            result: dict[int, int] = {}
             keys = set(self._map.keys()).union(list(arg._map.keys()))
             for k in keys:
-                kk = arg(k)
-                v = self(kk)
+                kk = cast(int, arg(k))
+                v = cast(int, self(kk))
                 if k == v:
                     continue
                 result[k] = v
@@ -521,16 +563,16 @@ class Permutation:
             else:
                 return arg
         else:
-            return list(map(self, arg))
+            return cast(list[int], list(map(self, arg)))
 
-    def inverse(self):
-        result = {}
+    def inverse(self) -> Permutation:
+        result: dict[int, int] = {}
         for k, v in list(self._map.items()):
             result[v] = k
 
         return Permutation(result)
 
-    def cycles(self, arg):
+    def cycles(self, arg: int) -> str:
         """
         Returns a string representing the permutation
         in cycle notation.
@@ -547,15 +589,15 @@ class Permutation:
         max_entry += 1
         # Build cycles
         unchecked = [True] * max_entry
-        cyclic_form = []
+        cyclic_form: list[list[str]] = []
         for i in range(max_entry):
             if unchecked[i]:
-                cycle = []
+                cycle: list[str] = []
                 cycle.append(str(i + arg))
                 unchecked[i] = False
                 j = i
-                while unchecked[self(j)]:
-                    j = self(j)
+                while unchecked[cast(int, self(j))]:
+                    j = cast(int, self(j))
                     cycle.append(str(j + arg))
                     unchecked[j] = False
                 if len(cycle) > 1:
@@ -566,8 +608,9 @@ class Permutation:
             result += "(" + "".join(elem) + ")"
         return result
 
-    def __str__(self):
-        args = []
+    @override
+    def __str__(self) -> str:
+        args: list[str] = []
         for k in sorted(self._map.keys()):
             v = self._map[k]
             if k == v:
@@ -575,62 +618,65 @@ class Permutation:
             args.append("%d -> %d" % (k, v))
         return "Permutation(%s)" % ", ".join(args)
 
-    def __repr__(self):
+    @override
+    def __repr__(self) -> str:
         return str(self)
 
-    def __hash__(self):
+    @override
+    def __hash__(self) -> int:
         return hash(tuple(self._map.items()))
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, Permutation):
-            return len(self(other.inverse())._map) == 0
+            return len(cast(Permutation, self(other.inverse()))._map) == 0
         else:
             return False
 
 
-def permutation_from_cycles(cycles):
+def permutation_from_cycles(cycles: Sequence[Sequence[int]]) -> Permutation:
     result = Permutation()
     for cycle in cycles:
-        l = len(cycle)
-        for p in range(l - 1):
+        for p in range(len(cycle) - 1):
             c0 = cycle[p]
             c1 = cycle[p + 1]
-            result = result(Permutation({c0: c1, c1: c0}))
+            result = cast(Permutation, result(Permutation({c0: c1, c1: c0})))
     return result
 
 
-def color_sort(tpl):
+def color_sort(tpl: tuple[list[list[int]], ...]) -> tuple[list[list[int]], ...]:
     lines, traces = tpl
-    ntraces = []
+    ntraces: list[list[int]] = []
     for trace in traces:
-        l = len(trace)
         m = min(trace)
-        r = list(reversed(trace))
         im = trace.index(m)
-        ir = r.index(m)
 
         t = trace[im:] + trace[:im]
-        tr = r[ir:] + r[:ir]
         # gionata's modification to correct dipoles
         #      if tr[1] < t[1]:
         #         ntraces.append(tr)
         #      else:
         ntraces.append(t)
 
-    return (sorted(lines, key=lambda lst: lst[0]), sorted(ntraces, key=lambda lst: lst[0]))
+    return (
+        sorted(lines, key=lambda lst: lst[0]),
+        sorted(ntraces, key=lambda lst: lst[0]),
+    )
 
 
-def group_identical_particles(conf, in_particles, out_particles):
+def group_identical_particles(
+    conf: Properties, in_particles: list[Particle], out_particles: list[Particle]
+) -> tuple[dict[ſtr, list[int]], list[int]]:
     """
     Produce a dictionary with particle names as key and a list of particle
     indices as value. Returns also a list of indices which should be
     considered relevant when permuting legs (during symmetry finding).
     """
-    numpolvec = conf["__NUMPOLVEC__"].lower() == "true"
+    numpolvec = cast(str, conf["__NUMPOLVEC__"]).lower() == "true"
     zeroes = golem.util.tools.getZeroes(conf)
 
-    relevant_indices = []
-    groups = {}
+    relevant_indices: list[int] = []
+    groups: dict[str, list[int]] = {}
 
     for i, p in enumerate(in_particles):
         name = str(p)
@@ -663,7 +709,7 @@ def group_identical_particles(conf, in_particles, out_particles):
     return groups, relevant_indices
 
 
-def generate_all_permutations(conf, groups):
+def generate_all_permutations(conf: Properties, groups: Mapping[str, Sequence[int]]):
     """
     Generate a set of all permutations which exchange identical particles.
 
@@ -674,7 +720,7 @@ def generate_all_permutations(conf, groups):
     See also: group_identical_particles
     """
 
-    symmetries = conf.getProperty(golem.properties.symmetries)
+    symmetries = cast(list[str], conf.getProperty(golem.properties.symmetries))
     lsymmetries = [s.lower().strip() for s in symmetries]
 
     # Produce list of permutations explicitly requested by user
@@ -686,29 +732,41 @@ def generate_all_permutations(conf, groups):
         user_permutations.append(permutation_from_cycles(cycles))
 
     permutation_group_factors = [set(user_permutations)]
-    identical_particles = []
+    identical_particles: Sequence[Sequence[int]] = []
     for lst in list(groups.values()):
         if len(lst) > 1:
             identical_particles.append(lst)
             permutation_group_factors.append(
-                set([Permutation(dict(list(zip(lst, p)))) for p in itertools.permutations(lst)])
+                set(
+                    [
+                        Permutation(dict(list(zip(lst, p))))
+                        for p in itertools.permutations(lst)
+                    ]
+                )
             )
 
     while len(permutation_group_factors) > 1:
         f1 = permutation_group_factors.pop()
         f2 = permutation_group_factors.pop()
-        f = set()
+        f: set[Permutation] = set()
         for p1 in f1:
             for p2 in f2:
-                f.add(p1(p2))
+                f.add(cast(Permutation, p1(p2)))
         permutation_group_factors.append(f)
 
     return permutation_group_factors.pop()
 
 
 def find_symmetry_mapping(
-    helicity, perm, relevant_indices, helicity_list, generated_helicities, conf, in_particles, out_particles
-):
+    helicity: Mapping[int, int],
+    perm: Permutation,
+    relevant_indices: list[int],
+    helicity_list: Sequence[MutableMapping[int, int]],
+    generated_helicities: list[int],
+    conf: Properties,
+    in_particles: list[Particle],
+    out_particles: list[Particle],
+) -> None | tuple[int, list[tuple[int, int, bool]], list[int], Permutation]:
     """
     First apply a permutation to a helicity then try to find a symmetry transformation
     onto a generated helicity.
@@ -734,7 +792,7 @@ def find_symmetry_mapping(
 
     See also: find_symmetry_group, find_gauge_invariant_symmetry_group
     """
-    symmetries = conf.getProperty(golem.properties.symmetries)
+    symmetries = cast(list[str], conf.getProperty(golem.properties.symmetries))
     lsymmetries = [s.lower().strip() for s in symmetries]
     parity = "parity" in lsymmetries
 
@@ -743,21 +801,32 @@ def find_symmetry_mapping(
     in_indices = list(range(li))
     out_indices = list(range(li, li + lo))
 
-    color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
+    color_basis = list(
+        map(
+            color_sort,
+            golem.algorithms.color.get_color_basis(in_particles, out_particles),
+        )
+    )
 
     # compute permuted color basis:
     pcb = [
-        color_sort(([perm(line) for line in lines], [perm(trace) for trace in traces])) for lines, traces in color_basis
+        color_sort(
+            (
+                [cast(list[int], perm(line)) for line in lines],
+                [cast(list[int], perm(trace)) for trace in traces],
+            )
+        )
+        for lines, traces in color_basis
     ]
     icb = [color_basis.index(c) for c in pcb]
     permuted_color_basis = icb
 
     # permute particle indices
-    p_in_indices = perm(in_indices)
-    p_out_indices = perm(out_indices)
+    p_in_indices = cast(list[int], perm(in_indices))
+    p_out_indices = cast(list[int], perm(out_indices))
 
-    p_helicity = {}
-    signs = []
+    p_helicity: dict[int, int] = {}
+    signs: list[int] = []
 
     for i, j in zip(in_indices, p_in_indices):
         h = helicity[j]
@@ -786,17 +855,24 @@ def find_symmetry_mapping(
         r_gh = [gh[i] for i in relevant_indices]
 
         if rp_helicity == r_gh:
-            lst = [(perm(i), signs[i], False) for i in range(li + lo)]
+            lst = [(cast(int, perm(i)), signs[i], False) for i in range(li + lo)]
             mapping = (gi, lst, permuted_color_basis, perm)
             break
         elif parity and (mrp_helicity == r_gh):
-            lst = [(perm(i), signs[i], True) for i in range(li + lo)]
+            lst = [(cast(int, perm(i)), signs[i], True) for i in range(li + lo)]
             mapping = (gi, lst, permuted_color_basis, perm)
 
     return mapping
 
 
-def find_symmetry_group(helicity_list, conf, in_particles, out_particles):
+def find_symmetry_group(
+    helicity_list: Sequence[MutableMapping[int, int]],
+    conf: Properties,
+    in_particles: list[Particle],
+    out_particles: list[Particle],
+) -> MutableSequence[
+    tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation, int]
+]:
     """
     Find a set of symmetry transformations which maps helicities of the
     given list onto each other.
@@ -814,46 +890,67 @@ def find_symmetry_group(helicity_list, conf, in_particles, out_particles):
 
     See also: find_gauge_invariant_symmetry_group
     """
-    noreduce = conf["__REDUCE_HELICITIES__"].lower() == "false"
+    noreduce = cast(str, conf["__REDUCE_HELICITIES__"]).lower() == "false"
 
-    color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
+    color_basis = list(
+        map(
+            color_sort,
+            golem.algorithms.color.get_color_basis(in_particles, out_particles),
+        )
+    )
 
+    result: Sequence[
+        tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation, int]
+    ] = []
     # If requested, do not attempt to reduce the number of helicities
     if noreduce:
-        result = []
         for ih, helicity in enumerate(helicity_list):
-            result.append((ih, None, list(range(len(color_basis)))))
+            result.append((ih, None, list(range(len(color_basis))), Permutation(), ih))
         return result
 
-    groups, relevant_indices = group_identical_particles(conf, in_particles, out_particles)
+    groups, relevant_indices = group_identical_particles(
+        conf, in_particles, out_particles
+    )
     permutation_group = generate_all_permutations(conf, groups)
 
-    generated_helicities = []
-    result = []
+    generated_helicities: list[int] = []
 
+    result_list: Sequence[
+        tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation]
+    ] = []
     for ih, helicity in enumerate(helicity_list):
         mapping = None
         for perm in permutation_group:
             mapping = find_symmetry_mapping(
-                helicity, perm, relevant_indices, helicity_list, generated_helicities, conf, in_particles, out_particles
+                helicity,
+                perm,
+                relevant_indices,
+                helicity_list,
+                generated_helicities,
+                conf,
+                in_particles,
+                out_particles,
             )
             if mapping is not None:
                 break
 
         if mapping is None:
             generated_helicities.append(ih)
-            result.append((ih, None, list(range(len(color_basis))), Permutation()))
+            result_list.append((ih, None, list(range(len(color_basis))), Permutation()))
         else:
-            result.append(mapping)
+            result_list.append(mapping)
 
-    # Append gauge invariant set to mappings (each helicity assumed to belong to different group)
-    for ih, mapping in enumerate(result):
-        result[ih] = mapping + (ih,)
-
-    return result
+    return [v + (ih,) for ih, v in enumerate(result_list)]
 
 
-def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_particles):
+def find_gauge_invariant_symmetry_group(
+    helicity_list: Sequence[MutableMapping[int, int]],
+    conf: Properties,
+    in_particles: list[Particle],
+    out_particles: list[Particle],
+) -> MutableSequence[
+    tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation, int]
+]:
     """
     Find a set of symmetry transformations which maps helicities of the
     given list onto each other. Only return symmetry transformations
@@ -873,20 +970,27 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     See also: find_symmetry_group
     """
     zeroes = golem.util.tools.getZeroes(conf)
-    noreduce = conf["__REDUCE_HELICITIES__"].lower() == "false"
+    noreduce = cast(str, conf["__REDUCE_HELICITIES__"]).lower() == "false"
 
-    color_basis = list(map(color_sort, golem.algorithms.color.get_color_basis(in_particles, out_particles)))
+    color_basis = list(
+        map(
+            color_sort,
+            golem.algorithms.color.get_color_basis(in_particles, out_particles),
+        )
+    )
 
     # If requested, do not attempt to reduce the number of helicities
+    result: MutableSequence[
+        tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation, int]
+    ] = []
     if noreduce:
-        result = []
         for ih, helicity in enumerate(helicity_list):
             result.append((ih, None, list(range(len(color_basis))), Permutation(), ih))
         return result
 
     # Get list of massive/massless in_particles
-    relevant_massive_particle_indices = []
-    irrelevant_particle_indices = []
+    relevant_massive_particle_indices: list[int] = []
+    irrelevant_particle_indices: list[int] = []
     for index, particle in enumerate(in_particles):
         if particle.isMassive(zeroes) and particle.getSpin() != 0:
             relevant_massive_particle_indices.append(index)
@@ -907,18 +1011,21 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     #
 
     # Get list of helicities of massless particles, ignoring massive particle helicities
-    massless_helicity_list = deepcopy(helicity_list)
+    massless_helicity_list: Sequence[MutableMapping[int, int]] = deepcopy(helicity_list)
     for helicity in massless_helicity_list:
         for index in relevant_massive_particle_indices:
-            helicity.pop(index)
+            _ = helicity.pop(index)
 
     # Remove duplicates
-    massless_helicity_list = [dict(t) for t in sorted(set(tuple(sorted(d.items())) for d in massless_helicity_list))]
+    massless_helicity_list = [
+        dict(t)
+        for t in sorted(set(tuple(sorted(d.items())) for d in massless_helicity_list))
+    ]
 
     # Look through helicity_list and group the parts of each gauge invariant set requested by the user
-    gauge_invariant_sets = []
+    gauge_invariant_sets: list[list[dict[str, int | MutableMapping[int, int]]]] = []
     for massless_helicity in massless_helicity_list:
-        gauge_invariant_set = []
+        gauge_invariant_set: list[dict[str, int | MutableMapping[int, int]]] = []
         for ih, helicity in enumerate(helicity_list):
             match = True
             for index in helicity:
@@ -934,7 +1041,7 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     helicity_gauge_set = [0] * len(helicity_list)
     for ig, gauge_invariant_set in enumerate(gauge_invariant_sets):
         for helicity in gauge_invariant_set:
-            helicity_gauge_set[helicity["index"]] = ig
+            helicity_gauge_set[cast(int, helicity["index"])] = ig
 
     #
     #  Step 2 - generate all permutations and sort them:
@@ -945,11 +1052,16 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     #
 
     # Generate all permutations
-    groups, relevant_indices = group_identical_particles(conf, in_particles, out_particles)
+    groups, relevant_indices = group_identical_particles(
+        conf, in_particles, out_particles
+    )
     all_permutations = generate_all_permutations(conf, groups)
 
     # Get dictionary of reference vectors
-    ref_vectors = reference_vectors(conf, in_particles, out_particles, return_particle_ids=True)
+    ref_vectors = cast(
+        dict[int, list[int]],
+        reference_vectors(conf, in_particles, out_particles, return_particle_ids=True),
+    )
 
     # Only the reference vectors of massive particles are relevant (each massless helicity is already a gauge set)
     relevant_ref_vectors = {}
@@ -977,15 +1089,15 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     #
 
     # Try to minimize helicities within gauge invariant set
-    potentially_generated_helicities = []
-    mappings = []
+    potentially_generated_helicities: list[int] = []
+    mappings: Sequence[Any] = []
     for gauge_invariant_set in gauge_invariant_sets:
-        gauge_set_generated_helicities = []
+        gauge_set_generated_helicities: list[int] = []
         for helicity in gauge_invariant_set:
             mapping = None
             for i_perm in individual_permutations:
                 mapping = find_symmetry_mapping(
-                    helicity["helicity"],
+                    cast(MutableMapping[int, int], helicity["helicity"]),
                     i_perm,
                     relevant_indices,
                     helicity_list,
@@ -994,16 +1106,20 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
                     in_particles,
                     out_particles,
                 )
-                if mapping != None:
+                if mapping is not None:
                     mappings.append([helicity, mapping])
                     break
-            if mapping == None:
-                gauge_set_generated_helicities.append(helicity["index"])
+            if mapping is None:
+                gauge_set_generated_helicities.append(cast(int, helicity["index"]))
         potentially_generated_helicities.extend(gauge_set_generated_helicities)
 
     # Remove helicities that are already mapped (do not need to be generated) from gauge invariant sets
     gauge_invariant_sets[:] = [
-        [helicity for helicity in gauge_invariant_set if helicity["index"] in potentially_generated_helicities]
+        [
+            helicity
+            for helicity in gauge_invariant_set
+            if helicity["index"] in potentially_generated_helicities
+        ]
         for gauge_invariant_set in gauge_invariant_sets
     ]
 
@@ -1012,23 +1128,25 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
     #
 
     # Now try to map helicities between gauge invariant sets
-    generated_helicities = []
-    for gi, gauge_invariant_set in enumerate(gauge_invariant_sets):
+    generated_helicities: list[int] = []
+    for gauge_invariant_set in gauge_invariant_sets:
         best_mappings = []
         best_count = 0
-        best_helicities_to_generate = [helicity["index"] for helicity in gauge_invariant_set]
+        best_helicities_to_generate = [
+            cast(int, helicity["index"]) for helicity in gauge_invariant_set
+        ]
 
         for g_perm in group_permutations:
-            potential_mappings = []
+            potential_mappings: list[Any] = []
             count = 0
-            helicities_to_generate = []
+            helicities_to_generate: list[int] = []
             for helicity in gauge_invariant_set:
                 # Search for mapping
                 mapping = None
                 for i_perm in individual_permutations:
-                    composed_perm = i_perm(g_perm)
+                    composed_perm = cast(Permutation, i_perm(g_perm))
                     mapping = find_symmetry_mapping(
-                        helicity["helicity"],
+                        cast(Mapping[int, int], helicity["helicity"]),
                         composed_perm,
                         relevant_indices,
                         helicity_list,
@@ -1037,12 +1155,12 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
                         in_particles,
                         out_particles,
                     )
-                    if mapping != None:
+                    if mapping is not None:
                         count += 1
                         potential_mappings.append([helicity, mapping])
                         break
-                if mapping == None:
-                    helicities_to_generate.append(helicity["index"])
+                if mapping is None:
+                    helicities_to_generate.append(cast(int, helicity["index"]))
             if count > best_count:
                 best_count = count
                 best_mappings = potential_mappings
@@ -1053,20 +1171,25 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
         mappings.extend(best_mappings)
 
     # Begin generating result
-    result = [(ih, None, list(range(len(color_basis))), Permutation()) for ih in range(0, len(helicity_list))]
+    result_list: MutableSequence[
+        tuple[int, None | list[tuple[int, int, bool]], list[int], Permutation]
+    ] = [
+        (ih, None, list(range(len(color_basis))), Permutation())
+        for ih in range(0, len(helicity_list))
+    ]
     for mapping in mappings:
-        result[mapping[0]["index"]] = mapping[1]
+        result_list[mapping[0]["index"]] = mapping[1]
 
     # Helicities may have been mapped onto helicities within their gauge invariant set
     # which were subsequently mapped onto helicities in another gauge invariant set,
     # fix mappings which point to helicities that will not be generated
     for ih, mapping in enumerate(mappings):
         if mapping[1][0] not in generated_helicities:
-            perm1 = mapping[1][3]
-            perm2 = result[mapping[1][0]][3]
-            composed_perm = perm1(perm2)
+            perm1 = cast(Permutation, mapping[1][3])
+            perm2 = cast(Permutation, result_list[mapping[1][0]][3])
+            composed_perm = cast(Permutation, perm1(perm2))
             new_mapping = find_symmetry_mapping(
-                mapping[0]["helicity"],
+                cast(Mapping[int, int], mapping[0]["helicity"]),
                 composed_perm,
                 relevant_indices,
                 helicity_list,
@@ -1075,7 +1198,8 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
                 in_particles,
                 out_particles,
             )
-            result[mapping[0]["index"]] = new_mapping
+            assert new_mapping is not None
+            result_list[cast(int, mapping[0]["index"])] = new_mapping
             mappings[ih] = [mapping[0], new_mapping]
 
     for mapping in mappings:
@@ -1083,15 +1207,13 @@ def find_gauge_invariant_symmetry_group(helicity_list, conf, in_particles, out_p
             "mapping points to a helicity that will not be generated %s" % mapping
         )
 
-    # Append to the result the gauge set to which the helicty belongs result
-    for ih, gauge_set in enumerate(helicity_gauge_set):
-        result[ih] = result[ih] + (gauge_set,)
-
-    return result
+    return [v + (gauge_set,) for gauge_set, v in zip(helicity_gauge_set, result_list)]
 
 
-def filter_helicities(conf, in_particles, out_particles):
-    key = []
+def filter_helicities(
+    conf: Properties, in_particles: list[Particle], out_particles: list[Particle]
+) -> Properties:
+    key: list[int] = []
     for i in range(len(in_particles)):
         key.append(in_particles[i].getPDGCode())
     for i in range(len(out_particles)):
@@ -1107,51 +1229,54 @@ def filter_helicities(conf, in_particles, out_particles):
         if any(item.startswith(conf["model"]) for item in smmodels):
             applyfilter = True
 
-    if applyfilter == True:
-        if conf["symmetries"] is None:
-            conf["symmetries"] = " "
+    if applyfilter:
+        symmetries = ""
+        zeroes = cast(list[str], conf[golem.properties.zero])
         # check D,Dbar
-        if key.count(1) * 10 + key.count(-1) == 1 and "mD" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-1=+"
-        elif key.count(1) * 10 + key.count(-1) == 10 and "mD" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+1=-"
+        if key.count(1) * 10 + key.count(-1) == 1 and "mD" in zeroes:
+            symmetries += ", %-1=+"
+        elif key.count(1) * 10 + key.count(-1) == 10 and "mD" in zeroes:
+            symmetries += ", %+1=-"
         # check U,Ubar
-        if key.count(2) * 10 + key.count(-2) == 1 and "mU" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-2=+"
-        elif key.count(2) * 10 + key.count(-2) == 10 and "mU" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+2=-"
+        if key.count(2) * 10 + key.count(-2) == 1 and "mU" in zeroes:
+            symmetries += ", %-2=+"
+        elif key.count(2) * 10 + key.count(-2) == 10 and "mU" in zeroes:
+            symmetries += ", %+2=-"
         # check S,Sbar
-        if key.count(3) * 10 + key.count(-3) == 1 and "mS" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-3=+"
-        elif key.count(3) * 10 + key.count(-3) == 10 and "mS" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+3=-"
+        if key.count(3) * 10 + key.count(-3) == 1 and "mS" in zeroes:
+            symmetries += ", %-3=+"
+        elif key.count(3) * 10 + key.count(-3) == 10 and "mS" in zeroes:
+            symmetries += ", %+3=-"
         # check C,Cbar
-        if key.count(4) * 10 + key.count(-4) == 1 and "mC" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-4=+"
-        elif key.count(4) * 10 + key.count(-4) == 10 and "mC" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+4=-"
+        if key.count(4) * 10 + key.count(-4) == 1 and "mC" in zeroes:
+            symmetries += ", %-4=+"
+        elif key.count(4) * 10 + key.count(-4) == 10 and "mC" in zeroes:
+            symmetries += ", %+4=-"
         # check B,Bbar
-        if key.count(5) * 10 + key.count(-5) == 1 and "mB" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-5=+"
-        elif key.count(5) * 10 + key.count(-5) == 10 and "mB" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+5=-"
+        if key.count(5) * 10 + key.count(-5) == 1 and "mB" in zeroes:
+            symmetries += ", %-5=+"
+        elif key.count(5) * 10 + key.count(-5) == 10 and "mB" in zeroes:
+            symmetries += ", %+5=-"
         # check T,Tbar
-        if key.count(6) * 10 + key.count(-6) == 1 and "mT" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %-6=+"
-        elif key.count(6) * 10 + key.count(-6) == 10 and "mT" in conf[golem.properties.zero]:
-            conf["symmetries"] += ", %+6=-"
+        if key.count(6) * 10 + key.count(-6) == 1 and "mT" in zeroes:
+            symmetries += ", %-6=+"
+        elif key.count(6) * 10 + key.count(-6) == 10 and "mT" in zeroes:
+            symmetries += ", %+6=-"
         # neutrinos:
         if key.count(12) != 0:
-            conf["symmetries"] += ", %+12=-"
+            symmetries += ", %+12=-"
         if key.count(14) != 0:
-            conf["symmetries"] += ", %+14=-"
+            symmetries += ", %+14=-"
         if key.count(16) != 0:
-            conf["symmetries"] += ", %+16=-"
+            symmetries += ", %+16=-"
         if key.count(-12) != 0:
-            conf["symmetries"] += ", %-12=+"
+            symmetries += ", %-12=+"
         if key.count(-14) != 0:
-            conf["symmetries"] += ", %-14=+"
+            symmetries += ", %-14=+"
         if key.count(-16) != 0:
-            conf["symmetries"] += ", %-16=+"
-
+            symmetries += ", %-16=+"
+        if conf["symmetries"] is None:
+            symmetries = " "
+        else:
+            conf["symmetries"] += symmetries
     return conf

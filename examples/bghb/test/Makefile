@@ -20,7 +20,7 @@ else
 endif
 
 test_program: test.o $(DEPS)
-	$(FC) -o $@ $< $(LDFLAGS)
+	$(FC) -g -o $@ $< $(LDFLAGS)
 
 test: test.log
 

@@ -4,7 +4,14 @@ import sys
 from collections import Counter
 
 
-def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", all_inv=False):
+def generate_mandelstam_set(
+    num_in: int,
+    num_out: int,
+    prefix: str = "s",
+    suffix: str = "",
+    infix: str = "",
+    all_inv: bool = False,
+) -> tuple[list[str], list[list[dict[str, int]]]]:
     """
     Generates a set of Mandelstam variables for
     num_in incoming and num_out outgoing particles.
@@ -52,7 +59,7 @@ def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", al
     cuts = sections(num_legs)
     dual_cuts = sections(num_legs, True)
 
-    def normalize(i):
+    def normalize(i: int) -> int:
         if i < 1:
             return i + num_legs
         elif i > num_legs:
@@ -60,7 +67,7 @@ def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", al
         else:
             return i
 
-    def find(i, j):
+    def find(i: int, j: int) -> list[int]:
         i = normalize(i)
         j = normalize(j)
 
@@ -81,7 +88,7 @@ def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", al
             sys.exit("Should never happen: Invalid cut: %r!" % lst)
 
     if all_inv:
-        extra = []
+        extra: list[list[int]] = []
         for i in range(1, num_legs + 1):
             for j in range(i, num_legs + 1):
                 if i != j:
@@ -90,12 +97,14 @@ def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", al
     else:
         cuts_tmp = cuts
 
-    names = list([mandelstam_name(prefix, suffix, infix, l) for l in cuts_tmp])
+    names = list(
+        [mandelstam_name(prefix, suffix, infix, indices) for indices in cuts_tmp]
+    )
 
-    substitutions = []
+    substitutions: list[list[dict[str, int]]] = []
 
     for i in range(1, num_legs + 1):
-        row = []
+        row: list[dict[str, int]] = []
         for j in range(1, num_legs + 1):
             if i > j:
                 row.append(substitutions[j - 1][i - 1])
@@ -133,7 +142,14 @@ def generate_mandelstam_set(num_in, num_out, prefix="s", suffix="", infix="", al
     return (names, substitutions)
 
 
-def mandelstam_calc(num_in, num_out, prefix="s", suffix="", infix="", all_inv=False):
+def mandelstam_calc(
+    num_in: int,
+    num_out: int,
+    prefix: str = "s",
+    suffix: str = "",
+    infix: str = "",
+    all_inv: bool = False,
+) -> dict[str, list[int]]:
     """
     This function returns a dictionary that contains for each
     Mandelstam variables the vectors that are used to calculate it.
@@ -144,19 +160,19 @@ def mandelstam_calc(num_in, num_out, prefix="s", suffix="", infix="", all_inv=Fa
     The sign represents the sign in front of the (outgoing) vector.
     """
 
-    def invert(x):
+    def invert(x: int) -> int:
         if x > num_in:
             return -x
         else:
             return x
 
-    result = {}
+    result: dict[str, list[int]] = {}
     num_legs = num_in + num_out
 
     cuts_tmp = sections(num_legs)
 
     if all_inv:
-        extra = []
+        extra: list[list[int]] = []
         for i in range(1, num_legs + 1):
             for j in range(i, num_legs + 1):
                 if i != j:
@@ -174,7 +190,7 @@ def mandelstam_calc(num_in, num_out, prefix="s", suffix="", infix="", all_inv=Fa
     return result
 
 
-def sections(n, dual=False):
+def sections(n: int, dual: bool = False) -> list[list[int]]:
     """
     Find all ways to cut a cycle of n nodes into two sets
     by cutting two of the edges.
@@ -189,7 +205,7 @@ def sections(n, dual=False):
     each sublist represents one of the two sets for each cut.
 
     """
-    result = []
+    result: list[list[int]] = []
     mom = list(range(1, n + 1))
     if dual:
         i1 = 1
@@ -207,22 +223,22 @@ def sections(n, dual=False):
     return result
 
 
-def extend(list1, list2):
+def extend(list1: list[list[int]], list2: list[list[int]]) -> list[list[int]]:
     result = list1
     for l2 in list2:
-        if not Counter(l2) in list(map(Counter, list1)):
+        if Counter(l2) not in list(map(Counter, list1)):
             result.append(l2)
     return result
 
 
-def mandelstam_name(prefix, suffix, infix, indices):
+def mandelstam_name(prefix: str, suffix: str, infix: str, indices: list[int]) -> str:
     if indices == []:
         return "0"
     else:
         return "%s%s%s" % (prefix, infix.join(map(number_to_letter, indices)), suffix)
 
 
-def number_to_letter(d):
+def number_to_letter(d: int) -> str:
     """
     Although it is not a problem of the near future the program
     should be safe for processes with more than 9 particles.

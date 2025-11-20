@@ -13,4 +13,4 @@ filter.particles=s:0,s:0,b:0,t:0,e-:0,mu-:0,tau-:0
 
 reduction_programs=ninja
 
-filter.nlo= lambda d: d.chord("g") > 0
+filter.nlo= lambda d: any(p.particle().name() == "g" for p in d.chord(0))

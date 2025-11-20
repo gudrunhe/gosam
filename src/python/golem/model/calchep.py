@@ -1,23 +1,25 @@
 # vim: ts=3:sw=3
 
+import logging
 import os.path
+from collections.abc import Iterable
+from typing import TextIO, cast, final, override
 
 from golem.model.expressions import (
+    DotExpression,
+    Expression,
     ExpressionParser,
     FunctionExpression,
-    SymbolExpression,
-    ProductExpression,
-    SumExpression,
-    SpecialExpression,
-    PowerExpression,
-    UnaryMinusExpression,
-    DotExpression,
     IntegerExpression,
+    PowerExpression,
+    ProductExpression,
+    SpecialExpression,
+    SumExpression,
+    SymbolExpression,
+    UnaryMinusExpression,
 )
 from golem.util.config import GolemConfigError
 from golem.util.tools import LimitedWidthOutputStream
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -77,16 +79,19 @@ CANONICAL_HEADER_NAMES = {
 
 
 class CalcHEPImportError(GolemConfigError):
-    def __init__(self, msg):
+    def __init__(self, msg: str):
         GolemConfigError.__init__(self, msg)
 
+    @override
     def __str__(self):
         return "Error in LanHEP import: %s" % self.value()
 
+    @override
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.value())
 
 
+@final
 class TableReader:
     """
     Reader for CalcHEP/CompHEP model files (tables)
@@ -103,10 +108,10 @@ class TableReader:
     The columns are fixed width
     """
 
-    def __init__(self, f):
+    def __init__(self, f: TextIO):
         self.load(f)
 
-    def load(self, f):
+    def load(self, f: TextIO):
         model_name = f.readline().strip()
         table_name = f.readline().strip()
 
@@ -122,7 +127,7 @@ class TableReader:
         column_names = format.split("|")
         widths = list(map(len, column_names))
         column_names = [s.strip() for s in column_names]
-        table = []
+        table: list[list[str]] = []
 
         num_columns = len(column_names)
 
@@ -137,13 +142,15 @@ class TableReader:
             while line.endswith("\r") or line.endswith("\n"):
                 line = line[:-1]
             data = line.split("|")
-            row = ["" for i in range(num_columns)]
+            row = ["" for _ in range(num_columns)]
 
             i = 0
             for cell in data:
                 if i >= num_columns:
                     if (i > num_columns) or len(cell.strip()) > 0:
-                        raise CalcHEPImportError("Too many columns in entry #%d" % num_rows)
+                        raise CalcHEPImportError(
+                            "Too many columns in entry #%d" % num_rows
+                        )
                     else:
                         continue
 
@@ -152,13 +159,25 @@ class TableReader:
                     if i < num_columns - 1:
                         if len(cell) > widths[i]:
                             raise CalcHEPImportError(
-                                ("Column too wide (column #%d, entry #%d)." % (i + 1, num_rows + 1))
-                                + ("\nColumn was %r but width was %d" % (cell, widths[i]))
+                                (
+                                    "Column too wide (column #%d, entry #%d)."
+                                    % (i + 1, num_rows + 1)
+                                )
+                                + (
+                                    "\nColumn was %r but width was %d"
+                                    % (cell, widths[i])
+                                )
                             )
                         elif len(cell) < widths[i]:
                             raise CalcHEPImportError(
-                                ("Column too narrow (column #%d, entry #%d)." % (i + 1, num_rows + 1))
-                                + ("\nColumn was %r but width was %d" % (cell, widths[i]))
+                                (
+                                    "Column too narrow (column #%d, entry #%d)."
+                                    % (i + 1, num_rows + 1)
+                                )
+                                + (
+                                    "\nColumn was %r but width was %d"
+                                    % (cell, widths[i])
+                                )
                             )
                 row[i] = cell.strip()
                 i += 1
@@ -173,7 +192,7 @@ class TableReader:
         self.num_rows = num_rows
         self.table = table
 
-        self.column_indices = {}
+        self.column_indices: dict[str, int] = {}
 
         i = 0
         for name in self.column_names:
@@ -181,16 +200,14 @@ class TableReader:
             self.column_indices[header] = i
             i += 1
 
-        return True
-
-    def normalize_name(self, name):
+    def normalize_name(self, name: str) -> str:
         words = name.lower().strip(" \t><").split()
         norm_name = " ".join(words)
         if norm_name in CANONICAL_HEADER_NAMES:
             norm_name = CANONICAL_HEADER_NAMES[norm_name]
         return norm_name
 
-    def index(self, *names):
+    def index(self, *names: str):
         for name in names:
             header = self.normalize_name(name)
             if header in self.column_indices:
@@ -198,12 +215,13 @@ class TableReader:
         return -1
 
 
+@final
 class Model:
     """
     Describes a model from a CompHEP/CalcHEP table base.
     """
 
-    def __init__(self, path, idx):
+    def __init__(self, path: str, idx: str):
         """
         Creates a new model from a set of CalcHep/CompHep files.
 
@@ -212,8 +230,9 @@ class Model:
                 idx  -- index to be added to the file names
         """
         self.load(path, idx)
+        self.fsubs: dict[str, Expression] = {}
 
-    def load(self, path, idx):
+    def load(self, path: str, idx: str):
         """
         Loads the CalcHEP/CompHEP files for processing.
 
@@ -222,10 +241,10 @@ class Model:
                 idx  -- index to be added to the file names
         """
         stubs = ["func", "lgrng", "prtcls", "vars"]
-        tables = {}
+        tables: dict[str, TableReader] = {}
         for stub in stubs:
+            fname = os.path.join(path, "%s%d.mdl" % (stub, idx))
             try:
-                fname = os.path.join(path, "%s%d.mdl" % (stub, idx))
                 with open(fname, "r") as f:
                     tables[stub] = TableReader(f)
             except CalcHEPImportError as exc:
@@ -244,7 +263,7 @@ class Model:
                 return True
         return False
 
-    def store(self, path, stub):
+    def store(self, path: str, stub: str):
         """
         Writes the files required by golem to the specified directory.
 
@@ -267,7 +286,7 @@ class Model:
         with open(os.path.join(path, stub + ".hh"), "w") as f:
             self.write_form_file(f)
 
-    def _check_header_sane(self, tbl):
+    def _check_header_sane(self, tbl: TableReader):
         required_headers = [
             "fullname",
             "name",
@@ -282,16 +301,20 @@ class Model:
             "pdg",
         ]
 
-        missing = []
+        missing: list[str] = []
         for header in required_headers:
             idx = tbl.index(header)
             if idx < 0:
                 missing.append(" or ".join(["'%s'" % s for s in header]))
 
         if len(missing) > 0:
-            raise CalcHEPImportError("In particles: columns missing in table: %s" % ", ".join(missing))
+            raise CalcHEPImportError(
+                "In particles: columns missing in table: %s" % ", ".join(missing)
+            )
 
-    def var_list(self, tbl, prtcls, prefix=""):
+    def var_list(
+        self, tbl: TableReader, prtcls: TableReader, prefix: str = ""
+    ) -> Iterable[list[str]]:
         i_name = tbl.index("Name")
         i_val = tbl.index("Value")
         i_cmt = tbl.index("Comment")
@@ -301,7 +324,7 @@ class Model:
         if i_val < 0:
             raise CalcHEPImportError("In vars: column 'Value' missing.")
 
-        seen = set()
+        seen: set[str] = set()
 
         for row in tbl.table:
             name = row[i_name]
@@ -344,7 +367,9 @@ class Model:
                     name = prefix + name
                     yield [name, "0.0", "Width of %s" % row[i_name], ltx_name]
 
-    def func_list(self, tbl, prefix=""):
+    def func_list(
+        self, tbl: TableReader, prefix: str = ""
+    ) -> Iterable[tuple[str, Expression] | tuple[str, Expression, str]]:
         i_name = tbl.index("Name")
         i_expr = tbl.index("Expression")
         i_cmt = tbl.index("Comment")
@@ -386,11 +411,13 @@ class Model:
             expr = expr.prefixSymbolsWith(prefix)
 
             if i_cmt >= 0:
-                yield [name, expr, row[i_cmt]]
+                yield name, expr, row[i_cmt]
             else:
-                yield [name, expr]
+                yield name, expr
 
-    def expand_field_list(self, tbl, prefix=""):
+    def expand_field_list(
+        self, tbl: TableReader, prefix: str = ""
+    ) -> Iterable[list[str | int]]:
         """
         Expands the list of fields by automatically generating
         ghosts and Goldstone bosons.
@@ -409,7 +436,7 @@ class Model:
                 10: PDG code
         """
 
-        def pack(val):
+        def pack(val: str) -> str:
             if val == "0":
                 return val
             else:
@@ -431,12 +458,14 @@ class Model:
         i_lat_p = tbl.index("atexname")
         i_pdg = tbl.index("pdg")
 
-        GHOSTS = 9000000
-        OTHERS = 9100000
+        current_ghost_id = 9000000
+        current_other_id = 9100000
         GOLDSTONES = {23: 250, 24: 251}
 
         if i_pdg < 0:
-            raise CalcHEPImportError("Old model files without PDG codes are not supported anymore.")
+            raise CalcHEPImportError(
+                "Old model files without PDG codes are not supported anymore."
+            )
         self._check_header_sane(tbl)
 
         for row in tbl.table:
@@ -444,8 +473,8 @@ class Model:
             pdg = row[i_pdg]
 
             if pdg == "":
-                OTHERS += 1
-                pdg = OTHERS
+                current_other_id += 1
+                pdg = current_other_id
 
             new_row = [
                 row[i_name],
@@ -463,10 +492,12 @@ class Model:
             yield new_row
 
             if aux == "G":
-                assert int(row[i_spin]) == 2, "Cannot have aux=G for fields other than vectors"
+                assert int(row[i_spin]) == 2, (
+                    "Cannot have aux=G for fields other than vectors"
+                )
                 mass = row[i_mass].strip()
                 color = int(row[i_color])
-                OTHERS += 1
+                current_other_id += 1
                 if abs(color) != 1:
                     new_row = [
                         row[i_A] + " tensor ghost",
@@ -479,16 +510,16 @@ class Model:
                         "t",  # indicates that we have a tensor ghost here
                         "{%s}_t" % row[i_latex],
                         "{%s}_t" % row[i_lat_p],
-                        OTHERS,
+                        current_other_id,
                     ]
                     yield new_row
 
                 if mass != "0":
-                    if row[i_pdg] in GOLDSTONES:
-                        pdg = GOLDSTONES[i_pdg]
+                    if int(row[i_pdg]) in GOLDSTONES:
+                        pdg = GOLDSTONES[int(row[i_pdg])]
                     else:
-                        OTHERS += 1
-                        pdg = OTHERS
+                        current_other_id += 1
+                        pdg = current_other_id
                     new_row = [
                         row[i_A] + " goldstone boson",
                         row[i_A] + ".f",
@@ -504,7 +535,7 @@ class Model:
                     ]
                     yield new_row
 
-                GHOSTS += 1
+                current_ghost_id += 1
                 new_row = [
                     row[i_A] + " faddeev popov ghost",
                     row[i_A] + ".c",
@@ -516,12 +547,12 @@ class Model:
                     "c",  # indicates that we have a ghost
                     "c_{%s}" % row[i_latex],
                     "\\bar{c}_{%s}" % row[i_latex],
-                    GHOSTS,
+                    current_ghost_id,
                 ]
                 yield new_row
 
                 if row[i_A] != row[i_A_p]:
-                    GHOSTS += 1
+                    current_ghost_id += 1
                     new_row = [
                         row[i_A_p] + " faddeev popov ghost",
                         row[i_A_p] + ".c",
@@ -533,12 +564,12 @@ class Model:
                         "c",  # indicates that we have a ghost
                         "c_{%s}" % row[i_lat_p],
                         "\\bar{c}_{%s}" % row[i_lat_p],
-                        GHOSTS,
+                        current_ghost_id,
                     ]
 
                     yield new_row
 
-    def write_qgraf_file(self, f, fmrules):
+    def write_qgraf_file(self, f: TextIO, fmrules: str):
         WIDTH = 70
         INDENT = "      "
         prtcls = self.tables["prtcls"]
@@ -546,17 +577,17 @@ class Model:
 
         prefix = MODEL_PREFIX
 
-        f.write("""\
+        _ = f.write("""\
 % vim: syntax=none:sw=3:ts=3
 %
 % This model file has been created automatically
 % from a source in CompHEP/CalcHEP format.
 
 """)
-        f.write("[ model = '%s']\n" % prtcls.model_name)
-        f.write("[ fmrules = '%s']\n" % fmrules)
+        _ = f.write("[ model = '%s']\n" % prtcls.model_name)
+        _ = f.write("[ fmrules = '%s']\n" % fmrules)
 
-        f.write("\n%%%%%%%%%% PROPAGATORS %%%%%%%%%%%%%%%%%%%\n\n")
+        _ = f.write("\n%%%%%%%%%% PROPAGATORS %%%%%%%%%%%%%%%%%%%\n\n")
 
         #   0: Full name
         #   1: field name A
@@ -570,14 +601,14 @@ class Model:
         #   9: LaTeX(A+)
         #  10: PDG code
 
-        names = {}
+        names: dict[str, str] = {}
 
         for row in self.expand_field_list(prtcls, prefix):
             row[3] = int(row[3])
             row[6] = int(row[6])
-            mass = row[4].strip()
+            mass = cast(str, row[4]).strip()
 
-            options = []
+            options: list[str] = []
 
             if row[3] % 2 == 1 or row[7] == "c":
                 commutation = "-"
@@ -594,8 +625,8 @@ class Model:
             else:
                 anti_name = "anti%d" % int(row[10])
 
-            names[row[1]] = name
-            names[row[2]] = anti_name
+            names[cast(str, row[1])] = name
+            names[cast(str, row[2])] = anti_name
 
             if row[1] != row[2]:
                 conj = "CONJ=('+','-')"
@@ -603,13 +634,17 @@ class Model:
                 conj = "CONJ=('+')"
 
             aux = 0
-            saux = row[7].lower()
+            saux = cast(str, row[7]).lower()
 
             if saux == "t":
                 aux = 1
 
-            f.write("%% %s (PDG %s)\n" % (row[0], row[10]))
-            line = "[%5s, %5s, %s;" % (name, anti_name, ",".join([commutation] + options))
+            _ = f.write("%% %s (PDG %s)\n" % (row[0], row[10]))
+            line = "[%5s, %5s, %s;" % (
+                name,
+                anti_name,
+                ",".join([commutation] + options),
+            )
             comma = False
             for param in [
                 "TWOSPIN=%d" % row[3],
@@ -627,18 +662,18 @@ class Model:
                 if len(line) + 1 < WIDTH:
                     line += " "
                 else:
-                    f.write(line + "\n")
+                    _ = f.write(line + "\n")
                     line = INDENT
 
                 if len(line) + len(param) < WIDTH:
                     line += param
                 else:
-                    f.write(line + "\n")
+                    _ = f.write(line + "\n")
                     line = INDENT + param
 
-            f.write(line + "]\n")
+            _ = f.write(line + "]\n")
 
-        f.write("%%%%%%%%%% VERTICES %%%%%%%%%%%%%%%%%%%%%%\n")
+        _ = f.write("%%%%%%%%%% VERTICES %%%%%%%%%%%%%%%%%%%%%%\n")
 
         parser = ExpressionParser(
             i=i_,
@@ -660,7 +695,7 @@ class Model:
         )
 
         # collect the names of the couplings
-        coupl_freq = {}
+        coupl_freq: dict[str, int] = {}
         for row in lgrng.table:
             prefactor = parser.compile(row[4])
             powers = prefactor.countSymbolPowers()
@@ -682,21 +717,21 @@ class Model:
 
             if row[3].strip() == "":
                 field = [names[fld] for fld in row[0:3]]
-                # map(qgraf_escape, row[0:3])
             else:
                 field = [names[fld] for fld in row[0:4]]
-                # map(qgraf_escape, row[0:4])
 
             if len(field) == 4:
-                f.write("%%  %s  %s  %s  %s  Vertex\n" % (row[0], row[1], row[2], row[3]))
+                _ = f.write(
+                    "%%  %s  %s  %s  %s  Vertex\n" % (row[0], row[1], row[2], row[3])
+                )
                 line = "[%s, %s, %s, %s" % (field[0], field[1], field[2], field[3])
             else:
-                f.write("%%  %s  %s  %s  Vertex\n" % (row[0], row[1], row[2]))
+                _ = f.write("%%  %s  %s  %s  Vertex\n" % (row[0], row[1], row[2]))
                 line = "[%s, %s, %s" % (field[0], field[1], field[2])
 
             comma = False
 
-            pwrs = {}
+            pwrs: dict[str, int] = {}
             for name in coupl_list[:coupl_cut]:
                 pwrs[name] = prefactor.powerCounting({name: 1})
 
@@ -713,7 +748,7 @@ class Model:
                     line += ","
                     if len(line) > WIDTH:
                         line += "\n"
-                        f.write(line)
+                        _ = f.write(line)
                         line = INDENT
                     else:
                         line += " "
@@ -724,29 +759,28 @@ class Model:
                 if len(line) + len(chunk) < WIDTH:
                     line += chunk
                 else:
-                    f.write(line + "\n")
+                    _ = f.write(line + "\n")
                     line = INDENT + chunk
-            f.write(line + "]\n")
+            _ = f.write(line + "]\n")
 
-        f.write("%%%%%%%%%%%%%%%% END % OF % FILE %%%%%%%%%\n")
+        _ = f.write("%%%%%%%%%%%%%%%% END % OF % FILE %%%%%%%%%\n")
 
-    def write_python_file(self, f):
+    def write_python_file(self, f: TextIO):
         prtcls = self.tables["prtcls"]
         vars = self.tables["vars"]
         funcs = self.tables["func"]
-        extra_floats = {}
 
         prefix = MODEL_PREFIX
 
-        f.write("""\
+        _ = f.write("""\
 # vim: ts=3:sw=3
 from golem.model.particle import Particle
 from math import sqrt
 
 """)
-        f.write("model_name = %r\n\n" % prtcls.model_name)
+        _ = f.write("model_name = %r\n\n" % prtcls.model_name)
 
-        f.write("particles = {\n")
+        _ = f.write("particles = {\n")
         comma = False
         # The fields are
         # 0            1   2   3       4     5      6     7
@@ -767,7 +801,7 @@ from math import sqrt
         #   8: LaTeX(A)
         #   9: LaTeX(A+)
         #  10: PDG code
-        names = {}
+        names: dict[str, str] = {}
         for row in self.expand_field_list(prtcls, prefix):
             name = "part%d" % int(row[10])
             if row[1] == row[2]:
@@ -775,12 +809,12 @@ from math import sqrt
             else:
                 anti_name = "anti%d" % int(row[10])
 
-            names[row[1]] = name
-            names[row[2]] = anti_name
+            names[cast(str, row[1])] = name
+            names[cast(str, row[2])] = anti_name
 
             max_len = max(max_len, len(name), len(anti_name))
-            max_mlen = max(max_mlen, len(row[4]))
-            max_rlen = max(max_rlen, len(row[1]), len(row[2]))
+            max_mlen = max(max_mlen, len(cast(str, row[4])))
+            max_rlen = max(max_rlen, len(cast(str, row[1])), len(cast(str, row[2])))
 
         max_len = str(max_len + 2)
         max_mlen = str(max_mlen + 2)
@@ -805,21 +839,47 @@ from math import sqrt
             row[10] = int(row[10])
 
             if comma:
-                f.write(",\n")
+                _ = f.write(",\n")
             else:
                 comma = True
 
-            name = names[row[1]]  # qgraf_escape(row[1])
-            anti_name = names[row[2]]  # qgraf_escape(row[2])
+            name = names[cast(str, row[1])]
+            anti_name = names[cast(str, row[2])]
             charge = 0  # FIXME not yet implemented
 
             if row[1] != row[2]:
-                f.write(line_fmt % (anti_name, anti_name, -row[3], row[4], -row[6], name, row[5], -row[10], -charge))
-                f.write(",\n")
-            f.write(line_fmt % (name, name, row[3], row[4], row[6], anti_name, row[5], row[10], charge))
-        f.write("\n}\n\n")
+                _ = f.write(
+                    line_fmt
+                    % (
+                        anti_name,
+                        anti_name,
+                        -row[3],
+                        row[4],
+                        -row[6],
+                        name,
+                        row[5],
+                        -row[10],
+                        -charge,
+                    )
+                )
+                _ = f.write(",\n")
+            _ = f.write(
+                line_fmt
+                % (
+                    name,
+                    name,
+                    row[3],
+                    row[4],
+                    row[6],
+                    anti_name,
+                    row[5],
+                    row[10],
+                    charge,
+                )
+            )
+        _ = f.write("\n}\n\n")
 
-        f.write("""\
+        _ = f.write("""\
 mnemonics = {
 \t# Here, you can add entries like:
 \t# 'mnemonic-name': particles['field-name']
@@ -828,106 +888,106 @@ mnemonics = {
         fmt = "\t%" + max_rlen + "r: particles[%" + max_len + "r]"
         comma = False
         for row in self.expand_field_list(prtcls, prefix):
-            name = names[row[1]]  # qgraf_escape(row[1])
-            anti_name = names[row[2]]  # qgraf_escape(row[2])
+            name = names[cast(str, row[1])]  # qgraf_escape(row[1])
+            anti_name = names[cast(str, row[2])]  # qgraf_escape(row[2])
 
             if name != row[1]:
                 if comma:
-                    f.write(",\n")
+                    _ = f.write(",\n")
                 else:
                     comma = True
-                f.write(fmt % (row[1], name))
+                _ = f.write(fmt % (row[1], name))
 
             if (anti_name != row[2]) and (row[1] != row[2]):
                 if comma:
-                    f.write(",\n")
+                    _ = f.write(",\n")
                 else:
                     comma = True
-                f.write(fmt % (row[2], anti_name))
+                _ = f.write(fmt % (row[2], anti_name))
 
         if comma:
-            f.write("\n}\n\n")
+            _ = f.write("\n}\n\n")
         else:
-            f.write("}\n\n")
+            _ = f.write("}\n\n")
 
         counter = [0]
-        self.fsubs = {}
+
         fprefix = prefix + "float"
-        f.write("functions = {\n")
-        f.write("\t'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'")
+        _ = f.write("functions = {\n")
+        _ = f.write("\t'Nfrat': 'if(Nfgen,Nf/Nfgen,1)'")
         for row in self.func_list(funcs, prefix):
             name = row[0]
             expr = row[1].replaceFloats(fprefix, self.fsubs, counter)
-            f.write(",\n")
+            _ = f.write(",\n")
             if len(row) > 2:
-                f.write("\t\t# %s\n" % row[2])
-            f.write("\t\t%r: " % name)
-            f.write("'")
+                _ = f.write("\t\t# %s\n" % row[2])
+            _ = f.write("\t\t%r: " % name)
+            _ = f.write("'")
             expr.write(f)
-            f.write("'")
-        f.write("\n}\n\n")
+            _ = f.write("'")
+        _ = f.write("\n}\n\n")
 
-        f.write("parameters = {\n")
-        f.write("\t\t# Number of colours in SU(NC) group (QCD)\n")
-        f.write("\t\t'NC': '3.0',\n")
-        f.write("\t\t# Number of light flavours\n")
-        f.write("\t\t'Nf': '5.0',")
-        f.write("\t\t'Nfgen': '-1.0'")
+        _ = f.write("parameters = {\n")
+        _ = f.write("\t\t# Number of colours in SU(NC) group (QCD)\n")
+        _ = f.write("\t\t'NC': '3.0',\n")
+        _ = f.write("\t\t# Number of light flavours\n")
+        _ = f.write("\t\t'Nf': '5.0',")
+        _ = f.write("\t\t'Nfgen': '-1.0'")
 
         for name, value in list(self.fsubs.items()):
-            f.write(",\n")
-            f.write("\t\t%r: " % name)
-            f.write("'")
+            _ = f.write(",\n")
+            _ = f.write("\t\t%r: " % name)
+            _ = f.write("'")
             value.write(f)
-            f.write("'")
+            _ = f.write("'")
 
         for row in self.var_list(vars, prtcls, prefix):
             if len(row) > 2:
-                f.write(",\n\t\t# %s\n" % row[2])
-            f.write("\t\t%r: %r" % (row[0], row[1]))
-        f.write("\n}\n\n")
+                _ = f.write(",\n\t\t# %s\n" % row[2])
+            _ = f.write("\t\t%r: %r" % (row[0], row[1]))
+        _ = f.write("\n}\n\n")
 
-        f.write("latex_parameters = {\n")
-        f.write("\t\t'NC': 'N_C',\n")
-        f.write("\t\t'Nf': 'N_f',\n")
-        f.write("\t\t'Nfgen': 'N_f^{gen}'")
+        _ = f.write("latex_parameters = {\n")
+        _ = f.write("\t\t'NC': 'N_C',\n")
+        _ = f.write("\t\t'Nf': 'N_f',\n")
+        _ = f.write("\t\t'Nfgen': 'N_f^{gen}'")
 
         for name, value in list(self.fsubs.items()):
-            f.write(",\n")
-            f.write("\t\t%r: %r" % (name, "\\text{" + name + "}"))
+            _ = f.write(",\n")
+            _ = f.write("\t\t%r: %r" % (name, "\\text{" + name + "}"))
 
         for row in self.var_list(vars, prtcls, prefix):
-            f.write(",\n\t\t%r: %r" % (row[0], row[3]))
-        f.write("\n}\n\n")
+            _ = f.write(",\n\t\t%r: %r" % (row[0], row[3]))
+        _ = f.write("\n}\n\n")
 
-        f.write("types = {\n")
-        f.write("\t\t'NC': 'R', 'Nf': 'R', 'Nfgen': 'R', 'Nfrat': 'R'")
+        _ = f.write("types = {\n")
+        _ = f.write("\t\t'NC': 'R', 'Nf': 'R', 'Nfgen': 'R', 'Nfrat': 'R'")
         for name in self.fsubs.keys():
-            f.write(",\n")
-            f.write("\t\t%r: 'RP'" % name)
+            _ = f.write(",\n")
+            _ = f.write("\t\t%r: 'RP'" % name)
         for row in self.var_list(vars, prtcls, prefix):
-            f.write(",\n\t\t%r: 'R'" % row[0])
+            _ = f.write(",\n\t\t%r: 'R'" % row[0])
         for row in self.func_list(funcs, prefix):
-            f.write(",\n\t\t%r: 'R'" % row[0])
-        f.write("\n}\n\n")
+            _ = f.write(",\n\t\t%r: 'R'" % row[0])
+        _ = f.write("\n}\n\n")
 
-        f.write("latex_names = {\n")
+        _ = f.write("latex_names = {\n")
         comma = False
         for row in self.expand_field_list(prtcls, prefix):
             if comma:
-                f.write(",\n")
+                _ = f.write(",\n")
             else:
                 comma = True
             if row[1] != row[2]:
-                f.write("\t\t%r: %r,\n" % (names[row[1]], row[8]))
-            f.write("\t\t%r: %r" % (names[row[2]], row[9]))
-        f.write("\n}\n\n")
+                _ = f.write("\t\t%r: %r,\n" % (names[cast(str, row[1])], row[8]))
+            _ = f.write("\t\t%r: %r" % (names[cast(str, row[2])], row[9]))
+        _ = f.write("\n}\n\n")
 
-        f.write("line_styles = {\n")
+        _ = f.write("line_styles = {\n")
         comma = False
         for row in self.expand_field_list(prtcls, prefix):
             if comma:
-                f.write(",\n")
+                _ = f.write(",\n")
             else:
                 comma = True
 
@@ -957,18 +1017,24 @@ mnemonics = {
                     style = "photon"
 
             if row[1] != row[2]:
-                f.write("\t\t%r: %r,\n" % (names[row[1]], style))
-            f.write("\t\t%r: %r" % (names[row[2]], style))
-        f.write("\n}\n\n")
+                _ = f.write("\t\t%r: %r,\n" % (names[cast(str, row[1])], style))
+            _ = f.write("\t\t%r: %r" % (names[cast(str, row[2])], style))
+        _ = f.write("\n}\n\n")
 
-        f.write("aux = {{\n    {}\n}}\n\n".format(",\n    ".join([
-            f"'{names[row[1]]}': {1 if row[7].lower() == 't' else 0}" for row in self.expand_field_list(prtcls, prefix)
-        ])))
+        _ = f.write(
+            "aux = {{\n    {}\n}}\n\n".format(
+                ",\n    ".join(
+                    [
+                        f"'{names[cast(str, row[1])]}': {1 if cast(str, row[7]).lower() == 't' else 0}"
+                        for row in self.expand_field_list(prtcls, prefix)
+                    ]
+                )
+            )
+        )
 
-        f.write("slha_locations = {}\n\n")
+        _ = f.write("slha_locations = {}\n\n")
 
-    def write_form_file(self, f):
-        WIDTH = 70
+    def write_form_file(self, f: TextIO):
         prtcls = self.tables["prtcls"]
         vars = self.tables["vars"]
         funcs = self.tables["func"]
@@ -976,16 +1042,16 @@ mnemonics = {
 
         prefix = MODEL_PREFIX
 
-        f.write("""\
+        _ = f.write("""\
 * vim: ts=3:sw=3:syntax=form
 * This file has been created automatically from a
 * CompHEP/CalcHEP source.
 
 *---#[ Symbol Definitions :
 """)
-        f.write("*---#[ Fields :\n")
-        particles = {}
-        names = {}
+        _ = f.write("*---#[ Fields :\n")
+        particles: dict[str, list[str]] = {}
+        names: dict[str, str] = {}
         for row in self.expand_field_list(prtcls, prefix):
             row[3] = int(row[3])
             row[6] = int(row[6])
@@ -995,47 +1061,73 @@ mnemonics = {
             else:
                 anti_name = "anti%d" % int(row[10])
 
-            names[row[1]] = name
-            names[row[2]] = anti_name
+            names[cast(str, row[1])] = name
+            names[cast(str, row[2])] = anti_name
 
             if row[1] != row[2]:
-                particles[anti_name] = [row[0], anti_name, name, -row[3], row[4], row[5], -row[6], row[7]]
-            particles[name] = [row[0], name, anti_name, row[3], row[4], row[5], row[6], row[7]]
+                particles[anti_name] = cast(
+                    list[str],
+                    [
+                        row[0],
+                        anti_name,
+                        name,
+                        -row[3],
+                        row[4],
+                        row[5],
+                        -row[6],
+                        row[7],
+                    ],
+                )
+            particles[name] = cast(
+                list[str],
+                [
+                    row[0],
+                    name,
+                    anti_name,
+                    row[3],
+                    row[4],
+                    row[5],
+                    row[6],
+                    row[7],
+                ],
+            )
 
             name = "[field.%s]" % name
             anti_name = "[field.%s]" % anti_name
 
             if name == anti_name:
-                f.write("Symbol %s;\n" % name)
+                _ = f.write("Symbol %s;\n" % name)
             else:
-                f.write("Symbols %s, %s;\n" % (name, anti_name))
-        f.write("*---#] Fields :\n")
+                _ = f.write("Symbols %s, %s;\n" % (name, anti_name))
+        _ = f.write("*---#] Fields :\n")
 
-        f.write("*---#[ Parameters :\n")
+        _ = f.write("*---#[ Parameters :\n")
         for row in self.var_list(vars, prtcls, prefix):
             if len(row) > 2:
-                f.write("* %s\n" % row[2])
-            f.write("Symbol %s;\n" % row[0])
+                _ = f.write("* %s\n" % row[2])
+            _ = f.write("Symbol %s;\n" % row[0])
 
         for row in self.func_list(funcs, prefix):
             if len(row) > 2:
-                f.write("* %s\n" % row[2])
-            f.write("Symbol %s;\n" % row[0])
+                _ = f.write("* %s\n" % row[2])
+            _ = f.write("Symbol %s;\n" % row[0])
 
         for row in self.fsubs:
-            f.write("Symbol %s;\n" % row)
+            _ = f.write("Symbol %s;\n" % row)
 
-        f.write("*---#] Parameters :\n")
-        f.write("*---#] Symbol Definitions :\n")
+        _ = f.write("*---#] Parameters :\n")
+        _ = f.write("*---#] Symbol Definitions :\n")
 
         if self.containsMajoranaFermions():
-            f.write("* Model contains Majorana Fermions:\n")
-            logger.debug("You are working with a model " + "that contains Majorana fermions.")
-            f.write('#Define DISCARDQGRAFSIGN "1"\n')
-        f.write('#Define USEVERTEXPROC "1"\n')
+            _ = f.write("* Model contains Majorana Fermions:\n")
+            logger.debug(
+                "You are working with a model " + "that contains Majorana fermions."
+            )
+            _ = f.write('#Define DISCARDQGRAFSIGN "1"\n')
+        _ = f.write('#Define USEVERTEXPROC "1"\n')
 
-        f.write("*---#[ Procedure ReplaceVertices :\n")
-        f.write("#Procedure ReplaceVertices\n")
+        _ = f.write("*---#[ Procedure ReplaceVertices :\n")
+        _ = f.write("#Procedure ReplaceVertices\n")
 
         parser = ExpressionParser(
             G5=Gamma5,
@@ -1075,30 +1167,30 @@ mnemonics = {
 
             fold = "*---#%%s  %s :\n" % vtxname
 
-            f.write(fold % "[")
-            f.write("Identify Once vertex(iv?,\n")
+            _ = f.write(fold % "[")
+            _ = f.write("Identify Once vertex(iv?,\n")
             i = 1
             subs = {}
-            idx_splits = []
-            sums = []
-            reps = []
+            idx_splits: list[tuple[int, Expression]] = []
+            sums: list[str] = []
+            reps: list[int] = []
 
-            Lidx = []
-            Cidx = []
+            Lidx: list[str] = []
+            Cidx: list[str] = []
 
             idx_taken = False
             adj_idx_taken = False
 
-            spins = []
+            spins: list[int] = []
 
             for fld in field:
                 if i > 1:
-                    f.write(",\n")
+                    _ = f.write(",\n")
                 prt = particles[fld]
 
                 Lidx.append("idx%dL%d" % (i, abs(int(prt[3]))))
                 Cidx.append("idx%dC%d" % (i, abs(int(prt[6]))))
-                f.write(
+                _ = f.write(
                     "      [field.%s], idx%d?, %d, k%d?, %s?, %d, %s?"
                     % (fld, i, int(prt[3]), i, Lidx[-1], int(prt[6]), Cidx[-1])
                 )
@@ -1108,9 +1200,6 @@ mnemonics = {
 
                 spin2 = int(prt[3])
                 spins.append(abs(spin2))
-                isselfconj = prt[1] == prt[2]
-                isfermion = spin2 % 2 == 1
-                ismaiorana = isfermion and isselfconj
 
                 if abs(spin2) == 1:
                     if (spin2 < 0 and not adj_idx_taken) or idx_taken:
@@ -1159,7 +1248,7 @@ mnemonics = {
                 else:
                     raise CalcHEPImportError("Spin %d/2 not supported" % spin2)
                 i += 1
-            f.write(") =")
+            _ = f.write(") =")
 
             if adj_idx_taken != idx_taken:
                 raise CalcHEPImportError("Illegal vertex: %s" % vtxname)
@@ -1173,7 +1262,7 @@ mnemonics = {
                 c = self.color_generator(reps, Cidx)
             except CalcHEPImportError as exc:
                 raise CalcHEPImportError("While importing vertex %r: %s" % (field, exc))
-            if c != 1:
+            if c is not None:
                 expression = expression * c
 
             if len(idx_splits) > 0:
@@ -1183,23 +1272,23 @@ mnemonics = {
             lwf = LimitedWidthOutputStream(f, 70, 3)
             lwf.nl()
             expression.write(lwf)
-            lwf.write(";")
-            f.write("\n")
+            _ = lwf.write(";")
+            _ = f.write("\n")
 
             if len(sums) > 0:
-                f.write("Sum %s;\n" % ", ".join(sums))
-            f.write(fold % "]")
+                _ = f.write("Sum %s;\n" % ", ".join(sums))
+            _ = f.write(fold % "]")
 
-        f.write("""\
+        _ = f.write("""\
 	Repeat;
 		Id once T(idx1?, idx2?) = T(idx1, idx3, idx4) * T(idx2, idx4, idx3) / TR;
 		Sum idx3, idx4;
 	EndRepeat;
 """)
-        f.write("#EndProcedure\n")
-        f.write("*---#] Procedure ReplaceVertices :\n")
+        _ = f.write("#EndProcedure\n")
+        _ = f.write("*---#] Procedure ReplaceVertices :\n")
 
-        f.write("""\
+        _ = f.write("""\
 *---#[ Procedure VertexConstants :
 #Procedure VertexConstants
 * Just a dummy, all vertex constants are already
@@ -1212,7 +1301,7 @@ mnemonics = {
 *---#] Procedure VertexConstants :
 """)
 
-    def color_generator(self, reps, indices):
+    def color_generator(self, reps: list[int], indices: list[str]) -> None | Expression:
         """
         Creates an expression for the color generator
         associated with a three particle vertex.
@@ -1233,7 +1322,7 @@ mnemonics = {
                 return self.color_generator(new_reps, new_indices)
 
         if len(reps) == 0:
-            return 1
+            return None
         elif len(reps) == 2:
             if abs(reps[0]) != 8:
                 return d_(SpecialExpression(indices[0]), SpecialExpression(indices[1]))
@@ -1251,26 +1340,39 @@ mnemonics = {
                     ig = indices[reps.index(8)]
 
                 if (-3 not in reps) or (3 not in reps):
-                    raise CalcHEPImportError("Cannot determine color flow in %r vector" % reps)
+                    raise CalcHEPImportError(
+                        "Cannot determine color flow in %r vector" % reps
+                    )
 
                 iqbar = indices[reps.index(-3)]
                 iq = indices[reps.index(3)]
 
-                return T(SpecialExpression(ig), SpecialExpression(iqbar), SpecialExpression(iq))
+                return T(
+                    SpecialExpression(ig),
+                    SpecialExpression(iqbar),
+                    SpecialExpression(iq),
+                )
 
             elif r == [8, 8, 8]:
                 return -i_ * f(
-                    SpecialExpression(indices[0]), SpecialExpression(indices[1]), SpecialExpression(indices[2])
+                    SpecialExpression(indices[0]),
+                    SpecialExpression(indices[1]),
+                    SpecialExpression(indices[2]),
                 )
             else:
-                raise CalcHEPImportError("Currently color generators for %r not supported" % reps)
+                raise CalcHEPImportError(
+                    "Currently color generators for %r not supported" % reps
+                )
         else:
             raise CalcHEPImportError(
-                ("Import of vertices with %d coloured" % len(reps)) + (" particles not supported. %r" % reps)
+                ("Import of vertices with %d coloured" % len(reps))
+                + (" particles not supported. %r" % reps)
             )
 
 
-def translate_lorentz(expr, has_clifford, is_vff=False):
+def translate_lorentz(
+    expr: Expression, has_clifford: bool, is_vff: bool = False
+) -> Expression:
     if has_clifford:
         one = IntegerExpression(1)
         two = IntegerExpression(2)
@@ -1286,7 +1388,7 @@ def translate_lorentz(expr, has_clifford, is_vff=False):
     return result
 
 
-def grep_clifford(expr, is_vff):
+def grep_clifford(expr: Expression, is_vff: bool) -> Expression:
     if isinstance(expr, SumExpression):
         return grep_clifford_in_sum(expr, is_vff)
     elif isinstance(expr, ProductExpression):
@@ -1299,27 +1401,25 @@ def grep_clifford(expr, is_vff):
         return expr * d_(adx, idx)
 
 
-def is_clifford(expr):
+def is_clifford(expr: Expression):
     if isinstance(expr, FunctionExpression):
         return expr._head == Sm or expr._head == Sm4 or expr._head == SmEps
     else:
         return expr == Gamma5 or expr == ProjPlus or expr == ProjMinus
 
 
-def grep_clifford_in_sum(expr, is_vff):
-    l = len(expr)
-    new_terms = []
-    for i in range(l):
+def grep_clifford_in_sum(expr: SumExpression, is_vff: bool) -> SumExpression:
+    new_terms: list[Expression] = []
+    for i in range(len(expr)):
         new_terms.append(grep_clifford(expr[i], is_vff))
     return SumExpression(new_terms)
 
 
-def grep_clifford_in_product(expr, is_vff):
-    l = len(expr)
-    cliff_factors = []
-    new_factors = []
-    stack = []
-    for i in range(l):
+def grep_clifford_in_product(expr: ProductExpression, _is_vff: bool) -> Expression:
+    cliff_factors: list[tuple[int, Expression]] = []
+    new_factors: list[tuple[int, Expression]] = []
+    stack: list[tuple[int, Expression]] = []
+    for i in range(len(expr)):
         stack.append(expr[i])
     stack.reverse()
 
@@ -1328,7 +1428,7 @@ def grep_clifford_in_product(expr, is_vff):
         if sig == -1:
             new_factors.append((sig, factor))
         elif isinstance(factor, ProductExpression):
-            prod = []
+            prod: list[tuple[int, Expression]] = []
             for i in range(len(factor)):
                 prod.append(factor[i])
             prod.reverse()
@@ -1345,7 +1445,7 @@ def grep_clifford_in_product(expr, is_vff):
         return d_(adx, idx) * expr
 
 
-def qgraf_escape(s):
+def qgraf_escape(s: str) -> str:
     """
     Escape all characters which are not Qgraf-conform.
 
@@ -1361,10 +1461,9 @@ def qgraf_escape(s):
     [^_.A-Za-z0-9] -> '_' + oct([^_.A-Za-z0-9]) + '_'
     """
 
-    res = ""
-    l = len(s)
+    res: str = ""
     fmt = "_%03o_"
-    for i in range(l):
+    for i in range(len(s)):
         ch = s[i : i + 1]
         if ch == "_":
             res += "__"
@@ -1373,7 +1472,7 @@ def qgraf_escape(s):
         elif ch == "-":
             res += "_0M_"
         elif ch == ".":
-            if (i < l - 1) and not s[i + 1 : i + 2].isalpha():
+            if (i < len(s) - 1) and not s[i + 1 : i + 2].isalpha():
                 res += fmt % ord(ch)
             else:
                 res += "_"
@@ -1387,7 +1486,7 @@ def qgraf_escape(s):
     return res
 
 
-def get_rank(expr):
+def get_rank(expr: Expression) -> int:
     if isinstance(expr, SumExpression):
         n = len(expr)
         lst = [get_rank(expr[i]) for i in range(n)]
@@ -1401,7 +1500,7 @@ def get_rank(expr):
         result = 0
 
         for i in range(n):
-            sign, factor = expr[i]
+            _, factor = expr[i]
             result += get_rank(factor)
         return result
 

@@ -14,7 +14,7 @@ symmetries=family
 
 filter.particles=A:0,Z:0,C:0,S:0,B:0,H:0
 
-filter.nlo= lambda d: not d.isScaleless() and not (d.legs("g") > 0 and d.chord("U") > 0)
+filter.nlo= lambda d: not is_scaleless(d) and not (any(l.particle().name() == "g" for l in d.legs()) and any(p.particle().name() == "U" for p in d.chord(0)))
 
 
 ###################

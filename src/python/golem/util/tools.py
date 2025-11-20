@@ -1,24 +1,29 @@
 # vim: ts=3:sw=3:expandtab
 import argparse
-import sys
+import logging
 import os.path
-import traceback
 import re
-from copy import copy
-import textwrap
 import shutil
+import sys
+import textwrap
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
+from copy import copy
+from types import ModuleType
+from typing import TextIO, TypeVar, cast, final, override
 
-import golem.model
-import golem.properties
 import golem.algorithms.helicity
 import golem.installation
-from golem.installation import LIB_DIR, BIN_DIR
-
-from golem.util.path import golem_path
-from golem.util.config import GolemConfigError
+import golem.model
+import golem.properties
+from golem.installation import BIN_DIR, LIB_DIR
+from golem.model.particle import Particle
+from golem.util.config import GolemConfigError, Properties, Property
 from golem.util.constants import MODEL_LOCAL
+from golem.util.parser import TemplateError
+from golem.util.path import golem_path
 
-import logging
+T = TypeVar("T")
+V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 
@@ -32,25 +37,36 @@ class NLRHelpFormatter(argparse.HelpFormatter):
     Newline respecting help formatter: same as default formatter, except that each line is wrapped separately.
     """
 
-    def _split_lines(self, text, width):
-        wrapped_lines = []
+    @override
+    def _split_lines(self, text: str, width: int) -> list[str]:
+        wrapped_lines: list[str] = []
         for line in text.splitlines():
             line = self._whitespace_matcher.sub(" ", line).strip()
             wrapped_lines += textwrap.wrap(line, width)
         return wrapped_lines
 
-    def _fill_text(self, text, width, indent):
-        wrapped_lines = []
+    @override
+    def _fill_text(self, text: str, width: int, indent: str):
+        wrapped_lines: list[str] = []
         for line in text.splitlines():
             line = self._whitespace_matcher.sub(" ", line).strip()
-            wrapped_lines.append(textwrap.fill(line, width, initial_indent=indent, subsequent_indent=indent))
+            wrapped_lines.append(
+                textwrap.fill(
+                    line, width, initial_indent=indent, subsequent_indent=indent
+                )
+            )
         return "\n".join(wrapped_lines)
 
 
 class CustomWrapper(textwrap.TextWrapper):
-    def wrap(self, text):
+    @override
+    def wrap(self, text: str):
         lines = text.splitlines()
-        wrapped_lines = [wrapped_line for line in lines for wrapped_line in super(CustomWrapper, self).wrap(line)]
+        wrapped_lines = [
+            wrapped_line
+            for line in lines
+            for wrapped_line in super(CustomWrapper, self).wrap(line)
+        ]
         if len(wrapped_lines) == 1:
             wrapped_lines[0] = "- " + wrapped_lines[0]
         else:
@@ -64,11 +80,14 @@ class CustomWrapper(textwrap.TextWrapper):
         return wrapped_lines
 
 
+@final
 class DuplicationFilter(logging.Filter):
     def __init__(self):
+        super().__init__()
         self.previous_logs = None
 
-    def filter(self, record):
+    @override
+    def filter(self, record: logging.LogRecord):
         current_log = (record.module, record.levelno, record.getMessage())
         if not self.previous_logs:
             self.previous_logs = [current_log]
@@ -79,13 +98,18 @@ class DuplicationFilter(logging.Filter):
                 self.previous_logs.append(current_log)
         return True
 
+
+@final
 class ColorFormatter(logging.Formatter):
-    def __init__(self, message, use_color=True, **kwargs):
+    def __init__(self, message: str, use_color: bool = True, **kwargs):
         super().__init__(message, **kwargs)
         self.use_color = use_color
-        self.wrapper = CustomWrapper(width=shutil.get_terminal_size().columns - 13, tabsize=4)
+        self.wrapper = CustomWrapper(
+            width=shutil.get_terminal_size().columns - 13, tabsize=4
+        )
 
-    def format(self, record):
+    @override
+    def format(self, record: logging.LogRecord):
         if self.use_color:
             colored_record = copy(record)
             colored_record.msg = self.wrapper.fill(colored_record.msg)
@@ -116,14 +140,18 @@ class ColorFormatter(logging.Formatter):
             return super().format(record)
 
 
-def setup_logging(loglevel, logfile=None, use_color=True):
+def setup_logging(loglevel: str, logfile: None | str = None, use_color: bool = True):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.NOTSET)
 
     if loglevel != "DEBUG":
-        console_formatter = ColorFormatter("{levelname} {message}", style="{", use_color=use_color)
+        console_formatter = ColorFormatter(
+            "{levelname} {message}", style="{", use_color=use_color
+        )
     else:
-        console_formatter = ColorFormatter("{levelname} {message} ({funcName} in {filename}:{lineno})", style="{")
+        console_formatter = ColorFormatter(
+            "{levelname} {message} ({funcName} in {filename}:{lineno})", style="{"
+        )
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
     console_handler.setFormatter(console_formatter)
@@ -132,7 +160,10 @@ def setup_logging(loglevel, logfile=None, use_color=True):
     if logfile is not None:
         if loglevel != "DEBUG":
             file_formatter = ColorFormatter(
-                "{asctime} - {levelname} {message}", style="{", datefmt="%H:%M:%S", use_color=False
+                "{asctime} - {levelname} {message}",
+                style="{",
+                datefmt="%H:%M:%S",
+                use_color=False,
             )
         else:
             file_formatter = ColorFormatter(
@@ -148,30 +179,30 @@ def setup_logging(loglevel, logfile=None, use_color=True):
         root_logger.addHandler(file_handler)
 
 
-def fg_24bit(r, g, b):
+def fg_24bit(r: str | int, g: str | int, b: str | int) -> str:
     return "38;2;{};{};{}".format(r, g, b)
 
 
-def bg_24bit(r, g, b):
+def bg_24bit(r: str | int, g: str | int, b: str | int) -> str:
     return "48;2;{};{};{}".format(r, g, b)
 
 
-def fg_8bit(n):
+def fg_8bit(n: str | int) -> str:
     return "38;5;{}".format(n)
 
 
-def bg_8bit(n):
+def bg_8bit(n: str | int) -> str:
     return "48;5;{}".format(n)
 
 
-def ansi_style(text, codes):
+def ansi_style(text: str, codes: str):
     if isinstance(codes, (list, tuple)):
         return "\033[{}m".format(";".join(codes)) + text + "\033[0m"
     else:
         return "\033[{}m".format(codes) + text + "\033[0m"
 
 
-def copy_file(in_file, out_file):
+def copy_file(in_file: str, out_file: str):
     if not os.path.exists(in_file):
         raise GolemConfigError("File not found: %r" % in_file)
 
@@ -180,7 +211,8 @@ def copy_file(in_file, out_file):
 
     with open(out_file, "w") as f:
         for line in lines:
-            f.write(line)
+            _ = f.write(line)
+
 
 def setup_env():
     env = os.environ.copy()
@@ -195,7 +227,7 @@ def setup_env():
     return env
 
 
-def combinations(map):
+def combinations(map: Mapping[T, Sequence[V]]) -> Iterable[MutableMapping[T, V]]:
     """
     This iterator lists all combinations of possible
     values for the elements of map.
@@ -207,14 +239,16 @@ def combinations(map):
        yields all combinations as dictionaries {key1: value1_i, ...}
     """
 
-    def rec_combinations(keys, map):
+    def rec_combinations(
+        keys: Sequence[T], map: Mapping[T, Sequence[V]]
+    ) -> Iterable[MutableMapping[T, V]]:
         if len(keys) == 0:
             yield {}
         else:
             key = keys[0]
             for new_map in rec_combinations(keys[1:], map):
                 for heli in map[key]:
-                    result = new_map.copy()
+                    result = copy(new_map)
                     result[key] = heli
                     yield result
 
@@ -222,32 +256,34 @@ def combinations(map):
         yield c
 
 
-def enumerate_helicities(conf):
+def enumerate_helicities(conf: Properties):
     """ """
     zeroes = getZeroes(conf)
     in_particles, out_particles = generate_particle_lists(conf)
-    fermion_filter = golem.algorithms.helicity.generate_symmetry_filter(conf, zeroes, in_particles, out_particles)
+    fermion_filter = golem.algorithms.helicity.generate_symmetry_filter(
+        conf, zeroes, in_particles, out_particles
+    )
 
     in_particles.extend(out_particles)
 
-    helic = {}
+    helic: dict[int, list[int]] = {}
     for i in range(len(in_particles)):
         helic[i] = in_particles[i].getHelicityStates(zeroes)
 
     helicity_comb = [h for h in combinations(helic)]
-    user_helis = conf.getProperty(golem.properties.helicities)
+    user_helis = cast(list[str | None], conf.getProperty(golem.properties.helicities))
     user_helis = [i for i in user_helis if i]
 
     if len(user_helis) > 0:
         ex_user_helis = expand_helicities(user_helis)
 
-        new_helicity_comb = []
+        new_helicity_comb: list[dict[int, int]] = []
         for s in ex_user_helis:
             heli = golem.algorithms.helicity.parse_helicity(s)
             if heli in helicity_comb:
                 new_helicity_comb.append(heli)
             else:
-                raise golem.util.parser.TemplateError("Helicity %r is not valid for this process" % s)
+                raise TemplateError("Helicity %r is not valid for this process" % s)
         helicity_comb = new_helicity_comb
 
     for h in helicity_comb:
@@ -255,18 +291,22 @@ def enumerate_helicities(conf):
             yield h
 
 
-def enumerate_and_reduce_helicities(conf):
+def enumerate_and_reduce_helicities(conf: Properties):
     in_particles, out_particles = generate_particle_lists(conf)
-    conf = golem.algorithms.helicity.filter_helicities(conf, in_particles, out_particles)
+    conf = golem.algorithms.helicity.filter_helicities(
+        conf, in_particles, out_particles
+    )
     helicities = [h for h in enumerate_helicities(conf)]
-    group = golem.algorithms.helicity.find_gauge_invariant_symmetry_group(helicities, conf, in_particles, out_particles)
+    group = golem.algorithms.helicity.find_gauge_invariant_symmetry_group(
+        helicities, conf, in_particles, out_particles
+    )
     return group
 
 
-def expand_helicities(patterns):
+def expand_helicities(patterns: list[str]) -> list[str]:
     anti = {"+": "-", "0": "0", "-": "+", "m": "k", "k": "m"}
 
-    solutions = []
+    solutions: list[str] = []
     while patterns:
         pat = patterns[0]
         patterns = patterns[1:]
@@ -285,6 +325,10 @@ def expand_helicities(patterns):
                 elif eqidx == 2:
                     symbol = chars[0]
                     asymbol = chars[1]
+                else:
+                    raise TemplateError(
+                        f"Unexpected expression '{chars[:eqidx]}' in helicity pattern '{chars}', only two symbols before '=' are allowed"
+                    )
                 chars = chars[eqidx + 1 :]
             else:
                 symbol = "%"
@@ -293,24 +337,32 @@ def expand_helicities(patterns):
             for c in chars:
                 ac = anti[c]
                 patterns = [
-                    head.replace(symbol, c).replace(asymbol, ac) + c + tail.replace(symbol, c).replace(asymbol, ac)
+                    head.replace(symbol, c).replace(asymbol, ac)
+                    + c
+                    + tail.replace(symbol, c).replace(asymbol, ac)
                 ] + patterns
         else:
             solutions.append(pat)
     return solutions
 
 
-def encode_helicity(h, sym=golem.algorithms.helicity.heli_to_symbol):
+def encode_helicity(
+    h: Mapping[T, int], sym: dict[int, str] = golem.algorithms.helicity.heli_to_symbol
+) -> dict[T, str]:
     return dict([(k, sym[v]) for k, v in list(h.items())])
 
 
-def prepare_model_files(conf, output_path=None):
+def prepare_model_files(conf: Properties, output_path: str | None = None):
+    # Do imports here to prevent circular imports from a module-level import
+    import golem.model.calchep
+    import golem.model.feynrules
+
     if output_path is None:
         path = process_path(conf)
     else:
         path = output_path
 
-    model_lst = conf.getProperty(golem.properties.model)
+    model_lst = cast(list[str], conf.getProperty(golem.properties.model))
 
     # For BLHA2 standards: conversion to GoSam internal keywords of SM:
     if len(model_lst) == 1 and str(model_lst[0]).lower() == "smdiag":
@@ -323,15 +375,17 @@ def prepare_model_files(conf, output_path=None):
     # Some options only work with ufo models.
     # For OLP mode: check if property is set already.
     if conf["is_ufo"] is not None:
-        isufo = conf["is_ufo"]
+        isufo = cast(bool, conf["is_ufo"])
     else:
         isufo = False
         conf["is_ufo"] = isufo
 
-    conf["enable_truncation_orders"] = conf.getProperty(golem.properties.enable_truncation_orders)
+    conf["enable_truncation_orders"] = conf.getProperty(
+        golem.properties.enable_truncation_orders
+    )
 
     if "setup-file" in conf:
-        rel_path = os.path.dirname(conf["setup-file"])
+        rel_path = os.path.dirname(cast(str, conf["setup-file"]))
     else:
         rel_path = os.getcwd()
     if len(model_lst) == 0:
@@ -344,12 +398,17 @@ def prepare_model_files(conf, output_path=None):
         conf.setProperty("model_path", os.path.join(src_path, model))
         # check for local file
         if os.path.sep in model and all(
-            [os.path.exists(os.path.join(rel_path, model + ext)) for ext in ["", ".py", ".hh"]]
+            [
+                os.path.exists(os.path.join(rel_path, model + ext))
+                for ext in ["", ".py", ".hh"]
+            ]
         ):
             src_path = rel_path
         for ext in [".py", ".hh"]:
-            copy_file(os.path.join(src_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
-        # when called from olp.py we end up here, but the file `model` only exists when the original model was not an UFO
+            copy_file(
+                os.path.join(src_path, model + ext),
+                os.path.join(path, MODEL_LOCAL + ext),
+            )
         if not isufo:
             copy_file(os.path.join(src_path, model), os.path.join(path, MODEL_LOCAL))
     elif len(model_lst) == 2:
@@ -363,11 +422,12 @@ def prepare_model_files(conf, output_path=None):
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
             mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS)
-            order_names = sorted(conf.getProperty(golem.properties.order_names))
+            order_names = sorted(
+                cast(list[str], conf.getProperty(golem.properties.order_names))
+            )
             if order_names == [""]:
                 order_names = []
             mdl.store(path, MODEL_LOCAL, order_names)
-            # TODO: Use proper UFO model instead of generated QGRAF model
             conf.setProperty("model_path", model_path)
             logger.info("Done with model import.")
         else:
@@ -386,16 +446,37 @@ def prepare_model_files(conf, output_path=None):
                 logger.info("Done with model import.")
             else:
                 model = model_lst[1]
-                conf.setProperty("model_path",  os.path.join(model_path, model))
+                conf.setProperty("model_path", os.path.join(model_path, model))
                 for ext in ["", ".py", ".hh"]:
-                    copy_file(os.path.join(model_path, model + ext), os.path.join(path, MODEL_LOCAL + ext))
+                    copy_file(
+                        os.path.join(model_path, model + ext),
+                        os.path.join(path, MODEL_LOCAL + ext),
+                    )
     else:
         logger.critical("Parameter 'model' cannot have more than two entries.")
         sys.exit("GoSam terminated due to an error")
 
+    if len(golem.model.MODEL_DATA) == 0:
+        model_module = getModel(conf, path)
+        particles = cast(Mapping[str, Particle], model_module.particles)
+        if hasattr(model_module, "aux"):
+            aux = cast(dict[str, int], model_module.aux)
+        else:
+            aux = {name: 0 for name, _ in particles.items()}
+        model_data: Mapping[str, Mapping[str, str | int]] = {
+            "mass": {name: p.getMass() for name, p in particles.items()},
+            "width": {name: p.getWidth() for name, p in particles.items()},
+            "twospin": {name: p.getSpin() for name, p in particles.items()},
+            "color": {name: p.getColor() for name, p in particles.items()},
+            "aux": aux,
+            "line_styles": cast(dict[str, str], model_module.line_styles),
+            "latex_names": cast(dict[str, str], model_module.latex_names),
+        }
+        golem.model.MODEL_DATA = model_data
 
-def extract_model_options(conf):
-    for opt in conf.getListProperty(golem.properties.model_options):
+
+def extract_model_options(conf: Properties):
+    for opt in cast(list[str], conf.getListProperty(golem.properties.model_options)):
         idx = -1
         for delim in [" ", ":", "="]:
             if delim in opt:
@@ -408,7 +489,7 @@ def extract_model_options(conf):
             golem.model.MODEL_OPTIONS[opt.strip()] = True
 
 
-def getModel(conf, extra_path=None):
+def getModel(conf: Properties, extra_path: str | None = None) -> ModuleType:
     MODEL_LOCAL = "model"
 
     if "model" in conf.cache:
@@ -422,12 +503,10 @@ def getModel(conf, extra_path=None):
     golem.model.MODEL_OPTIONS = {}
     golem.model.MODEL_ONES = conf.getListProperty(golem.properties.one)
 
-    model_shortname = conf["model"]
-
     extract_model_options(conf)
 
-    fname = os.path.join(path, "%s.py" % MODEL_LOCAL)
-    logger.debug("Loading model file %r" % fname)
+    fname: str = os.path.join(path, f"{MODEL_LOCAL}.py")
+    logger.debug(f"Loading model file {fname}")
 
     # --[ EW scheme management:
 
@@ -455,27 +534,30 @@ def getModel(conf, extra_path=None):
 
     # Adapt EW scheme to order file request:
     if conf["__OLP_MODE__"]:
-        if conf["olp.ewscheme"] is not None and ew_supp == True:
+        if conf["olp.ewscheme"] is not None and ew_supp:
             select_olp_EWScheme(conf)
-        elif ew_supp == True and ((conf["model.options"] is None) or "ewchoose" in conf["model.options"]):
+        elif ew_supp and (
+            (conf["model.options"] is None) or "ewchoose" in conf["model.options"]
+        ):
             golem.model.MODEL_OPTIONS["ewchoose"] = True
-        elif conf["olp.ewscheme"] is not None and ew_supp == False:
+        elif conf["olp.ewscheme"] is not None and not ew_supp:
             logger.critical("EWScheme tag in orderfile incompatible with model.")
             sys.exit("GoSam terminated due to an error")
 
     # Modify EW setting for model file:
     if ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
-        if golem.model.MODEL_OPTIONS["ewchoose"] == True:
+        if golem.model.MODEL_OPTIONS["ewchoose"]:
             golem.model.MODEL_OPTIONS["users_choice"] = "0"
         else:
-            golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS["ewchoose"]
+            golem.model.MODEL_OPTIONS["users_choice"] = golem.model.MODEL_OPTIONS[
+                "ewchoose"
+            ]
             golem.model.MODEL_OPTIONS["ewchoose"] = True
     elif ew_supp and "ewchoose" not in list(golem.model.MODEL_OPTIONS.keys()):
         golem.model.MODEL_OPTIONS["ewchoose"] = False
         golem.model.MODEL_OPTIONS["users_choice"] = "0"
-    elif ew_supp == False and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
+    elif not ew_supp and "ewchoose" in list(golem.model.MODEL_OPTIONS.keys()):
         del golem.model.MODEL_OPTIONS["ewchoose"]
-        # error("ewchoose option in model.options is not supported with the chosen model.")
 
     # --] EW scheme management
 
@@ -484,14 +566,14 @@ def getModel(conf, extra_path=None):
     return mod
 
 
-def select_olp_EWScheme(conf):
+def select_olp_EWScheme(conf: Properties):
     ewparameters = ["mW", "mZ", "alpha", "GF", "sw", "e", "vev", "ewchoose"]
-    ewscheme = conf["olp.ewscheme"]
+    ewscheme = cast(str, conf["olp.ewscheme"])
     raisewarn = False
     if conf.getBooleanProperty("olp.config_model_options"):
         # raise warning only when model.options were actually given in the config file,
         # not just because model.options was filled with the default
-        for key, value in list(golem.model.MODEL_OPTIONS.items()):
+        for key in golem.model.MODEL_OPTIONS.keys():
             if any(item.startswith(str(key)) for item in ewparameters):
                 raisewarn = True
     #  possible values are: alphaGF, alpha0, alphaMZ, alphaRUN, alphaMSbar, OLPDefined
@@ -511,16 +593,14 @@ def select_olp_EWScheme(conf):
         logger.info("OLP EWScheme --> alphaMZ")
 
     if ewscheme == "alphaRUN":
-        logger.warning("OLP EWScheme --> alphaRUN\n"
-                       + "EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaRUN\n" + "EW not supported yet!")
     if ewscheme == "alphaMSbar":
-        logger.warning("OLP EWScheme --> alphaMSbar\n"
-                    +"EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaMSbar\n" + "EW not supported yet!")
     if ewscheme == "OLPDefined":
         logger.info("OLP EWScheme --> OLPDefined: GoSam default taken")
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"
 
-    if raisewarn == True:
+    if raisewarn:
         logger.warning(
             "EWScheme setting from orderfile will override the model.options\n"
             + " setting from input card if incompatible!"
@@ -529,13 +609,13 @@ def select_olp_EWScheme(conf):
     return
 
 
-def expand_parameter_list(prop, conf):
+def expand_parameter_list(prop: Property, conf: Properties):
     params = generate_parameter_list(conf)
-    lst = conf.getProperty(prop, default=None)
+    lst = cast(None | list[str], conf.getProperty(prop, default=None))
     if lst is None:
         return
 
-    new_values = set([])
+    new_values: set[str] = set([])
     for value in lst:
         if not value:
             continue
@@ -548,20 +628,23 @@ def expand_parameter_list(prop, conf):
                     count += 1
                     new_values.add(param)
             if count == 0:
-                logger.warning("No known parameters match '%s' in property '%s'." % (value, prop))
+                logger.warning(
+                    "No known parameters match '%s' in property '%s'." % (value, prop)
+                )
         elif value in params:
             new_values.add(value)
         else:
             logger.warning(
-                "Property '%s' contains an unknown parameter name (%s)\n" % (prop, value)
+                "Property '%s' contains an unknown parameter name (%s)\n"
+                % (prop, value)
                 + "The symbol has been removed from the list."
             )
     conf.setProperty(prop, list(new_values))
 
 
-def generate_parameter_list(conf):
+def generate_parameter_list(conf: Properties):
     model = getModel(conf)
-    result = list(model.types.keys())
+    result = list(cast(dict[str, str], model.types).keys())
 
     if conf["__GAUGE_CHECK__"]:
         in_p, out_p = generate_particle_lists(conf)
@@ -581,7 +664,7 @@ def generate_parameter_list(conf):
     return result
 
 
-def generate_particle_lists(conf):
+def generate_particle_lists(conf: Properties) -> tuple[list[Particle], ...]:
     """
     Generates a three-tuple of the form
        (in_particles, out_particles)
@@ -591,20 +674,20 @@ def generate_particle_lists(conf):
     """
 
     if "particle_lists" in conf.cache:
-        inp, outp = conf.cache["particle_lists"]
+        inp, outp = cast(tuple[list[Particle], ...], conf.cache["particle_lists"])
         return inp[:], outp[:]
 
-    ini = conf.getProperty(golem.properties.particles_in)
-    fin = conf.getProperty(golem.properties.particles_out)
+    ini = cast(list[str], conf.getProperty(golem.properties.particles_in))
+    fin = cast(list[str], conf.getProperty(golem.properties.particles_out))
 
     mod = getModel(conf)
 
-    in_particles = []
+    in_particles: list[Particle] = []
     for p in ini:
         particle = interpret_particle_name(p, mod)
         in_particles.append(particle)
 
-    out_particles = []
+    out_particles: list[Particle] = []
     for p in fin:
         particle = interpret_particle_name(p, mod)
         out_particles.append(particle)
@@ -614,36 +697,37 @@ def generate_particle_lists(conf):
     return (in_particles[:], out_particles[:])
 
 
-__latex_particle_warnings__ = []
+__latex_particle_warnings__: list[str] = []
 
 
-def interpret_particle_name(p, mod):
+def interpret_particle_name(p: str, mod: ModuleType) -> Particle:
     """
     Translates a particle names into objects.
     """
     name = p.strip()
-    if p in mod.particles:
-        result = mod.particles[name]
-    elif p in mod.mnemonics:
-        result = mod.mnemonics[name]
+    particles = cast(dict[str, Particle], mod.particles)
+    result: Particle | None = None
+    if p in particles:
+        result = particles[name]
+    elif p in cast(dict[str, Particle], mod.mnemonics):
+        result = cast(Particle, mod.mnemonics[name])
         name = str(result)
     else:
-        found = False
         try:
             pdg_code = int(name)
-            for pname, p in list(mod.particles.items()):
-                if p.getPDGCode() == pdg_code:
+            for pname, part in particles.items():
+                if part.getPDGCode() == pdg_code:
                     name = pname
-                    result = p
-                    found = True
+                    result = part
                     break
         except ValueError:
             pass
-        if not found:
-            raise GolemConfigError("Unknown particle: %r" % name)
+    if not result:
+        raise GolemConfigError("Unknown particle: %r" % name)
 
-    if name in mod.latex_names:
-        result.setLaTeXName(mod.latex_names[name])
+    latex_names = cast(dict[str, str], mod.latex_names)
+    if name in latex_names:
+        result.setLaTeXName(latex_names[name])
     else:
         if name not in __latex_particle_warnings__:
             __latex_particle_warnings__.append(name)
@@ -652,46 +736,17 @@ def interpret_particle_name(p, mod):
     return result
 
 
-def diagram_count(path, suffix):
-    """
-    Analyzes the file diagrams-<suffix>.hh to
-    infer the total number of diagrams in a
-    process at the given loop order.
-
-    PARAMETER
-
-       path -- the path pointing to the file which contains
-               the diagrams.
-       suffix -- index which denotes the part of the amplitude
-
-
-    This function looks for a line starting with
-     '#define DIAGRAMCOUNT' and interprets the argument as the
-     number of diagrams.
-    """
-    fname = os.path.join(path, "diagrams-%s.hh" % suffix)
-    result = 0
-    if os.path.exists(fname):
-        with open(fname, "r") as f:
-            for line in f:
-                if line.strip().startswith("#define DIAGRAMCOUNT"):
-                    words = line.strip().split()
-                    result = int(words[2].strip('"'))
-                    break
-    else:
-        pass
-        # print "Warning: File %r not found." % fname
-    return result
-
-
-def process_path(conf):
-    setup_file = conf.getProperty("setup-file")
+def process_path(conf: Properties) -> str:
+    setup_file = cast(str, conf.getProperty("setup-file"))
     setup_dir = os.path.dirname(setup_file)
     setup_dir = os.path.abspath(setup_dir)
 
-    path = conf.getProperty(golem.properties.process_path)
+    path: str | None = cast(str | None, conf.getProperty(golem.properties.process_path))
     if path is None:
-        logger.critical("Property %r must be set in %r!" % (str(golem.properties.process_path), setup_file))
+        logger.critical(
+            "Property %r must be set in %r!"
+            % (str(golem.properties.process_path), setup_file)
+        )
         sys.exit("GoSam terminated due to an error")
     path = os.path.expandvars(path)
     if os.path.isabs(path):
@@ -700,12 +755,12 @@ def process_path(conf):
         return os.path.join(setup_dir, path)
 
 
-def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
-    authors = golem.util.constants.AUTHORS
-    former_authors = golem.util.constants.FORMER_AUTHORS
-    asciiart = golem.util.constants.ASCIIART
+def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
+    authors = cast(dict[str, list[str]], golem.util.constants.AUTHORS)
+    former_authors = cast(dict[str, list[str]], golem.util.constants.FORMER_AUTHORS)
+    asciiart = cast(str, golem.util.constants.ASCIIART)
     asciiwidth = max(list(map(len, asciiart)))
-    clines = golem.util.constants.CLINES
+    clines = cast(list[str], golem.util.constants.CLINES)
 
     llines = ["AUTHORS:"]
 
@@ -722,7 +777,9 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
 
     llines.append("")
     llines.append("FORMER AUTHORS:")
-    for author in sorted(list(former_authors.keys()), key=lambda n: n.rsplit(" ", 1)[-1]):
+    for author in sorted(
+        list(former_authors.keys()), key=lambda n: n.rsplit(" ", 1)[-1]
+    ):
         values = former_authors[author]
         if len(values) >= 1 and len(values[0]) > 0:
             email = " <" + values[0] + ">"
@@ -755,7 +812,7 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
         else:
             yield PREFIX + " " + outl
 
-    for line in golem.util.constants.LICENSE:
+    for line in cast(list[str], golem.util.constants.LICENSE):
         ll = len(line) + len(PREFIX) + len(SUFFIX)
         if ll < WIDTH:
             ws = " " * (WIDTH - ll)
@@ -764,33 +821,44 @@ def banner(WIDTH=70, PREFIX="#", SUFFIX="#"):
         yield PREFIX + line + ws + SUFFIX
 
 
-class LimitedWidthOutputStream:
-    def __init__(self, out, width, indent=0):
+@final
+class LimitedWidthOutputStream(TextIO):
+    def __init__(self, out: TextIO, width: int, indent: int = 0):
         self._out = out
         self._width = width
         self._indent = indent
         self._pos = indent
 
-    def write(self, token):
+    @override
+    def write(self, token: str) -> int:
         advance = len(str(token))
         if advance + self._pos > self._width:
-            self._out.write("\n" + " " * self._indent)
+            _ = self._out.write("\n" + " " * self._indent)
             self._pos = self._indent
-        self._out.write(str(token))
+        _ = self._out.write(str(token))
         self._pos += advance
+        return advance
 
     def nl(self):
-        self._out.write("\n" + " " * self._indent)
+        _ = self._out.write("\n" + " " * self._indent)
         self._pos = self._indent
 
 
-def getZeroes(conf):
-    model_mod = getModel(conf)
-    zeroes = list([_f for _f in conf.getListProperty(golem.properties.zero) if _f])
-    for name, value in list(model_mod.parameters.items()):
+def getZeroes(conf: Properties) -> list[str]:
+    model_mod: ModuleType = getModel(conf)
+    zeroes: list[str] = list(
+        [
+            _f
+            for _f in cast(
+                list[str | None], conf.getListProperty(golem.properties.zero)
+            )
+            if _f
+        ]
+    )
+    for name, value in list(cast(dict[str, str], model_mod.parameters).items()):
         if name in zeroes:
             continue
-        t = model_mod.types[name]
+        t = cast(str, model_mod.types[name])
         if t == "RP":
             if float(value) == 0.0:
                 zeroes.append(name)
@@ -800,13 +868,19 @@ def getZeroes(conf):
     return zeroes
 
 
-def getOnes(conf):
+def getOnes(conf: Properties) -> list[str]:
     model_mod = getModel(conf)
-    ones = list([_f for _f in conf.getListProperty(golem.properties.one) if _f])
-    for name, value in list(model_mod.parameters.items()):
+    ones = list(
+        [
+            _f
+            for _f in cast(list[str | None], conf.getListProperty(golem.properties.one))
+            if _f
+        ]
+    )
+    for name, value in list(cast(dict[str, str], model_mod.parameters).items()):
         if name in ones:
             continue
-        t = model_mod.types[name]
+        t = cast(str, model_mod.types[name])
         if t == "RP":
             if float(value) == 1.0:
                 ones.append(name)
@@ -816,29 +890,32 @@ def getOnes(conf):
     return ones
 
 
-def product(lst):
+def product(lst: Sequence[int]) -> int:
     r = 1
     for i in lst:
         r *= i
     return r
 
 
-def factorial(n):
+def factorial(n: int) -> int:
     return product(list(range(2, n + 1)))
 
 
-def derive_coupling_names(conf):
+def derive_coupling_names(conf: Properties) -> dict[str, str]:
     """
     For a given configuration try to find out how the QCD and the QED
     couplings are called and if they are set to one.
     """
 
-    result = {}
+    result: dict[str, str] = {}
 
-    candidates = {"QCD": ["gs", "mdlG", "mdlGG", "mdlGS"], "QED": ["e", "mdlee", "mdlEE", "mdlE"]}
+    candidates = {
+        "QCD": ["gs", "mdlG", "mdlGG", "mdlGS"],
+        "QED": ["e", "mdlee", "mdlEE", "mdlE"],
+    }
 
     model = getModel(conf)
-    symbols = list(model.types.keys())
+    symbols = list(cast(dict[str, str], model.types).keys())
     ones = getOnes(conf)
     zeroes = getZeroes(conf)
 
@@ -859,17 +936,22 @@ def derive_coupling_names(conf):
     return result
 
 
-def load_source(mname, mpath):
+def load_source(mname: str, mpath: str) -> ModuleType:
     if sys.version_info >= (
         3,
         6,
     ):
         # see https://docs.python.org/dev/whatsnew/3.12.html#imp
-        import importlib.util
         import importlib.machinery
+        import importlib.util
 
         loader = importlib.machinery.SourceFileLoader(mname, mpath)
         spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
+        if not spec:
+            logger.critical(
+                f"Unable to load module spec for file '{mname}' from '{mpath}'"
+            )
+            sys.exit("GoSam terminated due to an error")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[mname] = mod
         loader.exec_module(mod)

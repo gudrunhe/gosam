@@ -3,7 +3,7 @@ install_subdir('app', install_dir: python.get_install_dir() / 'golem')
 install_subdir('model', install_dir: python.get_install_dir() / 'golem')
 install_subdir('pyxo', install_dir: python.get_install_dir() / 'golem')
 install_subdir('templates', install_dir: python.get_install_dir() / 'golem')
-install_subdir('topolopy', install_dir: python.get_install_dir() / 'golem')
+install_subdir('diagrams', install_dir: python.get_install_dir() / 'golem')
 install_subdir('util', install_dir: python.get_install_dir() / 'golem')
 
 installation_py = configure_file(

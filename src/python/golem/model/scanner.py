@@ -1,6 +1,8 @@
 # vim: ts=3:sw=3
-
 import re
+from collections.abc import Iterator
+from re import Pattern
+from typing import Callable, cast, final
 
 
 class Scanner(object):
@@ -8,15 +10,18 @@ class Scanner(object):
     Implements a general purpose scanner (=tokenizer).
     """
 
-    def __new__(cls, *args, **opts):
-        inst = object.__new__(cls)
-        patterns = []
+    def __init__(self):
+        patterns: list[str] = []
         actions = {}
 
-        for name, func in list(cls.__dict__.items()):
+        for name, func in cast(
+            dict[str, Callable[[Scanner, str], str | None]], self.__class__.__dict__
+        ).items():
             doc = func.__doc__
             if doc is not None:
-                errmsg = ("In doc-string of %s.%s: " % (cls.__name__, name)) + "Invalid pattern after '@TOKEN' (%s)."
+                errmsg = (
+                    "In doc-string of %s.%s: " % (self.__class__.__name__, name)
+                ) + "Invalid pattern after '@TOKEN' (%s)."
 
                 for line in doc.splitlines():
                     sline = line.strip()
@@ -25,7 +30,9 @@ class Scanner(object):
                         delim = sline[0:1]
                         lasti = sline.rfind(delim, 1)
                         if lasti < 0:
-                            raise SyntaxError(errmsg % ("Missing closing delimiter '%s'" % delim))
+                            raise SyntaxError(
+                                errmsg % ("Missing closing delimiter '%s'" % delim)
+                            )
                         pattern = sline[1:lasti]
                         flags = sline[lasti + 1 :].strip()
                         iflags = 0
@@ -43,54 +50,58 @@ class Scanner(object):
                             else:
                                 raise SyntaxError(errmsg % ("Unknown flag '%s'" % ch))
 
-                        gpattern = "(?P<%s>%s%s)" % (name, flags_to_string(iflags), pattern)
+                        gpattern = "(?P<%s>%s%s)" % (
+                            name,
+                            flags_to_string(iflags),
+                            pattern,
+                        )
                         try:
                             prog = re.compile(gpattern)
                         except BaseException as ex:
                             raise SyntaxError(errmsg % str(ex))
                         if prog.match(""):
-                            raise SyntaxError(errmsg % ("%r matches the empty string" % pattern))
+                            raise SyntaxError(
+                                errmsg % ("%r matches the empty string" % pattern)
+                            )
                         patterns.append(gpattern)
                         actions[name] = func
 
                         break
 
-        inst._REGEX = re.compile("|".join(patterns), re.MULTILINE)
-        inst._ACTIONS = actions
+        self._REGEX: Pattern[str] = re.compile("|".join(patterns), re.MULTILINE)
+        self._ACTIONS: dict[str, Callable[[Scanner, str], str | int | float | None]] = (
+            actions
+        )
 
-        return inst
-
-    def __init__(self, *args, **opts):
-        pass
-
-    def parse(self, text):
+    def parse(self, text: str) -> Iterator[tuple[str, str | int | float]]:
         for match in self._REGEX.finditer(text):
-            for name, image in list(match.groupdict().items()):
+            for name, image in match.groupdict().items():
                 if image is None:
                     continue
-                token = self._ACTIONS[name].__call__(self, image)
+                token = self._ACTIONS[name](self, image)
                 if token is not None:
                     yield (name, token)
 
 
+@final
 class TokenStream:
-    def __init__(self, scanner, text):
-        self._iter = scanner.parse(text)
-        self._stack = []
+    def __init__(self, scanner: Scanner, text: str):
+        self._iter: Iterator[tuple[str, str | int | float]] = scanner.parse(text)
+        self._stack: list[tuple[str, str | int | float]] = []
         self._text = text
 
     def source(self):
         return self._text
 
-    def name(self):
-        name, token = self.top()
+    def name(self) -> str:
+        name, _ = self.top()
         return name
 
     def token(self):
-        name, token = self.top()
+        _, token = self.top()
         return token
 
-    def top(self):
+    def top(self) -> tuple[str, str | int | float | None]:
         if len(self._stack) == 0:
             try:
                 name, token = next(self._iter)
@@ -102,17 +113,23 @@ class TokenStream:
             return self._stack[-1]
 
     def pop(self):
-        name, token = self.top()
+        _, token = self.top()
         if len(self._stack) > 0:
-            self._stack.pop()
+            _ = self._stack.pop()
         return token
 
-    def push(self, name, token):
+    def push(self, name: str, token: str):
         self._stack.append((name, token))
 
 
-def flags_to_string(flags):
-    FS = {re.IGNORECASE: "i", re.LOCALE: "L", re.MULTILINE: "m", re.DOTALL: "s", re.UNICODE: "u"}
+def flags_to_string(flags: int) -> str:
+    FS = {
+        re.IGNORECASE: "i",
+        re.LOCALE: "L",
+        re.MULTILINE: "m",
+        re.DOTALL: "s",
+        re.UNICODE: "u",
+    }
 
     if flags == 0:
         return ""

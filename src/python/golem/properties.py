@@ -1,16 +1,18 @@
 # vim: ts=3:sw=3:expandtab
 import os
-from golem.util.config import Property
+from typing import cast
+
 from golem.installation import BIN_DIR
+from golem.util.config import Properties, Property
 
 process_name = Property(
     "process_name",
     """\
-   A symbolic name for the process. This name, appended with 
+   A symbolic name for the process. This name, appended with
    an underscore, will be used as a prefix for the Fortran modules.
 
-   The deafult name is 'gosam_process', but the user can also 
-   explcitly set 'process_name=', i.e. empty. In this case no prefix 
+   The deafult name is 'gosam_process', but the user can also
+   explcitly set 'process_name=', i.e. empty. In this case no prefix
    will be used (not recommended).
    """,
     str,
@@ -28,7 +30,7 @@ process_path = Property(
    process_path=/scratch/golem_processes/process1
    """,
     str,
-    "gosam_process"
+    "gosam_process",
 )
 
 particles_in = Property(
@@ -76,7 +78,7 @@ model = Property(
    Format 1) searches for the model files <name>, <name>.hh
    and <name>.py in the models/ directory under the installation
    path of Golem. The following models are shipped with GoSam:
-   sm, smdiag, sm_complex, smdiag_complex, smehc, smdiagehc, smdiag_mad 
+   sm, smdiag, sm_complex, smdiag_complex, smehc, smdiagehc, smdiag_mad
 
    Format 2) is similar to format 1) but <path> is used instead
    of the models/ directory of the Golem installation
@@ -115,7 +117,7 @@ coupling_power = Property(
    tree level amplitude and <virt> for the virtual amplitude.
    For UFO models, all couplings defined as `CouplingOrder`
    objects are available.
-   
+
    The line
       order = gs, 4, 6
    would select all diagrams which have (gs)^4 at tree level
@@ -146,7 +148,7 @@ coupling_power = Property(
 loop_suppressed_Born = Property(
     "loop_suppressed_Born",
     """\
-   In case of a a loop-induced process generate Born diagrams with tree 
+   In case of a a loop-induced process generate Born diagrams with tree
    topology containing loop-suppressed EFT operators.
     """,
     bool,
@@ -280,6 +282,189 @@ filter_ct_particles = Property(
     str,
 )
 
+diagram_selector = Property(
+    "diagram_selector",
+    """\
+    A FeynGraph `DiagramSelector` object used as a basis for diagram filtering.
+    Additional filters, e.g. `native_filters` and `filter_<...>_diagrams` will
+    be applied on top of this selector.
+    """,
+    type=str,
+)
+
+diagram_selector_lo = Property(
+    "diagram_selector.lo",
+    """\
+    Same as `diagram_selector`, but only applied to the leading order diagrams.
+    Overwrites `diagram_selector` if both are specified.
+    """,
+    type=str,
+)
+
+diagram_selector_nlo = Property(
+    "diagram_selector.nlo",
+    """\
+    Same as `diagram_selector`, but only applied to the next-to-leading order diagrams.
+    Overwrites `diagram_selector` if both are specified.
+    """,
+    type=str,
+)
+
+diagram_selector_ct = Property(
+    "diagram_selector.ct",
+    """\
+    Same as `diagram_selector`, but only applied to the counter-term diagrams.
+    Overwrites `diagram_selector` if both are specified.
+    """,
+    type=str,
+)
+
+filter_diagrams = Property(
+    "filter",
+    """\
+   A python function which provides a filter for diagrams. This function
+   is used as a custom function in the FeynGraph `DiagramSelector`
+   and is expected to be of the form `f(d: fg.Diagram) -> bool`. See the
+   FeynGraph documentation for details.
+
+   Example
+   -------
+
+   filter=lambda d: sum(p.name() == "Z" for p in d.propagators()) == 1 \
+      and not any(v.match_particles(["Z", "U", "Ubar"]) for v in d.vertices())
+   """,
+    str,
+    "",
+)
+
+filter_lo_diagrams = Property(
+    "filter.lo",
+    """\
+    A python function which provides a filter for tree-level diagrams.
+
+    See filter.lo for more explanation.
+   """,
+    str,
+    "",
+)
+
+filter_nlo_diagrams = Property(
+    "filter.nlo",
+    """\
+   A python function which provides a filter for loop diagrams.
+
+   See filter.lo for more explanation.
+   """,
+    str,
+    "",
+)
+
+filter_ct_diagrams = Property(
+    "filter.ct",
+    """\
+   A python function which provides a filter for eft counterterm diagrams.
+
+   See filter.lo for more explanation.
+   """,
+    str,
+    "",
+)
+
+filter_module = Property(
+    "filter.module",
+    """\
+   A python file of predefined functions which should be available
+   in filters.
+
+   Example:
+
+   filter.module=filter.py
+   filter.lo=lo_selector
+   filter.lo=nlo_selector
+
+   ------ filter.py -----
+
+    import feyngraph as fg
+
+    lo_selector = fg.DiagramSelector()
+    lo_selector.select_coupling_power("NP", 1)
+    lo_selector.select_vertex_count(["Z", "u", "u~"], 1)
+
+    nlo_selector = fg.DiagramSelector()
+    nlo_selector.select_coupling_power("NP", 1)
+    nlo_selector.select_vertex_count(["Z", "u", "u~"], 2)
+
+   ----------------------
+
+   See filter.lo, filter.nlo
+   """,
+    str,
+    "",
+)
+
+select_lo_diagrams = Property(
+    "select.lo",
+    """\
+   A list of integer numbers, indicating leading order diagrams to be
+   selected. If no list is given, all diagrams are selected.
+   Otherwise, all diagrams not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.lo=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.lo=1,2,5,8,50,51,52,53
+
+   See also: select.nlo, filter.lo, filter.nlo
+   """,
+    list,
+    sep=",",
+)
+
+select_nlo_diagrams = Property(
+    "select.nlo",
+    """\
+   A list of integer numbers, indicating one-loop diagrams to be selected.
+   If no list is given, all diagrams are selected.
+   Otherwise, all diagrams   not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.nlo=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.nlo=1,2,5,8,50,51,52,53
+
+   See also: select.lo, filter.lo, filter.nlo
+   """,
+    list,
+    sep=",",
+)
+
+select_ct_diagrams = Property(
+    "select.ct",
+    """\
+   A list of integer numbers, indicating EFT counterterm diagrams to be
+   selected. If no list is given, all diagrams are selected.
+   Otherwise, all diagrams not in the list are discarded.
+
+   The list may contain ranges:
+
+   select.ct=1,2,5:10:3, 50:53
+
+   which is equivalent to
+
+   select.ct=1,2,5,8,50,51,52,53
+
+   See also: select.nlo, filter.lo, filter.nlo
+   """,
+    list,
+    sep=",",
+)
+
 zero = Property(
     "zero",
     """\
@@ -288,7 +473,7 @@ zero = Property(
    symbols must be defined by the model file. For convenience
    masses and widths can be set by means of PDG codes, e.g.
    mass(1),width(1) for the down-quark mass and width, res-
-   pectively. Lists of PDG codes separated by ';' can be used 
+   pectively. Lists of PDG codes separated by ';' can be used
    in the arguments of 'mass' and 'width'.
 
    Examples:
@@ -447,7 +632,7 @@ formopt_level = Property(
 regularisation_scheme = Property(
     "regularisation_scheme",
     """\
-         Sets the used regularisation scheme, dimensional reduction (DRED) 
+         Sets the used regularisation scheme, dimensional reduction (DRED)
          or 't Hooft-Veltman (tHV).
          Possible values: dred (recommended), thv
       """,
@@ -461,7 +646,7 @@ config_convert_to_thv = Property(
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the conversion of the result into the 't Hooft-Veltman 
+   Activates or disables the conversion of the result into the 't Hooft-Veltman
    (tHV) regularisation scheme, when the calculation has been performed in DRED.
 
    Does not have an effect when tHV is picked as regularisation scheme in
@@ -506,14 +691,14 @@ extensions = Property(
     "extensions",
     """\
    A list of extension names which should be activated for the
-   code generation. Note that for some of those extensions 
-   dedicated keywords exist: reduction_programs, 
+   code generation. Note that for some of those extensions
+   dedicated keywords exist: reduction_programs,
    regularisation_scheme, polvec
 
    dred         --- Use DRED as IR regularisation scheme (default).
    thv          --- Use tHV as IR regularisation scheme.
    numpolvec    --- Evaluate polarisation vectors numerically (default).
-   quadruple    --- Activate the use of quadruple precision in the 
+   quadruple    --- Activate the use of quadruple precision in the
                     rescue system (this works only with ninja).
    customspin2prop --- replace the propagator of spin-2 particles
                        with a custom function (read the manual for this).
@@ -550,193 +735,20 @@ extensions = Property(
     ],
 )
 
-select_lo_diagrams = Property(
-    "select.lo",
-    """\
-   A list of integer numbers, indicating leading order diagrams to be
-   selected. If no list is given, all diagrams are selected.
-   Otherwise, all diagrams not in the list are discarded.
-
-   The list may contain ranges:
-
-   select.lo=1,2,5:10:3, 50:53
-
-   which is equivalent to
-
-   select.lo=1,2,5,8,50,51,52,53
-
-   See also: select.nlo, filter.lo, filter.nlo
-   """,
-    list,
-    sep=",",
-)
-
-select_nlo_diagrams = Property(
-    "select.nlo",
-    """\
-   A list of integer numbers, indicating one-loop diagrams to be selected.
-   If no list is given, all diagrams are selected.
-   Otherwise, all diagrams   not in the list are discarded.
-
-   The list may contain ranges:
-
-   select.nlo=1,2,5:10:3, 50:53
-
-   which is equivalent to
-
-   select.nlo=1,2,5,8,50,51,52,53
-
-   See also: select.lo, filter.lo, filter.nlo
-   """,
-    list,
-    sep=",",
-)
-
-select_ct_diagrams = Property(
-    "select.ct",
-    """\
-   A list of integer numbers, indicating EFT counterterm diagrams to be
-   selected. If no list is given, all diagrams are selected.
-   Otherwise, all diagrams not in the list are discarded.
-
-   The list may contain ranges:
-
-   select.ct=1,2,5:10:3, 50:53
-
-   which is equivalent to
-
-   select.ct=1,2,5,8,50,51,52,53
-
-   See also: select.nlo, filter.lo, filter.nlo
-   """,
-    list,
-    sep=",",
-)
-
-filter_lo_diagrams = Property(
-    "filter.lo",
-    """\
-   A python function which provides a filter for tree diagrams.
-
-   filter.lo=lambda d: d.iprop("Z") == 1 \\
-      and d.vertices("Z", "U", "Ubar") == 0
-
-   The following methods of the diagram class can be used:
-
-   * d.rank() = the maximum rank in Q possible for this diagram
-   * d.loopsize() = the number of propagators in the loop
-   * d.vertices(field1, field2, ...) = number of vertices
-       with the given fields
-   * d.loopvertices(field1, field2, ...) = number of vertices
-       with the given fields; only those vertices which have
-       at least one loop propagator attached to them
-   * d.iprop(field, momentum="...", twospin=..., massive=True/False,
-                                                            color=...) =
-       the number of propagators with the given properties:
-        - field: a field or list of fields
-        - momentum: a string denoting the momentum through this propagator,
-               such as "k1+k2"
-        - twospin: two times the spin (integer number)
-        - massive: select only propagators with/without a non-zero mass
-        - color: one of the numbers 1, 3, -3 or 8, or a list of
-                 these numbers
-   * d.legs(...) = number of legs
-      same as iprop, but for external legs
-   * d.iprop_momentum(field, momentum="...") = True when the diagram contains
-      a propagator of field with the specified momentum, False otherwise
-   * d.chord(...) = number of loop propagators with the given properties;
-       the arguments are the same as in iprop
-   * d.bridge(...) = number of non-loop propagators with the given
-       properties; the arguments are the same as in iprop
-   * d.order(order) = total power of diagrams with respect to specified
-      coupling order. Only works whit UFO models. The order must be defined
-      in the UFO model's coupling_orders.py and listed in the 'order_names'
-      property of the GoSam config/runcard.
-
-   Note: Using d.iprop(field, momentum="...") in olp-mode can lead to
-         inconsistencies in the automatically generated crossings. This
-         can be circumvented by running GoSam with the option --no-crossings
-         or using the iprop_momentum function, which tracks invalid crossings.
-
-   See also: filter.nlo, select.lo, select.nlo
-   """,
-    str,
-    "",
-)
-
-filter_nlo_diagrams = Property(
-    "filter.nlo",
-    """\
-   A python function which provides a filter for loop diagrams.
-
-   See filter.lo for more explanation.
-   """,
-    str,
-    "",
-)
-
-filter_ct_diagrams = Property(
-    "filter.ct",
-    """\
-   A python function which provides a filter for eft counterterm diagrams.
-
-   See filter.lo for more explanation.
-   """,
-    str,
-    "",
-)
-
-filter_module = Property(
-    "filter.module",
-    """\
-   A python file of predefined functions which should be available
-   in filters.
-
-   Example:
-
-   filter.module=filter.py
-   filter.nlo=my_nlo_filter("vertices.txt")
-   filter.lo=my_nlo_filter("vertices.txt")
-
-   ------ filter.py -----
-
-   class my_nlo_filter_class:
-      def __init__(self, fname):
-         self.fields = []
-         with open(fname, 'r') as f:
-            for line in f.readlines():
-               fields = map(lambda s: s.strip(),
-                     line.split(","))
-               self.fields.append(fields)
-
-      def __call__(self, diag):
-         for lst in self.fields:
-            if diag.vertices(*lst) > 0:
-               return False
-         return True
-
-   ----------------------
-
-   See filter.lo, filter.nlo
-   """,
-    str,
-    "",
-)
-
 debug_flags = Property(
     "debug",
     """\
-   A list of debug flags. Currently, the words 'lo', 'nlo' and 'all' are 
-   supported. All debug output will be directed towards the unit specified 
-   by the compile time parameter 'logfile' defined in common/config.f90. 
-   The default is logfile=19. If no file is associated to the unit by means 
-   of the 'open' statement in the fortran code calling the process library 
-   the output is written to 'fort.<logfile>'. See the file 'test.f90' in 
-   the 'matrix' subdirectory for an example how to write the debug output 
+   A list of debug flags. Currently, the words 'lo', 'nlo' and 'all' are
+   supported. All debug output will be directed towards the unit specified
+   by the compile time parameter 'logfile' defined in common/config.f90.
+   The default is logfile=19. If no file is associated to the unit by means
+   of the 'open' statement in the fortran code calling the process library
+   the output is written to 'fort.<logfile>'. See the file 'test.f90' in
+   the 'matrix' subdirectory for an example how to write the debug output
    into a file of your choice:
 
    open(unit=logfile,status='unknown',action='write',file='debug.xml')
-   
+
    """,
     list,
     options=["nlo", "lo", "numpolvec", "all"],
@@ -884,7 +896,7 @@ config_renorm_alphas = Property(
     """\
    Sets the name of the same variable in config.f90
 
-   Activates or disables the one-loop QCD renormalisation 
+   Activates or disables the one-loop QCD renormalisation
    of the strong coupling.
 
    QCD only
@@ -956,7 +968,7 @@ config_renorm_gamma5 = Property(
     """\
    Sets the same variable in config.f90
 
-   Activates or disables finite one-loop QCD renormalisation 
+   Activates or disables finite one-loop QCD renormalisation
    for axial couplings in the 't Hooft-Veltman scheme.
 
    QCD only, works only with built-in model files.
@@ -988,9 +1000,9 @@ config_renorm_eftwilson = Property(
    Sets the same variable in config.f90
 
    Activates or disables one-loop QCD renormalisation
-   of EFT Wilson coefficients. Works only with special 
+   of EFT Wilson coefficients. Works only with special
    New Physics UFO models, containing 'NP' as additional
-   coupling order. 'order_names' must be specified and 
+   coupling order. 'order_names' must be specified and
    explicitly contain 'NP'.
 
    QCD only
@@ -1004,10 +1016,10 @@ config_renorm_ehc = Property(
     """\
    Sets the same variable in config.f90
 
-   Activates or disables one-loop QCD renormalisation of effective 
-   Higgs-gluon vertices. Implemented for models in the heavy-top 
+   Activates or disables one-loop QCD renormalisation of effective
+   Higgs-gluon vertices. Implemented for models in the heavy-top
    limit like smehc. Should not be used when counterterms for Wilson
-   coefficients are supplyed by means of a UFO model 
+   coefficients are supplyed by means of a UFO model
    (see 'renorm_eft_wilson').
    CAUTION:
    This will only work if the Higgs-gluon vertices factorize from the
@@ -1034,7 +1046,7 @@ config_reduction_interoperation = Property(
    """,
     str,
     -1,
-    options=["-1","ninja","golem95"],
+    options=["-1", "ninja", "golem95"],
 )
 
 config_reduction_interoperation_rescue = Property(
@@ -1051,7 +1063,7 @@ config_reduction_interoperation_rescue = Property(
    """,
     str,
     -1,
-    options=["-1","ninja","golem95","quadruple"],
+    options=["-1", "ninja", "golem95", "quadruple"],
 )
 
 config_nlo_prefactors = Property(
@@ -1121,9 +1133,9 @@ config_PSP_chk_th1 = Property(
    Sets the same variable in config.f90
 
    Threshold to accept a PSP point without further treatment,
-   based on the precision of the single pole. The number has to be 
-   an integer indicating the desired minimum number of digits 
-   accuracy on the single pole. For poles more precise than this 
+   based on the precision of the single pole. The number has to be
+   an integer indicating the desired minimum number of digits
+   accuracy on the single pole. For poles more precise than this
    threshold the finite part is not checked.
 
    !!Works only with models for which ir_subtraction returns
@@ -1141,11 +1153,11 @@ config_PSP_chk_th2 = Property(
    Sets the same variable in config.f90
 
    Threshold to declare a PSP as a bad point, based of the precision
-   of the single pole. Points with precision less than this 
-   threshold are directly reprocessed with the rescue system (if 
-   available), or declared as unstable. According to the verbosity 
-   level set, such points are written to a file and not used when 
-   the code is interfaced to an external Monte Carlo using the new 
+   of the single pole. Points with precision less than this
+   threshold are directly reprocessed with the rescue system (if
+   available), or declared as unstable. According to the verbosity
+   level set, such points are written to a file and not used when
+   the code is interfaced to an external Monte Carlo using the new
    BLHA standards.
 
    !!Works only with models for which ir_subtraction returns
@@ -1163,11 +1175,11 @@ config_PSP_chk_th3 = Property(
    Sets the same variable in config.f90
 
    Threshold to declare a PSP as a bad point, based on the precision
-   of the finite part estimated with a rotation. Points with 
-   precision less than this threshold are directly reprocessed 
+   of the finite part estimated with a rotation. Points with
+   precision less than this threshold are directly reprocessed
    with the rescue system (if available), or declared as unstable.
-   According to the verbosity level set, such points are written 
-   to a file and not used when the code is interfaced to an 
+   According to the verbosity level set, such points are written
+   to a file and not used when the code is interfaced to an
    external Monte Carlo using the new BLHA standards.
 
    The number has to be an integer.
@@ -1182,8 +1194,8 @@ config_PSP_chk_th4 = Property(
    Sets the same variable in config.f90
 
    Threshold to accept a PSP point without further treatment,
-   based on the precision of the finite part estimated by 
-   comparing the normal and rotated double precision 
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated double precision
    evaluations against a quadruple precision evaluation.
 
    !!Used only for: extensions=quadruple!!
@@ -1201,7 +1213,7 @@ config_PSP_chk_th5 = Property(
 
    Threshold to declare a quadruple precision PSP as a bad point,
    based on the precision of the finite part estimated by
-   comparing the normal and rotated quadruple precision 
+   comparing the normal and rotated quadruple precision
    evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
@@ -1246,10 +1258,10 @@ config_PSP_chk_li1 = Property(
    processes, it is used instead of PSP_chk_th1.
 
    Threshold to accept a PSP point without further treatment,
-   based on the precision of the single pole (which should be 
-   zero). The number has to be an integer indicating the desired 
-   minimum number of digits  accuracy on the single pole. For 
-   poles more precise than this  threshold the finite part is 
+   based on the precision of the single pole (which should be
+   zero). The number has to be an integer indicating the desired
+   minimum number of digits  accuracy on the single pole. For
+   poles more precise than this  threshold the finite part is
    not checked.
 
    !!Works only with models for which the single pole vanishes
@@ -1268,11 +1280,11 @@ config_PSP_chk_li2 = Property(
    processes, it is used instead of PSP_chk_th2.
 
    Threshold to declare a PSP as a bad point, based of the precision
-   of the single pole. Points with precision less than this 
-   threshold are directly reprocessed with the rescue system (if 
-   available), or declared as unstable. According to the verbosity 
-   level set, such points are written to a file and not used when 
-   the code is interfaced to an external Monte Carlo using the new 
+   of the single pole. Points with precision less than this
+   threshold are directly reprocessed with the rescue system (if
+   available), or declared as unstable. According to the verbosity
+   level set, such points are written to a file and not used when
+   the code is interfaced to an external Monte Carlo using the new
    BLHA standards.
 
    !!Works only with models for which the single pole vanishes
@@ -1291,11 +1303,11 @@ config_PSP_chk_li3 = Property(
    processes, it is used instead of PSP_chk_th3.
 
    Threshold to declare a PSP as a bad point, based on the precision
-   of the finite part estimated with a rotation. Points with 
-   precision less than this threshold are directly reprocessed 
+   of the finite part estimated with a rotation. Points with
+   precision less than this threshold are directly reprocessed
    with the rescue system (if available), or declared as unstable.
-   According to the verbosity level set, such points are written 
-   to a file and not used when the code is interfaced to an 
+   According to the verbosity level set, such points are written
+   to a file and not used when the code is interfaced to an
    external Monte Carlo using the new BLHA standards.
 
    The number has to be an integer.
@@ -1311,8 +1323,8 @@ config_PSP_chk_li4 = Property(
    processes, it is used instead of PSP_chk_th4.
 
    Threshold to accept a PSP point without further treatment,
-   based on the precision of the finite part estimated by 
-   comparing the normal and rotated double precision 
+   based on the precision of the finite part estimated by
+   comparing the normal and rotated double precision
    evaluations against a quadruple precision evaluation.
 
    !!Used only for: extensions=quadruple!!
@@ -1331,7 +1343,7 @@ config_PSP_chk_li5 = Property(
 
    Threshold to declare a quadruple precision PSP as a bad point,
    based on the precision of the finite part estimated by
-   comparing the normal and rotated quadruple precision 
+   comparing the normal and rotated quadruple precision
    evaluations. According to the verbosity level set, such points
    are written to a file and not used when the code is interfaced
    to an external Monte Carlo using the new BLHA standards.
@@ -1425,7 +1437,7 @@ order_names = Property(
     """\
    Only works in combination with UFO models.
    A list of additional coupling orders as defined in the model's
-   coupling_orders.py file that should be tracked throughout the 
+   coupling_orders.py file that should be tracked throughout the
    amplitude generation. Relevant for correct EFT treatment.
 
    Example:
@@ -1437,11 +1449,11 @@ order_names = Property(
 enable_truncation_orders = Property(
     "enable_truncation_orders",
     """\
-   Whether or not to generate extra code for different truncation 
+   Whether or not to generate extra code for different truncation
    options in EFT calculations. Only works with a New Physics UFO
-   model containing 'NP' as additional coupling order. 
-   'order_names' must be specified and explicitly contain 'NP'. 
-   When set to False (default) no truncation is performed, i.e. 
+   model containing 'NP' as additional coupling order.
+   'order_names' must be specified and explicitly contain 'NP'.
+   When set to False (default) no truncation is performed, i.e.
    the amplitude is squared in the naive way.
    """,
     bool,
@@ -1592,18 +1604,18 @@ unitary_gauge = Property(
 massive_light_fermions = Property(
     "massive_light_fermions",
     """\
-    Some models define mass parameters for light fermions, but initialise 
+    Some models define mass parameters for light fermions, but initialise
     them to zero. This is for example the case for the up- and down-quark,
-    and the leptons in the built-in model files. Per default GoSam will 
-    treat those fermions as masseless during the code generation. The 
-    corresponding mass parameter in config.f90 is then fixed to zero and 
-    connot be changed. Setting 
+    and the leptons in the built-in model files. Per default GoSam will
+    treat those fermions as masseless during the code generation. The
+    corresponding mass parameter in config.f90 is then fixed to zero and
+    connot be changed. Setting
 
     massive_light_fermions=true
 
     deactivates this behaviour. Note that in this case the user can still
     add fermion mass parameters to the 'zero' property manually. For all
-    other fermions a non-zero mass MUST be set when calling the process 
+    other fermions a non-zero mass MUST be set when calling the process
     libraries.
     """,
     bool,
@@ -1612,7 +1624,7 @@ massive_light_fermions = Property(
 
 # Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
-#   main process definition
+    #   main process definition
     process_name,
     process_path,
     particles_in,
@@ -1628,21 +1640,26 @@ properties = [
     form_factor_lo,
     form_factor_nlo,
     crossings,
-#   filters and selectors
+    #   filters and selectors
     helicities,
     native_filters,
     filter_particles,
     filter_lo_particles,
     filter_nlo_particles,
     filter_ct_particles,
+    diagram_selector,
+    diagram_selector_lo,
+    diagram_selector_nlo,
+    diagram_selector_ct,
     select_lo_diagrams,
     select_nlo_diagrams,
     select_ct_diagrams,
+    filter_diagrams,
     filter_lo_diagrams,
     filter_nlo_diagrams,
     filter_ct_diagrams,
     filter_module,
-#   schemes and program settings 
+    #   schemes and program settings
     regularisation_scheme,
     config_convert_to_thv,
     sum_diagrams,
@@ -1657,7 +1674,7 @@ properties = [
     unitary_gauge,
     order_names,
     enable_truncation_orders,
-#   renormalisation
+    #   renormalisation
     renorm,
     config_renorm_alphas,
     config_renorm_gluonwf,
@@ -1665,12 +1682,12 @@ properties = [
     config_renorm_qmass,
     use_MQSE,
     config_renorm_yukawa,
-    MSbar_yukawa,    
+    MSbar_yukawa,
     config_renorm_logs,
     config_renorm_gamma5,
     config_renorm_eftwilson,
     config_renorm_ehc,
-#   reduction and rescue
+    #   reduction and rescue
     reduction_programs,
     config_reduction_interoperation,
     config_reduction_interoperation_rescue,
@@ -1692,12 +1709,12 @@ properties = [
     config_PSP_chk_li5,
     config_PSP_chk_kfactor_li,
     config_PSP_chk_rotdiff_li,
-#   misc
+    #   misc
     extensions,
-#   diagram drawing
+    #   diagram drawing
     pyxodraw,
     use_vertex_labels,
-#   technical settings
+    #   technical settings
     debug_flags,
     abbrev_color,
     abbrev_limit,
@@ -1708,17 +1725,17 @@ properties = [
     form_workspace,
     formopt_level,
     meson_buildtype,
-    meson_arch
+    meson_arch,
 ]
 
 REDUCTION_EXTENSIONS = ["golem95", "ninja"]
 
 
-def getExtensions(conf):
+def getExtensions(conf: Properties):
     ext_name = str(extensions)
-    ext_set = []
+    ext_set: list[str] = []
 
-    ext_sets = {}
+    ext_sets: dict[str, list[str]] = {}
 
     for key in conf:
         parts = key.split(".")
@@ -1728,12 +1745,12 @@ def getExtensions(conf):
             if len(parts) >= 2 and "olp" in parts[0].lower():
                 continue
             prefix = ".".join(parts[:-1])
-            lst = []
+            lst: list[str] = []
             ext_sets[prefix] = lst
             for s in conf.getListProperty(key, delimiter=","):
-                lst.append(s.lower())
+                lst.append(cast(str, s).lower())
             lst.sort()
-    keys = sorted(ext_sets.keys())
+    keys: list[str] = sorted(ext_sets.keys())
     for key in keys:
         lst = ext_sets[key]
         for ext in lst:
@@ -1742,7 +1759,7 @@ def getExtensions(conf):
     return list(ext_set)
 
 
-def setInternals(conf):
+def setInternals(conf: Properties):
     extensions = getExtensions(conf)
     conf["__INTERNALS__"] = [
         "__REGULARIZATION_DRED__",
@@ -1783,9 +1800,9 @@ def setInternals(conf):
     conf["__OLP_TO_LOWER__"] = "f77" in extensions
     conf["__OLP_BADPTSFILE_NUMBERING__"] = "olp_badpts" in extensions
     conf["__OLP_BLHA1__"] = "olp_blha1" in extensions
-    conf["__OLP_BLHA2__"] = not "olp_blha1" in extensions
-    if not "__OLP_MODE__" in conf:
+    conf["__OLP_BLHA2__"] = "olp_blha1" not in extensions
+    if "__OLP_MODE__" not in conf:
         conf["__OLP_MODE__"] = False
     conf["__REQUIRE_FR5__"] = "thv" in extensions
-    if not "__LOOPINDUCED__" in conf:
+    if "__LOOPINDUCED__" not in conf:
         conf["__LOOPINDUCED__"] = False
