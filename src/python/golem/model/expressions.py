@@ -1,28 +1,36 @@
 # vim: ts=3:sw=3
+from __future__ import annotations
 
-import golem.model.scanner
-import golem.util.tools
-
-import sys
 import logging
+import sys
+from collections.abc import Callable, Mapping, MutableMapping, Sequence
+from typing import (
+    TextIO,
+    cast,
+    final,
+    override,
+)
+
+from golem.model.scanner import Scanner, TokenStream
 
 logger = logging.getLogger(__name__)
 
 
+@final
 class ExpressionParser:
     """
     Recursive descent parser for mathematical expressions
     in 'standard' notation.
     """
 
-    def __init__(self, **opts):
+    def __init__(self, **opts: Expression):
         self._specials = opts
 
-    def compile(self, text):
-        tokens = golem.model.scanner.TokenStream(ExpressionScanner(), text)
+    def compile(self, text: str) -> Expression:
+        tokens = TokenStream(ExpressionScanner(), text)
         return self.expression(tokens)
 
-    def expression(self, tokens):
+    def expression(self, tokens: TokenStream) -> Expression:
         terms = [self.product(tokens)]
         while tokens.name() == "plus_op":
             sign = tokens.pop()
@@ -35,12 +43,12 @@ class ExpressionParser:
         else:
             return terms[0]
 
-    def product(self, tokens):
-        factors = []
+    def product(self, tokens: TokenStream) -> Expression:
+        factors: list[tuple[int, Expression]] = []
         o1 = self.factor(tokens)
         factors.append((1, o1))
         while tokens.name() == "mul_op":
-            sign = tokens.pop()
+            sign = cast(int, tokens.pop())
             o2 = self.factor(tokens)
             factors.append((sign, o2))
 
@@ -49,18 +57,18 @@ class ExpressionParser:
         else:
             return ProductExpression(factors)
 
-    def factor(self, tokens):
-        name = tokens.name()
+    def factor(self, tokens: TokenStream) -> Expression:
+        _ = tokens.name()
         sign = 1
         while tokens.name() == "plus_op":
-            sign *= tokens.pop()
+            sign *= cast(int, tokens.pop())
         o1 = self.simple(tokens)
 
         if tokens.name() == "power_op":
-            tokens.pop()
+            _ = tokens.pop()
             ex_sign = 1
             while tokens.name() == "plus_op":
-                ex_sign *= tokens.pop()
+                ex_sign *= cast(int, tokens.pop())
             o2 = self.simple_power(tokens)
             if ex_sign == -1:
                 o2 = UnaryMinusExpression(o2)
@@ -70,14 +78,14 @@ class ExpressionParser:
             o1 = UnaryMinusExpression(o1)
         return o1
 
-    def simple(self, tokens):
+    def simple(self, tokens: TokenStream) -> Expression:
         name = tokens.name()
         if name == "symbol":
             op1 = self.symbol(tokens)
             name = tokens.name()
             while name == "dot" or name == "lparen":
                 if name == "dot":
-                    tokens.pop()
+                    _ = tokens.pop()
                     op2 = self.symbol(tokens)
                     op1 = DotExpression(op1, op2)
                 elif name == "lparen":
@@ -86,39 +94,45 @@ class ExpressionParser:
                 name = tokens.name()
             return op1
         elif name == "float":
-            return FloatExpression(tokens.pop())
+            return FloatExpression(cast(float, tokens.pop()))
         elif name == "integer":
             # Change 27.08.13 any integer in an expression
             # that is not a power is treated as a float
-            return FloatExpression(tokens.pop())
+            return FloatExpression(cast(float, tokens.pop()))
         elif name == "single_quoted":
-            return StringExpression(tokens.pop())
+            return StringExpression(cast(str, tokens.pop()))
         elif name == "lparen":
-            tokens.pop()
+            _ = tokens.pop()
             result = self.expression(tokens)
             if tokens.name() == "rparen":
-                tokens.pop()
+                _ = tokens.pop()
                 return result
             elif tokens.name() != "":
                 logger.critical(
-                    "')' expected but %s (%r) found in '%s'." % (tokens.name(), tokens.token(), tokens.source())
+                    "')' expected but %s (%r) found in '%s'."
+                    % (tokens.name(), tokens.token(), tokens.source())
                 )
                 sys.exit("GoSam terminated due to an error")
             else:
-                logger.critical("Unexpected end of expression: ')' expected in '%s'." % tokens.source())
+                logger.critical(
+                    "Unexpected end of expression: ')' expected in '%s'."
+                    % tokens.source()
+                )
                 sys.exit("GoSam terminated due to an error")
         else:
-            logger.critical("%s (%r) encountered in %s." % (name, tokens.token(), tokens.source()))
+            logger.critical(
+                "%s (%r) encountered in %s." % (name, tokens.token(), tokens.source())
+            )
             sys.exit("GoSam terminated due to an error")
 
-    def simple_power(self, tokens):
+    def simple_power(self, tokens: TokenStream) -> Expression:
         name = tokens.name()
         if name == "symbol":
             op1 = self.symbol(tokens)
             name = tokens.name()
             while name == "dot" or name == "lparen":
                 if name == "dot":
-                    tokens.pop()
+                    _ = tokens.pop()
                     op2 = self.symbol(tokens)
                     op1 = DotExpression(op1, op2)
                 elif name == "lparen":
@@ -127,30 +141,36 @@ class ExpressionParser:
                 name = tokens.name()
             return op1
         elif name == "float":
-            return FloatExpression(tokens.pop())
+            return FloatExpression(cast(float, tokens.pop()))
         elif name == "integer":
-            return IntegerExpression(tokens.pop())
+            return IntegerExpression(cast(int, tokens.pop()))
         elif name == "single_quoted":
-            return StringExpression(tokens.pop())
+            return StringExpression(cast(str, tokens.pop()))
         elif name == "lparen":
-            tokens.pop()
+            _ = tokens.pop()
             result = self.expression(tokens)
             if tokens.name() == "rparen":
-                tokens.pop()
+                _ = tokens.pop()
                 return result
             elif tokens.name() != "":
                 logger.critical(
-                    "')' expected but %s (%r) found in '%s'." % (tokens.name(), tokens.token(), tokens.source())
+                    "')' expected but %s (%r) found in '%s'."
+                    % (tokens.name(), tokens.token(), tokens.source())
                 )
                 sys.exit("GoSam terminated due to an error")
             else:
-                logger.critical("Unexpected end of expression: ')' expected in '%s'." % tokens.source())
+                logger.critical(
+                    "Unexpected end of expression: ')' expected in '%s'."
+                    % tokens.source()
+                )
                 sys.exit("GoSam terminated due to an error")
         else:
-            logger.critical("%s (%r) encountered in %s." % (name, tokens.token(), tokens.source()))
+            logger.critical(
+                "%s (%r) encountered in %s." % (name, tokens.token(), tokens.source())
+            )
             sys.exit("GoSam terminated due to an error")
 
-    def simple_old(self, tokens):
+    def simple_old(self, tokens: TokenStream) -> Expression:
         """
         Still needed in model.feynrules
         """
@@ -160,7 +180,7 @@ class ExpressionParser:
             name = tokens.name()
             while name == "dot" or name == "lparen":
                 if name == "dot":
-                    tokens.pop()
+                    _ = tokens.pop()
                     op2 = self.symbol(tokens)
                     op1 = DotExpression(op1, op2)
                 elif name == "lparen":
@@ -169,49 +189,57 @@ class ExpressionParser:
                 name = tokens.name()
             return op1
         elif name == "integer":
-            return IntegerExpression(tokens.pop())
+            return IntegerExpression(cast(int, tokens.pop()))
         elif name == "float":
-            return FloatExpression(tokens.pop())
+            return FloatExpression(cast(float, tokens.pop()))
         elif name == "single_quoted":
-            return StringExpression(tokens.pop())
+            return StringExpression(cast(str, tokens.pop()))
         elif name == "lparen":
-            tokens.pop()
+            _ = tokens.pop()
             result = self.expression(tokens)
             if tokens.name() == "rparen":
-                tokens.pop()
+                _ = tokens.pop()
                 return result
             elif tokens.name() != "":
                 logger.critical(
-                    "')' expected but %s (%r) found in '%s'." % (tokens.name(), tokens.token(), tokens.source())
+                    "')' expected but %s (%r) found in '%s'."
+                    % (tokens.name(), tokens.token(), tokens.source())
                 )
                 sys.exit("GoSam terminated due to an error")
             else:
-                logger.critical("Unexpected end of expression: ')' expected in '%s'." % tokens.source())
+                logger.critical(
+                    "Unexpected end of expression: ')' expected in '%s'."
+                    % tokens.source()
+                )
                 sys.exit("GoSam terminated due to an error")
         else:
-            logger.critical("%s (%r) encountered in %s." % (name, tokens.token(), tokens.source()))
+            logger.critical(
+                "%s (%r) encountered in %s." % (name, tokens.token(), tokens.source())
+            )
             sys.exit("GoSam terminated due to an error")
 
-    def symbol(self, tokens):
+    def symbol(self, tokens: TokenStream) -> Expression:
         name = tokens.name()
         if name != "symbol":
-            logger.critical("Symbol expected but %s found in %s" % (name, tokens.source()))
+            logger.critical(
+                "Symbol expected but %s found in %s" % (name, tokens.source())
+            )
             sys.exit("GoSam terminated due to an error")
 
-        symbol = tokens.pop()
+        symbol = cast(str, tokens.pop())
 
         if symbol in self._specials:
             return self._specials[symbol]
         else:
             return SymbolExpression(symbol)
 
-    def argumentlist(self, tokens):
+    def argumentlist(self, tokens: TokenStream):
         name = tokens.name()
         if name != "lparen":
             logger.critical("'(' expected but %s found in %s" % (name, tokens.source()))
             sys.exit("GoSam terminated due to an error")
-        tokens.pop()
-        result = []
+        _ = tokens.pop()
+        result: list[Expression] = []
 
         name = tokens.name()
         while name != "rparen":
@@ -220,164 +248,224 @@ class ExpressionParser:
             if name != "comma" and name != "rparen":
                 logger.critical(
                     "Invalid argument list: ',' or ')' expected "
-                    + ("but %s ('%s') found in '%s'." % (name, tokens.token(), tokens.source()))
+                    + (
+                        "but %s ('%s') found in '%s'."
+                        % (name, tokens.token(), tokens.source())
+                    )
                 )
                 sys.exit("GoSam terminated due to an error")
             result.append(arg)
 
             if name == "comma":
-                tokens.pop()
+                _ = tokens.pop()
                 name = tokens.name()
 
-        tokens.pop()
+        _ = tokens.pop()
         return result
 
 
-class ExpressionScanner(golem.model.scanner.Scanner):
+class ExpressionScanner(Scanner):
     """
     Tokenizer for mathematical expressions. To be used together
     with ExpressionParser.
     """
 
     def __init__(self):
+        super().__init__()
         pass
 
-    def skip(self, image):
+    def skip(self, image: str):
         r"@TOKEN /\s+/"
         pass
 
-    def symbol(self, image):
+    def symbol(self, image: str) -> str:
         r"@TOKEN /[A-Za-z_][A-Za-z0-9_]*/"
         return image
 
-    def float(self, image):
+    def float(self, image: str) -> str:
         "@TOKEN \
 /([0-9]*\\.[0-9]+|[0-9]+\\.[0-9]*)([EeDd][-+]?[0-9]+)?|[0-9]+[EeDd][-+][0-9]+/"
         return image
 
-    def integer(self, image):
+    def integer(self, image: str) -> int:
         r"@TOKEN /[0-9]+(?![.0-9])/"
         return int(image)
 
-    def plus_op(self, image):
+    def plus_op(self, image: str) -> int:
         r"@TOKEN :\+|-:"
         if image == "+":
             return 1
         else:
             return -1
 
-    def comma(self, image):
+    def comma(self, image: str) -> str:
         "@TOKEN /,/"
         return image
 
-    def mul_op(self, image):
+    def mul_op(self, image: str) -> int:
         r"@TOKEN :\*(?!\*)|/:"
         if image == "*":
             return 1
         else:
             return -1
 
-    def power_op(self, image):
+    def power_op(self, image: str) -> str:
         r"@TOKEN :\*\*|\^:"
         return image
 
-    def lparen(self, image):
+    def lparen(self, image: str) -> str:
         r"@TOKEN :\(:"
         return image
 
-    def rparen(self, image):
+    def rparen(self, image: str) -> str:
         r"@TOKEN :\):"
         return image
 
-    def dot(self, image):
+    def dot(self, image: str) -> str:
         r"@TOKEN /\./"
         return image
 
-    def single_quoted(self, image):
+    def single_quoted(self, image: str) -> str:
         r"@TOKEN /'[^\n\r']*'/"
         return image
 
 
 class Expression:
-    def getPrecedence(self):
-        raise NotImplementedError("Expression.getPrecedence() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def dependsOn(self, symbol):
-        raise NotImplementedError("Expression.dependsOn() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def prefixSymbolsWith(self, prefix):
+    def getPrecedence(self) -> int:
         raise NotImplementedError(
-            "Expression.prefixSymbolsWith() needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.getPrecedence() needs to be overwritten in %s."
+            % self.__class__.__name__
         )
 
-    def subs(self, aDict):
-        raise NotImplementedError("Expression.subs() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def algsubs(self, orig, image):
-        raise NotImplementedError("Expression.algsubs() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def powerCounting(self, powers):
-        raise NotImplementedError("Expression.powerCounting() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def countSymbolPowers(self):
+    def dependsOn(self, _symbol: str) -> bool:
         raise NotImplementedError(
-            "Expression.countSymbolPowers() needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.dependsOn() needs to be overwritten in %s."
+            % self.__class__.__name__
         )
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    def prefixSymbolsWith(self, _prefix: str) -> Expression:
         raise NotImplementedError(
-            "Expression.replaceNegativeIndices() " + "needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.prefixSymbolsWith() needs to be overwritten in %s."
+            % self.__class__.__name__
         )
 
-    def __int__(self):
+    def subs(self, _aDict: Mapping[str, Expression]) -> Expression:
+        raise NotImplementedError(
+            "Expression.subs() needs to be overwritten in %s." % self.__class__.__name__
+        )
+
+    def algsubs(self, _orig: Expression, _image: Expression) -> Expression:
+        raise NotImplementedError(
+            "Expression.algsubs() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    def powerCounting(self, _powers: MutableMapping[str, int]) -> int:
+        raise NotImplementedError(
+            "Expression.powerCounting() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    def countSymbolPowers(self) -> Mapping[str, int]:
+        raise NotImplementedError(
+            "Expression.countSymbolPowers() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    def replaceNegativeIndices(
+        self, _lvl: int, _pattern: str, _found: MutableMapping[int, Expression]
+    ) -> Expression:
+        raise NotImplementedError(
+            "Expression.replaceNegativeIndices() "
+            + "needs to be overwritten in %s." % self.__class__.__name__
+        )
+
+    def __int__(self) -> int:
         print(type(self.__class__.__name__), self.__class__.__name__)
-        raise NotImplementedError("Expression.__int__() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def replaceIntegerPowers(self, pow_fun):
         raise NotImplementedError(
-            "Expression.replaceIntegerPowers() " + "needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.__int__() needs to be overwritten in %s."
+            % self.__class__.__name__
         )
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
-        raise NotImplementedError("Expression.replaceFloats() needs to be overwritten in %s." % self.__class__.__name__)
-
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    def replaceIntegerPowers(self, _pow_fun: Expression) -> Expression:
         raise NotImplementedError(
-            "Expression.replaceStrings() needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.replaceIntegerPowers() "
+            + "needs to be overwritten in %s." % self.__class__.__name__
         )
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
+    def replaceFloats(
+        self,
+        _prefix: str,
+        _subs: MutableMapping[str, Expression],
+        _counter: list[int] = [0],
+    ) -> Expression:
         raise NotImplementedError(
-            "Expression.replaceDotProducts() needs to be overwritten in %s." % self.__class__.__name__
+            "Expression.replaceFloats() needs to be overwritten in %s."
+            % self.__class__.__name__
         )
 
-    def __eq__(self, other):
-        raise NotImplementedError("Expression.__eq__() needs to be overwritten in %s." % self.__class__.__name__)
+    def replaceStrings(
+        self,
+        _prefix: str,
+        _subs: MutableMapping[str, Expression],
+        _counter: list[int] = [0],
+    ) -> Expression:
+        raise NotImplementedError(
+            "Expression.replaceStrings() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
 
-    def __ne__(self, other):
+    def replaceDotProducts(
+        self,
+        _idx_prefixes: Sequence[str],
+        _metric: Callable[[Expression, Expression], Expression],
+        _dotproduct: None | Callable[[Expression, Expression], Expression] = None,
+    ) -> Expression:
+        raise NotImplementedError(
+            "Expression.replaceDotProducts() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    def write(self, _out: TextIO) -> None:
+        raise NotImplementedError(
+            "Expression.write() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    def write_fortran(self) -> str:
+        raise NotImplementedError(
+            "Expression.write_fortran() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    @override
+    def __eq__(self, _other: object) -> bool:
+        raise NotImplementedError(
+            "Expression.__eq__() needs to be overwritten in %s."
+            % self.__class__.__name__
+        )
+
+    @override
+    def __ne__(self, other: object):
         return not (self == other)
 
-    def __call__(self, *args):
-        if isinstance(args, tuple):
-            largs = list(args)
-        else:
-            largs = [args]
-            dir(args)
+    def __call__(self, *args: Expression) -> Expression:
+        largs = list(args)
         return FunctionExpression(self, largs)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Expression) -> Expression:
         return ProductExpression([(1, self), (1, other)])
 
-    def __div__(self, other):
+    def __div__(self, other: Expression) -> Expression:
         return ProductExpression([(1, self), (-1, other)])
 
-    def __pow__(self, other):
+    def __pow__(self, other: Expression) -> Expression:
         return PowerExpression(self, other)
 
-    def __add__(self, other):
+    def __add__(self, other: Expression) -> Expression:
         return SumExpression([self, other])
 
-    def __sub__(self, other):
+    def __sub__(self, other: Expression) -> Expression:
         return SumExpression([self, UnaryMinusExpression(other)])
 
     def __neg__(self):
@@ -385,58 +473,96 @@ class Expression:
 
 
 class ConstantExpression(Expression):
+    @override
     def getPrecedence(self):
         return 1000
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, _symbol: str):
         return False
 
-    def prefixSymbolsWith(self, prefix):
+    @override
+    def prefixSymbolsWith(self, _prefix: str):
         return self
 
-    def subs(self, aDict):
+    @override
+    def subs(self, _aDict: Mapping[str, Expression]):
         return self
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, _powers: MutableMapping[str, int]):
         return 0
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, _lvl: int, _pattern: str, _found: MutableMapping[int, Expression]
+    ) -> Expression:
         return self
 
-    def countSymbolPowers(self):
+    @override
+    def countSymbolPowers(self) -> dict[str, int]:
         return {}
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
-    def replaceIntegerPowers(self, pow_fun):
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression) -> Expression:
         return self
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression) -> Expression:
         if self == orig:
             return image
         else:
             return self
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: None | Callable[[Expression, Expression], Expression] = None,
+    ):
         return self
 
 
+@final
 class FloatExpression(ConstantExpression):
-    def __init__(self, float):
+    def __init__(self, float: float):
         self._float = str(float)
 
-    def write(self, out):
-        out.write(str(self._float))
+    @override
+    def write(self, out: TextIO):
+        _ = out.write(str(self._float))
 
+    @override
     def write_fortran(self):
         return str(self._float)
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
-        for name, value in list(subs.items()):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
+        for name, value in subs.items():
             if str(value) == str(self._float):
                 return SymbolExpression(name)
 
@@ -445,36 +571,46 @@ class FloatExpression(ConstantExpression):
         subs[name] = self
         return SymbolExpression(name)
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, FloatExpression):
             return self._float == other._float
         else:
             return False
 
+    @override
     def __str__(self):
         return str(self._float)
 
 
+@final
 class IntegerExpression(ConstantExpression):
-    def __init__(self, integer):
+    def __init__(self, integer: int):
         self._integer = integer
 
+    @override
     def __int__(self):
         return self._integer
 
-    def write(self, out):
-        out.write(str(self._integer))
+    @override
+    def write(self, out: TextIO):
+        _ = out.write(str(self._integer))
 
+    @override
     def write_fortran(self):
         return str(self._integer)
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, IntegerExpression):
             return self._integer == other._integer
         else:
             return False
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ) -> Expression:
         if lvl > 0 and self._integer < 0:
             idx = abs(self._integer)
             if idx in found:
@@ -486,78 +622,114 @@ class IntegerExpression(ConstantExpression):
         else:
             return self
 
+    @override
     def __str__(self):
         return str(self._integer)
 
 
+@final
 class SymbolExpression(Expression):
-    def __init__(self, symbol):
+    def __init__(self, symbol: str):
         self._symbol = symbol
 
+    @override
     def countSymbolPowers(self):
         return {self._symbol: 1}
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str) -> bool:
         return self._symbol == symbol
 
-    def prefixSymbolsWith(self, prefix):
+    @override
+    def prefixSymbolsWith(self, prefix: str):
         return SymbolExpression(prefix + self._symbol)
 
-    def subs(self, aDict):
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
         if self._symbol in aDict:
             return aDict[self._symbol]
         else:
             return self
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression) -> Expression:
         if self == orig:
             return image
         else:
             return self
 
-    def getPrecedence(self):
+    @override
+    def getPrecedence(self) -> int:
         return 1000
 
-    def write(self, out):
-        out.write(self._symbol)
+    @override
+    def write(self, out: TextIO):
+        _ = out.write(self._symbol)
 
+    @override
     def write_fortran(self):
         return self._symbol
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, _lvl: int, pattern: str, found: Mapping[int, Expression]
+    ):
         return self
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]) -> int:
         if self._symbol in powers:
             return powers[self._symbol]
         else:
             return 0
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression) -> Expression:
         return self
 
-    def replaceIntegerPowers(self, pow_fun):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
+    @override
     def __str__(self):
         return self._symbol
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, SymbolExpression):
             return self._symbol == other._symbol
         else:
             return False
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: None | Callable[[Expression, Expression], Expression] = None,
+    ):
         return self
 
 
+@final
 class FunctionExpression(Expression):
-    def __init__(self, head, args):
-        self._deps = {}
+    def __init__(self, head: Expression, args: Sequence[Expression]):
+        self._deps: dict[str, bool] = {}
         self._head = head
         self._arguments = list(args)
 
@@ -567,65 +739,85 @@ class FunctionExpression(Expression):
     def getArguments(self):
         return self._arguments[:]
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]):
         return self._head.powerCounting(powers)
 
+    @override
     def countSymbolPowers(self):
         return self._head.countSymbolPowers()
 
+    @override
     def getPrecedence(self):
         return 500
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str) -> bool:
         if symbol in self._deps:
             return self._deps[symbol]
         else:
-            dep = self._head.dependsOn(symbol) or any(arg.dependsOn(symbol) for arg in self._arguments)
+            dep = self._head.dependsOn(symbol) or any(
+                arg.dependsOn(symbol) for arg in self._arguments
+            )
             self._deps[symbol] = dep
             return dep
 
-    def prefixSymbolsWith(self, prefix):
+    @override
+    def prefixSymbolsWith(self, prefix: str):
         return FunctionExpression(
-            self._head.prefixSymbolsWith(prefix), [arg.prefixSymbolsWith(prefix) for arg in self._arguments]
+            self._head.prefixSymbolsWith(prefix),
+            [arg.prefixSymbolsWith(prefix) for arg in self._arguments],
         )
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ):
         return FunctionExpression(
             self._head.replaceNegativeIndices(lvl, pattern, found),
-            [arg.replaceNegativeIndices(lvl + 1, pattern, found) for arg in self._arguments],
+            [
+                arg.replaceNegativeIndices(lvl + 1, pattern, found)
+                for arg in self._arguments
+            ],
         )
-        return self
 
-    def subs(self, aDict):
-        return FunctionExpression(self._head.subs(aDict), [arg.subs(aDict) for arg in self._arguments])
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
+        return FunctionExpression(
+            self._head.subs(aDict), [arg.subs(aDict) for arg in self._arguments]
+        )
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression):
         if self == orig:
             return image
         else:
             return FunctionExpression(
-                self._head.algsubs(orig, image), [arg.algsubs(orig, image) for arg in self._arguments]
+                self._head.algsubs(orig, image),
+                [arg.algsubs(orig, image) for arg in self._arguments],
             )
 
-    def write(self, out):
+    @override
+    def write(self, out: TextIO):
         if self._head.getPrecedence() >= self.getPrecedence():
             self._head.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._head.write(out)
-            out.write(")")
+            _ = out.write(")")
 
-        out.write("(")
+        _ = out.write("(")
         first = True
         for arg in self._arguments:
             if first:
                 first = False
             else:
-                out.write(",")
+                _ = out.write(",")
             arg.write(out)
-        out.write(")")
+        _ = out.write(")")
 
-    def write_fortran(self):
+    @override
+    def write_fortran(self) -> str:
         r_string = ""
         if self._head.getPrecedence() >= self.getPrecedence():
             r_string += self._head.write_fortran()
@@ -645,10 +837,12 @@ class FunctionExpression(Expression):
         r_string += ")"
         return r_string
 
+    @override
     def __str__(self):
         return "[" + str(self._head) + "](" + ",".join(map(str, self._arguments)) + ")"
 
-    def replaceIntegerPowers(self, pow_fun):
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression) -> Expression:
         if self._head == pow_fun:
             if len(self) == 2:
                 if isinstance(self[1], IntegerExpression):
@@ -657,28 +851,50 @@ class FunctionExpression(Expression):
         new_args = [x.replaceIntegerPowers(pow_fun) for x in self._arguments]
         return new_head(*new_args)
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_head = self._head.replaceFloats(prefix, subs, counter)
         new_args = [x.replaceFloats(prefix, subs, counter) for x in self._arguments]
         return FunctionExpression(new_head, new_args)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_head = self._head.replaceStrings(prefix, subs, counter)
         new_args = [x.replaceStrings(prefix, subs, counter) for x in self._arguments]
         return FunctionExpression(new_head, new_args)
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: None | Callable[[Expression, Expression], Expression] = None,
+    ):
         new_head = self._head.replaceDotProducts(idx_prefixes, metric, dotproduct)
-        new_args = [x.replaceDotProducts(idx_prefixes, metric, dotproduct) for x in self._arguments]
+        new_args = [
+            x.replaceDotProducts(idx_prefixes, metric, dotproduct)
+            for x in self._arguments
+        ]
         return FunctionExpression(new_head, new_args)
 
     def __len__(self):
         return len(self._arguments)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Expression:
         return self._arguments[index]
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, FunctionExpression):
             if self._head == other._head and len(self) == len(other):
                 for i in range(len(self)):
@@ -691,26 +907,42 @@ class FunctionExpression(Expression):
             return False
 
 
+@final
 class DotExpression(Expression):
-    def __init__(self, first, second):
-        self._deps = {}
+    def __init__(self, first: Expression, second: Expression):
+        self._deps: dict[str, bool] = {}
         self._first = first
         self._second = second
 
+    @override
     def __str__(self):
         return "(" + str(self._first) + "." + str(self._second) + ")"
 
-    def replaceIntegerPowers(self, pow_fun):
-        return DotExpression(self._first.replaceIntegerPowers(pow_fun), self._second.replaceIntegerPowers(pow_fun))
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression):
+        return DotExpression(
+            self._first.replaceIntegerPowers(pow_fun),
+            self._second.replaceIntegerPowers(pow_fun),
+        )
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
-        if isinstance(self._first, SymbolExpression) or isinstance(self._first, SpecialExpression):
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: None | Callable[[Expression, Expression], Expression] = None,
+    ):
+        if isinstance(self._first, SymbolExpression) or isinstance(
+            self._first, SpecialExpression
+        ):
             s1 = str(self._first)
             i1 = any(s1.startswith(prefix) for prefix in idx_prefixes)
         else:
             i1 = False
 
-        if isinstance(self._second, SymbolExpression) or isinstance(self._second, SpecialExpression):
+        if isinstance(self._second, SymbolExpression) or isinstance(
+            self._second, SpecialExpression
+        ):
             s2 = str(self._second)
             i2 = any(s2.startswith(prefix) for prefix in idx_prefixes)
         else:
@@ -728,12 +960,16 @@ class DotExpression(Expression):
             else:
                 return self
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ):
         s1 = self._first.replaceNegativeIndices(lvl, pattern, found)
         s2 = self._second.replaceNegativeIndices(lvl, pattern, found)
-        return DotExpression(self._first, self._second)
+        return DotExpression(s1, s2)
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, DotExpression):
             return (self._first == other._first and self._second == other._second) or (
                 self._first == other._second and self._second == other._first
@@ -747,28 +983,44 @@ class DotExpression(Expression):
     def getSecond(self):
         return self._second
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_first = self._first.replaceFloats(prefix, subs, counter)
         new_second = self._second.replaceFloats(prefix, subs, counter)
         return DotExpression(new_first, new_second)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_first = self._first.replaceStrings(prefix, subs, counter)
         new_second = self._second.replaceStrings(prefix, subs, counter)
         return DotExpression(new_first, new_second)
 
-    def countSymbolPowers(self):
+    @override
+    def countSymbolPowers(self) -> Mapping[str, int]:
         p1 = self._first.countSymbolPowers()
         p2 = self._second.countSymbolPowers()
         return addSymbolPowers(p1, p2)
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]):
         return self._first.powerCounting(powers) + self._second.powerCounting(powers)
 
+    @override
     def getPrecedence(self):
         return 500
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str):
         if symbol in self._deps:
             return self._deps[symbol]
         else:
@@ -776,35 +1028,45 @@ class DotExpression(Expression):
             self._deps[symbol] = dep
             return dep
 
-    def prefixSymbolsWith(self, prefix):
-        return DotExpression(self._first.prefixSymbolsWith(prefix), self._second.prefixSymbolsWith(prefix))
+    @override
+    def prefixSymbolsWith(self, prefix: str):
+        return DotExpression(
+            self._first.prefixSymbolsWith(prefix),
+            self._second.prefixSymbolsWith(prefix),
+        )
 
-    def subs(self, aDict):
+    @override
+    def subs(self, aDict: Mapping[str, Expression]) -> Expression:
         return DotExpression(self._first.subs(aDict), self._second.subs(aDict))
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression) -> Expression:
         if self == orig:
             return image
         else:
-            return DotExpression(self._first.algsubs(orig, image), self._second.algsubs(orig, image))
+            return DotExpression(
+                self._first.algsubs(orig, image), self._second.algsubs(orig, image)
+            )
 
-    def write(self, out):
+    @override
+    def write(self, out: TextIO):
         if self._first.getPrecedence() >= self.getPrecedence():
             self._first.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._first.write(out)
-            out.write(")")
+            _ = out.write(")")
 
-        out.write(".")
+        _ = out.write(".")
 
         if self._second.getPrecedence() >= self.getPrecedence():
             self._second.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._second.write(out)
-            out.write(")")
+            _ = out.write(")")
 
+    @override
     def write_fortran(self):
         r_string = "dotproduct"
         if self._first.getPrecedence() >= self.getPrecedence():
@@ -825,15 +1087,18 @@ class DotExpression(Expression):
         return r_string
 
 
+@final
 class PowerExpression(Expression):
-    def __init__(self, base, exponent):
+    def __init__(self, base: Expression, exponent: Expression):
         self._base = base
         self._exponent = exponent
 
+    @override
     def __str__(self):
         return "(" + str(self._base) + ")^(" + str(self._exponent) + ")"
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, PowerExpression):
             return self._base == other._base and self._exponent == other._exponent
         else:
@@ -845,28 +1110,49 @@ class PowerExpression(Expression):
     def getExponent(self):
         return self._exponent
 
-    def replaceIntegerPowers(self, pow_fun):
-        return PowerExpression(self._base.replaceIntegerPowers(pow_fun), self._exponent.replaceIntegerPowers(pow_fun))
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression):
+        return PowerExpression(
+            self._base.replaceIntegerPowers(pow_fun),
+            self._exponent.replaceIntegerPowers(pow_fun),
+        )
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_base = self._base.replaceFloats(prefix, subs, counter)
         new_exponent = self._exponent.replaceFloats(prefix, subs, counter)
         return PowerExpression(new_base, new_exponent)
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ):
         new_base = self._base.replaceNegativeIndices(lvl, pattern, found)
         new_exponent = self._exponent.replaceNegativeIndices(lvl, pattern, found)
         return PowerExpression(new_base, new_exponent)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         new_base = self._base.replaceStrings(prefix, subs, counter)
         new_exponent = self._exponent.replaceStrings(prefix, subs, counter)
         return PowerExpression(new_base, new_exponent)
 
-    def __int__(self):
-        return int(self._base) ** int(self._exponent)
+    @override
+    def __int__(self) -> int:
+        return cast(int, int(self._base) ** int(self._exponent))
 
-    def countSymbolPowers(self):
+    @override
+    def countSymbolPowers(self) -> Mapping[str, int]:
         powers = self._base.countSymbolPowers()
         try:
             factor = int(self._exponent)
@@ -875,50 +1161,69 @@ class PowerExpression(Expression):
 
         return mulSymbolPowers(powers, factor)
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]):
         return int(self._exponent) * self._base.powerCounting(powers)
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str):
         return self._base.dependsOn(symbol) or self._exponent.dependsOn(symbol)
 
-    def prefixSymbolsWith(self, prefix):
-        return PowerExpression(self._base.prefixSymbolsWith(prefix), self._exponent.prefixSymbolsWith(prefix))
+    @override
+    def prefixSymbolsWith(self, prefix: str):
+        return PowerExpression(
+            self._base.prefixSymbolsWith(prefix),
+            self._exponent.prefixSymbolsWith(prefix),
+        )
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: Callable[[Expression, Expression], Expression] | None = None,
+    ):
         return PowerExpression(
             self._base.replaceDotProducts(idx_prefixes, metric, dotproduct),
             self._exponent.replaceDotProducts(idx_prefixes, metric, dotproduct),
         )
 
-    def subs(self, aDict):
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
         return PowerExpression(self._base.subs(aDict), self._exponent.subs(aDict))
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression) -> Expression:
         if self == orig:
             return image
         else:
-            return PowerExpression(self._base.algsubs(orig, image), self._exponent.algsubs(orig, image))
+            return PowerExpression(
+                self._base.algsubs(orig, image), self._exponent.algsubs(orig, image)
+            )
 
+    @override
     def getPrecedence(self):
         return 400
 
-    def write(self, out):
+    @override
+    def write(self, out: TextIO):
         if self._base.getPrecedence() >= self.getPrecedence():
             self._base.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._base.write(out)
-            out.write(")")
+            _ = out.write(")")
 
-        out.write("^")
+        _ = out.write("^")
 
         if self._exponent.getPrecedence() >= self.getPrecedence():
             self._exponent.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._exponent.write(out)
-            out.write(")")
+            _ = out.write(")")
 
+    @override
     def write_fortran(self):
         r_string = ""
         if self._base.getPrecedence() >= self.getPrecedence():
@@ -939,11 +1244,13 @@ class PowerExpression(Expression):
         return r_string
 
 
+@final
 class ProductExpression(Expression):
-    def __init__(self, factors):
+    def __init__(self, factors: Sequence[tuple[int, Expression]]):
         self._factors = factors[:]
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, ProductExpression):
             if len(self) == len(other):
                 for i in range(len(self)):
@@ -960,53 +1267,72 @@ class ProductExpression(Expression):
     def __len__(self):
         return len(self._factors)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> tuple[int, Expression]:
         return self._factors[index]
 
     def getFactors(self):
         return self._factors[:]
 
+    @override
     def countSymbolPowers(self):
         result = {}
         for sig, factor in self._factors:
             p = factor.countSymbolPowers()
-            if p == -1:
+            if sig == -1:  # TODO: Is this correct?
                 p = mulSymbolPowers(p, -1)
             result = addSymbolPowers(p, result)
         return result
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
-        result = []
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
+        result: list[tuple[int, Expression]] = []
         for sig, factor in self._factors:
             p = factor.replaceFloats(prefix, subs, counter)
             result.append((sig, p))
         return ProductExpression(result)
 
-    def replaceIntegerPowers(self, pow_fun):
-        result = []
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression):
+        result: list[tuple[int, Expression]] = []
         for sig, factor in self._factors:
             p = factor.replaceIntegerPowers(pow_fun)
             result.append((sig, p))
         return ProductExpression(result)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
-        result = []
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
+        result: list[tuple[int, Expression]] = []
         for sig, factor in self._factors:
             p = factor.replaceStrings(prefix, subs, counter)
             result.append((sig, p))
         return ProductExpression(result)
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
-        result = []
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ):
+        result: list[tuple[int, Expression]] = []
         for sig, factor in self._factors:
             p = factor.replaceNegativeIndices(lvl, pattern, found)
             result.append((sig, p))
         return ProductExpression(result)
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]):
         return sum([sig * term.powerCounting(powers) for sig, term in self._factors])
 
-    def __int__(self):
+    @override
+    def __int__(self) -> int:
         num = 1
         den = 1
         for sig, factor in self._factors:
@@ -1016,63 +1342,80 @@ class ProductExpression(Expression):
                 den *= int(factor)
         return num / den
 
-    def dependsOn(self, symbol):
-        return any(factor.dependsOn(symbol) for sign, factor in self._factors)
+    @override
+    def dependsOn(self, symbol: str):
+        return any(factor.dependsOn(symbol) for _, factor in self._factors)
 
-    def prefixSymbolsWith(self, prefix):
-        new_factors = []
+    @override
+    def prefixSymbolsWith(self, prefix: str):
+        new_factors: list[tuple[int, Expression]] = []
         for sign, factor in self._factors:
             new_factors.append((sign, factor.prefixSymbolsWith(prefix)))
         return ProductExpression(new_factors)
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
-        new_factors = []
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: Callable[[Expression, Expression], Expression] | None = None,
+    ):
+        new_factors: list[tuple[int, Expression]] = []
         for sign, factor in self._factors:
-            new_factors.append((sign, factor.replaceDotProducts(idx_prefixes, metric, dotproduct)))
+            new_factors.append(
+                (sign, factor.replaceDotProducts(idx_prefixes, metric, dotproduct))
+            )
         return ProductExpression(new_factors)
 
-    def subs(self, aDict):
-        new_factors = []
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
+        new_factors: list[tuple[int, Expression]] = []
         for sign, factor in self._factors:
             new_factors.append((sign, factor.subs(aDict)))
         return ProductExpression(new_factors)
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression):
         if self == orig:
             return image
         else:
-            new_factors = []
+            new_factors: list[tuple[int, Expression]] = []
             for sign, factor in self._factors:
                 new_factors.append((sign, factor.algsubs(orig, image)))
             return ProductExpression(new_factors)
 
+    @override
     def __str__(self):
-        return "*".join(["(" + str(term) + ")^" + str(sig) for sig, term in self._factors])
+        return "*".join(
+            ["(" + str(term) + ")^" + str(sig) for sig, term in self._factors]
+        )
 
-    def write(self, out):
+    @override
+    def write(self, out: TextIO):
         first_sig, first_term = self._factors[0]
         follow = self._factors[1:]
         if first_sig == -1:
-            out.write("1/")
+            _ = out.write("1/")
         if first_term.getPrecedence() >= self.getPrecedence():
             first_term.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             first_term.write(out)
-            out.write(")")
+            _ = out.write(")")
 
         for sig, term in follow:
             if sig == 1:
-                out.write("*")
+                _ = out.write("*")
             else:
-                out.write("/")
+                _ = out.write("/")
             if term.getPrecedence() > self.getPrecedence():
                 term.write(out)
             else:
-                out.write("(")
+                _ = out.write("(")
                 term.write(out)
-                out.write(")")
+                _ = out.write(")")
 
+    @override
     def write_fortran(self):
         first_sig, first_term = self._factors[0]
         follow = self._factors[1:]
@@ -1099,16 +1442,19 @@ class ProductExpression(Expression):
                 r_string += ")"
         return r_string
 
+    @override
     def getPrecedence(self):
         return 200
 
 
+@final
 class SumExpression(Expression):
-    def __init__(self, terms):
-        self._deps = {}
+    def __init__(self, terms: Sequence[Expression]):
+        self._deps: MutableMapping[str, bool] = {}
         self._terms = list(terms)
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, SumExpression):
             if len(self) == len(other):
                 iterms = set(range(len(other)))
@@ -1133,49 +1479,66 @@ class SumExpression(Expression):
     def __len__(self):
         return len(self._terms)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Expression:
         return self._terms[index]
 
     def getTerms(self):
         return self._terms[:]
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
-        result = []
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
+        result: list[Expression] = []
         for term in self._terms:
             p = term.replaceFloats(prefix, subs, counter)
             result.append(p)
         return SumExpression(result)
 
-    def replaceIntegerPowers(self, pow_fun):
-        result = []
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression):
+        result: list[Expression] = []
         for term in self._terms:
             p = term.replaceIntegerPowers(pow_fun)
             result.append(p)
         return SumExpression(result)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
-        result = []
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
+        result: list[Expression] = []
         for term in self._terms:
             p = term.replaceStrings(prefix, subs, counter)
             result.append(p)
         return SumExpression(result)
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
-        result = []
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ):
+        result: list[Expression] = []
         for term in self._terms:
             p = term.replaceNegativeIndices(lvl, pattern, found)
             result.append(p)
         return SumExpression(result)
 
-    def countSymbolPowers(self):
-        all_p = []
-        names = set([])
+    @override
+    def countSymbolPowers(self) -> Mapping[str, int]:
+        all_p: list[Mapping[str, int]] = []
+        names: set[str] = set([])
         for term in self._terms:
             p = term.countSymbolPowers()
             all_p.append(p)
             names.update(list(p.keys()))
 
-        result = {}
+        result: Mapping[str, int] = {}
         for name in names:
             if any(name not in p for p in all_p):
                 continue
@@ -1186,10 +1549,12 @@ class SumExpression(Expression):
                 result[name] = minp
         return result
 
+    @override
     def __int__(self):
         return sum(map(int, self._terms))
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str):
         if symbol in self._deps:
             return self._deps[symbol]
         else:
@@ -1197,44 +1562,60 @@ class SumExpression(Expression):
             self._deps[symbol] = dep
             return dep
 
-    def prefixSymbolsWith(self, prefix):
+    @override
+    def prefixSymbolsWith(self, prefix: str):
         return SumExpression([term.prefixSymbolsWith(prefix) for term in self._terms])
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
-        return SumExpression([term.replaceDotProducts(idx_prefixes, metric, dotproduct) for term in self._terms])
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: Callable[[Expression, Expression], Expression] | None = None,
+    ):
+        return SumExpression(
+            [
+                term.replaceDotProducts(idx_prefixes, metric, dotproduct)
+                for term in self._terms
+            ]
+        )
 
-    def subs(self, aDict):
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
         return SumExpression([term.subs(aDict) for term in self._terms])
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression):
         if self == orig:
             return image
         else:
             return SumExpression([term.algsubs(orig, image) for term in self._terms])
 
-    def write(self, out):
+    @override
+    def write(self, out: TextIO):
         first = self._terms[0]
         follow = self._terms[1:]
         if first.getPrecedence() >= self.getPrecedence():
             first.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             first.write(out)
-            out.write(")")
+            _ = out.write(")")
 
         for term in follow:
             if isinstance(term, UnaryMinusExpression):
                 term.write(out)
             else:
-                out.write("+")
+                _ = out.write("+")
                 if term.getPrecedence() >= self.getPrecedence():
                     term.write(out)
                 else:
-                    out.write("(")
+                    _ = out.write("(")
                     term.write(out)
-                    out.write(")")
+                    _ = out.write(")")
 
-    def write_fortran(self):
+    @override
+    def write_fortran(self) -> str:
         r_string = ""
         first = self._terms[0]
         follow = self._terms[1:]
@@ -1258,22 +1639,27 @@ class SumExpression(Expression):
                     r_string += ")"
         return r_string
 
+    @override
     def getPrecedence(self):
         return 100
 
+    @override
     def __str__(self):
         return "+".join(map(str, self._terms))
 
 
+@final
 class UnaryMinusExpression(Expression):
-    def __init__(self, term):
-        self._deps = {}
+    def __init__(self, term: Expression):
+        self._deps: MutableMapping[str, bool] = {}
         self._term = term
 
+    @override
     def __str__(self):
         return "-(" + str(self._term) + ")"
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, UnaryMinusExpression):
             return self._term == other._term
         else:
@@ -1282,28 +1668,45 @@ class UnaryMinusExpression(Expression):
     def getTerm(self):
         return self._term
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         p = self._term.replaceFloats(prefix, subs, counter)
         return UnaryMinusExpression(p)
 
-    def replaceIntegerPowers(self, pow_fun):
+    @override
+    def replaceIntegerPowers(self, pow_fun: Expression):
         p = self._term.replaceIntegerPowers(pow_fun)
         return UnaryMinusExpression(p)
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ):
         p = self._term.replaceStrings(prefix, subs, counter)
         return UnaryMinusExpression(p)
 
+    @override
     def countSymbolPowers(self):
         return self._term.countSymbolPowers()
 
-    def powerCounting(self, powers):
+    @override
+    def powerCounting(self, powers: MutableMapping[str, int]):
         return self._term.powerCounting(powers)
 
+    @override
     def __int__(self):
         return -int(self._term)
 
-    def dependsOn(self, symbol):
+    @override
+    def dependsOn(self, symbol: str):
         if symbol in self._deps:
             return self._deps[symbol]
         else:
@@ -1311,13 +1714,25 @@ class UnaryMinusExpression(Expression):
             self._deps[symbol] = dep
             return dep
 
-    def prefixSymbolsWith(self, prefix):
+    @override
+    def prefixSymbolsWith(self, prefix: str):
         return UnaryMinusExpression(self._term.prefixSymbolsWith(prefix))
 
-    def replaceDotProducts(self, idx_prefixes, metric, dotproduct=None):
-        return UnaryMinusExpression(self._term.replaceDotProducts(idx_prefixes, metric, dotproduct))
+    @override
+    def replaceDotProducts(
+        self,
+        idx_prefixes: Sequence[str],
+        metric: Callable[[Expression, Expression], Expression],
+        dotproduct: Callable[[Expression, Expression], Expression] | None = None,
+    ):
+        return UnaryMinusExpression(
+            self._term.replaceDotProducts(idx_prefixes, metric, dotproduct)
+        )
 
-    def replaceNegativeIndices(self, lvl, pattern, found):
+    @override
+    def replaceNegativeIndices(
+        self, lvl: int, pattern: str, found: MutableMapping[int, Expression]
+    ) -> Expression:
         if isinstance(self._term, IntegerExpression) and lvl > 0:
             idx = int(self._term)
             if idx > 0:
@@ -1330,26 +1745,32 @@ class UnaryMinusExpression(Expression):
             else:
                 return self
         else:
-            return UnaryMinusExpression(self._term.replaceNegativeIndices(lvl, pattern, found))
+            return UnaryMinusExpression(
+                self._term.replaceNegativeIndices(lvl, pattern, found)
+            )
 
-    def subs(self, aDict):
+    @override
+    def subs(self, aDict: Mapping[str, Expression]):
         return UnaryMinusExpression(self._term.subs(aDict))
 
-    def algsubs(self, orig, image):
+    @override
+    def algsubs(self, orig: Expression, image: Expression):
         if self == orig:
             return image
         else:
             return UnaryMinusExpression(self._term.algsubs(orig, image))
 
-    def write(self, out):
-        out.write("-")
+    @override
+    def write(self, out: TextIO):
+        _ = out.write("-")
         if self._term.getPrecedence() >= self.getPrecedence():
             self._term.write(out)
         else:
-            out.write("(")
+            _ = out.write("(")
             self._term.write(out)
-            out.write(")")
+            _ = out.write(")")
 
+    @override
     def write_fortran(self):
         r_string = ""
         r_string += "-"
@@ -1361,56 +1782,85 @@ class UnaryMinusExpression(Expression):
             r_string += ")"
         return r_string
 
+    @override
     def getPrecedence(self):
         return 150
 
 
+@final
 class SpecialExpression(ConstantExpression):
-    def __init__(self, image):
+    def __init__(self, image: str):
         self._image = image
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, SpecialExpression):
             return self._image == other._image
         else:
             return False
 
-    def write(self, out):
-        out.write(self._image)
+    @override
+    def write(self, out: TextIO):
+        _ = out.write(self._image)
 
+    @override
     def write_fortran(self):
         return self._image
 
+    @override
     def __str__(self):
         return self._image
 
-    def replaceFloats(self, prefix, subs, counter=[0]):
+    @override
+    def replaceFloats(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         return self
 
 
+@final
 class StringExpression(ConstantExpression):
-    def __init__(self, image):
+    def __init__(self, image: str):
         self._image = image
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: object):
         if isinstance(other, SpecialExpression):
             return self._image == other._image
         else:
             return False
 
-    def write(self, out):
-        out.write("'" + self._image + "'")
+    @override
+    def write(self, out: TextIO):
+        _ = out.write("'" + self._image + "'")
 
+    @override
     def write_fortran(self):
         return "'" + self._image + "'"
 
+    @override
     def __str__(self):
         return "'" + self._image + "'"
 
-    def replaceStrings(self, prefix, subs, counter=[0]):
+    @override
+    def replaceStrings(
+        self,
+        prefix: str,
+        subs: MutableMapping[str, Expression],
+        counter: list[int] = [0],
+    ) -> Expression:
         if self._image in subs:
             return subs[self._image]
 
@@ -1421,9 +1871,9 @@ class StringExpression(ConstantExpression):
         return expr
 
 
-def addSymbolPowers(p1, p2):
+def addSymbolPowers(p1: Mapping[str, int], p2: Mapping[str, int]):
     names = set(list(p1.keys()) + list(p2.keys()))
-    result = {}
+    result: Mapping[str, int] = {}
     for name in names:
         p = 0
         if name in p1:
@@ -1434,28 +1884,28 @@ def addSymbolPowers(p1, p2):
     return result
 
 
-def mulSymbolPowers(p1, factor):
-    result = {}
+def mulSymbolPowers(p1: Mapping[str, int], factor: int) -> Mapping[str, int]:
+    result: Mapping[str, int] = {}
     for name, p in list(p1.items()):
         result[name] = factor * p
     return result
 
 
-def resolve_dependencies(functions):
+def resolve_dependencies(functions: Mapping[str, Expression]):
     """
     Bring a list of expressions into an order in which they
     can be computed
     """
     all_names = list(functions.keys())
     nfunctions = len(all_names)
-    graph = {}
+    graph: dict[str, list[str]] = {}
     logger.info("      * Building call graph")
     i = 0
     for name, expr in list(functions.items()):
         i += 1
         if i % 100 == 0:
             logger.info("         (%5d/%5d)" % (i, nfunctions))
-        edges = []
+        edges: list[str] = []
         for other in all_names:
             if name == other:
                 continue
@@ -1468,7 +1918,8 @@ def resolve_dependencies(functions):
     nedges = len(graph)
     logger.info("         %5d edges left" % nedges)
 
-    program = []
+    program: list[str] = []
+    name = ""
     while len(graph) > 0:
         found = None
         for name, edges in list(graph.items()):
@@ -1498,7 +1949,9 @@ def resolve_dependencies(functions):
 
             problem_set = ", ".join(list(graph.keys()))
 
-            logger.critical("Cannot resolve dependencies between functions: %s." % problem_set)
+            logger.critical(
+                "Cannot resolve dependencies between functions: %s." % problem_set
+            )
             sys.exit("GoSam terminated due to an error")
 
         program.append(name)

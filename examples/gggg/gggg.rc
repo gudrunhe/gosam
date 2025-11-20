@@ -15,7 +15,7 @@ one=gs,e
 
 helicities=++++
 
-filter.nlo= lambda d: not d.isScaleless()
+filter.nlo= lambda d: not is_scaleless(d)
 
 regularisation_scheme=dred
 convert_to_thv=true

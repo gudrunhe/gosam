@@ -78,6 +78,34 @@ check_selection :
 	printf "\033[0m" ;
 	printf "\n"
 
+.SILENT .PHONY : run_failed
+run_failed :
+	for f in $(SELECTED_TESTS) ; do \
+		if grep -q "@@@ SUCCESS @@@" $$f/test/test.log 2>/dev/null; then \
+			printf "\033[0;32mExample $$f previously succeeded, skipping.\033[0m\n" ; \
+		else \
+			printf "\033[1;31mExample $$f previously failed, rerunning...\033[0m\n" ; \
+			echo ------------------------------------------------------------ ; \
+			echo "START `date +'%s'`" ; \
+			echo ------------------------------------------------------------ ; \
+			echo "TEST $$f" ; \
+			echo ------------------------------------------------------------ ; \
+			printf "Running 'make very-clean' in $$f ...\n" ; \
+			$(MAKE) -C "$$f" very-clean \
+			|| printf "make very-clean failed\n@@@ FAILURE @@@\n" \
+				> "$@/test/test.log" ; \
+			printf "Running 'make test' in $$f...\n" ; \
+			$(MAKE) GOSAM=$(GOSAM_BIN) ENABLE_CODE_CHECK=$(ENABLE_CODE_CHECK) -C "$$f" test \
+			|| printf "make test failed\n@@@ FAILURE @@@\n" \
+				> "$@/test/test.log" ; \
+			echo ------------------------------------------------------------ ; \
+			echo "DONE `date +'%s'`" ; \
+			echo ------------------------------------------------------------ ; \
+		fi \
+	done ; \
+	printf "\033[0m" ;
+	printf "\n"
+
 .PHONY : runselected
 runselected : printselected $(SELECTED_TESTS)
 

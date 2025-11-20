@@ -16,5 +16,5 @@ loop_suppressed_Born=True
 
 zero=width(6;25)
 
-filter.lo=lambda d: d.vertices("b","b~","H")==0
-filter.nlo=lambda d: d.vertices("b","b~","H")==0
+filter.lo=lambda d: d.count_vertices(["b","b~","H"])==0
+filter.nlo=lambda d: d.count_vertices(["b","b~","H"])==0

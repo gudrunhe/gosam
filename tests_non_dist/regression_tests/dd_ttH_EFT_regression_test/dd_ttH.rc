@@ -15,9 +15,7 @@ all_mandelstam=True
 enable_truncation_orders=True
 renorm_eftwilson=True
 
-filter.lo=lambda d: d.vertices("H","b","b~")==0
-filter.nlo=lambda d: d.vertices("H","b","b~")==0
-filter.ct=lambda d: d.vertices("H","b","b~")==0
+filter=lambda d: d.count_vertices(["H","b","b~"])==0
 
 reduction_programs=ninja
 

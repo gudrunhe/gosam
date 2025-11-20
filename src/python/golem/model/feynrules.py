@@ -3,23 +3,37 @@
 This module allows to import model definitions from FeynRules using the
 Python interface.
 """
-import sys
+
+from __future__ import annotations
+
+import copy
+import logging
 import os
 import os.path
-import sys
-import copy
 import re
-import itertools
+import sys
+from collections.abc import Mapping, MutableMapping, Sequence
+from types import ModuleType
+from typing import TYPE_CHECKING, TextIO, cast, final
+
+import feyngraph as fg
 
 import golem.model
 import golem.model.expressions as ex
-from golem.topolopy.objects import Vertex
 
+# The UFO classes are defined as stubs in ´ufo_stub.pyi`. This file contains no logic and can only be used for type
+# checking purposes.
+if TYPE_CHECKING:
+    from golem.model.ufo_stub import (
+        Coupling,
+        CTParameter,
+        CTVertex,
+        Lorentz,
+        Parameter,
+        Particle,
+        Vertex,
+    )
 from golem.util.tools import LimitedWidthOutputStream, load_source
-
-import logging
-
-import feyngraph as fg
 
 logger = logging.getLogger(__name__)
 
@@ -92,67 +106,138 @@ cmath_functions = [
     sym_e,
 ]
 
-shortcut_functions = [sym_re, sym_im, sym_sec, sym_csc, sym_asec, sym_acsc, sym_conjg, sym_cmplx, sym_if, sym_abs]
+shortcut_functions = [
+    sym_re,
+    sym_im,
+    sym_sec,
+    sym_csc,
+    sym_asec,
+    sym_acsc,
+    sym_conjg,
+    sym_cmplx,
+    sym_if,
+    sym_abs,
+]
 
 unprefixed_symbols = [sym_Nf, sym_Nfgen, sym_Nfrat]
 
 
+@final
 class Model:
-    def __init__(self, model_path, model_options=None, initial_import=True, final_import=True):
+    def __init__(
+        self,
+        model_path: str,
+        model_options: Mapping[str, str | list[str]] | None = None,
+        initial_import: bool = True,
+        final_import: bool = True,
+    ):
         self.model_options = model_options or dict()
         self.initial_import = initial_import
         self.final_import = final_import
 
         try:
             self.MSbaryukawa = self.model_options["MSbaryukawa"]
-        except  KeyError:
+        except KeyError:
             self.MSbaryukawa = []
 
-        # IMPORTANT: When using the optimized_import feature we call feynrules.py twice and rely on 
-        #            the fact that the model is cached by adding it to sys.modules in tools.load_source, 
+        # IMPORTANT: When using the optimized_import feature we call feynrules.py twice and rely on
+        #            the fact that the model is cached by adding it to sys.modules in tools.load_source,
         #            including the modifications made during the first call. If for some reason the model
         #            is not cached, optimized_import will not work.
         mod, mname, cached = load_ufo_files(model_path)
 
+        # The UFO classes need to be known at runtime for the type system, this dynamically imports them
+        if hasattr(mod, "object_libarary"):
+            globals()["Coupling"] = cast(
+                object, cast(ModuleType, mod.object_library).Coupling
+            )
+            globals()["CTParameter"] = cast(
+                object, cast(ModuleType, mod.object_library).CTParameter
+            )
+            globals()["CTVertex"] = cast(
+                object, cast(ModuleType, mod.object_library).CTVertex
+            )
+            globals()["Lorentz"] = cast(
+                object, cast(ModuleType, mod.object_library).Lorentz
+            )
+            globals()["Parameter"] = cast(
+                object, cast(ModuleType, mod.object_library).Parameter
+            )
+            globals()["Particle"] = cast(
+                object, cast(ModuleType, mod.object_library).Particle
+            )
+            globals()["Vertex"] = cast(
+                object, cast(ModuleType, mod.object_library).Vertex
+            )
+        else:
+            globals()["Coupling"] = cast(
+                object, cast(ModuleType, mod.couplings).Coupling
+            )
+            globals()["Lorentz"] = cast(object, cast(ModuleType, mod.lorentz).Lorentz)
+            globals()["Parameter"] = cast(
+                object, cast(ModuleType, mod.parameters).Parameter
+            )
+            globals()["Particle"] = cast(
+                object, cast(ModuleType, mod.particles).Particle
+            )
+            globals()["Vertex"] = cast(object, cast(ModuleType, mod.vertices).Vertex)
+            if hasattr(mod, "CT_vertices"):
+                globals()["CTVertex"] = cast(
+                    object, cast(ModuleType, mod.CT_vertices).CTVertex
+                )
+            if hasattr(mod, "CT_parameters"):
+                globals()["CTParameter"] = cast(
+                    object, cast(ModuleType, mod.CT_parameters).CTParameter
+                )
+
         self.useCT = False
+        keep_couplings: None | set[Coupling] = None
         if self.initial_import:
-            self.all_vertices = mod.all_vertices
-            try:
-                self.all_CTvertices = mod.all_CTvertices
+            self.all_vertices = cast(list[Vertex], mod.all_vertices)
+            if hasattr(mod, "all_CTvertices"):
+                self.all_CTvertices = cast(list[CTVertex], mod.all_CTvertices)
                 self.useCT = True
-            except AttributeError:
-                pass
-            self.all_couplings = mod.all_couplings
+            self.all_couplings = cast(list[Coupling], mod.all_couplings)
         else:
             keep_couplings = set()
-            self.all_vertices = [v for v in mod.all_vertices if v.name in model_options["keep_vertices"]]
+            keep_vertices = cast(list[str], self.model_options["keep_vertices"])
+            self.all_vertices = [
+                v
+                for v in cast(list[Vertex], mod.all_vertices)
+                if v.name in keep_vertices
+            ]
             for v in self.all_vertices:
                 keep_couplings.update(set(v.couplings.values()))
-            try:
-                self.all_CTvertices = [v for v in mod.all_CTvertices if v.name in model_options["keep_vertices"]]
+            if hasattr(mod, "all_CTvertices"):
+                self.all_CTvertices = [
+                    v
+                    for v in cast(list[CTVertex], mod.all_CTvertices)
+                    if v.name in keep_vertices
+                ]
                 for v in self.all_CTvertices:
                     keep_couplings.update(set(v.couplings.values()))
                 self.useCT = True
-            except AttributeError:
-                pass
             self.all_couplings = list(keep_couplings)
             if len(keep_couplings) > 0:
-                logger.info(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings: {keep_couplings}")
+                logger.info(
+                    f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings: {keep_couplings}"
+                )
             else:
-                logger.warning(f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings -> Something might have gone wrong")
+                logger.warning(
+                    f"optimized_import: identified {len(keep_couplings)} relevant UFO couplings -> Something might have gone wrong"
+                )
 
-        self.all_parameters = mod.all_parameters
-        try:
-            self.all_CTparameters = mod.all_CTparameters
-        except AttributeError:
-            if self.useCT:
-                logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
-                sys.exit("GoSam terminated due to an error")
-            else:
-                pass
+        self.all_parameters = cast(list[Parameter], mod.all_parameters)
+        if hasattr(mod, "all_CTparameters"):
+            self.all_CTparameters = cast(list[CTParameter], mod.all_CTparameters)
+        elif self.useCT:
+            logger.critical(
+                f"UFO model '{mname}' has CT_vertices but no CT_parameters!"
+            )
+            sys.exit("GoSam terminated due to an error")
 
-        self.all_particles = mod.all_particles
-        self.all_lorentz = mod.all_lorentz
+        self.all_particles = cast(list[Particle], mod.all_particles)
+        self.all_lorentz = cast(list[Lorentz], mod.all_lorentz)
         self.model_orig = model_path
         self.model_name = mname
         self.prefix = "mdl"
@@ -160,15 +245,15 @@ class Model:
         self.floatsd = {}
         self.floatsc = []
 
-        self.orders = set()
+        self.orders: set[str] = set()
         for c in self.all_couplings:
             self.orders.update(list(c.order.keys()))
 
         parser = ex.ExpressionParser()
         ex.ExpressionParser.simple = ex.ExpressionParser.simple_old
-        for l in self.all_lorentz:
-            structure = parser.compile(l.structure)
-            l.rank = get_rank(structure)
+        for lorentz in self.all_lorentz:
+            structure = parser.compile(lorentz.structure)
+            lorentz.rank = get_rank(structure)
 
         if self.initial_import and not cached:
             fg_model = fg.Model.from_ufo(model_path)
@@ -176,19 +261,24 @@ class Model:
             # ################################################
             # Apply the vertex splitting of FeynGraph to self
             # ################################################
-            new_vertices = []
-            obsolete_vertices = []
+            new_vertices: list[Vertex] = []
+            obsolete_vertices: list[int] = []
             for i, v in enumerate(self.all_vertices):
                 if (splitting := fg_model.splitting(v.name)) is not None:
                     obsolete_vertices.append(i)
-                    for name, couplings in splitting.items():
+                    for name, coupling_coords in splitting.items():
                         newv = copy.deepcopy(v)
                         newv.name = name
-                        newv.color = list(set(v.color[c] for c, _ in couplings))
-                        newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
+                        newv.color = list(set(v.color[c] for c, _ in coupling_coords))
+                        newv.lorentz = list(
+                            set(v.lorentz[lorentz] for _, lorentz in coupling_coords)
+                        )
                         newv.couplings = {
-                            (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
-                            for c in couplings
+                            (
+                                newv.color.index(v.color[c[0]]),
+                                newv.lorentz.index(v.lorentz[c[1]]),
+                            ): v.couplings[c]
+                            for c in coupling_coords
                         }
                         new_vertices.append(newv)
             for i in sorted(obsolete_vertices, reverse=True):
@@ -196,24 +286,32 @@ class Model:
             self.all_vertices.extend(new_vertices)
 
             if self.useCT:
-                new_vertices = []
-                obsolete_vertices = []
+                new_ct_vertices: list[CTVertex] = []
+                obsolete_ct_vertices: list[int] = []
                 for i, v in enumerate(self.all_CTvertices):
                     if (splitting := fg_model.splitting(v.name)) is not None:
-                        obsolete_vertices.append(i)
-                        for name, couplings in splitting.items():
+                        obsolete_ct_vertices.append(i)
+                        for name, coupling_coords in splitting.items():
                             newv = copy.deepcopy(v)
                             newv.name = name
-                            newv.color = list(set(v.color[c] for c, _ in couplings))
-                            newv.lorentz = list(set(v.lorentz[l] for _, l in couplings))
+                            newv.color = list(
+                                set(v.color[c] for c, _ in coupling_coords)
+                            )
+                            newv.lorentz = list(
+                                set(v.lorentz[lor] for _, lor in coupling_coords)
+                            )
                             newv.couplings = {
-                                (newv.color.index(v.color[c[0]]), newv.lorentz.index(v.lorentz[c[1]])): v.couplings[c]
-                                for c in couplings
+                                (
+                                    newv.color.index(v.color[c[0]]),
+                                    newv.lorentz.index(v.lorentz[c[1]]),
+                                    0,
+                                ): v.couplings[c + (0,)]
+                                for c in coupling_coords
                             }
-                            new_vertices.append(newv)
-                for i in sorted(obsolete_vertices, reverse=True):
-                    self.all_CTvertices.pop(i)
-                self.all_CTvertices.extend(new_vertices)
+                            new_ct_vertices.append(newv)
+                for i in sorted(obsolete_ct_vertices, reverse=True):
+                    _ = self.all_CTvertices.pop(i)
+                self.all_CTvertices.extend(new_ct_vertices)
 
             # ################################################################################
             # Add rank as coupling order to FeynGraph vertices and split vertices if necessary
@@ -221,33 +319,58 @@ class Model:
             new_vertices = []
             new_ct_vertices = []
             obsolete_vertices = []
-            for v_index, ufo_vert in enumerate(self.all_vertices + self.all_CTvertices if self.useCT else self.all_vertices):
-                ranks = set(ufo_vert.lorentz[l].rank for _, l, *_ in ufo_vert.couplings.keys())
+            for v_index, ufo_vert in enumerate(
+                self.all_vertices + self.all_CTvertices
+                if self.useCT
+                else self.all_vertices
+            ):
+                ranks = set(
+                    ufo_vert.lorentz[lor].rank
+                    for _, lor, *_ in ufo_vert.couplings.keys()
+                )
                 if len(ranks) > 1:
                     logger.info(
                         "Ambiguous rank for vertex {}, splitting into {} vertices '{}_0' .. '{}_{}'".format(
+                            ufo_vert.name,
+                            len(ranks),
+                            ufo_vert.name,
+                            ufo_vert.name,
+                            len(ranks) - 1,
+                        )
+                    )
+                    fg_model.split_vertex(
                         ufo_vert.name,
-                        len(ranks),
-                        ufo_vert.name,
-                        ufo_vert.name,
-                        len(ranks) - 1
-                    ))
-                    fg_model.split_vertex(ufo_vert.name, [f"{ufo_vert.name}_{i}" for i in range(len(ranks))])
+                        [f"{ufo_vert.name}_{i}" for i in range(len(ranks))],
+                    )
                     for i, unique_rank in enumerate(ranks):
-                        lorentz_indices = [i for i, l in enumerate(ufo_vert.lorentz) if l.rank == unique_rank]
+                        lorentz_indices = [
+                            i
+                            for i, lor in enumerate(ufo_vert.lorentz)
+                            if lor.rank == unique_rank
+                        ]
                         newv = copy.deepcopy(ufo_vert)
                         newv.name = f"{ufo_vert.name}_{i}"
                         newv.lorentz = [ufo_vert.lorentz[j] for j in lorentz_indices]
-                        newv.couplings = {
-                            (c, newv.lorentz.index(ufo_vert.lorentz[l])): v
-                            for (c, l), v in ufo_vert.couplings.items() if ufo_vert.lorentz[l].rank == unique_rank
-                        }
                         newv.rank = {unique_rank}
-                        fg_model.add_coupling(newv.name, "RK", unique_rank)
-                        if hasattr(ufo_vert, "type"):
-                            new_ct_vertices.append(newv)
-                        else:
+                        if isinstance(newv, Vertex):
+                            newv.couplings = {
+                                (c, newv.lorentz.index(ufo_vert.lorentz[lor])): v
+                                for (c, lor), v in cast(
+                                    Vertex, ufo_vert
+                                ).couplings.items()
+                                if ufo_vert.lorentz[lor].rank == unique_rank
+                            }
                             new_vertices.append(newv)
+                        else:
+                            newv.couplings = {
+                                (c, newv.lorentz.index(ufo_vert.lorentz[lor]), loop): v
+                                for (c, lor, loop), v in cast(
+                                    CTVertex, ufo_vert
+                                ).couplings.items()
+                                if ufo_vert.lorentz[lor].rank == unique_rank
+                            }
+                            new_ct_vertices.append(newv)
+                        fg_model.add_coupling(newv.name, "RK", unique_rank)
                     obsolete_vertices.append(v_index)
                 else:
                     rank = ranks.pop()
@@ -255,9 +378,9 @@ class Model:
                     ufo_vert.rank = {rank}
             for i in sorted(obsolete_vertices, reverse=True):
                 if i <= len(self.all_vertices):
-                    self.all_vertices.pop(i)
+                    _ = self.all_vertices.pop(i)
                 else:
-                    self.all_CTvertices.pop(i)
+                    _ = self.all_CTvertices.pop(i)
             self.all_vertices.extend(new_vertices)
             if self.useCT:
                 self.all_CTvertices.extend(new_ct_vertices)
@@ -278,30 +401,45 @@ class Model:
                         f"Vertices {original} have same external legs, coupling orders and spin map. Merging them internally into: {merged}."
                     )
                 )
-                indices = [i for i, v in enumerate(self.all_vertices) if v.name in original]
+                indices = [
+                    i for i, v in enumerate(self.all_vertices) if v.name in original
+                ]
                 if len(indices) != 0:
-                    color = list(set([c for i in indices for c in self.all_vertices[i].color]))
-                    lorentz = list(set(l for i in indices for l in self.all_vertices[i].lorentz))
-                    couplings = {}
+                    color = list(
+                        set([c for i in indices for c in self.all_vertices[i].color])
+                    )
+                    lorentz = list(
+                        set(
+                            lor for i in indices for lor in self.all_vertices[i].lorentz
+                        )
+                    )
+                    couplings_list: dict[tuple[int, int], list[Coupling]] = {}
                     for i in indices:
-                        current_couplings =  {(
-                                 color.index(self.all_vertices[i].color[c]),
-                                 lorentz.index(self.all_vertices[i].lorentz[l])
-                            ): value for (c, l), value in self.all_vertices[i].couplings.items()
+                        current_couplings = {
+                            (
+                                color.index(self.all_vertices[i].color[c]),
+                                lorentz.index(self.all_vertices[i].lorentz[lor]),
+                            ): value
+                            for (c, lor), value in self.all_vertices[
+                                i
+                            ].couplings.items()
                         }
                         for coord, coupling in current_couplings.items():
-                            if coord in couplings:
-                                couplings[coord].append(coupling)
+                            if coord in couplings_list:
+                                couplings_list[coord].append(coupling)
                             else:
-                                couplings[coord] = [coupling]
+                                couplings_list[coord] = [coupling]
                     # Merge couplings where necessary
-                    for coord, coupling_list in couplings.items():
+                    couplings: dict[tuple[int, int], Coupling] = {}
+                    for coord, coupling_list in couplings_list.items():
                         if len(coupling_list) == 1:
                             couplings[coord] = coupling_list[0]
                         else:
                             newcoupling = copy.deepcopy(coupling_list[0])
                             newcoupling.name = f"GC_M_{k}"
-                            newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                            newcoupling.value = "+".join(
+                                f"({c.value})" for c in coupling_list
+                            )
                             self.all_couplings.append(newcoupling)
                             couplings[coord] = newcoupling
                             k += 1
@@ -314,50 +452,73 @@ class Model:
                     obsolete_vertices.extend(indices)
                     new_vertices.append(newv)
                 else:
-                    indices = [i for i, v in enumerate(self.all_CTvertices) if v.name in original]
-                    color = list(set([c for i in indices for c in self.all_CTvertices[i].color]))
-                    lorentz = list(set(l for i in indices for l in self.all_CTvertices[i].lorentz))
-                    couplings = {}
+                    indices = [
+                        i
+                        for i, v in enumerate(self.all_CTvertices)
+                        if v.name in original
+                    ]
+                    color = list(
+                        set([c for i in indices for c in self.all_CTvertices[i].color])
+                    )
+                    lorentz = list(
+                        set(
+                            lor
+                            for i in indices
+                            for lor in self.all_CTvertices[i].lorentz
+                        )
+                    )
+                    ct_couplings_list: dict[tuple[int, int, int], list[Coupling]] = {}
                     for i in indices:
-                        current_couplings = {(
-                                                 color.index(self.all_CTvertices[i].color[c]),
-                                                 lorentz.index(self.all_CTvertices[i].lorentz[l])
-                                             ): value for (c, l), value in self.all_CTvertices[i].couplings.items()
-                                             }
+                        current_couplings = {
+                            (
+                                color.index(self.all_CTvertices[i].color[c]),
+                                lorentz.index(self.all_CTvertices[i].lorentz[lor]),
+                                loop,
+                            ): value
+                            for (c, lor, loop), value in self.all_CTvertices[
+                                i
+                            ].couplings.items()
+                        }
                         for coord, coupling in current_couplings.items():
-                            if coord in couplings:
-                                couplings[coord].append(coupling)
+                            if coord in ct_couplings_list:
+                                ct_couplings_list[coord].append(coupling)
                             else:
-                                couplings[coord] = [coupling]
+                                ct_couplings_list[coord] = [coupling]
                     # Merge couplings where necessary
-                    for coord, coupling_list in couplings.items():
+                    ct_couplings: dict[tuple[int, int, int], Coupling] = {}
+                    for coord, coupling_list in ct_couplings_list.items():
                         if len(coupling_list) == 1:
-                            couplings[coord] = coupling_list[0]
+                            ct_couplings[coord] = coupling_list[0]
                         else:
                             newcoupling = copy.deepcopy(coupling_list[0])
                             newcoupling.name = f"CTGC_M_{k}"
-                            newcoupling.value = "+".join(f"({c.value})" for c in coupling_list)
+                            newcoupling.value = "+".join(
+                                f"({c.value})" for c in coupling_list
+                            )
                             self.all_couplings.append(newcoupling)
-                            couplings[coord] = newcoupling
+                            ct_couplings[coord] = newcoupling
                             k += 1
                     newv = copy.deepcopy(self.all_CTvertices[indices[0]])
                     newv.name = merged
                     newv.color = color
                     newv.lorentz = lorentz
-                    newv.couplings = couplings
+                    newv.couplings = ct_couplings
                     obsolete_ct_vertices.extend(indices)
                     new_ct_vertices.append(newv)
 
             for i in sorted(obsolete_vertices, reverse=True):
-                self.all_vertices.pop(i)
+                _ = self.all_vertices.pop(i)
             self.all_vertices.extend(new_vertices)
             if self.useCT:
                 for i in sorted(obsolete_ct_vertices, reverse=True):
-                    self.all_CTvertices.pop(i)
+                    _ = self.all_CTvertices.pop(i)
                 self.all_CTvertices.extend(new_ct_vertices)
 
             if self.useCT:
-                self.labels = {v.name: i for i, v in enumerate(self.all_vertices + self.all_CTvertices)}
+                self.labels = {
+                    v.name: i
+                    for i, v in enumerate(self.all_vertices + self.all_CTvertices)
+                }
             else:
                 self.labels = {v.name: i for i, v in enumerate(self.all_vertices)}
 
@@ -368,12 +529,14 @@ class Model:
             # two separate lists of CT and non-CT couplings
             # also fills self.ctfunctions used write_python_file
             if self.useCT:
-                self.all_CTcouplings = []
-                self.ctfunctions = {}
-                self.cttypes = {}
+                self.all_CTcouplings: list[Coupling] = []
+                self.ctfunctions: dict[str, dict[int, str]] = {}
+                self.cttypes: dict[str, str] = {}
                 for ctv in self.all_CTvertices:
                     for ctc in ctv.couplings.values():
-                        if not self.initial_import and ctc not in keep_couplings:
+                        if not self.initial_import and ctc not in cast(
+                            set[Coupling], keep_couplings
+                        ):
                             continue
                         self.all_CTcouplings.append(ctc)
                         if ctc in self.all_couplings:
@@ -392,9 +555,11 @@ class Model:
                     elif isinstance(c.value, str):
                         # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
                         CTparams = [
-                            ctp for ctp in self.all_CTparameters if ctp.name in re.split(r"\(|\)|\+|\*|-|/", c.value)
+                            ctp
+                            for ctp in self.all_CTparameters
+                            if ctp.name in re.split(r"\(|\)|\+|\*|-|/", c.value)
                         ]
-                        CTpoles = set()
+                        CTpoles: set[int] = set()
 
                         for ctparam in CTparams:
                             CTpoles = CTpoles.union(set(ctparam.value.keys()))
@@ -403,39 +568,36 @@ class Model:
                             ctcoeff = c.value
                             for ctparam in CTparams:
                                 if ctpole in ctparam.value:
-                                    ctcoeff = ctcoeff.replace(ctparam.name, ctparam.value[ctpole])
+                                    ctcoeff = ctcoeff.replace(
+                                        ctparam.name, cast(str, ctparam.value[ctpole])
+                                    )
                             self.ctfunctions[name][ctpole] = ctcoeff
                     else:
                         logger.critical("CT coupling %s is neither a dict nor str!" % c)
                         sys.exit("GoSam terminated due to an error")
 
-    def write_python_file(self, f):
+    def write_python_file(self, f: TextIO):
         f.write("# vim: ts=3:sw=3\n")
         f.write("# This file has been generated from the FeynRules model files\n")
         f.write("# in %s\n" % self.model_orig)
         f.write("from golem.model.particle import Particle\n")
-        f.write("\nmodel_name = %r\n\n" % self.model_name)
+        f.write(f"\nmodel_name = '{self.model_name}'\n\n")
 
         logger.info("      Generating particle list ...")
-        f.write("particles = {")
+        _ = f.write("particles = {")
 
         is_first = True
 
-        mnemonics = {}
-        latex_names = {}
-        line_types = {}
-        particlect = {}
+        mnemonics: dict[str, str] = {}
+        latex_names: dict[str, str] = {}
+        line_types: dict[str, str] = {}
 
         for p in self.all_particles:
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
-            try:
-                particlect[p] = p.counterterm
-            except AttributeError:
-                pass
+                _ = f.write(",\n")
             pmass = str(p.mass)
             pwidth = str(p.width)
 
@@ -468,60 +630,70 @@ class Model:
             else:
                 width = self.prefix + pwidth
 
-            f.write(
+            _ = f.write(
                 "\t%r: Particle(%r, %d, %r, %d, %r, %r, %d, %r)"
-                % (p.name, p.name, spin, mass, p.color, p.antiname, width, pdg_code, p.charge)
+                % (
+                    p.name,
+                    p.name,
+                    spin,
+                    mass,
+                    p.color,
+                    p.antiname,
+                    width,
+                    pdg_code,
+                    p.charge,
+                )
             )
 
-        f.write("\n}\n\n")
+        _ = f.write("\n}\n\n")
 
         is_first = True
-        f.write("mnemonics = {")
+        _ = f.write("mnemonics = {")
         for key, value in list(mnemonics.items()):
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
+                _ = f.write(",\n")
 
-            f.write("\t%r: particles[%r]" % (key, value))
-        f.write("\n}\n\n")
+            _ = f.write("\t%r: particles[%r]" % (key, value))
+        _ = f.write("\n}\n\n")
 
         is_first = True
-        f.write("latex_names = {")
+        _ = f.write("latex_names = {")
         for key, value in list(latex_names.items()):
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
+                _ = f.write(",\n")
 
-            f.write("\t%r: %r" % (key, value))
-        f.write("\n}\n\n")
+            _ = f.write("\t%r: %r" % (key, value))
+        _ = f.write("\n}\n\n")
 
         is_first = True
-        f.write("line_styles = {")
+        _ = f.write("line_styles = {")
         for key, value in list(line_types.items()):
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
+                _ = f.write(",\n")
 
-            f.write("\t%r: %r" % (key, value))
-        f.write("\n}\n\n")
+            _ = f.write("\t%r: %r" % (key, value))
+        _ = f.write("\n}\n\n")
 
-        parameters = {}
-        functions = {}
-        types = {}
-        slha_locations = {}
+        parameters: dict[str, float | str] = {}
+        functions: dict[str, str | Mapping[int, str]] = {}
+        types: dict[str, str] = {}
+        slha_locations: dict[str, tuple[str, ...]] = {}
         for p in self.all_parameters:
             name = self.prefix + p.name.replace("_", "undrscr")
             if p.nature == "external":
                 parameters[name] = p.value
-                slha_locations[name] = (p.lhablock, p.lhacode)
+                slha_locations[name] = (cast(str, p.lhablock), cast(str, p.lhacode))
             elif p.nature == "internal":
-                functions[name] = p.value
+                functions[name] = cast(str, p.value)
             else:
                 logger.critical("Parameter's nature ('%s') not implemented." % p.nature)
                 sys.exit("GoSam terminated due to an error")
@@ -551,12 +723,17 @@ class Model:
                     real_key = self.prefix + key
                 try:
                     sval = str(value)
-                    fval = float(sval)
                     parameters[real_key] = sval
                 except ValueError:
-                    logger.warning("Model option %s=%r not in allowed range.\n" % (key, value) + "Option ignored")
-        if self.final_import:            
-            specials = {}
+                    logger.warning(
+                        "Model option %s=%r not in allowed range.\n" % (key, value)
+                        + "Option ignored"
+                    )
+
+        fcounter = [0]
+        fsubs: MutableMapping[str, ex.Expression] = {}
+        if self.final_import:
+            specials: dict[str, ex.Expression] = {}
             for expr in shortcut_functions:
                 specials[str(expr)] = expr
             for expr in unprefixed_symbols:
@@ -570,33 +747,90 @@ class Model:
                 types[name] = "C"
 
             logger.info("      Generating function list ...")
-            f.write("functions = {")
-            fcounter = [0]
-            fsubs = {}
+            _ = f.write("functions = {")
             is_first = True
             for name, value in list(functions.items()):
-                expr = parser.compile(value)
+                expr = parser.compile(cast(str, value))
                 for fn in cmath_functions:
-                    expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
+                    expr = expr.algsubs(
+                        ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn))
+                    )
                 expr = expr.prefixSymbolsWith(self.prefix)
                 expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-                expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                expr = expr.algsubs(
+                    sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_
+                )
                 expr = expr.algsubs(sym_abs, abs_)
 
                 if is_first:
                     is_first = False
-                    f.write("\n")
+                    _ = f.write("\n")
                 else:
-                    f.write(",\n")
-                f.write("\t%r: " % name)
-                f.write("'")
+                    _ = f.write(",\n")
+                _ = f.write("\t%r: " % name)
+                _ = f.write("'")
                 expr.write(f)
-                f.write("'")
-            f.write("\n}\n\n")
+                _ = f.write("'")
+            _ = f.write("\n}\n\n")
 
             if self.useCT:
                 types.update(self.cttypes)
 
+                logger.info("      Generating counter term function list ...")
+                _ = f.write("ctfunctions = {")
+                is_first = True
+                for name, value in list(functions.items()):
+                    expr = parser.compile(cast(str, value))
+                    for fn in cmath_functions:
+                        expr = expr.algsubs(
+                            ex.DotExpression(sym_cmath, fn),
+                            ex.SpecialExpression(str(fn)),
+                        )
+                    expr = expr.prefixSymbolsWith(self.prefix)
+                    expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
+                    expr = expr.algsubs(
+                        sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_
+                    )
+                    expr = expr.algsubs(sym_abs, abs_)
+
+                    if is_first:
+                        is_first = False
+                        _ = f.write("\n")
+                    else:
+                        _ = f.write(",\n")
+                    _ = f.write("\t%r: " % name)
+                    is_firstcf = True
+                    for pl, cf in cast(Mapping[int, str], value).items():
+                        expr = parser.compile(cf)
+                        for fn in cmath_functions:
+                            expr = expr.algsubs(
+                                ex.DotExpression(sym_cmath, fn),
+                                ex.SpecialExpression(str(fn)),
+                            )
+                        expr = expr.prefixSymbolsWith(self.prefix)
+                        expr = expr.replaceFloats(
+                            self.prefix + "float", fsubs, fcounter
+                        )
+                        expr = expr.algsubs(
+                            sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)),
+                            i_,
+                        )
+                        expr = expr.algsubs(sym_abs, abs_)
+
+                        if is_firstcf:
+                            is_firstcf = False
+                            _ = f.write("{\n")
+                        else:
+                            _ = f.write(",\n")
+                        _ = f.write("\t\t%r: " % pl)
+                        _ = f.write("'")
+                        expr.write(f)
+                        _ = f.write("'")
+                    _ = f.write("\n\t}")
+                _ = f.write("\n}\n\n")
+
+            # search for additional floats appearing in lorentz structures
+            if self.useCT:
                 logger.info("      Generating counter term function list ...")
                 f.write("ctfunctions = {")
                 is_first = True
@@ -611,10 +845,18 @@ class Model:
                     for pl, cf in value.items():
                         expr = parser.compile(cf)
                         for fn in cmath_functions:
-                            expr = expr.algsubs(ex.DotExpression(sym_cmath, fn), ex.SpecialExpression(str(fn)))
+                            expr = expr.algsubs(
+                                ex.DotExpression(sym_cmath, fn),
+                                ex.SpecialExpression(str(fn)),
+                            )
                         expr = expr.prefixSymbolsWith(self.prefix)
-                        expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-                        expr = expr.algsubs(sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_)
+                        expr = expr.replaceFloats(
+                            self.prefix + "float", fsubs, fcounter
+                        )
+                        expr = expr.algsubs(
+                            sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)),
+                            i_,
+                        )
                         expr = expr.algsubs(sym_abs, abs_)
 
                         if is_firstcf:
@@ -630,37 +872,39 @@ class Model:
                 f.write("\n}\n\n")
 
             # search for additional floats appearing in lorentz structures
-            for l in self.all_lorentz:
-                structure = parser.compile(l.structure)
-                structure = structure.replaceFloats(self.prefix + "float", fsubs, fcounter)
+            for lor in self.all_lorentz:
+                structure = parser.compile(lor.structure)
+                structure = structure.replaceFloats(
+                    self.prefix + "float", fsubs, fcounter
+                )
 
             self.floats = list(fsubs.keys())
             self.floatsd = fsubs
             self.floatsc = fcounter
 
-        f.write("parameters = {")
+        _ = f.write("parameters = {")
         is_first = True
 
         if self.final_import:
             for name, value in list(fsubs.items()):
                 if is_first:
                     is_first = False
-                    f.write("\n")
+                    _ = f.write("\n")
                 else:
-                    f.write(",\n")
-                f.write("\t%r: %r" % (name, str(value)))
+                    _ = f.write(",\n")
+                _ = f.write("\t%r: %r" % (name, str(value)))
 
         for name, value in list(parameters.items()):
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
+                _ = f.write(",\n")
             if isinstance(value, complex):
-                f.write("\t%r: [%r, %r" % (name, str(value.real), str(value.imag)))
+                _ = f.write("\t%r: [%r, %r" % (name, str(value.real), str(value.imag)))
             else:
-                f.write("\t%r: %r" % (name, str(value)))
-        f.write("\n}\n\n")
+                _ = f.write("\t%r: %r" % (name, str(value)))
+        _ = f.write("\n}\n\n")
 
         if self.final_import:
             f.write("latex_parameters = {")
@@ -670,30 +914,30 @@ class Model:
                 if is_first:
                     is_first = False
                 else:
-                    f.write(",")
-                f.write("\n\t%r: %r" % (name, p.texname))
-            f.write("\n}\n\n")
+                    _ = f.write(",")
+                _ = f.write("\n\t%r: %r" % (name, p.texname))
+            _ = f.write("\n}\n\n")
 
-        f.write("types = {")
+        _ = f.write("types = {")
         is_first = True
 
         if self.final_import:
             for name in list(fsubs.keys()):
                 if is_first:
                     is_first = False
-                    f.write("\n")
+                    _ = f.write("\n")
                 else:
-                    f.write(",\n")
-                f.write("\t%r: 'RP'" % name)
+                    _ = f.write(",\n")
+                _ = f.write("\t%r: 'RP'" % name)
 
         for name, value in list(types.items()):
             if is_first:
                 is_first = False
-                f.write("\n")
+                _ = f.write("\n")
             else:
-                f.write(",\n")
-            f.write("\t%r: %r" % (name, value))
-        f.write("\n}\n\n")
+                _ = f.write(",\n")
+            _ = f.write("\t%r: %r" % (name, value))
+        _ = f.write("\n}\n\n")
 
         if self.final_import:
             f.write("slha_locations = {")
@@ -702,58 +946,63 @@ class Model:
             for name, value in list(slha_locations.items()):
                 if is_first:
                     is_first = False
-                    f.write("\n")
+                    _ = f.write("\n")
                 else:
-                    f.write(",\n")
+                    _ = f.write(",\n")
                 f.write("\t%r: %r" % (name, value))
-            f.write("\n}\n\n")
+            _ = f.write("\n}\n\n")
 
-        f.write("aux = {\n")
+        _ = f.write("aux = {\n")
         for p in self.all_particles:
             aux = 0 if p.propagating else 1
             if hasattr(p, "CustomSpin2Prop"):
                 if p.CustomSpin2Prop:
                     if not p.propagating:
-                        logger.critical(f"Particle {p.name} with CustomSpin2Prop has to propagate.")
+                        logger.critical(
+                            f"Particle {p.name} with CustomSpin2Prop has to propagate."
+                        )
                         sys.exit("GoSam terminated due to an error")
                     aux = 2
-            f.write(f"    '{p.name}': {aux},\n")
-        f.write("}")
+            _ = f.write(f"    '{p.name}': {aux},\n")
+        _ = f.write("}")
 
-
-    def write_form_file(self, f, order_names):
+    def write_form_file(self, f: TextIO, order_names: list[str]):
         parser = ex.ExpressionParser()
-        lorex = {}
-        lsubs = {}
+        lorex: dict[str, ex.Expression] = {}
+        lsubs: dict[str, ex.Expression] = {}
         lcounter = [0]
-        dummy_found = {}
-        for l in self.all_lorentz:
-            name = l.name
-            structure = parser.compile(l.structure)
+        dummy_found: dict[int, ex.Expression] = {}
+        for lor in self.all_lorentz:
+            name = lor.name
+            structure = parser.compile(lor.structure)
             structure = structure.replaceStrings("ModelDummyIndex", lsubs, lcounter)
             structure = structure.replaceNegativeIndices(0, "MDLIndex%d", dummy_found)
-            structure = structure.replaceFloats(self.prefix + "float", self.floatsd, self.floatsc)
+            structure = structure.replaceFloats(
+                self.prefix + "float", self.floatsd, self.floatsc
+            )
             for i in [2]:
-                structure = structure.algsubs(ex.FloatExpression("%d." % i), ex.IntegerExpression("%d" % i))
-            lorex[name] = transform_lorentz(structure, l.spins)
+                structure = structure.algsubs(
+                    ex.FloatExpression(float(i)), ex.IntegerExpression(i)
+                )
+            lorex[name] = transform_lorentz(structure, lor.spins)
         lwf = LimitedWidthOutputStream(f, 70, 6)
-        f.write("* vim: syntax=form:ts=3:sw=3\n\n")
-        f.write("* This file has been generated from the FeynRule model files\n")
-        f.write("* in %s\n\n" % self.model_orig)
+        _ = f.write("* vim: syntax=form:ts=3:sw=3\n\n")
+        _ = f.write("* This file has been generated from the FeynRule model files\n")
+        _ = f.write("* in %s\n\n" % self.model_orig)
 
-        f.write("*---#[ Symbol Definitions:\n")
-        f.write("*---#[ Coupling Orders:\n")
-        f.write("AutoDeclare Symbols RK")
-        f.write(",isNP")
-        f.write(",V")
-        f.write(",CTV")
-        f.write(";\n")
-        f.write("Symbol XNPorder,XQLorder,Xkeep;")
-        f.write("\n")
-        f.write("*---#] Coupling Orders:\n")
-        f.write("*---#[ Parameters:\n")
+        _ = f.write("*---#[ Symbol Definitions:\n")
+        _ = f.write("*---#[ Coupling Orders:\n")
+        _ = f.write("AutoDeclare Symbols RK")
+        _ = f.write(",isNP")
+        _ = f.write(",V")
+        _ = f.write(",CTV")
+        _ = f.write(";\n")
+        _ = f.write("Symbol XNPorder,XQLorder,Xkeep;")
+        _ = f.write("\n")
+        _ = f.write("*---#] Coupling Orders:\n")
+        _ = f.write("*---#[ Parameters:\n")
 
-        params = []
+        params: list[str] = []
         for p in self.all_parameters:
             params.append(self.prefix + p.name.replace("_", "undrscr"))
 
@@ -762,75 +1011,81 @@ class Model:
 
         if len(params) > 0:
             if len(params) == 1:
-                f.write("Symbol %s;" % params[0])
+                _ = f.write("Symbol %s;" % params[0])
             else:
-                f.write("Symbols")
+                _ = f.write("Symbols")
                 lwf.nl()
-                lwf.write(params[0])
+                _ = lwf.write(params[0])
                 for p in params[1:]:
-                    lwf.write(",")
-                    lwf.write(p)
-                lwf.write(";")
+                    _ = lwf.write(",")
+                    _ = lwf.write(p)
+                _ = lwf.write(";")
 
-        f.write("\n")
+        _ = f.write("\n")
 
         if self.useCT:
-            ctparams = [self.prefix + c.name.replace("_", "") for c in self.all_CTcouplings]
+            ctparams = [
+                self.prefix + c.name.replace("_", "") for c in self.all_CTcouplings
+            ]
             if len(ctparams) > 0:
                 if len(ctparams) == 1:
-                    f.write("Symbol %s;" % ctparams[0] + "eftctcpl")
+                    _ = f.write("Symbol %s;" % ctparams[0] + "eftctcpl")
                 else:
-                    f.write("Symbols")
+                    _ = f.write("Symbols")
                     lwf.nl()
-                    lwf.write(ctparams[0] + "eftctcpl")
+                    _ = lwf.write(ctparams[0] + "eftctcpl")
                     for ctp in ctparams[1:]:
-                        lwf.write(",")
-                        lwf.write(ctp + "eftctcpl")
-                    lwf.write(";")
+                        _ = lwf.write(",")
+                        _ = lwf.write(ctp + "eftctcpl")
+                    _ = lwf.write(";")
 
-            f.write("\n")
+            _ = f.write("\n")
 
         if len(self.floats) == 1:
-            f.write("Symbol %s;\n" % self.floats[0])
+            _ = f.write("Symbol %s;\n" % self.floats[0])
         elif len(self.floats) > 1:
-            f.write("Symbols")
+            _ = f.write("Symbols")
             lwf.nl()
-            lwf.write(self.floats[0])
+            _ = lwf.write(self.floats[0])
             for p in self.floats[1:]:
-                lwf.write(",")
-                lwf.write(p)
-            lwf.write(";\n")
+                _ = lwf.write(",")
+                _ = lwf.write(p)
+            _ = lwf.write(";\n")
 
-        f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
-        f.write("*---#] Parameters:\n")
+        _ = f.write("AutoDeclare Indices ModelDummyIndex, MDLIndex;\n")
+        _ = f.write("*---#] Parameters:\n")
         if hasattr(self, "all_CTvertices"):
-            max_deg = max([len(v.particles) for v in (self.all_vertices + self.all_CTvertices)])
+            max_deg = max(
+                [len(v.particles) for v in (self.all_vertices + self.all_CTvertices)]
+            )
         else:
             max_deg = max([len(v.particles) for v in self.all_vertices])
-        f.write("*---#[ Auxilliary Symbols:\n")
-        f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
-        f.write("*---#] Auxilliary Symbols:\n")
-        f.write("*---#] Symbol Definitions:\n")
+        _ = f.write("*---#[ Auxilliary Symbols:\n")
+        _ = f.write("Vectors vec1, ..., vec%d;\n" % max_deg)
+        _ = f.write("*---#] Auxilliary Symbols:\n")
+        _ = f.write("*---#] Symbol Definitions:\n")
         if self.containsMajoranaFermions():
-            f.write("* Model contains Majorana Fermions:\n")
-            logger.debug("You are working with a model " + "that contains Majorana fermions.")
-            f.write('#Define DISCARDQGRAFSIGN "1"\n')
-        f.write('#Define USEVERTEXPROC "1"\n')
-        f.write("*---#[ Procedure ReplaceVertices :\n")
-        f.write("#Procedure ReplaceVertices\n")
+            _ = f.write("* Model contains Majorana Fermions:\n")
+            logger.debug(
+                "You are working with a model " + "that contains Majorana fermions."
+            )
+            _ = f.write('#Define DISCARDQGRAFSIGN "1"\n')
+        _ = f.write('#Define USEVERTEXPROC "1"\n')
+        _ = f.write("*---#[ Procedure ReplaceVertices :\n")
+        _ = f.write("#Procedure ReplaceVertices\n")
 
-        orders = set()
+        orders: set[str] = set()
         orders.update(list(order_names))
 
         for v in self.all_vertices:
             particles = v.particles
-            names = []
-            spins = []
+            names: list[str] = []
+            spins: list[int] = []
             for p in particles:
                 names.append(p.name)
                 spins.append(p.spin - 1)
 
-            vorders = {}
+            vorders: dict[str, int] = {}
             cplnames = [c.name for c in v.couplings.values()]
             for coord, coupling in list(v.couplings.items()):
                 for name in orders:
@@ -847,9 +1102,9 @@ class Model:
             xidx = list(range(deg))
 
             fold_name = "(%s) %s Vertex" % (v.name, " -- ".join(names))
-            f.write("*---#[ %s:\n" % fold_name)
-            f.write(f"Identify Once vertex(iv?, {v.name}")
-            colors = []
+            _ = f.write("*---#[ %s:\n" % fold_name)
+            _ = f.write(f"Identify Once vertex(iv?, {v.name}")
+            colors: list[int] = []
             for i in xidx:
                 p = particles[i]
                 color = abs(p.color)
@@ -858,26 +1113,28 @@ class Model:
                 # the convention where all particles are incoming. Therefore all particles must be inverted.
                 if p.name != p.antiname and p.pdg_code > 0:
                     spin = -spin
-                    color = -color
+                    # No anti-trivial and anti-adjoint color representation in UFO convention
+                    if color not in [1, 8]:
+                        color = -color
                 colors.append(color)
 
-                f.write(
+                _ = f.write(
                     ",\n   idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
                     % (i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
                 )
-            f.write(") =")
+            _ = f.write(") =")
 
             # The following is used split the amplitude for the truncation options.
             # QL>0 always implies NP>0.
             NPQL_brack_flag = False
             if "QL" in vorders.keys() and vorders["QL"] > 0:
-                f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
+                _ = f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
                 NPQL_brack_flag = True
             elif "NP" in vorders.keys() and vorders["NP"] > 0:
-                f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
+                _ = f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
                 NPQL_brack_flag = True
 
-            dummies = []
+            dummies: list[str] = []
 
             brack_flag = False
             for i, s in enumerate(spins):
@@ -886,20 +1143,26 @@ class Model:
                     idx = "idx%dL%d" % (i + 1, s)
                     idxa = "idx%dL%da" % (i + 1, s)
                     idxb = "idx%dL%db" % (i + 1, s)
-                    f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+                    _ = f.write(
+                        "\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb)
+                    )
                     dummies.append(idxa)
                     dummies.append(idxb)
 
             if brack_flag:
-                f.write(" (")
+                _ = f.write(" (")
 
-            for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                if not coupling.name in cplnames:
+            for coord, coupling in sorted(
+                list(v.couplings.items()), key=lambda x: x[0]
+            ):
+                if coupling.name not in cplnames:
                     continue
                 ic, il = coord
                 lorentz = lorex[v.lorentz[il].name]
                 scolor = v.color[ic]
-                f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "")))
+                _ = f.write(
+                    "\n   + %s" % (self.prefix + coupling.name.replace("_", ""))
+                )
                 if scolor != "1":
                     color = parser.compile(scolor)
                     color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
@@ -912,10 +1175,10 @@ class Model:
                 else:
                     expr = lorentz
                 if not expr == ex.IntegerExpression(1):
-                    f.write(" * (")
+                    _ = f.write(" * (")
                     lwf.nl()
                     expr.write(lwf)
-                    f.write("\n   )")
+                    _ = f.write("\n   )")
 
                 for ind in list(lsubs.values()):
                     s = str(ind)
@@ -924,17 +1187,17 @@ class Model:
                             dummies.append(s)
 
             if brack_flag:
-                f.write(")")
+                _ = f.write(")")
             if NPQL_brack_flag:
-                f.write("\n)")
-            f.write(";\n")
+                _ = f.write("\n)")
+            _ = f.write(";\n")
 
             for idx in list(dummy_found.values()):
                 dummies.append(str(idx))
 
             if len(dummies) > 0:
-                f.write("Sum %s;\n" % ", ".join(dummies))
-            f.write("*---#] %s:\n" % fold_name)
+                _ = f.write("Sum %s;\n" % ", ".join(dummies))
+            _ = f.write("*---#] %s:\n" % fold_name)
 
         if self.useCT:
             for v in self.all_CTvertices:
@@ -961,8 +1224,8 @@ class Model:
                 xidx = list(range(deg))
 
                 fold_name = "(%s) %s CTVertex" % (v.name, " -- ".join(names))
-                f.write("*---#[ %s:\n" % fold_name)
-                f.write(f"Identify Once vertex(iv?, {v.name}")
+                _ = f.write("*---#[ %s:\n" % fold_name)
+                _ = f.write(f"Identify Once vertex(iv?, {v.name}")
                 colors = []
                 for i in xidx:
                     p = particles[i]
@@ -975,20 +1238,29 @@ class Model:
                         color = -color
                     colors.append(color)
 
-                    f.write(
+                    _ = f.write(
                         ",\n   idx%d?,%d,vec%d?,idx%dL%d?,%d,idx%dC%d?"
-                        % (i + 1, spin, i + 1, i + 1, abs(spin), color, i + 1, abs(color))
+                        % (
+                            i + 1,
+                            spin,
+                            i + 1,
+                            i + 1,
+                            abs(spin),
+                            color,
+                            i + 1,
+                            abs(color),
+                        )
                     )
-                f.write(") =")
+                _ = f.write(") =")
 
                 # The following is used split the amplitude for the truncation options.
                 # QL>0 always implies NP>0.
                 NPQL_brack_flag = False
                 if "QL" in vorders.keys() and vorders["QL"] > 0:
-                    f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
+                    _ = f.write("\n  XQLorder^%d * (" % (vorders["QL"]))
                     NPQL_brack_flag = True
                 elif "NP" in vorders.keys() and vorders["NP"] > 0:
-                    f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
+                    _ = f.write("\n  XNPorder^%d * (" % (vorders["NP"]))
                     NPQL_brack_flag = True
 
                 dummies = []
@@ -1000,24 +1272,33 @@ class Model:
                         idx = "idx%dL%d" % (i + 1, s)
                         idxa = "idx%dL%da" % (i + 1, s)
                         idxb = "idx%dL%db" % (i + 1, s)
-                        f.write("\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb))
+                        _ = f.write(
+                            "\n SplitLorentzIndex(%s, %s, %s) *" % (idx, idxa, idxb)
+                        )
                         dummies.append(idxa)
                         dummies.append(idxb)
 
                 if brack_flag:
-                    f.write(" (")
+                    _ = f.write(" (")
 
-                for coord, coupling in sorted(list(v.couplings.items()), key=lambda x: x[0]):
-                    if not coupling.name in cplnames:
+                for coord, coupling in sorted(
+                    list(v.couplings.items()), key=lambda x: x[0]
+                ):
+                    if coupling.name not in cplnames:
                         continue
-                    ic, il, ip = coord
+                    ic, il, _ = coord
                     lorentz = lorex[v.lorentz[il].name]
                     scolor = v.color[ic]
-                    f.write("\n   + %s" % (self.prefix + coupling.name.replace("_", "") + "eftctcpl"))
+                    _ = f.write(
+                        "\n   + %s"
+                        % (self.prefix + coupling.name.replace("_", "") + "eftctcpl")
+                    )
                     if scolor != "1":
                         color = parser.compile(scolor)
                         color = color.replaceStrings("ModelDummyIndex", lsubs, lcounter)
-                        color = color.replaceNegativeIndices(0, "MDLIndex%d", dummy_found)
+                        color = color.replaceNegativeIndices(
+                            0, "MDLIndex%d", dummy_found
+                        )
                         color = transform_color(color, colors, xidx)
                         if lorentz == ex.IntegerExpression(1):
                             expr = color
@@ -1026,10 +1307,10 @@ class Model:
                     else:
                         expr = lorentz
                     if not expr == ex.IntegerExpression(1):
-                        f.write(" * (")
+                        _ = f.write(" * (")
                         lwf.nl()
                         expr.write(lwf)
-                        f.write("\n   )")
+                        _ = f.write("\n   )")
 
                     for ind in list(lsubs.values()):
                         s = str(ind)
@@ -1038,26 +1319,26 @@ class Model:
                                 dummies.append(s)
 
                 if brack_flag:
-                    f.write(")")
+                    _ = f.write(")")
                 if NPQL_brack_flag:
-                    f.write("\n)")
-                f.write(";\n")
+                    _ = f.write("\n)")
+                _ = f.write(";\n")
 
                 for idx in list(dummy_found.values()):
                     dummies.append(str(idx))
 
                 if len(dummies) > 0:
-                    f.write("Sum %s;\n" % ", ".join(dummies))
-                f.write("*---#] %s:\n" % fold_name)
+                    _ = f.write("Sum %s;\n" % ", ".join(dummies))
+                _ = f.write("*---#] %s:\n" % fold_name)
 
-        f.write("#EndProcedure\n")
-        f.write("*---#] Procedure ReplaceVertices :\n")
+        _ = f.write("#EndProcedure\n")
+        _ = f.write("*---#] Procedure ReplaceVertices :\n")
 
-        f.write("*---#[ Dummy Indices:\n")
+        _ = f.write("*---#[ Dummy Indices:\n")
         for ind in list(lsubs.values()):
-            f.write("Index %s;\n" % ind)
-        f.write("*---#] Dummy Indices:\n")
-        f.write("""\
+            _ = f.write("Index %s;\n" % ind)
+        _ = f.write("*---#] Dummy Indices:\n")
+        _ = f.write("""\
 *---#[ Procedure VertexConstants :
 #Procedure VertexConstants
 * Just a dummy, all vertex constants are already
@@ -1070,22 +1351,34 @@ class Model:
 *---#] Procedure VertexConstants :
 """)
 
-    def write_yukawa_ct_file(self, f) -> None:
+    def write_yukawa_ct_file(self, f: TextIO) -> None:
         for v in self.all_vertices:
             # Identify Yukawa vertices we want to generate counterterms for:
             #   - Has two massive quarks (identified by PDG code <= 6)
             #   - Has one Higgs (identified by PDG code 25)
             #   - Has no new physics (order zero in coupling `NP`)
             pdg_codes = [abs(p.pdg_code) for p in v.particles]
-            if len(v.particles) == 3 and any(pdg_codes.count(q) == 2 for q in range(7)) and pdg_codes.count(25) == 1:
+            if (
+                len(v.particles) == 3
+                and any(pdg_codes.count(q) == 2 for q in range(7))
+                and pdg_codes.count(25) == 1
+            ):
                 orders = next((c.order for c in v.couplings.values()), None)
                 if orders is not None and "NP" in orders and orders["NP"] != 0:
                     continue
-                quark_mass, quark_name, anti_name = next((str(p.mass), str(p.name), str(p.antiname)) for p in v.particles if abs(p.pdg_code) <= 6)
+                quark_mass, quark_name, anti_name = next(
+                    (str(p.mass), str(p.name), str(p.antiname))
+                    for p in v.particles
+                    if abs(p.pdg_code) <= 6
+                )
                 if quark_mass == "0" or quark_mass == "ZERO":
-                    continue                
-                scheme = "MSbar" if bool(set(self.MSbaryukawa).intersection((quark_name, anti_name))) else "OS" + self.prefix + str(quark_mass)
-                f.write(f"""\
+                    continue
+                scheme = (
+                    "MSbar"
+                    if bool(set(self.MSbaryukawa).intersection((quark_name, anti_name)))
+                    else "OS" + self.prefix + str(quark_mass)
+                )
+                _ = f.write(f"""\
 Id vertex(iv?, {v.name},
           idx1?, sDUMMY1?, vDUMMY1?, iv1L?, sign1?, iv1C?,
           idx2?, sDUMMY2?, vDUMMY2?, iv2L?, sign2?, iv2C?,
@@ -1098,14 +1391,13 @@ Id vertex(iv?, {v.name},
 
 """)
 
-
     def containsMajoranaFermions(self):
         for p in self.all_particles:
             if p.spin % 2 == 0 and p.selfconjugate:
                 return True
         return False
 
-    def store(self, path, local_name, order_names):
+    def store(self, path: str, local_name: str, order_names: list[str]):
         logger.info("  Writing Python file ...")
         with open(os.path.join(path, "%s.py" % local_name), "w") as f:
             self.write_python_file(f)
@@ -1118,7 +1410,9 @@ Id vertex(iv?, {v.name},
             logger.info("  Writing Form Yukawa counterterm file ...")
             if not os.path.isdir(os.path.join(path, "codegen")):
                 os.mkdir(os.path.join(path, "codegen"))
-            with open(os.path.join(path, "codegen", "ufo_yukawa_counterterms.hh"), "w") as f:
+            with open(
+                os.path.join(path, "codegen", "ufo_yukawa_counterterms.hh"), "w"
+            ) as f:
                 self.write_yukawa_ct_file(f)
 
 
@@ -1140,7 +1434,7 @@ lor_Gamma5 = ex.SymbolExpression("Gamma5")
 lor_e = ex.SymbolExpression("e_")
 
 
-def get_rank(expr):
+def get_rank(expr: ex.Expression) -> int:
     if isinstance(expr, ex.SumExpression):
         n = len(expr)
         lst = [get_rank(expr[i]) for i in range(n)]
@@ -1154,7 +1448,7 @@ def get_rank(expr):
         result = 0
 
         for i in range(n):
-            sign, factor = expr[i]
+            _, factor = expr[i]
             result += get_rank(factor)
         return result
 
@@ -1167,7 +1461,6 @@ def get_rank(expr):
 
     elif isinstance(expr, ex.FunctionExpression):
         head = expr.getHead()
-        args = expr.getArguments()
         if head == lor_P:
             return 1
         else:
@@ -1176,13 +1469,13 @@ def get_rank(expr):
         return 0
 
 
-def transform_lorentz(expr, spins):
+def transform_lorentz(expr: ex.Expression, spins: Sequence[int]) -> ex.Expression:
     if isinstance(expr, ex.SumExpression):
         n = len(expr)
         return ex.SumExpression([transform_lorentz(expr[i], spins) for i in range(n)])
     elif isinstance(expr, ex.ProductExpression):
         n = len(expr)
-        new_factors = []
+        new_factors: list[tuple[int, ex.Expression]] = []
 
         for i in range(n):
             sign, factor = expr[i]
@@ -1190,7 +1483,8 @@ def transform_lorentz(expr, spins):
         return ex.ProductExpression(new_factors)
     elif isinstance(expr, ex.PowerExpression):
         return ex.PowerExpression(
-            transform_lorentz(expr.getBase(), spins), transform_lorentz(expr.getExponent(), spins)
+            transform_lorentz(expr.getBase(), spins),
+            transform_lorentz(expr.getExponent(), spins),
         )
     elif isinstance(expr, ex.UnaryMinusExpression):
         return ex.UnaryMinusExpression(transform_lorentz(expr.getTerm(), spins))
@@ -1217,7 +1511,7 @@ def transform_lorentz(expr, spins):
             # UFO files have all momenta outgoing:
             return -mom(index)
         elif head == lor_Metric or head == lor_Identity:
-            my_spins = []
+            my_spins: list[int] = []
             if isinstance(args[0], ex.IntegerExpression):
                 i = int(args[0])
                 i_particle = i % 1000
@@ -1360,7 +1654,7 @@ def transform_lorentz(expr, spins):
                 index2 = args[1]
             return lor_NCContainer(lor_ProjPlus, index1, index2)
         elif head == lor_Epsilon:
-            arg_list = []
+            arg_list: list[ex.Expression] = []
             for ind in range(len(args)):
                 if isinstance(args[ind], ex.IntegerExpression):
                     i = int(args[ind])
@@ -1392,13 +1686,17 @@ col_d8 = ex.SymbolExpression("dcolor8")
 col_d3 = ex.SymbolExpression("dcolor")
 
 
-def transform_color(expr, colors, xidx):
+def transform_color(
+    expr: ex.Expression, colors: list[int], xidx: list[int]
+) -> ex.Expression:
     if isinstance(expr, ex.SumExpression):
         n = len(expr)
-        return ex.SumExpression([transform_color(expr[i], colors, xidx) for i in range(n)])
+        return ex.SumExpression(
+            [transform_color(expr[i], colors, xidx) for i in range(n)]
+        )
     elif isinstance(expr, ex.ProductExpression):
         n = len(expr)
-        new_factors = []
+        new_factors: list[tuple[int, ex.Expression]] = []
 
         for i in range(n):
             sign, factor = expr[i]
@@ -1411,9 +1709,9 @@ def transform_color(expr, colors, xidx):
         head = expr.getHead()
         args = expr.getArguments()
         if head == col_T or head == col_f:
-            indices = []
-            order = []
-            xi = []
+            indices: list[ex.Expression] = []
+            order: list[int] = []
+            xi: list[int] = []
             for j in range(3):
                 if isinstance(args[j], ex.IntegerExpression):
                     i = int(args[j])
@@ -1441,7 +1739,9 @@ def transform_color(expr, colors, xidx):
                 elif order == [8, 3, -3]:
                     return head(indices[0], indices[2], indices[1])
                 else:
-                    logger.critical("Cannot recognize color assignment at vertex: %s" % order)
+                    logger.critical(
+                        "Cannot recognize color assignment at vertex: %s" % order
+                    )
                     sys.exit("GoSam terminated due to an error")
             else:
                 return head(indices[0], indices[1], indices[2])
@@ -1470,18 +1770,23 @@ def transform_color(expr, colors, xidx):
     else:
         return expr
 
-def load_ufo_files(model_path):
+
+def load_ufo_files(model_path: str) -> tuple[ModuleType, str, bool]:
     parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
     norm_path = os.path.normpath(model_path)
     if norm_path.startswith(parent_path):
         mname = norm_path[len(parent_path) :].replace(os.sep, "")
     else:
-        mname = os.path.basename(model_path.rstrip(os.sep + (os.altsep if os.altsep else "")))
+        mname = os.path.basename(
+            model_path.rstrip(os.sep + (os.altsep if os.altsep else ""))
+        )
     if os.altsep is not None:
         mname = mname.replace(os.altsep, "")
     search_path = [parent_path]
 
-    logger.info("Trying to import FeynRules model '%s' from %s" % (mname, search_path[0]))
+    logger.info(
+        "Trying to import FeynRules model '%s' from %s" % (mname, search_path[0])
+    )
 
     cached = False
 

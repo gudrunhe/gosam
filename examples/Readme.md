@@ -165,6 +165,9 @@ It defines the following commands:
 - `make check_selection`: \
    Print a list of the tests in the selection tests.
    Check if they exist or not and if they ran successfully.
+   
+- `make run_failed`: \
+   This command runs all tests which did not succeed previously.
 
 - `make runlo`: \
    This command runs all LO tests.

@@ -22,8 +22,20 @@ class TemplateFactory:
     def __init__(self):
         pass
 
-    def process(self, in_file, out_file, class_name, props, conf, opts, filter=None, executable=False):
-        logger.debug("Transforming file %r by template class %sTemplate" % (in_file, class_name))
+    def process(
+        self,
+        in_file,
+        out_file,
+        class_name,
+        props,
+        conf,
+        opts,
+        filter=None,
+        executable=False,
+    ):
+        logger.debug(
+            "Transforming file %r by template class %sTemplate" % (in_file, class_name)
+        )
 
         assert class_name is not None
 
@@ -43,7 +55,9 @@ class TemplateFactory:
                 f_template = open(in_file, "r")
                 if class_name == "Model":
                     if "conf" not in opts:
-                        raise golem.util.parser.TemplateError("Cannot use template 'Model' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'Model' here."
+                        )
                     conf = opts["conf"]
                     template = golem.templates.parameters.ModelTemplate(f_template)
                     template.init_model(conf)
@@ -61,11 +75,12 @@ class TemplateFactory:
                         or "lo_flags" not in opts
                         or "nlo_flags" not in opts
                         or "heavy_quarks" not in opts
-                        or "massive_bubbles" not in opts
                         or "diagram_sum" not in opts
                         or "helicity_map" not in opts
                     ):
-                        raise golem.util.parser.TemplateError("Cannot use template 'Integrals' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'Integrals' here."
+                        )
                     loopcache = opts["loopcache"]
                     loopcache_tot = opts["loopcache_tot"]
                     in_particles = opts["in_particles"]
@@ -74,7 +89,6 @@ class TemplateFactory:
                     heavy_quarks = opts["heavy_quarks"]
                     lo_flags = opts["lo_flags"]
                     nlo_flags = opts["nlo_flags"]
-                    massive_bubbles = opts["massive_bubbles"]
                     diagram_sum = opts["diagram_sum"]
                     helicity_map = opts["helicity_map"]
 
@@ -88,7 +102,6 @@ class TemplateFactory:
                         heavy_quarks,
                         lo_flags,
                         nlo_flags,
-                        massive_bubbles,
                         diagram_sum,
                         helicity_map,
                     )
@@ -101,29 +114,31 @@ class TemplateFactory:
                         or "lo_flags" not in opts
                         or "nlo_flags" not in opts
                         or "heavy_quarks" not in opts
-                        or "massive_bubbles" not in opts
                         or "diagram_sum" not in opts
                         or "helicity_map" not in opts
-                        or "treecache" not in opts
-                        or "ctcache" not in opts
+                        or "tree_diagrams" not in opts
+                        or "ct_diagrams" not in opts
                         or "ct_flags" not in opts
                     ):
-                        raise golem.util.parser.TemplateError("Cannot use template 'Integrals_doc' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'Integrals_doc' here."
+                        )
                     loopcache = opts["loopcache_tot"]
-                    treecache = opts["treecache"]
+                    tree_diagrams = opts["tree_diagrams"]
                     in_particles = opts["in_particles"]
                     out_particles = opts["out_particles"]
                     conf = opts["conf"]
                     heavy_quarks = opts["heavy_quarks"]
                     lo_flags = opts["lo_flags"]
                     nlo_flags = opts["nlo_flags"]
-                    massive_bubbles = opts["massive_bubbles"]
                     diagram_sum = opts["diagram_sum"]
                     helicity_map = opts["helicity_map"]
-                    ctcache = opts["ctcache"]
+                    ct_diagrams = opts["ct_diagrams"]
                     ct_flags = opts["ct_flags"]
 
-                    template = golem.templates.integrals_doc.IntegralsTemplate_doc(f_template)
+                    template = golem.templates.integrals_doc.IntegralsTemplate_doc(
+                        f_template
+                    )
                     template.setup(
                         loopcache,
                         in_particles,
@@ -132,11 +147,10 @@ class TemplateFactory:
                         heavy_quarks,
                         lo_flags,
                         nlo_flags,
-                        massive_bubbles,
                         diagram_sum,
                         helicity_map,
-                        treecache,
-                        ctcache,
+                        tree_diagrams,
+                        ct_diagrams,
                         ct_flags,
                     )
                 elif class_name == "Kinematics":
@@ -147,7 +161,9 @@ class TemplateFactory:
                         or "heavy_quarks" not in opts
                         or "helicity_map" not in opts
                     ):
-                        raise golem.util.parser.TemplateError("Cannot use template 'Kinematics' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'Kinematics' here."
+                        )
                     in_particles = opts["in_particles"]
                     out_particles = opts["out_particles"]
                     conf = opts["conf"]
@@ -166,25 +182,35 @@ class TemplateFactory:
                         or "subprocesses_conf" not in opts
                         or "conf" not in opts
                     ):
-                        raise golem.util.parser.TemplateError("Cannot use template 'OLP' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'OLP' here."
+                        )
                     template = golem.templates.olp.OLPTemplate(f_template)
                     template.init_contract(opts["contract"])
-                    template.init_channels(opts["subprocesses"], opts["subprocesses_conf"])
+                    template.init_channels(
+                        opts["subprocesses"], opts["subprocesses_conf"]
+                    )
                 elif class_name == "Multi":
                     if "conf" not in opts:
-                        raise golem.util.parser.TemplateError("Cannot use template 'Multi' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'Multi' here."
+                        )
                     conf = opts["conf"]
                     template = golem.templates.multi.MultiTemplate(f_template)
                     template.setup(conf, opts)
                 elif class_name == "LightCone":
                     if "refs" not in opts or "onshell" not in opts:
-                        raise golem.util.parser.TemplateError("Cannot use template 'LightCone' here.")
+                        raise golem.util.parser.TemplateError(
+                            "Cannot use template 'LightCone' here."
+                        )
                     refs = opts["refs"]
                     onshell = opts["onshell"]
                     template = golem.templates.analyzer.LightConeTemplate(f_template)
                     template.setup(refs, onshell)
                 else:
-                    raise golem.util.parser.TemplateError("Unknown template class '%s'." % (class_name))
+                    raise golem.util.parser.TemplateError(
+                        "Unknown template class '%s'." % (class_name)
+                    )
 
                 f_template.close()
                 if out_file is None:
@@ -207,4 +233,8 @@ def set_executable_bit_if_needed(out_file, executable):
     if executable:
         umask = os.umask(0)
         os.umask(umask)
-        os.chmod(out_file, (~umask) & (os.stat(out_file).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+        os.chmod(
+            out_file,
+            (~umask)
+            & (os.stat(out_file).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH),
+        )

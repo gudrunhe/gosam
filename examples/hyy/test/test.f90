@@ -2,7 +2,6 @@ program test
 use hyy_config, only: ki, debug_lo_diagrams, debug_nlo_diagrams, dbl
 use hyy_matrix, only: initgolem, exitgolem
 use hyy_kinematics, only: inspect_kinematics, init_event
-use hyy_groups, only: virt_flags
 implicit none
 
 ! unit of the log file
@@ -19,8 +18,6 @@ logical :: success
 real(ki), dimension(5, 4) :: vecs
 real(ki) :: scale2
 
-type(virt_flags) :: flags
-
 double precision, dimension(0:3) :: gosam_amp, ref_amp, diff
 
 channels(1) = logf
@@ -33,7 +30,7 @@ if (debug_lo_diagrams .or. debug_nlo_diagrams) then
    open(file="gosam.log", unit=gosamlogf)
 end if
 
-call setup_parameters(flags)
+call setup_parameters()
 call initgolem()
 
 call load_reference_kinematics(vecs, scale2)
@@ -41,7 +38,7 @@ call load_reference_kinematics(vecs, scale2)
 call init_event(vecs)
 call inspect_kinematics(logf)
 call compute_gosam_result(vecs, scale2, gosam_amp)
-call compute_reference_result(flags, vecs, scale2, ref_amp)
+call compute_reference_result(vecs, scale2, ref_amp)
 
 diff = abs(rel_diff(gosam_amp, ref_amp))
 
@@ -92,13 +89,11 @@ pure subroutine load_reference_kinematics(vecs, scale2)
    scale2 = 71.2_ki**2
 end  subroutine load_reference_kinematics
 
-subroutine     setup_parameters(flags)
+subroutine     setup_parameters()
    use hyy_config
    use hyy_model, only: set_parameter
-   use hyy_groups, only: virt_flags, update_flags
    implicit none
    integer :: ierr = 0
-   type(virt_flags), intent(out) :: flags
 
    call set_parameter("mH", 124.5_ki, 0.0_ki, ierr)
 
@@ -108,11 +103,6 @@ subroutine     setup_parameters(flags)
    call set_parameter("alpha", 0.00729735299_ki, 0.0_ki, ierr)
 
    renormalisation = 0
-
-   flags%eval_bosonic   = .false.
-   flags%eval_fermionic = .true.
-
-   call update_flags(flags)
 
 end subroutine setup_parameters
 
@@ -135,7 +125,7 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
    GF =  pi * alpha / sqrt(2.0_ki) / sw**2 / mW**2
 
    call samplitude(vecs, real(scale2, dbl), amp, prec, ok)
-      
+
    ! factor 1/16/pi/mH for converting to width
    ! factor 2 for summing over helicities
    amp = amp * 2.0_ki / (16.0d0 * pi * mH)
@@ -158,17 +148,15 @@ subroutine     compute_gosam_result(vecs, scale2, amp)
 
 end subroutine compute_gosam_result
 
-subroutine     compute_reference_result(flags, vecs, scale2, amp)
-   use hyy_groups, only: virt_flags
+subroutine     compute_reference_result(vecs, scale2, amp)
    implicit none
 
-   type(virt_flags), intent(in) :: flags
    real(ki), dimension(5, 4), intent(in) :: vecs
    real(ki), intent(in) :: scale2
    double precision, dimension(0:3), intent(out) :: amp
 
    amp(:) = 0.0d0
-   amp(1) = gammaHyy(flags)
+   amp(1) = gammaHyy()
 
    do ic = 1, 2
       ch = channels(ic)
@@ -190,13 +178,10 @@ pure elemental function rel_diff(a, b)
    end if
 end  function rel_diff
 
-!pure function GammaHyy(flags) result(Gamma)
-function GammaHyy(flags) result(Gamma)
+!pure function GammaHyy() result(Gamma)
+function GammaHyy() result(Gamma)
    use hyy_model, only: mH, mT, mW, alpha, sw, NC
-   use hyy_groups, only: virt_flags
    implicit none
-
-   type(virt_flags), intent(in) :: flags
 
    double precision :: Gamma
 
@@ -211,10 +196,7 @@ function GammaHyy(flags) result(Gamma)
 
    amps = (0.0d0, 0.0d0)
 
-   if (flags%eval_fermionic) &
-   & amps = amps + NC * (2.0d0/3.0d0)**2 * AHq(tauT)
-   if (flags%eval_bosonic) &
-   & amps = amps + AHW(tauW)
+   amps = amps + NC * (2.0d0/3.0d0)**2 * AHq(tauT)
 
    Gamma = mH**3 * real(amps*conjg(amps), kind(1.d0))
    Gamma = Gamma * GF * alpha**2 / sqrt(2.0d0) / 128.0d0 / pi**3

@@ -1,26 +1,30 @@
 # vim: ts=3:sw=3:expandtab
-import sys
+from __future__ import annotations
+
 import datetime
-import re
-
-try:
-    import ast
-except ImportError:
-    ast = None
-
 import logging
+import re
+import sys
+from collections.abc import Mapping, Sequence
+from typing import TextIO, TypeAlias, cast, final, override
 
 logger = logging.getLogger(__name__)
 
 
-class GolemConfigError(Exception):
-    def __init__(self, value):
-        Exception.__init__(self, value)
-        self._value = value
+PropAtom: TypeAlias = int | bool | str
+PropValue: TypeAlias = PropAtom | Sequence[PropAtom] | Mapping[PropAtom, PropAtom]
 
+
+class GolemConfigError(Exception):
+    def __init__(self, value: object):
+        Exception.__init__(self, value)
+        self._value: object = value
+
+    @override
     def __str__(self):
         return "GoSam Configuration Error: %s" % self._value
 
+    @override
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self._value)
 
@@ -28,6 +32,7 @@ class GolemConfigError(Exception):
         return self._value
 
 
+@final
 class Property:
     """
     This class is a wrapper for properties including their
@@ -38,7 +43,15 @@ class Property:
     """
 
     def __init__(
-        self, name, description, type=str, default=None, experimental=False, options=None, sep=None, hidden=False
+        self,
+        name: str,
+        description: str,
+        type: type = str,
+        default: PropValue | None = None,
+        experimental: bool = False,
+        options: list[str] | None = None,
+        sep: str | None = None,
+        hidden: bool = False,
     ):
         """
         Note, in the case of type=list sep encodes the
@@ -54,8 +67,8 @@ class Property:
         self._sep = sep
         self._hidden = hidden
 
-    def _guess_correct(self, options, *given):
-        result = []
+    def _guess_correct(self, options: list[str], *given: str) -> list[str]:
+        result: list[str] = []
         for word in given:
             min_lev = len(word)
             min_opt = None
@@ -65,27 +78,44 @@ class Property:
                     min_opt = option
                     min_lev = dist
             if min_opt is not None and min_lev <= 5:
-                result.append(("If you meant '%s' instead of '%s', " + "please correct and rerun!") % (min_opt, word))
+                result.append(
+                    (
+                        f"If you meant '{min_opt}' instead of '{word}', "
+                        + "please correct and rerun!"
+                    )
+                )
         return result
 
-    def check(self, conf):
-        result = []
+    def check(self, conf: Properties) -> list[str]:
+        result: list[str] = []
 
-        if self._type == int:
+        if self._type is int:
             if self._options is not None:
-                value = conf.getProperty(str(self))
+                value: None | PropValue = conf.getProperty(str(self))
 
                 if value is not None:
                     try:
-                        ivalue = int(value)
+                        # `value` does not actually have to be a `str` here, but the type is explicitly checked by
+                        # the `int` cast. Therefore the type in `cast` does not matter
+                        ivalue = int(cast(str, value))
                         if value not in self._options:
                             result.append(
-                                ("The value (%d) of option '%s'" + " is not in the valid range.") % (ivalue, self)
+                                (
+                                    "The value (%d) of option '%s'"
+                                    + " is not in the valid range."
+                                )
+                                % (ivalue, self)
                             )
                     except ValueError:
-                        result.append(("The value (%r) of option '%s'" + " is not an integer number.") % (value, self))
+                        result.append(
+                            (
+                                "The value (%r) of option '%s'"
+                                + " is not an integer number."
+                            )
+                            % (value, self)
+                        )
 
-        elif self._type == bool:
+        elif self._type is bool:
             bool_values = [
                 "1",
                 "true",
@@ -102,19 +132,21 @@ class Property:
                 "no",
                 "n",
             ]
-            value = conf.getProperty(str(self))
+            value = cast(str | None, conf.getProperty(str(self)))
 
             if value is not None:
                 if value.lower() not in bool_values:
-                    result.append("The value (%r) of option '%s' is not a boolean literal." % (value, self))
+                    result.append(
+                        "The value (%r) of option '%s' is not a boolean literal."
+                        % (value, self)
+                    )
                     result.extend(self._guess_correct(bool_values, value))
 
-        elif self._type == list:
+        elif self._type is list:
             if self._options is not None:
-                odds = []
-                default = self.getDefault()
+                odds: list[str] = []
                 sep = self.getSep()
-                sval = conf.getProperty(str(self))
+                sval = cast(str | None, conf.getProperty(str(self)))
                 if sval is not None:
                     if sep is None:
                         values = sval.split(",")
@@ -129,14 +161,19 @@ class Property:
                             odds.append(value)
 
                 if len(odds) > 0:
-                    result.append("The option '%s' contains unexpected values: %s" % (self, ", ".join(map(repr, odds))))
+                    result.append(
+                        "The option '%s' contains unexpected values: %s"
+                        % (self, ", ".join(map(repr, odds)))
+                    )
                     result.extend(self._guess_correct(self._options, *odds))
         else:
             if self._options is not None:
-                value = conf.getProperty(str(self))
+                value = cast(str | None, conf.getProperty(str(self)))
                 if value is not None:
                     if value.lower() not in self._options:
-                        result.append("Unexpected value (%r) for option '%s'." % (value, self))
+                        result.append(
+                            "Unexpected value (%r) for option '%s'." % (value, self)
+                        )
                         result.extend(self._guess_correct(self._options, value))
 
         return result
@@ -162,13 +199,21 @@ class Property:
     def getSep(self):
         return self._sep
 
+    @override
     def __str__(self):
         return self.getName()
 
+    @override
     def __repr__(self):
-        return "Property(%r, %r, %r, %r)" % (self._name, self._description, self._type, self._default)
+        return "Property(%r, %r, %r, %r)" % (
+            self._name,
+            self._description,
+            self._type,
+            self._default,
+        )
 
 
+@final
 class Properties:
     """
     This class provides a simplistic replacement for
@@ -181,10 +226,14 @@ class Properties:
     in front of any other character is removed.
     """
 
-    def __init__(self, defaults=None, **values):
+    def __init__(
+        self,
+        defaults: dict[str, PropValue] | None = None,
+        **values: Mapping[str, PropValue],
+    ):
         self._defaults = defaults
-        self._map = {}
-        for key, value in list(values.items()):
+        self._map: dict[str, PropValue] = {}
+        for key, value in values.items():
             self.setProperty(key, str(value))
 
         self._decode = False
@@ -197,28 +246,30 @@ class Properties:
     def nodecode(self):
         self._decode = False
 
-    def getProperty(self, key, default=None):
+    def getProperty(
+        self, key: str | Property, default: None | PropValue = None
+    ) -> None | PropValue:
         result = self._getProperty(key)
         if result is None:
             return default
         else:
             return result
 
-    def _getProperty(self, key):
+    def _getProperty(self, key: str | Property) -> None | PropValue:
         if isinstance(key, Property):
             type = key.getType()
             name = str(key)
             default = key.getDefault()
             sep = key.getSep()
-            if type == int:
-                return self.getIntegerProperty(name, default)
-            elif type == bool:
-                return self.getBooleanProperty(name, default)
-            elif type == list:
+            if type is int:
+                return self.getIntegerProperty(name, cast(int | None, default))
+            elif type is bool:
+                return self.getBooleanProperty(name, cast(bool | None, default))
+            elif type is list:
                 if sep is None:
-                    return self.getListProperty(name, default, ",")
+                    return self.getListProperty(name, cast(str | None, default), ",")
                 else:
-                    return self.getListProperty(name, default, sep)
+                    return self.getListProperty(name, cast(str | None, default), sep)
             else:
                 return self.getProperty(name, default)
         else:
@@ -233,20 +284,16 @@ class Properties:
                 return None
 
             if self._decode and isinstance(result, str):
-                # won't work in python3:
-                # return result.decode("string_escape")
-                # This is not 100% correct but should work reasonably well:
-                if ast is not None:
-                    return ast.literal_eval("'" + result + "'")
-                else:
-                    return result.decode("string_escape")
+                return result.encode().decode("unicode_escape")
             else:
                 return result
 
-    def getListProperty(self, key, default=None, delimiter=","):
+    def getListProperty(
+        self, key: str | Property, default: str | None = None, delimiter: str = ","
+    ) -> Sequence[PropAtom]:
         name = str(key)
         if name in self:
-            value = self[name].split(delimiter)
+            value = cast(str, self[name]).split(delimiter)
             return list([x.strip() for x in value])
         else:
             if default:
@@ -254,46 +301,53 @@ class Properties:
             else:
                 return []
 
-    def getBooleanProperty(self, key, default=False):
+    def getBooleanProperty(
+        self, key: str | Property, default: bool | None = False
+    ) -> None | bool:
         true_values = ["1", "true", ".true.", "t", ".t.", "yes", "y"]
         name = str(key)
         if name in self:
-            value = self.getProperty(name, default=default).strip().lower()
+            value = cast(str, self.getProperty(name, default=default)).strip().lower()
             return value in true_values
         else:
             return default
 
-    def getIntegerProperty(self, key, default=None):
+    def getIntegerProperty(
+        self, key: str | Property, default: int | None = None
+    ) -> int | None:
         name = str(key)
         if name in self:
-            value = self.getProperty(name, default=default).strip()
+            value = cast(str, self.getProperty(name, default=default)).strip()
             try:
                 return int(value)
-            except ValueError as ex:
-                raise GolemConfigError("Property '%s' does not contain an integer value ('%s')." % (key, value))
+            except ValueError as _:
+                raise GolemConfigError(
+                    "Property '%s' does not contain an integer value ('%s')."
+                    % (key, value)
+                )
         else:
             return default
 
-    def copyProperties(self, other, *keys):
+    def copyProperties(self, other: Properties, *keys: str | Property):
         for key in keys:
-            self.setProperty(key, other.getProperty(key))
+            self.setProperty(key, cast(PropValue, other.getProperty(key)))
 
-    def copy(self):
+    def copy(self) -> Properties:
         result = Properties()
         for key in self.propertyNames():
-            result.setProperty(key, self.getProperty(key))
+            result.setProperty(key, cast(PropValue, self.getProperty(key)))
         return result
 
-    def setProperty(self, key, value):
+    def setProperty(self, key: str | Property, value: PropValue):
         name = str(key)
         if name.startswith("+"):
             self.setProperty(name[1:], value)
-        if value.__class__ == list:
-            self._map[name] = ",".join(map(str, value))
+        if value.__class__ is list:
+            self._map[name] = ",".join(map(str, cast(Sequence[PropAtom], value)))
         else:
             self._map[name] = str(value)
 
-    def __contains__(self, key):
+    def __contains__(self, key: str | Property) -> bool:
         name = str(key)
         if name in self._map:
             return True
@@ -310,53 +364,63 @@ class Properties:
                 if key not in self._map:
                     yield key
 
-    def list(self, stream=sys.stdout):
+    def list(self, stream: TextIO = sys.stdout):
         for key in self:
-            stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
+            _ = stream.write(
+                "%s=%s\n" % (escape(key, True), escape(str(cast(PropValue, self[key]))))
+            )
 
-    def store(self, stream, comments=None, properties=None, info=[]):
-        def format_comment(prop):
-            if prop.getType() == str:
+    def store(
+        self,
+        stream: TextIO,
+        comments: str | None = None,
+        properties: Sequence[Property] | None = None,
+        info: list[str] = [],
+    ):
+        def format_comment(prop: Property):
+            if prop.getType() is str:
                 stype = "text"
-            elif prop.getType() == int:
+            elif prop.getType() is int:
                 stype = "integer number"
-            elif prop.getType() == bool:
+            elif prop.getType() is bool:
                 stype = "true/false"
-            elif prop.getType() == list:
+            elif prop.getType() is list:
                 stype = "comma separated list"
             else:
                 stype = str(prop.getType())
 
-            stream.write("### %s (%s)\n" % (prop, stype))
+            _ = stream.write("### %s (%s)\n" % (prop, stype))
             for line in prop.getDescription().splitlines(False):
                 text = "# %s" % (line.expandtabs(3))
-                stream.write("%s\n" % text)
+                _ = stream.write("%s\n" % text)
 
             if prop.isExperimental():
-                stream.write("### This property is marked as EXPERIMENTAL !!!\n")
+                _ = stream.write("### This property is marked as EXPERIMENTAL !!!\n")
 
         if comments is not None:
             for cline in comments.splitlines():
-                stream.write("# %s\n" % cline)
-        stream.write("# %s\n" % datetime.datetime.now())
+                _ = stream.write("# %s\n" % cline)
+        _ = stream.write("# %s\n" % datetime.datetime.now())
 
         keys = [key for key in self]
 
         for key in info:
             if key in keys:
-                stream.write("# %s=%s\n" % (key, self[key]))
+                _ = stream.write("# %s=%s\n" % (key, self[key]))
                 keys.remove(key)
-        stream.write("\n")
+        _ = stream.write("\n")
 
         if properties is not None:
             for propty in properties:
                 key = str(propty)
-                if propty.isHidden() and not (self[key] is propty.getDefault()):
+                if propty.isHidden() and self[key] is not propty.getDefault():
                     continue
                 format_comment(propty)
 
                 if key in keys:
-                    stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
+                    _ = stream.write(
+                        "%s=%s\n" % (escape(key, True), escape(cast(str, self[key])))
+                    )
                     keys.remove(key)
                 else:
                     dflt = propty.getDefault()
@@ -364,17 +428,19 @@ class Properties:
                         dflt = ""
                     else:
                         dflt = str(dflt)
-                    stream.write("### Default:\n")
-                    stream.write("# %s=%s\n" % (escape(key, True), escape(dflt)))
-                stream.write("\n")
+                    _ = stream.write("### Default:\n")
+                    _ = stream.write("# %s=%s\n" % (escape(key, True), escape(dflt)))
+                _ = stream.write("\n")
 
-        stream.write("### Further settings:\n")
+        _ = stream.write("### Further settings:\n")
         keys.sort()
         for key in keys:
-            stream.write("%s=%s\n" % (escape(key, True), escape(self[key])))
+            _ = stream.write(
+                "%s=%s\n" % (escape(key, True), escape(cast(str, self[key])))
+            )
 
-    def load(self, stream, avail_props=[]):
-        dollar_variables = []
+    def load(self, stream: TextIO, avail_props: list[str] = []):
+        dollar_variables: list[tuple[str, ...]] = []
         buf = ""
         raise_err = False
         err_str = ""
@@ -404,7 +470,9 @@ class Properties:
             separator_index = -1
             in_brackets = False
             for i in range(len(buf)):
-                if (not preceeding_backslash and not in_brackets) and (buf[i] in ["=", ":", " ", "\f", "\t"]):
+                if (not preceeding_backslash and not in_brackets) and (
+                    buf[i] in ["=", ":", " ", "\f", "\t"]
+                ):
                     separator_index = i
                     break
                 if buf[i] == "[":
@@ -417,7 +485,9 @@ class Properties:
                     preceeding_backslash = False
 
             if in_brackets:
-                raise GolemConfigError("Invalid range specification in '%s'. Missing ']'?" % buf)
+                raise GolemConfigError(
+                    "Invalid range specification in '%s'. Missing ']'?" % buf
+                )
 
             if separator_index < 0:
                 key = buf.strip()
@@ -446,33 +516,38 @@ class Properties:
             buf = ""
         if raise_err:
             raise GolemConfigError(
-                "The properties '{0}'".format(err_str) + " which you set in your configuration file are unknown."
+                "The properties '{0}'".format(err_str)
+                + " which you set in your configuration file are unknown."
             )
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str | Property) -> None | PropValue:
         return self._getProperty(key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str | Property, value: PropValue):
         self.setProperty(key, value)
 
     def __iter__(self):
         return self.propertyNames()
 
-    def addAll(self, other):
+    def addAll(self, other: Properties):
         for name in other:
-            self[name] = other[name]
+            self[name] = cast(PropValue, other[name])
         return self
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: Properties):
         return self.addAll(other)
 
+    @override
     def __str__(self):
         res = ""
         for key in self:
-            res += "%s=%s\n" % (escape(key, True), escape(self[key]))
+            res += "%s=%s\n" % (
+                escape(key, True),
+                escape(str(cast(PropValue, self[key]))),
+            )
         return res
 
-    def _del(self, name):
+    def _del(self, name: str):
         del self._map[name]
         # keep plussed and unplussed entries consistent
         if name.startswith("+"):
@@ -483,23 +558,23 @@ class Properties:
             except KeyError:
                 pass
 
-    def activate_subconfig(self, no):
-        changed = {}
+    def activate_subconfig(self, no: int):
+        changed: dict[str, PropValue] = {}
         for key in self:
             if "[" not in key:
                 continue
             pos = key.index("[")
             if no in extractRange(key[pos + 1 : -1]):
-                if key[:pos] in list(changed.keys()) and changed[key[:pos]] != self[key]:
+                if key[:pos] in changed and changed[key[:pos]] != self[key]:
                     raise GolemConfigError(
                         "multiple values for option '%s' in subprocess %s: '%s' or '%s'?"
                         % (key[:pos], no, changed[key[:pos]], self[key])
                     )
-                self[key[:pos]] = self[key]
-                changed[key[:pos]] = self[key]
+                self[key[:pos]] = cast(PropValue, self[key])
+                changed[key[:pos]] = cast(PropValue, self[key])
 
 
-def unescape(s):
+def unescape(s: str) -> str:
     buf = [s[i] for i in range(len(s))]
     if "\\" in buf:
         idx_bk = buf.index("\\")
@@ -525,7 +600,7 @@ def unescape(s):
     return "".join(buf)
 
 
-def escape(s, isKey=False):
+def escape(s: str, isKey: bool = False) -> str:
     escapes = {"\n": "\\n", "\r": "\\r", "\f": "\\f", "\t": "\\t"}
     keyescapes = {"=": "\\=", ":": "\\:", " ": "\\ "}
     buf = s.replace("\\", "\\\\")
@@ -538,27 +613,30 @@ def escape(s, isKey=False):
             buf = "\\" + buf
     return buf
 
+
 class ConfigurationException(Exception):
     pass
 
-def version_compare(v1, v2):
-   l1 = len(v1)
-   l2 = len(v2)
-   if l1 < l2:
-      v1c = v1 + [0] * (l2-l1)
-      v2c = v2[:]
-   else:
-      v1c = v1[:]
-      v2c = v2 + [0] * (l1-l2)
 
-   for p1, p2 in zip(v1c, v2c):
-      if p1 > p2:
-         return 1
-      elif p1 < p2:
-         return -1
-   return 0
+def version_compare(v1: list[int], v2: list[int]) -> int:
+    l1 = len(v1)
+    l2 = len(v2)
+    if l1 < l2:
+        v1c = v1 + [0] * (l2 - l1)
+        v2c = v2[:]
+    else:
+        v1c = v1[:]
+        v2c = v2 + [0] * (l1 - l2)
 
-def levenshtein(str1, str2, case_sensitive=False):
+    for p1, p2 in zip(v1c, v2c):
+        if p1 > p2:
+            return 1
+        elif p1 < p2:
+            return -1
+    return 0
+
+
+def levenshtein(str1: str, str2: str, case_sensitive: bool = False) -> int:
     l1 = len(str1)
     l2 = len(str2)
 
@@ -601,7 +679,7 @@ def levenshtein(str1, str2, case_sensitive=False):
     return previous_row[-1]
 
 
-def extractRange(s, minval=0, maxval=999):
+def extractRange(s: str, minval: int = 0, maxval: int = 999) -> set[int]:
     """extract ranges from a string and returns a set
      Examples:
 
@@ -625,7 +703,7 @@ def extractRange(s, minval=0, maxval=999):
     """
     s = s.replace(" ", ",")
     ranges = [x.split("-") for x in s.split(",")]
-    res = set()
+    res: set[int] = set()
     for r in ranges:
         if r == [""]:
             continue
@@ -650,7 +728,7 @@ def extractRange(s, minval=0, maxval=999):
     return res
 
 
-def split_power(power):
+def split_power(power: str | list[list[int | str]]) -> list[list[int | str]]:
     """
     >>> split_power('QCD,2,0,QED,3,3')
     [['QCD', 2, 0], ['QED', 3, 3]]
@@ -669,15 +747,15 @@ def split_power(power):
      ...
     ConfigurationException: Coupling 'QED' repeated
     """
-    if type(power) == list:
+    if isinstance(power, list):
         return power
-    assert type(power) == str
+    assert isinstance(power, str)
     min_length = 0
-    orders = []
-    couplings = set()
-    l = re.split(",|;", power)
-    current_coupling = []
-    for i in l + [""]:
+    orders: list[list[int | str]] = []
+    couplings: set[str] = set()
+    li: list[str] = re.split(",|;", power)
+    current_coupling: list[str | int] = []
+    for i in li + [""]:
         if str(i).isdigit() or str(i).lower() == "none":
             assert current_coupling
             current_coupling.append(i)
@@ -687,7 +765,9 @@ def split_power(power):
                 current_len = 0
             if current_len < min_length and current_coupling:
                 if current_len > 0:
-                    current_coupling.extend([current_coupling[-1]] * (min_length - current_len))
+                    current_coupling.extend(
+                        [current_coupling[-1]] * (min_length - current_len)
+                    )
                 else:
                     current_coupling.extend([0] * (min_length - current_len))
             if current_len and current_coupling:

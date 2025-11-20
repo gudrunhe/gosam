@@ -188,21 +188,6 @@ Id XQLorder = 1;[%
 Id proplorentz(sDUMMY1?, vDUMMY1?, 0, sDUMMY3?, ?tail) =
    proplorentz(sDUMMY1, vDUMMY1, 0, 0, ?tail);
 
-*#IfDef `MASSIVEBUBBLE'
-*
-* NOTE: If you plan to insert your own renormalization code here
-*       check if you need to undefine MQSE:
-*
-* #Undefine MQSE
-*
-*   #$MASSIVEBUBBLESIZE = nargs_(`MASSIVEBUBBLE') / 3;
-*   #If `$MASSIVEBUBBLESIZE' == 1
-*      #Message This is a massive tadpole: `MASSIVEBUBBLE'
-*   #Else
-*      #Message This is a massive two-point function: `MASSIVEBUBBLE'
-*   #EndIf
-*#EndIf
-
 [% @if use_MQSE %]
 #IfDef `MQSE'
   SplitArg (p1), proplorentz;

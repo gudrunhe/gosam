@@ -93,7 +93,7 @@ id vertex(iv?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, sign2?{-1,1}, iv2C?,
 	field3?, idx3?, 2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?,
 	field4?, idx4?, 2, vDUMMY4?, iv4L?, sign4?{-1,1}, iv4C?) =
-		PREFACTOR(i_) * C(field1, field2, field3, field4) * 
+		PREFACTOR(i_) * C(field1, field2, field3, field4) *
 			LorVVVV(iv1L, iv2L, iv3L, iv4L);
 *---#] VVVV vertex (A.2.6) :
 *---#[ VVVV vertex (QCD) (2.4.32) :
@@ -167,9 +167,9 @@ id vertex(iv?,
 *---#] SVV vertex (A.2.18) :
 *---#[ VFF vertex (A.2.20) :
 id vertex(iv?,
-	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C?,
-	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C?) = i_ * (
+	field3?, idx3?,  sDUMMY2?{2,-2}, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C?) = i_ * (
 		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
 		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
@@ -181,7 +181,7 @@ id vertex(iv?,
 id vertex(iv?,
 	field1?, idx1?, -1, vDUMMY1?, iv1L?, -3, iv1C3?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  3, iv2C3?,
-	field3?, idx3?,  2, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C1?) = i_ * (
+	field3?, idx3?,  sDUMMY2?{2,-2}, vDUMMY3?, iv3L?,  sign3?{-1,1}, iv3C1?) = i_ * (
 		+ 1/2 * (CR(field1, field2, field3) + CL(field1, field2, field3)) *
 		  NCContainer(Sm(iv3L), iv1L, iv2L)
 		+ (CR(field1, field2, field3) - CL(field1, field2, field3)) *
@@ -203,7 +203,7 @@ id vertex(iv?,
 *---#[ SFF vertex (A.2.24) :
 * TODO: Have a look at hep-ph/9302240 --> peudoscalar coupling might not be correct yet.
 id vertex(iv?,
-	field1?, idx1?, -1, vDUMMY1?, iv1L?, -1, iv1C1?,
+	field1?, idx1?, -1, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C1?,
 	field2?, idx2?,  1, vDUMMY2?, iv2L?,  1, iv2C1?,
 	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C1?) = i_ * (
 		+ CL(field1, field2, field3) *
@@ -227,14 +227,14 @@ id vertex(iv?,
 *---#] SFF vertex (A.2.24) :
 *---#[ VGG vertex (A.2.26) :
 id vertex(iv?,
-	field1?, idx1?,  0, vDUMMY1?, iv1L?, -1, iv1C?,
-	field2?, idx2?,  0, vDUMMY2?, iv2L?,  1, iv2C?,
+	field1?, idx1?,  0, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?,  0, vDUMMY2?, iv2L?,  sign1?{-1,1}, iv2C?,
 	field3?, idx3?,  2, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
 		i_ * C(field1, field2, field3) * vDUMMY1(iv3L);
 *---#] VGG vertex (A.2.26) :
 *---#[ VGG vertex (QCD) (2.4.32) :
 id vertex(iv?,
-	field1?, idx1?,  0, vDUMMY1?, iv1L?, -8, iv1C?,
+	field1?, idx1?,  0, vDUMMY1?, iv1L?, 8, iv1C?,
 	field2?, idx2?,  0, vDUMMY2?, iv2L?,  8, iv2C?,
 	field3?, idx3?,  2, vDUMMY3?, iv3L?,  8, iv3C?) =
 		- C(field1, field2, field3) * f(iv3C, iv1C, iv2C) *
@@ -242,8 +242,8 @@ id vertex(iv?,
 *---#] VGG vertex (QCD) (2.4.32) :
 *---#[ SGG vertex (A.2.28) :
 id vertex(iv?,
-	field1?, idx1?,  0, vDUMMY1?, iv1L?, -1, iv1C?,
-	field2?, idx2?,  0, vDUMMY2?, iv2L?,  1, iv2C?,
+	field1?, idx1?,  0, vDUMMY1?, iv1L?, sign1?{-1,1}, iv1C?,
+	field2?, idx2?,  0, vDUMMY2?, iv2L?,  sign1?{-1,1}, iv2C?,
 	field3?, idx3?,  0, vDUMMY3?, iv3L?, sign3?{-1,1}, iv3C?) =
 		i_ * C(field1, field2, field3);
 *---#] SGG vertex (A.2.28) :
@@ -262,7 +262,7 @@ id vertex(iv?,
         field4?, idx4?, 0, vDUMMY4?, iv4L?, sign2?{-1,1}, iv4C?) =
 		i_ * C(field1, field2, field3, field4) * dcolor8(iv1C, iv2C) *
       ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
-		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));      
+		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));
 id vertex(iv?,
 	field1?, idx1?, 2, vDUMMY1?, iv1L?, 8, iv1C?,
 	field2?, idx2?, 2, vDUMMY2?, iv2L?, 8, iv2C?,
@@ -291,7 +291,7 @@ id vertex(iv?,
 		i_ * C(field1, field2, field3) *
       ( d(iv1L, iv2L) * d(vDUMMY1, vDUMMY2)
 		- d(vDUMMY2, iv1L) * d(vDUMMY1, iv2L));
-*---#] effective AAH:      
+*---#] effective AAH:
 #EndProcedure
 
 #Procedure ExpandLorentzStructures

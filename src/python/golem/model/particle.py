@@ -1,14 +1,27 @@
 # vim: ts=3:sw=3
+from collections.abc import Mapping, MutableMapping
+from typing import TypeVar, final, override
 
 import golem.algorithms.helicity
 
 
+@final
 class Particle:
     """
     Store basic facts about particles.
     """
 
-    def __init__(self, field, twospin, mass, color, partner, width, pdg_code, charge):
+    def __init__(
+        self,
+        field: str,
+        twospin: int,
+        mass: str,
+        color: int,
+        partner: str | None,
+        width: str,
+        pdg_code: int,
+        charge: int,
+    ):
         self._field = field
         self._twospin = twospin
         self._mass = mass
@@ -27,13 +40,13 @@ class Particle:
 
         self._pdg_code = pdg_code
 
-    def getPDGCode(self):
+    def getPDGCode(self) -> int:
         return self._pdg_code
 
     def __int__(self):
         return self._pdg_code
 
-    def setLaTeXName(self, name):
+    def setLaTeXName(self, name: str):
         """
         Sets the LaTeX name, i.e. a character string
         which is used to type-set the particles name in LaTeX.
@@ -43,14 +56,14 @@ class Particle:
     def getLaTeXName(self):
         return self._latex_name
 
-    def getSpin(self):
+    def getSpin(self) -> int:
         """
         Returns an integer number, two times the spin,
         negative for antiparticles, positive for particles
         """
         return self._twospin
 
-    def getColor(self):
+    def getColor(self) -> int:
         """
         Returns an integer number, labeling the
         the SU(N)-color representation.
@@ -59,7 +72,7 @@ class Particle:
         """
         return self._color
 
-    def getPartner(self):
+    def getPartner(self) -> str:
         """
         Returns the field name of its conjugate.
         If the particle is self-conjugate it returns its
@@ -67,7 +80,7 @@ class Particle:
         """
         return self._partner
 
-    def getPartnerPDGCode(self):
+    def getPartnerPDGCode(self) -> int:
         """
         Returns the PDG code of its conjugate.
         If the particle is self-conjugate it returns its
@@ -78,19 +91,19 @@ class Particle:
         else:
             return -self._pdg_code
 
-    def isMassive(self, zeroes={}):
+    def isMassive(self, zeroes: list[str] = []):
         return self.getMass(zeroes) != "0"
 
-    def hasWidth(self, zeroes={}):
+    def hasWidth(self, zeroes: list[str] = []):
         return self.getWidth(zeroes) != "0"
 
-    def getWidth(self, zeroes={}):
+    def getWidth(self, zeroes: list[str] = []):
         if str(self._width) != "0":
             if self._width in zeroes:
                 return "0"
         return str(self._width)
 
-    def getMass(self, zeroes={}):
+    def getMass(self, zeroes: list[str] = []):
         if self._mass != 0:
             if self._mass in zeroes:
                 return "0"
@@ -102,10 +115,12 @@ class Particle:
     def nullifyWidth(self):
         self._width = 0
 
-    def __str__(self):
+    @override
+    def __str__(self) -> str:
         return self._field
 
-    def __repr__(self):
+    @override
+    def __repr__(self) -> str:
         return "Particle(%r, %r, %r, %r, %r, %r, %r, %r)" % (
             self._field,
             self._twospin,
@@ -117,7 +132,7 @@ class Particle:
             self._charge,
         )
 
-    def getHelicityStates(self, zeroes={}):
+    def getHelicityStates(self, zeroes: list[str] = []) -> list[int]:
         sp = abs(self.getSpin())
         if self.isMassive(zeroes):
             states = golem.algorithms.helicity.massive_states
@@ -132,7 +147,7 @@ class Particle:
         # "Spin %s particles currently not implemented" % ssp)
         return states[sp]
 
-    def referenceRequired(self, zeroes={}):
+    def referenceRequired(self, zeroes: list[str] = []) -> bool:
         return self.getSpin() >= 2 or self.isMassive(zeroes)
 
     def getCharge(self):
@@ -145,7 +160,17 @@ class Particle:
         return self._field
 
 
-def simplify_model(particles, parameters, types, functions, masses, widths):
+T = TypeVar("T")
+
+
+def simplify_model(
+    particles: Mapping[str, Particle],
+    parameters: MutableMapping[str, str],
+    types: MutableMapping[str, str],
+    functions: MutableMapping[str, T],
+    masses: None | Mapping[str, str],
+    widths: None | Mapping[str, str],
+):
     for p in list(particles.values()):
         m = p.getMass()
         w = p.getWidth()
@@ -162,7 +187,7 @@ def simplify_model(particles, parameters, types, functions, masses, widths):
         if w == "0":
             continue
 
-        if m == 0 or (widths is not None and w not in widths):
+        if m == "0" or (widths is not None and w not in widths):
             p.nullifyWidth()
             parameters[w] = "0.0"
             types[w] = "RP"

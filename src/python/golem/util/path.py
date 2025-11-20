@@ -1,8 +1,10 @@
 import os.path
+from typing import cast
+
 import golem
 
 
-def golem_path(*dir):
+def golem_path(*dir: str) -> str:
     """
     Calculates the path where Golem is installed.
     """
@@ -10,7 +12,7 @@ def golem_path(*dir):
     try:
         from golem.installation import DATA_DIR
 
-        return os.path.join(DATA_DIR, *dir)
+        return os.path.join(cast(str, DATA_DIR), *dir)
     except ImportError:
         # This means we work with the sources rather than
         # from the installed version.
@@ -21,7 +23,7 @@ def golem_path(*dir):
         return os.path.join(src_path, *dir)
 
 
-def get_homedir():
+def get_homedir() -> str:
     """
     Try to determin the user's home directory.
 
@@ -40,7 +42,7 @@ def get_homedir():
     # (CSIDL_APPDATA asks for the roaming, CSIDL_LOCAL_APPDATA for the local one)
     # (See microsoft references for further CSIDL constants)
     try:
-        from win32com.shell import shellcon, shell
+        from win32com.shell import shell, shellcon
 
         homedir = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, 0, 0)
     except ImportError:  # quick semi-nasty fallback for non-windows/win32com case

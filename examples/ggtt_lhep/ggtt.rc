@@ -15,6 +15,6 @@ model=../model/Standard_Model_LanHep, 4
 zero=mdlMb,mdlMc,mdlMs,mdlwtop
 one=mdlEE,mdlGG
 
-filter.nlo=lambda d: not d.isScaleless()
+filter.nlo=lambda d: not is_scaleless(d)
 r2=implicit
 debug=nlo

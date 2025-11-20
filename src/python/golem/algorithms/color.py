@@ -1,9 +1,15 @@
 # vim: ts=3:sw=3:expandtab
+from collections.abc import Iterable, Sequence
+from typing import TypeVar
+
 import golem.util.tools
+from golem.model.particle import Particle
 from golem.util.config import GolemConfigError
 
 
-def colorbasis(quarks, aquarks, gluons):
+def colorbasis(
+    quarks: list[int], aquarks: list[int], gluons: list[int]
+) -> Iterable[tuple[list[list[int]], ...]]:
     """
     Generates a SU(N) color basis for a set
     of quarks, antiquarks and gluons
@@ -26,8 +32,8 @@ def colorbasis(quarks, aquarks, gluons):
 
     try:
         for l in permutations(lhs):
-            lines = []
-            traces = []
+            lines: list[list[int]] = []
+            traces: list[list[int]] = []
             iglue = set(range(nglue))
             for a in aquarks:
                 line = [a]
@@ -40,7 +46,7 @@ def colorbasis(quarks, aquarks, gluons):
                 line.append(r)
                 lines.append(line)
             while len(iglue) > 0:
-                line = []
+                line: list[int] = []
                 ig = iglue.pop()
                 g = gluons[ig]
                 r = rhs[l.index(g)]
@@ -63,13 +69,15 @@ Perhaps you need to change a particle to its anti-particle in the initial or fin
         )
 
 
-def get_color_basis(in_particles, out_particles):
+def get_color_basis(
+    in_particles: Sequence[Particle], out_particles: Sequence[Particle]
+) -> list[tuple[list[list[int]], ...]]:
     """
     Find all colored particles and build a color basis
     """
-    quarks = []
-    aquarks = []
-    gluons = []
+    quarks: list[int] = []
+    aquarks: list[int] = []
+    gluons: list[int] = []
     li = len(in_particles)
     for i in range(li):
         p = in_particles[i]
@@ -92,10 +100,13 @@ def get_color_basis(in_particles, out_particles):
         elif p.getColor() == 8:
             gluons.append(color_index)
 
-    return [(lines, traces) for lines, traces in golem.algorithms.color.colorbasis(quarks, aquarks, gluons)]
+    return [(lines, traces) for lines, traces in colorbasis(quarks, aquarks, gluons)]
 
 
-def permutations(lst):
+T = TypeVar("T")
+
+
+def permutations(lst: Sequence[T]) -> Iterable[Sequence[T]]:
     """
     Generates all permutations of a list.
     """
@@ -107,9 +118,9 @@ def permutations(lst):
         return
 
     a = list(range(N))
-    face_left = [True for i in a]
+    face_left = [True for _ in a]
 
-    def index_of_max_mobile():
+    def index_of_max_mobile() -> int:
         idx = -1
         max_mobile = -1
         for i in range(N):
@@ -129,7 +140,7 @@ def permutations(lst):
                     idx = i
         return idx
 
-    def swap(index):
+    def swap(index: int):
         if face_left[index]:
             tmp = a[index - 1]
             a[index - 1] = a[index]
@@ -157,7 +168,7 @@ def permutations(lst):
         max_index = index_of_max_mobile()
 
 
-def num_colors(F, G):
+def num_colors(F: int, G: int) -> int:
     """
     Predict the number of color structures
     for F quark-anti-quark pairs and G gluons.

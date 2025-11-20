@@ -12,9 +12,7 @@ out=11, -12
 order=QCD, 0, 2
 
 # Only W+ in s-channel, no Goldstone bosons
-filter.lo=lambda d: d.bridge(["W+", "W-"]) > 0
-filter.nlo=lambda d: d.bridge(["W+", "W-"]) > 0
-
+filter=lambda d: any(p.particle().name() in ["W+", "W-"] for p in d.bridges())
 
 model=FeynRules, ../model/Standard_Model_UFO
 
