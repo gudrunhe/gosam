@@ -1081,10 +1081,9 @@ class Model:
                 orders = next((c.order for c in v.couplings.values()), None)
                 if orders is not None and "NP" in orders and orders["NP"] != 0:
                     continue
-                quark_mass = next(p.mass for p in v.particles if abs(p.pdg_code) <= 6)
-                if quark_mass == "0" or quark_mass == "ZERO":
-                    continue
                 quark_mass, quark_name, anti_name = next((str(p.mass), str(p.name), str(p.antiname)) for p in v.particles if abs(p.pdg_code) <= 6)
+                if quark_mass == "0" or quark_mass == "ZERO":
+                    continue                
                 scheme = "MSbar" if bool(set(self.MSbaryukawa).intersection((quark_name, anti_name))) else "OS" + self.prefix + str(quark_mass)
                 f.write(f"""\
 Id vertex(iv?, {v.name},
