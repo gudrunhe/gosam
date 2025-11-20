@@ -14,7 +14,7 @@ order=QCD, 0
 
 zero=mass(11),width(23;24;25),mdlyme
 
-filter.lo=lambda d: d.order('NP')<=1 and d.vertices('e+','e-','H')==0
+filter.lo=lambda d: d.vertices('e+','e-','H')==0
 
 
 

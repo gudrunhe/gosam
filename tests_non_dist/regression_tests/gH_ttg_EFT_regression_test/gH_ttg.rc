@@ -14,7 +14,7 @@ order_names=QCD,NP
 all_mandelstam=True
 enable_truncation_orders=True
 
-filter.lo=lambda d: d.vertices("H","b","b~")==0 and d.order('NP')<=1
+filter.lo=lambda d: d.vertices("H","b","b~")==0
 
 reduction_programs=ninja
 

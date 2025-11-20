@@ -74,6 +74,12 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
 
     momentum_labels: list[str] = ["k" + str(i+1) for i in range(len(in_particles) + len(out_particles))] + ["p1"]
 
+
+    # Discard all diagrams with double insertions, when truncation orders are used. 
+    if conf.getBooleanProperty("enable_truncation_orders"):
+        logger.info("\'enable_truncation_orders=True\' -> discarding diagrams with double insertions (NP>1)")
+
+
     # ----------- Born Diagrams -----------
     if conf.getBooleanProperty("generate_tree_diagrams") or conf.getBooleanProperty("generate_eft_loopind"):
         lo_selector: fg.DiagramSelector = deepcopy(selector)
@@ -83,6 +89,13 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         else:
             for coupling, _, nlo_power in powers:
                 lo_selector.select_coupling_power(coupling, int(nlo_power))
+        lo_selector.select_coupling_power("CT", 0)
+        if conf.getBooleanProperty("enable_truncation_orders"):
+            # Discard all diagrams with double insertions
+            lo_selector.select_coupling_power_list("NP", [0,1])
+        if conf.getBooleanProperty("loop_suppressed_Born"):
+            # Exactly on loop-suppressed operator in tree diagrams
+            lo_selector.select_coupling_power("QL", 1)
         particle_restrictions: dict[str, int] = {
             restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
             for restriction in conf.getProperty("filter.lo.particles").split(",")
@@ -95,7 +108,6 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         } if conf.getProperty("filter.lo.vertices") is not None else {}
         for particle_list, count in vertex_restrictions.items():
             lo_selector.select_vertex_count(particle_list, count)
-        lo_selector.select_coupling_power("CT", 0)
         lo_generator: fg.DiagramGenerator = fg.DiagramGenerator(
             in_particles,
             out_particles,
@@ -119,6 +131,12 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         for coupling, _, nlo_power in powers:
             nlo_selector.select_coupling_power(coupling, int(nlo_power))
         nlo_selector.select_coupling_power("CT", 0)
+        if conf.getBooleanProperty("enable_truncation_orders"):
+            # Discard all diagrams with double insertions
+            nlo_selector.select_coupling_power_list("NP", [0,1])
+        if conf.getBooleanProperty("loop_suppressed_Born"):
+            # No loop-suppressed operators in loop diagrams
+            nlo_selector.select_coupling_power("QL", 0)
         particle_restrictions: dict[str, int] = {
             restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
             for restriction in conf.getProperty("filter.nlo.particles").split(",")
@@ -154,6 +172,9 @@ def run_feyngraph(in_particles: list[str], out_particles: list[str], conf: Prope
         for coupling, _, nlo_power in powers:
             ct_selector.select_coupling_power(coupling, int(nlo_power))
         ct_selector.select_coupling_power("CT", 1)
+        if conf.getBooleanProperty("enable_truncation_orders"):
+            # Discard all diagrams with double insertions
+            ct_selector.select_coupling_power_list("NP", [0,1])
         particle_restrictions: dict[str, int] = {
             restriction.split(":")[0].strip(): int(restriction.split(":")[1].strip())
             for restriction in conf.getProperty("filter.ct.particles").split(",")

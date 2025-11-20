@@ -648,40 +648,6 @@ def fill_config(conf):
 
         # END: Check for incompatible configuration
 
-
-    # Discard all diagrams with double insertions, when truncation orders
-    # are used. Is also done later in golem.frm, but doing it here reduces
-    # the number of generated diagrams and speeds up the calculation.
-    # Note: cannot be done when a filter module is used -> has to be part of the module
-    if conf.getBooleanProperty("enable_truncation_orders"):
-        for fltr in ["lo","nlo","ct"]:
-            if conf["filter."+fltr] is None:
-                logger.info("\'enable_truncation_orders=True\' -> adding filter.%s: d.order('NP')<=1 " % fltr)
-                conf["filter."+fltr] = "lambda d: d.order('NP')<=1"
-            elif conf["filter."+fltr].startswith("lambda d:"):
-                logger.info("\'enable_truncation_orders=True\' -> appending filter.%s: d.order('NP')<=1 " % fltr)
-                conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
-            else:
-                logger.warning("You seem to be using a filter for the %s component " % (fltr) \
-                + "defined in a filter module: %s.\n" % (conf["filter."+fltr]) \
-                + "Since you are also using the 'enable_truncation_orders' feature please make sure you\n"
-                + "restrict order('NP')<=1 to avoid double insertions of EFT operators (if applicable).")
-
-    # For loop-induced processed any tree diagram must contain a
-    # loop suppressed operator, while loop diagrams must not. Add appropriate filters here.
-    # Note: cannot be done when a filter module is used -> has to be part of the module
-    if conf.getBooleanProperty("loop_suppressed_Born"):
-        for l, fltr in enumerate(["nlo","lo"]):
-            if conf["filter."+fltr] is None:
-                conf["filter."+fltr] = "lambda d: d.order('QL')==" + str(l)
-            elif conf["filter."+fltr].startswith("lambda d:"):
-                conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('QL')==" + str(l)
-            else:
-                logger.warning("You seem to be using a filter for the %s component " % (fltr) \
-                + "defined in a filter module: %s.\n" % (conf["filter."+fltr]) \
-                + "Since you are also using the 'loop_suppressed_Born' feature please make sure you\n"
-                + "include order('QL')==%d. to ensure proper loop counting." % (l))
-
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
 

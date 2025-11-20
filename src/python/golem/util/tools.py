@@ -330,8 +330,6 @@ def prepare_model_files(conf, output_path=None):
         isufo = False
         conf.setProperty("is_ufo",isufo)
 
-    conf["enable_truncation_orders"] = conf.getProperty(golem.properties.enable_truncation_orders)
-
     if "setup-file" in conf:
         rel_path = os.path.dirname(conf["setup-file"])
     else:
