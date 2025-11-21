@@ -112,7 +112,7 @@ class Model:
         #            the fact that the model is cached by adding it to sys.modules in tools.load_source, 
         #            including the modifications made during the first call. If for some reason the model
         #            is not cached, optimized_import will not work.
-        mod, mname = load_ufo_files(model_path)
+        mod, mname, cached = load_ufo_files(model_path)
 
         self.useCT = False
         if self.initial_import:
@@ -170,7 +170,7 @@ class Model:
             structure = parser.compile(l.structure)
             l.rank = get_rank(structure)
 
-        if self.initial_import:
+        if self.initial_import and not cached:
             fg_model = fg.Model.from_ufo(model_path)
 
             # ################################################
@@ -1471,7 +1471,6 @@ def transform_color(expr, colors, xidx):
         return expr
 
 def load_ufo_files(model_path):
-    sys.path.append(model_path)
     parent_path = os.path.normpath(os.path.join(model_path, os.pardir))
     norm_path = os.path.normpath(model_path)
     if norm_path.startswith(parent_path):
@@ -1484,11 +1483,20 @@ def load_ufo_files(model_path):
 
     logger.info("Trying to import FeynRules model '%s' from %s" % (mname, search_path[0]))
 
-    try:
-        fpath = search_path[0] + "/" + mname + "/__init__.py"
-        mod = load_source(mname, fpath)
-    except ImportError as exc:
-        logger.critical("Problem importing model file: %s" % exc)
-        sys.exit("GoSam terminated due to an error")
+    cached = False
 
-    return mod, mname
+    if mname in sys.modules:
+        logger.info(f"Model {mname} already cached -> skip reload")
+        mod = sys.modules[mname]
+        cached = True
+    else:
+        sys.path.append(model_path)
+
+        try:
+            fpath = search_path[0] + "/" + mname + "/__init__.py"
+            mod = load_source(mname, fpath)
+        except ImportError as exc:
+            logger.critical("Problem importing model file: %s" % exc)
+            sys.exit("GoSam terminated due to an error")
+
+    return mod, mname, cached
