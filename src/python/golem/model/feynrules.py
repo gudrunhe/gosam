@@ -775,24 +775,10 @@ class Model:
 
             if self.useCT:
                 types.update(self.cttypes)
-
                 logger.info("      Generating counter term function list ...")
                 _ = f.write("ctfunctions = {")
                 is_first = True
-                for name, value in list(functions.items()):
-                    expr = parser.compile(cast(str, value))
-                    for fn in cmath_functions:
-                        expr = expr.algsubs(
-                            ex.DotExpression(sym_cmath, fn),
-                            ex.SpecialExpression(str(fn)),
-                        )
-                    expr = expr.prefixSymbolsWith(self.prefix)
-                    expr = expr.replaceFloats(self.prefix + "float", fsubs, fcounter)
-                    expr = expr.algsubs(
-                        sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)), i_
-                    )
-                    expr = expr.algsubs(sym_abs, abs_)
-
+                for name, value in list(self.ctfunctions.items()):
                     if is_first:
                         is_first = False
                         _ = f.write("\n")
@@ -800,8 +786,8 @@ class Model:
                         _ = f.write(",\n")
                     _ = f.write("\t%r: " % name)
                     is_firstcf = True
-                    for pl, cf in cast(Mapping[int, str], value).items():
-                        expr = parser.compile(cf)
+                    for pl, cf in list(value.items()):
+                        expr = parser.compile(cast(str, cf))
                         for fn in cmath_functions:
                             expr = expr.algsubs(
                                 ex.DotExpression(sym_cmath, fn),
@@ -828,48 +814,6 @@ class Model:
                         _ = f.write("'")
                     _ = f.write("\n\t}")
                 _ = f.write("\n}\n\n")
-
-            # search for additional floats appearing in lorentz structures
-            if self.useCT:
-                logger.info("      Generating counter term function list ...")
-                f.write("ctfunctions = {")
-                is_first = True
-                for name, value in self.ctfunctions.items():
-                    if is_first:
-                        is_first = False
-                        f.write("\n")
-                    else:
-                        f.write(",\n")
-                    f.write("\t%r: " % name)
-                    is_firstcf = True
-                    for pl, cf in value.items():
-                        expr = parser.compile(cf)
-                        for fn in cmath_functions:
-                            expr = expr.algsubs(
-                                ex.DotExpression(sym_cmath, fn),
-                                ex.SpecialExpression(str(fn)),
-                            )
-                        expr = expr.prefixSymbolsWith(self.prefix)
-                        expr = expr.replaceFloats(
-                            self.prefix + "float", fsubs, fcounter
-                        )
-                        expr = expr.algsubs(
-                            sym_cmplx(ex.IntegerExpression(0), ex.IntegerExpression(1)),
-                            i_,
-                        )
-                        expr = expr.algsubs(sym_abs, abs_)
-
-                        if is_firstcf:
-                            is_firstcf = False
-                            f.write("{\n")
-                        else:
-                            f.write(",\n")
-                        f.write("\t\t%r: " % pl)
-                        f.write("'")
-                        expr.write(f)
-                        f.write("'")
-                    f.write("\n\t}")
-                f.write("\n}\n\n")
 
             # search for additional floats appearing in lorentz structures
             for lor in self.all_lorentz:
