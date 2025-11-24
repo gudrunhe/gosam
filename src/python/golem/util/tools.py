@@ -1003,11 +1003,11 @@ def optimize_model(
 
     if len(keep_vertices) > 0:
         logger.info(
-            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices: {keep_vertices}"
+            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices for process {conf['process_name']}: {keep_vertices}"
         )
     else:
         logger.warning(
-            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices -> Something might have gone wrong"
+            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices for process {conf['process_name']} -> Something might have gone wrong"
         )
 
     conf["keep_vertices"] = list(keep_vertices)
@@ -1054,7 +1054,7 @@ def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
 def extract_vertices(diagrams):
     vertices = set()
     if diagrams is not None:
-        for idx, diagram in list(diagrams.items()):
-            for v in diagram._vertices.values():
-                vertices.add(v.label)
+        for diagram in diagrams:
+            for v in diagram.vertices():
+                vertices.add(v.interaction().name())
     return vertices
