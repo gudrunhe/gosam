@@ -9,12 +9,15 @@ import textwrap
 from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 from copy import copy
 from types import ModuleType
-from typing import TextIO, TypeVar, cast, final, override
+from typing import Any, TextIO, TypeVar, cast, final, override
+
+import feyngraph as fg
 
 import golem.algorithms.helicity
 import golem.installation
 import golem.model
 import golem.properties
+import golem.util.constants
 from golem.installation import BIN_DIR, LIB_DIR
 from golem.model.particle import Particle
 from golem.util.config import GolemConfigError, Properties, Property
@@ -27,8 +30,8 @@ V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 
-POSTMORTEM_LOG = []
-POSTMORTEM_CFG = None
+POSTMORTEM_LOG: list[str] = []
+POSTMORTEM_CFG: None | Properties = None
 POSTMORTEM_DO = False
 
 
@@ -101,7 +104,7 @@ class DuplicationFilter(logging.Filter):
 
 @final
 class ColorFormatter(logging.Formatter):
-    def __init__(self, message: str, use_color: bool = True, **kwargs):
+    def __init__(self, message: str, use_color: bool = True, **kwargs: Any):
         super().__init__(message, **kwargs)
         self.use_color = use_color
         self.wrapper = CustomWrapper(
@@ -362,7 +365,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
     else:
         path = output_path
 
-    model_lst = cast(list[str], conf.getProperty(golem.properties.model))
+    model_lst = cast(list[str], conf.getProperty(cast(str, golem.properties.model)))
 
     logger.debug(f"Preparing model: {model_lst}")
 
@@ -424,8 +427,9 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                 model_path = os.path.join(rel_path, model_path)
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
-            golem.model.MODEL_OPTIONS["MSbaryukawa"] = conf.getProperty(
-                golem.properties.MSbar_yukawa
+            golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
+                list[str],
+                conf.getProperty(cast(Property, golem.properties.MSbar_yukawa)),
             )
             if conf.getBooleanProperty("optimized_import"):
                 # initial import of model; do not have any information on relevant vertices, yet
@@ -443,7 +447,12 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                     initial_import=True,
                     final_import=True,
                 )
-                order_names = sorted(conf.getProperty(golem.properties.order_names))
+                order_names = sorted(
+                    cast(
+                        list[str],
+                        conf.getProperty(cast(Property, golem.properties.order_names)),
+                    )
+                )
                 if order_names == [""]:
                     order_names = []
                 mdl.store(path, MODEL_LOCAL, order_names)
@@ -460,7 +469,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
             if model_name.isdigit():
                 # This is a CalcHEP model, needs to be converted.
                 logger.info("Importing CalcHep model files ...")
-                mdl = golem.model.calchep.Model(model_path, int(model_name))
+                mdl = golem.model.calchep.Model(model_path, model_name)
                 mdl.store(path, MODEL_LOCAL)
                 conf.setProperty("model_path", os.path.join(path, MODEL_LOCAL))
                 logger.info("Done with model import.")
@@ -565,7 +574,8 @@ def getModel(conf: Properties, extra_path: str | None = None) -> ModuleType:
         if conf["olp.ewscheme"] is not None and ew_supp:
             select_olp_EWScheme(conf)
         elif ew_supp and (
-            (conf["model.options"] is None) or "ewchoose" in conf["model.options"]
+            (conf["model.options"] is None)
+            or "ewchoose" in cast(list[str], conf["model.options"])
         ):
             golem.model.MODEL_OPTIONS["ewchoose"] = True
         elif conf["olp.ewscheme"] is not None and not ew_supp:
@@ -784,11 +794,11 @@ def process_path(conf: Properties) -> str:
 
 
 def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
-    authors = cast(dict[str, list[str]], golem.util.constants.AUTHORS)
-    former_authors = cast(dict[str, list[str]], golem.util.constants.FORMER_AUTHORS)
+    authors = golem.util.constants.AUTHORS
+    former_authors = golem.util.constants.FORMER_AUTHORS
     asciiart = cast(str, golem.util.constants.ASCIIART)
     asciiwidth = max(list(map(len, asciiart)))
-    clines = cast(list[str], golem.util.constants.CLINES)
+    clines = golem.util.constants.CLINES
 
     llines = ["AUTHORS:"]
 
@@ -840,7 +850,7 @@ def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
         else:
             yield PREFIX + " " + outl
 
-    for line in cast(list[str], golem.util.constants.LICENSE):
+    for line in golem.util.constants.LICENSE:
         ll = len(line) + len(PREFIX) + len(SUFFIX)
         if ll < WIDTH:
             ws = " " * (WIDTH - ll)
@@ -984,18 +994,23 @@ def load_source(mname: str, mpath: str) -> ModuleType:
 
 
 def optimize_model(
-    conf,
-    path,
-    lo_diagrams=None,
-    nlo_diagrams=None,
-    ct_diagrams=None,
-    olp=False,
-    sconf=dict(),
+    conf: Properties,
+    path: str,
+    lo_diagrams: fg.DiagramContainer | None = None,
+    nlo_diagrams: fg.DiagramContainer | None = None,
+    ct_diagrams: fg.DiagramContainer | None = None,
+    olp: bool = False,
+    sconf: Mapping[int, Properties] = dict(),
 ):
+    import golem.model.feynrules
+
+    keep_vertices: set[str]
     if olp:
         keep_vertices = set()
         for sp_conf in sconf.values():
-            keep_vertices.update(set(sp_conf.getListProperty("keep_vertices")))
+            keep_vertices.update(
+                set(cast(list[str], sp_conf.getListProperty("keep_vertices")))
+            )
     else:
         keep_vertices = extract_vertices_all(
             lo_diagrams, nlo_diagrams, ct_diagrams, conf
@@ -1013,28 +1028,35 @@ def optimize_model(
     conf["keep_vertices"] = list(keep_vertices)
 
     if conf.getBooleanProperty("__OLP_MODE__"):
-        model_path = conf["modeltype"]
+        model_path = cast(str, conf["modeltype"])
     else:
-        model_path = conf["model_path"]
+        model_path = cast(str, conf["model_path"])
     golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
-    golem.model.MODEL_OPTIONS["MSbaryukawa"] = conf.getProperty(
-        golem.properties.MSbar_yukawa
+    golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
+        list[str], conf.getProperty(cast(Property, golem.properties.MSbar_yukawa))
     )
     mdl = golem.model.feynrules.Model(
         model_path, golem.model.MODEL_OPTIONS, initial_import=False, final_import=True
     )
-    order_names = sorted(conf.getProperty(golem.properties.order_names))
+    order_names = sorted(
+        cast(list[str], conf.getProperty(cast(Property, golem.properties.order_names)))
+    )
     if order_names == [""]:
         order_names = []
-    MODEL_LOCAL = golem.util.constants.MODEL_LOCAL
+    MODEL_LOCAL = cast(str, golem.util.constants.MODEL_LOCAL)
     mdl.store(path, MODEL_LOCAL, order_names)
     # Remove model.py from cache so it will be reloaded:
     if MODEL_LOCAL in conf.cache:
         del conf.cache[MODEL_LOCAL]
 
 
-def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
-    keep_vertices = set()
+def extract_vertices_all(
+    lo_diagrams: None | fg.DiagramContainer,
+    nlo_diagrams: None | fg.DiagramContainer,
+    ct_diagrams: None | fg.DiagramContainer,
+    conf: Properties,
+):
+    keep_vertices: set[str] = set()
 
     if conf.getBooleanProperty("generate_tree_diagrams") or conf.getBooleanProperty(
         "generate_eft_loopind"
@@ -1051,10 +1073,9 @@ def extract_vertices_all(lo_diagrams, nlo_diagrams, ct_diagrams, conf):
     return keep_vertices
 
 
-def extract_vertices(diagrams):
-    vertices = set()
+def extract_vertices(diagrams: None | fg.DiagramContainer):
+    vertices: set[str] = set()
     if diagrams is not None:
-        for diagram in diagrams:
-            for v in diagram.vertices():
-                vertices.add(v.interaction().name())
+        for d in diagrams:
+            vertices |= set(v.interaction().name() for v in d.vertices())
     return vertices

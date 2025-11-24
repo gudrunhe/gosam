@@ -4,12 +4,22 @@ import os
 import re
 import shutil
 import sys
+from collections.abc import Callable, Sequence
+from types import ModuleType
+from typing import Any, TextIO, cast, final
 
 import golem
-import golem.installation
+import golem.model
+import golem.properties
+import golem.util.constants
+import golem.util.main_misc
+import golem.util.olp_objects
+import golem.util.olp_options
 import golem.util.tools
+from golem.installation import GOLEM_REVISION, GOLEM_VERSION
 from golem.model import update_zero
-from golem.util.config import GolemConfigError
+from golem.model.particle import Particle
+from golem.util.config import GolemConfigError, Properties, PropValue, split_power
 from golem.util.main_misc import fill_config
 
 try:
@@ -22,19 +32,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@final
 class OLPSubprocess:
-    def __init__(self, id, process_name, process_path, p_ini, p_fin, key, conf):
+    def __init__(
+        self,
+        id: int,
+        process_name: str,
+        process_path: str,
+        p_ini: list[Particle],
+        p_fin: list[Particle],
+        key: Sequence[str | int],
+        conf: Properties,
+    ):
         self.id = id
         self.process_name = process_name
         self.process_path = process_path
         self.p_ini = p_ini
         self.p_fin = p_fin
-        self.crossings = {}
-        self.crossings_conf = {}
-        self.crossings_p_ini = {}
-        self.crossings_p_fin = {}
+        self.crossings: dict[str, str] = {}
+        self.crossings_conf: dict[int, Properties] = {}
+        self.crossings_p_ini: dict[int, list[Particle]] = {}
+        self.crossings_p_fin: dict[int, list[Particle]] = {}
         self.ids = {id: process_name}
-        self.channels = {}
+        self.channels: dict[int, list[int]] = {}
         self.key = key
         self.conf = conf
         self.crossings_conf[id] = conf
@@ -45,7 +65,14 @@ class OLPSubprocess:
         self.num_helicities = -1
         self.generated_helicities = []
 
-    def addCrossing(self, id, process_name, p_ini, p_fin, conf):
+    def addCrossing(
+        self,
+        id: int,
+        process_name: str,
+        p_ini: list[Particle],
+        p_fin: list[Particle],
+        conf: Properties,
+    ):
         self.crossings[process_name] = "%s > %s" % (
             " ".join(map(str, p_ini)),
             " ".join(map(str, p_fin)),
@@ -55,7 +82,7 @@ class OLPSubprocess:
         self.crossings_p_ini[id] = p_ini
         self.crossings_p_fin[id] = p_fin
 
-    def removeCrossing(self, id):
+    def removeCrossing(self, id: int):
         self.crossings.pop(self.ids.pop(id))
         self.crossings_conf.pop(id)
         self.crossings_p_ini.pop(id)
@@ -68,10 +95,10 @@ class OLPSubprocess:
         self.crossings_p_ini = {self.id: self.p_ini}
         self.crossings_p_fin = {self.id: self.p_fin}
 
-    def assignChannels(self, id, channels):
+    def assignChannels(self, id: int, channels: list[int]):
         self.channels[id] = channels
 
-    def assignNumberHelicities(self, nh, gh):
+    def assignNumberHelicities(self, nh: int, gh: list[int]):
         self.num_helicities = nh
         self.generated_helicities = gh
 
@@ -81,7 +108,7 @@ class OLPSubprocess:
     def getIDs(self):
         return list(self.ids.keys())
 
-    def getIDConf(self, id):
+    def getIDConf(self, id: int):
         return self.crossings_conf[id]
 
     def __str__(self):
@@ -90,13 +117,13 @@ class OLPSubprocess:
     def __int__(self):
         return self.id
 
-    def getPath(self, path=None):
+    def getPath(self, path: str | None = None):
         if path is None:
             return self.process_path
         else:
             return os.path.join(path, self.process_path)
 
-    def getConf(self, conf, path, base=None):
+    def getConf(self, conf: Properties, path: str, base: None | Properties = None):
         if base:
             subproc_conf = base.copy()
         else:
@@ -117,29 +144,37 @@ class OLPSubprocess:
 
 
 def getSubprocess(
-    olpname, id, inp, out, subprocesses, subprocesses_flav, model, use_crossings, conf
-):
-    def getparticle(name):
+    olpname: str,
+    id: int,
+    inp: list[str],
+    out: list[str],
+    subprocesses: dict[tuple[str | int, ...], OLPSubprocess],
+    _subprocesses_flav: dict[tuple[str | int, ...], OLPSubprocess],
+    model: ModuleType,
+    use_crossings: bool,
+    conf: Properties,
+) -> tuple[OLPSubprocess, bool]:
+    def getparticle(name: str):
         return golem.util.tools.interpret_particle_name(name, model)
 
     p_ini = list(map(getparticle, inp))
     p_fin = list(map(getparticle, out))
 
     # replace special characters by placeholders, so the particle names can be used by other code
-    replace_specials = {"~":"__tilde__", "+":"__plus__", "-":"__minus__"}
+    replace_specials = {"~": "__tilde__", "+": "__plus__", "-": "__minus__"}
 
-    s_ini = []
-    s_fin = []
+    s_ini: list[str] = []
+    s_fin: list[str] = []
 
     for p in p_ini:
         s = str(p)
-        for k,v in replace_specials.items():
-            s = s.replace(k,v)
+        for k, v in replace_specials.items():
+            s = s.replace(k, v)
         s_ini.append(s)
     for p in p_fin:
         s = str(p)
-        for k,v in replace_specials.items():
-            s = s.replace(k,v)
+        for k, v in replace_specials.items():
+            s = s.replace(k, v)
         s_fin.append(s)
 
     if len(olpname) > 0:
@@ -184,9 +219,11 @@ def getSubprocess(
     return sp, is_new
 
 
-def get_sp_key(p_ini, p_fin, use_crossings, conf):
+def get_sp_key(
+    p_ini: list[Particle], p_fin: list[Particle], use_crossings: bool, conf: Properties
+) -> tuple[str, ...]:
     if use_crossings:
-        pflvgrps = conf.getProperty(golem.properties.flavour_groups)
+        pflvgrps = cast(list[str], conf.getProperty(golem.properties.flavour_groups))
         if pflvgrps != [] and pflvgrps != [""]:
             # The following piece of code constructs the channel key respecting
             # the given flavour groups/classes. Nested structure needed to deal
@@ -194,8 +231,8 @@ def get_sp_key(p_ini, p_fin, use_crossings, conf):
 
             # translate flavour_groups property into list of list -> flvgrps
             # set up dictionary to translate pdg codes into flavour group identifiers -> flvgrps_dict
-            flvgrps = []
-            flvgrps_dict = {}
+            flvgrps: list[list[int]] = []
+            flvgrps_dict: dict[int, tuple[int, str]] = {}
             for i, fg in enumerate(pflvgrps):
                 if fg == "":
                     break
@@ -216,7 +253,7 @@ def get_sp_key(p_ini, p_fin, use_crossings, conf):
             gen_key = [0, 0, 0]
 
             k = [1 for _ in range(len(pflvgrps))]
-            key_fg = [None for _ in range(len(pdg_proc))]
+            key_fg: list[str | None] = [None for _ in range(len(pdg_proc))]
             skip = [False for _ in range(len(pdg_proc))]
             for i, pi in enumerate(pdg_proc):
                 if skip[i]:
@@ -265,7 +302,7 @@ def get_sp_key(p_ini, p_fin, use_crossings, conf):
             gen_key.sort()
             conf["gen_key"] = gen_key
 
-            key = tuple(sorted(key_fg))
+            key = tuple(sorted(cast(list[str], key_fg)))
         else:
             key = tuple(sorted(list(map(str, p_ini)) + [p.getPartner() for p in p_fin]))
     else:
@@ -274,43 +311,44 @@ def get_sp_key(p_ini, p_fin, use_crossings, conf):
     return key
 
 
-def is_config_compatible(conf1, conf2):
+def is_config_compatible(conf1: Properties, conf2: Properties) -> bool:
     """Checks if a subprocess with conf2 can be a crossing of conf1"""
-    special = {
+    special: dict[str, Callable[[str, str], bool]] = {
         "olp.amplitudetype": (lambda a, b: True),  # => ignored
         "olp.no_loop_level": (lambda a, b: True),  # => ignored
         "order": (lambda a, b: a.startswith(b) or b.startswith(a)),
     }
     for i in conf1:
-        if not i in conf2 or conf1[i] != conf2[i]:
-            bval = conf2[i] if i in conf2 else ""
+        if i not in conf2 or conf1[i] != conf2[i]:
+            bval = str(conf2[i]) if i in conf2 else ""
             if i in special:
-                if special[i](conf1[i], bval):
+                if special[i](str(conf1[i]), bval):
                     continue
             return False
     for i in conf2:
-        if not i in conf1:
+        if i not in conf1:
             if i in special:
-                if special[i]("", conf2[i]):
+                if special[i]("", str(conf2[i])):
                     continue
             return False
     return True
 
 
-def adapt_config(conf1, conf2):
+def adapt_config(conf1: Properties, conf2: Properties):
     """Adapt the configuration conf1 of a subprocess
     that a subprocess with conf2 can be a crossing of it."""
-    conf1["olp.no_tree_level"] = (
-        conf1["olp.no_tree_level"] and conf2["olp.no_tree_level"]
+    conf1["olp.no_tree_level"] = cast(PropValue, conf1["olp.no_tree_level"]) and cast(
+        PropValue, conf2["olp.no_tree_level"]
     )
-    conf1["olp.no_loop_level"] = (
-        conf1["olp.no_loop_level"] and conf2["olp.no_loop_level"]
+    conf1["olp.no_loop_level"] = cast(PropValue, conf1["olp.no_loop_level"]) and cast(
+        PropValue, conf2["olp.no_loop_level"]
     )
-    conf1["order"] = max(conf1["order"], conf2["order"])  # take longest
-    return True
+    conf1["order"] = max(
+        cast(str, conf1["order"]), cast(str, conf2["order"])
+    )  # take longest
 
 
-def derive_output_name(input_name, pattern, dest_dir=None):
+def derive_output_name(input_name: str, pattern: str, dest_dir: str | None = None):
     path, file = os.path.split(input_name)
     if dest_dir is not None:
         path = dest_dir
@@ -327,7 +365,9 @@ def derive_output_name(input_name, pattern, dest_dir=None):
     return output_name
 
 
-def derive_coupling_names(model_path, conf):
+def derive_coupling_names(
+    model_path: str | None, conf: Properties
+) -> tuple[str, str, list[str]]:
     """
     Return a triple (qcd_name, qed_name, all_couplings):
 
@@ -347,9 +387,9 @@ def derive_coupling_names(model_path, conf):
     mod = golem.util.tools.getModel(conf, model_path)
     # ---#] Load model file as module:
 
-    strong_couplings_found = {}
-    weak_couplings_found = {}
-    candidates = []
+    strong_couplings_found: dict[str, str] = {}
+    weak_couplings_found: dict[str, str] = {}
+    candidates: list[str] = []
 
     for param in mod.types.keys():
         if param.startswith("mdl"):
@@ -363,6 +403,7 @@ def derive_coupling_names(model_path, conf):
         else:
             candidates.append(canonical_name)
 
+    qcd_name = None
     if len(strong_couplings_found) == 0:
         logger.critical(
             "Invalid model file: cannot determine name of strong coupling.\n"
@@ -376,6 +417,7 @@ def derive_coupling_names(model_path, conf):
                 qcd_name = strong_couplings_found[name]
                 break
 
+    qed_name = None
     if len(weak_couplings_found) == 0:
         logger.critical(
             "Invalid model file: cannot determine name of weak coupling.",
@@ -392,10 +434,10 @@ def derive_coupling_names(model_path, conf):
         weak_couplings_found.values()
     )
 
-    return qcd_name, qed_name, all_couplings
+    return cast(str, qcd_name), cast(str, qed_name), all_couplings
 
 
-def get_power(conf):
+def get_power(conf: Properties) -> list[str | int]:
     """
     Returns two lists:
        list of length three: [coupling_name, born_power, virt_power]
@@ -403,8 +445,8 @@ def get_power(conf):
 
     If the list is empty the process is not specified unambiguously.
     """
-    alpha_power = conf.getProperty("olp.alphapower", default=None)
-    alphas_power = conf.getProperty("olp.alphaspower", default=None)
+    alpha_power = cast(int | None, conf.getProperty("olp.alphapower", default=None))
+    alphas_power = cast(int | None, conf.getProperty("olp.alphaspower", default=None))
     correction_type = conf.getProperty("olp.correctiontype", default=None)
     notreelevel = conf.getBooleanProperty("olp.no_tree_level", default=False)
     nolooplevel = conf.getBooleanProperty("olp.no_loop_level", default=False)
@@ -493,14 +535,16 @@ def get_power(conf):
     return [*qcd_powers, *ew_powers]
 
 
-def derive_zero_masses(model_path, slha_file, conf):
+def derive_zero_masses(
+    model_path: str | None, slha_file: str, conf: Properties
+) -> list[str]:
     mod_params = golem.util.olp_objects.SUSYLesHouchesFile(slha_file)
     # ---#[ Load model file as module:
     mod = golem.util.tools.getModel(conf, model_path)
     # ---#] Load model file as module:
 
-    result = []
-    for name, part in mod.particles.items():
+    result: list[str] = []
+    for _, part in cast(dict[str, Particle], mod.particles).items():
         mass = part.getMass().strip()
         if mass in mod.slha_locations:
             block, coords = mod.slha_locations[mass]
@@ -515,29 +559,29 @@ def derive_zero_masses(model_path, slha_file, conf):
 
 
 def handle_subprocess(
-    conf,
-    subprocess,
-    subprocess_key,
-    subprocesses_conf,
-    path,
-    from_scratch,
-    use_crossings,
-    contract_file,
-):
-    helicities = {}
-    subprocesses = {}
-    subprocesses_conf_short = {}
+    conf: Properties,
+    subprocess: OLPSubprocess,
+    subprocess_key: tuple[str | int, ...],
+    subprocesses_conf: list[Properties],
+    path: str,
+    from_scratch: bool,
+    use_crossings: bool,
+    _contract_file: golem.util.olp_objects.OLPContractFile,
+) -> tuple[
+    dict[tuple[int | str, ...], OLPSubprocess], dict[int, Any], dict[int, Properties]
+]:
+    helicities: dict[int, Any] = {}
+    subprocesses: dict[tuple[int | str, ...], OLPSubprocess] = {}
+    subprocesses_conf_short: dict[int, Properties] = {}
 
-    GOLEM_FULL = "GoSam %s" % ".".join(map(str, golem.installation.GOLEM_VERSION))
+    GOLEM_FULL = "GoSam %s" % ".".join(map(str, GOLEM_VERSION))
 
     process_path = subprocess.getPath(path)
     subprocess_conf = subprocess.getConf(subprocesses_conf[int(subprocess)], path)
     subprocess_conf["golem.name"] = "GoSam"
-    subprocess_conf["golem.version"] = ".".join(
-        map(str, golem.installation.GOLEM_VERSION)
-    )
+    subprocess_conf["golem.version"] = ".".join(map(str, GOLEM_VERSION))
     subprocess_conf["golem.full-name"] = GOLEM_FULL
-    subprocess_conf["golem.revision"] = golem.installation.GOLEM_REVISION
+    subprocess_conf["golem.revision"] = GOLEM_REVISION
 
     golem.util.tools.POSTMORTEM_CFG = subprocess_conf
 
@@ -551,7 +595,7 @@ def handle_subprocess(
 
         if use_crossings and any(
             [
-                kw in subprocess_conf.getProperty(fltr)
+                kw in cast(str, subprocess_conf.getProperty(fltr))
                 if subprocess_conf.getProperty(fltr)
                 else False
                 for fltr in ["filter.lo", "filter.nlo"]
@@ -595,11 +639,9 @@ def handle_subprocess(
 
                     sp_conf = sp.getConf(subprocesses_conf[int(sp)], path)
                     sp_conf["golem.name"] = "GoSam"
-                    sp_conf["golem.version"] = ".".join(
-                        map(str, golem.installation.GOLEM_VERSION)
-                    )
+                    sp_conf["golem.version"] = ".".join(map(str, GOLEM_VERSION))
                     sp_conf["golem.full-name"] = GOLEM_FULL
-                    sp_conf["golem.revision"] = golem.installation.GOLEM_REVISION
+                    sp_conf["golem.revision"] = GOLEM_REVISION
 
                     golem.util.tools.POSTMORTEM_CFG = sp_conf
 
@@ -633,7 +675,7 @@ def handle_subprocess(
                             if subprocess_conf.getBooleanProperty("veto_crossings"):
                                 if not parent_subprocess:
                                     parent_subprocess = sp
-                                    parent_key = key
+                                    parent_key = cast(tuple[str | int, ...], key)
                                     keep_subprocess = False
                                 else:
                                     parent_subprocess.addCrossing(
@@ -645,7 +687,7 @@ def handle_subprocess(
                                     )
                                 subprocess.removeCrossing(sp.id)
 
-                    except golem.util.config.GolemConfigError as err:
+                    except GolemConfigError as err:
                         logger.critical("Configuration file is not sound:" + str(err))
                         sys.exit("GoSam terminated due to an error")
 
@@ -656,11 +698,9 @@ def handle_subprocess(
                 subprocesses_conf[int(subprocess)], path
             )
             subprocess_conf["golem.name"] = "GoSam"
-            subprocess_conf["golem.version"] = ".".join(
-                map(str, golem.installation.GOLEM_VERSION)
-            )
+            subprocess_conf["golem.version"] = ".".join(map(str, GOLEM_VERSION))
             subprocess_conf["golem.full-name"] = GOLEM_FULL
-            subprocess_conf["golem.revision"] = golem.installation.GOLEM_REVISION
+            subprocess_conf["golem.revision"] = GOLEM_REVISION
             golem.util.main_misc.workflow(subprocess_conf)
             golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch)
             # Regenerate process files for new parent subprocess if it exists
@@ -672,11 +712,9 @@ def handle_subprocess(
                     subprocesses_conf[int(parent_subprocess)], path
                 )
                 parent_conf["golem.name"] = "GoSam"
-                parent_conf["golem.version"] = ".".join(
-                    map(str, golem.installation.GOLEM_VERSION)
-                )
+                parent_conf["golem.version"] = ".".join(map(str, GOLEM_VERSION))
                 parent_conf["golem.full-name"] = GOLEM_FULL
-                parent_conf["golem.revision"] = golem.installation.GOLEM_REVISION
+                parent_conf["golem.revision"] = GOLEM_REVISION
                 golem.util.main_misc.workflow(parent_conf)
                 golem.util.main_misc.generate_process_files(parent_conf, from_scratch)
                 helicities[parent_subprocess.id] = list(
@@ -684,13 +722,15 @@ def handle_subprocess(
                 )
 
                 subprocesses_conf_short[parent_subprocess.id] = parent_conf
-                subprocesses[parent_key] = parent_subprocess
+                subprocesses[cast(tuple[str | int, ...], parent_key)] = (
+                    parent_subprocess
+                )
 
         helicities[subprocess.id] = list(
             golem.util.tools.enumerate_and_reduce_helicities(subprocess_conf)
         )
 
-    except golem.util.config.GolemConfigError as err:
+    except GolemConfigError as err:
         logger.critical("Configuration file is not sound:" + str(err))
         sys.exit("GoSam terminated due to an error")
 
@@ -701,29 +741,21 @@ def handle_subprocess(
 
 
 def process_order_file(
-    order_file_name,
-    f_contract,
-    path,
-    default_conf,
-    templates=None,
-    ignore_case=False,
-    ignore_unknown=False,
-    from_scratch=False,
-    mc_name="any",
-    use_crossings=True,
-    **opts,
+    order_file_name: str,
+    f_contract: TextIO,
+    path: str,
+    default_conf: Properties,
+    templates: str | None = None,
+    ignore_case: bool = False,
+    ignore_unknown: bool = False,
+    from_scratch: bool = False,
+    mc_name: str = "any",
+    use_crossings: bool = True,
+    **opts: bool,
 ) -> int:
-    def getquarktype(quark):
-        # keep only first capital letter
-        # trick to transform anti-quarks in quarks
-        if list(quark)[0].isupper():
-            return list(quark)[0]
-        else:
-            return quark
-
     syntax_extensions = ["single_quotes", "double_quotes", "backslash_escape"]
 
-    extensions = {}
+    extensions: dict[str, bool] = {}
     for ex in syntax_extensions:
         if ex in opts:
             extensions[ex] = opts[ex]
@@ -731,34 +763,35 @@ def process_order_file(
             extensions[ex] = False
 
     logger.debug("Processing order file at %r" % order_file_name)
-    GOLEM_FULL = "GoSam %s" % ".".join(map(str, golem.installation.GOLEM_VERSION))
+    GOLEM_FULL = "GoSam %s" % ".".join(map(str, GOLEM_VERSION))
     result = 0
 
-    conf = golem.util.config.Properties()
+    conf = Properties()
     conf += default_conf
 
     # check if any model.options are set in the config file (before filling in the defaults)
     config_model_options = conf.getListProperty("model.options") != []
     conf.setProperty("olp.config_model_options", config_model_options)
 
-    try:
-        config_ir_scheme = default_conf["regularisation_scheme"].upper()
-    except AttributeError:
+    if "regularisation_scheme" in default_conf:
+        config_ir_scheme = cast(str, default_conf["regularisation_scheme"]).upper()
+    else:
         config_ir_scheme = None
 
     ext_ir_scheme = None
-    if "dred" in default_conf["extensions"] and "thv" in default_conf["extensions"]:
+    cfg_extensions = cast(list[str], default_conf["extensions"])
+    if "dred" in cfg_extensions and "thv" in cfg_extensions:
         logger.critical(
             "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
         )
         sys.exit("GoSam terminated due to an error")
-    if "dred" in default_conf["extensions"]:
+    if "dred" in cfg_extensions:
         ext_ir_scheme = "DRED"
-    if "thv" in default_conf["extensions"]:
+    if "thv" in cfg_extensions:
         ext_ir_scheme = "THV"
 
     # check consistency of regularisation schemes in setup file (if present)
-    if config_ir_scheme != None and ext_ir_scheme != None:
+    if config_ir_scheme is not None and ext_ir_scheme is not None:
         if config_ir_scheme != ext_ir_scheme:
             logger.critical(
                 "Incompatible settings between regularisation_scheme and extensions: "
@@ -767,7 +800,7 @@ def process_order_file(
             sys.exit("GoSam terminated due to an error")
 
     if "olp_process_name" in opts:
-        olp_process_name = opts["olp_process_name"].strip().lower()
+        olp_process_name = cast(str, opts["olp_process_name"]).strip().lower()
     else:
         olp_process_name = ""
 
@@ -790,7 +823,7 @@ def process_order_file(
 
     mc_specials(conf, order_file)
 
-    for pi_key in conf.getListProperty("mc_specials.keys"):
+    for pi_key in cast(list[str], conf.getListProperty("mc_specials.keys")):
         if pi_key == "":
             continue
         if pi_key in default_conf:
@@ -814,18 +847,20 @@ def process_order_file(
         key = pi_key.removeprefix("mc_specials")
         if key == "extensions":
             conf["extensions"] = (
-                conf["mc_specials.extensions"]
+                cast(str, conf["mc_specials.extensions"])
                 if conf["extensions"] == ""
-                else conf[extensions] + "," + conf["mc_specials.extensions"]
+                else cast(str, conf["extensions"])
+                + ","
+                + cast(str, conf["mc_specials.extensions"])
             )
         else:
-            conf[key] = conf["mc_specials." + pi_key]
+            conf[key] = cast(str, conf["mc_specials." + pi_key])
         conf._del("mc_specials." + pi_key)
 
     contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
     tmp_contract_file = golem.util.olp_objects.OLPContractFile(order_file)
-    subprocesses_conf = []
+    subprocesses_conf: list[Properties] = []
 
     conf.setProperty("setup-file", order_file_name)
     orig_conf = conf.copy()
@@ -857,7 +892,10 @@ def process_order_file(
             os.mkdir(imodel_path)
         for lconf in [conf] + subprocesses_conf:
             # before preparing the model files we need to initialize 'optimized_import' to its default when not set in config
-            lconf.setProperty("optimized_import", lconf.getProperty(golem.properties.optimized_import))
+            lconf.setProperty(
+                "optimized_import",
+                cast(PropValue, lconf.getProperty(golem.properties.optimized_import)),
+            )
             golem.util.tools.prepare_model_files(lconf, imodel_path)
 
             lconf["modeltype"] = lconf.getListProperty("model")[-1]
@@ -865,7 +903,7 @@ def process_order_file(
             lconf["model"] = os.path.join(imodel_path, golem.util.constants.MODEL_LOCAL)
         # ---#] Import model file once for all subprocesses:
         # ---#[ Constrain masses:
-        model_file = conf["olp.modelfile"]
+        model_file = cast(str | None, conf["olp.modelfile"])
         if model_file is not None:
             zero_masses = derive_zero_masses(imodel_path, model_file, conf)
             zero = golem.util.tools.getZeroes(conf)
@@ -882,18 +920,20 @@ def process_order_file(
         for p in golem.properties.properties:
             if (
                 model_conf.getProperty(p)
-                or model_conf.getProperty(p) == False
+                or not model_conf.getProperty(p)
                 or model_conf.getProperty(p) == 0
             ):
                 # Note that 'False'and '0' are actually valid values. We want to skip falsy values like [], " ", None, etc.
-                model_conf.setProperty(str(p), model_conf.getProperty(p))
+                model_conf.setProperty(
+                    str(p), cast(PropValue, model_conf.getProperty(p))
+                )
 
         model = golem.util.tools.getModel(model_conf, imodel_path)
 
         # zero property: convert masses and width defined through PDG code to internal parameter name
         # (depends on model, so model.py must have been created already)
-        orig_zero = conf.getListProperty("zero")
-        new_zero = []
+        orig_zero = cast(list[str], conf.getListProperty("zero"))
+        new_zero: list[str] = []
         for z in orig_zero:
             massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
             if massmatch:
@@ -928,8 +968,8 @@ def process_order_file(
         # property to avoid erroneous code generation. Otherwise the user has to remember
         # to add these cases to 'zero' manually.
         if not conf.getBooleanProperty("massive_light_fermions"):
-            zeros = conf.getListProperty("zero")
-            for p in model.particles.values():
+            zeros = cast(list[str], conf.getListProperty("zero"))
+            for p in cast(dict[str, Particle], model.particles).values():
                 if p.isMassive(zeros):
                     m = p.getMass(zeros)
                     try:
@@ -953,9 +993,9 @@ def process_order_file(
 
         # ---#[ Setup excluded and massive particles :
         for lconf in [conf] + subprocesses_conf:
-            list_exclude = []
+            list_exclude: list[str] = []
             for i in (
-                [int(p) for p in lconf["__excludedParticles__"].split()]
+                [int(p) for p in cast(str, lconf["__excludedParticles__"]).split()]
                 if lconf["__excludedParticles__"]
                 else []
             ):
@@ -967,8 +1007,10 @@ def process_order_file(
                 if not lconf["filter.particles"]:
                     lconf["filter.particles"] = ",".join(f"{p}:0" for p in list_exclude)
                 else:
-                    lconf["filter.particles"] += "," + ",".join(
-                        f"{p}:0" for p in list_exclude
+                    lconf["filter.particles"] = (
+                        cast(str, lconf["filter.particles"])
+                        + ","
+                        + ",".join(f"{p}:0" for p in list_exclude)
                     )
 
             lconf["__excludedParticles__"] = None
@@ -1025,9 +1067,7 @@ def process_order_file(
         # ---#[ Setup couplings :
 
         for lconf in [conf] + subprocesses_conf:
-            qcd_name, qed_name, all_couplings = derive_coupling_names(
-                imodel_path, lconf
-            )
+            _, _, all_couplings = derive_coupling_names(imodel_path, lconf)
             coupling_power = get_power(lconf)
 
             if len(coupling_power) == 0:
@@ -1053,7 +1093,7 @@ def process_order_file(
                 strip_couplings = False
 
             if strip_couplings:
-                ones = lconf.getListProperty(golem.properties.one)
+                ones = cast(list[str], lconf.getListProperty(golem.properties.one))
                 for coupling in all_couplings:
                     if coupling not in ones:
                         ones.append(coupling)
@@ -1085,8 +1125,8 @@ def process_order_file(
             # DRED | regularisation_scheme=thv    | mismatch -> ERROR (terminate)
             # DRED | thv in extensions            | mismatch -> ERROR (terminate)
 
-            ir_scheme = lconf["olp.irregularisation"].upper()
-            ext = lconf.getListProperty(golem.properties.extensions)
+            ir_scheme = cast(str, lconf["olp.irregularisation"]).upper()
+            ext = cast(list[str], lconf.getListProperty(golem.properties.extensions))
             uext = [s.upper() for s in ext]
 
             # check BLHA regularisation scheme vs regularisation_scheme or extensions in setup file (if present)
@@ -1100,11 +1140,11 @@ def process_order_file(
                 )
                 ir_scheme = "THV"
 
-            if config_ir_scheme != None:
+            if config_ir_scheme is not None:
                 if config_ir_scheme != ir_scheme:
                     mismatch_schemes = [True, config_ir_scheme]
 
-            if ext_ir_scheme != None:
+            if ext_ir_scheme is not None:
                 if ext_ir_scheme != ir_scheme:
                     mismatch_schemes = [True, ext_ir_scheme]
 
@@ -1121,7 +1161,7 @@ def process_order_file(
                 if "DRED" not in uext:
                     lconf["olp." + str(golem.properties.extensions)] = "DRED"
             elif ir_scheme == "THV":
-                if config_ir_scheme == None and ext_ir_scheme == None:
+                if config_ir_scheme is None and ext_ir_scheme is None:
                     if "DRED" not in uext:
                         lconf["olp." + str(golem.properties.extensions)] = "DRED"
                     lconf["convert_to_thv"] = True
@@ -1138,18 +1178,23 @@ def process_order_file(
     fill_config(conf)
 
     # ---#[ Iterate over subprocesses:
-    subdivide = conf.getProperty("olp.subdivide", "no").lower() in ["yes", "true", "1"]
-    channels = {}
+    subdivide = cast(str, conf.getProperty("olp.subdivide", "no")).lower() in [
+        "yes",
+        "true",
+        "1",
+    ]
+    channels: dict[int, list[int]] = {}
     chelis = {}
-    helicities = {}
+    helicities: dict[int, Any] = {}
     max_occupied_channel = -1
-    subprocesses = {}
-    subprocesses_flav = {}
+    subprocesses: dict[tuple[str | int, ...], OLPSubprocess] = {}
+    subprocesses_flav: dict[tuple[str | int, ...], OLPSubprocess] = {}
 
-    subprocesses_conf_short = {}
+    subprocesses_conf_short: dict[int, Properties] = {}
 
     if file_ok:
-        for lineno, id, inp, outp in contract_file.processes_ordered():
+        assert model
+        for _, id, inp, outp in contract_file.processes_ordered():
             subprocess, is_new = getSubprocess(
                 olp_process_name,
                 id,
@@ -1173,9 +1218,6 @@ def process_order_file(
                         sys.exit("GoSam terminated due to an error")
 
         # Now we run the loop again since all required crossings are added
-
-        # store initial symmetries infos
-        start_symmetries = conf["symmetries"]
 
         if (
             False
@@ -1222,9 +1264,10 @@ def process_order_file(
 
         for sp in list(subprocesses.values()):
             for sp_id in sp.getIDs():
-                generated_helicities = [
-                    t[0] for t in [t for t in helicities[sp.id] if t[1] is None]
-                ]
+                generated_helicities = cast(
+                    list[int],
+                    [t[0] for t in [t for t in helicities[sp.id] if t[1] is None]],
+                )
                 chelis[sp_id] = len(helicities[sp.id])
                 if subdivide:
                     num_channels = len(helicities[sp.id])
@@ -1237,16 +1280,14 @@ def process_order_file(
                     channel = max_occupied_channel
                     channels[sp_id] = [channel]
 
-                contract_file.setProcessResponse(sp_id, channels[sp_id])
+                contract_file.setProcessResponse(sp_id, list(map(str, channels[sp_id])))
                 sp.assignChannels(sp_id, channels[sp_id])
                 sp.assignNumberHelicities(len(helicities[sp.id]), generated_helicities)
 
     # ---#] Iterate over subprocesses:
     # ---#[ Write output file:
     f_contract.write("# vim: syntax=olp\n")
-    f_contract.write(
-        "#@OLP GoSam %s\n" % ".".join(map(str, golem.installation.GOLEM_VERSION))
-    )
+    f_contract.write("#@OLP GoSam %s\n" % ".".join(map(str, GOLEM_VERSION)))
     f_contract.write("#@IgnoreUnknown %s\n" % ignore_unknown)
     f_contract.write("#@IgnoreCase %s\n" % ignore_case)
     f_contract.write(
@@ -1279,18 +1320,14 @@ def process_order_file(
 
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:
-        if (
-            conf.getProperty(p)
-            or conf.getProperty(p) == False
-            or conf.getProperty(p) == 0
-        ):
+        if conf.getProperty(p) or not conf.getProperty(p) or conf.getProperty(p) == 0:
             # Note that 'False'and '0' are actually valid values a property can be set to.
-            conf.setProperty(str(p), conf.getProperty(p))
+            conf.setProperty(str(p), cast(PropValue, conf.getProperty(p)))
         else:
             # this catches all falsy values like [], None, " ", etc., which mean
             # the property is not set yet. But not '0' and the acual bool 'False',
             # which we checked for above, since those ARE possible values for a property.
-            conf.setProperty(str(p), p.getDefault())
+            conf.setProperty(str(p), cast(PropValue, p.getDefault()))
 
     ##################################################################################
     #   ATTENTION!!!
@@ -1311,15 +1348,17 @@ def process_order_file(
 
     # ---#[ Fill in information needed by the main config to generate the common source files
     conf["golem.name"] = "GoSam"
-    conf["golem.version"] = ".".join(map(str, golem.installation.GOLEM_VERSION))
+    conf["golem.version"] = ".".join(map(str, GOLEM_VERSION))
     conf["golem.full-name"] = GOLEM_FULL
-    conf["golem.revision"] = golem.installation.GOLEM_REVISION
+    conf["golem.revision"] = GOLEM_REVISION
 
-    orders = golem.util.config.split_power(
+    orders = split_power(
         ",".join(map(str, conf.getListProperty(golem.properties.coupling_power)))
     )
     powers = orders[0] if orders else []
 
+    generate_tree_diagrams = False
+    generate_loop_diagrams = False
     if len(powers) == 2:
         generate_tree_diagrams = True
         generate_loop_diagrams = False
@@ -1338,11 +1377,18 @@ def process_order_file(
     # ---] Fill in information needed by the main config to generate the common source files
 
     # ---[ Optimize common model files (in case of UFO model and optimized_import=True)
-    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty("optimized_import"):
-        golem.util.tools.optimize_model(conf, os.path.dirname(conf["model"]), olp=True, sconf=subprocesses_conf_short)
+    if conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty(
+        "optimized_import"
+    ):
+        golem.util.tools.optimize_model(
+            conf,
+            os.path.dirname(cast(str, conf["model"])),
+            olp=True,
+            sconf=subprocesses_conf_short,
+        )
         # Reload model:
-        _  = golem.util.tools.getModel(conf, imodel_path)
-    # ---] Optimize common model files        
+        _ = golem.util.tools.getModel(conf, os.path.join(path, "model"))
+    # ---] Optimize common model files
 
     golem.templates.xmltemplates.transform_templates(
         templates,
@@ -1362,8 +1408,8 @@ def process_order_file(
     return result
 
 
-def mc_specials(conf, order_file):
-    pi_keys = []
+def mc_specials(conf: Properties, order_file: golem.util.olp_objects.OLPOrderFile):
+    pi_keys: list[str] = []
     for pi in order_file.processing_instructions():
         pi_parts = pi.strip().split(" ", 1)
         if pi_parts[0] == "regularisation_scheme":
@@ -1391,33 +1437,33 @@ def mc_specials(conf, order_file):
 
     overwrite_warn = False
 
-    mc_name = conf.getProperty("olp.mc.name").lower().strip()
+    mc_name = cast(str, conf.getProperty("olp.mc.name")).lower().strip()
 
+    mc_special_mc_name = ""
     if mc_name != "any":
         if conf.getProperty("mc_specials.olp.mc.name") is not None:
             mc_special_mc_name = (
-                conf.getProperty("mc_specials.olp.mc.name").lower().strip()
+                cast(str, conf.getProperty("mc_specials.olp.mc.name")).lower().strip()
             )
             if mc_name != mc_special_mc_name:
                 overwrite_warn = True
     elif conf.getProperty("mc_specials.olp.mc.name") is not None:
-        mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
+        mc_name = cast(str, conf.getProperty("mc_specials.olp.mc.name")).lower().strip()
 
-    mc_version = []
     s = ""
     mc_special_s = ""
     if conf.getProperty("olp.mc.version") is not None:
-        s = conf.getProperty("olp.mc.version", default="").strip()
+        s = cast(str, conf.getProperty("olp.mc.version", default="")).strip()
         if conf.getProperty("mc_specials.olp.mc.version") is not None:
-            mc_special_s = conf.getProperty(
-                "mc_specials.olp.mc.version", default=""
+            mc_special_s = cast(
+                str, conf.getProperty("mc_specials.olp.mc.version", default="")
             ).strip()
             if s != mc_special_s:
                 overwrite_warn = True
     elif conf.getProperty("mc_specials.olp.mc.version") is not None:
-        s = conf.getProperty("mc_specials.olp.mc.version", default="").strip()
-    if len(s) > 0:
-        mc_version = list(map(int, s.split(".")))
+        s = cast(
+            str, conf.getProperty("mc_specials.olp.mc.version", default="")
+        ).strip()
 
     if overwrite_warn:
         old_mc = (
@@ -1431,7 +1477,7 @@ def mc_specials(conf, order_file):
             % (new_mc, old_mc, new_mc)
         )
 
-    required_extensions = []
+    required_extensions: list[str] = []
 
     if mc_name == "any":
         pass
@@ -1447,7 +1493,7 @@ def mc_specials(conf, order_file):
         )
 
     extensions = golem.properties.getExtensions(conf)
-    add_extensions = []
+    add_extensions: list[str] = []
     for ext in required_extensions:
         if ext not in extensions:
             add_extensions.append(ext)
@@ -1455,7 +1501,7 @@ def mc_specials(conf, order_file):
         conf.setProperty("%s-auto.extensions" % mc_name, ",".join(add_extensions))
 
 
-def merge_extensions(conf_a, conf_b):
+def merge_extensions(conf_a: Properties, conf_b: Properties):
     """merge extensions from conf_a into conf_b"""
 
     extensions_a = golem.properties.getExtensions(conf_a)
@@ -1463,7 +1509,9 @@ def merge_extensions(conf_a, conf_b):
 
     add_extensions = []
     if conf_b.getProperty("merge-auto.extensions"):
-        add_extensions = conf_b.getProperty("merge-auto.extensions").split(",")
+        add_extensions = cast(str, conf_b.getProperty("merge-auto.extensions")).split(
+            ","
+        )
     for ext in extensions_a:
         if ext and ext not in extensions_b and ext not in add_extensions:
             add_extensions.append(ext)

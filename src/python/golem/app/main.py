@@ -31,7 +31,7 @@ from golem.util.path import golem_path
 logger = logging.getLogger(__name__)
 
 
-def main(parser: ArgumentParser, argv: list[str] = sys.argv):
+def main(argv: list[str] = sys.argv):
     """
     This is the main program of GoSam.
     """
