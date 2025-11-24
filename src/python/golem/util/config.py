@@ -6,7 +6,7 @@ import logging
 import re
 import sys
 from collections.abc import Mapping, Sequence
-from typing import TextIO, TypeAlias, cast, final, override
+from typing import Any, TextIO, TypeAlias, cast, final, override
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +238,7 @@ class Properties:
 
         self._decode = False
 
-        self.cache = {}
+        self.cache: dict[str, Any] = {}
 
     def decode(self):
         self._decode = True

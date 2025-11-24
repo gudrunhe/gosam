@@ -1,10 +1,12 @@
 # vim: ts=3:sw=3
 
-import golem
+import logging
+from collections.abc import Iterable, MutableMapping
+from typing import TextIO, TypeVar, cast, final
 
 from golem.util.config import GolemConfigError
 
-import logging
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +118,15 @@ class OLPOrderFile:
     in their original writing.
     """
 
-    def __init__(self, source, extensions={"double_quotes": False, "single_quotes": False, "backslash_escape": False}):
+    def __init__(
+        self,
+        source: str | list[str] | TextIO,
+        extensions: MutableMapping[str, bool] = {
+            "double_quotes": False,
+            "single_quotes": False,
+            "backslash_escape": False,
+        },
+    ):
         """
         Generates an order-file objects from
         a given source.
@@ -146,14 +156,14 @@ class OLPOrderFile:
         else:
             self._backslash_escape = False
 
-        self._options = {}
-        self._options_ordered = []
-        self._opt_res = {}
-        self._opt_res_ordered = []
-        self._processes = []
-        self._processes_opt_until = []
-        self._proc_res = []
-        self._processing_instructions = []
+        self._options: dict[str, list[str]] = {}
+        self._options_ordered: list[tuple[int, str, list[str]]] = []
+        self._opt_res: dict[str, list[str]] = {}
+        self._opt_res_ordered: list[tuple[int, str, list[str], list[str] | None]] = []
+        self._processes: list[tuple[int, list[str], list[str]]] = []
+        self._processes_opt_until: list[int] = []
+        self._proc_res: list[list[str]] = []
+        self._processing_instructions: list[str] = []
 
         if isinstance(source, str):
             with open(source, "r") as f:
@@ -166,9 +176,13 @@ class OLPOrderFile:
                 try:
                     parseStatus = self._parseLine(line, line_number, parseStatus)
                 except OLPError as ex:
-                    raise OLPError("While parsing line #%d: %s" % (line_number, str(ex)))
+                    raise OLPError(
+                        "While parsing line #%d: %s" % (line_number, str(ex))
+                    )
 
-    def _parseLine(self, line, line_number, parseStatus):
+    def _parseLine(
+        self, line: str, line_number: int, parseStatus: None | str
+    ) -> str | None:
         if parseStatus is not None:
             # This is a continuation line:
             s = line.lstrip(WHITESPACE)
@@ -190,7 +204,7 @@ class OLPOrderFile:
         # Continuation business is finished.
         # Now tokenize the line
 
-        elements = [[], [], []]
+        elements: list[list[str]] = [[], [], []]
         sp = 0
         is_subprocess = False
         is_contract = False
@@ -204,22 +218,32 @@ class OLPOrderFile:
                 sp = 2
                 is_contract = True
             else:
-                elements[sp].append(tok)
+                elements[sp].append(cast(str, tok))
 
         if not is_blank:
             if is_subprocess:
                 if is_contract:
-                    self._handle_subprocess(line_number, elements[0], elements[1], elements[2])
+                    self._handle_subprocess(
+                        line_number, elements[0], elements[1], elements[2]
+                    )
                 else:
                     self._handle_subprocess(line_number, elements[0], elements[1])
             else:
                 if is_contract:
-                    self._handle_option(line_number, elements[0][0], elements[0][1:], elements[2])
+                    self._handle_option(
+                        line_number, elements[0][0], elements[0][1:], elements[2]
+                    )
                 else:
                     self._handle_option(line_number, elements[0][0], elements[0][1:])
         return None
 
-    def _handle_option(self, line_number, name, value, response=None):
+    def _handle_option(
+        self,
+        line_number: int,
+        name: str,
+        value: list[str],
+        response: list[str] | None = None,
+    ):
         # if name in self._options:
         # raise OLPError("Option %s has been specified more than once" % name)
 
@@ -248,9 +272,15 @@ class OLPOrderFile:
             else:
                 self._options[name] = value
                 self._options_ordered.append((line_number, name, value))
-                self._opt_res_ordered.append((line_number, name, None))
+                self._opt_res_ordered.append((line_number, name, value, None))
 
-    def _handle_subprocess(self, line_number, inp, out, response=None):
+    def _handle_subprocess(
+        self,
+        line_number: int,
+        inp: list[str],
+        out: list[str],
+        response: list[str] | None = None,
+    ):
         if response is not None:
             if isinstance(self, OLPContractFile):
                 self._processes.append((line_number, inp, out))
@@ -262,13 +292,15 @@ class OLPOrderFile:
                 tmp = response[0].lower()
 
                 if tmp != "error:":
-                    values = []
+                    values: list[int] = []
                     for token in response:
                         try:
                             val = int(token)
                             values.append(val)
                         except ValueError:
-                            raise OLPError("Invalid integer literal %r in response" % token)
+                            raise OLPError(
+                                "Invalid integer literal %r in response" % token
+                            )
                     if len(values) != values[0] + 1:
                         raise OLPError("Wrong number of channels in response")
 
@@ -284,8 +316,8 @@ class OLPOrderFile:
                 self._proc_res.append([])
         pass
 
-    def _tokens(self, line):
-        token = ""
+    def _tokens(self, line: str) -> Iterable[str | int]:
+        token: str = ""
         state = 0
         col = 0
         digits = 0
@@ -432,8 +464,17 @@ class OLPOrderFile:
         return self._processing_instructions[:]
 
 
+@final
 class OLPContractFile(OLPOrderFile):
-    def __init__(self, source, extensions={"double_quotes": False, "single_quotes": False, "backslash_escape": False}):
+    def __init__(
+        self,
+        source: OLPOrderFile | str | list[str] | TextIO,
+        extensions: dict[str, bool] = {
+            "double_quotes": False,
+            "single_quotes": False,
+            "backslash_escape": False,
+        },
+    ):
         if isinstance(source, OLPOrderFile):
             self._options = source._options.copy()
             self._options_ordered = source._options_ordered[:]
@@ -448,74 +489,91 @@ class OLPContractFile(OLPOrderFile):
         else:
             OLPOrderFile.__init__(self, source, extensions)
 
-    def getProperty(self, name, default=None):
+    def getProperty(
+        self, name: str, default: list[str] | None = None
+    ) -> None | list[str]:
         if name in self._options:
             return (self._options[name])[:]
         else:
             return default
 
-    def getPropertyResponse(self, name):
+    def getPropertyResponse(self, name: str) -> None | str:
         if name in self._opt_res:
             return " ".join(self._opt_res[name])
         else:
             return None
 
-    def getProcessResponse(self, idx):
+    def getProcessResponse(self, idx: int):
         return self._proc_res[idx]
 
-    def setProcessResponse(self, idx, lst):
+    def setProcessResponse(self, idx: int, lst: list[str]):
         self._proc_res[idx] = lst
 
-    def setProcessError(self, idx, msg):
+    def setProcessError(self, idx: int, msg: list[str]):
         self._proc_res[idx] = msg
 
-    def setPropertyResponse(self, name, value):
+    def setPropertyResponse(self, name: str, value: str | list[str]):
         i = 0
-        for l, n, _ in self.options_ordered():
+        n = None
+        for _, n, _ in self.options_ordered():
             if n == name:
                 break
             i = i + 1
+        assert n is not None
         if n != self._options_ordered[i][1]:
             assert False
         line_number = self._options_ordered[i][0]
         if isinstance(value, str):
             self._opt_res[name] = value.split(" ")
-            self._opt_res_ordered[i] = line_number, name, value.split(" ")
+            self._opt_res_ordered[i] = line_number, name, value.split(" "), None
         else:
             self._opt_res[name] = value
-            self._opt_res_ordered[i] = line_number, name, value
+            self._opt_res_ordered[i] = line_number, name, value, None
 
-        assert isinstance(self._opt_res[name], list), "self._opt_res[%r] == %r" % (name, self._opt_res[name])
+        assert isinstance(self._opt_res[name], list), "self._opt_res[%r] == %r" % (
+            name,
+            self._opt_res[name],
+        )
 
-    def setPropertyResponseOrdered(self, name, value, line_number):
+    def setPropertyResponseOrdered(
+        self, name: str, value: str | list[str], line_number: int
+    ):
         i = 0
+        n = None
         for l, n, _ in self.options_ordered():
             if line_number == l and n == name:
                 break
             i = i + 1
-        if line_number != self._options_ordered[i][0] or n != self._options_ordered[i][1]:
+        assert n is not None
+        if (
+            line_number != self._options_ordered[i][0]
+            or n != self._options_ordered[i][1]
+        ):
             assert False
 
         if isinstance(value, str):
             self._opt_res[name] = value.split(" ")
-            self._opt_res_ordered[i] = line_number, name, value.split(" ")
+            self._opt_res_ordered[i] = line_number, name, value.split(" "), None
         else:
             self._opt_res[name] = value
-            self._opt_res_ordered[i] = line_number, name, value
+            self._opt_res_ordered[i] = line_number, name, value, None
 
-        assert isinstance(self._opt_res[name], list), "self._opt_res[%r] == %r" % (name, self._opt_res[name])
+        assert isinstance(self._opt_res[name], list), "self._opt_res[%r] == %r" % (
+            name,
+            self._opt_res[name],
+        )
 
-    def isPropertyOk(self, name):
-        r = self.getPropertyResponse(name).lower()
+    def isPropertyOk(self, name: str):
+        r = self.getPropertyResponse(name)
         if r is None:
             return False
         else:
-            return r == "ok"
+            return r.lower() == "ok"
 
-    def escape(self, value):
+    def escape(self, value: T) -> T:
         return value
 
-    def _escape(self, value):
+    def _escape(self, value: str):
         spaced = value.translate(PROBLEM_TO_SPACE)
         needs_escape = " " in spaced
 
@@ -563,7 +621,7 @@ class OLPContractFile(OLPOrderFile):
         else:
             return value
 
-    def store(self, f):
+    def store(self, f: TextIO):
         start_pos = 0
         end_pos = 0
         for i, inp, out in self.processes():
@@ -572,12 +630,19 @@ class OLPContractFile(OLPOrderFile):
             for j in range(start_pos, end_pos):
                 _, name, value = self._options_ordered[j]
                 # response = self.getPropertyResponse(name)
-                response = self._opt_res_ordered[j] if (len(self._opt_res_ordered) > j) else None
+                response = (
+                    self._opt_res_ordered[j]
+                    if (len(self._opt_res_ordered) > j)
+                    else None
+                )
                 if response is None:
                     response = "OK # Option has been ignored."
                 else:
                     response = " ".join(response[2])
-                f.write("%s %s | %s\n" % (name, " ".join([self._escape(s) for s in value]), response))
+                f.write(
+                    "%s %s | %s\n"
+                    % (name, " ".join([self._escape(s) for s in value]), response)
+                )
 
             try:
                 response = self.getProcessResponse(i)
@@ -587,10 +652,18 @@ class OLPContractFile(OLPOrderFile):
             if isinstance(response, list):
                 f.write(
                     "%s -> %s | %d %s\n"
-                    % (" ".join(map(str, inp)), " ".join(map(str, out)), len(response), " ".join(map(str, response)))
+                    % (
+                        " ".join(map(str, inp)),
+                        " ".join(map(str, out)),
+                        len(response),
+                        " ".join(map(str, response)),
+                    )
                 )
             else:
-                f.write("%s -> %s | %s\n" % (" ".join(map(str, inp)), " ".join(map(str, out)), response))
+                f.write(
+                    "%s -> %s | %s\n"
+                    % (" ".join(map(str, inp)), " ".join(map(str, out)), response)
+                )
             start_pos = end_pos
 
 
@@ -622,14 +695,15 @@ if __name__ == "__main__":
             cf.setPropertyResponse(key, ["ok"])
 
 
+@final
 class SUSYLesHouchesFile:
     """
     This class allows to read a SUSY Les Houches accord
     parameter file.
     """
 
-    def __init__(self, *files):
-        self.blocks = {}
+    def __init__(self, *files: str | TextIO):
+        self.blocks: dict[str, dict[tuple[int, ...], float]] = {}
         for f in files:
             if isinstance(f, str):
                 with open(f, "r") as the_file:
@@ -637,8 +711,8 @@ class SUSYLesHouchesFile:
             else:
                 self.load(f)
 
-    def load(self, f):
-        block = {}
+    def load(self, f: TextIO):
+        block: dict[tuple[int, ...], float] = {}
         line_number = 0
 
         for line in f:
@@ -660,10 +734,12 @@ class SUSYLesHouchesFile:
                         setattr(self, name, block)
                         self.blocks[name] = block
                 else:
-                    logger.warning("Skipping line %d and remainder of this BLOCK" % line_number)
+                    logger.warning(
+                        "Skipping line %d and remainder of this BLOCK" % line_number
+                    )
                     block = {}
             elif line[0] == " " or line[0] == "\t":
-                tokens = []
+                tokens: list[str] = []
                 s = line.replace("\t", " ").strip()
                 while s != "":
                     values = s.split(" ", 1)
@@ -682,7 +758,7 @@ class SUSYLesHouchesFile:
             else:
                 logger.warning("Skipped line %d: missing value" % line_number)
 
-    def __getitem__(self, id):
+    def __getitem__(self, id: str) -> dict[tuple[int, ...], float]:
         if id in self.blocks:
             return self.blocks[id]
         else:

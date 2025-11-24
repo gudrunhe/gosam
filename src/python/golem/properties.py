@@ -109,11 +109,11 @@ model_options = Property(
 optimized_import = Property(
     "optimized_import",
     """\
-    Only import those vertices and couplings from UFO model which appear in diagrams.    
+    Only import those vertices and couplings from UFO model which appear in diagrams.
     """,
     bool,
     False,
-    experimental=True
+    experimental=True,
 )
 
 coupling_power = Property(

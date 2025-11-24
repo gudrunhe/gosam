@@ -7,26 +7,26 @@ import os.path
 import re
 import sys
 from time import gmtime, strftime
+from typing import cast
 
 import golem.properties
 import golem.templates.xmltemplates
 import golem.util.config
 import golem.util.constants as consts
-import golem.util.parser
 import golem.util.tools
 from golem.diagrams.checks import analyze_loop, check_tree
 from golem.diagrams.main_feyngraph import run_feyngraph
 from golem.diagrams.objects import LoopCache
 from golem.installation import GOLEM_REVISION, GOLEM_VERSION, LIB_DIR
 from golem.model import update_zero
-from golem.util.config import GolemConfigError, split_power
+from golem.util.config import GolemConfigError, Properties, PropValue, split_power
 from golem.util.path import golem_path
-from golem.util.tools import copy_file, generate_particle_lists
+from golem.util.tools import generate_particle_lists
 
 logger = logging.getLogger(__name__)
 
 
-def generate_process_files(conf, from_scratch=False):
+def generate_process_files(conf: Properties, from_scratch: bool = False):
     """
     This routine is a wrapper around anything that needs to be done
     for creating a new process.
@@ -36,20 +36,20 @@ def generate_process_files(conf, from_scratch=False):
 
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:
-        props.setProperty(str(p), conf.getProperty(p))
+        props.setProperty(str(p), cast(PropValue, conf.getProperty(p)))
 
     golem.properties.setInternals(conf)
 
     path = golem.util.tools.process_path(conf)
 
-    templates = conf.getProperty(golem.properties.template_path)
+    templates = cast(str, conf.getProperty(golem.properties.template_path))
     templates = os.path.expandvars(templates)
 
-    if templates is None or len(templates) == 0:
+    if len(templates) == 0:
         templates = golem_path("templates")
 
     for name in conf:
-        props[name] = conf[name]
+        props[name] = cast(PropValue, conf[name])
 
     if not os.path.exists(path):
         raise GolemConfigError("Process path does not exist: %s" % path)
@@ -79,13 +79,14 @@ def generate_process_files(conf, from_scratch=False):
     if nlo_diagrams is not None:
         loopcache, loopcache_tot, nlo_props = analyze_loop(nlo_diagrams, conf)
         props.setProperty(
-            "topolopy.keep.virt", ",".join(map(str, nlo_props["keep_indices"]))
+            "topolopy.keep.virt",
+            ",".join(map(str, cast(list[int], nlo_props["keep_indices"]))),
         )
         props.setProperty("topolopy.count.docu", len(nlo_diagrams))
-        props.setProperty("max_rank", nlo_props["max_rank"])
+        props.setProperty("max_rank", cast(int, nlo_props["max_rank"]))
 
-        conf["__heavy_quarks__"] = nlo_props["quark_masses"]
-        conf["complex_masses"] = nlo_props["complex_quark_masses"]
+        conf["__heavy_quarks__"] = cast(list[str], nlo_props["quark_masses"])
+        conf["complex_masses"] = cast(list[str], nlo_props["complex_quark_masses"])
     else:
         loopcache = LoopCache()
         loopcache_tot = LoopCache()
@@ -93,8 +94,8 @@ def generate_process_files(conf, from_scratch=False):
         props.setProperty("topolopy.keep.virt", "")
         props.setProperty("topolopy.count.docu", 0)
         props.setProperty("max_rank", 0)
-        conf["__heavy_quarks__"] = set()
-        conf["complex_masses"] = set()
+        conf["__heavy_quarks__"] = []
+        conf["complex_masses"] = []
 
     if ct_diagrams is not None:
         props.setProperty(
@@ -136,7 +137,7 @@ def generate_process_files(conf, from_scratch=False):
         )
 
     # TODO: Dummy flags, currently not implemented
-    flags = [{}, {}, {}]
+    flags: list[dict[int, int]] = [{}, {}, {}]
 
     # Create and populate subdirectories
     golem.templates.xmltemplates.transform_templates(
@@ -152,7 +153,9 @@ def generate_process_files(conf, from_scratch=False):
         loopcache=loopcache,
         loopcache_tot=loopcache_tot,
         heavy_quarks=[
-            p for p in conf.getListProperty("__heavy_quarks__") if len(p.strip()) > 0
+            p
+            for p in cast(list[str], conf.getListProperty("__heavy_quarks__"))
+            if len(p.strip()) > 0
         ],
         lo_flags=flags[0],
         nlo_flags=flags[1],
@@ -164,8 +167,8 @@ def generate_process_files(conf, from_scratch=False):
     cleanup(path)
 
 
-def cleanup(path):
-    cleanup_files = []
+def cleanup(path: str):
+    cleanup_files: list[str] = []
 
     for ext in [".tex", ".log", ".py", ".pyc", ".pyo"]:
         for stub in [
@@ -188,7 +191,7 @@ def cleanup(path):
             os.remove(full_name)
 
 
-def find_config_files():
+def find_config_files() -> tuple[Properties, list[str]]:
     """
     Searches for configuration files in the default locations.
     These are used to fill the fields of newly created input
@@ -208,7 +211,7 @@ def find_config_files():
     props = golem.util.config.Properties()
     directories = [os.getcwd()]
     files = [".gosam", ".golem", "gosam.in", "golem.in", "gosam.conf", "golem.conf"]
-    files_found = []
+    files_found: list[str] = []
     avail_props = list(map(str, [p for p in golem.properties.properties]))
     for dir in directories:
         for file in files:
@@ -225,7 +228,7 @@ def find_config_files():
     return props, files_found
 
 
-def write_template_file(fname, defaults, format=None):
+def write_template_file(fname: str, defaults: Properties, format: str | None = None):
     """
     Creates a template file using the given default-configuration
     if present.
@@ -269,13 +272,13 @@ def write_template_file(fname, defaults, format=None):
             continue
             pass
 
-        if prop.getType() == str:
+        if prop.getType() is str:
             stype = "text"
-        elif prop.getType() == int:
+        elif prop.getType() is int:
             stype = "integer number"
-        elif prop.getType() == bool:
+        elif prop.getType() is bool:
             stype = "true/false"
-        elif prop.getType() == list:
+        elif prop.getType() is list:
             stype = "comma separated list"
         else:
             stype = str(prop.getType())
@@ -303,6 +306,8 @@ def write_template_file(fname, defaults, format=None):
         elif format == "LaTeX":
             f.write("\\begin{verbatim}\n")
             first = True
+            indent = 0
+            prev_empty = False
             for line in prop.getDescription().splitlines(False):
                 if first:
                     indent = len(line) - len(line.lstrip())
@@ -322,9 +327,9 @@ def write_template_file(fname, defaults, format=None):
 
         if format is None:
             if str(prop) in defaults.propertyNames():
-                value = defaults.getProperty(prop)
+                value = cast(PropValue, defaults.getProperty(prop))
                 if isinstance(value, list):
-                    value = ",".join(value)
+                    value = ",".join(map(str, value))
                 f.write("%s=%s\n" % (str(prop), value))
             elif prop.getDefault() is None:
                 f.write("# %s=\n" % prop)
@@ -349,16 +354,14 @@ def write_template_file(fname, defaults, format=None):
                     f.write("Default: \\verb|None|\n\\\\")
 
         if format == "LaTeX":
-            if prop.isHidden() is not None:
-                value = str(prop.isHidden())
-                if len(value) > 0:
-                    f.write("Hidden: \\verb|%s|\n\\\\" % value)
+            value = str(prop.isHidden())
+            if len(value) > 0:
+                f.write("Hidden: \\verb|%s|\n\\\\" % value)
 
         if format == "LaTeX":
-            if prop.isExperimental() is not None:
-                value = str(prop.isExperimental())
-                if len(value) > 0:
-                    f.write("Experimental: \\verb|%s|\n\\\\" % value)
+            value = str(prop.isExperimental())
+            if len(value) > 0:
+                f.write("Experimental: \\verb|%s|\n\\\\" % value)
 
     if format is None:
         for prop in defaults:
@@ -370,7 +373,7 @@ def write_template_file(fname, defaults, format=None):
     f.close()
 
 
-def read_golem_dir_file(path):
+def read_golem_dir_file(path: str) -> Properties:
     """
     Looks for the file .golem.dir under the given path.
     """
@@ -385,7 +388,7 @@ def read_golem_dir_file(path):
             logger.critical("Configuration file is not sound:" + str(err))
             sys.exit("GoSam terminated due to an error")
 
-        ver = list(map(int, result["golem-version"].split(".")))
+        ver = list(map(int, cast(str, result["golem-version"]).split(".")))
 
         # be compatible between internal 1.99 releases and 2.0.*
         if ver == [1, 99] and GOLEM_VERSION[:2] == [2, 0]:
@@ -412,7 +415,7 @@ def read_golem_dir_file(path):
                 )
                 return result
 
-        for gv, v in zip(GOLEM_VERSION + [0] * 5, ver):
+        for gv, v in zip(cast(list[int], GOLEM_VERSION) + [0] * 5, ver):
             if gv > v:
                 raise GolemConfigError(
                     "This directory has been generated with an older version "
@@ -431,7 +434,7 @@ def read_golem_dir_file(path):
     return result
 
 
-def write_golem_dir_file(path, fname, conf):
+def write_golem_dir_file(path: str, fname: str, conf: Properties):
     """
     Writes .golem.dir which will allow us later to identify
     this directory as a golem directory and to logically
@@ -450,21 +453,23 @@ def write_golem_dir_file(path, fname, conf):
         ).hexdigest()
     dir_info["golem-version"] = ".".join(map(str, GOLEM_VERSION))
     dir_info["golem-revision"] = str(GOLEM_REVISION)
-    dir_info["process-name"] = conf.getProperty(golem.properties.process_name)
+    dir_info["process-name"] = cast(
+        str, conf.getProperty(golem.properties.process_name)
+    )
     dir_info["time-stamp"] = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
     with open(os.path.join(path, consts.GOLEM_DIR_FILE_NAME), "w") as f:
         dir_info.store(f, "Do not remove this file!")
 
 
-def check_dont_overwrite(conf):
+def check_dont_overwrite(conf: Properties):
     path = golem.util.tools.process_path(conf)
 
     dir_info = read_golem_dir_file(path)
 
     if "setup-file" in dir_info:
-        setup_file_conf = conf["setup-file"]
-        setup_file_dir = dir_info["setup-file"]
+        setup_file_conf = cast(str, conf["setup-file"])
+        setup_file_dir = cast(str, dir_info["setup-file"])
 
         if not os.path.exists(setup_file_dir):
             raise GolemConfigError(
@@ -487,7 +492,7 @@ def check_dont_overwrite(conf):
             )
 
 
-def fill_config(conf):
+def fill_config(conf: Properties):
     """
     Checks whether the combination of properties in the given config
     makes sense and sets additional properties based on the given
@@ -504,8 +509,7 @@ def fill_config(conf):
     # save the settings given in the process config file
     rc_conf = conf.copy()
 
-    ini = conf.getProperty(golem.properties.particles_in)
-    fin = conf.getProperty(golem.properties.particles_out)
+    ini = cast(list[str], conf.getProperty(golem.properties.particles_in))
 
     # Prepare a copy of the setup file in the property [% user.setup %]
     buf = io.StringIO()
@@ -542,11 +546,13 @@ def fill_config(conf):
     for p in golem.properties.properties:
         if (
             conf.getProperty(p)
+            # The explicit '== False' is required here, since we do _not_ want to set the default if
+            # `conf.getProperty(p)` is `None`, only if it is actually the boolean value `False`
             or conf.getProperty(p) == False
             or conf.getProperty(p) == 0
         ):
             # Note that 'False'and '0' are actually valid values. We want to skip falsy values like [], " ", None, etc.
-            conf.setProperty(str(p), conf.getProperty(p))
+            conf.setProperty(str(p), cast(PropValue, conf.getProperty(p)))
 
     # Check for required properties in standalone mode:
     if not conf.getBooleanProperty("__OLP_MODE__"):
@@ -567,8 +573,6 @@ def fill_config(conf):
     orders = split_power(
         ",".join(map(str, conf.getListProperty(golem.properties.coupling_power)))
     )
-    if orders is None:
-        orders = []
 
     if all(len(p) == 2 for p in orders):
         generate_tree_diagrams = True
@@ -618,7 +622,9 @@ def fill_config(conf):
     raise_err = False
     err_str = ""
     err_count = 0
-    if not (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+    if not (
+        conf["is_ufo"] or ("FeynRules" in cast(list[str], conf.getProperty("model")))
+    ):
         # model is not a UFO
         if conf.getProperty("order_names"):
             raise_err = True
@@ -666,7 +672,7 @@ def fill_config(conf):
     elif (
         True
         if not conf.getProperty("order_names")
-        else ("NP" not in conf.getProperty("order_names"))
+        else ("NP" not in cast(list[str], conf.getProperty("order_names")))
     ):
         # model is a UFO, but no order_names specified or 'NP' not present in 'order_names'
         # Note: whether or not 'NP' is present in UFO is checked in feynrules.py, can't be done here
@@ -706,7 +712,7 @@ def fill_config(conf):
                 + "to 'True' when calculating a loop-induced process."
             )
         if not conf.getProperty("order_names") or (
-            "QL" not in conf.getProperty("order_names")
+            "QL" not in cast(list[str], conf.getProperty("order_names"))
         ):
             raise GolemConfigError(
                 "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
@@ -734,17 +740,19 @@ def fill_config(conf):
         # END: Check for incompatible configuration
 
     if not conf["extensions"] and props["extensions"]:
-        conf["extensions"] = props["extensions"]
+        conf["extensions"] = cast(PropValue, props["extensions"])
 
     tmp_ext = golem.properties.getExtensions(conf)
 
     # add appropriate reduction programs to extensions
     if rc_conf["reduction_programs"] is None:
         # no input provided by the user -> defaults (ninja+golem95)
-        reduction_programs = conf.getListProperty("reduction_programs")
+        reduction_programs = cast(list[str], conf.getListProperty("reduction_programs"))
     else:
         # use reduction programs specified by the user
-        reduction_programs = rc_conf.getListProperty("reduction_programs")
+        reduction_programs = cast(
+            list[str], rc_conf.getListProperty("reduction_programs")
+        )
 
     if not golem.installation.WITH_GOLEM:
         if reduction_programs == ["golem95"]:
@@ -762,16 +770,16 @@ def fill_config(conf):
             conf.setProperty("reduction_programs", ",".join(reduction_programs))
 
     for p in reduction_programs:
-        if not p in tmp_ext:
+        if p not in tmp_ext:
             if conf["gosam-auto-reduction.extensions"]:
                 conf["gosam-auto-reduction.extensions"] = (
-                    p + "," + conf["gosam-auto-reduction.extensions"]
+                    p + "," + cast(str, conf["gosam-auto-reduction.extensions"])
                 )
             else:
                 conf["gosam-auto-reduction.extensions"] = p
 
     generate_counterterms = (
-        conf.getBooleanProperty("renorm")
+        cast(bool, conf.getBooleanProperty("renorm"))
         and generate_loop_diagrams
         and not is_loopinduced
     )
@@ -780,29 +788,32 @@ def fill_config(conf):
     conf["generate_loop_diagrams"] = generate_loop_diagrams
     conf["is_loopinduced"] = is_loopinduced
     conf["generate_eft_loopind"] = (
-        conf.getBooleanProperty("loop_suppressed_Born") and is_loopinduced
+        cast(bool, conf.getBooleanProperty("loop_suppressed_Born")) and is_loopinduced
     )
     conf["generate_counterterms"] = generate_counterterms
     conf["generate_eft_counterterms"] = (
-        conf.getBooleanProperty("renorm_eftwilson")
+        cast(bool, conf.getBooleanProperty("renorm_eftwilson"))
         and generate_counterterms
         and generate_loop_diagrams
     )
     conf["generate_ym_counterterms"] = (
         (
-            conf.getBooleanProperty("renorm_yukawa")
-            or conf.getBooleanProperty("renorm_qmass")
-            or conf.getBooleanProperty("renorm_gamma5")
+            cast(bool, conf.getBooleanProperty("renorm_yukawa"))
+            or cast(bool, conf.getBooleanProperty("renorm_qmass"))
+            or cast(bool, conf.getBooleanProperty("renorm_gamma5"))
         )
         and generate_counterterms
         and generate_loop_diagrams
     )
     conf["finite_renorm_ehc"] = (
-        conf.getBooleanProperty("renorm_ehc") and generate_loop_diagrams
+        cast(bool, conf.getBooleanProperty("renorm_ehc")) and generate_loop_diagrams
     )
-    conf["use_MQSE"] = conf.getBooleanProperty("use_MQSE")
+    conf["use_MQSE"] = cast(bool, conf.getBooleanProperty("use_MQSE"))
 
-    if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() == "automatic":
+    if (
+        not conf["PSP_chk_method"]
+        or cast(str, conf["PSP_chk_method"]).lower() == "automatic"
+    ):
         conf["PSP_chk_method"] = (
             "PoleRotation" if generate_tree_diagrams else "LoopInduced"
         )
@@ -851,12 +862,12 @@ def fill_config(conf):
         if conf["regularisation_scheme"] == "dred":
             if "thv" in ext:
                 mismatch_schemes = [True, "thv"]
-            if not "dred" in ext:
+            if "dred" not in ext:
                 ext.append("dred")
         elif conf["regularisation_scheme"] == "thv":
             if "dred" in ext:
                 mismatch_schemes = [True, "dred"]
-            if not "thv" in ext:
+            if "thv" not in ext:
                 ext.append("thv")
         else:
             logger.critical(
@@ -878,7 +889,7 @@ def fill_config(conf):
             )
             sys.exit("GoSam terminated due to an error")
     else:
-        ext.append(conf["olp.extensions"])
+        ext.append(cast(str, conf["olp.extensions"]))
         ext = list(set(ext))
 
     if "thv" in ext and conf.getProperty("r2") != "explicit":
@@ -888,7 +899,9 @@ def fill_config(conf):
         )
         sys.exit("GoSam terminated due to an error")
 
-    if "thv" in ext and (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
+    if "thv" in ext and (
+        conf["is_ufo"] or ("FeynRules" in cast(list[str], conf.getProperty("model")))
+    ):
         logger.warning(
             "You are using the tHV regularisation scheme and a UFO model. Note that in tHV a finite\n"
             + "renormalisation of the non-singlet axial-vector current (-> gamma_5) is required. The\n"
@@ -898,16 +911,18 @@ def fill_config(conf):
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
-        if "ninja" not in conf["reduction_programs"]:
+        if "ninja" not in cast(list[str], conf["reduction_programs"]):
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
                 + "in association with ninja. Please add ninja as reduction program to 'reduction_programs' in the input card.\n"
             )
 
-    conf["reduction_interoperation"] = conf["reduction_interoperation"].upper()
-    conf["reduction_interoperation_rescue"] = conf[
-        "reduction_interoperation_rescue"
-    ].upper()
+    conf["reduction_interoperation"] = cast(
+        str, conf["reduction_interoperation"]
+    ).upper()
+    conf["reduction_interoperation_rescue"] = cast(
+        str, conf["reduction_interoperation_rescue"]
+    ).upper()
 
     if conf.getBooleanProperty("helsum"):
         if conf.getBooleanProperty("is_loopinduced"):
@@ -929,7 +944,7 @@ def fill_config(conf):
                 + 'Set "helsum=false" for the selected process.\n'
             )
     else:
-        if conf.getProperty("polvec") == "numerical" and not "numpolvec" in ext:
+        if conf.getProperty("polvec") == "numerical" and "numpolvec" not in ext:
             ext.append("numpolvec")
 
     for prop in golem.properties.properties:
@@ -943,7 +958,7 @@ def fill_config(conf):
     conf["debug_diagsum"] = False
 
 
-def workflow(conf):
+def workflow(conf: Properties):
     """
     Creates additional properties which determine the workflow
     later in the program.
@@ -955,7 +970,7 @@ def workflow(conf):
     if not os.path.exists(path):
         try:
             rp = os.path.relpath(path)
-            if not os.path.sep in rp:
+            if os.path.sep not in rp:
                 os.mkdir(rp)
                 logger.info("Process path %r created." % path)
         except OSError as err:
@@ -975,8 +990,8 @@ def workflow(conf):
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf.getBooleanProperty("__OLP_MODE__"):
         model = golem.util.tools.getModel(conf)
-        orig_zero = conf.getListProperty("zero")
-        new_zero = []
+        orig_zero = cast(list[str], conf.getListProperty("zero"))
+        new_zero: list[str] = []
         for z in orig_zero:
             massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
             if massmatch:
@@ -1003,34 +1018,32 @@ def workflow(conf):
                     new_zero.append(p.getWidth())
         conf.setProperty("zero", ",".join(list(set(new_zero))))
         update_zero(new_zero)
-    # It can happen that a model defines names for a particle's mass and width but
-    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
-    # built-in models). We have to take care of that and add those names to the zero
-    # property to avoid erroneous code generation. Otherwise the user has to remember
-    # to add these cases to 'zero' manually.
-    # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-    if not conf["__OLP_MODE__"] and not conf.getBooleanProperty(
-        "massive_light_fermions"
-    ):
-        zeros = conf.getListProperty("zero")
-        for p in model.particles.values():
-            if p.isMassive(zeros):
-                m = p.getMass(zeros)
-                try:
-                    if float(model.parameters[m]) == 0.0:
-                        zeros.append(m)
-                except KeyError:
-                    # dependent parameters are not part of parameters dict
-                    pass
-            if p.hasWidth(zeros):
-                w = p.getWidth(zeros)
-                try:
-                    if float(model.parameters[w]) == 0.0:
-                        zeros.append(w)
-                except KeyError:
-                    # dependent parameters are not part of parameters dict
-                    pass
-        conf.setProperty("zero", ",".join(list(set(zeros))))
+        # It can happen that a model defines names for a particle's mass and width but
+        # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+        # built-in models). We have to take care of that and add those names to the zero
+        # property to avoid erroneous code generation. Otherwise the user has to remember
+        # to add these cases to 'zero' manually.
+        # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
+        if not conf.getBooleanProperty("massive_light_fermions"):
+            zeros = cast(list[str], conf.getListProperty("zero"))
+            for p in model.particles.values():
+                if p.isMassive(zeros):
+                    m = p.getMass(zeros)
+                    try:
+                        if float(model.parameters[m]) == 0.0:
+                            zeros.append(m)
+                    except KeyError:
+                        # dependent parameters are not part of parameters dict
+                        pass
+                if p.hasWidth(zeros):
+                    w = p.getWidth(zeros)
+                    try:
+                        if float(model.parameters[w]) == 0.0:
+                            zeros.append(w)
+                    except KeyError:
+                        # dependent parameters are not part of parameters dict
+                        pass
+            conf.setProperty("zero", ",".join(list(set(zeros))))
 
     if conf.getBooleanProperty("unitary_gauge"):
         golem.model.UNITARY_GAUGE = True

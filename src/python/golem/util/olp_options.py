@@ -1,42 +1,48 @@
 # vim: ts=3:sw=3
-import os.path
-import golem.properties
-from golem.util.olp_objects import OLPError
-import math
-
 import logging
+import math
+import os.path
+from collections.abc import Sequence
+from types import FunctionType
+from typing import Any, cast
+
+import golem.properties
+from golem.util.config import Properties
+from golem.util.olp_objects import OLPContractFile, OLPError
 
 logger = logging.getLogger(__name__)
 
-__all_olp_options__ = {}
-__olp_lower_case__ = {}
-__required_olp_options__ = set()
-__required_olp_options_default__ = {}  # called with default value if not present
+__all_olp_options__: dict[str, FunctionType] = {}
+__olp_lower_case__: dict[str, str] = {}
+__required_olp_options__: set[str] = set()
+__required_olp_options_default__: dict[
+    str, FunctionType
+] = {}  # called with default value if not present
 
 __value_OK__ = "OK"
 __value_ERR__ = "Error:"
 
 
-def required_olp_option(f):
+def required_olp_option(f: FunctionType):
     name = f.__name__
     __olp_lower_case__[name.lower()] = name
     __all_olp_options__[name] = f
     __required_olp_options__.add(name)
 
 
-def optional_olp_option(f):
+def optional_olp_option(f: FunctionType):
     name = f.__name__
     __olp_lower_case__[name.lower()] = name
     __all_olp_options__[name] = f
 
 
-def required_olp_option_default(default):
-    def wrap(f):
+def required_olp_option_default(default: Sequence[str]):
+    def wrap(f: FunctionType):
         name = f.__name__
         __olp_lower_case__[name.lower()] = name
         __all_olp_options__[name] = f
 
-        def wrapped_f(*args):
+        def wrapped_f(*args: Any):
             f(default, *args)
 
         __required_olp_options_default__[name] = wrapped_f
@@ -46,7 +52,7 @@ def required_olp_option_default(default):
 
 
 @optional_olp_option
-def MatrixElementSquareType(values, conf, ignore_case):
+def MatrixElementSquareType(values: Sequence[str], conf: Properties, ignore_case: bool):
     err_flag = False
 
     supported_values = [
@@ -61,11 +67,11 @@ def MatrixElementSquareType(values, conf, ignore_case):
         "NoTreeLevel",
     ]
 
-    lower_case_values = {}
+    lower_case_values: dict[str, str] = {}
     for name in supported_values:
         lower_case_values[name.lower()] = name
 
-    checked_values = []
+    checked_values: list[str] = []
     for value in values:
         if ignore_case:
             lvalue = value.lower()
@@ -149,48 +155,57 @@ def MatrixElementSquareType(values, conf, ignore_case):
 
 
 @required_olp_option
-def IRregularisation(values, conf, ignore_case):
-    err_flag = False
+def IRregularisation(values: Sequence[str], conf: Properties, ignore_case: bool):
     supported_values = ["tHV", "DRED", "CDR"]
-    return expect_one_keyword(values, conf, ignore_case, "olp.irregularisation", supported_values)
+    return expect_one_keyword(
+        values, conf, ignore_case, "olp.irregularisation", supported_values
+    )
 
 
 @optional_olp_option
-def IRsubtractionMethod(values, conf, ignore_case):
-    err_flag = False
+def IRsubtractionMethod(values: Sequence[str], conf: Properties, ignore_case: bool):
     supported_values = ["None"]
-    return expect_one_keyword(values, conf, ignore_case, "olp.irsubtractionmethod", supported_values)
+    return expect_one_keyword(
+        values, conf, ignore_case, "olp.irsubtractionmethod", supported_values
+    )
 
 
 @optional_olp_option
-def MassiveParticleScheme(values, conf, ignore_case):
-    err_flag = False
+def MassiveParticleScheme(
+    _values: Sequence[str], _conf: Properties, _ignore_case: bool
+):
     # GoSam does not support setting the mass scheme via BLHA.
-    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticleScheme'."
-                   + " This option will be IGNORED, as GoSam does not support EW renormalisation, for which"
-                   + " the scheme choice becomes relevant. If you still wish to choose something like the "
-                   + "complex-mass-scheme (at tree-level), please implement this in your model file(s). "
-                   + "For the SM you can use a built-in model: sm_complex or smdiag_complex.")
+    logger.warning(
+        "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticleScheme'."
+        + " This option will be IGNORED, as GoSam does not support EW renormalisation, for which"
+        + " the scheme choice becomes relevant. If you still wish to choose something like the "
+        + "complex-mass-scheme (at tree-level), please implement this in your model file(s). "
+        + "For the SM you can use a built-in model: sm_complex or smdiag_complex."
+    )
     return __value_OK__
     # supported_values = ["OnShell"]
     # return expect_one_keyword(values, conf, ignore_case, "olp.massiveparticlescheme", supported_values)
 
 
 @optional_olp_option
-def OperationMode(values, conf, ignore_case):
+def OperationMode(values: Sequence[str], conf: Properties, ignore_case: bool):
     supported_values = ["CouplingsStrippedOff"]
 
-    return expect_many_keywords(values, conf, ignore_case, "olp.operationmode", supported_values)
+    return expect_many_keywords(
+        values, conf, ignore_case, "olp.operationmode", supported_values
+    )
 
 
 @required_olp_option
-def CorrectionType(values, conf, ignore_case):
+def CorrectionType(values: Sequence[str], conf: Properties, ignore_case: bool):
     supported_values = ["QCD", "EW", "QED"]
-    return expect_one_keyword(values, conf, ignore_case, "olp.correctiontype", supported_values)
+    return expect_one_keyword(
+        values, conf, ignore_case, "olp.correctiontype", supported_values
+    )
 
 
 @optional_olp_option
-def ModelFile(values, conf, ignore_case):
+def ModelFile(values: Sequence[str], conf: Properties, _ignore_case: bool):
     file_name = " ".join(values)
     conf["olp.modelfile"] = file_name
     if os.path.exists(file_name):
@@ -198,8 +213,9 @@ def ModelFile(values, conf, ignore_case):
     else:
         return __value_ERR__ + "model file does not exist."
 
+
 @optional_olp_option
-def ParameterCard(values, conf, ignore_case):
+def ParameterCard(values: Sequence[str], conf: Properties, ignore_case: bool):
     file_name = " ".join(values)
     conf["olp.modelfile"] = file_name
     if os.path.exists(file_name):
@@ -209,13 +225,15 @@ def ParameterCard(values, conf, ignore_case):
 
 
 @optional_olp_option
-def SubdivideSubprocess(values, conf, ignore_case):
+def SubdivideSubprocess(values: Sequence[str], conf: Properties, ignore_case: bool):
     supported_values = ["yes", "no", "true", "false"]
-    return expect_one_keyword(values, conf, ignore_case, "olp.subdivide", supported_values)
+    return expect_one_keyword(
+        values, conf, ignore_case, "olp.subdivide", supported_values
+    )
 
 
 @optional_olp_option
-def Model(values, conf, ignore_case):
+def Model(values: Sequence[str], conf: Properties, ignore_case: bool):
     if len(values) >= 1 and values[0][:5].lower() == "ufo:/":
         file_name = os.path.abspath(" ".join(values)[4:].strip())
         conf["olp.ufomodel"] = file_name
@@ -227,7 +245,9 @@ def Model(values, conf, ignore_case):
             conf[golem.properties.model] = ["FeynRules", file_name]
             return __value_OK__
         else:
-            logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
+            logger.critical(
+                "UFOModel which expands to '%s' does not exist." % file_name
+            )
             return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
     supported_values = ["SMdiag", "SMnondiag"]
@@ -235,7 +255,7 @@ def Model(values, conf, ignore_case):
 
 
 @optional_olp_option
-def CouplingPower(values, conf, ignore_case):
+def CouplingPower(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 2:
         return __value_ERR__ + "too many values."
 
@@ -261,7 +281,7 @@ def CouplingPower(values, conf, ignore_case):
 
 
 @optional_olp_option
-def AlphasPower(values, conf, ignore_case):
+def AlphasPower(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "too many values."
     elif len(values) == 1:
@@ -277,7 +297,7 @@ def AlphasPower(values, conf, ignore_case):
 
 
 @optional_olp_option
-def AlphaPower(values, conf, ignore_case):
+def AlphaPower(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "too many values."
     elif len(values) == 1:
@@ -293,16 +313,23 @@ def AlphaPower(values, conf, ignore_case):
 
 
 @optional_olp_option
-def EWScheme(values, conf, ignore_case):
+def EWScheme(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "too many values."
-    supported_values = ["alphaGF", "alpha0", "alphaMZ", "alphaRUN", "alphaMSbar", "OLPDefined"]
+    supported_values = [
+        "alphaGF",
+        "alpha0",
+        "alphaMZ",
+        "alphaRUN",
+        "alphaMSbar",
+        "OLPDefined",
+    ]
     ret = expect_one_keyword(values, conf, True, "olp.ewscheme", supported_values)
     return ret
 
 
 @optional_olp_option
-def WidthScheme(values, conf, ignore_case):
+def WidthScheme(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "too many values."
     supported_values = ["ComplexMass", "FixedWidth"]
@@ -313,7 +340,7 @@ def WidthScheme(values, conf, ignore_case):
 
 
 @optional_olp_option
-def AmplitudeType(values, conf, ignore_case):
+def AmplitudeType(values: Sequence[str], conf: Properties, _ignore_case: bool):
     # Amplitudetype LoopInterference (alias: LIEffInterference) is an extension to BLHA2 -> deactivated. Use GoSam3's EFT features instead
     if len(values) > 1:
         return __value_ERR__ + "too many values."
@@ -324,38 +351,43 @@ def AmplitudeType(values, conf, ignore_case):
         "scTree",
         "scTree2",
         "LoopInduced",
-        #"LoopInterference",
-        #"LIEffInterference",
+        # "LoopInterference",
+        # "LIEffInterference",
         "ccLoop",
         "scLoop",
     ]
     ret = expect_one_keyword(values, conf, True, "olp.amplitudetype", supported_values)
     if hasattr(conf, "psp_chk_method_last"):
         # reset PSP_chk_method if necessary
-        conf["PSP_chk_method"] = conf.psp_chk_method_last if conf.psp_chk_method_last else "Automatic"
-    if ret.startswith(__value_OK__) and "tree" in conf["olp.amplitudetype"].lower():
+        conf["PSP_chk_method"] = (
+            conf.psp_chk_method_last if conf.psp_chk_method_last else "Automatic"
+        )
+    if (
+        ret.startswith(__value_OK__)
+        and "tree" in cast(str, conf["olp.amplitudetype"]).lower()
+    ):
         conf["olp.no_tree_level"] = False
         conf["olp.no_loop_level"] = True
     if ret.startswith(__value_OK__) and (
-        "loopinduced" in conf["olp.amplitudetype"].lower()
-        or "ccloop" in conf["olp.amplitudetype"].lower()
-        or "scloop" in conf["olp.amplitudetype"].lower()
+        "loopinduced" in cast(str, conf["olp.amplitudetype"]).lower()
+        or "ccloop" in cast(str, conf["olp.amplitudetype"]).lower()
+        or "scloop" in cast(str, conf["olp.amplitudetype"]).lower()
     ):
         conf["olp.no_tree_level"] = True
         conf["olp.no_loop_level"] = False
-#    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
-#        "loopinterference",
-#        "lieffinterference",
-#    ]:
-#        conf["olp.no_tree_level"] = False
-#        conf["olp.no_loop_level"] = False
-#        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
-#            conf.psp_chk_method_last = conf["PSP_chk_method"]
-#            conf["PSP_chk_method"] = "LoopInduced"
+    #    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
+    #        "loopinterference",
+    #        "lieffinterference",
+    #    ]:
+    #        conf["olp.no_tree_level"] = False
+    #        conf["olp.no_loop_level"] = False
+    #        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
+    #            conf.psp_chk_method_last = conf["PSP_chk_method"]
+    #            conf["PSP_chk_method"] = "LoopInduced"
     elif ret.startswith(__value_OK__) and (
-        "loop" in conf["olp.amplitudetype"].lower()
-        and not "ccloop" in conf["olp.amplitudetype"].lower()
-        and not "scloop" in conf["olp.amplitudetype"].lower()
+        "loop" in cast(str, conf["olp.amplitudetype"]).lower()
+        and "ccloop" not in cast(str, conf["olp.amplitudetype"]).lower()
+        and "scloop" not in cast(str, conf["olp.amplitudetype"]).lower()
     ):
         conf["olp.no_tree_level"] = False
         conf["olp.no_loop_level"] = False
@@ -366,7 +398,7 @@ def AmplitudeType(values, conf, ignore_case):
 
 
 @optional_olp_option
-def Precision(values, conf, ignore_case):
+def Precision(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "requires one value."
     if len(values) == 1:
@@ -381,7 +413,7 @@ def Precision(values, conf, ignore_case):
 
 
 @optional_olp_option
-def AccuracyTarget(values, conf, ignore_case):
+def AccuracyTarget(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) > 1:
         return __value_ERR__ + "requires one value."
     if len(values) == 1:
@@ -396,11 +428,11 @@ def AccuracyTarget(values, conf, ignore_case):
 
 
 @optional_olp_option
-def DebugUnstable(values, conf, ignore_case):
+def DebugUnstable(values: Sequence[str], conf: Properties, _ignore_case: bool):
     supported_values = ["yes", "no", "true", "false"]
     ret = expect_one_keyword(values, conf, True, "PSP_verbosity", supported_values)
     if ret == __value_OK__:
-        if conf["PSP_verbosity"].lower() in ["yes", "true"]:
+        if cast(str, conf["PSP_verbosity"]).lower() in ["yes", "true"]:
             conf["PSP_verbosity"] = "True"
         else:
             conf["PSP_verbosity"] = "False"
@@ -408,19 +440,22 @@ def DebugUnstable(values, conf, ignore_case):
 
 
 @optional_olp_option
-def PrecisionCheck(values, conf, ignore_case):
-    supported_values = ["disabled", "off"] + golem.properties.config_PSP_chk_method._options
+def PrecisionCheck(values: Sequence[str], conf: Properties, _ignore_case: bool):
+    supported_values = [
+        "disabled",
+        "off",
+    ] + cast(list[str], golem.properties.config_PSP_chk_method._options)
     ret = expect_one_keyword(values, conf, True, "PSP_chk_method", supported_values)
     if ret == __value_OK__:
-        if conf["PSP_chk_method"].lower() in ["disabled", "off"]:
+        if cast(str, conf["PSP_chk_method"]).lower() in ["disabled", "off"]:
             conf["PSP_chk_method"] = "Automatic"
             conf["PSP_check"] = "False"
     return ret
 
 
 @optional_olp_option
-def ExcludedParticles(values, conf, ignore_case):
-    excl = []
+def ExcludedParticles(values: Sequence[str], conf: Properties, _ignore_case: bool):
+    excl: list[str] = []
     for p in values:
         try:
             excl.append(str(int(p)))
@@ -431,15 +466,17 @@ def ExcludedParticles(values, conf, ignore_case):
 
 
 @optional_olp_option
-def MassiveParticles(values, conf, ignore_case):
-    # Deactivated to avoid unintuitive behaviour. Particle 
-    # masses should be taken as in the model file or set to 
+def MassiveParticles(_values: Sequence[str], conf: Properties, _ignore_case: bool):
+    # Deactivated to avoid unintuitive behaviour. Particle
+    # masses should be taken as in the model file or set to
     # zero (if desired) through the process card (*.in or *.rc)
-    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticles'." 
-                   + " To prevent any unintuitive behaviour this option is IGNORED! Particle masses "
-                   + "are taken as defined in the model file. If you wish to set any of them to zero "
-                   + "please provide an additional process card (*.in or *.rc file) through the "
-                   " --config flag and add the masses to the 'zero' property.")
+    logger.warning(
+        "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticles'."
+        + " To prevent any unintuitive behaviour this option is IGNORED! Particle masses "
+        + "are taken as defined in the model file. If you wish to set any of them to zero "
+        + "please provide an additional process card (*.in or *.rc file) through the "
+        " --config flag and add the masses to the 'zero' property."
+    )
     if conf["__OLP_BLHA2__"] == "False" or conf["__OLP_BLHA2__"] is None:
         return __value_ERR__ + " option only allowed with InterfaceVersion BLHA2."
     # massive = []
@@ -453,27 +490,31 @@ def MassiveParticles(values, conf, ignore_case):
 
 
 @optional_olp_option
-def LightMassiveParticles(values, conf, ignore_case):
+def LightMassiveParticles(
+    _values: Sequence[str], _conf: Properties, _ignore_case: bool
+):
     return __value_ERR__ + " LightMassiveParticles not supported."
 
 
 @optional_olp_option
-def Extra(values, conf, ignore_case):
+def Extra(values: Sequence[str], conf: Properties, ignore_case: bool):
     if len(values) > 1 and values[0] in __all_olp_options__:
         return __all_olp_options__[values[0]](values[1:], conf, ignore_case)
     return __value_OK__ + " # Ignored by OLP"
 
 
 @required_olp_option_default(["BLHA1"])
-def InterfaceVersion(values, conf, ignore_case):
+def InterfaceVersion(values: Sequence[str], conf: Properties, _ignore_case: bool):
     if len(values) != 1:
         return __value_ERR__ + " unknown version"
     version = str(values[0]).upper()
     if version == "BLHA1":
         conf["__OLP_BLHA1__"] = True
         conf["__OLP_BLHA2__"] = False
-        if not conf["extensions"] or not "olp_blha1" in conf["extensions"]:
-            conf["extensions"] = (conf["extensions"] + "," if conf["extensions"] else "") + "olp_blha1"
+        if not conf["extensions"] or "olp_blha1" not in cast(str, conf["extensions"]):
+            conf["extensions"] = (
+                cast(str, conf["extensions"]) + "," if conf["extensions"] else ""
+            ) + "olp_blha1"
             return __value_OK__
     elif version == "BLHA2":
         conf["__OLP_BLHA1__"] = False
@@ -483,7 +524,7 @@ def InterfaceVersion(values, conf, ignore_case):
 
 
 @optional_olp_option
-def UFOModel(values, conf, ignore_case):
+def UFOModel(values: Sequence[str], conf: Properties, _ignore_case: bool):
     """
     NOT YET PART OF THE STANDARD
     """
@@ -500,8 +541,9 @@ def UFOModel(values, conf, ignore_case):
         logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
         return __value_ERR__ + "UFO model does not exist or is not a valid model."
 
+
 @optional_olp_option
-def Parameters(values, conf, ignore_case):
+def Parameters(values: Sequence[str], conf: Properties, _ignore_case: bool):
     """
     NOT YET PART OF THE STANDARD
     """
@@ -515,19 +557,30 @@ def Parameters(values, conf, ignore_case):
     else:
         conf["olp.alphas"] = 0
         conf["olp.parameters"] = parameters
-        logger.warning("WARNING: by convention the first parameter should be 'alpha_s.'")
-        return __value_OK__ + "# WARNING: by convention the first parameter should be 'alpha_s'."
+        logger.warning(
+            "WARNING: by convention the first parameter should be 'alpha_s.'"
+        )
+        return (
+            __value_OK__
+            + "# WARNING: by convention the first parameter should be 'alpha_s'."
+        )
     return __value_OK__
 
 
-def expect_one_keyword(values, conf, ignore_case, key, supported_values):
+def expect_one_keyword(
+    values: Sequence[str],
+    conf: Properties,
+    ignore_case: bool,
+    key: str,
+    supported_values: Sequence[str],
+) -> str:
     err_flag = False
 
-    lower_case_values = {}
+    lower_case_values: dict[str, str] = {}
     for name in supported_values:
         lower_case_values[name.lower()] = name
 
-    checked_values = []
+    checked_values: list[str] = []
     for value in values:
         if ignore_case:
             lvalue = value.lower()
@@ -548,7 +601,12 @@ def expect_one_keyword(values, conf, ignore_case, key, supported_values):
             str_val = ""
         else:
             str_val = supported_values[0]
-        return __value_ERR__ + " Unsupported values encountered.\n" + "# Supported values: " + str_val
+        return (
+            __value_ERR__
+            + " Unsupported values encountered.\n"
+            + "# Supported values: "
+            + str_val
+        )
 
     if len(checked_values) != 1:
         return __value_ERR__ + " Expected exactly one value."
@@ -557,14 +615,20 @@ def expect_one_keyword(values, conf, ignore_case, key, supported_values):
     return __value_OK__
 
 
-def expect_many_keywords(values, conf, ignore_case, key, supported_values):
+def expect_many_keywords(
+    values: Sequence[str],
+    conf: Properties,
+    ignore_case: bool,
+    key: str,
+    supported_values: Sequence[str],
+) -> str:
     err_flag = False
 
-    lower_case_values = {}
+    lower_case_values: dict[str, str] = {}
     for name in supported_values:
         lower_case_values[name.lower()] = name
 
-    checked_values = []
+    checked_values: list[str] = []
     for value in values:
         if ignore_case:
             lvalue = value.lower()
@@ -585,17 +649,34 @@ def expect_many_keywords(values, conf, ignore_case, key, supported_values):
             str_val = ""
         else:
             str_val = supported_values[0]
-        return __value_ERR__ + " Unsupported values encountered.\n" + "# Supported values: " + str_val
+        return (
+            __value_ERR__
+            + " Unsupported values encountered.\n"
+            + "# Supported values: "
+            + str_val
+        )
 
     conf[key] = ",".join(checked_values)
 
     return __value_OK__
 
 
-def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_lineno=None, quiet=False):
+def process_olp_options(
+    contract_file: OLPContractFile,
+    conf: Properties,
+    ignore_case: bool,
+    ignore_unknown: bool,
+    until_lineno: int | None = None,
+    quiet: bool = False,
+):
     global __all_olp_options__, __olp_lower_case__, __required_olp_options__
     global __required_olp_options_default__
-    backup = (__all_olp_options__, __olp_lower_case__, __required_olp_options__, __required_olp_options_default__)
+    backup = (
+        __all_olp_options__,
+        __olp_lower_case__,
+        __required_olp_options__,
+        __required_olp_options_default__,
+    )
     error_count = 0
     missing = set(__required_olp_options__)
     for lineno, name, values in contract_file.options_ordered():
@@ -606,10 +687,14 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
         elif name in __all_olp_options__:
             key = name
         elif ignore_unknown:
-            contract_file.setPropertyResponseOrdered(name, __value_OK__ + " # Ignored by OLP", lineno)
+            contract_file.setPropertyResponseOrdered(
+                name, __value_OK__ + " # Ignored by OLP", lineno
+            )
             continue
         else:
-            contract_file.setPropertyResponseOrdered(name, "Error: Unknown by OLP", lineno)
+            contract_file.setPropertyResponseOrdered(
+                name, "Error: Unknown by OLP", lineno
+            )
             if not quiet:
                 logger.critical("Line %s: Keyword '%s' unknown." % (name, lineno))
             error_count += 1
@@ -625,7 +710,9 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
         contract_file.setPropertyResponseOrdered(name, response, lineno)
         if not contract_file.isPropertyOk(name):
             if not quiet:
-                logger.critical("Line %s: Option '%s' failed. %s" % (lineno, name, response))
+                logger.critical(
+                    "Line %s: Option '%s' failed. %s" % (lineno, name, response)
+                )
             error_count += 1
     for key in __required_olp_options_default__:
         handler = __required_olp_options_default__[key]
@@ -637,6 +724,11 @@ def process_olp_options(contract_file, conf, ignore_case, ignore_unknown, until_
             logger.critical("Missing required options: %s" % ", ".join(missing))
         raise OLPError("Missing required options: %s" % ", ".join(missing))
 
-    (__all_olp_options__, __olp_lower_case__, __required_olp_options__, __required_olp_options_default__) = backup
+    (
+        __all_olp_options__,
+        __olp_lower_case__,
+        __required_olp_options__,
+        __required_olp_options_default__,
+    ) = backup
 
     return error_count == 0

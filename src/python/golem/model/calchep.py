@@ -243,7 +243,7 @@ class Model:
         stubs = ["func", "lgrng", "prtcls", "vars"]
         tables: dict[str, TableReader] = {}
         for stub in stubs:
-            fname = os.path.join(path, "%s%d.mdl" % (stub, idx))
+            fname = os.path.join(path, f"{stub}{idx}.mdl")
             try:
                 with open(fname, "r") as f:
                     tables[stub] = TableReader(f)

@@ -127,7 +127,8 @@ class Model:
     def __init__(
         self,
         model_path: str,
-        model_options: Mapping[str, str | list[str]] | None = None,
+        model_options: Mapping[str, str | int | bool | Sequence[str] | set[str]]
+        | None = None,
         initial_import: bool = True,
         final_import: bool = True,
     ):
@@ -136,7 +137,7 @@ class Model:
         self.final_import = final_import
 
         try:
-            self.MSbaryukawa = self.model_options["MSbaryukawa"]
+            self.MSbaryukawa = cast(set[str], self.model_options["MSbaryukawa"])
         except KeyError:
             self.MSbaryukawa = []
 
@@ -786,8 +787,8 @@ class Model:
                         _ = f.write(",\n")
                     _ = f.write("\t%r: " % name)
                     is_firstcf = True
-                    for pl, cf in list(value.items()):
-                        expr = parser.compile(cast(str, cf))
+                    for pl, cf in value.items():
+                        expr = parser.compile(cf)
                         for fn in cmath_functions:
                             expr = expr.algsubs(
                                 ex.DotExpression(sym_cmath, fn),

@@ -1223,10 +1223,10 @@ def filter_helicities(
     applyfilter = False
     # Check if model is some form of SM:
     if conf["modeltype"] is not None:
-        if any(item.startswith(conf["modeltype"]) for item in smmodels):
+        if any(item.startswith(cast(str, conf["modeltype"])) for item in smmodels):
             applyfilter = True
     if conf["model"] is not None:
-        if any(item.startswith(conf["model"]) for item in smmodels):
+        if any(item.startswith(cast(str, conf["model"])) for item in smmodels):
             applyfilter = True
 
     if applyfilter:
@@ -1278,5 +1278,5 @@ def filter_helicities(
         if conf["symmetries"] is None:
             symmetries = " "
         else:
-            conf["symmetries"] += symmetries
+            conf["symmetries"] = cast(str, conf["symmetries"]) + symmetries
     return conf
