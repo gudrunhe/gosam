@@ -890,16 +890,20 @@ def process_order_file(
         if not os.path.exists(imodel_path):
             logger.info("Creating directory %r" % imodel_path)
             os.mkdir(imodel_path)
-        for lconf in [conf] + subprocesses_conf:
-            # before preparing the model files we need to initialize 'optimized_import' to its default when not set in config
-            lconf.setProperty(
-                "optimized_import",
-                cast(PropValue, lconf.getProperty(golem.properties.optimized_import)),
-            )
-            golem.util.tools.prepare_model_files(lconf, imodel_path)
-
-            lconf["modeltype"] = lconf.getListProperty("model")[-1]
-
+        # before preparing the model files we need to initialize 'optimized_import' to its default when not set in config
+        conf.setProperty(
+            "optimized_import",
+            cast(PropValue, conf.getProperty(golem.properties.optimized_import)),
+        )
+        golem.util.tools.prepare_model_files(conf, imodel_path)
+        conf["modeltype"] = conf.getListProperty("model")[-1]
+        conf["model"] = os.path.join(imodel_path, golem.util.constants.MODEL_LOCAL)
+        for lconf in subprocesses_conf:
+            lconf["is_ufo"] = conf.getBooleanProperty("is_ufo")
+            if conf.getBooleanProperty("is_ufo"):
+                lconf["modeltype"] = lconf.getListProperty("model")[-1]
+            else:
+                lconf["modeltype"] = conf.getListProperty("model")[-1]
             lconf["model"] = os.path.join(imodel_path, golem.util.constants.MODEL_LOCAL)
         # ---#] Import model file once for all subprocesses:
         # ---#[ Constrain masses:

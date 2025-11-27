@@ -416,7 +416,10 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                 os.path.join(path, MODEL_LOCAL + ".hh"),
             )
         if not isufo:
-            copy_file(os.path.join(src_path, model), os.path.join(path, MODEL_LOCAL))
+            copy_file(
+                os.path.join(src_path, model),
+                os.path.join(path, MODEL_LOCAL)
+            )
     elif len(model_lst) == 2:
         if model_lst[0].lower().strip() == "feynrules":
             conf["is_ufo"] = True
