@@ -4,7 +4,7 @@ program main
   
   implicit none
   integer, parameter :: ki = kind(1.0d0)
-  integer, parameter :: NEVT = 10
+  integer, parameter :: NEVT = 1
   integer, parameter :: NCHAN = 10
   integer :: ievt, ierr, ipass, ichan
   integer, dimension(0:NCHAN-1) :: eval_chans
@@ -33,7 +33,7 @@ program main
  
   mu = 100._ki
   
-  do ievt = 1, 1!NEVT
+  do ievt = 1, NEVT
      !call rambo(500._ki**2,vecs)
      call get_reference(ievt,vecs,ref_res)
      call vecs_to_blha(vecs,momenta)
@@ -47,7 +47,7 @@ program main
            close(unit=logf)
            success = .false.
         end if
-        call check_results(ichan,blha_res(ichan,:),ref_res(ichan,:),failed,.false.,logf)
+        call check_results(ichan,blha_res(ichan,:),ref_res(ichan,:),failed,.true.,logf)
         if (failed) then
            success = .false.
         end if
