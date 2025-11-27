@@ -1,7 +1,7 @@
 project('GoSam',
     'fortran',
     'cpp',
-    version: '3.0.2-' + run_command(find_program('git'), 'rev-parse', '--short=7', 'HEAD', capture: true, check: true).stdout().strip(),
+    version: '3.0.3-' + run_command(find_program('git'), 'rev-parse', '--short=7', 'HEAD', capture: true, check: true).stdout().strip(),
     default_options: {
         'buildtype': 'release',
         'bindir': get_option('bindir') + '/GoSam',
