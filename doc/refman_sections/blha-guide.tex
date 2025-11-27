@@ -39,7 +39,7 @@ MatrixElementSquareType  CHsummed
 \centering
 \begin{lstlisting}[title={BLHA1 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
 # vim: syntax=olp
-#@OLP GoSam 3.0.2
+#@OLP GoSam 3.0.3
 #@IgnoreUnknown False
 #@IgnoreCase False
 #@SyntaxExtensions
@@ -106,7 +106,7 @@ AmplitudeType Tree
 \centering
 \begin{lstlisting}[title={BLHA2 contract file},gobble=0,style=insmall,keepspaces=true,frame=single]
 # vim: syntax=olp
-#@OLP GoSam 3.0.2
+#@OLP GoSam 3.0.3
 #@IgnoreUnknown False
 #@IgnoreCase False
 #@SyntaxExtensions
@@ -462,6 +462,6 @@ all necessary building blocks for a complete NLO calculation. Such a setup has b
 
 \textsc{Whizard} requires the spin-correlations to be passed in the form of the (real  part of the) spin-correlation tensor $B_j^{\mu\nu}$ for particle $j$, instead. It is defined by
 \begin{equation}
-   B_j^{\mu\nu} = \sum_{\lambda,\lambda'}\epsilon_h^\mu(p_j)\epsilon_{\lambda'}^{*\nu}(p_j)\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle\,,
+   B_j^{\mu\nu} = \sum_{\lambda,\lambda'}\epsilon_{\lambda}^\mu(p_j)\epsilon_{\lambda'}^{*\nu}(p_j)\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle\,,
 \end{equation}
 where again a sum over the helicities of the other particles is implicitly understood. Invoking the BLHA interface with the non-standard \texttt{AmplitudeType scTree2} newly implemented in \gosam{}-3.0 will return the relevant entries of $B_j^{\mu\nu}$ in a way which can be directly used in \textsc{Whizard}. Additional phase-factors in $\langle {\cal M}_{j,\lambda}|{\cal M}_{j,\lambda'}\rangle$ related to the fact that \textsc{Whizard} expects the polarization vectors to be defined in the conventions of~\cite{Murayama:1992gi} are taken into account automatically. We remark that this convention for the spin-correlated tree matrix elements conincides with the one used by OpenLoops~\cite{Buccioni:2019sur} in its subroutine \texttt{evaluate\_scpowheg}.

@@ -2,7 +2,7 @@
     #   __   __   ___   __   __  __                      GoSam                     #
     #  / _) /  \ / __) (  ) (  \/  )             An Automated One-Loop             #
     # ( (/\( () )\__ \ /__\  )    (             Matrix Element Generator           #
-    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.0.2                     #
+    #  \__/ \__/ (___/(_)(_)(_/\/\_)             Version 3.0.3                     #
     #                                                                              #
     #                                    (c) The GoSam Collaboration 2011-2025     #
     #                                                                              #
