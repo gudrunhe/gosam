@@ -67,7 +67,7 @@ contains
     real(ki), dimension(0:9,0:3), intent(in) :: res
 
     print '(A9,I3,A1)', "    case(", ievt,")"
-    
+    print '(A36,A25,A20,A23)', "! double pole", "single pole", "finite", "tree"
     do ichan = 0, 9
        ! NOTE: E0.d specifier requires gfortran version >= 10
        print '(A15,I1,A9,4(E19.13,A6))', &

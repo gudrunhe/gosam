@@ -202,9 +202,9 @@ contains
                &   " double pole              ", &
                &   " single pole              ", &
                &   " finite"
-          write(out(iout),*) "GoSam:     ", res(0:3)
-          write(out(iout),*) "OpenLoops: ", ref(0:3)
-          write(out(iout),*) "Ratio:     ", res(0:3)/ref(0:3)
+          write(out(iout),*) "GoSam:     ", res(3), res(0:2)
+          write(out(iout),*) "OpenLoops: ", ref(3), ref(0:2)
+          write(out(iout),*) "Ratio:     ", res(3)/ref(3), res(0:2)/ref(0:2)
        end do
        close(unit=logf)           
     end if
