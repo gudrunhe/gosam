@@ -745,13 +745,13 @@ def process_order_file(
     f_contract: TextIO,
     path: str,
     default_conf: Properties,
-    templates: str | None = None,
+    templates: list[str] | str | None = None,
     ignore_case: bool = False,
     ignore_unknown: bool = False,
     from_scratch: bool = False,
     mc_name: str = "any",
     use_crossings: bool = True,
-    **opts: bool,
+    **opts: bool | str,
 ) -> int:
     syntax_extensions = ["single_quotes", "double_quotes", "backslash_escape"]
 
@@ -879,6 +879,80 @@ def process_order_file(
         )
         subprocesses_conf.append(subconf)
 
+    # ---#[ Select regularisation scheme:
+    for lconf in [conf] + subprocesses_conf:
+        # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
+        # in config file (if present). The following behaviour is implemented:
+        #
+        # OLP  | config (from e.g. golem.in)  | result
+        # -----------------------------------------------------------------------
+        # tHV  | None                         | "dred" + "convert_to_thv = True"
+        # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False"
+        # tHV  | thv in extensions            | "thv"  + "convert_to_thv = False"
+        # DRED | None                         | "dred" + "convert_to_thv = False"
+        # DRED | regularisation_scheme=dred   | "dred" + "convert_to_thv = False"
+        # DRED | dred in extensions           | "dred" + "convert_to_thv = False"
+        # DRED | convert_to_thv=True          | "dred" + "convert_to_thv = True"
+        #
+        #
+        # In case of mismatch execution is terminated.
+        #
+        # OLP  | config (from e.g. golem.in)  | result
+        # -----------------------------------------------------------------------
+        # tHV  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
+        # tHV  | dred in extensions           | mismatch -> ERROR (terminate)
+        # DRED | regularisation_scheme=thv    | mismatch -> ERROR (terminate)
+        # DRED | thv in extensions            | mismatch -> ERROR (terminate)
+         
+        ir_scheme = cast(str, lconf["olp.irregularisation"]).upper()
+        ext = cast(list[str], lconf.getListProperty(golem.properties.extensions))
+        uext = [s.upper() for s in ext] 
+
+        # check BLHA regularisation scheme vs regularisation_scheme or extensions in setup file (if present)
+        mismatch_schemes = [False, None] 
+        if ir_scheme == "CDR":
+            logger.warning(
+                "GoSam results are returned in the 't Hooft-Veltman scheme,\n"
+                "which differs from requested CDR scheme at O(eps). For \n"
+                "ordinary NLO calculations this should not be a problem."
+            )
+            ir_scheme = "THV" 
+        if config_ir_scheme is not None:
+            if config_ir_scheme != ir_scheme:
+                mismatch_schemes = [True, config_ir_scheme]
+        if ext_ir_scheme is not None:
+            if ext_ir_scheme != ir_scheme:
+                mismatch_schemes = [True, ext_ir_scheme] 
+
+        if mismatch_schemes[0]:
+            logger.critical(
+                "IR regularisation scheme specified in BLHA-file conflicts with "
+                "scheme specified in config file(s)\n %r:\n %r vs. %r"
+                % (default_conf["extra_setup_file"], ir_scheme, mismatch_schemes[1])
+            )
+            sys.exit("GoSam terminated due to an error") 
+
+        # choose behaviour according to table above
+        if ir_scheme == "DRED":
+            if "DRED" not in uext:
+                lconf["olp." + str(golem.properties.extensions)] = "DRED"
+        elif ir_scheme == "THV":
+            if config_ir_scheme is None and ext_ir_scheme is None:
+                if "DRED" not in uext:
+                    lconf["olp." + str(golem.properties.extensions)] = "DRED"
+                lconf["convert_to_thv"] = True
+            else:
+                # at this point we can be sure that at least one of config_ir_scheme or
+                # ext_ir_scheme equal "tHV" because of the check above
+                if "tHV" not in uext:
+                    lconf["olp." + str(golem.properties.extensions)] = "tHV"
+                lconf["convert_to_thv"] = False
+        else:
+            logger.critical("BLHA-file does not specify IRregularisation!")
+            sys.exit("GoSam terminated due to an error")
+
+    fill_config(conf)
+
     # ---#] Read order file:
     if file_ok:
         if not os.path.exists(path):
@@ -890,16 +964,11 @@ def process_order_file(
         if not os.path.exists(imodel_path):
             logger.info("Creating directory %r" % imodel_path)
             os.mkdir(imodel_path)
-        # before preparing the model files we need to initialize 'optimized_import' to its default when not set in config
-        conf.setProperty(
-            "optimized_import",
-            cast(PropValue, conf.getProperty(golem.properties.optimized_import)),
-        )
         golem.util.tools.prepare_model_files(conf, imodel_path)
         conf["modeltype"] = conf.getListProperty("model")[-1]
         conf["model"] = os.path.join(imodel_path, golem.util.constants.MODEL_LOCAL)
         for lconf in subprocesses_conf:
-            lconf["is_ufo"] = conf.getBooleanProperty("is_ufo")
+            lconf["is_ufo"] = cast(bool, conf.getBooleanProperty("is_ufo"))
             if conf.getBooleanProperty("is_ufo"):
                 lconf["modeltype"] = lconf.getListProperty("model")[-1]
             else:
@@ -934,66 +1003,9 @@ def process_order_file(
 
         model = golem.util.tools.getModel(model_conf, imodel_path)
 
-        # zero property: convert masses and width defined through PDG code to internal parameter name
-        # (depends on model, so model.py must have been created already)
-        orig_zero = cast(list[str], conf.getListProperty("zero"))
-        new_zero: list[str] = []
-        for z in orig_zero:
-            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
-            if massmatch:
-                nz = re.sub(r"\;", r"),mass(", z.lower()).split(",")
-                new_zero.extend(nz)
-                continue
-            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
-            if widthmatch:
-                nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
-                new_zero.extend(nz)
-                continue
-            new_zero.append(z)
-        for p in model.particles.values():
-            searchm = "mass(" + str(abs(p.getPDGCode())) + ")"
-            if searchm in list(map(str.lower, new_zero)):
-                new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
-                if p.isMassive():
-                    new_zero.append(p.getMass())
-            searchw = "width(" + str(abs(p.getPDGCode())) + ")"
-            if searchw in list(map(str.lower, new_zero)):
-                new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
-                if p.hasWidth():
-                    new_zero.append(p.getWidth())
-        conf.setProperty("zero", ",".join(list(set(new_zero))))
+        golem.util.tools.process_zero(conf, model)
         for subconf in subprocesses_conf:
-            subconf.setProperty("zero", ",".join(list(set(new_zero))))
-        update_zero(new_zero)
-
-        # It can happen that a model defines names for a particle's mass and width but
-        # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
-        # built-in models). We have to take care of that and add those names to the zero
-        # property to avoid erroneous code generation. Otherwise the user has to remember
-        # to add these cases to 'zero' manually.
-        if not conf.getBooleanProperty("massive_light_fermions"):
-            zeros = cast(list[str], conf.getListProperty("zero"))
-            for p in cast(dict[str, Particle], model.particles).values():
-                if p.isMassive(zeros):
-                    m = p.getMass(zeros)
-                    try:
-                        if float(model.parameters[m]) == 0.0:
-                            zeros.append(m)
-                    except KeyError:
-                        # dependent parameters are not part of parameters dict
-                        pass
-                if p.hasWidth(zeros):
-                    w = p.getWidth(zeros)
-                    try:
-                        if float(model.parameters[w]) == 0.0:
-                            zeros.append(w)
-                    except KeyError:
-                        # dependent parameters are not part of parameters dict
-                        pass
-            conf.setProperty("zero", ",".join(list(set(zeros))))
-            for subconf in subprocesses_conf:
-                subconf.setProperty("zero", ",".join(list(set(zeros))))
-            update_zero(zeros)
+            subconf.setProperty("zero", conf.getProperty("zero"))
 
         # ---#[ Setup excluded and massive particles :
         for lconf in [conf] + subprocesses_conf:
@@ -1018,58 +1030,9 @@ def process_order_file(
                     )
 
             lconf["__excludedParticles__"] = None
-
-            # Deactivated to avoid unintuitive behaviour. Particle
-            # masses should be taken as in the model file or set to
-            # zero (if desired) through the process card (*.in or *.rc)
-
-            # set_massiveParticles = set()
-            # list_default_zero_values = default_conf["zero"].split(",") if default_conf["zero"] else []
-            # list_zero_values = []
-            # list_nonzero_values = []
-            # if lconf["__OLP_BLHA2__"] == "True":  # only supported in BLHA2
-            #     for i in (
-            #         [int(p) for p in lconf["__massiveParticles__"].split()] if lconf["__massiveParticles__"] else []
-            #     ):
-            #         for n in model.particles:
-            #             particle = model.particles[n]
-            #             if particle.getPDGCode() == i:
-            #                 set_massiveParticles.add(particle.getPDGCode())
-            #                 set_massiveParticles.add(-particle.getPDGCode())
-            #                 mass = particle.getMass()
-            #                 if mass != "0":
-            #                     if mass in list_default_zero_values:
-            #                         logger.critical(
-            #                             "BLHA-file specifies particle %r (PDG %r) as massive, which\n" \
-            #                             " conficts with 'zero' list provided in config file(s)\n %r."
-            #                             % (str(particle),particle.getPDGCode(),default_conf["extra_setup_file"]))
-            #                         sys.exit("GoSam terminated due to an error")
-            #                     list_nonzero_values.append(mass)
-            #                 width = particle.getWidth()
-            #                 if width != "0":
-            #                     list_nonzero_values.append(width)
-
-            #     for n in model.particles:
-            #         particle = model.particles[n]
-            #         if particle.getPDGCode() not in set_massiveParticles:
-            #             mass = particle.getMass()
-            #             if mass != "0" and mass not in list_zero_values and mass not in list_nonzero_values:
-            #                 list_zero_values.append(mass)
-            #             width = particle.getWidth()
-            #             if width != "0" and width not in list_zero_values and width not in list_nonzero_values:
-            #                 list_zero_values.append(width)
-            # if list_zero_values:
-            #     if lconf["zero"]:
-            #         lconf["zero"] = lconf["zero"] + "," + ",".join(list_zero_values)
-            #     else:
-            #         lconf["zero"] = ",".join(list_zero_values)
-
-            # lconf["__massiveParticles__"] = None
-
-        # ---#] Setup excluded and massive particles :
+ 
 
         # ---#[ Setup couplings :
-
         for lconf in [conf] + subprocesses_conf:
             _, _, all_couplings = derive_coupling_names(imodel_path, lconf)
             coupling_power = get_power(lconf)
@@ -1104,82 +1067,7 @@ def process_order_file(
                 lconf[golem.properties.one] = ",".join(ones)
                 conf["nlo_prefactors"] = 0
         # ---#] Setup couplings :
-        # ---#[ Select regularisation scheme:
-        for lconf in [conf] + subprocesses_conf:
-            # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
-            # in config file (if present). The following behaviour is implemented:
-            #
-            # OLP  | config (from e.g. golem.in)  | result
-            # -----------------------------------------------------------------------
-            # tHV  | None                         | "dred" + "convert_to_thv = True"
-            # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False"
-            # tHV  | thv in extensions            | "thv"  + "convert_to_thv = False"
-            # DRED | None                         | "dred" + "convert_to_thv = False"
-            # DRED | regularisation_scheme=dred   | "dred" + "convert_to_thv = False"
-            # DRED | dred in extensions           | "dred" + "convert_to_thv = False"
-            # DRED | convert_to_thv=True          | "dred" + "convert_to_thv = True"
-            #
-            #
-            # In case of mismatch execution is terminated.
-            #
-            # OLP  | config (from e.g. golem.in)  | result
-            # -----------------------------------------------------------------------
-            # tHV  | regularisation_scheme=dred   | mismatch -> ERROR (terminate)
-            # tHV  | dred in extensions           | mismatch -> ERROR (terminate)
-            # DRED | regularisation_scheme=thv    | mismatch -> ERROR (terminate)
-            # DRED | thv in extensions            | mismatch -> ERROR (terminate)
 
-            ir_scheme = cast(str, lconf["olp.irregularisation"]).upper()
-            ext = cast(list[str], lconf.getListProperty(golem.properties.extensions))
-            uext = [s.upper() for s in ext]
-
-            # check BLHA regularisation scheme vs regularisation_scheme or extensions in setup file (if present)
-            mismatch_schemes = [False, None]
-
-            if ir_scheme == "CDR":
-                logger.warning(
-                    "GoSam results are returned in the 't Hooft-Veltman scheme,\n"
-                    "which differs from requested CDR scheme at O(eps). For \n"
-                    "ordinary NLO calculations this should not be a problem."
-                )
-                ir_scheme = "THV"
-
-            if config_ir_scheme is not None:
-                if config_ir_scheme != ir_scheme:
-                    mismatch_schemes = [True, config_ir_scheme]
-
-            if ext_ir_scheme is not None:
-                if ext_ir_scheme != ir_scheme:
-                    mismatch_schemes = [True, ext_ir_scheme]
-
-            if mismatch_schemes[0]:
-                logger.critical(
-                    "IR regularisation scheme specified in BLHA-file conflicts with "
-                    "scheme specified in config file(s)\n %r:\n %r vs. %r"
-                    % (default_conf["extra_setup_file"], ir_scheme, mismatch_schemes[1])
-                )
-                sys.exit("GoSam terminated due to an error")
-
-            # choose behaviour according to table above
-            if ir_scheme == "DRED":
-                if "DRED" not in uext:
-                    lconf["olp." + str(golem.properties.extensions)] = "DRED"
-            elif ir_scheme == "THV":
-                if config_ir_scheme is None and ext_ir_scheme is None:
-                    if "DRED" not in uext:
-                        lconf["olp." + str(golem.properties.extensions)] = "DRED"
-                    lconf["convert_to_thv"] = True
-                else:
-                    # at this point we can be sure that at least one of config_ir_scheme or
-                    # ext_ir_scheme equal "tHV" because of the check above
-                    if "tHV" not in uext:
-                        lconf["olp." + str(golem.properties.extensions)] = "tHV"
-                    lconf["convert_to_thv"] = False
-            else:
-                logger.critical("BLHA-file does not specify IRregularisation!")
-                sys.exit("GoSam terminated due to an error")
-
-    fill_config(conf)
 
     # ---#[ Iterate over subprocesses:
     subdivide = cast(str, conf.getProperty("olp.subdivide", "no")).lower() in [
@@ -1366,12 +1254,22 @@ def process_order_file(
     if len(powers) == 2:
         generate_tree_diagrams = True
         generate_loop_diagrams = False
+        is_loopinduced = False
     elif len(powers) == 3:
         generate_tree_diagrams = str(powers[1]).strip().lower() != "none"
         generate_loop_diagrams = True
+        is_loopinduced = not generate_tree_diagrams
 
     conf["generate_tree_diagrams"] = generate_tree_diagrams
     conf["generate_loop_diagrams"] = generate_loop_diagrams
+
+    generate_counterterms = (
+        cast(bool, conf.getBooleanProperty("renorm")) 
+        and generate_loop_diagrams 
+        and not is_loopinduced
+    )
+
+    conf["generate_counterterms"] = generate_counterterms
 
     if "ewchoose" in golem.model.MODEL_OPTIONS:
         conf.setProperty("ewchoose", str(golem.model.MODEL_OPTIONS["ewchoose"]))

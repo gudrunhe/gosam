@@ -380,7 +380,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
     # Some options only work with ufo models.
     # For OLP mode: check if property is set already.
     if conf["is_ufo"] is not None:
-        isufo = cast(bool, conf["is_ufo"])
+        isufo = cast(bool, conf.getBooleanProperty("is_ufo"))
     else:
         isufo = False
         conf["is_ufo"] = isufo
@@ -430,10 +430,12 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                 model_path = os.path.join(rel_path, model_path)
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
+            # ToDo: Better way to pass this info?:
             golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
                 list[str],
                 conf.getProperty(cast(Property, golem.properties.MSbar_yukawa)),
             )
+            # END ToDo
             if conf.getBooleanProperty("optimized_import"):
                 # initial import of model; do not have any information on relevant vertices, yet
                 mdl = golem.model.feynrules.Model(
@@ -442,7 +444,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                     initial_import=True,
                     final_import=False,
                 )
-                mdl.store(path, MODEL_LOCAL, order_names=[])
+                order_names = []
             else:
                 mdl = golem.model.feynrules.Model(
                     model_path,
@@ -458,8 +460,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                 )
                 if order_names == [""]:
                     order_names = []
-                mdl.store(path, MODEL_LOCAL, order_names)
-            # TODO: Use proper UFO model instead of generated QGRAF model
+            mdl.store(path, MODEL_LOCAL, order_names)
             conf.setProperty("model_path", model_path)
             logger.info("Done with model import.")
         else:
@@ -487,14 +488,6 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
     else:
         logger.critical("Parameter 'model' cannot have more than two entries.")
         sys.exit("GoSam terminated due to an error")
-
-    if not conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty(
-        "optimized_import"
-    ):
-        logger.warning(
-            "optimized_import is a UFO specific feature, but you are not using a UFO model. => Turning it off."
-        )
-        conf.setProperty("optimized_import", False)
 
     if len(golem.model.MODEL_DATA) == 0:
         model_module = getModel(conf, path)
@@ -1034,19 +1027,22 @@ def optimize_model(
         model_path = cast(str, conf["modeltype"])
     else:
         model_path = cast(str, conf["model_path"])
+    # ToDo: Better way to pass this info? 
+    #       Remove redundancy with prepare_model_files?
     golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
     golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
         list[str], conf.getProperty(cast(Property, golem.properties.MSbar_yukawa))
     )
+    # END ToDo
     mdl = golem.model.feynrules.Model(
         model_path, golem.model.MODEL_OPTIONS, initial_import=False, final_import=True
     )
-    order_names = sorted(
+    order_names: list[str] = sorted(
         cast(list[str], conf.getProperty(cast(Property, golem.properties.order_names)))
     )
     if order_names == [""]:
         order_names = []
-    MODEL_LOCAL = cast(str, golem.util.constants.MODEL_LOCAL)
+    MODEL_LOCAL: str = cast(str, golem.util.constants.MODEL_LOCAL)
     mdl.store(path, MODEL_LOCAL, order_names)
     # Remove model.py from cache so it will be reloaded:
     if MODEL_LOCAL in conf.cache:
@@ -1082,3 +1078,58 @@ def extract_vertices(diagrams: None | fg.DiagramContainer):
         for d in diagrams:
             vertices |= set(v.interaction().name() for v in d.vertices())
     return vertices
+
+
+def process_zero(conf, model) -> None:
+    # zero property: convert masses and width defined through PDG code to internal parameter name
+    # (depends on model, so model.py must have been created already)
+    orig_zero: list[str] = cast(list[str], conf.getListProperty("zero"))
+    new_zero: list[str] = []
+    for z in orig_zero:
+        massmatch: re.Match[str] | None = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
+        if massmatch:
+            nz: list[str] = re.sub(r"\;", r"),mass(", z.lower()).split(",")
+            new_zero.extend(nz)
+            continue
+        widthmatch: re.Match[str] | None = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
+        if widthmatch:
+            nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
+            new_zero.extend(nz)
+            continue
+        new_zero.append(z)
+    for p in model.particles.values():
+        searchm: str = "mass(" + str(abs(p.getPDGCode())) + ")"
+        if searchm in list(map(str.lower, new_zero)):
+            new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
+            if p.isMassive():
+                new_zero.append(p.getMass())
+        searchw: str = "width(" + str(abs(p.getPDGCode())) + ")"
+        if searchw in list(map(str.lower, new_zero)):
+            new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
+            if p.hasWidth():
+                new_zero.append(p.getWidth())
+    # It can happen that a model defines names for a particle's mass and width but
+    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+    # built-in models). We have to take care of that and add those names to the zero
+    # property to avoid erroneous code generation. Otherwise the user has to remember
+    # to add these cases to 'zero' manually.
+    if not conf.getBooleanProperty("massive_light_fermions"):
+        for p in cast(dict[str, Particle], model.particles).values():
+            if p.isMassive(new_zero):
+                m: str = p.getMass(new_zero)
+                try:
+                    if float(model.parameters[m]) == 0.0:
+                        new_zero.append(m)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+            if p.hasWidth(new_zero):
+                w: str = p.getWidth(new_zero)
+                try:
+                    if float(model.parameters[w]) == 0.0:
+                        new_zero.append(w)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+    conf.setProperty("zero", ",".join(list(set(new_zero))))
+    golem.model.update_zero(new_zero)

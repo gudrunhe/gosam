@@ -18,7 +18,6 @@ from golem.diagrams.checks import analyze_loop, check_tree
 from golem.diagrams.main_feyngraph import run_feyngraph
 from golem.diagrams.objects import LoopCache
 from golem.installation import GOLEM_REVISION, GOLEM_VERSION, LIB_DIR
-from golem.model import update_zero
 from golem.util.config import GolemConfigError, Properties, PropValue, split_power
 from golem.util.path import golem_path
 from golem.util.tools import generate_particle_lists
@@ -569,6 +568,13 @@ def fill_config(conf: Properties):
                 "You have to specify the perturbative order of your process!"
             )
 
+    # we need know early if we are dealing with an UFO model
+    if cast(list[str], conf.getProperty(cast(str, golem.properties.model)))[0].lower().strip() == "feynrules" \
+        or conf.getBooleanProperty("is_ufo"):
+        conf.setProperty("is_ufo",True)
+    else:
+        conf.setProperty("is_ufo",False)
+
     # Check for non-fatal incompatible configurations:
     orders = split_power(
         ",".join(map(str, conf.getListProperty(golem.properties.coupling_power)))
@@ -617,6 +623,15 @@ def fill_config(conf: Properties):
             + "The following settings will therefore have no effect:\n"
             + warn_str
         )
+
+    if not conf.getBooleanProperty("is_ufo") and conf.getBooleanProperty(
+        "optimized_import"
+    ):
+        logger.warning(
+            "optimized_import is a UFO specific feature, but you are not using a UFO model. => Turning it off."
+        )
+        conf.setProperty("optimized_import", False)
+
 
     # Check for fatal incompatible configurations:
     raise_err = False
@@ -985,65 +1000,10 @@ def workflow(conf: Properties):
     # here we create it:
     golem.util.tools.prepare_model_files(conf)
 
-    # zero property: convert masses and width defined through PDG code to internal parameter name
-    # (depends on model, so model.py must have been created already)
-    # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf.getBooleanProperty("__OLP_MODE__"):
-        model = golem.util.tools.getModel(conf)
-        orig_zero = cast(list[str], conf.getListProperty("zero"))
-        new_zero: list[str] = []
-        for z in orig_zero:
-            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
-            if massmatch:
-                nz = re.sub(r"\;", r"),mass(", z.lower()).split(",")
-                new_zero.extend(nz)
-                continue
-            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
-            if widthmatch:
-                nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
-                new_zero.extend(nz)
-                continue
-            new_zero.append(z)
-
-        for p in model.particles.values():
-            searchm = "mass(" + str(abs(p.getPDGCode())) + ")"
-            if searchm in list(map(str.lower, new_zero)):
-                new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
-                if p.isMassive():
-                    new_zero.append(p.getMass())
-            searchw = "width(" + str(abs(p.getPDGCode())) + ")"
-            if searchw in list(map(str.lower, new_zero)):
-                new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
-                if p.hasWidth():
-                    new_zero.append(p.getWidth())
-        conf.setProperty("zero", ",".join(list(set(new_zero))))
-        update_zero(new_zero)
-        # It can happen that a model defines names for a particle's mass and width but
-        # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
-        # built-in models). We have to take care of that and add those names to the zero
-        # property to avoid erroneous code generation. Otherwise the user has to remember
-        # to add these cases to 'zero' manually.
         # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
-        if not conf.getBooleanProperty("massive_light_fermions"):
-            zeros = cast(list[str], conf.getListProperty("zero"))
-            for p in model.particles.values():
-                if p.isMassive(zeros):
-                    m = p.getMass(zeros)
-                    try:
-                        if float(model.parameters[m]) == 0.0:
-                            zeros.append(m)
-                    except KeyError:
-                        # dependent parameters are not part of parameters dict
-                        pass
-                if p.hasWidth(zeros):
-                    w = p.getWidth(zeros)
-                    try:
-                        if float(model.parameters[w]) == 0.0:
-                            zeros.append(w)
-                    except KeyError:
-                        # dependent parameters are not part of parameters dict
-                        pass
-            conf.setProperty("zero", ",".join(list(set(zeros))))
+        model = golem.util.tools.getModel(conf)
+        golem.util.tools.process_zero(conf, model)
 
     if conf.getBooleanProperty("unitary_gauge"):
         golem.model.UNITARY_GAUGE = True

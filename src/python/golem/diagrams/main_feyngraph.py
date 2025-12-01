@@ -300,7 +300,7 @@ boundary={BOUNDARY}
 
 def vertex_type(v: fg.Vertex) -> int:
     if v.interaction().order("CT") > 0:
-        return 0
+        return -1
     elif v.interaction().order("NP") > 0:
         return v.interaction().order("NP")
     else:
