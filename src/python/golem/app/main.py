@@ -129,6 +129,12 @@ def main(argv: list[str] = sys.argv):
         action="store_true",
         dest="from_scratch",
     )
+    _ = parser.add_argument(
+        "--no-clean",
+        help="Do not remove temporary files generated during code generation.",
+        action="store_true",
+        dest="no_clean",
+    )
     _ = parser.add_argument("config_file", nargs="+")
 
     cmd_args = parser.parse_args(argv[1:])
@@ -247,12 +253,12 @@ def main(argv: list[str] = sys.argv):
                 if cast(bool, cmd_args.generate_profile):
                     stats_file = os.path.join(path, "pstats")
                     cProfile.run(
-                        "workflow(c);generate_process_files(c, from_scratch)",
+                        "workflow(c);generate_process_files(c, from_scratch, no_clean)",
                         stats_file,
                     )
                 else:
                     workflow(c)
-                    generate_process_files(c, cast(bool, cmd_args.from_scratch))
+                    generate_process_files(c, cast(bool, cmd_args.from_scratch), cast(bool, cmd_args.no_clean))
 
                 write_golem_dir_file(path, in_file, c)
 

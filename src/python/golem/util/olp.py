@@ -565,6 +565,7 @@ def handle_subprocess(
     subprocesses_conf: list[Properties],
     path: str,
     from_scratch: bool,
+    no_clean: bool,
     use_crossings: bool,
     _contract_file: golem.util.olp_objects.OLPContractFile,
 ) -> tuple[
@@ -589,7 +590,7 @@ def handle_subprocess(
         golem.util.main_misc.workflow(subprocess_conf)
         merge_extensions(subprocess_conf, conf)
 
-        golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch)
+        golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch, no_clean)
 
         # ---[ Handle Crossings:
 
@@ -650,7 +651,7 @@ def handle_subprocess(
 
                         # Generate the files for the crossing and apply the filters
                         golem.util.main_misc.generate_process_files(
-                            sp_conf, from_scratch
+                            sp_conf, from_scratch, no_clean
                         )
 
                         # If the crossing is also vetoed, it has to be kept as separate subprocess and be
@@ -702,7 +703,7 @@ def handle_subprocess(
             subprocess_conf["golem.full-name"] = GOLEM_FULL
             subprocess_conf["golem.revision"] = GOLEM_REVISION
             golem.util.main_misc.workflow(subprocess_conf)
-            golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch)
+            golem.util.main_misc.generate_process_files(subprocess_conf, from_scratch, no_clean)
             # Regenerate process files for new parent subprocess if it exists
             if parent_subprocess:
                 parent_path = os.path.join(path, str(parent_subprocess))
@@ -716,7 +717,7 @@ def handle_subprocess(
                 parent_conf["golem.full-name"] = GOLEM_FULL
                 parent_conf["golem.revision"] = GOLEM_REVISION
                 golem.util.main_misc.workflow(parent_conf)
-                golem.util.main_misc.generate_process_files(parent_conf, from_scratch)
+                golem.util.main_misc.generate_process_files(parent_conf, from_scratch, no_clean)
                 helicities[parent_subprocess.id] = list(
                     golem.util.tools.enumerate_and_reduce_helicities(parent_conf)
                 )
@@ -749,6 +750,7 @@ def process_order_file(
     ignore_case: bool = False,
     ignore_unknown: bool = False,
     from_scratch: bool = False,
+    no_clean: bool = False,
     mc_name: str = "any",
     use_crossings: bool = True,
     **opts: bool | str,
@@ -1124,6 +1126,7 @@ def process_order_file(
                         subprocesses_conf,
                         path,
                         from_scratch,
+                        no_clean,
                         use_crossings,
                         contract_file,
                     ),
@@ -1139,6 +1142,7 @@ def process_order_file(
                         subprocesses_conf,
                         path,
                         from_scratch,
+                        no_clean,
                         use_crossings,
                         contract_file,
                     ),
@@ -1307,6 +1311,10 @@ def process_order_file(
     )
 
     # ---#] Process global templates:
+
+    if not no_clean:
+        golem.util.main_misc.cleanup(os.path.join(path, "model"))
+
     return result
 
 

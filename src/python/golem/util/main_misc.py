@@ -4,8 +4,8 @@ import io
 import logging
 import os
 import os.path
-import re
 import sys
+import shutil
 from time import gmtime, strftime
 from typing import cast
 
@@ -25,7 +25,7 @@ from golem.util.tools import generate_particle_lists
 logger = logging.getLogger(__name__)
 
 
-def generate_process_files(conf: Properties, from_scratch: bool = False):
+def generate_process_files(conf: Properties, from_scratch: bool = False, no_clean: bool = False):
     """
     This routine is a wrapper around anything that needs to be done
     for creating a new process.
@@ -163,7 +163,8 @@ def generate_process_files(conf: Properties, from_scratch: bool = False):
         ct_diagrams=ct_diagrams,
         ct_flags=flags[2],
     )
-    cleanup(path)
+    if not no_clean:
+        cleanup(path)
 
 
 def cleanup(path: str):
@@ -188,6 +189,11 @@ def cleanup(path: str):
         full_name = os.path.join(path, filename)
         if os.path.exists(full_name):
             os.remove(full_name)
+    
+    pycache = os.path.join(path, "__pycache__")
+    if os.path.exists(pycache):
+        shutil.rmtree(pycache)
+
 
 
 def find_config_files() -> tuple[Properties, list[str]]:

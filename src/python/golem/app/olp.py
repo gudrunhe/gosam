@@ -167,6 +167,12 @@ def main(argv: list[str] = sys.argv):
         action="store_true",
         dest="from_scratch",
     )
+    _ = parser.add_argument(
+        "--no-clean",
+        help="Do not remove temporary files generated during code generation.",
+        action="store_true",
+        dest="no_clean",
+    )
     _ = parser.add_argument("order_file", nargs="+")
 
     cmd_args = parser.parse_args(argv[1:])
@@ -290,6 +296,7 @@ def main(argv: list[str] = sys.argv):
                 ignore_case=cast(bool, cmd_args.ignore_case),
                 ignore_unknown=cast(bool, cmd_args.ignore_unknown),
                 from_scratch=cast(bool, cmd_args.from_scratch),
+                no_clean=cast(bool, cmd_args.no_clean),
                 olp_process_name=cast(str, cmd_args.name),
                 use_crossings=cast(bool, cmd_args.use_crossings),
                 mc_name=cast(str, cmd_args.mc),
