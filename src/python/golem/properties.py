@@ -106,6 +106,16 @@ model_options = Property(
     "ewchoose",
 )
 
+optimized_import = Property(
+    "optimized_import",
+    """\
+    Only import those vertices and couplings from UFO model which appear in diagrams.
+    """,
+    bool,
+    False,
+    experimental=True,
+)
+
 coupling_power = Property(
     "order",
     """\
@@ -1631,6 +1641,7 @@ properties = [
     particles_out,
     model,
     model_options,
+    optimized_import,
     coupling_power,
     loop_suppressed_Born,
     zero,

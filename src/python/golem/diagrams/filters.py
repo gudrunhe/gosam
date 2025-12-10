@@ -85,6 +85,12 @@ def setup_selectors(
             lo_selector.select_coupling_power(cast(str, coupling), int(nlo_power))
 
     lo_selector.select_coupling_power("CT", 0)
+    if conf.getBooleanProperty("enable_truncation_orders"):
+        # Discard all diagrams with double insertions
+        lo_selector.select_coupling_power_list("NP", [0, 1])
+    if conf.getBooleanProperty("loop_suppressed_Born"):
+        # Exactly on loop-suppressed operator in tree diagrams
+        lo_selector.select_coupling_power("QL", 1)
     logger.debug(f"Selecting tree-level diagram with properties: {lo_selector}")
 
     # ---------------------------------- NLO ----------------------------------
@@ -114,6 +120,12 @@ def setup_selectors(
         nlo_selector.select_coupling_power(cast(str, coupling), int(nlo_power))
 
     nlo_selector.select_coupling_power("CT", 0)
+    if conf.getBooleanProperty("enable_truncation_orders"):
+        # Discard all diagrams with double insertions
+        nlo_selector.select_coupling_power_list("NP", [0, 1])
+    if conf.getBooleanProperty("loop_suppressed_Born"):
+        # No loop-suppressed operators in loop diagrams
+        nlo_selector.select_coupling_power("QL", 0)
     logger.debug(f"Selecting one-loop diagram with properties: {nlo_selector}")
 
     # ---------------------------------- CT -----------------------------------
@@ -141,6 +153,9 @@ def setup_selectors(
         ct_selector.select_coupling_power(cast(str, coupling), int(nlo_power))
 
     ct_selector.select_coupling_power("CT", 1)
+    if conf.getBooleanProperty("enable_truncation_orders"):
+        # Discard all diagrams with double insertions
+        ct_selector.select_coupling_power_list("NP", [0, 1])
     logger.debug(f"Selecting counterterm diagram with properties: {ct_selector}")
 
     return lo_selector, nlo_selector, ct_selector

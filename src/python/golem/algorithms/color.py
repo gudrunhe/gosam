@@ -31,30 +31,30 @@ def colorbasis(
     nglue = len(gluons)
 
     try:
-        for l in permutations(lhs):
+        for lor in permutations(lhs):
             lines: list[list[int]] = []
             traces: list[list[int]] = []
             iglue = set(range(nglue))
             for a in aquarks:
                 line = [a]
-                r = rhs[l.index(a)]
+                r = rhs[lor.index(a)]
                 while r in [gluons[i] for i in iglue]:
                     ir = gluons.index(r)
                     line.append(r)
                     iglue.remove(ir)
-                    r = rhs[l.index(r)]
+                    r = rhs[lor.index(r)]
                 line.append(r)
                 lines.append(line)
             while len(iglue) > 0:
                 line: list[int] = []
                 ig = iglue.pop()
                 g = gluons[ig]
-                r = rhs[l.index(g)]
+                r = rhs[lor.index(g)]
                 while r in [gluons[i] for i in iglue]:
                     ir = gluons.index(r)
                     line.append(r)
                     iglue.remove(ir)
-                    r = rhs[l.index(r)]
+                    r = rhs[lor.index(r)]
                 line.append(r)
                 traces.append(line)
             # check for tadpoles

@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from typing import cast
 
 import feyngraph as fg
 
-MODEL_OPTIONS: dict[str, str | int | bool] = {}
+MODEL_OPTIONS: dict[str, str | int | bool | set[str] | Sequence[str]] = {}
 MODEL_ONES = []
 UNITARY_GAUGE = False
 

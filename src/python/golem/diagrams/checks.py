@@ -54,7 +54,7 @@ def analyze_loop(
 ) -> tuple[
     LoopCache,
     LoopCache,
-    dict[str, set[str] | list[str] | int | str | list[int] | dict[int, list[int]]],
+    dict[str, list[str] | int | str | list[int] | dict[int, list[int]]],
 ]:
     """
     Analyze the loop diagrams in the `DiagramContainer` and process them. Diagrams are discarded if they are on-shell.
@@ -140,7 +140,7 @@ def analyze_loop(
         cache,
         cache_tot,
         {
-            "quark_masses": quark_masses,
+            "quark_masses": list(quark_masses),
             "complex_quark_masses": complex_quark_masses,
             "max_rank": max_rank,
             "keep_indices": keep_indices,

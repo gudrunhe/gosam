@@ -89,7 +89,7 @@ containing an explicit $\varepsilon$ or $\mu^2$ coming from the Lorentz
 algebra in $D=4-2\varepsilon$ dimensions. 
 For an explicit reduction of these terms, we give a list of all relevant integrals of the form
 \begin{align}
-\int\frac{\diff[D] k}{i\pi^{n/2}}
+\int\frac{\diff[D] k}{i\pi^{D/2}}
 \frac{N(\hat{k})\cdot\mu^{2\alpha}\cdot\varepsilon^\beta}{D_0\cdots D_N}
 \end{align}
 where either $\alpha$ or $\beta$ is a positive integer number, 
@@ -116,11 +116,11 @@ integral with the parameters $z_{j_1}, z_{j_2}, \ldots$ in the numerator,
 \begin{equation}
 I_N^d(j_1,\ldots, j_p)=
 (-1)^N\Gamma\left(N-\frac{d}2\right)%
-\int\!\!\diff[D]_\Box\!z\,\delta_z
+\int\!\!\diff[N]_\Box\!z\,\delta_z
 \frac{\prod_{\nu=1}^p z_{j_\nu}}{%
 \left[-\frac12 z^{\mathsf{T}}Sz-i\delta\right]^{N-d/2}},
 \end{equation}
-where $\diff[D]_\Box\!z=
+where $\diff[N]_\Box\!z=
 \prod_{j=1}^N\mathrm{d}z_j\Theta(z_j)\Theta(1-z_j)$
 and $\delta_z=\delta(1-\sum_i z_i)$.
 The square brackets $[\ldots]^{\mu_1\ldots\mu_p}$ expand to the sum of
@@ -147,7 +147,7 @@ Hence, we examine further the expression
 \varepsilon\cdot I_N^{D+2l+2\alpha}(l_1,\ldots, l_{r-2l})=
 \left\{\begin{array}{lr}
 {\mathcal O}(\varepsilon),&\eta<0\\
-(-1)^N\frac1{2^\eta\eta!}\int\diff[D]_\Box\!z\delta_z
+(-1)^N\frac1{2^\eta\eta!}\int\diff[N]_\Box\!z\delta_z
 \left[z^{\mathsf{T}}Sz\right]^\eta
 \prod_{i=1}^{r-2l}z_{l_i},&\eta\geq0
 \end{array}\right.
@@ -157,13 +157,13 @@ The remaining integration can be understood as a special case of the
 Feynman parameter identity
 \begin{equation}
 \frac{1}{\prod_{j=1}^N A_j^{\nu_j}}=\frac{\Gamma(\nu)}{
-\prod_{j=1}^N \Gamma(\nu_j)}\int\!\diff[D]_\Box\!z\,\delta_z
+\prod_{j=1}^N \Gamma(\nu_j)}\int\!\diff[N]_\Box\!z\,\delta_z
 \frac{\prod_{j=1}^N z_j^{\nu_j-1}}{\left(
 \sum_{j=1}^N z_j A_j\right)^\nu}\; , \; \nu=\sum_j \nu_j
 \end{equation}
 for $A_j=1$, in which case one finds
 \begin{equation}
-\int\!\diff[D]_\Box\!z\,\delta_z
+\int\!\diff[N]_\Box\!z\,\delta_z
 \prod_{j=1}^N z_j^{\nu_j-1}=\frac{\prod_{j=1}^N \Gamma(\nu_j)}%
 {\Gamma(\alpha)}
 \end{equation}
@@ -174,7 +174,7 @@ while the integrand reduction can be done in 4 dimensions.
 Choosing \texttt{r2=implicit} means that $R_2$ will be calculated together with the 4-dimensional
 part during the reduction.
 
-\section*{Integrals with \boldmath$r\leq D$}
+\section*{Integrals with \boldmath$r\leq N$}
 All non-zero cases (in the limit $\epsilon\to0$) for
 integrals where the rank does not exceed the number of propagators are listed
  below~\cite{Binoth:2006hk,Reiter:2009kb}. We encounter box integrals at most; pentagons and above are all zero.
@@ -227,12 +227,12 @@ Note: $S_{11}=-2m_1^2$
 \end{align}
 \end{subequations}
 
-\section*{Integrals with \boldmath$r>D$}
+\section*{Integrals with \boldmath$r>N$}
 In addition, we list integrals which contribute to the rational part in cases where the rank exceeds the number of
-propagators, for example in the presence of effective gluon-Higgs couplings, or in models involving
+propagators $N$, for example in the presence of effective gluon-Higgs couplings, or in models involving
 gravitons.
 More details about higher rank integrals can be found in
-Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}. All non-zero integrals (in the limit $\epsilon\to0$) with $r=D+1$ are implemented in \gosam and shown below. Integrals with $r>D+1$ are currently not available. We encounter pentagon integrals at most; hexagons and above are all zero.
+Refs.~\cite{Guillet:2013msa,Mastrolia:2012bu,vanDeurzen:2013pja}. All non-zero integrals (in the limit $\epsilon\to0$) with $r=N+1$ are implemented in \gosam and shown below. Integrals with $r>N+1$ are currently not available. We encounter pentagon integrals at most; hexagons and above are all zero.
 % \bea
 % &&I_5^{D,3}(S)=
 % \int\!\!\frac{\diff[D]k}{i\pi^{D/2}}\frac{\left(\tilde{k}^2\right)^3

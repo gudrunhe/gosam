@@ -15,7 +15,3 @@ use_vertex_labels=True
 order=QCD, 0, 2
 
 zero=mdlGAMH
-
-filter.lo=lambda d: d.order('NP')<=1
-filter.nlo=lambda d: d.order('NP')<=1
-filter.ct=lambda d: d.order('NP')<=1

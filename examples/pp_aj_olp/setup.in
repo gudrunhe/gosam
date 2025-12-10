@@ -1,0 +1,6 @@
+reduction_programs=ninja
+all_mandelstam=True
+flavour_groups=1:3:5,2:4
+zero=mass(1;2;3;4;5),mBMS
+filter.module=filter.py
+filter.nlo=furry_zero

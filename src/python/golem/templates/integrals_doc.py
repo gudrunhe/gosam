@@ -64,11 +64,11 @@ class IntegralsTemplate_doc(golem.templates.kinematics.KinematicsTemplate):
                 ]
 
         return r",\\".join(
-            "{} of {}({})".format(
+            "{} of \\verb|{}|({})".format(
                 n,
                 name,
                 ", ".join(
-                    f"{coupling} $=$ {order}" for coupling, order in orders.items()
+                    f"\\verb|{coupling} = {order}|" for coupling, order in orders.items()
                 ),
             )
             for name, (orders, n) in vertices.items()

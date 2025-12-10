@@ -9,12 +9,15 @@ import textwrap
 from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 from copy import copy
 from types import ModuleType
-from typing import TextIO, TypeVar, cast, final, override
+from typing import Any, TextIO, TypeVar, cast, final, override
+
+import feyngraph as fg
 
 import golem.algorithms.helicity
 import golem.installation
 import golem.model
 import golem.properties
+import golem.util.constants
 from golem.installation import BIN_DIR, LIB_DIR
 from golem.model.particle import Particle
 from golem.util.config import GolemConfigError, Properties, Property
@@ -27,8 +30,8 @@ V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 
-POSTMORTEM_LOG = []
-POSTMORTEM_CFG = None
+POSTMORTEM_LOG: list[str] = []
+POSTMORTEM_CFG: None | Properties = None
 POSTMORTEM_DO = False
 
 
@@ -101,7 +104,7 @@ class DuplicationFilter(logging.Filter):
 
 @final
 class ColorFormatter(logging.Formatter):
-    def __init__(self, message: str, use_color: bool = True, **kwargs):
+    def __init__(self, message: str, use_color: bool = True, **kwargs: Any):
         super().__init__(message, **kwargs)
         self.use_color = use_color
         self.wrapper = CustomWrapper(
@@ -362,7 +365,9 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
     else:
         path = output_path
 
-    model_lst = cast(list[str], conf.getProperty(golem.properties.model))
+    model_lst = cast(list[str], conf.getProperty(cast(str, golem.properties.model)))
+
+    logger.debug(f"Preparing model: {model_lst}")
 
     # For BLHA2 standards: conversion to GoSam internal keywords of SM:
     if len(model_lst) == 1 and str(model_lst[0]).lower() == "smdiag":
@@ -375,14 +380,10 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
     # Some options only work with ufo models.
     # For OLP mode: check if property is set already.
     if conf["is_ufo"] is not None:
-        isufo = cast(bool, conf["is_ufo"])
+        isufo = cast(bool, conf.getBooleanProperty("is_ufo"))
     else:
         isufo = False
         conf["is_ufo"] = isufo
-
-    conf["enable_truncation_orders"] = conf.getProperty(
-        golem.properties.enable_truncation_orders
-    )
 
     if "setup-file" in conf:
         rel_path = os.path.dirname(cast(str, conf["setup-file"]))
@@ -404,13 +405,21 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
             ]
         ):
             src_path = rel_path
-        for ext in [".py", ".hh"]:
+        # In OLP mode we end up here even if the original model was a UFO. We have to take this into account:
+        copy_file(
+            os.path.join(src_path, model + ".py"),
+            os.path.join(path, MODEL_LOCAL + ".py"),
+        )
+        if not (isufo and conf.getBooleanProperty("optimized_import")):
             copy_file(
-                os.path.join(src_path, model + ext),
-                os.path.join(path, MODEL_LOCAL + ext),
+                os.path.join(src_path, model + ".hh"),
+                os.path.join(path, MODEL_LOCAL + ".hh"),
             )
         if not isufo:
-            copy_file(os.path.join(src_path, model), os.path.join(path, MODEL_LOCAL))
+            copy_file(
+                os.path.join(src_path, model),
+                os.path.join(path, MODEL_LOCAL)
+            )
     elif len(model_lst) == 2:
         if model_lst[0].lower().strip() == "feynrules":
             conf["is_ufo"] = True
@@ -421,12 +430,36 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
                 model_path = os.path.join(rel_path, model_path)
             logger.info("Importing FeynRules model files ...")
             extract_model_options(conf)
-            mdl = golem.model.feynrules.Model(model_path, golem.model.MODEL_OPTIONS)
-            order_names = sorted(
-                cast(list[str], conf.getProperty(golem.properties.order_names))
+            # ToDo: Better way to pass this info?:
+            golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
+                list[str],
+                conf.getProperty(cast(Property, golem.properties.MSbar_yukawa)),
             )
-            if order_names == [""]:
+            # END ToDo
+            if conf.getBooleanProperty("optimized_import"):
+                # initial import of model; do not have any information on relevant vertices, yet
+                mdl = golem.model.feynrules.Model(
+                    model_path,
+                    golem.model.MODEL_OPTIONS,
+                    initial_import=True,
+                    final_import=False,
+                )
                 order_names = []
+            else:
+                mdl = golem.model.feynrules.Model(
+                    model_path,
+                    golem.model.MODEL_OPTIONS,
+                    initial_import=True,
+                    final_import=True,
+                )
+                order_names = sorted(
+                    cast(
+                        list[str],
+                        conf.getProperty(cast(Property, golem.properties.order_names)),
+                    )
+                )
+                if order_names == [""]:
+                    order_names = []
             mdl.store(path, MODEL_LOCAL, order_names)
             conf.setProperty("model_path", model_path)
             logger.info("Done with model import.")
@@ -440,7 +473,7 @@ def prepare_model_files(conf: Properties, output_path: str | None = None):
             if model_name.isdigit():
                 # This is a CalcHEP model, needs to be converted.
                 logger.info("Importing CalcHep model files ...")
-                mdl = golem.model.calchep.Model(model_path, int(model_name))
+                mdl = golem.model.calchep.Model(model_path, model_name)
                 mdl.store(path, MODEL_LOCAL)
                 conf.setProperty("model_path", os.path.join(path, MODEL_LOCAL))
                 logger.info("Done with model import.")
@@ -537,7 +570,8 @@ def getModel(conf: Properties, extra_path: str | None = None) -> ModuleType:
         if conf["olp.ewscheme"] is not None and ew_supp:
             select_olp_EWScheme(conf)
         elif ew_supp and (
-            (conf["model.options"] is None) or "ewchoose" in conf["model.options"]
+            (conf["model.options"] is None)
+            or "ewchoose" in cast(list[str], conf["model.options"])
         ):
             golem.model.MODEL_OPTIONS["ewchoose"] = True
         elif conf["olp.ewscheme"] is not None and not ew_supp:
@@ -756,8 +790,8 @@ def process_path(conf: Properties) -> str:
 
 
 def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
-    authors = cast(dict[str, list[str]], golem.util.constants.AUTHORS)
-    former_authors = cast(dict[str, list[str]], golem.util.constants.FORMER_AUTHORS)
+    authors = golem.util.constants.AUTHORS
+    former_authors = golem.util.constants.FORMER_AUTHORS
     asciiart = cast(str, golem.util.constants.ASCIIART)
     asciiwidth = max(list(map(len, asciiart)))
     clines = cast(list[str], golem.util.constants.CLINES)
@@ -937,26 +971,165 @@ def derive_coupling_names(conf: Properties) -> dict[str, str]:
 
 
 def load_source(mname: str, mpath: str) -> ModuleType:
-    if sys.version_info >= (
-        3,
-        6,
-    ):
-        # see https://docs.python.org/dev/whatsnew/3.12.html#imp
-        import importlib.machinery
-        import importlib.util
+    # see https://docs.python.org/dev/whatsnew/3.12.html#imp
+    import importlib.machinery
+    import importlib.util
 
-        loader = importlib.machinery.SourceFileLoader(mname, mpath)
-        spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
-        if not spec:
-            logger.critical(
-                f"Unable to load module spec for file '{mname}' from '{mpath}'"
-            )
-            sys.exit("GoSam terminated due to an error")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[mname] = mod
-        loader.exec_module(mod)
-    else:
-        import imp
+    loader = importlib.machinery.SourceFileLoader(mname, mpath)
+    spec = importlib.util.spec_from_file_location(mname, mpath, loader=loader)
+    if spec is None:
+        logger.critical(f"Unable to load module spec for file '{mname}' from '{mpath}'")
+        sys.exit("GoSam terminated due to an error")
+    mod = importlib.util.module_from_spec(spec)
+    # cache the module (relied on by optimized_import feature in feynrules.py):
+    # Note: olp mode does not work without this
+    sys.modules[mname] = mod
+    loader.exec_module(mod)
 
-        mod = imp.load_source(mname, mpath)
     return mod
+
+
+def optimize_model(
+    conf: Properties,
+    path: str,
+    lo_diagrams: fg.DiagramContainer | None = None,
+    nlo_diagrams: fg.DiagramContainer | None = None,
+    ct_diagrams: fg.DiagramContainer | None = None,
+    olp: bool = False,
+    sconf: Mapping[int, Properties] = dict(),
+):
+    import golem.model.feynrules
+
+    keep_vertices: set[str]
+    if olp:
+        keep_vertices = set()
+        for sp_conf in sconf.values():
+            keep_vertices.update(
+                set(cast(list[str], sp_conf.getListProperty("keep_vertices")))
+            )
+    else:
+        keep_vertices = extract_vertices_all(
+            lo_diagrams, nlo_diagrams, ct_diagrams, conf
+        )
+
+    if len(keep_vertices) > 0:
+        logger.info(
+            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices for process {conf['process_name']}: {keep_vertices}"
+        )
+    else:
+        logger.warning(
+            f"optimized_import: identified {len(keep_vertices)} relevant UFO vertices for process {conf['process_name']} -> Something might have gone wrong"
+        )
+
+    conf["keep_vertices"] = list(keep_vertices)
+
+    if conf.getBooleanProperty("__OLP_MODE__"):
+        model_path = cast(str, conf["modeltype"])
+    else:
+        model_path = cast(str, conf["model_path"])
+    # ToDo: Better way to pass this info? 
+    #       Remove redundancy with prepare_model_files?
+    golem.model.MODEL_OPTIONS["keep_vertices"] = keep_vertices
+    golem.model.MODEL_OPTIONS["MSbaryukawa"] = cast(
+        list[str], conf.getProperty(cast(Property, golem.properties.MSbar_yukawa))
+    )
+    # END ToDo
+    mdl = golem.model.feynrules.Model(
+        model_path, golem.model.MODEL_OPTIONS, initial_import=False, final_import=True
+    )
+    order_names: list[str] = sorted(
+        cast(list[str], conf.getProperty(cast(Property, golem.properties.order_names)))
+    )
+    if order_names == [""]:
+        order_names = []
+    MODEL_LOCAL: str = cast(str, golem.util.constants.MODEL_LOCAL)
+    mdl.store(path, MODEL_LOCAL, order_names)
+    # Remove model.py from cache so it will be reloaded:
+    if MODEL_LOCAL in conf.cache:
+        del conf.cache[MODEL_LOCAL]
+
+
+def extract_vertices_all(
+    lo_diagrams: None | fg.DiagramContainer,
+    nlo_diagrams: None | fg.DiagramContainer,
+    ct_diagrams: None | fg.DiagramContainer,
+    conf: Properties,
+):
+    keep_vertices: set[str] = set()
+
+    if conf.getBooleanProperty("generate_tree_diagrams") or conf.getBooleanProperty(
+        "generate_eft_loopind"
+    ):
+        tree_vertices = extract_vertices(lo_diagrams)
+        keep_vertices.update(tree_vertices)
+    if conf.getBooleanProperty("generate_loop_diagrams"):
+        loop_vertices = extract_vertices(nlo_diagrams)
+        keep_vertices.update(loop_vertices)
+    if conf.getBooleanProperty("generate_eft_counterterms"):
+        ct_vertices = extract_vertices(ct_diagrams)
+        keep_vertices.update(ct_vertices)
+
+    return keep_vertices
+
+
+def extract_vertices(diagrams: None | fg.DiagramContainer):
+    vertices: set[str] = set()
+    if diagrams is not None:
+        for d in diagrams:
+            vertices |= set(v.interaction().name() for v in d.vertices())
+    return vertices
+
+
+def process_zero(conf, model) -> None:
+    # zero property: convert masses and width defined through PDG code to internal parameter name
+    # (depends on model, so model.py must have been created already)
+    orig_zero: list[str] = cast(list[str], conf.getListProperty("zero"))
+    new_zero: list[str] = []
+    for z in orig_zero:
+        massmatch: re.Match[str] | None = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
+        if massmatch:
+            nz: list[str] = re.sub(r"\;", r"),mass(", z.lower()).split(",")
+            new_zero.extend(nz)
+            continue
+        widthmatch: re.Match[str] | None = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
+        if widthmatch:
+            nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
+            new_zero.extend(nz)
+            continue
+        new_zero.append(z)
+    for p in model.particles.values():
+        searchm: str = "mass(" + str(abs(p.getPDGCode())) + ")"
+        if searchm in list(map(str.lower, new_zero)):
+            new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
+            if p.isMassive():
+                new_zero.append(p.getMass())
+        searchw: str = "width(" + str(abs(p.getPDGCode())) + ")"
+        if searchw in list(map(str.lower, new_zero)):
+            new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
+            if p.hasWidth():
+                new_zero.append(p.getWidth())
+    # It can happen that a model defines names for a particle's mass and width but
+    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+    # built-in models). We have to take care of that and add those names to the zero
+    # property to avoid erroneous code generation. Otherwise the user has to remember
+    # to add these cases to 'zero' manually.
+    if not conf.getBooleanProperty("massive_light_fermions"):
+        for p in cast(dict[str, Particle], model.particles).values():
+            if p.isMassive(new_zero):
+                m: str = p.getMass(new_zero)
+                try:
+                    if float(model.parameters[m]) == 0.0:
+                        new_zero.append(m)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+            if p.hasWidth(new_zero):
+                w: str = p.getWidth(new_zero)
+                try:
+                    if float(model.parameters[w]) == 0.0:
+                        new_zero.append(w)
+                except KeyError:
+                    # dependent parameters are not part of parameters dict
+                    pass
+    conf.setProperty("zero", ",".join(list(set(new_zero))))
+    golem.model.update_zero(new_zero)
