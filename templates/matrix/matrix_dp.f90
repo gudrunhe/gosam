@@ -1382,7 +1382,11 @@ contains
 
    subroutine     color_correlated_lo2(vecs,borncc)
       use [% process_name asprefix=\_ %]kinematics, only: init_event
-      use [% process_name asprefix=\_ %]dipoles, only: pi
+      use [% process_name asprefix=\_ %]dipoles, only: pi[% 
+      @if is_loopinduced %]
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: nlo_prefactors
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[% 
+      @end @if %]
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,num_legs), intent(out) :: borncc
@@ -1398,7 +1402,10 @@ contains
       complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c
       logical :: my_ok
-      real(ki) :: rational2, scale2[%
+      real(ki) :: rational2, scale2[% 
+      @if is_loopinduced %]
+      real(ki) :: nlo_coupling[% 
+      @end @if %][%
       @end @if generate_tree_diagrams %]
       borncc(:,:) = 0.0_ki[%
      @for repeat 1 num_legs inclusive=true %][%
@@ -1662,6 +1669,36 @@ contains
       if (include_symmetry_factor) then
          borncc = borncc / real(symmetry_factor, ki)
       end if
+
+      [% @if is_loopinduced %]
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         ! loop-induced
+         borncc = borncc * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         borncc = borncc * (nlo_coupling / 8.0_ki / pi / pi)**2
+      end select[% 
+      @end @if %]
+
    end subroutine color_correlated_lo2
 
 
@@ -1705,7 +1742,11 @@ contains
 
    subroutine OLP_color_correlated(vecs,ampcc)
       use [% process_name asprefix=\_ %]kinematics, only: init_event
-      use [% process_name asprefix=\_ %]dipoles, only: pi
+      use [% process_name asprefix=\_ %]dipoles, only: pi[% 
+      @if is_loopinduced %]
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: nlo_prefactors
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[% 
+      @end @if %]
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs*(num_legs-1)/2), intent(out) :: ampcc
@@ -1721,7 +1762,10 @@ contains
       complex(ki), dimension(numcs,-2:0) :: colorvec[% @if enable_truncation_orders %]_0, colorvec_1, colorvec_2[% @end @if %]
       integer :: c
       logical :: my_ok
-      real(ki) :: rational2, scale2[%
+      real(ki) :: rational2, scale2[% 
+      @if is_loopinduced %]
+      real(ki) :: nlo_coupling[% 
+      @end @if %][%
       @end @if generate_tree_diagrams %]
       ampcc(:) = 0.0_ki[%
      @for repeat 1 num_legs inclusive=true %][%
@@ -1979,6 +2023,35 @@ contains
          ampcc = ampcc / real(symmetry_factor, ki)
       end if
 
+[% @if is_loopinduced %]
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         ! loop-induced
+         ampcc = ampcc * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         ampcc = ampcc * (nlo_coupling / 8.0_ki / pi / pi)**2
+      end select[% 
+      @end @if %]
+
    end subroutine OLP_color_correlated
    !---#] color correlated ME :
 
@@ -1992,7 +2065,11 @@ contains
      ! This is required by Whizard.[% 
       @end @select %]
       use [% process_name asprefix=\_ %]kinematics
-      use [% process_name asprefix=\_ %]dipoles, only: pi
+      use [% process_name asprefix=\_ %]dipoles, only: pi[% 
+      @if is_loopinduced %]
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: nlo_prefactors
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[% 
+      @end @if %]
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(num_legs,4,4) :: bornsc
@@ -2014,7 +2091,11 @@ contains
       integer :: c
       logical :: my_ok
       real(ki) :: rational2, scale2[%
-      @end @if generate_tree_diagrams %]
+      @end @if generate_tree_diagrams %][% 
+      @if is_loopinduced %]
+      real(ki) :: nlo_coupling[% 
+      @end @if %]
+
 
       bornsc(:,:,:) = 0.0_ki[% 
       @if generate_tree_diagrams %][% @else %][% 
@@ -2607,12 +2688,45 @@ contains
          bornsc = bornsc / real(symmetry_factor, ki)
       end if
 
+      [% @if is_loopinduced %]
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         ! loop-induced
+         bornsc = bornsc * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         bornsc = bornsc * (nlo_coupling / 8.0_ki / pi / pi)**2
+      end select[% 
+      @end @if %]
+
    end subroutine spin_correlated_lo2[% @select sct @case 1 %]_whizard[% @end @select %]
 [% @end @for %][% ' sct loop ' %]
 
    subroutine OLP_spin_correlated_lo2(vecs, ampsc)
       use [% process_name asprefix=\_ %]kinematics
-      use [% process_name asprefix=\_ %]dipoles, only: pi
+      use [% process_name asprefix=\_ %]dipoles, only: pi[% 
+      @if is_loopinduced %]
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]config, only: nlo_prefactors
+      use [% @if internal OLP_MODE %][% @else %][% process_name asprefix=\_ %][% @end @if %]model[% 
+      @end @if %]
       implicit none
       real(ki), dimension(num_legs, 4), intent(in) :: vecs
       real(ki), dimension(2*num_legs*num_legs) :: ampsc
@@ -2633,7 +2747,10 @@ contains
       integer :: c
       logical :: my_ok
       real(ki) :: rational2, scale2[%
-@end @if generate_tree_diagrams %]
+@end @if generate_tree_diagrams %][% 
+      @if is_loopinduced %]
+      real(ki) :: nlo_coupling[% 
+      @end @if %]
 
       ampsc(:) = 0.0_ki[% 
       @if generate_tree_diagrams %][% @else %][% 
@@ -2931,6 +3048,35 @@ contains
       if (include_symmetry_factor) then
          ampsc = ampsc / real(symmetry_factor, ki)
       end if
+
+      [% @if is_loopinduced %]
+      if(corrections_are_qcd) then[%
+      @select QCD_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QCD_COUPLING_NAME %]*[% QCD_COUPLING_NAME %][%
+      @end @select %]
+      else[%
+      @select QED_COUPLING_NAME
+      @case 0 1 %]
+         nlo_coupling = 1.0_ki[%
+      @else %]
+         nlo_coupling = [% QED_COUPLING_NAME %]*[% QED_COUPLING_NAME %][%
+      @end @select %]
+      end if
+
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         ! loop-induced
+         ampsc = ampsc * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         ampsc = ampsc * (nlo_coupling / 8.0_ki / pi / pi)**2
+      end select[% 
+      @end @if %]
 
    end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :
