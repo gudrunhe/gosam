@@ -794,7 +794,7 @@ def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
     former_authors = golem.util.constants.FORMER_AUTHORS
     asciiart = cast(str, golem.util.constants.ASCIIART)
     asciiwidth = max(list(map(len, asciiart)))
-    clines = golem.util.constants.CLINES
+    clines = cast(list[str], golem.util.constants.CLINES)
 
     llines = ["AUTHORS:"]
 
@@ -846,7 +846,7 @@ def banner(WIDTH: int = 70, PREFIX: str = "#", SUFFIX: str = "#"):
         else:
             yield PREFIX + " " + outl
 
-    for line in golem.util.constants.LICENSE:
+    for line in cast(list[str], golem.util.constants.LICENSE):
         ll = len(line) + len(PREFIX) + len(SUFFIX)
         if ll < WIDTH:
             ws = " " * (WIDTH - ll)
