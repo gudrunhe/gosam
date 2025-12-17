@@ -62,6 +62,10 @@ git clone
 > in the `build` directory. Otherwise, the revision tag of the installation is not updated after pulling changes.
 
 The tarball is available [here](https://github.com/gudrunhe/gosam/releases).
+> [!WARNING]
+> When installing from the tarball, please use the `*.tar.xz` version. Installing from the other source code archives
+>  (`*.tar.gz` and `*.zip`) automatically created by github might not work and result in an error during the `meson setup` step.
+
 Then, in the cloned repository or the unpacked tarball, running
 ```console
 meson setup build --prefix <prefix> [-Doption=value]
