@@ -1,4 +1,4 @@
-project('Ninja', 'cpp', 'fortran', version: '1.1.0', meson_version: '>=1.4')
+project('Ninja', 'cpp', 'fortran', version: '1.2.0', meson_version: '>=1.4')
 
 add_project_arguments('-w', language: 'fortran')
 add_project_arguments('-w', language: 'cpp')
@@ -24,7 +24,7 @@ ninja_src += files(['src/avholo_wrapper.F90'])
 
 ninja_args = [
         '-DNINJA_USE_ONELOOP=1',
-        '-DVERSION="1.1.0"',
+        '-DVERSION="1.2.0"',
         '-DNINJA_MASSLESS=1',
         '-DNINJA_X1RANK=1',
         '-DNINJA_USE_ONELOOP_WITH_CACHE=1'
