@@ -1,6 +1,6 @@
 [wrap-git]
 url=https://codeberg.org/hameren/oneloop.git
-revision=v3.8
+revision=594adae9b180fb95da808e661122c6c048841804
 depth=1
 patch_directory=avh_olo
 diff_files=avh_olo/create.py.patch

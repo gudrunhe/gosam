@@ -1,4 +1,4 @@
-project('avh_olo', 'fortran', version: '3.7.2')
+project('avh_olo', 'fortran', version: '3.8')
 
 pkg = import('pkgconfig')
 
