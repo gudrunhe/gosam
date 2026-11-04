@@ -538,25 +538,28 @@ def escape(s, isKey=False):
             buf = "\\" + buf
     return buf
 
+
 class ConfigurationException(Exception):
     pass
 
-def version_compare(v1, v2):
-   l1 = len(v1)
-   l2 = len(v2)
-   if l1 < l2:
-      v1c = v1 + [0] * (l2-l1)
-      v2c = v2[:]
-   else:
-      v1c = v1[:]
-      v2c = v2 + [0] * (l1-l2)
 
-   for p1, p2 in zip(v1c, v2c):
-      if p1 > p2:
-         return 1
-      elif p1 < p2:
-         return -1
-   return 0
+def version_compare(v1, v2):
+    l1 = len(v1)
+    l2 = len(v2)
+    if l1 < l2:
+        v1c = v1 + [0] * (l2 - l1)
+        v2c = v2[:]
+    else:
+        v1c = v1[:]
+        v2c = v2 + [0] * (l1 - l2)
+
+    for p1, p2 in zip(v1c, v2c):
+        if p1 > p2:
+            return 1
+        elif p1 < p2:
+            return -1
+    return 0
+
 
 def levenshtein(str1, str2, case_sensitive=False):
     l1 = len(str1)

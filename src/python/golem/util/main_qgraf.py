@@ -189,6 +189,7 @@ def format_qgraf_verbatim(conf, prop):
         result.append(lhs + sep)
     return "\n".join(result)
 
+
 def format_particle_verbatim(filter_str):
     if filter_str is None:
         return ""
@@ -202,9 +203,7 @@ def format_particle_verbatim(filter_str):
             filter_dict[count].append(p)
         else:
             filter_dict[count] = [p]
-    return "\n".join(
-        f"true=iprop[{','.join(particles)},{count},{count}];" for count, particles in filter_dict.items()
-    )
+    return "\n".join(f"true=iprop[{','.join(particles)},{count},{count}];" for count, particles in filter_dict.items())
 
 
 def run_qgraf(conf, in_particles, out_particles):
@@ -227,10 +226,12 @@ def run_qgraf(conf, in_particles, out_particles):
 
     flag_generate_eft_counterterms = conf.getBooleanProperty("generate_eft_counterterms")
 
-    if not (flag_generate_loop_diagrams 
-            or flag_generate_tree_diagrams 
-            or flag_generate_eft_counterterms
-            or flag_generate_eft_loopind):
+    if not (
+        flag_generate_loop_diagrams
+        or flag_generate_tree_diagrams
+        or flag_generate_eft_counterterms
+        or flag_generate_eft_loopind
+    ):
         # Should never happen but is not considered an error either.
         # nothing to do
         return
@@ -452,9 +453,9 @@ def run_qgraf(conf, in_particles, out_particles):
     # Clean up and leave
     qgraf_dat_name = os.path.join(path, "qgraf.dat")
     for filename in cleanup_files:
-     full_name = os.path.join(path, filename)
-     if os.path.exists(full_name):
-        os.remove(full_name)
+        full_name = os.path.join(path, filename)
+        if os.path.exists(full_name):
+            os.remove(full_name)
 
     if flag_generate_tree_diagrams and diagram_count(conf, 0) == 0 and flag_generate_loop_diagrams:
         logger.warning(

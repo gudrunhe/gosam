@@ -79,6 +79,7 @@ class DuplicationFilter(logging.Filter):
                 self.previous_logs.append(current_log)
         return True
 
+
 class ColorFormatter(logging.Formatter):
     def __init__(self, message, use_color=True, **kwargs):
         super().__init__(message, **kwargs)
@@ -181,6 +182,7 @@ def copy_file(in_file, out_file):
     with open(out_file, "w") as f:
         for line in lines:
             f.write(line)
+
 
 def setup_env():
     env = os.environ.copy()
@@ -481,7 +483,7 @@ def select_olp_EWScheme(conf):
     ewscheme = conf["olp.ewscheme"]
     raisewarn = False
     if conf.getBooleanProperty("olp.config_model_options"):
-        # raise warning only when model.options were actually given in the config file, 
+        # raise warning only when model.options were actually given in the config file,
         # not just because model.options was filled with the default
         for key, value in list(golem.model.MODEL_OPTIONS.items()):
             if any(item.startswith(str(key)) for item in ewparameters):
@@ -503,11 +505,9 @@ def select_olp_EWScheme(conf):
         logger.info("OLP EWScheme --> alphaMZ")
 
     if ewscheme == "alphaRUN":
-        logger.warning("OLP EWScheme --> alphaRUN\n"
-                       + "EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaRUN\n" + "EW not supported yet!")
     if ewscheme == "alphaMSbar":
-        logger.warning("OLP EWScheme --> alphaMSbar\n"
-                    +"EW not supported yet!")
+        logger.warning("OLP EWScheme --> alphaMSbar\n" + "EW not supported yet!")
     if ewscheme == "OLPDefined":
         logger.info("OLP EWScheme --> OLPDefined: GoSam default taken")
         golem.model.MODEL_OPTIONS["ewchoose"] = "2"

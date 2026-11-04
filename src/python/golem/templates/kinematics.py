@@ -749,7 +749,7 @@ class KinematicsTemplate(golem.util.parser.Template):
         else:
             end_index = self._num_in
 
-        # when using "particles" as iterator, which is the last object 
+        # when using "particles" as iterator, which is the last object
         # depends on applied filters, so we have to run the loop twice
         last_index = start_index
         for index in range(start_index, end_index):
@@ -773,7 +773,6 @@ class KinematicsTemplate(golem.util.parser.Template):
             # continue
 
             last_index = index
-            
 
         for index in range(start_index, end_index):
             if self._lightlike[index]:
@@ -795,7 +794,7 @@ class KinematicsTemplate(golem.util.parser.Template):
             # if charge not in charge_filter:
             # continue
 
-            if index==last_index:
+            if index == last_index:
                 props.setProperty(last_name, True)
             else:
                 props.setProperty(last_name, False)

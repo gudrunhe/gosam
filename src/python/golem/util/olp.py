@@ -649,7 +649,7 @@ def process_order_file(
 
     # check if any model.options are set in the config file (before filling in the defaults)
     config_model_options = conf.getListProperty("model.options") != []
-    conf.setProperty("olp.config_model_options",config_model_options)
+    conf.setProperty("olp.config_model_options", config_model_options)
 
     try:
         config_ir_scheme = default_conf["regularisation_scheme"].upper()
@@ -658,9 +658,7 @@ def process_order_file(
 
     ext_ir_scheme = None
     if "dred" in default_conf["extensions"] and "thv" in default_conf["extensions"]:
-        logger.critical(
-                        "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
-                    )
+        logger.critical("Multiple regularisation schemes specified in extensions: thv and dred. Please pick one.")
         sys.exit("GoSam terminated due to an error")
     if "dred" in default_conf["extensions"]:
         ext_ir_scheme = "DRED"
@@ -671,11 +669,10 @@ def process_order_file(
     if config_ir_scheme != None and ext_ir_scheme != None:
         if config_ir_scheme != ext_ir_scheme:
             logger.critical(
-                        "Incompatible settings between regularisation_scheme and extensions: "
-                        + "%r vs. %r" % (config_ir_scheme,ext_ir_scheme)
-                    )
+                "Incompatible settings between regularisation_scheme and extensions: "
+                + "%r vs. %r" % (config_ir_scheme, ext_ir_scheme)
+            )
             sys.exit("GoSam terminated due to an error")
-
 
     if "olp_process_name" in opts:
         olp_process_name = opts["olp_process_name"].strip().lower()
@@ -705,17 +702,23 @@ def process_order_file(
         if pi_key == "":
             continue
         if pi_key in default_conf:
-            if conf["mc_specials."+pi_key] != conf[pi_key] and conf[pi_key] is not None and conf[pi_key] != "":
-                logger.warning("Your BLHA order file '%s' specifies the property '%s' in a special '#@' instruction.\n" \
-                "It will overwrite the default and/or the value given in the config file\n'%s':\n%s -> %s\n" \
-                "Please check that this is really what you want to do! " 
-                % (order_file_name,pi_key,conf["extra_setup_file"],conf[pi_key],conf["mc_specials."+pi_key]))
+            if conf["mc_specials." + pi_key] != conf[pi_key] and conf[pi_key] is not None and conf[pi_key] != "":
+                logger.warning(
+                    "Your BLHA order file '%s' specifies the property '%s' in a special '#@' instruction.\n"
+                    "It will overwrite the default and/or the value given in the config file\n'%s':\n%s -> %s\n"
+                    "Please check that this is really what you want to do! "
+                    % (order_file_name, pi_key, conf["extra_setup_file"], conf[pi_key], conf["mc_specials." + pi_key])
+                )
         key = pi_key.removeprefix("mc_specials")
         if key == "extensions":
-            conf["extensions"] = conf["mc_specials.extensions"] if conf["extensions"] == "" else conf[extensions]+","+conf["mc_specials.extensions"]
+            conf["extensions"] = (
+                conf["mc_specials.extensions"]
+                if conf["extensions"] == ""
+                else conf[extensions] + "," + conf["mc_specials.extensions"]
+            )
         else:
-            conf[key] = conf["mc_specials."+pi_key]
-        conf._del("mc_specials."+pi_key)
+            conf[key] = conf["mc_specials." + pi_key]
+        conf._del("mc_specials." + pi_key)
 
     contract_file = golem.util.olp_objects.OLPContractFile(order_file)
 
@@ -775,40 +778,40 @@ def process_order_file(
 
         model = golem.util.tools.getModel(model_conf, imodel_path)
 
-        # zero property: convert masses and width defined through PDG code to internal parameter name 
+        # zero property: convert masses and width defined through PDG code to internal parameter name
         # (depends on model, so model.py must have been created already)
         orig_zero = conf.getListProperty("zero")
         new_zero = []
         for z in orig_zero:
-            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)",z.lower())
+            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
             if massmatch:
-                nz = re.sub(r"\;",r"),mass(",z.lower()).split(",")
+                nz = re.sub(r"\;", r"),mass(", z.lower()).split(",")
                 new_zero.extend(nz)
                 continue
-            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)",z.lower())
+            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
             if widthmatch:
-                nz = re.sub(r"\;",r"),width(",z.lower()).split(",")
+                nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
                 new_zero.extend(nz)
                 continue
             new_zero.append(z)
         for p in model.particles.values():
-            searchm = "mass("+str(abs(p.getPDGCode()))+")"
-            if searchm in list(map(str.lower,new_zero)):
-                new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
+            searchm = "mass(" + str(abs(p.getPDGCode())) + ")"
+            if searchm in list(map(str.lower, new_zero)):
+                new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
                 if p.isMassive():
                     new_zero.append(p.getMass())
-            searchw = "width("+str(abs(p.getPDGCode()))+")"
-            if searchw in list(map(str.lower,new_zero)):
-                new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
+            searchw = "width(" + str(abs(p.getPDGCode())) + ")"
+            if searchw in list(map(str.lower, new_zero)):
+                new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
                 if p.hasWidth():
                     new_zero.append(p.getWidth())
-        conf.setProperty("zero",",".join(list(set(new_zero))))
+        conf.setProperty("zero", ",".join(list(set(new_zero))))
         for subconf in subprocesses_conf:
-            subconf.setProperty("zero",",".join(list(set(new_zero))))
+            subconf.setProperty("zero", ",".join(list(set(new_zero))))
 
-        # It can happen that a model defines names for a particle's mass and width but 
-        # sets them to 0 in the parameters definiton (see e.g. the light quarks in the 
-        # built-in models). We have to take care of that and add those names to the zero 
+        # It can happen that a model defines names for a particle's mass and width but
+        # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+        # built-in models). We have to take care of that and add those names to the zero
         # property to avoid erroneous code generation. Otherwise the user has to remember
         # to add these cases to 'zero' manually.
         if not conf.getBooleanProperty("massive_light_fermions"):
@@ -817,7 +820,7 @@ def process_order_file(
                 if p.isMassive(zeros):
                     m = p.getMass(zeros)
                     try:
-                        if float(model.parameters[m]) == 0.:
+                        if float(model.parameters[m]) == 0.0:
                             zeros.append(m)
                     except KeyError:
                         # dependent parameters are not part of parameters dict
@@ -825,14 +828,14 @@ def process_order_file(
                 if p.hasWidth(zeros):
                     w = p.getWidth(zeros)
                     try:
-                        if float(model.parameters[w]) == 0.:
+                        if float(model.parameters[w]) == 0.0:
                             zeros.append(w)
                     except KeyError:
                         # dependent parameters are not part of parameters dict
                         pass
-            conf.setProperty("zero",",".join(list(set(zeros))))
+            conf.setProperty("zero", ",".join(list(set(zeros))))
             for subconf in subprocesses_conf:
-                subconf.setProperty("zero",",".join(list(set(zeros))))
+                subconf.setProperty("zero", ",".join(list(set(zeros))))
 
         # ---#[ Setup excluded and massive particles :
         for lconf in [conf] + subprocesses_conf:
@@ -852,8 +855,8 @@ def process_order_file(
 
             lconf["__excludedParticles__"] = None
 
-            # Deactivated to avoid unintuitive behaviour. Particle 
-            # masses should be taken as in the model file or set to 
+            # Deactivated to avoid unintuitive behaviour. Particle
+            # masses should be taken as in the model file or set to
             # zero (if desired) through the process card (*.in or *.rc)
 
             # set_massiveParticles = set()
@@ -931,20 +934,19 @@ def process_order_file(
         # ---#] Setup couplings :
         # ---#[ Select regularisation scheme:
         for lconf in [conf] + subprocesses_conf:
-
             # In OLP mode IR-scheme is specified through IRregularisation, which might interfere with scheme given
             # in config file (if present). The following behaviour is implemented:
             #
             # OLP  | config (from e.g. golem.in)  | result
             # -----------------------------------------------------------------------
             # tHV  | None                         | "dred" + "convert_to_thv = True"
-            # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False" 
+            # tHV  | regularisation_scheme=thv    | "thv"  + "convert_to_thv = False"
             # tHV  | thv in extensions            | "thv"  + "convert_to_thv = False"
             # DRED | None                         | "dred" + "convert_to_thv = False"
             # DRED | regularisation_scheme=dred   | "dred" + "convert_to_thv = False"
             # DRED | dred in extensions           | "dred" + "convert_to_thv = False"
             # DRED | convert_to_thv=True          | "dred" + "convert_to_thv = True"
-            # 
+            #
             #
             # In case of mismatch execution is terminated.
             #
@@ -963,9 +965,11 @@ def process_order_file(
             mismatch_schemes = [False, None]
 
             if ir_scheme == "CDR":
-                logger.warning("GoSam results are returned in the 't Hooft-Veltman scheme,\n" \
-                "which differs from requested CDR scheme at O(eps). For \n"
-                "ordinary NLO calculations this should not be a problem.")
+                logger.warning(
+                    "GoSam results are returned in the 't Hooft-Veltman scheme,\n"
+                    "which differs from requested CDR scheme at O(eps). For \n"
+                    "ordinary NLO calculations this should not be a problem."
+                )
                 ir_scheme = "THV"
 
             if config_ir_scheme != None:
@@ -978,9 +982,10 @@ def process_order_file(
 
             if mismatch_schemes[0]:
                 logger.critical(
-                    "IR regularisation scheme specified in BLHA-file conflicts with " \
-                    "scheme specified in config file(s)\n %r:\n %r vs. %r" \
-                            % (default_conf["extra_setup_file"],ir_scheme,mismatch_schemes[1]))
+                    "IR regularisation scheme specified in BLHA-file conflicts with "
+                    "scheme specified in config file(s)\n %r:\n %r vs. %r"
+                    % (default_conf["extra_setup_file"], ir_scheme, mismatch_schemes[1])
+                )
                 sys.exit("GoSam terminated due to an error")
 
             # choose behaviour according to table above
@@ -991,9 +996,9 @@ def process_order_file(
                 if config_ir_scheme == None and ext_ir_scheme == None:
                     if "DRED" not in uext:
                         lconf["olp." + str(golem.properties.extensions)] = "DRED"
-                    lconf["convert_to_thv"] = True   
-                else: 
-                    # at this point we can be sure that at least one of config_ir_scheme or 
+                    lconf["convert_to_thv"] = True
+                else:
+                    # at this point we can be sure that at least one of config_ir_scheme or
                     # ext_ir_scheme equal "tHV" because of the check above
                     if "tHV" not in uext:
                         lconf["olp." + str(golem.properties.extensions)] = "tHV"
@@ -1102,11 +1107,13 @@ def process_order_file(
         raise golem.util.olp_objects.OLPError("while writing contract file: %s" % err)
     # ---#] Write output file:
 
-    # Contract file is written, no we can stop if there were any errors 
+    # Contract file is written, no we can stop if there were any errors
     if not file_ok:
-        logger.critical("Your BLHA order file could not be processed properly.\n"
-                        "Please, check configuration and contract files for errors!")
-        sys.exit("GoSam terminated due to an error")   
+        logger.critical(
+            "Your BLHA order file could not be processed properly.\n"
+            "Please, check configuration and contract files for errors!"
+        )
+        sys.exit("GoSam terminated due to an error")
 
     # ---#[ Process global templates:
 
@@ -1121,31 +1128,28 @@ def process_order_file(
     # This fills in the defaults where no option is given:
     for p in golem.properties.properties:
         if conf.getProperty(p) or conf.getProperty(p) == False or conf.getProperty(p) == 0:
-            # Note that 'False'and '0' are actually valid values a property can be set to. 
+            # Note that 'False'and '0' are actually valid values a property can be set to.
             conf.setProperty(str(p), conf.getProperty(p))
         else:
             # this catches all falsy values like [], None, " ", etc., which mean
-            # the property is not set yet. But not '0' and the acual bool 'False', 
+            # the property is not set yet. But not '0' and the acual bool 'False',
             # which we checked for above, since those ARE possible values for a property.
             conf.setProperty(str(p), p.getDefault())
 
-##################################################################################
-#   ATTENTION!!! 
-#   
-#   The following original implementation looks fine but is broken, as properties
-#   evaluating to 'False' or '0' will be counted as not initialized/given. But
-#   this is not correct. A property can be set to either of these values and we
-#   DO NOT want to overwrite it with its default. Code kept here as a warning.    
-#
-##################################################################################
-#    for p in golem.properties.properties:
-#        if conf.getProperty(p):
-#            conf.setProperty(str(p), conf.getProperty(p))
-#        else:
-#            conf.setProperty(str(p), p.getDefault())
-
-
-
+    ##################################################################################
+    #   ATTENTION!!!
+    #
+    #   The following original implementation looks fine but is broken, as properties
+    #   evaluating to 'False' or '0' will be counted as not initialized/given. But
+    #   this is not correct. A property can be set to either of these values and we
+    #   DO NOT want to overwrite it with its default. Code kept here as a warning.
+    #
+    ##################################################################################
+    #    for p in golem.properties.properties:
+    #        if conf.getProperty(p):
+    #            conf.setProperty(str(p), conf.getProperty(p))
+    #        else:
+    #            conf.setProperty(str(p), p.getDefault())
 
     golem.properties.setInternals(conf)
 
@@ -1195,33 +1199,37 @@ def mc_specials(conf, order_file):
     for pi in order_file.processing_instructions():
         pi_parts = pi.strip().split(" ", 1)
         if pi_parts[0] == "regularisation_scheme":
-            logger.critical("Property 'regularisation_scheme' cannot be set as a '#@' instruction in the BLHA order file!\n" \
-            "Please only use BLHA's 'IRregularisation' keyword.")
+            logger.critical(
+                "Property 'regularisation_scheme' cannot be set as a '#@' instruction in the BLHA order file!\n"
+                "Please only use BLHA's 'IRregularisation' keyword."
+            )
             sys.exit("GoSam terminated due to an error")
         if pi_parts[0] == "extensions":
-            if any(irs in [ext.lower() for ext in pi_parts[1].split(",")] for irs in ["dred","thv"]):
-                logger.critical("IR regularisation scheme ('dred' or 'thv') cannot be added to 'extensions'\n"
-                                "in a '#@' instruction in the BLHA order file! Please only use BLHA's 'IRregularisation' keyword.")
-                sys.exit("GoSam terminated due to an error")   
+            if any(irs in [ext.lower() for ext in pi_parts[1].split(",")] for irs in ["dred", "thv"]):
+                logger.critical(
+                    "IR regularisation scheme ('dred' or 'thv') cannot be added to 'extensions'\n"
+                    "in a '#@' instruction in the BLHA order file! Please only use BLHA's 'IRregularisation' keyword."
+                )
+                sys.exit("GoSam terminated due to an error")
         pi_keys.append(pi_parts[0])
         if len(pi_parts) == 2:
-            conf.setProperty("mc_specials."+pi_parts[0], pi_parts[1])
+            conf.setProperty("mc_specials." + pi_parts[0], pi_parts[1])
         else:
-            conf.setProperty("mc_specials."+pi_parts[0], True)
-    conf.setProperty("mc_specials.keys",pi_keys)
+            conf.setProperty("mc_specials." + pi_parts[0], True)
+    conf.setProperty("mc_specials.keys", pi_keys)
 
     overwrite_warn = False
 
     mc_name = conf.getProperty("olp.mc.name").lower().strip()
 
-    if mc_name != "any":        
+    if mc_name != "any":
         if conf.getProperty("mc_specials.olp.mc.name") is not None:
             mc_special_mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
             if mc_name != mc_special_mc_name:
                 overwrite_warn = True
     elif conf.getProperty("mc_specials.olp.mc.name") is not None:
         mc_name = conf.getProperty("mc_specials.olp.mc.name").lower().strip()
-    
+
     mc_version = []
     s = ""
     mc_special_s = ""
@@ -1237,10 +1245,12 @@ def mc_specials(conf, order_file):
         mc_version = list(map(int, s.split(".")))
 
     if overwrite_warn:
-        old_mc = mc_special_mc_name if mc_special_s == "" else mc_special_mc_name+"/"+mc_special_s
-        new_mc = mc_name if s == "" else mc_name+"/"+s
-        logger.warning("Command line argument --mc %s overwrites #@ instruction in BLHA order file: %s -> %s " 
-                        % (new_mc,old_mc,new_mc))
+        old_mc = mc_special_mc_name if mc_special_s == "" else mc_special_mc_name + "/" + mc_special_s
+        new_mc = mc_name if s == "" else mc_name + "/" + s
+        logger.warning(
+            "Command line argument --mc %s overwrites #@ instruction in BLHA order file: %s -> %s "
+            % (new_mc, old_mc, new_mc)
+        )
 
     required_extensions = []
 
@@ -1252,7 +1262,9 @@ def mc_specials(conf, order_file):
     elif mc_name == "amcatnlo":
         required_extensions.extend(["f77"])
     else:
-        logger.warning("Unknown Monte Carlo program passed via the --mc argument: %s. This statement will be IGNORED!" % (mc_name))
+        logger.warning(
+            "Unknown Monte Carlo program passed via the --mc argument: %s. This statement will be IGNORED!" % (mc_name)
+        )
 
     extensions = golem.properties.getExtensions(conf)
     add_extensions = []
@@ -1261,6 +1273,7 @@ def mc_specials(conf, order_file):
             add_extensions.append(ext)
     if len(add_extensions) > 0:
         conf.setProperty("%s-auto.extensions" % mc_name, ",".join(add_extensions))
+
 
 def merge_extensions(conf_a, conf_b):
     """merge extensions from conf_a into conf_b"""

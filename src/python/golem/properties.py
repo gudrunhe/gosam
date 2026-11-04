@@ -28,7 +28,7 @@ process_path = Property(
    process_path=/scratch/golem_processes/process1
    """,
     str,
-    "gosam_process"
+    "gosam_process",
 )
 
 qgraf_in = Property(
@@ -1107,7 +1107,7 @@ config_reduction_interoperation = Property(
    """,
     str,
     -1,
-    options=["-1","ninja","golem95"],
+    options=["-1", "ninja", "golem95"],
 )
 
 config_reduction_interoperation_rescue = Property(
@@ -1124,7 +1124,7 @@ config_reduction_interoperation_rescue = Property(
    """,
     str,
     -1,
-    options=["-1","ninja","golem95","quadruple"],
+    options=["-1", "ninja", "golem95", "quadruple"],
 )
 
 config_nlo_prefactors = Property(
@@ -1685,7 +1685,7 @@ massive_light_fermions = Property(
 
 # Note: the order in the properties list determines the order of entries in the appendix of refman
 properties = [
-#   main process definition
+    #   main process definition
     process_name,
     process_path,
     qgraf_in,
@@ -1701,7 +1701,7 @@ properties = [
     form_factor_lo,
     form_factor_nlo,
     crossings,
-#   filters and selectors
+    #   filters and selectors
     helicities,
     filter_particles,
     filter_lo_particles,
@@ -1718,7 +1718,7 @@ properties = [
     filter_nlo_diagrams,
     filter_ct_diagrams,
     filter_module,
-#   schemes and program settings 
+    #   schemes and program settings
     regularisation_scheme,
     config_convert_to_thv,
     sum_diagrams,
@@ -1733,7 +1733,7 @@ properties = [
     unitary_gauge,
     order_names,
     enable_truncation_orders,
-#   renormalisation
+    #   renormalisation
     renorm,
     config_renorm_alphas,
     config_renorm_gluonwf,
@@ -1741,12 +1741,12 @@ properties = [
     config_renorm_qmass,
     use_MQSE,
     config_renorm_yukawa,
-    MSbar_yukawa,    
+    MSbar_yukawa,
     config_renorm_logs,
     config_renorm_gamma5,
     config_renorm_eftwilson,
     config_renorm_ehc,
-#   reduction and rescue
+    #   reduction and rescue
     reduction_programs,
     config_reduction_interoperation,
     config_reduction_interoperation_rescue,
@@ -1768,12 +1768,12 @@ properties = [
     config_PSP_chk_li5,
     config_PSP_chk_kfactor_li,
     config_PSP_chk_rotdiff_li,
-#   misc
+    #   misc
     extensions,
-#   diagram drawing
+    #   diagram drawing
     pyxodraw,
     use_vertex_labels,
-#   technical settings
+    #   technical settings
     debug_flags,
     abbrev_color,
     abbrev_limit,
@@ -1785,7 +1785,7 @@ properties = [
     form_workspace,
     formopt_level,
     meson_buildtype,
-    meson_arch
+    meson_arch,
 ]
 
 REDUCTION_EXTENSIONS = ["golem95", "ninja"]

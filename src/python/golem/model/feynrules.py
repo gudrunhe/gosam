@@ -3,6 +3,7 @@
 This module allows to import model definitions from FeynRules using the
 Python interface.
 """
+
 import sys
 import os
 import os.path
@@ -150,14 +151,13 @@ class Model:
                 logger.critical("UFO model '%s' has CT_vertices but no CT_parameters!" % self.model_name)
                 sys.exit("GoSam terminated due to an error")
             else:
-                pass   
+                pass
 
         # #########################################################################################
         # Check if there are any vertices with ambiguous coupling orders and if so split them up.
         # #########################################################################################
         checked_vertices = []
         for vertex in self.all_vertices:
-            
             vertex.rank = set()
             for l in vertex.lorentz:
                 vertex.rank.add(l.rank)
@@ -165,11 +165,11 @@ class Model:
             if ambiguous_vertex(vertex):
                 vertices = split_vertex(vertex)
                 logger.info(
-                            (
-                                "Vertex %s has ambiguous structure of powers and/or rank. Internally split up into: %s."
-                                % (vertex.name, ', '.join(map(str,vertices)))
-                            )
-                        )
+                    (
+                        "Vertex %s has ambiguous structure of powers and/or rank. Internally split up into: %s."
+                        % (vertex.name, ", ".join(map(str, vertices)))
+                    )
+                )
                 for key, v in vertices.items():
                     newv = copy.deepcopy(vertex)
                     newv.name = v["name"]
@@ -184,7 +184,7 @@ class Model:
 
         # #######################################################################################################
         # Check if there are multiple vertices with the same particels and coupling orders. If so, combine them.
-        # #######################################################################################################     
+        # #######################################################################################################
         # Step 1: check vertex legs/particles
         seen_vertices = {}
         for vertex in checked_vertices:
@@ -199,10 +199,10 @@ class Model:
         for verts in check_vertices:
             seen_vertices2 = {}
             for v in verts:
-                # At this stage all couplings of a vertex should come with the same order, 
-                # so we can just take the first coupling. The same is true for the rank of 
+                # At this stage all couplings of a vertex should come with the same order,
+                # so we can just take the first coupling. The same is true for the rank of
                 # its lorentz structures.
-                vord = str(list(v.couplings.values())[0].order)+"_RK"+str(list(v.rank)[0])
+                vord = str(list(v.couplings.values())[0].order) + "_RK" + str(list(v.rank)[0])
                 if vord in list(seen_vertices2):
                     seen_vertices2[vord].append(v)
                 else:
@@ -211,9 +211,9 @@ class Model:
 
             # loop over vertices to be joined
             for jv in join_vertices:
-                #print("joining vertices: ",jv)
-                combv = {}              
-                combv["name"] = "V_%s_0" % 'a'.join(map(lambda v: v.name.split("_")[1],jv))
+                # print("joining vertices: ",jv)
+                combv = {}
+                combv["name"] = "V_%s_0" % "a".join(map(lambda v: v.name.split("_")[1], jv))
                 combv["particles"] = jv[0].particles
                 combv["color"] = []
                 combv["lorentz"] = []
@@ -227,26 +227,26 @@ class Model:
                             ccoord = combv["color"].index(v.color[coord[0]])
                         else:
                             combv["color"].append(v.color[coord[0]])
-                            ccoord = len(combv["color"])-1
+                            ccoord = len(combv["color"]) - 1
                         if v.lorentz[coord[1]] in combv["lorentz"]:
                             lcoord = combv["lorentz"].index(v.lorentz[coord[1]])
                         else:
                             combv["lorentz"].append(v.lorentz[coord[1]])
-                            lcoord = len(combv["lorentz"])-1
-                        if (ccoord,lcoord) in list(seen_couplings.keys()):
-                            seen_couplings[(ccoord,lcoord)].append(cpl)
-                        else:   
-                            seen_couplings[(ccoord,lcoord)] = [cpl]
+                            lcoord = len(combv["lorentz"]) - 1
+                        if (ccoord, lcoord) in list(seen_couplings.keys()):
+                            seen_couplings[(ccoord, lcoord)].append(cpl)
+                        else:
+                            seen_couplings[(ccoord, lcoord)] = [cpl]
 
                 # loop over couplings to be merged
                 for coord, jc in seen_couplings.items():
                     if len(jc) < 2:
                         combv["couplings"][coord] = jc[0]
                         continue
-                    #print("joining couplings: ",jc)
+                    # print("joining couplings: ",jc)
                     combc = {}
-                    combc["name"] = "GC_%s" % 'a'.join(map(lambda c: c.name.split("_")[1],jc))
-                    combc["value"] = "%s" % '+'.join(map(lambda c: "("+c.value+")",jc))
+                    combc["name"] = "GC_%s" % "a".join(map(lambda c: c.name.split("_")[1], jc))
+                    combc["value"] = "%s" % "+".join(map(lambda c: "(" + c.value + ")", jc))
                     # All couplings to be merged have the same order by construction.
                     combc["order"] = jc[0].order
                     newc = copy.deepcopy(jc[0])
@@ -254,8 +254,8 @@ class Model:
                     newc.value = combc["value"]
                     newc.order = combc["order"]
                     self.all_couplings.append(newc)
-                    combv["couplings"][coord] = newc 
-      
+                    combv["couplings"][coord] = newc
+
                 # create the merged vertex and remove the original ones
                 newv = copy.deepcopy(jv[0])
                 newv.name = combv["name"]
@@ -265,11 +265,11 @@ class Model:
                 newv.couplings = combv["couplings"]
 
                 logger.info(
-                            (
-                                "Vertices %s have same external legs, coupling orders and rank. Merging them internally into: %s."
-                                % (', '.join(map(str,jv)),newv.name)
-                            )
-                        )
+                    (
+                        "Vertices %s have same external legs, coupling orders and rank. Merging them internally into: %s."
+                        % (", ".join(map(str, jv)), newv.name)
+                    )
+                )
 
                 checked_vertices.append(newv)
                 for v in jv:
@@ -298,9 +298,9 @@ class Model:
                         if tuple(m) == unique_map:
                             structures.append(vertex.lorentz[k])
                             for ccoord in range(len(vertex.color)):
-                                if (ccoord,k) in list(vertex.couplings.keys()):
-                                    new_couplings[(ccoord,new_lcoord)] = vertex.couplings[(ccoord,k)]
-                            new_lcoord += 1                                    
+                                if (ccoord, k) in list(vertex.couplings.keys()):
+                                    new_couplings[(ccoord, new_lcoord)] = vertex.couplings[(ccoord, k)]
+                            new_lcoord += 1
                     v = copy.deepcopy(vertex)
                     v.name = f"{vertex.name}_{j}"
                     v.lorentz = structures
@@ -323,7 +323,9 @@ class Model:
                 unique_maps = set(tuple(map) for map in maps)
                 n_structures = len(unique_maps)
                 if n_structures > 1:
-                    logger.info(f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices")
+                    logger.info(
+                        f"Ambiguous spin mapping for vertex {vertex.name}, splitting into {n_structures} vertices"
+                    )
                     vertices = []
                     for j, unique_map in enumerate(unique_maps):
                         structures = []
@@ -334,9 +336,11 @@ class Model:
                                 structures.append(vertex.lorentz[k])
                                 for ccoord in range(len(vertex.color)):
                                     for xcoord in range(len(vertex.loop_particles)):
-                                        if (ccoord,k,xcoord) in list(vertex.couplings.keys()):
-                                            new_couplings[(ccoord,new_lcoord,xcoord)] = vertex.couplings[(ccoord,k,xcoord)]
-                                new_lcoord += 1                                    
+                                        if (ccoord, k, xcoord) in list(vertex.couplings.keys()):
+                                            new_couplings[(ccoord, new_lcoord, xcoord)] = vertex.couplings[
+                                                (ccoord, k, xcoord)
+                                            ]
+                                new_lcoord += 1
                         v = copy.deepcopy(vertex)
                         v.name = f"{vertex.name}_{j}"
                         v.lorentz = structures
@@ -378,7 +382,7 @@ class Model:
                     # => split const from log terms, if present
                     for ctpole in list(c.value.keys()):
                         ctcoeff = c.value[ctpole]
-                        self.ctfunctions[name][ctpole] = ctcoeff                    
+                        self.ctfunctions[name][ctpole] = ctcoeff
                 elif isinstance(c.value, str):
                     # the value of the coupling is a string and the Laurent expansion is only evident after evaluating CTParameter type objects
                     CTparams = [
@@ -388,7 +392,7 @@ class Model:
 
                     for ctparam in CTparams:
                         CTpoles = CTpoles.union(set(ctparam.value.keys()))
-              
+
                     for ctpole in CTpoles:
                         ctcoeff = c.value
                         for ctparam in CTparams:
@@ -839,7 +843,7 @@ class Model:
                 continue
                 assert False
 
-            #flip = spins[0] == 1 and spins[2] == 1
+            # flip = spins[0] == 1 and spins[2] == 1
 
             vfunctions = {}
             vertorders = []
@@ -873,7 +877,7 @@ class Model:
                 is_first = True
 
                 xfields = afields[:]
-                #if flip:
+                # if flip:
                 #    xfields[0] = afields[1]
                 #    xfields[1] = afields[0]
 
@@ -934,7 +938,7 @@ class Model:
                     continue
                     assert False
 
-                #flip = spins[0] == 1 and spins[2] == 1
+                # flip = spins[0] == 1 and spins[2] == 1
 
                 vfunctions = {}
                 vertorders = []
@@ -967,7 +971,7 @@ class Model:
                     is_first = True
 
                     xfields = afields[:]
-                    #if flip:
+                    # if flip:
                     #    xfields[0] = afields[1]
                     #    xfields[1] = afields[0]
 
@@ -1167,11 +1171,11 @@ class Model:
                     cplnames.append([coupling.name])
 
             for ivo in range(len(vertorders)):
-                #flip = spins[0] == 1 and spins[2] == 1
+                # flip = spins[0] == 1 and spins[2] == 1
                 deg = len(particles)
 
                 xidx = list(range(deg))
-                #if flip:
+                # if flip:
                 #    xidx[0] = 1
                 #    xidx[1] = 0
 
@@ -1210,7 +1214,7 @@ class Model:
                 elif "NP" in vertorders[ivo].keys() and vertorders[ivo]["NP"] > 0:
                     f.write("\n  XNPorder^%d * (" % (vertorders[ivo]["NP"]))
                     NPQL_brack_flag = True
-                    
+
                 dummies = []
 
                 brack_flag = False
@@ -1313,11 +1317,11 @@ class Model:
                         cplnames.append([coupling.name])
 
                 for ivo in range(len(vertorders)):
-                    #flip = spins[0] == 1 and spins[2] == 1
+                    # flip = spins[0] == 1 and spins[2] == 1
                     deg = len(particles)
 
                     xidx = list(range(deg))
-                    #if flip:
+                    # if flip:
                     #    xidx[0] = 1
                     #    xidx[1] = 0
 
@@ -1558,12 +1562,12 @@ class Model:
             # During export into a QGRAF or FORM model file, a '_<digit>' is added. Since this only encodes splitting
             # into unambiguous coupling power pieces, it can be ignored here
             if self.useCT:
-                return (self.all_vertices+self.all_CTvertices)[self.labels[label[:-2]]]
+                return (self.all_vertices + self.all_CTvertices)[self.labels[label[:-2]]]
             else:
                 return self.all_vertices[self.labels[label[:-2]]]
         else:
             if self.useCT:
-                return (self.all_vertices+self.all_CTvertices)[self.labels[label]]
+                return (self.all_vertices + self.all_CTvertices)[self.labels[label]]
             else:
                 return self.all_vertices[self.labels[label]]
 
@@ -1934,20 +1938,21 @@ def transform_color(expr, colors, xidx):
     else:
         return expr
 
+
 def trace_spin(lorentz):
     connections, _ = get_spin_connections(lorentz.structure)
 
     # Trace the leg connections by contracting the internal spin indices
     if connections == {}:
         # no spin connections given by Lorentz structure
-        seen = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
+        seen = [True if (s > 0 and not s % 2 == 0) else False for s in lorentz.spins]
         connection_map = [-1 for _ in lorentz.spins]
     else:
         # Found spin connections in Lorentz structure. Loop over the different terms.
         seen = []
         connection_map = []
         for ckey, cval in connections.items():
-            s = [True if (s > 0 and not s % 2 ==0) else False for s in lorentz.spins]
+            s = [True if (s > 0 and not s % 2 == 0) else False for s in lorentz.spins]
             cm = [-1 for _ in lorentz.spins]
 
             for i in range(len(lorentz.spins)):
@@ -1976,12 +1981,12 @@ def trace_spin(lorentz):
                             cm[i] = cursor + 1
                         break
             seen.append(s)
-            connection_map.append(cm)  
+            connection_map.append(cm)
         # remove duplicates:
         seen.sort()
-        seen=list(seen for seen,_ in itertools.groupby(seen))          
+        seen = list(seen for seen, _ in itertools.groupby(seen))
         connection_map.sort()
-        connection_map=list(connection_map for connection_map,_ in itertools.groupby(connection_map))
+        connection_map = list(connection_map for connection_map, _ in itertools.groupby(connection_map))
 
         if len(seen) > 1 or len(connection_map) > 1:
             logger.critical(f"Cannot find unambigous spin connection for Lorentz structure {lorentz}.")
@@ -1989,7 +1994,6 @@ def trace_spin(lorentz):
 
         # there's only one element left, and that's our map:
         connection_map = connection_map[0]
-
 
     # If the vertex does not provide explicit matching through the analytic expression and only two legs are unmatched,
     # connect the two unmatched legs
@@ -2003,16 +2007,16 @@ def trace_spin(lorentz):
     return connection_map
 
 
-def get_spin_connections(expr,depth=0):
+def get_spin_connections(expr, depth=0):
     # A recursive routine extracting the spin connections from a Lorentz structure string.
     # Has to be recursive as we have to resolve nested brackets.
 
-    keywords = ['Identity','Gamma5','ProjM','ProjP','C','Gamma','Sigma']
+    keywords = ["Identity", "Gamma5", "ProjM", "ProjP", "C", "Gamma", "Sigma"]
 
     connections = {}
 
-    curr_word = ''
-    
+    curr_word = ""
+
     skip = 0
     term = 0
     len_bracket = 0
@@ -2022,17 +2026,17 @@ def get_spin_connections(expr,depth=0):
         l = expr[idx]
         idx += 1
 
-        if l == ')' and depth > 0:
+        if l == ")" and depth > 0:
             # reached the end of a bracketed expression
             break
 
         if l.isalnum():
             # accumulate the name of the current function
             curr_word += l
-        elif l == '(' and expr[idx-2] in ['',' ','+','-','*']:
+        elif l == "(" and expr[idx - 2] in ["", " ", "+", "-", "*"]:
             # a bracket which does not belong to the argument of a function -> descent into it
-            brack_connections, skip = get_spin_connections(expr[idx:],depth+1)
-            idx += skip            
+            brack_connections, skip = get_spin_connections(expr[idx:], depth + 1)
+            idx += skip
             len_bracket = len(brack_connections.keys())
             try:
                 # check if we already have connections in the current term (multiplying the bracket we just processed)
@@ -2044,54 +2048,55 @@ def get_spin_connections(expr,depth=0):
             for bck, bcv in brack_connections.items():
                 term += 1
                 connections[term] = fconnections.union(bcv)
-        elif l == '(' and curr_word in keywords:
+        elif l == "(" and curr_word in keywords:
             # a bracket indicating the start of the arguments of one of the key functions
             # find the closing bracket and extract the spin indices/connection
-            curr_word = ''
+            curr_word = ""
             idx1 = idx
             idx2 = idx
             while idx < len(expr):
                 idx += 1
                 if expr[idx] == ")":
                     idx2 = idx
-                    idx += 1 
+                    idx += 1
                     break
             matcher = re.compile(r"\(\s*(?:-?\d+,\s*){0,2}\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
-            curr_connection = tuple(int(x)-1 for x in matcher.findall(expr[idx1-1:idx2+1])[0])
+            curr_connection = tuple(int(x) - 1 for x in matcher.findall(expr[idx1 - 1 : idx2 + 1])[0])
             # check if we had any preceeding bracket in the current term
             # if so, expand it
             if len_bracket > 0:
                 for t in range(len_bracket):
-                    connections[term-t].add(curr_connection)
-            else:           
+                    connections[term - t].add(curr_connection)
+            else:
                 try:
                     connections[term].add(curr_connection)
                 except KeyError:
                     connections[term] = set([curr_connection])
             curr_connection = None
-        elif (l == "+" or l == "-"):
+        elif l == "+" or l == "-":
             # a plus or minus indicating we're looking at a new term
             term += 1
             len_bracket = 0
-            curr_word = ''           
+            curr_word = ""
         else:
             # end of the current function/object, but is was not any of the key functions
-            curr_word = ''
-        
+            curr_word = ""
+
     return connections, idx
 
 
 def ambiguous_vertex(vertex):
-    # checks if vertex has ambiguous coupling orders and/or rank  
+    # checks if vertex has ambiguous coupling orders and/or rank
     cpl_orders = []
     for coord, cpl in vertex.couplings.items():
-        #cpl_orders.append(str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank))
+        # cpl_orders.append(str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank))
         cpl_orders.append(str(cpl.order))
     if len(set(cpl_orders)) > 1:
         return True
-    if len(vertex.rank)>1:
-        return True 
+    if len(vertex.rank) > 1:
+        return True
     return False
+
 
 def split_vertex(vertex):
     # splits a vertex with ambiguous coupling orders in multiple unambiguous vertices
@@ -2101,32 +2106,33 @@ def split_vertex(vertex):
     vertices = {}
     i = -1
     for coord, cpl in vertex.couplings.items():
-        i += 1 
-        cplord = str(cpl.order)+"_RK"+str(vertex.lorentz[coord[1]].rank)
+        i += 1
+        cplord = str(cpl.order) + "_RK" + str(vertex.lorentz[coord[1]].rank)
         if cplord in cpl_orders.keys():
-            vn = vertex.name+"_"+str(cpl_orders[cplord])
+            vn = vertex.name + "_" + str(cpl_orders[cplord])
             if vertex.color[coord[0]] in vertices[vn]["color"]:
                 ccoord = vertices[vn]["color"].index(vertex.color[coord[0]])
             else:
                 vertices[vn]["color"].append(vertex.color[coord[0]])
-                ccoord = len(vertices[vn]["color"])-1
+                ccoord = len(vertices[vn]["color"]) - 1
             if vertex.lorentz[coord[1]] in vertices[vn]["lorentz"]:
                 lcoord = vertices[vn]["lorentz"].index(vertex.lorentz[coord[1]])
             else:
                 vertices[vn]["lorentz"].append(vertex.lorentz[coord[1]])
-                lcoord = len(vertices[vn]["lorentz"])-1
-            vertices[vn]["couplings"][(ccoord,lcoord)] = cpl
+                lcoord = len(vertices[vn]["lorentz"]) - 1
+            vertices[vn]["couplings"][(ccoord, lcoord)] = cpl
         else:
             cpl_orders[cplord] = i
-            vn = vertex.name+"_"+str(i)
+            vn = vertex.name + "_" + str(i)
             vertices[vn] = {}
             vertices[vn]["name"] = vn
             vertices[vn]["particles"] = vertex.particles
             vertices[vn]["color"] = [vertex.color[coord[0]]]
             vertices[vn]["lorentz"] = [vertex.lorentz[coord[1]]]
-            vertices[vn]["couplings"] = {(0,0):cpl}
+            vertices[vn]["couplings"] = {(0, 0): cpl}
             vertices[vn]["rank"] = {vertex.lorentz[coord[1]].rank}
     return vertices
+
 
 def load_ufo_files(mname, mpath):
     mfile = None

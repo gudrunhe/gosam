@@ -35,6 +35,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def generate_process_files(conf, from_scratch=False):
     """
     This routine is a wrapper around anything that needs to be done
@@ -122,9 +123,9 @@ def generate_process_files(conf, from_scratch=False):
         props.setProperty("write_vanishing_amplitude", "false")
 
     if conf.getBooleanProperty("generate_eft_loopind"):
-        props.setProperty("generate_eft_loopind","true")
+        props.setProperty("generate_eft_loopind", "true")
     else:
-        props.setProperty("generate_eft_loopind","false")
+        props.setProperty("generate_eft_loopind", "false")
 
     conf["__info.count.tree__"] = len(keep_tree)
     conf["__info.count.virt__"] = len(keep_virt)
@@ -277,7 +278,8 @@ def write_template_file(fname, defaults, format=None):
                 f.write("%s\n" % text)
         elif format == "LaTeX":
             f.write(
-                "\\item[\\colorbox{gray!30}{\\texttt{%s}}] (\\textit{%s})\n" % (str(prop).replace("_", "\\_"), stype.replace("_", "\\_"))
+                "\\item[\\colorbox{gray!30}{\\texttt{%s}}] (\\textit{%s})\n"
+                % (str(prop).replace("_", "\\_"), stype.replace("_", "\\_"))
             )
 
         if format is None:
@@ -334,9 +336,9 @@ def write_template_file(fname, defaults, format=None):
                     if len(value) > 0:
                         f.write("Default: \\verb|%s|\n\\\\" % value)
                     else:
-                        f.write("Default: \\verb|\"\"|\n\\\\")
+                        f.write('Default: \\verb|""|\n\\\\')
                 else:
-                        f.write("Default: \\verb|None|\n\\\\")
+                    f.write("Default: \\verb|None|\n\\\\")
 
         if format == "LaTeX":
             if prop.isHidden() is not None:
@@ -466,6 +468,7 @@ def check_dont_overwrite(conf):
                 + "you need to remove the file %r in that directory." % consts.GOLEM_DIR_FILE_NAME
             )
 
+
 def fill_config(conf):
     """
     Checks whether the combination of properties in the given config
@@ -517,11 +520,11 @@ def fill_config(conf):
 
     # Check for required properties in standalone mode:
     if not conf["__OLP_MODE__"]:
-        if (True if conf.getProperty("in") is None else conf.getProperty("in")==""):
+        if True if conf.getProperty("in") is None else conf.getProperty("in") == "":
             raise GolemConfigError("You have to specify at least one 'in' particle!")
-        if (True if conf.getProperty("out") is None else conf.getProperty("out")==""):
+        if True if conf.getProperty("out") is None else conf.getProperty("out") == "":
             raise GolemConfigError("You have to specify at least one 'out' particle!")
-        if (True if conf.getProperty("order") is None else conf.getProperty("order")==""):
+        if True if conf.getProperty("order") is None else conf.getProperty("order") == "":
             raise GolemConfigError("You have to specify the perturbative order of your process!")
 
     # Check for non-fatal incompatible configurations:
@@ -545,24 +548,28 @@ def fill_config(conf):
     no_renorm = generate_loop_diagrams and not conf.getBooleanProperty("renorm")
     raise_warn = False
     warn_str = ""
-    for p in ["renorm_alphas",
-              "renorm_mqwf",
-              "renorm_gluonwf",
-              "renorm_qmass",
-              "renorm_logs",
-              "renorm_gamma5",
-              "renorm_yukawa",
-              "renorm_eftwilson",
-              "renorm_ehc",
-              "MSbar_yukawa",
-              "use_MQSE"]:
+    for p in [
+        "renorm_alphas",
+        "renorm_mqwf",
+        "renorm_gluonwf",
+        "renorm_qmass",
+        "renorm_logs",
+        "renorm_gamma5",
+        "renorm_yukawa",
+        "renorm_eftwilson",
+        "renorm_ehc",
+        "MSbar_yukawa",
+        "use_MQSE",
+    ]:
         if conf.getBooleanProperty(p) and no_renorm:
             raise_warn = True
             warn_str = warn_str + ",\n" + p if warn_str else p
     if raise_warn:
-        logger.warning("You explicitly turned off QCD renormalisation by setting renorm=False.\n"
-                       + "The following settings will therefore have no effect:\n"
-                       + warn_str)
+        logger.warning(
+            "You explicitly turned off QCD renormalisation by setting renorm=False.\n"
+            + "The following settings will therefore have no effect:\n"
+            + warn_str
+        )
 
     # Check for fatal incompatible configurations:
     raise_err = False
@@ -634,16 +641,19 @@ def fill_config(conf):
     if conf.getBooleanProperty("loop_suppressed_Born"):
         if not is_loopinduced:
             raise GolemConfigError(
-            "\nThe property 'loop_suppressed_Born' can only be set\n"
-            + "to 'True' when calculating a loop-induced process.")
+                "\nThe property 'loop_suppressed_Born' can only be set\n"
+                + "to 'True' when calculating a loop-induced process."
+            )
         if not conf.getProperty("order_names") or ("QL" not in conf.getProperty("order_names")):
             raise GolemConfigError(
-            "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
-            + "when 'order_names' are specified and contain the parameter 'QL'.")
+                "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
+                + "when 'order_names' are specified and contain the parameter 'QL'."
+            )
         if not conf.getBooleanProperty("enable_truncation_orders"):
             raise GolemConfigError(
-            "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
-            + "when also 'enable_truncation_orders=True'.")
+                "\nThe property 'loop_suppressed_Born' can only be set to 'True'\n"
+                + "when also 'enable_truncation_orders=True'."
+            )
 
     if conf.getBooleanProperty("renorm_eftwilson") and conf.getBooleanProperty("renorm_ehc"):
         raise GolemConfigError(
@@ -653,43 +663,47 @@ def fill_config(conf):
             + "latter turns on the hardcoded finite renormalisation of\n"
             + "effictive Higgs-gluon couplings like in the heavy-top limit.\n"
             + "This will probably cause some serious errors in your result,\n"
-            + "so I will not let you do that, sorry.")
+            + "so I will not let you do that, sorry."
+        )
 
         # END: Check for incompatible configuration
 
-
-    # Discard all diagrams with double insertions, when truncation orders 
-    # are used. Is also done later in golem.frm, but doing it here reduces 
+    # Discard all diagrams with double insertions, when truncation orders
+    # are used. Is also done later in golem.frm, but doing it here reduces
     # the number of generated diagrams and speeds up the calculation.
     # Note: cannot be done when a filter module is used -> has to be part of the module
     if conf.getBooleanProperty("enable_truncation_orders"):
-        for fltr in ["lo","nlo","ct"]:
-            if conf["filter."+fltr] is None:
-                logger.info("\'enable_truncation_orders=True\' -> adding filter.%s: d.order('NP')<=1 " % fltr)
-                conf["filter."+fltr] = "lambda d: d.order('NP')<=1"
-            elif conf["filter."+fltr].startswith("lambda d:"):
-                logger.info("\'enable_truncation_orders=True\' -> appending filter.%s: d.order('NP')<=1 " % fltr)
-                conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('NP')<=1"
+        for fltr in ["lo", "nlo", "ct"]:
+            if conf["filter." + fltr] is None:
+                logger.info("'enable_truncation_orders=True' -> adding filter.%s: d.order('NP')<=1 " % fltr)
+                conf["filter." + fltr] = "lambda d: d.order('NP')<=1"
+            elif conf["filter." + fltr].startswith("lambda d:"):
+                logger.info("'enable_truncation_orders=True' -> appending filter.%s: d.order('NP')<=1 " % fltr)
+                conf["filter." + fltr] = conf["filter." + fltr] + " and d.order('NP')<=1"
             else:
-                logger.warning("You seem to be using a filter for the %s component " % (fltr) \
-                + "defined in a filter module: %s.\n" % (conf["filter."+fltr]) \
-                + "Since you are also using the 'enable_truncation_orders' feature please make sure you\n"
-                + "restrict order('NP')<=1 to avoid double insertions of EFT operators (if applicable).")
+                logger.warning(
+                    "You seem to be using a filter for the %s component " % (fltr)
+                    + "defined in a filter module: %s.\n" % (conf["filter." + fltr])
+                    + "Since you are also using the 'enable_truncation_orders' feature please make sure you\n"
+                    + "restrict order('NP')<=1 to avoid double insertions of EFT operators (if applicable)."
+                )
 
-    # For loop-induced processed any tree diagram must contain a 
+    # For loop-induced processed any tree diagram must contain a
     # loop suppressed operator, while loop diagrams must not. Add appropriate filters here.
     # Note: cannot be done when a filter module is used -> has to be part of the module
     if conf.getBooleanProperty("loop_suppressed_Born"):
-        for l, fltr in enumerate(["nlo","lo"]):
-            if conf["filter."+fltr] is None:
-                conf["filter."+fltr] = "lambda d: d.order('QL')==" + str(l) 
-            elif conf["filter."+fltr].startswith("lambda d:"):
-                conf["filter."+fltr] = conf["filter."+fltr] + " and d.order('QL')==" + str(l)
+        for l, fltr in enumerate(["nlo", "lo"]):
+            if conf["filter." + fltr] is None:
+                conf["filter." + fltr] = "lambda d: d.order('QL')==" + str(l)
+            elif conf["filter." + fltr].startswith("lambda d:"):
+                conf["filter." + fltr] = conf["filter." + fltr] + " and d.order('QL')==" + str(l)
             else:
-                logger.warning("You seem to be using a filter for the %s component " % (fltr) \
-                + "defined in a filter module: %s.\n" % (conf["filter."+fltr]) \
-                + "Since you are also using the 'loop_suppressed_Born' feature please make sure you\n"
-                + "include order('QL')==%d. to ensure proper loop counting." % (l))
+                logger.warning(
+                    "You seem to be using a filter for the %s component " % (fltr)
+                    + "defined in a filter module: %s.\n" % (conf["filter." + fltr])
+                    + "Since you are also using the 'loop_suppressed_Born' feature please make sure you\n"
+                    + "include order('QL')==%d. to ensure proper loop counting." % (l)
+                )
 
     if not conf["extensions"] and props["extensions"]:
         conf["extensions"] = props["extensions"]
@@ -706,14 +720,18 @@ def fill_config(conf):
 
     if not golem.installation.WITH_GOLEM:
         if reduction_programs == ["golem95"]:
-            raise GolemConfigError("The configuration requests only 'golem95' as reduction library,"+
-                                    "but GoSam was built without Golem.\n"+
-                                    "Please reinstall GoSam with support for Golem or select a diferent reduction library.")
+            raise GolemConfigError(
+                "The configuration requests only 'golem95' as reduction library,"
+                + "but GoSam was built without Golem.\n"
+                + "Please reinstall GoSam with support for Golem or select a diferent reduction library."
+            )
         elif "golem95" in reduction_programs:
-            logger.warning("The configuration requests 'golem95' as a reduction library, but GoSam was build without Golem.\n"+
-                            "Removing 'golem95' from 'reduction_programs'.")
+            logger.warning(
+                "The configuration requests 'golem95' as a reduction library, but GoSam was build without Golem.\n"
+                + "Removing 'golem95' from 'reduction_programs'."
+            )
             reduction_programs.remove("golem95")
-            conf.setProperty("reduction_programs",",".join(reduction_programs))
+            conf.setProperty("reduction_programs", ",".join(reduction_programs))
 
     for p in reduction_programs:
         if not p in tmp_ext:
@@ -729,11 +747,18 @@ def fill_config(conf):
     conf["is_loopinduced"] = is_loopinduced
     conf["generate_eft_loopind"] = conf.getBooleanProperty("loop_suppressed_Born") and is_loopinduced
     conf["generate_counterterms"] = generate_counterterms
-    conf["generate_eft_counterterms"] = conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_loop_diagrams
-    conf["generate_ym_counterterms"] = (conf.getBooleanProperty("renorm_yukawa") \
-                                        or conf.getBooleanProperty("renorm_qmass") \
-                                        or conf.getBooleanProperty("renorm_gamma5")) \
-        and generate_counterterms and generate_loop_diagrams
+    conf["generate_eft_counterterms"] = (
+        conf.getBooleanProperty("renorm_eftwilson") and generate_counterterms and generate_loop_diagrams
+    )
+    conf["generate_ym_counterterms"] = (
+        (
+            conf.getBooleanProperty("renorm_yukawa")
+            or conf.getBooleanProperty("renorm_qmass")
+            or conf.getBooleanProperty("renorm_gamma5")
+        )
+        and generate_counterterms
+        and generate_loop_diagrams
+    )
     conf["finite_renorm_ehc"] = conf.getBooleanProperty("renorm_ehc") and generate_loop_diagrams
     conf["use_MQSE"] = conf.getBooleanProperty("use_MQSE")
 
@@ -776,11 +801,11 @@ def fill_config(conf):
     # retrive final extensions from other options
     ext = golem.properties.getExtensions(conf)
 
-    # check consistency of regularisation schemes in setup file 
+    # check consistency of regularisation schemes in setup file
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf["__OLP_MODE__"]:
         mismatch_schemes = [False, None]
-    
+
         if conf["regularisation_scheme"] == "dred":
             if "thv" in ext:
                 mismatch_schemes = [True, "thv"]
@@ -792,22 +817,18 @@ def fill_config(conf):
             if not "thv" in ext:
                 ext.append("thv")
         else:
-            logger.critical(
-                    "Unknown regularisation_scheme in config: %s" % str(conf["regularisation_scheme"])
-                )
+            logger.critical("Unknown regularisation_scheme in config: %s" % str(conf["regularisation_scheme"]))
             sys.exit("GoSam terminated due to an error")
-    
+
         if mismatch_schemes[0]:
             logger.critical(
-                    "Incompatible settings between regularisation_scheme and extensions: "
-                    + "%r vs. %r" % (conf["regularisation_scheme"],mismatch_schemes[1])
-                )
+                "Incompatible settings between regularisation_scheme and extensions: "
+                + "%r vs. %r" % (conf["regularisation_scheme"], mismatch_schemes[1])
+            )
             sys.exit("GoSam terminated due to an error")
-    
+
         if "thv" in ext and "dred" in ext:
-            logger.critical(
-                    "Multiple regularisation schemes specified in extensions: thv and dred. Please pick one."
-                )
+            logger.critical("Multiple regularisation schemes specified in extensions: thv and dred. Please pick one.")
             sys.exit("GoSam terminated due to an error")
     else:
         ext.append(conf["olp.extensions"])
@@ -815,23 +836,22 @@ def fill_config(conf):
 
     if "thv" in ext and conf.getProperty("r2") != "explicit":
         logger.critical(
-                "When using the tHV regularisation scheme, only explicit construction of the R2 terms is permitted. "
-                + "Please use DRED as regularisation scheme or switch to r2=explict."
-            )
+            "When using the tHV regularisation scheme, only explicit construction of the R2 terms is permitted. "
+            + "Please use DRED as regularisation scheme or switch to r2=explict."
+        )
         sys.exit("GoSam terminated due to an error")
 
     if "thv" in ext and (conf["is_ufo"] or ("FeynRules" in conf.getProperty("model"))):
         logger.warning(
-              "You are using the tHV regularisation scheme and a UFO model. Note that in tHV a finite\n"
+            "You are using the tHV regularisation scheme and a UFO model. Note that in tHV a finite\n"
             + "renormalisation of the non-singlet axial-vector current (-> gamma_5) is required. The\n"
             + "corresponding counterterms are only available for the built-in models.\n"
             + "=> If your process contains non-singlet axial-vector currents you will get a WRONG RESULT!\n"
-
         )
 
     # Check that is 'quadruple' is in the extensions, only Ninja is used
     if "quadruple" in ext:
-        if ("ninja" not in conf["reduction_programs"]):
+        if "ninja" not in conf["reduction_programs"]:
             raise GolemConfigError(
                 "The quadruple precision copy of the code can be generated only\n"
                 + "in association with ninja. Please add ninja as reduction program to 'reduction_programs' in the input card.\n"
@@ -873,6 +893,7 @@ def fill_config(conf):
     # debuging the diagsum property:
     conf["debug_diagsum"] = False
 
+
 def workflow(conf):
     """
     Creates additional properties which determine the workflow
@@ -898,8 +919,7 @@ def workflow(conf):
     # here we create it:
     golem.util.tools.prepare_model_files(conf)
 
-
-    # zero property: convert masses and width defined through PDG code to internal parameter name 
+    # zero property: convert masses and width defined through PDG code to internal parameter name
     # (depends on model, so model.py must have been created already)
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
     if not conf["__OLP_MODE__"]:
@@ -907,35 +927,34 @@ def workflow(conf):
         orig_zero = conf.getListProperty("zero")
         new_zero = []
         for z in orig_zero:
-            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)",z.lower())
+            massmatch = re.search(r"mass\([0-9+][\;0-9+]+\)", z.lower())
             if massmatch:
-                nz = re.sub(r"\;",r"),mass(",z.lower()).split(",")
+                nz = re.sub(r"\;", r"),mass(", z.lower()).split(",")
                 new_zero.extend(nz)
                 continue
-            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)",z.lower())
+            widthmatch = re.search(r"width\([0-9+][\;0-9+]+\)", z.lower())
             if widthmatch:
-                nz = re.sub(r"\;",r"),width(",z.lower()).split(",")
+                nz = re.sub(r"\;", r"),width(", z.lower()).split(",")
                 new_zero.extend(nz)
                 continue
             new_zero.append(z)
 
         for p in model.particles.values():
-            searchm = "mass("+str(abs(p.getPDGCode()))+")"
-            if searchm in list(map(str.lower,new_zero)):
-                new_zero.pop(list(map(str.lower,new_zero)).index(searchm))
+            searchm = "mass(" + str(abs(p.getPDGCode())) + ")"
+            if searchm in list(map(str.lower, new_zero)):
+                new_zero.pop(list(map(str.lower, new_zero)).index(searchm))
                 if p.isMassive():
                     new_zero.append(p.getMass())
-            searchw = "width("+str(abs(p.getPDGCode()))+")"
-            if searchw in list(map(str.lower,new_zero)):
-                new_zero.pop(list(map(str.lower,new_zero)).index(searchw))
+            searchw = "width(" + str(abs(p.getPDGCode())) + ")"
+            if searchw in list(map(str.lower, new_zero)):
+                new_zero.pop(list(map(str.lower, new_zero)).index(searchw))
                 if p.hasWidth():
                     new_zero.append(p.getWidth())
-        conf.setProperty("zero",",".join(list(set(new_zero))))
+        conf.setProperty("zero", ",".join(list(set(new_zero))))
 
-
-    # It can happen that a model defines names for a particle's mass and width but 
-    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the 
-    # built-in models). We have to take care of that and add those names to the zero 
+    # It can happen that a model defines names for a particle's mass and width but
+    # sets them to 0 in the parameters definiton (see e.g. the light quarks in the
+    # built-in models). We have to take care of that and add those names to the zero
     # property to avoid erroneous code generation. Otherwise the user has to remember
     # to add these cases to 'zero' manually.
     # (can be skipped in OLP mode: already checked in util/olp.py:process_order_file)
@@ -945,7 +964,7 @@ def workflow(conf):
             if p.isMassive(zeros):
                 m = p.getMass(zeros)
                 try:
-                    if float(model.parameters[m]) == 0.:
+                    if float(model.parameters[m]) == 0.0:
                         zeros.append(m)
                 except KeyError:
                     # dependent parameters are not part of parameters dict
@@ -953,13 +972,12 @@ def workflow(conf):
             if p.hasWidth(zeros):
                 w = p.getWidth(zeros)
                 try:
-                    if float(model.parameters[w]) == 0.:
+                    if float(model.parameters[w]) == 0.0:
                         zeros.append(w)
                 except KeyError:
                     # dependent parameters are not part of parameters dict
                     pass
-        conf.setProperty("zero",",".join(list(set(zeros))))
-
+        conf.setProperty("zero", ",".join(list(set(zeros))))
 
     for prop in [golem.properties.zero, golem.properties.one]:
         golem.util.tools.expand_parameter_list(prop, conf)
@@ -1006,7 +1024,7 @@ def run_analyzer(path, conf, in_particles, out_particles):
                 )
                 sys.exit("GoSam terminated due to an error")
         if len(keep_tree) == 0 and generate_eftli:
-            conf.setProperty("generate_eft_loopind","false")
+            conf.setProperty("generate_eft_loopind", "false")
     else:
         keep_tree = []
         tree_signs = {}

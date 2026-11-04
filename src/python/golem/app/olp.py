@@ -38,7 +38,7 @@ def main(argv=sys.argv):
         dest="config_files",
         action="extend",
         nargs="*",
-        default=[]
+        default=[],
     )
     parser.add_argument(
         "-C", "--no-defaults", help="Do not build default configuration", action="store_true", dest="skip_default"
@@ -48,12 +48,7 @@ def main(argv=sys.argv):
     )
     parser.add_argument("-e", "--use-single-quotes", help="Allow the use of single quotes", action="store_true")
     parser.add_argument("-E", "--use-double-quotes", help="Allow the use of double quotes", action="store_true")
-    parser.add_argument(
-        "-f",
-        "--force",
-        help="Overwrite contract files without asking",
-        action="store_true"
-    )
+    parser.add_argument("-f", "--force", help="Overwrite contract files without asking", action="store_true")
     parser.add_argument("-i", "--ignore-case", help="Interpret the file case insensitive", action="store_true")
     parser.add_argument(
         "-I",

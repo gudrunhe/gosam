@@ -166,11 +166,13 @@ def IRsubtractionMethod(values, conf, ignore_case):
 def MassiveParticleScheme(values, conf, ignore_case):
     err_flag = False
     # GoSam does not support setting the mass scheme via BLHA.
-    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticleScheme'."
-                   + " This option will be IGNORED, as GoSam does not support EW renormalisation, for which"
-                   + " the scheme choice becomes relevant. If you still wish to choose something like the "
-                   + "complex-mass-scheme (at tree-level), please implement this in your model file(s). "
-                   + "For the SM you can use a built-in model: sm_complex or smdiag_complex.")
+    logger.warning(
+        "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticleScheme'."
+        + " This option will be IGNORED, as GoSam does not support EW renormalisation, for which"
+        + " the scheme choice becomes relevant. If you still wish to choose something like the "
+        + "complex-mass-scheme (at tree-level), please implement this in your model file(s). "
+        + "For the SM you can use a built-in model: sm_complex or smdiag_complex."
+    )
     return __value_OK__
     # supported_values = ["OnShell"]
     # return expect_one_keyword(values, conf, ignore_case, "olp.massiveparticlescheme", supported_values)
@@ -197,6 +199,7 @@ def ModelFile(values, conf, ignore_case):
         return __value_OK__
     else:
         return __value_ERR__ + "model file does not exist."
+
 
 @optional_olp_option
 def ParameterCard(values, conf, ignore_case):
@@ -324,8 +327,8 @@ def AmplitudeType(values, conf, ignore_case):
         "scTree",
         "scTree2",
         "LoopInduced",
-        #"LoopInterference",
-        #"LIEffInterference",
+        # "LoopInterference",
+        # "LIEffInterference",
         "ccLoop",
         "scLoop",
     ]
@@ -343,15 +346,15 @@ def AmplitudeType(values, conf, ignore_case):
     ):
         conf["olp.no_tree_level"] = True
         conf["olp.no_loop_level"] = False
-#    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
-#        "loopinterference",
-#        "lieffinterference",
-#    ]:
-#        conf["olp.no_tree_level"] = False
-#        conf["olp.no_loop_level"] = False
-#        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
-#            conf.psp_chk_method_last = conf["PSP_chk_method"]
-#            conf["PSP_chk_method"] = "LoopInduced"
+    #    elif ret.startswith(__value_OK__) and conf["olp.amplitudetype"].lower() in [
+    #        "loopinterference",
+    #        "lieffinterference",
+    #    ]:
+    #        conf["olp.no_tree_level"] = False
+    #        conf["olp.no_loop_level"] = False
+    #        if not conf["PSP_chk_method"] or conf["PSP_chk_method"].lower() in ["automatic", "polerotation"]:
+    #            conf.psp_chk_method_last = conf["PSP_chk_method"]
+    #            conf["PSP_chk_method"] = "LoopInduced"
     elif ret.startswith(__value_OK__) and (
         "loop" in conf["olp.amplitudetype"].lower()
         and not "ccloop" in conf["olp.amplitudetype"].lower()
@@ -432,14 +435,16 @@ def ExcludedParticles(values, conf, ignore_case):
 
 @optional_olp_option
 def MassiveParticles(values, conf, ignore_case):
-    # Deactivated to avoid unintuitive behaviour. Particle 
-    # masses should be taken as in the model file or set to 
+    # Deactivated to avoid unintuitive behaviour. Particle
+    # masses should be taken as in the model file or set to
     # zero (if desired) through the process card (*.in or *.rc)
-    logger.warning(  "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticles'." 
-                   + " To prevent any unintuitive behaviour this option is IGNORED! Particle masses "
-                   + "are taken as defined in the model file. If you wish to set any of them to zero "
-                   + "please provide an additional process card (*.in or *.rc file) through the "
-                   " --config flag and add the masses to the 'zero' property.")
+    logger.warning(
+        "Your BLHA contract file contains the optional BLHA keyword 'MassiveParticles'."
+        + " To prevent any unintuitive behaviour this option is IGNORED! Particle masses "
+        + "are taken as defined in the model file. If you wish to set any of them to zero "
+        + "please provide an additional process card (*.in or *.rc file) through the "
+        " --config flag and add the masses to the 'zero' property."
+    )
     if conf["__OLP_BLHA2__"] == "False" or conf["__OLP_BLHA2__"] is None:
         return __value_ERR__ + " option only allowed with InterfaceVersion BLHA2."
     # massive = []
@@ -499,6 +504,7 @@ def UFOModel(values, conf, ignore_case):
     else:
         logger.critical("UFOModel which expands to '%s' does not exist." % file_name)
         return __value_ERR__ + "UFO model does not exist or is not a valid model."
+
 
 @optional_olp_option
 def Parameters(values, conf, ignore_case):

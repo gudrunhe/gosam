@@ -21,7 +21,7 @@ AUTHORS = {
     "Stephen Jones": ["stephen.jones@durham.ac.uk"],
     "Matthias Kerner": ["matthias.kerner@kit.edu"],
     "Jannis Lang": ["jannis.lang@partner.kit.edu"],
-    "Vitaly Magerya": ["vitaly.magerya@tx97.net"]
+    "Vitaly Magerya": ["vitaly.magerya@tx97.net"],
 }
 
 FORMER_AUTHORS = {

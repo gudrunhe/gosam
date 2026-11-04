@@ -163,7 +163,7 @@ class Diagram:
                 self._adjacency_list[nkeep] = lst
 
     def getLoopIntegral(self, MQSE=True, checkrank=True):
-        return LoopIntegral([self._propagators[abs(l)] for l in self._loop], self.rank(MQSE,checkrank))
+        return LoopIntegral([self._propagators[abs(l)] for l in self._loop], self.rank(MQSE, checkrank))
 
     def colorforbidden(self):
         reps = []
@@ -433,58 +433,61 @@ class Diagram:
         to_visit = []
         if isinstance(start, Leg):
             initial = self._vertices[start.v]
-            seen_legs[start.index-1 + (len(self._in_legs) if not start.ingoing else 0)] = True
+            seen_legs[start.index - 1 + (len(self._in_legs) if not start.ingoing else 0)] = True
             incoming_ray = start.r
         else:
             initial = self._vertices[start.v2]
-            seen_props[start.index-1] = True
+            seen_props[start.index - 1] = True
             incoming_ray = start.r2
 
         to_visit.append(initial)
         # Walk the diagram along the fermi line
         while len(to_visit) > 0:
             current: Vertex = to_visit.pop()
-            if golem.model.global_model is not None: # Model with connection map
-                outgoing_ray = golem.model.global_model.vertex(current.label).spin_map[incoming_ray-1]
+            if golem.model.global_model is not None:  # Model with connection map
+                outgoing_ray = golem.model.global_model.vertex(current.label).spin_map[incoming_ray - 1]
                 for leg in [*self._in_legs.values(), *self._out_legs.values()]:
-                    if (leg.v == current.index and leg.r == outgoing_ray and not
-                        seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)]):
+                    if (
+                        leg.v == current.index
+                        and leg.r == outgoing_ray
+                        and not seen_legs[leg.index - 1 + (len(self._in_legs) if not leg.ingoing else 0)]
+                    ):
                         return leg
                 for prop in self._propagators.values():
-                    if seen_props[prop.index-1]:
+                    if seen_props[prop.index - 1]:
                         continue
                     if prop.v1 == current.index and prop.r1 == outgoing_ray:
                         to_visit.append(self._vertices[prop.v2])
                         incoming_ray = prop.r2
-                        seen_props[prop.index-1] = True
+                        seen_props[prop.index - 1] = True
                     elif prop.v2 == current.index and prop.r2 == outgoing_ray:
                         to_visit.append(self._vertices[prop.v1])
                         incoming_ray = prop.r1
-                        seen_props[prop.index-1] = True
-            else: # Connection map unknown, walk along first leg/propagator that is found
+                        seen_props[prop.index - 1] = True
+            else:  # Connection map unknown, walk along first leg/propagator that is found
                 # Next propagator in the line is an external leg, return early
                 legs: list[Leg] = list(
                     filter(
-                        lambda l: l.v == current.index and not seen_legs[l.index-1 + (len(self._in_legs) if not l.ingoing else 0)],
-                        [*self._in_legs.values(), *self._out_legs.values()]
+                        lambda l: (
+                            l.v == current.index
+                            and not seen_legs[l.index - 1 + (len(self._in_legs) if not l.ingoing else 0)]
+                        ),
+                        [*self._in_legs.values(), *self._out_legs.values()],
                     )
                 )
                 for leg in legs:
                     if leg.twospin >= 0 and leg.twospin % 2 == 0:
-                        seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)] = True
+                        seen_legs[leg.index - 1 + (len(self._in_legs) if not leg.ingoing else 0)] = True
                         continue
                     return leg
                 # No external leg, continue within the diagram
                 props: list[Propagator] = list(
-                    filter(
-                        lambda p: p.v1 == current.index or p.v2 == current.index,
-                        self._propagators.values()
-                    )
+                    filter(lambda p: p.v1 == current.index or p.v2 == current.index, self._propagators.values())
                 )
                 for prop in props:
-                    if seen_props[prop.index-1]:
+                    if seen_props[prop.index - 1]:
                         continue
-                    seen_props[prop.index-1] = True
+                    seen_props[prop.index - 1] = True
                     if prop.sign != "-":
                         continue
                     connected_vertex = self._vertices[prop.v1] if prop.v2 == current.index else self._vertices[prop.v2]
@@ -493,21 +496,22 @@ class Diagram:
                     to_visit.append(connected_vertex)
         return start
 
-
-
     def _calculate_fermion_sign(self):
-        seen_propagators = [False]*(max(prop.index for prop in self._propagators.values()) if len(self._propagators) > 0 else 0)
-        seen_legs = [False]*(len(self._in_legs) + len(self._out_legs))
+        seen_propagators = [False] * (
+            max(prop.index for prop in self._propagators.values()) if len(self._propagators) > 0 else 0
+        )
+        seen_legs = [False] * (len(self._in_legs) + len(self._out_legs))
 
         ext_legs = []
         for leg in [*self._in_legs.values(), *self._out_legs.values()]:
-            if (seen_legs[leg.index-1 + (len(self._in_legs) if not leg.ingoing else 0)]
-                    or (leg.twospin >= 0 and leg.twospin % 2 == 0)):
-                    continue
+            if seen_legs[leg.index - 1 + (len(self._in_legs) if not leg.ingoing else 0)] or (
+                leg.twospin >= 0 and leg.twospin % 2 == 0
+            ):
+                continue
             final = self._trace_fermi_line(leg, seen_propagators, seen_legs)
             if isinstance(final, Vertex):
                 continue
-            seen_legs[final.index-1 + (len(self._in_legs) if not final.ingoing else 0)] = True
+            seen_legs[final.index - 1 + (len(self._in_legs) if not final.ingoing else 0)] = True
             in_index = leg.index + (len(self._in_legs) if not leg.ingoing else 0)
             out_index = final.index + (len(self._in_legs) if not final.ingoing else 0)
             if in_index < out_index:
@@ -523,7 +527,7 @@ class Diagram:
 
         n_loops = 0
         for prop in self._propagators.values():
-            if seen_propagators[prop.index-1] or prop.sign != "-":
+            if seen_propagators[prop.index - 1] or prop.sign != "-":
                 continue
             _ = self._trace_fermi_line(prop, seen_propagators, seen_legs)
             n_loops += 1
