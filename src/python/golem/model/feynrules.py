@@ -470,7 +470,17 @@ class Model:
 
             f.write(
                 "\t%r: Particle(%r, %d, %r, %d, %r, %r, %d, %r)"
-                % (canonical_name, canonical_name, spin, mass, p.color, canonical_anti, width, pdg_code, p.charge)
+                % (
+                    canonical_name,
+                    canonical_name,
+                    spin,
+                    mass,
+                    p.color,
+                    canonical_anti,
+                    width,
+                    pdg_code,
+                    3 * (p.charge if spin > 0 else -p.charge),
+                )
             )
 
         f.write("\n}\n\n")
