@@ -1,4 +1,10 @@
-project('Form', 'c', 'cpp', version: '4.2.1', default_options: ['buildtype=release', 'b_ndebug=if-release'])
+project(
+  'Form',
+  'c',
+  'cpp',
+  version: '4.2.1',
+  default_options: ['buildtype=release', 'b_ndebug=if-release'],
+)
 
 add_project_arguments('-w', language: 'c')
 add_project_arguments('-w', language: 'cpp')
@@ -26,7 +32,7 @@ check_headers = [
   'tr1/unordered_map',
   'tr1/unordered_set',
   'unordered_map',
-  'unordered_set'
+  'unordered_set',
 ]
 
 foreach h : check_headers
@@ -40,11 +46,11 @@ check_functions = [
   ['HAVE_FTIME', 'ftime', '#include<sys/timeb.h>'],
   ['HAVE_GETTIMEOFDAY', 'gettimeofday', '#include<sys/time.h>'],
   ['HAVE_BUILTIN_POPCOUNT', '__builtin_popcount', ''],
-  ['HAVE_POPCNT', '__popcnt', '#include <intrin.h>']
+  ['HAVE_POPCNT', '__popcnt', '#include <intrin.h>'],
 ]
 
 foreach f : check_functions
-  if cc.has_function(f.get(1), prefix : f.get(2))
+  if cc.has_function(f.get(1), prefix: f.get(2))
     cdata.set(f.get(0), 1)
   endif
 endforeach
@@ -67,38 +73,38 @@ int_sizes = [
   cc.sizeof('long long'),
   cc.sizeof('void*'),
 ]
-if int_sizes == [1,2,4,4,8,4]
+if int_sizes == [1, 2, 4, 4, 8, 4]
   cdata.set('ILP32', 1)
-elif int_sizes == [1,2,4,4,8,8]
+elif int_sizes == [1, 2, 4, 4, 8, 8]
   cdata.set('LLP64', 1)
-elif int_sizes == [1,2,4,8,8,8]
+elif int_sizes == [1, 2, 4, 8, 8, 8]
   cdata.set('LP64', 1)
 else
   error('This platform is neither ILP32, LLP64, nor LP64!')
 endif
 
-configure_file(input : 'config.h.meson',
-  output : 'config.h',
-  configuration : cdata)
+configure_file(input: 'config.h.meson', output: 'config.h', configuration: cdata)
 
-form_src = files([])
-tform_src = files([])
+form_src = files()
+tform_src = files()
 
 subdir('sources')
 
-executable('form',
-    form_src,
-    install:true,
-    include_directories: include_directories('.', 'sources'),
-    c_args: ['-DHAVE_CONFIG_H=1'],
-    cpp_args: ['-DHAVE_CONFIG_H=1', '-U_GLIBCXX_ASSERTIONS']
-    )
+executable(
+  'form',
+  form_src,
+  install: true,
+  include_directories: include_directories('.', 'sources'),
+  c_args: ['-DHAVE_CONFIG_H=1'],
+  cpp_args: ['-DHAVE_CONFIG_H=1', '-U_GLIBCXX_ASSERTIONS'],
+)
 
-executable('tform',
-    form_src + tform_src,
-    install:true,
-    include_directories: include_directories('.', 'sources'),
-    c_args: ['-DHAVE_CONFIG_H=1'],
-    cpp_args: ['-DHAVE_CONFIG_H=1'],
-    dependencies: threads
-    )
+executable(
+  'tform',
+  form_src + tform_src,
+  install: true,
+  include_directories: include_directories('.', 'sources'),
+  c_args: ['-DHAVE_CONFIG_H=1'],
+  cpp_args: ['-DHAVE_CONFIG_H=1'],
+  dependencies: threads,
+)
