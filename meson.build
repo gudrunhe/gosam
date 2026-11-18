@@ -2,7 +2,7 @@ project(
   'GoSam',
   'fortran',
   'cpp',
-  version: '3.0.3-'
+  version: '3.0.4-'
   + run_command(
     find_program('git'),
     'rev-parse',
